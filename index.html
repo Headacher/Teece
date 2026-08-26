@@ -22,6 +22,15 @@ body{
   background:radial-gradient(120% 90% at 50% 0%, #241d15 0%, var(--table) 60%),var(--table);
   color:var(--cream); font-family:var(--body); font-size:14px;-webkit-font-smoothing:antialiased;
 }
+/* Deck-specific background colors */
+body[data-deck="classic"]{background:radial-gradient(120% 90% at 50% 0%, #1a2015 0%, #1a3020 60%),#0f1810;}
+body[data-deck="teece100"]{background:radial-gradient(120% 90% at 50% 0%, #201515 0%, #2a1515 60%),#150a0a;}
+body[data-deck="berserker"]{background:radial-gradient(120% 90% at 50% 0%, #2d1a1a 0%, #3d1515 60%),#1a0f0f;}
+body[data-deck="rock"]{background:radial-gradient(120% 90% at 50% 0%, #1a1a2d 0%, #1a1a3d 60%),#0f0f1a;}
+body[data-deck="ogre"]{background:radial-gradient(120% 90% at 50% 0%, #2a1f0f 0%, #3a2f1a 60%),#1a140a;}
+body[data-deck="robot"]{background:radial-gradient(120% 90% at 50% 0%, #1a2a2d 0%, #1a3a3d 60%),#0f1a1f;}
+body[data-deck="gadget"]{background:radial-gradient(120% 90% at 50% 0%, #2d1a2d 0%, #3d1a3d 60%),#1a0f1a;}
+body[data-deck="time"]{background:radial-gradient(120% 90% at 50% 0%, #2d2d1a 0%, #3d3d1a 60%),#1a1a0f;}
 button{font-family:var(--body);cursor:pointer}
 button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
@@ -3797,6 +3806,13 @@ function render(){
   bd.style.setProperty('--bw',BW);
   bd.style.setProperty('--cs',(BW>=4?'86px':'110px'));
   bd.style.setProperty('--cs-sm',(BW>=4?'70px':'96px'));
+  let deckAttr='classic';
+  if(G.mode==='rogue')deckAttr='classic';
+  else if(G.mode==='three'&&G.deckNames)deckAttr=G.deckNames[0].toLowerCase();
+  else if(G.mode==='deck'&&G.deckNames)deckAttr=G.deckNames[0].toLowerCase();
+  else if(G.mode==='t100')deckAttr='teece100';
+  else if(G.mode==='classic')deckAttr='classic';
+  document.body.setAttribute('data-deck',deckAttr);
   document.getElementById('modeLbl').textContent=
     G.mode==='rogue'?'roguelike · level '+G.level:
     G.mode==='three'?((G.formatName||'three players')+' \u00b7 four by four'+
