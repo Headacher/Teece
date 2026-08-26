@@ -322,6 +322,19 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ card registry ============ */
 const HAS_DOM = typeof document !== 'undefined';
 
+let DECKS={}, FORMATS=[], CLASSIC=[], POOL=[];
+async function loadDeckData(){
+  try{
+    const res=await fetch('decks.json');
+    const data=await res.json();
+    DECKS=data.decks;
+    FORMATS=data.formats;
+    CLASSIC=data.classic;
+    POOL=data.pool;
+  }catch(e){console.error('Failed to load decks.json:',e);}
+}
+if(HAS_DOM)loadDeckData();
+
 /* fx vocabulary:
    mod{who:self|ally|enemy|any|last, where:any|rowcol|adj, n, dur:perm|temp, may, move:'any1', notSelf}
    aoe{who:ally|enemy, where:adj, n, dur}    (centered on source or death cell)
@@ -866,28 +879,6 @@ const CARDS = {
     cast:[{fx:'moveTarget',where:'any',who:'ally',thenMod:{n:3,dur:'temp'}}]},
  430:{name:'Landing Pad',type:'ground',gEndTurn:'TD',
     text:'At the end of your turn, if this panel is empty, a Drone is built on it.'}
-};
-const CLASSIC=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
-const POOL=[];
-for(let i=101;i<=200;i++)POOL.push(i);
-for(let i=301;i<=312;i++)POOL.push(i);
-for(let i=321;i<=340;i++)POOL.push(i);
-for(let i=351;i<=370;i++)POOL.push(i);
-for(let i=381;i<=400;i++)POOL.push(i);
-for(let i=411;i<=430;i++)POOL.push(i);
-const DECKS={
-  berserker:{name:'Berserker',cards:[301,302,303,304,305,306,307,308,309,310,311,312],
-    blurb:'Twelve cards, every one of them overpowered. Win before you run dry: your own empty deck never loses you the game, only your opponent\'s does.'},
-  rock:{name:'Rock',cards:[321,322,323,324,325,326,327,328,329,330,331,332,333,334,335,336,337,338,339,340],
-    blurb:'Defence soaks up the difference. A Teece with Defence 2 only dies to an attack that beats it by three or more.'},
-  ogre:{name:'Ogre',cards:[351,352,353,354,355,356,357,358,359,360,361,362,363,364,365,366,367,368,369,370],
-    blurb:'Shove everything. Ogres move enemies around and the penalties they hand out are permanent, so a shoved Teece never recovers. Negative attributes are lethal.'},
-  robot:{name:'Robot',cards:[411,412,413,414,415,416,417,418,419,420,421,422,423,424,425,426,427,428,429,430],
-    blurb:'Every Robot Flies, and Drones roll off the line all game. Drones are 3/3/3/3 Tokens that also Fly \u2014 they block, they kill, and several Robots pay you for keeping them moving.'},
-  gadget:{name:'Gadget',cards:[441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460],
-    blurb:'Almost every card asks you to choose a mode. The deck is built to cheat that choice \u2014 fire every mode at once, fire the chosen one twice, or switch modes off for both players entirely.'},
-  time:{name:'Time',cards:[381,382,383,384,385,386,387,388,389,390,391,392,393,394,395,396,397,398,399,400],
-    blurb:'Cards that grow or rot on a clock. Every Teece ages at the start of your turn; some come of age into something far bigger, others decay every turn you keep them.'}
 };
 const DEF=t=>CARDS[t.cardId];
 const isBossCard=id=>(CARDS[id].sac||0)>=2;
@@ -3514,14 +3505,6 @@ function pickDeck(who,opts){
 const HCAPS=[{n:-3,lbl:'Gentle'},{n:-2,lbl:'Easy'},{n:-1,lbl:'Soft'},{n:0,lbl:'Even'},
              {n:1,lbl:'Tough'},{n:2,lbl:'Harsh'},{n:3,lbl:'Brutal'}];
 /* three-player formats. teams[i] is the side seat i fights for. */
-const FORMATS=[
-  {key:'ffa',   name:'Free-for-all',      teams:[0,1,2],
-   blurb:'Three separate sides. Everyone is your enemy, and the first side four Teece ahead of the next best wins.'},
-  {key:'withAI',name:'You and one computer', teams:[0,0,1],
-   blurb:'You and the first computer fight as one side against the second. Allies never damage each other and win together.'},
-  {key:'vsBoth',name:'You against both',  teams:[0,1,1],
-   blurb:'Both computers are allied against you. Hardest of the three, and the reason the difficulty rating goes below zero.'}
-];
 function pickFormat(){
   return new Promise(res=>{
     const overlay=document.getElementById('draftOverlay');
