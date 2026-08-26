@@ -877,7 +877,7 @@ function modalCtl(p,cell){
   for(let i=0;i<BN;i++){
     const t=b[i].teece;if(!t)continue;
     const d=DEF(t);
-    if(d.modalNone)off=true;
+    if(d.modalNone&&t.owner===p)off=true;
     if(sameTeam(t.owner,p)){
       if(d.modalAll)all=true;
       if(d.modalTwice)times=2;
@@ -2356,7 +2356,6 @@ async function FXRUN(st,ctx){
     if(hasKw(b,i,'immovable')){log('It cannot move.');return;}
     let pool;
     if(st.range==='orth')pool=ADJ[i];
-    else if(st.range==='any')pool=ADJ[i];
     else{pool=[];for(let j=0;j<BN;j++)if(j!==i)pool.push(j);}
     const d=pool.filter(j=>!b[j].teece);
     if(!d.length){log('Nowhere to move.');return;}
@@ -2749,13 +2748,8 @@ async function playTeece(p,handIdx){
     for(let k=0;k<4;k++)t.perm[k]+=cn;
     log(nm(t)+' matches the dial: '+sgn(cn)+'.');
   }
-  if(G.trap&&!sameTeam(p,G.trap.by)){
-    G.trap=null;
-    log(nm(t)+' walks straight into the trap.');
-    await processDeath({cell:spot,t,killers:[]});
-    await resolveCombat();render();
-    return true;
-  }
+  const dbl=b[spot].ground&&CARDS[b[spot].ground.cardId].gDouble?2:1;
+  if(d.onPlay)for(let k=0;k<dbl;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked});
   for(let i=0;i<BN;i++){
     const w=b[i].teece;
     if(!w||sameTeam(w.owner,p))continue;
@@ -2763,8 +2757,13 @@ async function playTeece(p,handIdx){
     if(wd.onEnemyPlay){applyModT(t,wd.onEnemyPlay.n,wd.onEnemyPlay.dur);
       log(nm(t)+' is met by '+nm(w)+': '+sgn(wd.onEnemyPlay.n)+durTxt(wd.onEnemyPlay.dur)+'.');}
   }
-  const dbl=b[spot].ground&&CARDS[b[spot].ground.cardId].gDouble?2:1;
-  if(d.onPlay)for(let k=0;k<dbl;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked});
+  if(G.trap&&!sameTeam(p,G.trap.by)){
+    G.trap=null;
+    log(nm(t)+' walks straight into the trap.');
+    await processDeath({cell:spot,t,killers:[]});
+    await resolveCombat();render();
+    return true;
+  }
   await resolveCombat();
   render();
   return true;
