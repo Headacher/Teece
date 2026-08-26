@@ -1,0 +1,3980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teece</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --table:#16130f; --panel:#1e1913; --panel2:#272018; --line:#3d3428;
+  --cream:#efe6d0; --cream2:#e3d6ba; --ink:#241f18;
+  --p0:#3fa08a; --p1:#c0392b; --p2:#9b7bd4; --gold:#c9a227; --violet:#7d5ba6;
+  --muted:#a1927b; --up:#2f8f5b; --down:#b8412f;
+  --disp:'Instrument Serif',Georgia,serif;
+  --body:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:radial-gradient(120% 90% at 50% 0%, #241d15 0%, var(--table) 60%),var(--table);
+  color:var(--cream); font-family:var(--body); font-size:14px;-webkit-font-smoothing:antialiased;
+}
+button{font-family:var(--body);cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+#app{display:grid;grid-template-columns:1fr 300px;gap:18px;max-width:1120px;margin:0 auto;padding:16px;min-height:100%}
+@media(max-width:880px){#app{grid-template-columns:1fr}}
+header{grid-column:1/-1;display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding-bottom:8px}
+header h1{font-family:var(--disp);font-size:34px;font-weight:400;margin:0;letter-spacing:.02em}
+header .sub{color:var(--muted);font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+main{display:flex;flex-direction:column;gap:12px;align-items:center}
+
+.handrow{width:100%;min-height:108px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
+  padding:8px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.18)}
+.handlbl{width:100%;text-align:center;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+
+.card{position:relative;width:88px;min-height:84px;background:var(--cream);color:var(--ink);border-radius:7px;
+  padding:6px;border:1px solid #cdbe9c;display:flex;flex-direction:column;gap:2px;
+  box-shadow:0 2px 0 rgba(0,0,0,.35);user-select:none}
+.card.t-teece{min-height:92px;border-color:#b9a67f}
+.card .hs{position:absolute;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.card .hs0{top:3px;left:50%;transform:translateX(-50%)}
+.card .hs1{right:6px;top:50%;transform:translateY(-50%)}
+.card .hs2{bottom:3px;left:50%;transform:translateX(-50%)}
+.card .hs3{left:6px;top:50%;transform:translateY(-50%)}
+.card .hcn{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+  text-align:center;padding:0 15px;font-size:12.5px;line-height:1.05}
+.card .kwl{position:absolute;left:0;right:0;top:65%;text-align:center;font-size:8px;
+  letter-spacing:.1em;text-transform:uppercase;color:#8a6d3b}
+.card .ct{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#7a6a4d}
+.card .cn{font-family:var(--disp);font-size:15px;line-height:1.05}
+.card .cs{font-size:11px;font-weight:700;margin-top:auto}
+.discardBtn{position:absolute;left:4px;bottom:4px;font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+  background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:5px;padding:2px 5px;
+  cursor:pointer;z-index:2}
+.discardBtn:hover{border-color:var(--gold)}
+.discardBtn:disabled{opacity:.4;cursor:default}
+.card.t-equip{background:#e6dcc6}
+.card.t-magic{background:#e2dae8}
+.card.t-ground{background:#e0dcc2}
+.card.back{background:repeating-linear-gradient(45deg,#3a2f24,#3a2f24 6px,#463a2c 6px,#463a2c 12px);border-color:#241d15;color:transparent}
+.card.dim{opacity:.45}
+.card.playable{cursor:pointer}
+.card.playable:hover{transform:translateY(-3px);box-shadow:0 5px 0 rgba(0,0,0,.4)}
+
+#board{display:grid;grid-template-columns:repeat(var(--bw,3),minmax(0,var(--cs,110px)));
+  grid-auto-rows:var(--cs,110px);gap:8px}
+@media(max-width:420px){#board{--cs:var(--cs-sm,96px)}}
+#oppHands{width:100%;display:flex;flex-direction:column;gap:8px}
+.cell{position:relative;border:1px solid var(--line);border-radius:8px;background:#191410;overflow:hidden;cursor:default}
+.cell .coord{position:absolute;top:2px;left:4px;font-size:9px;color:#584a38;z-index:0}
+.cell.target{box-shadow:inset 0 0 0 2px var(--gold);cursor:pointer}
+.cell.target:hover{background:#231b12}
+.cell.locked{box-shadow:inset 0 0 0 2px rgba(239,230,208,.55)}
+.mineMark{position:absolute;bottom:3px;right:5px;font-size:12px;z-index:1}
+.mineMark.m0{color:var(--p0)} .mineMark.m1{color:var(--p1)} .mineMark.m2{color:var(--p2)}
+.bglayer{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;
+  font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding-bottom:2px}
+.bgplus{background:linear-gradient(180deg,rgba(201,162,39,.05),rgba(201,162,39,.28));color:var(--gold)}
+.bgminus{background:linear-gradient(180deg,rgba(125,91,166,.05),rgba(125,91,166,.30));color:#b79ad6}
+.bgutil{background:linear-gradient(180deg,rgba(63,160,138,.05),rgba(63,160,138,.22));color:#7fc4b2}
+.teece{position:absolute;inset:8px;border-radius:6px;background:var(--cream);color:var(--ink);
+  border:2px solid var(--p0);cursor:pointer}
+.teece.o1{border-color:var(--p1)}
+.teece.o2{border-color:var(--p2)}
+.teece .nm{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;
+  font-family:var(--disp);font-size:12px;line-height:1;padding:0 13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.teece .tok{font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#7a6a4d;
+  position:absolute;left:0;right:0;bottom:2px;text-align:center}
+.teece .s{position:absolute;font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+.teece .s0{top:1px;left:50%;transform:translateX(-50%)}
+.teece .s1{right:4px;top:50%;transform:translateY(-50%)}
+.teece .s2{bottom:1px;left:50%;transform:translateX(-50%)}
+.teece .s3{left:4px;top:50%;transform:translateY(-50%)}
+.teece .up{color:var(--up)} .teece .down{color:var(--down)}
+.teece .eq{position:absolute;top:2px;right:4px;font-size:8px;color:#7a6a4d;letter-spacing:.05em}
+.teece .actdot{position:absolute;top:2px;left:4px;width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px var(--gold)}
+
+@keyframes dieShake{
+  0%{transform:translateX(0)}20%{transform:translateX(-3px)}40%{transform:translateX(3px)}
+  60%{transform:translateX(-2px)}80%{transform:translateX(2px)}100%{transform:translateX(0);opacity:.3}}
+.teece.dying{animation:dieShake .19s ease-in-out both;box-shadow:inset 0 0 0 3px var(--down)}
+@keyframes zapPulse{0%{box-shadow:inset 0 0 0 0 rgba(201,162,39,0)}
+  45%{box-shadow:inset 0 0 0 3px var(--gold);background:#2a2015}
+  100%{box-shadow:inset 0 0 0 0 rgba(201,162,39,0)}}
+.cell.zap{animation:zapPulse .17s ease-out}
+@keyframes placePop{0%{transform:scale(.84);opacity:.4}100%{transform:scale(1);opacity:1}}
+.teece.placed{animation:placePop .15s ease-out}
+.teece .shield{position:absolute;left:0;right:0;bottom:1px;text-align:center;font-size:9px;
+  letter-spacing:.02em;color:#6b5a3c;font-weight:700}
+#detail .dlock{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
+#actionBar{width:100%;max-width:560px;display:flex;align-items:center;justify-content:center;gap:8px;
+  flex-wrap:wrap;padding:8px 10px;border:1px solid var(--gold);border-radius:8px;background:rgba(201,162,39,.08)}
+#actionBar .who{font-family:var(--disp);font-size:15px;margin-right:2px}
+#actionBar .none{color:var(--muted);font-size:12px}
+button,.teece,.cell,.card{touch-action:manipulation}
+#promptBar{min-height:38px;width:100%;max-width:560px;display:flex;align-items:center;justify-content:center;
+  gap:10px;padding:8px 12px;border:1px dashed var(--line);border-radius:8px;text-align:center;flex-wrap:wrap}
+#promptBar.hot{border-color:var(--gold);border-style:solid;background:rgba(201,162,39,.07)}
+#promptBar .msg{font-size:13px}
+.btn{background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:6px;
+  padding:6px 12px;font-size:12px;letter-spacing:.06em}
+.btn:hover{background:#33291e}
+.btn.primary{background:var(--p0);border-color:var(--p0);color:#0d1815;font-weight:700}
+.btn.primary:hover{background:#4fb69e}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+aside{display:flex;flex-direction:column;gap:12px;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+.panel h2{font-family:var(--disp);font-weight:400;font-size:16px;margin:0 0 6px}
+.turnline{font-size:13px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.d0{background:var(--p0)} .d1{background:var(--p1)} .d2{background:var(--p2)}
+.teamtag{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.counts{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12px;color:var(--muted);margin-top:6px}
+#detail .dn{font-family:var(--disp);font-size:20px}
+#detail .dt{font-size:12px;color:var(--muted);line-height:1.45;margin-top:4px}
+#detail .dstats{font-size:12px;margin-top:6px;font-variant-numeric:tabular-nums}
+#detail .abtn{margin-top:8px;margin-right:6px}
+#log{height:180px;overflow:auto;font-size:11.5px;line-height:1.5;color:var(--muted)}
+#log div{padding:1px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+#log div:first-child{color:var(--cream)}
+
+.overlay{position:fixed;inset:0;background:rgba(10,8,6,.94);display:flex;align-items:center;
+  justify-content:center;padding:20px;z-index:20;overflow:auto}
+.overlay .box{max-width:640px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px}
+.overlay h2{font-family:var(--disp);font-weight:400;font-size:30px;margin:0 0 8px}
+.overlay h3{font-family:var(--disp);font-weight:400;font-size:19px;margin:14px 0 2px}
+.overlay p{color:var(--muted);font-size:13px;line-height:1.6;margin:6px 0}
+.overlay .row{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+.hidden{display:none!important}
+
+#draftOverlay .box{max-width:760px;width:100%}
+#draftCards{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.dcard{position:relative;width:200px;min-height:210px;background:var(--cream);color:var(--ink);
+  border:2px solid #b9a67f;border-radius:10px;padding:10px;cursor:pointer;display:flex;flex-direction:column}
+.dcard:hover{transform:translateY(-4px);box-shadow:0 6px 0 rgba(0,0,0,.4)}
+.dcard.t-equip{background:#e6dcc6}.dcard.t-magic{background:#e2dae8}.dcard.t-ground{background:#e0dcc2}
+.dcard .ds{position:absolute;font-weight:700;font-size:17px}
+.dcard .ds0{top:6px;left:50%;transform:translateX(-50%)}
+.dcard .ds1{right:9px;top:64px}
+.dcard .ds2{top:112px;left:50%;transform:translateX(-50%)}
+.dcard .ds3{left:9px;top:64px}
+.dcard .dnm{font-family:var(--disp);font-size:19px;text-align:center;margin-top:56px}
+.dcard.nostat .dnm{margin-top:6px}
+.dcard .dty{font-size:9px;letter-spacing:.14em;text-transform:uppercase;text-align:center;color:#7a6a4d}
+.dcard .dkw{font-size:10px;letter-spacing:.1em;text-transform:uppercase;text-align:center;color:#8a6d3b}
+.dcard .dtx{font-size:11.5px;line-height:1.45;text-align:center;margin-top:auto;padding-top:34px}
+.dcard.nostat .dtx{padding-top:8px}
+#draftDeck{font-size:11.5px;color:var(--muted);line-height:1.5;max-height:110px;overflow:auto;margin-top:8px}
+
+#hcapRow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:18px 0 6px}
+.hcap{min-width:84px;background:var(--panel2);color:var(--cream);border:1px solid var(--line);
+  border-radius:9px;padding:11px 12px;cursor:pointer;font-family:var(--body);
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  transition:border-color .15s,transform .15s}
+.hcap:hover{border-color:var(--gold);transform:translateY(-2px)}
+.hcap .hn{font-family:var(--disp);font-size:23px;line-height:1;font-variant-numeric:tabular-nums}
+.hcap .hl{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.hcap.even{border-color:var(--gold)}
+.hcap.easy .hn{color:var(--up)}
+.hcap.hard .hn{color:var(--down)}
+
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000;border:1px solid var(--line);
+  color:var(--cream);padding:8px 14px;border-radius:20px;font-size:12px;z-index:40;opacity:0;transition:opacity .18s}
+#toast.show{opacity:1}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}
+  .card.playable:hover,.dcard:hover,.hcap:hover{transform:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>Teece</h1>
+    <span class="sub" id="modeLbl">three by three</span>
+  </header>
+  <main>
+    <div id="oppHands"></div>
+    <div id="promptBar"><span class="msg">&nbsp;</span></div>
+    <div id="board"></div>
+    <div id="actionBar" class="hidden"></div>
+    <div class="handrow" id="myHand"></div>
+  </main>
+  <aside>
+    <div class="panel">
+      <div class="turnline" id="turnInfo"></div>
+      <div class="counts" id="counts"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn primary" id="endTurn">End Turn</button>
+        <button class="btn" id="restart">Restart</button>
+      </div>
+    </div>
+    <div class="panel" id="detail"><h2>Detail</h2><div class="dt">Hover or tap a card. Click one of your Teece to use its abilities.</div></div>
+    <div class="panel"><h2>Log</h2><div id="log"></div></div>
+  </aside>
+</div>
+
+<div class="overlay" id="startOverlay">
+  <div class="box">
+    <h2>Teece</h2>
+    <p>Adjacent enemy Teece compare touching edge numbers; the smaller one dies, ties do nothing, and every stat
+       change anywhere re-checks the whole board. One Teece per turn; equips, magic and battlegrounds are unlimited.
+       Win by wiping out every enemy Teece, ending a turn with four more Teece fielded (Tokens never count),
+       or having the bigger field when a player must draw from an empty deck.
+       Any Teece whose attributes drop below zero dies on the spot.</p>
+    <h3>Classic</h3>
+    <p>Both sides play the identical fixed twenty-card deck.</p>
+    <div class="row">
+      <button class="btn primary" id="cAI">vs Computer</button>
+      <button class="btn" id="cHot">Hotseat</button>
+    </div>
+    <h3>Teece 100</h3>
+    <p>Draft your own twenty-card deck: twenty picks, three cards offered per pick, from every card in the game —
+       the hundred draft designs plus all seventy-two deck cards. Ranged, Flying, Teleport, Defence, clocks, Mines,
+       activated abilities (select your Teece on the board to use them), mind control and more.</p>
+    <div class="row">
+      <button class="btn primary" id="tAI">vs Computer</button>
+      <button class="btn" id="tHot">Hotseat</button>
+    </div>
+    <h3>Decks</h3>
+    <p>Pick a prebuilt deck, choose which deck the computer brings, and set how hard it hits: every enemy Teece
+       can carry anywhere from &minus;3 to +3 on all four sides. Each deck has its own machinery: Berserker is twelve
+       overpowered cards racing the clock, Rock soaks hits with Defence, Ogre shoves everything around the board and the damage it deals sticks.</p>
+    <div class="row">
+      <button class="btn primary" id="dAI">vs Computer</button>
+      <button class="btn" id="dHot">Hotseat</button>
+    </div>
+    <h3>Three players</h3>
+    <p>A four by four board and three seats. Play a free-for-all where every other seat is an enemy,
+       or take a side in two versus one. Allies never fight each other, they win and lose together, and
+       a seat is skipped once its whole side is wiped out. Four Teece ahead of the <em>next best</em> side
+       still wins it.</p>
+    <div class="row">
+      <button class="btn primary" id="p3AI">vs Computers</button>
+      <button class="btn" id="p3Hot">Hotseat</button>
+    </div>
+    <h3>Roguelike</h3>
+    <p>Draft five cards and beat the computer. Clear a level and you draft five more, but the enemy's Teece
+       grow: +1 on every side at level two, +2 at level three, +3 at level four. Running out of cards never ends
+       a level; only wiping out the enemy's Teece, or ending a turn four Teece ahead, does.</p>
+    <div class="row">
+      <button class="btn primary" id="rAI">Start run</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="draftOverlay">
+  <div class="box">
+    <h2 id="draftTitle">Draft</h2>
+    <p id="draftInfo"></p>
+    <div id="draftCards"></div>
+    <div id="hcapRow" class="hidden"></div>
+    <div id="draftDeck"></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="endOverlay">
+  <div class="box">
+    <h2 id="endTitle">Game over</h2>
+    <p id="endText"></p>
+    <div class="row"><button class="btn primary" id="endRestart">New game</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script>
+/* ============ card registry ============ */
+const HAS_DOM = typeof document !== 'undefined';
+
+/* fx vocabulary:
+   mod{who:self|ally|enemy|any|last, where:any|rowcol|adj, n, dur:perm|temp, may, move:'any1', notSelf}
+   aoe{who:ally|enemy, where:adj, n, dur}    (centered on source or death cell)
+   mass{who, n, dur}                          (whole board)
+   copy{}  token{tok, where:any|adj|here, count, linked}
+   control{}  rot{may}  flip{}  draw{n}  bolt{n}
+   bounce{}  gust{who}  shatter{}  quake{}  terra{}  kwT{kw}
+   mine{}  swap{}  move{range:orth|any|fly}
+   onDeath extra: resummon{bonus} killer{n,dur}
+*/
+const CARDS = {
+ /* ---- classic twenty ---- */
+ 1:{name:'Grunt',type:'teece',sides:[7,7,7,7],text:'No effect.'},
+ 2:{name:'Hypeman',type:'teece',sides:[6,6,6,6],text:'When played: a Teece gets +2 until end of turn.',
+    onPlay:[{fx:'mod',who:'any',where:'any',n:2,dur:'temp'}]},
+ 3:{name:'Splitter',type:'teece',sides:[5,5,5,5],text:'When played: summon a copy in an adjacent empty space.',
+    onPlay:[{fx:'copy'}]},
+ 4:{name:'Revenant',type:'teece',sides:[3,3,3,3],text:'When destroyed, once per game: resummon to an empty space.',
+    onDeath:[{fx:'resummon',bonus:0}]},
+ 5:{name:'Martyr',type:'teece',sides:[0,0,0,0],text:'When destroyed: its killer gets -8 until end of turn.',
+    onDeath:[{fx:'killer',n:-8,dur:'temp'}]},
+ 6:{name:'Sniper',type:'teece',sides:[4,4,8,8],text:'When played: another Teece in this row or column gets -1 permanently.',
+    onPlay:[{fx:'mod',who:'any',where:'rowcol',n:-1,dur:'perm',notSelf:true}]},
+ 7:{name:'Lance',type:'teece',sides:[0,11,0,0],text:'When played: you may rotate it.',
+    onPlay:[{fx:'rot',may:true}]},
+ 8:{name:'Gate',type:'teece',sides:[10,1,10,1],text:'No effect.'},
+ 9:{name:'Sensei',type:'teece',sides:[8,8,8,8],text:'When destroyed: its killer gets +1 permanently.',
+    onDeath:[{fx:'killer',n:1,dur:'perm'}]},
+ 10:{name:'Southpaw',type:'teece',sides:[6,6,6,9],text:'No effect.'},
+ 11:{name:'Miniboss',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice one fielded Teece to play. Adjacent allies get +1.',
+    aura:{who:'ally',where:'adj',n:1}},
+ 12:{name:'Boss',type:'teece',sides:[12,12,12,12],sac:2,text:'Sacrifice two fielded Teece to play.'},
+ 13:{name:'Whetstone',type:'equip',mod:2,text:'Equipped Teece gets +2.'},
+ 14:{name:'Boots',type:'equip',mod:1,text:'Equipped Teece gets +1 and may move one space once per your turn.',
+    grants:{act:[{name:'Step',once:'turn',steps:[{fx:'move',range:'orth'}]}]}},
+ 15:{name:'Cursed Locket',type:'equip',mod:-1,text:'Equipped Teece gets -1. When it is destroyed, return that Teece to your hand.',
+    grants:{teeceReturn:true}},
+ 16:{name:'Hex',type:'magic',text:'An enemy Teece gets -2.',cast:[{fx:'mod',who:'enemy',where:'any',n:-2,dur:'perm'}]},
+ 17:{name:'Surge',type:'magic',text:'An allied Teece gets +2 and may move one space.',
+    cast:[{fx:'mod',who:'ally',where:'any',n:2,dur:'perm',move:'any1'}]},
+ 18:{name:'Swarm',type:'magic',text:'Summon up to four 0/0/0/0 Tokens. Tokens cannot be sacrificed and never count toward winning.',
+    cast:[{fx:'token',tok:'T0',where:'any',count:4}]},
+ 19:{name:'High Ground',type:'ground',gmod:3,text:'A Teece on this panel gets +3.'},
+ 20:{name:'Low Ground',type:'ground',gmod:-3,text:'A Teece on this panel gets -3.'},
+ /* ---- tokens ---- */
+ T0:{name:'Token',type:'teece',token:true,sides:[0,0,0,0],text:'Token. Cannot be sacrificed; never counts toward winning.'},
+ T2:{name:'Token',type:'teece',token:true,sides:[2,2,2,2],text:'Token. Cannot be sacrificed; never counts toward winning.'},
+ T3:{name:'Token',type:'teece',token:true,sides:[3,3,3,3],text:'Token. Cannot be sacrificed; never counts toward winning.'},
+ T8:{name:'Token',type:'teece',token:true,sides:[8,8,8,8],text:'Token. Cannot be sacrificed; never counts toward winning.'},
+ T4:{name:'Token',type:'teece',token:true,sides:[4,4,4,4],text:'Token. Cannot be sacrificed; never counts toward winning.'},
+ TR:{name:'Rock Token',type:'teece',token:true,sides:[0,0,0,0],def:6,text:'Token with Defence 6. Cannot be sacrificed; never counts toward winning.'},
+ TD:{name:'Drone',type:'teece',token:true,sides:[3,3,3,3],kw:['flying'],text:'Drone Token. Flying: once per your turn, move one space. Never counts toward winning.'},
+ /* ---- Teece 100 pool: the twenty-two you specified ---- */
+ 101:{name:'Enforcer',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice one fielded Teece to play.'},
+ 102:{name:'Grudge',type:'teece',sides:[8,8,8,8],text:'When destroyed: all adjacent enemies get +1.',
+    onDeath:[{fx:'aoe',who:'enemy',where:'adj',n:1,dur:'perm'}]},
+ 103:{name:'Regular',type:'teece',sides:[7,7,7,7],text:'No effect.'},
+ 104:{name:'Gasser',type:'teece',sides:[6,6,6,6],text:'When played: a Teece gets +2 until end of turn.',
+    onPlay:[{fx:'mod',who:'any',where:'any',n:2,dur:'temp'}]},
+ 105:{name:'Chorus',type:'teece',sides:[5,5,5,5],text:'All other allied Teece get +2.',
+    aura:{who:'ally',where:'global',n:2}},
+ 106:{name:'Gloom',type:'teece',sides:[4,4,4,4],text:'All enemy Teece get -2.',
+    aura:{who:'enemy',where:'global',n:-2}},
+ 107:{name:'Mitosis',type:'teece',sides:[3,3,3,3],text:'When played: summon a copy in an adjacent empty space.',
+    onPlay:[{fx:'copy'}]},
+ 108:{name:'Comeback',type:'teece',sides:[2,2,2,2],text:'When destroyed, once per game: resummon with +3.',
+    onDeath:[{fx:'resummon',bonus:3}]},
+ 109:{name:'Puppeteer',type:'teece',sides:[1,1,1,1],text:'When played: summon an 8/8/8/8 Token on any empty space. It is destroyed when this is destroyed.',
+    onPlay:[{fx:'token',tok:'T8',where:'any',count:1,linked:true}]},
+ 110:{name:'Hypnotist',type:'teece',sides:[0,0,0,0],text:'When played: control an enemy Teece until this is destroyed.',
+    onPlay:[{fx:'control'}]},
+ 111:{name:'Miniboss',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice one fielded Teece to play. Adjacent allies get +1.',
+    aura:{who:'ally',where:'adj',n:1}},
+ 112:{name:'Boss',type:'teece',sides:[12,12,12,12],sac:2,text:'Sacrifice two fielded Teece to play.'},
+ 113:{name:'Greatblade',type:'equip',mod:3,text:'Equipped Teece gets +3.'},
+ 114:{name:'Warwings',type:'equip',mod:2,text:'Equipped Teece gets +2 and Flying (once per your turn, move one space).',
+    grants:{kw:['flying']}},
+ 115:{name:'Soulthread',type:'equip',mod:0,text:'When the equipped Teece is destroyed, return it to your hand.',
+    grants:{teeceReturn:true}},
+ 116:{name:'Adrenaline',type:'magic',text:'An allied Teece gets +3 until end of turn and may move one space.',
+    cast:[{fx:'mod',who:'ally',where:'any',n:3,dur:'temp',move:'any1'}]},
+ 117:{name:'Undertow',type:'magic',text:'An enemy Teece gets -3 until end of turn and you may move it one space.',
+    cast:[{fx:'mod',who:'enemy',where:'any',n:-3,dur:'temp',move:'any1'}]},
+ 118:{name:'Lightning Strike',type:'magic',text:'Pick a column: the Teece nearest the top of it gets -6.',
+    cast:[{fx:'bolt',n:-6}]},
+ 119:{name:'High Ground',type:'ground',gmod:3,text:'A Teece on this panel gets +3.'},
+ 120:{name:'Low Ground',type:'ground',gmod:-3,text:'A Teece on this panel gets -3.'},
+ 121:{name:'Repossess',type:'magic',text:'Return a non-Boss Teece (Minibosses allowed) to its owner hand, along with its equip cards.',
+    cast:[{fx:'bounce'}]},
+ 122:{name:'Miner',type:'teece',sides:[3,6,9,4],text:'Once per your turn: place a Mine on an unoccupied panel. The next Teece to enter that panel gets -2 and the Mine is removed.',
+    act:[{name:'Lay Mine',once:'turn',steps:[{fx:'mine'}]}]},
+ /* ---- filler: plain spreads ---- */
+ 123:{name:'Gatekeep',type:'teece',sides:[9,9,2,2],text:'No effect.'},
+ 124:{name:'Sidegate',type:'teece',sides:[2,2,9,9],text:'No effect.'},
+ 125:{name:'Southpaw',type:'teece',sides:[9,7,5,4],text:'No effect.'},
+ 126:{name:'Uppercut',type:'teece',sides:[9,9,5,5],text:'No effect.'},
+ 127:{name:'Pillar',type:'teece',sides:[8,8,6,5],text:'No effect.'},
+ 128:{name:'Beam',type:'teece',sides:[6,5,8,8],text:'No effect.'},
+ 129:{name:'Wedge',type:'teece',sides:[8,8,7,3],text:'No effect.'},
+ 130:{name:'Blink',type:'teece',sides:[5,5,5,5],kw:['teleport'],text:'Teleport: once per your turn, move to any empty space on the board.'},
+ /* ---- Ranged: priced a little under the 7/7/7/7 baseline ---- */
+ 131:{name:'Archer',type:'teece',sides:[6,6,6,6],kw:['ranged'],text:'Ranged.'},
+ 132:{name:'Crossbow',type:'teece',sides:[7,7,4,4],kw:['ranged'],text:'Ranged.'},
+ 133:{name:'Longshot',type:'teece',sides:[8,3,3,3],kw:['ranged'],text:'Ranged.'},
+ 134:{name:'Ballista',type:'teece',sides:[7,7,7,2],kw:['ranged'],text:'Ranged.'},
+ 135:{name:'Slinger',type:'teece',sides:[5,5,6,6],kw:['ranged'],text:'Ranged.'},
+ 136:{name:'Sharpshooter',type:'teece',sides:[6,6,6,4],kw:['ranged'],text:'Ranged.'},
+ /* ---- Flying: one move per turn, diagonals allowed ---- */
+ 137:{name:'Kestrel',type:'teece',sides:[6,6,6,8],kw:['flying'],text:'Flying: once per your turn, move one space.'},
+ 138:{name:'Gargoyle',type:'teece',sides:[7,7,5,5],kw:['flying'],text:'Flying: once per your turn, move one space.'},
+ 139:{name:'Wisp',type:'teece',sides:[5,5,7,7],kw:['flying'],text:'Flying: once per your turn, move one space.'},
+ 140:{name:'Falcon',type:'teece',sides:[8,8,4,4],kw:['flying'],text:'Flying: once per your turn, move one space.'},
+ /* ---- auras ---- */
+ 141:{name:'Bannerman',type:'teece',sides:[5,5,5,5],text:'Adjacent allies get +2.',aura:{who:'ally',where:'adj',n:2}},
+ 142:{name:'Drummer',type:'teece',sides:[6,6,5,5],text:'Other allies in this row get +2.',aura:{who:'ally',where:'row',n:2}},
+ 143:{name:'Warp',type:'magic',text:'Move an allied Teece to any empty space on the board.',cast:[{fx:'gust',who:'ally',range:'tele'}]},
+ 144:{name:'Chiller',type:'teece',sides:[5,5,5,5],text:'Adjacent enemies get -1.',aura:{who:'enemy',where:'adj',n:-1}},
+ 145:{name:'Mascot',type:'teece',sides:[6,6,5,6],text:'All other allied Teece get +1.',aura:{who:'ally',where:'global',n:1}},
+ /* ---- when played ---- */
+ 146:{name:'Scholar',type:'teece',sides:[3,2,5,5],text:'When played: draw a card.',onPlay:[{fx:'draw',n:1}]},
+ 147:{name:'Archivist',type:'teece',sides:[5,5,5,5],text:'When played, once per game: draw two cards at the start of your next turn.',onPlay:[{fx:'delayDraw',n:2}]},
+ 148:{name:'Shover',type:'teece',sides:[6,6,5,5],text:'When played: all adjacent enemies get -2.',
+    onPlay:[{fx:'aoe',who:'enemy',where:'adj',n:-2,dur:'perm'}]},
+ 149:{name:'Rouser',type:'teece',sides:[6,6,5,5],text:'When played: all adjacent allies get +2.',
+    onPlay:[{fx:'aoe',who:'ally',where:'adj',n:2,dur:'perm'}]},
+ 150:{name:'Marshal',type:'teece',sides:[7,7,6,6],text:'When played: you may move an allied Teece one space.',
+    onPlay:[{fx:'gust',who:'ally',may:true}]},
+ 151:{name:'Bruiser',type:'teece',sides:[7,7,3,3],text:'When played: an enemy Teece gets -2.',
+    onPlay:[{fx:'mod',who:'enemy',where:'any',n:-2,dur:'perm'}]},
+ 152:{name:'Breeder',type:'teece',sides:[6,6,5,5],text:'When played: summon a 4/4/4/4 Token on an adjacent empty space.',
+    onPlay:[{fx:'token',tok:'T4',where:'adj',count:1}]},
+ 153:{name:'Latecomer',type:'teece',sides:[8,8,8,8],text:'When played: it gets -8 until end of turn.',
+    onPlay:[{fx:'mod',who:'self',n:-8,dur:'temp'}]},
+ 154:{name:'Donor',type:'teece',sides:[6,6,6,6],text:'When played: another allied Teece gets +2.',
+    onPlay:[{fx:'mod',who:'ally',where:'any',n:2,dur:'perm',notSelf:true,may:true}]},
+ /* ---- when destroyed ---- */
+ 155:{name:'Bequeather',type:'teece',sides:[4,4,5,4],text:'When destroyed: draw a card.',onDeath:[{fx:'draw',n:1}]},
+ 156:{name:'Rallier',type:'teece',sides:[6,6,6,6],text:'When destroyed: adjacent allies get +2.',
+    onDeath:[{fx:'aoe',who:'ally',where:'adj',n:2,dur:'perm'}]},
+ 157:{name:'Stinger',type:'teece',sides:[7,7,6,6],text:'When destroyed: adjacent enemies get -2.',
+    onDeath:[{fx:'aoe',who:'enemy',where:'adj',n:-2,dur:'perm'}]},
+ 158:{name:'Husk',type:'teece',sides:[7,7,6,6],text:'When destroyed: leave a 4/4/4/4 Token where it stood.',
+    onDeath:[{fx:'token',tok:'T4',where:'here',count:1}]},
+ 159:{name:'Bramble',type:'teece',sides:[4,5,6,7],text:'When destroyed: its killer gets -3 until end of turn.',
+    onDeath:[{fx:'killer',n:-3,dur:'temp'}]},
+ 160:{name:'Kindling',type:'teece',sides:[5,5,5,5],text:'When destroyed: all allied Teece get +1 permanently.',
+    onDeath:[{fx:'mass',who:'ally',n:1,dur:'perm'}]},
+ 161:{name:'Phaser',type:'teece',sides:[7,7,3,3],kw:['teleport'],text:'Teleport: once per your turn, move to any empty space on the board.'},
+ /* ---- on kill ---- */
+ 162:{name:'Glutton',type:'teece',sides:[6,6,6,6],text:'Whenever this kills a Teece, it gets +1 permanently.',
+    onKill:{n:1,dur:'perm'}},
+ 163:{name:'Headhunter',type:'teece',sides:[8,8,5,5],text:'Whenever this kills a Teece, draw a card.',
+    onKill:{draw:1}},
+ 164:{name:'Berserker',type:'teece',sides:[9,9,4,4],text:'Whenever this kills a Teece, it gets +2 until end of turn.',
+    onKill:{n:2,dur:'temp'}},
+ /* ---- activated ---- */
+ 165:{name:'Coach',type:'teece',sides:[6,6,6,6],text:'Once per your turn: an adjacent ally gets +2 until end of turn.',
+    act:[{name:'Coach up',once:'turn',steps:[{fx:'mod',who:'ally',where:'adj',n:2,dur:'temp',notSelf:true}]}]},
+ 166:{name:'Dancer',type:'teece',sides:[8,8,5,5],text:'Once per your turn: rotate this Teece.',
+    act:[{name:'Spin',once:'turn',steps:[{fx:'rot',may:true}]}]},
+ 167:{name:'Bodyguard',type:'teece',sides:[6,6,6,6],text:'Once per your turn: swap places with any enemy Teece on the board.',
+    act:[{name:'Swap',once:'turn',steps:[{fx:'swap',who:'enemy'}]}]},
+ 168:{name:'Strider',type:'teece',sides:[6,6,6,6],text:'Once per your turn: move one space.',
+    act:[{name:'Stride',once:'turn',steps:[{fx:'move',range:'orth'}]}]},
+ 169:{name:'Sapper',type:'teece',sides:[5,5,5,5],text:'Once per your turn: place a Mine on an unoccupied panel. The next Teece to enter it gets -2; the Mine is removed.',
+    act:[{name:'Lay Mine',once:'turn',steps:[{fx:'mine'}]}]},
+ 170:{name:'Feeder',type:'teece',sides:[7,7,7,7],text:'Once per your turn: this gets -1 permanently and another ally gets +2 permanently.',
+    act:[{name:'Feed',once:'turn',steps:[{fx:'mod',who:'self',n:-1,dur:'perm'},{fx:'mod',who:'ally',where:'any',n:2,dur:'perm',notSelf:true}]}]},
+ 171:{name:'Heckler',type:'teece',sides:[6,6,6,6],text:'Once per your turn: an adjacent enemy gets -2 until end of turn.',
+    act:[{name:'Heckle',once:'turn',steps:[{fx:'mod',who:'enemy',where:'adj',n:-2,dur:'temp'}]}]},
+ 172:{name:'Bouncer',type:'teece',sides:[6,6,6,6],text:'Once per your turn: push an adjacent enemy one space directly away from this Teece, if that space is empty.',
+    act:[{name:'Shove',once:'turn',steps:[{fx:'push'}]}]},
+ /* ---- elites ---- */
+ 173:{name:'Warden',type:'teece',sides:[10,10,10,10],sac:1,text:'Miniboss. Sacrifice one fielded Teece to play.'},
+ 174:{name:'Roc',type:'teece',sides:[11,11,11,11],sac:2,kw:['flying'],text:'Boss. Sacrifice two fielded Teece to play. Flying: once per your turn, move one space.'},
+ /* ---- equips ---- */
+ 175:{name:'Scope',type:'equip',mod:2,text:'Equipped Teece gets +2 and Ranged.',grants:{kw:['ranged']}},
+ 176:{name:'Boots',type:'equip',mod:2,text:'Equipped Teece gets +2 and may move one space once per your turn.',
+    grants:{act:[{name:'Step',once:'turn',steps:[{fx:'move',range:'orth'}]}]}},
+ 177:{name:'Helm',type:'equip',mod:[6,0,0,0],text:'Equipped Teece gets +6 on its top side.'},
+ 178:{name:'Greaves',type:'equip',mod:[0,0,6,0],text:'Equipped Teece gets +6 on its bottom side.'},
+ 179:{name:'Warp Boots',type:'equip',mod:1,text:'Equipped Teece gets +1 and Teleport (once per your turn, move to any empty space).',grants:{kw:['teleport']}},
+ 180:{name:'Trophy Belt',type:'equip',mod:1,text:'Equipped Teece gets +1. Whenever it kills, it gets +3 permanently.',
+    grants:{onKill:{n:3,dur:'perm'}}},
+ 181:{name:'Powder Keg',type:'equip',mod:3,text:'Equipped Teece gets +3. When it is destroyed, all adjacent enemies get -3.',
+    grants:{onDeath:[{fx:'aoe',who:'enemy',where:'adj',n:-3,dur:'perm'}]}},
+ 182:{name:'Banner',type:'equip',mod:1,text:'Equipped Teece gets +1. Allies adjacent to it get +2.',
+    grants:{aura:{who:'ally',where:'adj',n:2}}},
+ 183:{name:'Spikes',type:'equip',mod:2,text:'Equipped Teece gets +2. Whatever kills it gets -6 until end of turn.',
+    grants:{onDeath:[{fx:'killer',n:-6,dur:'temp'}]}},
+ 184:{name:'Anchor',type:'equip',mod:5,text:'Equipped Teece gets +5 and cannot move or be moved.',
+    grants:{kw:['immovable']}},
+ /* ---- magic ---- */
+ 185:{name:'Gust',type:'magic',rebound:true,text:'Move any Teece one space. The first time you cast this each game, it returns to your hand.',
+    cast:[{fx:'gust',who:'any'}]},
+ 186:{name:'Rally',type:'magic',text:'All your Teece get +2 permanently.',cast:[{fx:'mass',who:'ally',n:2,dur:'perm'}]},
+ 187:{name:'Panic',type:'magic',text:'All enemy Teece get -2 permanently.',cast:[{fx:'mass',who:'enemy',n:-2,dur:'perm'}]},
+ 188:{name:'Shatter',type:'magic',text:'Destroy an equip card, then draw a card.',cast:[{fx:'shatter'},{fx:'draw',n:1}]},
+ 189:{name:'Quake',type:'magic',text:'Destroy a battleground. If that panel is empty, summon a 4/4/4/4 Token on it.',cast:[{fx:'quake'}]},
+ 190:{name:'Study',type:'magic',text:'Draw three cards.',cast:[{fx:'draw',n:3}]},
+ 191:{name:'Reinforce',type:'magic',text:'Summon two 4/4/4/4 Tokens on empty spaces.',
+    cast:[{fx:'token',tok:'T4',where:'any',count:2}]},
+ 192:{name:'Overload',type:'magic',text:'An allied Teece gets +6 until end of turn and -2 permanently.',
+    cast:[{fx:'mod',who:'ally',where:'any',n:6,dur:'temp'},{fx:'mod',who:'last',n:-2,dur:'perm'}]},
+ 193:{name:'Snipe',type:'magic',text:'An enemy Teece gets -3. Draw a card.',
+    cast:[{fx:'mod',who:'enemy',where:'any',n:-3,dur:'perm'},{fx:'draw',n:1}]},
+ 194:{name:'Terraform',type:'magic',text:'Move a battleground to another panel, then draw a card.',
+    cast:[{fx:'terra'},{fx:'draw',n:1}]},
+ 195:{name:'Flip',type:'magic',text:'Rotate any Teece clockwise one, two or three times.',cast:[{fx:'flip'}]},
+ 196:{name:'Hawkeye',type:'magic',text:'An allied Teece gains Ranged and +1, both permanently.',
+    cast:[{fx:'kwT',kw:'ranged',perm:true},{fx:'mod',who:'last',n:1,dur:'perm'}]},
+ /* ---- battlegrounds ---- */
+ 197:{name:'Watchtower',type:'ground',gkw:['ranged'],gRangedPlus:3,
+    text:'A Teece on this panel has Ranged. If it already had Ranged, it gets +3 instead.'},
+ 198:{name:'Pedestal',type:'ground',gmod:[7,0,0,0],text:'A Teece on this panel gets +7 on its top side.'},
+ 199:{name:'Swamp',type:'ground',gmod:-3,gkw:['immovable'],text:'A Teece on this panel gets -3 and cannot move or be moved.'},
+ 200:{name:'Springboard',type:'ground',gmod:1,gact:[{name:'Spring',once:'turn',steps:[{fx:'move',range:'orth'}]}],
+    text:'A Teece on this panel gets +1 and may move one space once per your turn.'},
+ /* ================= DECK MODE ================= */
+ /* ---- Berserker: twelve supercharged cards ---- */
+ 301:{name:'Berserk Rite',type:'magic',
+    text:'Choose one: destroy a non-Boss Teece, or summon a non-Boss Teece from your grave.',
+    cast:[{fx:'choose',msg:'Berserk Rite:',opts:[
+      {lbl:'Destroy a Teece',steps:[{fx:'destroy',nonBoss:true}]},
+      {lbl:'Summon from grave',steps:[{fx:'graveSummon'}]}]}]},
+ 302:{name:'Blood Memory',type:'magic',
+    text:'Choose one: return any card from your grave to your hand, or give an ally +2.',
+    cast:[{fx:'choose',msg:'Blood Memory:',opts:[
+      {lbl:'Return a card from grave',steps:[{fx:'graveToHand'}]},
+      {lbl:'An ally gets +2',steps:[{fx:'mod',who:'ally',where:'any',n:2,dur:'perm'}]}]}]},
+ 303:{name:'Warchanter',type:'teece',sides:[7,7,7,7],text:'When played: any Teece gets +1 permanently.',
+    onPlay:[{fx:'mod',who:'any',where:'any',n:1,dur:'perm'}]},
+ 304:{name:'Bloodbow',type:'teece',sides:[9,10,7,6],kw:['ranged'],text:'Ranged.'},
+ 305:{name:'Undying Axe',type:'teece',sides:[11,2,11,2],
+    text:'When destroyed, once per game: return it to your deck, or resummon it anywhere.',
+    onDeath:[{fx:'choose',msg:'Undying Axe falls:',once:'game',opts:[
+      {lbl:'Return it to the deck',steps:[{fx:'toDeck'}]},
+      {lbl:'Resummon it anywhere',steps:[{fx:'resummonAny'}]}]}]},
+ 306:{name:'Skullsplitter',type:'teece',sides:[15,0,0,0],text:'When played: you may rotate it.',
+    onPlay:[{fx:'rot',may:true}]},
+ 307:{name:'Warlord',type:'teece',sides:[9,9,9,9],sac:1,
+    text:'Sacrifice one fielded Teece to play. The sacrificed Teece returns to your hand.',
+    onPlay:[{fx:'sacToHand'}]},
+ 308:{name:'Titan',type:'teece',sides:[16,16,16,16],sac:2,text:'Sacrifice two fielded Teece to play.'},
+ 309:{name:'Warcamp',type:'ground',gmod:0,gSalvage:true,gShape:true,gDiscardOnBreak:2,
+    text:'Covers one, two or four panels. Your cards that would go to the grave from it return to your hand instead. If an opponent destroys or replaces it, they discard two cards.'},
+ 310:{name:'Pyre',type:'ground',gmod:4,gBurn:true,
+    text:'A Teece on this panel gets +4. Either player may discard a card to destroy this battleground.'},
+ 311:{name:'Bulwark Sigil',type:'equip',mod:3,text:'Equipped Teece gets +3 and cannot be selected by enemy effects.',
+    grants:{kw:['ward']}},
+ 312:{name:'Blood Pact',type:'equip',mod:3,text:'Equipped Teece gets +3. When it is destroyed, return that Teece to your hand.',
+    grants:{teeceReturn:true}},
+ /* ---- Rock: Defence ---- */
+ 321:{name:'Boulder',type:'teece',sides:[6,6,6,6],def:2,text:'Defence 2.'},
+ 322:{name:'Pebble Thrower',type:'teece',sides:[4,3,3,6],def:1,
+    text:'Defence 1. Whenever an enemy Teece is played, it gets -1.',onEnemyPlay:{n:-1,dur:'perm'}},
+ 323:{name:'Stonewall',type:'teece',sides:[7,7,4,7],def:1,text:'Defence 1.'},
+ 324:{name:'Colossus',type:'teece',sides:[10,10,10,10],kw:['needsflinger'],
+    text:'Cannot destroy enemy Teece unless Master Rock Flinger is on the field.'},
+ 325:{name:'Muckraider',type:'teece',sides:[0,0,8,8],kw:['steadfast','ward'],
+    text:'Its attributes cannot decrease, and it cannot be selected by enemy effects.'},
+ 326:{name:'Barricade Builder',type:'teece',sides:[6,7,7,5],
+    text:'When played: choose a panel. Teece on it get +2 Defence while Barricade Builder stands.',
+    onPlay:[{fx:'defMark',n:2}]},
+ 327:{name:'Rolling Stone',type:'teece',sides:[3,3,3,3],dodge:{n:-3},
+    text:'When it would be destroyed: it gets -3 and rolls one space instead, once per turn. When it moves: summon a 0/0/0/0 Rock Token with Defence 6 beside it.',
+    onMove:[{fx:'token',tok:'TR',where:'adj',count:1}]},
+ 328:{name:'Rock Sergeant',type:'teece',sides:[7,7,7,7],def:1,sac:1,
+    text:'Sacrifice one fielded Teece to play. Defence 1. Every other ally gets +X, where X is its own Defence.',
+    aura:{who:'ally',where:'global',byDef:true,n:0}},
+ 329:{name:'Master Rock Flinger',type:'teece',sides:[9,9,9,9],sac:2,flinger:true,
+    text:'Sacrifice two fielded Teece to play. All other allies get +3 and Flying.',
+    aura:{who:'ally',where:'global',n:3,kw:['flying']}},
+ 330:{name:'Quarry Foreman',type:'teece',sides:[4,4,4,4],def:1,
+    text:'Defence 1. Every other allied Teece gets +1 Defence.',aura:{who:'ally',where:'global',n:0,def:1}},
+ 331:{name:'Rubble',type:'teece',sides:[2,2,2,2],
+    text:'When destroyed: the next Teece you play gets +2 Defence.',onDeath:[{fx:'nextDef',n:2}]},
+ 332:{name:'Gravel Golem',type:'teece',sides:[3,3,3,3],def:5,text:'Defence 5. Adjacent enemies get -1.',
+    aura:{who:'enemy',where:'adj',n:-1}},
+ 333:{name:'Avalanche',type:'magic',
+    text:'Sacrifice one of your Teece. Everything below it in that column gets -6 until end of turn, and an Avalanche battleground settles where it stood.',
+    cast:[{fx:'avalanche',n:-6,bg:340}]},
+ 334:{name:'Ground Pound',type:'magic',
+    text:'Choose one of your Teece: lay an Avalanche battleground on its panel and shove every adjacent Teece one space.',
+    cast:[{fx:'groundPound',bg:340}]},
+ 335:{name:'Roll',type:'magic',
+    text:'Choose one of your Teece: roll it anywhere along its row or column, then every enemy beside it gets -2.',
+    cast:[{fx:'rowColMove',n:-2,dur:'perm'}]},
+ 336:{name:'Studded Plate',type:'equip',mod:1,def:2,text:'Equipped Teece gets +1 and +2 Defence.',grants:{def:2}},
+ 337:{name:'Stoneheart',type:'equip',mod:0,modPerDef:1,text:'Equipped Teece gets +1 for each point of Defence it has.'},
+ 338:{name:'Clinging Moss',type:'equip',mod:0,text:'Equipped Teece gets +1 Defence. When it is destroyed, you may move this to another Teece.',
+    grants:{def:1,reequip:true}},
+ 339:{name:'Bedrock',type:'ground',gkw:['steadfast','ward'],
+    text:'A Teece on this panel cannot lose attributes and cannot be selected by enemy effects.'},
+ 340:{name:'Avalanche Field',type:'ground',gdef:2,text:'A Teece on this panel gets +2 Defence.'},
+ /* ---- Ogre: shoving things around ---- */
+ 351:{name:'Ogre Bruiser',type:'teece',sides:[6,6,6,6],
+    text:'When played: you may move an adjacent Teece one space. If you do, it gets -2 permanently.',
+    onPlay:[{fx:'moveTarget',where:'adj',may:true,thenMod:{n:-2,dur:'perm'}}]},
+ 352:{name:'Ogre Hurler',type:'teece',sides:[4,4,8,8],
+    text:'When played: you may throw an adjacent Teece to the panel directly opposite this one. If you do, it gets -2 permanently.',
+    onPlay:[{fx:'moveTarget',where:'adj',dir:'opposite',may:true,thenMod:{n:-2,dur:'perm'}}]},
+ 353:{name:'Ogre Sharpshooter',type:'teece',sides:[4,5,8,7],kw:['ranged'],
+    text:'Ranged. When played: you may knock any Teece one space directly away from this one. If you do, it gets -2 permanently.',
+    onPlay:[{fx:'moveTarget',where:'any',dir:'away',may:true,thenMod:{n:-2,dur:'perm'}}]},
+ 354:{name:'Ogre Warden',type:'teece',sides:[5,5,5,9],
+    text:'When played: choose an adjacent Teece. Its controller moves it one space; if it cannot move, it is destroyed.',
+    onPlay:[{fx:'moveTarget',where:'adj',byController:true,mustMove:true,elseDestroy:true}]},
+ 355:{name:'Ogre Chieftain',type:'teece',sides:[8,8,8,8],sac:1,
+    text:'Sacrifice one fielded Teece to play. When played: move every adjacent Teece one space and give each -4 permanently.',
+    onPlay:[{fx:'moveAllAdj',n:-4,dur:'perm'}]},
+ 356:{name:'Ogre Warlord',type:'teece',sides:[4,10,10,10],sac:2,
+    text:'Sacrifice two fielded Teece to play. When played: destroy every adjacent Teece. '+
+      'March, once per your turn: move one space, then if you did, move every Teece adjacent to it one space.',
+    onPlay:[{fx:'destroyAdj'}],
+    act:[{name:'March',once:'turn',steps:[{fx:'march'}]}]},
+ 357:{name:'Ogre Tactician',type:'teece',sides:[7,7,5,5],onAllyTargets:{n:2,dur:'temp'},
+    text:'Whenever one of your Teece selects an enemy with an effect, that Teece gets +2 until end of turn.'},
+ 358:{name:'Ogre Trapper',type:'teece',sides:[3,8,8,3],onEnemyMove:[{fx:'modMoved',n:-3,dur:'perm',anyCause:true}],
+    text:'Whenever an enemy Teece is moved, however it was moved, that Teece gets -3 permanently.'},
+ 359:{name:'Ogre Hexer',type:'teece',sides:[4,4,5,6],
+    text:'When played: curse an enemy Teece. Every time it moves for the rest of the game it gets -2 permanently, even if it changes zones.',
+    onPlay:[{fx:'curse'}]},
+ 360:{name:'Goblin Projectile',type:'teece',sides:[4,4,4,4],
+    text:'When it moves: +3 until end of turn. Once per your turn: move any Teece one space.',
+    onMove:[{fx:'mod',who:'self',n:3,dur:'temp'}],
+    act:[{name:'Launch',once:'turn',steps:[{fx:'moveTarget',where:'any'}]}]},
+ 361:{name:'Exploding Ogre',type:'teece',sides:[6,6,6,6],
+    text:'When it moves: you may destroy it to give every adjacent Teece -3 and blow them one space.',
+    onMove:[{fx:'selfDestruct',n:-3,dur:'perm'}]},
+ 362:{name:'Ogre Whelp',type:'teece',sides:[1,1,1,1],
+    text:'When played: return an adjacent Teece to hand, or move it one space. When destroyed, once per game: return this to your hand.',
+    onPlay:[{fx:'handOrMove'}],grants:{},onDeath:[{fx:'selfToHand'}]},
+ 363:{name:'Rockslide Call',type:'magic',rebound:true,
+    text:'Drag an enemy one space toward one of your Teece in its row or column. The first time you cast this each game, it returns to your hand.',
+    cast:[{fx:'dragToward'}]},
+ 364:{name:'Second Wind',type:'magic',
+    text:'Choose a Teece that moved this turn: it gets +3 or -3.',
+    cast:[{fx:'choose',msg:'Second Wind:',opts:[
+      {lbl:'Give it +3',steps:[{fx:'movedMod',n:3,dur:'perm'}]},
+      {lbl:'Give it -3',steps:[{fx:'movedMod',n:-3,dur:'perm'}]}]}]},
+ 365:{name:'Warstomp',type:'magic',text:'If any Teece moved this turn: summon an 8/8/8/8 Ogre Token.',
+    cast:[{fx:'movedToken',tok:'T8'}]},
+ 366:{name:'Counterweight',type:'equip',mod:0,
+    text:'Whenever an enemy moves, the equipped Teece gets +2 until end of turn and may move one space.',
+    grants:{onEnemyMove:[{fx:'modSelf',n:2,dur:'temp'}]}},
+ 367:{name:'Grudge Chain',type:'equip',mod:0,
+    text:'Once per your turn: destroy this equip to move an enemy Teece one space.',
+    grants:{act:[{name:'Yank',once:'turn',steps:[
+      {fx:'moveTarget',where:'any',who:'enemy'},{fx:'sacEquip'}]}]}},
+ 368:{name:'Shove Harness',type:'equip',mod:2,text:'Equipped Teece gets +2. When you equip it, shove an enemy one space.',
+    grants:{onEquip:[{fx:'moveTarget',where:'any',who:'enemy',may:true}]}},
+ 369:{name:'Sinkhole',type:'ground',gDestroyOnMove:true,
+    text:'A Teece that moves onto this panel is destroyed.'},
+ 370:{name:'Springshelf',type:'ground',gmove:3,text:'A Teece that moves onto this panel gets +3.'},
+ /* ---- Gadget: modalities, and machines that bend them ---- */
+ 441:{name:'Spring-Loaded Scout',type:'teece',sides:[3,3,3,3],revealPlay:true,
+    text:'When this is the first card you draw on your turn you may reveal it and play it at once. Played any other way it arrives with +3.',
+    onPlay:[{fx:'revealBonus',n:3}]},
+ 442:{name:'Calibration Dial',type:'teece',sides:[2,2,2,2],
+    text:'When played: choose a number X from zero to eight. The next Teece you play whose four sides all equal X arrives with plus nine minus X.',
+    onPlay:[{fx:'calibrate'}]},
+ 443:{name:'Pocket Multitool',type:'teece',sides:[1,1,1,1],
+    text:'When played, choose a modality: return a non-Boss Teece to its owner hand and send its equips with it, or arm this so that when it is destroyed the next Teece your opponent plays is destroyed.',
+    onPlay:[{fx:'choose',modal:true,msg:'Pocket Multitool:',opts:[
+      {lbl:'Return a non-Boss Teece to hand',steps:[{fx:'bounce'}]},
+      {lbl:'Arm the trap',steps:[{fx:'armTrap'}]}]}],
+    onDeath:[{fx:'trapCheck'}]},
+ 444:{name:'Null Module',type:'teece',sides:[0,0,0,0],
+    text:'When played: the next modality triggers every mode. When destroyed: the next modality triggers its mode twice.',
+    onPlay:[{fx:'modalNext',all:true}],onDeath:[{fx:'modalNext',twice:true}]},
+ 445:{name:'Assembly Line',type:'teece',sides:[4,4,4,4],
+    text:'Once per your turn, choose a modality: build one 4/4/4/4 Token, or two 2/2/2/2 Tokens, or three 0/0/0/0 Tokens.',
+    act:[{name:'Run the line',once:'turn',steps:[{fx:'choose',modal:true,msg:'Assembly Line:',opts:[
+      {lbl:'One 4/4/4/4 Token',steps:[{fx:'token',tok:'T4',count:1}]},
+      {lbl:'Two 2/2/2/2 Tokens',steps:[{fx:'token',tok:'T2',count:2}]},
+      {lbl:'Three 0/0/0/0 Tokens',steps:[{fx:'token',tok:'T0',count:3}]}]}]}]},
+ 446:{name:'Supply Cache',type:'teece',sides:[5,5,5,5],
+    text:'When played, choose a modality: draw a card then put a card from your hand on top of your deck, or discard a card then take a card from your grave.',
+    onPlay:[{fx:'choose',modal:true,msg:'Supply Cache:',opts:[
+      {lbl:'Draw, then stack one back',steps:[{fx:'draw',n:1},{fx:'handToDeck'}]},
+      {lbl:'Discard, then dig one up',steps:[{fx:'discard',n:1},{fx:'graveToHand'}]}]}]},
+ 447:{name:'Torque Wrench',type:'teece',sides:[6,6,6,6],
+    text:'When played, choose a modality: give one side of an allied Teece +2, or give one side of an enemy Teece -2.',
+    onPlay:[{fx:'choose',modal:true,msg:'Torque Wrench:',opts:[
+      {lbl:'An ally gains +2 on one side',steps:[{fx:'modSide',who:'ally',n:2}]},
+      {lbl:'An enemy loses 2 on one side',steps:[{fx:'modSide',who:'enemy',n:-2}]}]}]},
+ 448:{name:'Spare Parts',type:'teece',sides:[7,7,7,7],
+    text:'You can discard this straight from your hand, any time on your turn, to choose a modality: give an allied Teece +2, or move an allied Teece one space. Played to the board instead, it fights as a plain 7/7/7/7; when destroyed, choose a modality: an enemy Teece gets +2, or your opponent draws a card.',
+    handDiscard:[{fx:'choose',modal:true,msg:'Discard Spare Parts:',opts:[
+      {lbl:'An ally gets +2',steps:[{fx:'mod',who:'ally',where:'global',n:2,dur:'perm'}]},
+      {lbl:'Move an ally one space',steps:[{fx:'moveTarget',where:'any',who:'ally'}]}]}],
+    onDeath:[{fx:'choose',modal:true,msg:'Spare Parts breaks apart:',opts:[
+      {lbl:'An enemy gets +2',steps:[{fx:'mod',who:'enemy',where:'global',n:2,dur:'perm'}]},
+      {lbl:'Your opponent draws',steps:[{fx:'oppDraw',n:1}]}]}]},
+ 449:{name:'Governor Chip',type:'teece',sides:[8,8,8,8],
+    text:'When played, choose a modality: set one of this Teece\u2019s own sides to zero, or give an enemy Teece +2.',
+    onPlay:[{fx:'choose',modal:true,msg:'Governor Chip:',opts:[
+      {lbl:'Zero one of my own sides',steps:[{fx:'setSide',who:'self',v:0}]},
+      {lbl:'An enemy gets +2',steps:[{fx:'mod',who:'enemy',where:'global',n:2,dur:'perm'}]}]}]},
+ 450:{name:'Overclocker',type:'teece',sides:[9,9,9,9],sac:1,
+    text:'Sacrifice one fielded Teece to play. Whenever one of your modalities resolves, this gets +1 and Flying until end of turn.',
+    onModal:{n:1,dur:'temp',kw:'flying'}},
+ 451:{name:'Safety Interlock',type:'teece',sides:[10,10,10,10],modalNone:true,
+    text:'While this stands, no modality triggers at all, for either player. Cards that offer a choice simply do nothing.'},
+ 452:{name:'Grand Apparatus',type:'teece',sides:[11,11,11,11],sac:2,modalAll:true,modalTwice:true,
+    text:'Sacrifice two fielded Teece to play. While this stands, your modalities trigger every mode, and every mode triggers twice.'},
+ 453:{name:'Preset',type:'magic',
+    text:'Choose a modality: the next modality you trigger fires all of its modes, or the next modality you trigger fires its chosen mode twice.',
+    cast:[{fx:'choose',modal:true,msg:'Preset:',opts:[
+      {lbl:'Next one fires every mode',steps:[{fx:'modalNext',all:true}]},
+      {lbl:'Next one fires twice',steps:[{fx:'modalNext',twice:true}]}]}]},
+ 454:{name:'Swiss Army Knife',type:'magic',
+    text:'Choose a modality: rotate a Teece clockwise, rotate a Teece counter-clockwise, move a Teece one space, or give a Teece +2 until end of turn.',
+    cast:[{fx:'choose',modal:true,msg:'Swiss Army Knife:',opts:[
+      {lbl:'Rotate clockwise',steps:[{fx:'rotTarget',dir:'cw'}]},
+      {lbl:'Rotate counter-clockwise',steps:[{fx:'rotTarget',dir:'ccw'}]},
+      {lbl:'Move it one space',steps:[{fx:'moveTarget',where:'any'}]},
+      {lbl:'Give it +2 until end of turn',steps:[{fx:'mod',where:'global',n:2,dur:'temp'}]}]}]},
+ 455:{name:'First Aid Kit',type:'magic',
+    text:'Choose a modality: strip every bonus and penalty off a Teece, or prime an empty panel so the next Teece to arrive there gets +3, or give an allied Teece -2 and take a card back from your grave.',
+    cast:[{fx:'choose',modal:true,msg:'First Aid Kit:',opts:[
+      {lbl:'Strip a Teece back to base',steps:[{fx:'scrub'}]},
+      {lbl:'Prime an empty panel',steps:[{fx:'prime',n:3}]},
+      {lbl:'An ally takes -2, dig up a card',steps:[{fx:'mod',who:'ally',where:'global',n:-2,dur:'perm'},{fx:'graveToHand'}]}]}]},
+ 456:{name:'Field Kit',type:'equip',mod:2,
+    text:'Equipped Teece gets +2. When you equip it, choose a modality: the Teece gains Ranged, or the Teece gains Flying.',
+    grants:{onEquip:[{fx:'choose',modal:true,msg:'Field Kit:',opts:[
+      {lbl:'It gains Ranged',steps:[{fx:'kwSelf',kw:'ranged'}]},
+      {lbl:'It gains Flying',steps:[{fx:'kwSelf',kw:'flying'}]}]}]}},
+ 457:{name:'Armoury',type:'equip',mod:0,
+    text:'When you equip it, choose a modality: the Sword, and the Teece gets +2, or the Shield, and the Teece gets 3 Defence and cannot lose attributes.',
+    grants:{onEquip:[{fx:'choose',modal:true,msg:'Armoury:',opts:[
+      {lbl:'Sword: +2',steps:[{fx:'mod',who:'self',n:2,dur:'perm'}]},
+      {lbl:'Shield: 3 Defence, steadfast',steps:[{fx:'defSelf',n:3},{fx:'kwSelf',kw:'steadfast'}]}]}]}},
+ 458:{name:'Coupling Rig',type:'equip',mod:0,gdefHost:2,
+    text:'Equipped Teece gets +2 Defence. When you equip it, the next modality you trigger fires every one of its modes.',
+    grants:{def:2,onEquip:[{fx:'modalNext',all:true}]}},
+ 459:{name:'Polarity Field',type:'ground',gShape:false,
+    gModal:[{lbl:'Negative panel: -2 here, bonuses here count double',gmod:-2,gDoublePos:true},
+            {lbl:'Positive panel: +2 here, penalties here count double',gmod:2,gDoubleNeg:true}],
+    text:'When played, choose a modality: this panel gives -2 and doubles every bonus applied here, or it gives +2 and doubles every penalty applied here.'},
+ 460:{name:'Modular Platform',type:'ground',gShape:true,gShapeModal:true,
+    text:'When played, choose its size. One panel: Teece here trigger every mode of their modalities. Two panels: Teece here trigger their chosen mode twice. Four panels: Teece here gain \u201cwhen destroyed, choose a modality: every Teece gets +2, or every Teece gets -2.\u201d'},
+ /* ---- Time: cards that grow, decay and hurry ---- */
+ 381:{name:'Baby Dragon',type:'teece',sides:[4,4,4,4],tick:{n:2,cap:6},
+    text:'At the start of each of your turns it gets +2, up to +6 in all.'},
+ 382:{name:'Chrysalis',type:'teece',sides:[4,4,8,8],timer:{turns:2,sides:[10,10,8,8]},
+    text:'After two of your turns, it becomes 10/10/8/8.'},
+ 383:{name:'Green Shoot',type:'teece',sides:[8,9,1,1],timer:{turns:3,sides:[8,9,11,11]},
+    text:'After three of your turns, it becomes 8/9/11/11.'},
+ 384:{name:'Cut Flower',type:'teece',sides:[9,9,9,9],timer:{turns:2,sides:[5,5,5,5]},
+    text:'After two of your turns, it wilts to 5/5/5/5.'},
+ 385:{name:'Hourglass Knight',type:'teece',sides:[9,9,9,9],tick:{n:-1},kw:['flying'],
+    text:'Flying. At the start of each of your turns, it gets -1.'},
+ 386:{name:'Fast Forward',type:'magic',text:"Advance a Teece's clock by two turns.",
+    cast:[{fx:'fastForward',n:2}]},
+ 387:{name:'Time Warp',type:'ground',gAgeRate:2,gDouble:true,
+    text:'A Teece on this panel ages twice as fast, and its when-played and when-destroyed effects happen twice.'},
+ 388:{name:'Acorn',type:'teece',sides:[3,3,3,3],timer:{turns:2,sides:[10,10,10,10]},
+    text:'After two of your turns, it becomes 10/10/10/10.'},
+ 389:{name:'Rewind',type:'magic',
+    text:'Return a card that reached a graveyard this turn to its owner hand.',
+    cast:[{fx:'rewind'}]},
+ 390:{name:'Long Game',type:'teece',sides:[2,2,2,2],timer:{turns:4,sides:[12,12,12,12]},
+    text:'After four of your turns, it becomes 12/12/12/12.'},
+ 391:{name:'Whetted Blade',type:'teece',sides:[5,5,7,7],timer:{turns:2,sides:[9,9,7,7]},
+    text:"When played: advance an ally's clock by one turn. After two of your turns, it becomes 9/9/7/7.",
+    onPlay:[{fx:'fastForward',n:1,who:'ally'}]},
+ 392:{name:'Heir Apparent',type:'teece',sides:[8,8,8,8],sac:1,timer:{turns:3,sides:[12,12,12,12]},
+    text:'Sacrifice one fielded Teece to play. After three of your turns, it becomes 12/12/12/12.'},
+ 393:{name:'Fading Titan',type:'teece',sides:[15,15,15,15],sac:2,tick:{n:-1},
+    text:'Sacrifice two fielded Teece to play. At the start of each of your turns, it gets -1.'},
+ 394:{name:'Timekeeper',type:'teece',sides:[4,4,4,4],
+    text:'When played: advance every other allied Teece by one turn.',
+    onPlay:[{fx:'ageAll',who:'ally',n:1,notSelf:true}]},
+ 395:{name:'Last Breath',type:'teece',sides:[5,5,5,5],
+    text:'When destroyed: advance every allied Teece by two turns.',
+    onDeath:[{fx:'ageAll',who:'ally',n:2}]},
+ 396:{name:'Chronoplate',type:'equip',mod:3,grants:{ageStop:true},
+    text:'Equipped Teece gets +3 and its clock stops: it never ages again.'},
+ 397:{name:'Pause',type:'magic',text:'A Teece cannot be destroyed until the start of your next turn.',
+    cast:[{fx:'pause'}]},
+ 398:{name:'Sundial',type:'equip',mod:2,text:'Equipped Teece gets +2 and ages twice as fast.',
+    grants:{ageRate:2}},
+ 399:{name:'Patina',type:'equip',mod:0,modPerAge:1,
+    text:'Equipped Teece gets +1 for every turn it has been on the field.'},
+ 400:{name:'Stasis Field',type:'ground',gSave:true,
+    text:'When a Teece on this panel would be destroyed, its owner may discard a card instead. It survives and cannot be destroyed until the start of their next turn.'},
+ /* ---- Robot: production and movement. Every Teece here Flies. ---- */
+ 411:{name:'Assembler',type:'teece',sides:[5,5,5,5],kw:['flying'],
+    text:'Flying. When played: build two Drones on adjacent empty panels.',
+    onPlay:[{fx:'token',tok:'TD',where:'adj',count:2}]},
+ 412:{name:'Launch Bay',type:'teece',sides:[6,6,6,6],kw:['flying'],
+    text:'Flying. When played: build a Drone on any empty panel.',
+    onPlay:[{fx:'token',tok:'TD',where:'any',count:1}]},
+ 413:{name:'Wreckage Core',type:'teece',sides:[6,6,6,6],kw:['flying'],
+    text:'Flying. When destroyed: build two Drones on empty panels.',
+    onDeath:[{fx:'token',tok:'TD',where:'any',count:2}]},
+ 414:{name:'Overclocker',type:'teece',sides:[5,5,5,5],kw:['flying'],
+    onAllyMove:[{fx:'modSelf',n:2,dur:'temp'}],
+    text:'Flying. Whenever another allied Teece moves, this gets +2 until end of turn.'},
+ 415:{name:'Signal Relay',type:'teece',sides:[5,5,5,5],kw:['flying'],
+    onAllyMove:[{fx:'modMoved',n:2,dur:'temp'}],
+    text:'Flying. Whenever another allied Teece moves, that Teece gets +2 until end of turn.'},
+ 416:{name:'Chassis',type:'teece',sides:[4,4,4,6],kw:['flying'],onAllyDeath:{n:1,dur:'perm'},
+    text:'Flying. Whenever another allied Teece or Drone is destroyed, this gets +1 permanently.'},
+ 417:{name:'Field Welder',type:'teece',sides:[7,7,5,5],kw:['flying'],
+    text:'Flying. Once per your turn: an adjacent ally gets +2 permanently.',
+    act:[{name:'Weld',once:'turn',steps:[{fx:'mod',who:'ally',where:'adj',n:2,dur:'perm',notSelf:true}]}]},
+ 418:{name:'Drone Foundry',type:'teece',sides:[4,4,4,4],kw:['flying'],
+    text:'Flying. Once per your turn: build a Drone on an adjacent empty panel.',
+    act:[{name:'Fabricate',once:'turn',steps:[{fx:'token',tok:'TD',where:'adj',count:1}]}]},
+ 419:{name:'Salvager',type:'teece',sides:[6,6,5,5],kw:['flying'],
+    text:'Flying. When destroyed: build a Drone and draw a card.',
+    onDeath:[{fx:'token',tok:'TD',where:'any',count:1},{fx:'draw',n:1}]},
+ 420:{name:'Swarm Node',type:'teece',sides:[5,5,5,5],kw:['flying'],
+    text:'Flying. Every allied Drone gets +2.',aura:{who:'ally',where:'global',n:2,tokenOnly:true}},
+ 421:{name:'Factory Line',type:'teece',sides:[8,8,8,8],sac:1,kw:['flying'],
+    text:'Flying. Sacrifice one fielded Teece to play. When played: build two Drones on any empty panels.',
+    onPlay:[{fx:'token',tok:'TD',where:'any',count:2}]},
+ 422:{name:'War Machine',type:'teece',sides:[11,11,11,11],sac:2,kw:['flying'],
+    text:'Flying. Sacrifice two fielded Teece to play. When played: build three Drones on any empty panels.',
+    onPlay:[{fx:'token',tok:'TD',where:'any',count:3}]},
+ 423:{name:'Mobile Frame',type:'teece',sides:[6,6,6,6],kw:['flying'],
+    text:'Flying. Whenever it moves, it gets +1 permanently.',
+    onMove:[{fx:'mod',who:'self',n:1,dur:'perm'}]},
+ 424:{name:'Hangar Guard',type:'teece',sides:[7,7,7,7],kw:['flying'],
+    text:'Flying. Adjacent allied Drones get +2.',aura:{who:'ally',where:'adj',n:2,tokenOnly:true}},
+ 425:{name:'Servo Rig',type:'equip',mod:1,
+    text:'Equipped Teece gets +1 and may move one space up to three times each of your turns.',
+    grants:{act:[{name:'Boost',once:'turn',times:3,steps:[{fx:'move',range:'orth'}]}]}},
+ 426:{name:'Drone Tether',type:'equip',mod:0,
+    text:'Allied Drones adjacent to the equipped Teece get +5.',
+    grants:{aura:{who:'ally',where:'adj',n:5,tokenOnly:true}}},
+ 427:{name:'Repair Bay',type:'equip',mod:5,onlyToken:true,
+    text:'Equip to a Drone only. That Drone gets +5.'},
+ 428:{name:'Deploy',type:'magic',text:'Build two Drones on empty panels.',
+    cast:[{fx:'token',tok:'TD',where:'any',count:2}]},
+ 429:{name:'Slipstream',type:'magic',
+    text:'Move one of your Teece, then it gets +3 until end of turn.',
+    cast:[{fx:'moveTarget',where:'any',who:'ally',thenMod:{n:3,dur:'temp'}}]},
+ 430:{name:'Landing Pad',type:'ground',gEndTurn:'TD',
+    text:'At the end of your turn, if this panel is empty, a Drone is built on it.'}
+};
+const CLASSIC=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+const POOL=[];
+for(let i=101;i<=200;i++)POOL.push(i);
+for(let i=301;i<=312;i++)POOL.push(i);
+for(let i=321;i<=340;i++)POOL.push(i);
+for(let i=351;i<=370;i++)POOL.push(i);
+for(let i=381;i<=400;i++)POOL.push(i);
+for(let i=411;i<=430;i++)POOL.push(i);
+const DECKS={
+  berserker:{name:'Berserker',cards:[301,302,303,304,305,306,307,308,309,310,311,312],
+    blurb:'Twelve cards, every one of them overpowered. Win before you run dry: your own empty deck never loses you the game, only your opponent\'s does.'},
+  rock:{name:'Rock',cards:[321,322,323,324,325,326,327,328,329,330,331,332,333,334,335,336,337,338,339,340],
+    blurb:'Defence soaks up the difference. A Teece with Defence 2 only dies to an attack that beats it by three or more.'},
+  ogre:{name:'Ogre',cards:[351,352,353,354,355,356,357,358,359,360,361,362,363,364,365,366,367,368,369,370],
+    blurb:'Shove everything. Ogres move enemies around and the penalties they hand out are permanent, so a shoved Teece never recovers. Negative attributes are lethal.'},
+  robot:{name:'Robot',cards:[411,412,413,414,415,416,417,418,419,420,421,422,423,424,425,426,427,428,429,430],
+    blurb:'Every Robot Flies, and Drones roll off the line all game. Drones are 3/3/3/3 Tokens that also Fly \u2014 they block, they kill, and several Robots pay you for keeping them moving.'},
+  gadget:{name:'Gadget',cards:[441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460],
+    blurb:'Almost every card asks you to choose a mode. The deck is built to cheat that choice \u2014 fire every mode at once, fire the chosen one twice, or switch modes off for both players entirely.'},
+  time:{name:'Time',cards:[381,382,383,384,385,386,387,388,389,390,391,392,393,394,395,396,397,398,399,400],
+    blurb:'Cards that grow or rot on a clock. Every Teece ages at the start of your turn; some come of age into something far bigger, others decay every turn you keep them.'}
+};
+const DEF=t=>CARDS[t.cardId];
+const isBossCard=id=>(CARDS[id].sac||0)>=2;
+const FLY_ACT={name:'Fly',once:'turn',steps:[{fx:'move',range:'any'}]};
+const TELE_ACT={name:'Teleport',once:'turn',steps:[{fx:'move',range:'tele'}]};
+
+/* ============ modalities ============
+   A modality is any effect that offers a choice. Gadget bends them: fire every
+   mode, fire the chosen mode twice, or switch them off for both sides. */
+const SIDE_NAMES=['top','right','bottom','left'];
+function groundFlag(g,key){
+  if(!g)return false;
+  if(g[key])return true;
+  const gd=CARDS[g.cardId];
+  return !!(gd&&gd[key]);
+}
+function modalCtl(p,cell){
+  let all=false,times=1,off=false;
+  const b=G.board;
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;if(!t)continue;
+    const d=DEF(t);
+    if(d.modalNone)off=true;
+    if(sameTeam(t.owner,p)){
+      if(d.modalAll)all=true;
+      if(d.modalTwice)times=2;
+    }
+  }
+  if(cell!=null&&b[cell]&&b[cell].ground){
+    const g=b[cell].ground;
+    if(groundFlag(g,'gModalAll'))all=true;
+    if(groundFlag(g,'gModalTwice'))times=2;
+  }
+  const nx=G.modalNext;
+  if(nx&&nx.p===p&&!off){
+    if(nx.all)all=true;
+    if(nx.twice)times=2;
+    G.modalNext=null;
+  }
+  return {off,all,times};
+}
+function fireModal(p){
+  const b=G.board;
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;if(!t||t.owner!==p)continue;
+    const d=DEF(t);
+    if(!d.onModal)continue;
+    applyModT(t,d.onModal.n,d.onModal.dur||'temp');
+    if(d.onModal.kw&&t.kwTemp.indexOf(d.onModal.kw)<0)t.kwTemp.push(d.onModal.kw);
+    log(nm(t)+' spins up: '+sgn(d.onModal.n)+(d.onModal.kw?' and '+d.onModal.kw:'')+' until end of turn.');
+  }
+}
+function setModalNext(p,opt){
+  G.modalNext={p,all:!!opt.all,twice:!!opt.twice};
+  log(pname(p)+"'s next modality "+(opt.all?'fires every mode.':'fires its mode twice.'));
+}
+function enemySeats(p){
+  const o=[];
+  for(let i=0;i<PLAYERS();i++)if(!sameTeam(i,p))o.push(i);
+  return o;
+}
+async function offerReveal(p){
+  const pl=G.players[p];
+  if(!pl||!pl.hand.length||G.over||G.teecePlayed)return;
+  const id=pl.hand[pl.hand.length-1];
+  const d=CARDS[id];
+  if(!d||!d.revealPlay)return;
+  let room=false;
+  for(let i=0;i<BN;i++)if(!G.board[i].teece){room=true;break;}
+  if(!room)return;
+  const yes=await chooseOption(p,[{v:'y',lbl:'Reveal it and play it now'},{v:'n',lbl:'Keep it in hand'}],
+    'You drew '+d.name+'. Reveal it and play it at once?');
+  if(yes!=='y')return;
+  G.viaReveal=true;
+  try{ await playTeece(p,pl.hand.length-1); }
+  finally{ G.viaReveal=false; }
+}
+async function pickSide(p,msg){
+  const o=await chooseOption(p,SIDE_NAMES.map((s,x)=>({v:String(x),lbl:s})),msg);
+  return o==null?null:parseInt(o,10);
+}
+/* ============ state ============ */
+let G=null, UID=1;
+/* ---- board geometry, rebuilt whenever the board size changes ---- */
+let BW=3;                 /* board width in panels  */
+let BN=9;                 /* total panels = BW*BW   */
+let ADJ=[],DIAG=[],CN=[];
+const ALL=()=>{const a=[];for(let i=0;i<BN;i++)a.push(i);return a;};
+const row=i=>Math.floor(i/BW), col=i=>i%BW;
+const sameRow=(a,b)=>row(a)===row(b), sameCol=(a,b)=>col(a)===col(b);
+function bandName(k,n){
+  if(n<=1)return '';
+  if(k===0)return 'top';
+  if(k===n-1)return 'bottom';
+  if(n===3)return 'middle';
+  return 'row '+(k+1);
+}
+function fileName(k,n){
+  if(n<=1)return '';
+  if(k===0)return 'left';
+  if(k===n-1)return 'right';
+  if(n===3)return 'middle';
+  return 'column '+(k+1);
+}
+function buildGeometry(w){
+  BW=w; BN=w*w;
+  ADJ=[];DIAG=[];CN=[];
+  for(let i=0;i<BN;i++){
+    const r=Math.floor(i/w),c=i%w,a=[],d=[];
+    for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+      if(!dr&&!dc)continue;
+      const rr=r+dr,cc=c+dc;
+      if(rr<0||rr>=w||cc<0||cc>=w)continue;
+      const j=rr*w+cc;
+      d.push(j);
+      if(!dr||!dc)a.push(j);
+    }
+    a.sort((x,y)=>x-y);d.sort((x,y)=>x-y);
+    ADJ.push(a);DIAG.push(d);
+    if(w===3&&r===1&&c===1)CN.push('center');
+    else CN.push((bandName(r,w)+'-'+fileName(c,w)).replace(/^-|-$/g,''));
+  }
+}
+buildGeometry(3);
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function makeTeece(cardId,owner){
+  const d=CARDS[cardId];
+  const base=d.sides.slice();
+  if(bonusApplies(owner))for(let k=0;k<4;k++)base[k]=Math.max(0,base[k]+G.enemyBonus);
+  return {uid:UID++,cardId,owner,baseOwner:owner,base,perm:[0,0,0,0],temp:[0,0,0,0],
+    equips:[],isToken:!!d.token,isCopy:false,resummoned:false,kwTemp:[],kwPerm:[],links:[],controls:[],
+    defPerm:0,dodged:false,age:0,transformed:false,tickTotal:0,immortalOwner:null,
+    actUsedTurn:{},actUsedGame:{}};
+}
+function newState(mode,vsAI,decks,extra){
+  UID=1;extra=extra||{};
+  const nP=extra.seats||2;
+  const teams=extra.teams||Array.from({length:nP},(_,i)=>i);
+  buildGeometry(extra.width||3);
+  const mk=p=>({deck:shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice()),hand:[],grave:[],onceUsed:{},pendingDraw:0,
+    nextDefBonus:0,noDeckOut:false});
+  const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
+    aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
+    width:BW,
+    board:Array.from({length:BN},()=>({teece:null,ground:null,mine:null,defMark:null})),
+    turn:Math.floor(Math.random()*nP),turnNum:1,teecePlayed:false,over:false,winner:null,pending:null,
+    detailLock:null,detailHover:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],
+    epoch:++EPOCH,
+    enemyBonus:extra.enemyBonus||0,level:extra.level||0,quiet:0,eventFlag:false,
+    modalNext:null,trap:null,
+    seatNames:extra.seatNames||null};
+  for(const p of s.players){for(let i=0;i<5&&p.deck.length;i++)p.hand.push(p.deck.pop());}
+  return s;
+}
+/* ---- teams. In a two-player game teams are [0,1], so sameTeam is
+       exactly owner-equality and every rule below behaves as before. ---- */
+/* Every new game bumps EPOCH. An AI turn captures the epoch it started in and
+   abandons itself the moment the game is replaced, so a restart mid-turn cannot
+   leave an async chain dereferencing a board that no longer exists. */
+let EPOCH=0;
+const stale=ep=>!G||G.epoch!==ep;
+const teamOf=p=>(G&&G.teams&&G.teams[p]!=null)?G.teams[p]:p;
+const sameTeam=(a,b)=>a===b||teamOf(a)===teamOf(b);
+const PLAYERS=()=>G?G.players.length:2;
+const seatsOnTeam=tm=>{const o=[];for(let i=0;i<PLAYERS();i++)if(teamOf(i)===tm)o.push(i);return o;};
+const teamsInPlay=()=>{const o=[];for(let i=0;i<PLAYERS();i++)if(o.indexOf(teamOf(i))<0)o.push(teamOf(i));return o;};
+/* the difficulty rating hits anyone not on the human's team (seat 0) */
+const bonusApplies=o=>!!(G&&G.enemyBonus&&!sameTeam(o,0));
+const isAIP=p=>G.vsAI&&(G.aiSeats?G.aiSeats.indexOf(p)>=0:p===1);
+function pname(p){
+  if(G&&G.seatNames&&G.seatNames[p])return G.seatNames[p];
+  if(G&&G.vsAI)return p===0?'You':(PLAYERS()>2?'Computer '+p:'Computer');
+  return 'Player '+(p+1);
+}
+function teamName(tm){
+  const seats=seatsOnTeam(tm);
+  if(seats.length===1)return pname(seats[0]);
+  return seats.map(pname).join(' and ');
+}
+function nm(t){const d=DEF(t);return d.name+(t.isCopy?' (copy)':'');}
+function log(m){G.log.unshift(m);if(G.log.length>140)G.log.pop();if(HAS_DOM)renderLog();}
+
+/* ============ derived stats, keywords, acts ============ */
+function addMod(sum,m){if(m==null)return;if(Array.isArray(m)){for(let k=0;k<4;k++)sum[k]+=m[k];}else{for(let k=0;k<4;k++)sum[k]+=m;}}
+function effSides(b,i){
+  const t=b[i].teece; if(!t)return[0,0,0,0];
+  const s=[0,0,0,0];
+  for(let k=0;k<4;k++)s[k]=t.base[k]+t.perm[k]+t.temp[k];
+  for(const e of t.equips){
+    const ed=CARDS[e.cardId];
+    addMod(s,ed.mod);
+    if(ed.modPerDef)addMod(s,ed.modPerDef*defOf(b,i));
+    if(ed.modPerAge)addMod(s,ed.modPerAge*(t.age||0));
+  }
+  if(b[i].ground){
+    const gd=CARDS[b[i].ground.cardId];
+    addMod(s,gd.gmod);
+    if(b[i].ground.gmod!=null)addMod(s,b[i].ground.gmod);
+    if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addMod(s,gd.gRangedPlus);
+  }
+  for(let j=0;j<BN;j++){
+    if(j===i)continue;
+    const o=b[j].teece; if(!o)continue;
+    const auras=[]; const od=DEF(o);
+    if(od.aura)auras.push(od.aura);
+    for(const e of o.equips){const g=CARDS[e.cardId].grants;if(g&&g.aura)auras.push(g.aura);}
+    for(const a of auras){
+      const ally=sameTeam(o.owner,t.owner);
+      if(a.who==='ally'&&!ally)continue;
+      if(a.who==='enemy'&&ally)continue;
+      if(a.where==='adj'&&ADJ[j].indexOf(i)<0)continue;
+      if(a.where==='row'&&!sameRow(i,j))continue;
+      if(a.where==='col'&&!sameCol(i,j))continue;
+      if(a.tokenOnly&&!t.isToken)continue;
+      const amt=a.byDef?defOf(b,i):a.n;
+      for(let k=0;k<4;k++)s[k]+=amt;
+    }
+  }
+  return s;
+}
+function defOf(b,i){
+  const t=b[i].teece; if(!t)return 0;
+  let d=(DEF(t).def||0)+(t.defPerm||0);
+  for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.def)d+=g.def;}
+  if(b[i].ground){const gd=CARDS[b[i].ground.cardId];if(gd.gdef)d+=gd.gdef;}
+  if(b[i].defMark&&b.some(c=>c.teece&&c.teece.uid===b[i].defMark.uid))d+=b[i].defMark.n;
+  for(let j=0;j<BN;j++){
+    if(j===i)continue;
+    const o=b[j].teece;if(!o)continue;
+    const a=DEF(o).aura;
+    if(a&&a.def&&((a.who==='ally')===sameTeam(o.owner,t.owner))&&a.where==='global')d+=a.def;
+  }
+  return d;
+}
+function isSteadfast(t){
+  if(!t)return false;
+  const d=DEF(t);
+  if((d.kw||[]).indexOf('steadfast')>=0)return true;
+  if((t.kwPerm||[]).indexOf('steadfast')>=0)return true;
+  if((t.kwTemp||[]).indexOf('steadfast')>=0)return true;
+  if(G&&G.board){
+    const i=G.board.findIndex(c=>c.teece===t);
+    if(i>=0&&G.board[i].ground){
+      const gd=CARDS[G.board[i].ground.cardId];
+      if((gd.gkw||[]).indexOf('steadfast')>=0)return true;
+    }
+  }
+  return false;
+}
+function canTarget(b,i,byPlayer){
+  const t=b[i].teece; if(!t)return false;
+  if(byPlayer==null||t.owner===byPlayer)return true;
+  return kwOf(b,i).indexOf('ward')<0;
+}
+function kwOf(b,i,noGround){
+  const t=b[i].teece; if(!t)return[];
+  const ks=[]; const d=DEF(t);
+  if(d.kw)ks.push(...d.kw);
+  ks.push(...t.kwTemp);
+  if(t.kwPerm)ks.push(...t.kwPerm);
+  for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.kw)ks.push(...g.kw);}
+  if(b[i].ground&&!noGround){const gd=CARDS[b[i].ground.cardId];if(gd.gkw)ks.push(...gd.gkw);}
+  for(let j=0;j<BN;j++){
+    if(j===i)continue;
+    const o=b[j].teece;if(!o)continue;
+    const a=DEF(o).aura;
+    if(a&&a.kw&&((a.who==='ally')===sameTeam(o.owner,t.owner))&&a.where==='global')ks.push(...a.kw);
+  }
+  return ks;
+}
+const hasKw=(b,i,k)=>kwOf(b,i).indexOf(k)>=0;
+function actsOf(b,i){
+  const t=b[i].teece; if(!t)return[];
+  const out=[]; const d=DEF(t);
+  (d.act||[]).forEach((a,x)=>out.push({key:'c'+x,act:a}));
+  for(const e of t.equips){
+    const g=CARDS[e.cardId].grants;
+    if(g&&g.act)g.act.forEach((a,x)=>out.push({key:'e'+e.cardId+'_'+x,act:a}));
+  }
+  if(hasKw(b,i,'flying'))out.push({key:'kfly',act:FLY_ACT});
+  if(hasKw(b,i,'teleport'))out.push({key:'ktele',act:TELE_ACT});
+  if(b[i].ground){const gd=CARDS[b[i].ground.cardId];if(gd.gact)gd.gact.forEach((a,x)=>out.push({key:'g'+b[i].ground.cardId+'_'+x,act:a}));}
+  return out;
+}
+function actAvailable(t,ent){
+  if(ent.act.once==='game'&&t.actUsedGame[ent.key])return false;
+  const cap=ent.act.times||1;
+  return (t.actUsedTurn[ent.key]||0)<cap;
+}
+
+/* ============ board entry (mines) ============ */
+function putTeece(b,i,t,live){
+  b[i].teece=t;
+  if(b[i].prime){
+    const pr=b[i].prime;b[i].prime=null;
+    for(let k=0;k<4;k++)t.perm[k]+=pr.n;
+    if(live)log(nm(t)+' arrives on a primed panel: '+sgn(pr.n)+'.');
+  }
+  if(b[i].mine){
+    for(let k=0;k<4;k++)t.perm[k]-=2;
+    b[i].mine=null;
+    if(live)log('A Mine detonates under '+nm(t)+': -2.');
+  }
+}
+function moveT(b,from,to,live){
+  const t=b[from].teece; b[from].teece=null; putTeece(b,to,t,live);
+}
+function ageRateAt(b,i){
+  const t=b[i].teece; if(!t)return 0;
+  const gd=b[i].ground?CARDS[b[i].ground.cardId]:null;
+  if(gd&&gd.gAgeStop)return 0;
+  let rate=1;
+  if(gd&&gd.gAgeRate)rate*=gd.gAgeRate;
+  for(const e of t.equips){
+    const g=CARDS[e.cardId].grants;
+    if(g&&g.ageStop)return 0;
+    if(g&&g.ageRate)rate*=g.ageRate;
+  }
+  return rate;
+}
+function checkTimer(b,i){
+  const t=b[i].teece; if(!t)return false;
+  const d=DEF(t);
+  if(!d.timer||t.transformed||(t.age||0)<d.timer.turns)return false;
+  t.transformed=true;
+  t.base=d.timer.sides.slice();
+  if(bonusApplies(t.owner))for(let k=0;k<4;k++)t.base[k]=Math.max(0,t.base[k]+G.enemyBonus);
+  log(nm(t)+' comes of age: '+d.timer.sides.join('/')+'.');
+  return true;
+}
+function ageOne(b,i,n){
+  const t=b[i].teece; if(!t)return;
+  t.age=(t.age||0)+n;
+  const d=DEF(t);
+  if(d.tick&&n>0){
+    let applied=0;
+    for(let k=0;k<n;k++){
+      if(d.tick.cap!=null&&Math.abs(t.tickTotal||0)>=Math.abs(d.tick.cap))break;
+      applyModT(t,d.tick.n,'perm');
+      t.tickTotal=(t.tickTotal||0)+d.tick.n;
+      applied+=d.tick.n;
+    }
+    if(applied)log(nm(t)+' ticks '+sgn(applied)+'.');
+  }
+  checkTimer(b,i);
+}
+async function ageTurn(p){
+  const b=G.board;
+  let any=false;
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(!t||t.owner!==p)continue;
+    const rate=ageRateAt(b,i);
+    if(rate<=0)continue;
+    const d=DEF(t);
+    if(!d.timer&&!d.tick){t.age=(t.age||0)+rate;continue;}
+    ageOne(b,i,rate);
+    any=true;
+  }
+  if(any)await resolveCombat();
+}
+async function fireMove(from,to,cause){
+  const b=G.board,t=b[to].teece;
+  if(!t)return;
+  const gd=b[to].ground?CARDS[b[to].ground.cardId]:null;
+  if(gd&&gd.gDestroyOnMove&&t.immortalOwner==null){
+    log(nm(t)+' steps into '+gd.name+' and is swallowed.');
+    await anim([to],'dying',190);
+    await processDeath({cell:to,t,killers:[]});
+    G.eventFlag=true;
+    return;
+  }
+  if(gd&&gd.gmove){applyModT(t,gd.gmove,'perm');log(nm(t)+' moves onto '+gd.name+': '+sgn(gd.gmove)+'.');}
+  for(const c of G.curses){
+    if(c.cardId===t.cardId&&c.owner===t.baseOwner){
+      applyModT(t,-2,'perm');
+      log(nm(t)+' is still cursed: -2 permanently.');
+    }
+  }
+  const d=DEF(t);
+  const selfHooks=(d.onMove||[]).slice();
+  for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.onMove)selfHooks.push(...g.onMove);}
+  for(const h of selfHooks)await runSteps([h],{p:t.owner,cell:to,t,first:false});
+  for(let i=0;i<BN;i++){
+    const w=b[i].teece;
+    if(!w||w.uid===t.uid)continue;
+    const ally=sameTeam(w.owner,t.owner);
+    const wd=DEF(w),hooks=[];
+    if(ally){
+      if(wd.onAllyMove)hooks.push(...wd.onAllyMove);
+      for(const e of w.equips){const g=CARDS[e.cardId].grants;if(g&&g.onAllyMove)hooks.push(...g.onAllyMove);}
+      for(const h of hooks){
+        if(h.fx==='modMoved'){applyModT(t,h.n,h.dur);log(nm(t)+' gets '+sgn(h.n)+durTxt(h.dur)+'.');}
+        else if(h.fx==='modSelf'){applyModT(w,h.n,h.dur);log(nm(w)+' gets '+sgn(h.n)+durTxt(h.dur)+'.');}
+        else await runSteps([h],{p:w.owner,cell:i,t:w,first:false});
+      }
+      continue;
+    }
+    const own=[]; 
+    if(wd.onEnemyMove)own.push(...wd.onEnemyMove);
+    for(const e of w.equips){const g=CARDS[e.cardId].grants;if(g&&g.onEnemyMove)own.push(...g.onEnemyMove);}
+    for(const h of own){
+      if(h.anyCause||cause==null||cause===w.owner)hooks.push(h);
+    }
+    for(const h of hooks){
+      if(h.fx==='modMoved'){applyModT(t,h.n,h.dur);log(nm(t)+' gets '+sgn(h.n)+durTxt(h.dur)+'.');}
+      else if(h.fx==='modSelf'){applyModT(w,h.n,h.dur);log(nm(w)+' gets '+sgn(h.n)+durTxt(h.dur)+'.');}
+      else await runSteps([h],{p:w.owner,cell:i,t:w,first:false});
+    }
+  }
+  if(G.movedThisTurn.indexOf(t.uid)<0)G.movedThisTurn.push(t.uid);
+  G.eventFlag=true;
+}
+
+/* ============ combat scan (adjacent + ranged) ============ */
+function scanDeaths(b){
+  const eff=[],kws=[],dfn=[];
+  for(let i=0;i<BN;i++){eff[i]=effSides(b,i);kws[i]=b[i].teece?kwOf(b,i):[];dfn[i]=b[i].teece?defOf(b,i):0;}
+  const dead={};
+  const canKill=ki=>{
+    const k=b[ki].teece;
+    if(kws[ki].indexOf('needsflinger')<0)return true;
+    return b.some(c=>c.teece&&sameTeam(c.teece.owner,k.owner)&&DEF(c.teece).flinger);
+  };
+  const mark=(vi,ki)=>{const v=b[vi].teece;if(!dead[vi])dead[vi]={cell:vi,t:v,killers:[]};
+    if(ki!=null&&dead[vi].killers.indexOf(b[ki].teece.uid)<0)dead[vi].killers.push(b[ki].teece.uid);};
+  const immune=i=>b[i].teece&&b[i].teece.immortalOwner!=null;
+  for(let i=0;i<BN;i++){
+    if(!b[i].teece||immune(i))continue;
+    if(eff[i].some(v=>v<0))mark(i,null);
+  }
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece; if(!t)continue;
+    for(const j of ADJ[i]){
+      if(j<i)continue;
+      const o=b[j].teece; if(!o||sameTeam(o.owner,t.owner))continue;
+      let mi,oj;
+      if(j===i+1){mi=1;oj=3;} else if(j===i-1){mi=3;oj=1;}
+      else if(j===i+BW){mi=2;oj=0;} else {mi=0;oj=2;}
+      const a=eff[i][mi], c=eff[j][oj];
+      if(a-c>dfn[j]&&canKill(i)&&!immune(j))mark(j,i);
+      else if(c-a>dfn[i]&&canKill(j)&&!immune(i))mark(i,j);
+    }
+  }
+  const inLine=(i,j,st)=>{
+    if(j<0||j>=BN)return false;
+    if(st===1||st===-1)return row(i)===row(j);
+    return true;
+  };
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece; if(!t)continue;
+    if(kws[i].indexOf('ranged')<0)continue;
+    for(const[st,ms]of[[-BW,0],[1,1],[BW,2],[-1,3]]){
+      let j=i+st,d=1;
+      while(inLine(i,j,st)){
+        if(b[j].teece){
+          if(d>1&&!sameTeam(b[j].teece.owner,t.owner)){
+            const os=(ms+2)%4;
+            if(eff[i][ms]-eff[j][os]>dfn[j]&&canKill(i)&&!immune(j))mark(j,i);
+          }
+          break;
+        }
+        j+=st;d++;
+      }
+    }
+  }
+  return Object.values(dead);
+}
+
+/* ============ live prompts ============ */
+function chooseCell(p,cells,msg,opt){
+  opt=opt||{};
+  if(isAIP(p)||!HAS_DOM){
+    return Promise.resolve(aiPickCell(cells,opt));
+  }
+  return new Promise(res=>{G.pending={kind:'cell',p,cells,msg,opt,res};render();});
+}
+function chooseOption(p,opts,msg){
+  if(isAIP(p)||!HAS_DOM){
+    return Promise.resolve(aiPickOpt(opts));
+  }
+  return new Promise(res=>{G.pending={kind:'opt',p,opts,msg,res};render();});
+}
+function resolvePending(val){
+  const pd=G.pending; if(!pd)return;
+  G.pending=null; pd.res(val); render();
+}
+
+/* ============ fx executor ============ */
+function applyModT(t,n,dur){
+  if(n<0&&isSteadfast(t))return;
+  if(G&&G.board){
+    const ci=G.board.findIndex(c=>c.teece===t);
+    if(ci>=0&&G.board[ci].ground){
+      const g=G.board[ci].ground;
+      if(n>0&&groundFlag(g,'gDoublePos'))n*=2;
+      if(n<0&&groundFlag(g,'gDoubleNeg'))n*=2;
+    }
+  }
+  const a=dur==='temp'?t.temp:t.perm;
+  for(let k=0;k<4;k++)a[k]+=n;
+}
+function applyDef(t,n){t.defPerm=(t.defPerm||0)+n;}
+const sgn=n=>(n>0?'+':'')+n;
+function durTxt(dur){return dur==='temp'?' until end of turn':' permanently';}
+
+async function runSteps(steps,ctx){
+  for(const st of steps||[]){
+    const r=await FXRUN(st,ctx);
+    if(r==='ABORT')return false;
+    ctx.first=false;
+  }
+  return true;
+}
+async function FXRUN(st,ctx){
+  const b=G.board,p=ctx.p;
+  const pickCell=async(cands,msg,mut,skip)=>{
+    const r=await chooseCell(p,cands,msg,{cancel:!!ctx.first,skip:!!skip,mut});
+    return r;
+  };
+  switch(st.fx){
+  case 'mod':{
+    if(st.who==='self'){if(ctx.t)applyModT(ctx.t,st.n,st.dur);return;}
+    if(st.who==='last'){if(ctx.last!=null&&b[ctx.last].teece){applyModT(b[ctx.last].teece,st.n,st.dur);
+      log(nm(b[ctx.last].teece)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');}return;}
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;if(!t)continue;
+      if(st.notSelf&&ctx.t&&t.uid===ctx.t.uid)continue;
+      if(st.who==='ally'&&!sameTeam(t.owner,p))continue;
+      if(st.who==='enemy'&&sameTeam(t.owner,p))continue;
+      if(!canTarget(b,i,p))continue;
+      if(st.where==='rowcol'&&ctx.cell!=null&&!(sameRow(i,ctx.cell)||sameCol(i,ctx.cell)))continue;
+      if(st.where==='adj'&&ctx.cell!=null&&ADJ[ctx.cell].indexOf(i)<0)continue;
+      cands.push(i);
+    }
+    if(!cands.length){log('No valid target.');return;}
+    const c=await pickCell(cands,'Choose a Teece: '+sgn(st.n)+durTxt(st.dur)+'.',
+      (bb,i)=>{applyModT(bb[i].teece,st.n,st.dur);},!!st.may);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    applyModT(b[c].teece,st.n,st.dur);
+    ctx.last=c;
+    log(nm(b[c].teece)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');
+    if(b[c].teece&&!sameTeam(b[c].teece.owner,p))noteTargeted(p);
+    await anim([c],'zap');
+    if(st.move&&!hasKw(b,c,'immovable')){
+      const d=ADJ[c].filter(j=>!b[j].teece);
+      if(d.length){
+        const t=b[c].teece;
+        const dst=await chooseCell(p,d,'Move it one space, or skip.',
+          {skip:true,mut:(bb,j)=>{if(bb[c].teece){moveT(bb,c,j,false);}}});
+        if(dst!=null&&dst!=='CANCEL'){moveT(b,c,dst,true);ctx.last=dst;log(nm(t)+' moves to the '+CN[dst]+'.');await fireMove(c,dst,p);}
+      }
+    }
+    return;}
+  case 'aoe':{
+    const center=ctx.deadCell!=null?ctx.deadCell:ctx.cell;
+    const own=ctx.deadOwner!=null?ctx.deadOwner:p;
+    const hit=[];
+    for(const j of ADJ[center]){
+      const o=b[j].teece;if(!o)continue;
+      const ally=sameTeam(o.owner,own);
+      if(st.who==='ally'&&!ally)continue;
+      if(st.who==='enemy'&&ally)continue;
+      applyModT(o,st.n,st.dur);
+      hit.push(j);
+      log(nm(o)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');
+    }
+    await anim(hit,'zap');
+    return;}
+  case 'mass':{
+    const own=ctx.deadOwner!=null?ctx.deadOwner:p;
+    const mhit=[];
+    for(let i=0;i<BN;i++){
+      const o=b[i].teece;if(!o)continue;
+      const ally=sameTeam(o.owner,own);
+      if(st.who==='ally'&&!ally)continue;
+      if(st.who==='enemy'&&ally)continue;
+      applyModT(o,st.n,st.dur);
+      mhit.push(i);
+    }
+    log('All '+(st.who==='ally'?'allied':'enemy')+' Teece get '+sgn(st.n)+durTxt(st.dur)+'.');
+    await anim(mhit,'zap');
+    return;}
+  case 'copy':{
+    const empt=ADJ[ctx.cell].filter(j=>!b[j].teece);
+    if(!empt.length){log('No adjacent space for the copy.');return;}
+    const c=await pickCell(empt,'Choose a space for the copy.',
+      (bb,i)=>{const cp=makeTeece(ctx.t.cardId,p);cp.isCopy=true;putTeece(bb,i,cp,false);},true);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const cp=makeTeece(ctx.t.cardId,p);cp.isCopy=true;
+    putTeece(b,c,cp,true);
+    log('A copy of '+DEF(ctx.t).name+' appears at the '+CN[c]+'.');
+    return;}
+  case 'token':{
+    if(st.where==='here'){
+      const i=ctx.deadCell;
+      if(i!=null&&!b[i].teece){const tk=makeTeece(st.tok,ctx.deadOwner!=null?ctx.deadOwner:p);
+        putTeece(b,i,tk,true);log('A '+CARDS[st.tok].sides.join('/')+' Token appears at the '+CN[i]+'.');}
+      return;}
+    for(let n=0;n<(st.count||1);n++){
+      const pool=(st.where==='adj'?ADJ[ctx.cell]:ALL()).filter(j=>!b[j].teece);
+      if(!pool.length){if(n===0)log('No space for a Token.');return;}
+      const c=await pickCell(pool,'Choose a space for a '+CARDS[st.tok].sides.join('/')+' Token ('+(n+1)+' of '+(st.count||1)+'), or skip.',
+        (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,p),false);},true);
+      if(c==='CANCEL')return 'ABORT';
+      if(c==null)return;
+      const tk=makeTeece(st.tok,p);
+      putTeece(b,c,tk,true);
+      if(st.linked&&ctx.t){ctx.t.links.push(tk.uid);}
+      log('A '+CARDS[st.tok].sides.join('/')+' Token appears at the '+CN[c]+'.');
+      ctx.first=false;
+      render();
+    }
+    return;}
+  case 'control':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length){log('No enemy to control.');return;}
+    const c=await pickCell(cands,'Choose an enemy Teece to control.',
+      (bb,i)=>{bb[i].teece.owner=p;},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece;
+    t.owner=p;
+    if(ctx.t)ctx.t.controls.push(t.uid);
+    log(pname(p)+' takes control of '+nm(t)+'.');
+    await anim([c],'zap');
+    return;}
+  case 'rot':{
+    const t=ctx.t; if(!t)return;
+    const opts=[{v:'cw',lbl:'Rotate clockwise'},{v:'ccw',lbl:'Rotate counter-clockwise'}];
+    if(st.may)opts.push({v:'no',lbl:'Leave it'});
+    let ch;
+    if(isAIP(p)&&ctx.cell!=null){
+      let bv=-1e9;
+      const base=boardValue(G.board,p);
+      for(const o of opts){
+        const bb=cloneBoard(G.board);
+        const tt=bb[ctx.cell].teece,bs=tt.base;
+        if(o.v==='cw')tt.base=[bs[3],bs[0],bs[1],bs[2]];
+        else if(o.v==='ccw')tt.base=[bs[1],bs[2],bs[3],bs[0]];
+        simCombat(bb);
+        const g=boardValue(bb,p)-base+(o.v==='no'?0.01:0);
+        if(g>bv){bv=g;ch=o.v;}
+      }
+    }else ch=await chooseOption(p,opts,'Rotate '+DEF(t).name+'?');
+    const bse=t.base;
+    if(ch==='cw')t.base=[bse[3],bse[0],bse[1],bse[2]];
+    else if(ch==='ccw')t.base=[bse[1],bse[2],bse[3],bse[0]];
+    if(ch==='cw'||ch==='ccw')log(nm(t)+' rotates.');
+    return;}
+  case 'flip':{
+    const cands=[];for(let i=0;i<BN;i++)if(b[i].teece)cands.push(i);
+    if(!cands.length){log('Nothing to flip.');return;}
+    const spin=(sd,n)=>{let r=sd.slice();for(let k=0;k<n;k++)r=[r[3],r[0],r[1],r[2]];return r;};
+    if(isAIP(p)){
+      const base=boardValue(b,p);
+      let bc=null,bn=1,bv=-1e9;
+      for(const i of cands)for(let n=1;n<=3;n++){
+        const bb=cloneBoard(b);
+        bb[i].teece.base=spin(bb[i].teece.base,n);
+        simCombat(bb);
+        const g=boardValue(bb,p)-base;
+        if(g>bv){bv=g;bc=i;bn=n;}
+      }
+      if(bc==null)return;
+      b[bc].teece.base=spin(b[bc].teece.base,bn);
+      log(nm(b[bc].teece)+' rotates clockwise '+bn+(bn===1?' time.':' times.'));
+      return;
+    }
+    const c=await pickCell(cands,'Choose a Teece to rotate clockwise.',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const n=await chooseOption(p,[{v:'1',lbl:'Once'},{v:'2',lbl:'Twice'},{v:'3',lbl:'Three times'}],
+      'How many clockwise turns?');
+    const times=parseInt(n||'1',10);
+    const ft=b[c].teece;
+    ft.base=spin(ft.base,times);
+    log(nm(ft)+' rotates clockwise '+times+(times===1?' time.':' times.'));
+    return;}
+  case 'draw':{drawCards(ctx.deadOwner!=null?ctx.deadOwner:p,st.n);return;}
+  case 'bolt':{
+    const cands=[];
+    for(let c=0;c<3;c++){for(let r=0;r<3;r++){const i=r*3+c;if(b[i].teece){cands.push(i);break;}}}
+    if(!cands.length){log('No Teece to strike.');return;}
+    const c=await pickCell(cands,'Choose a column: its topmost Teece gets '+st.n+'.',
+      (bb,i)=>{applyModT(bb[i].teece,st.n,'perm');},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    applyModT(b[c].teece,st.n,'perm');
+    log('Lightning strikes '+nm(b[c].teece)+': '+st.n+'.');
+    await anim([c],'zap',200);
+    return;}
+  case 'bounce':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!isBossCard(t.cardId)&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length){log('No legal target.');return;}
+    const c=await pickCell(cands,'Choose a non-Boss Teece to return to its owner hand.',
+      (bb,i)=>{bb[i].teece=null;},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece;b[c].teece=null;
+    for(const uid of t.links)for(let i=0;i<BN;i++){
+      const o=b[i].teece;if(o&&o.uid===uid){b[i].teece=null;log(nm(o)+' collapses with its summoner.');}
+    }
+    for(const uid of t.controls)revertControl(b,uid,true);
+    if(t.isToken||t.isCopy){log(nm(t)+' vanishes.');}
+    else{
+      G.players[t.baseOwner].hand.push(t.cardId);
+      for(const e of t.equips)G.players[e.owner].hand.push(e.cardId);
+      log(nm(t)+' returns to '+pname(t.baseOwner)+"'s hand"+(t.equips.length?' with its equips.':'.'));
+    }
+    return;}
+  case 'gust':{ /* one orthogonal step */
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;if(!t)continue;
+      if(st.who==='ally'&&!sameTeam(t.owner,p))continue;
+      if(st.who==='enemy'&&sameTeam(t.owner,p))continue;
+      if(hasKw(b,i,'immovable'))continue;
+      const reach=st.range==='tele'?ALL().filter(x=>x!==i):ADJ[i];
+      if(!reach.some(j=>!b[j].teece))continue;
+      cands.push(i);
+    }
+    if(!cands.length){log('Nothing can move.');return;}
+    const c=await pickCell(cands,'Choose a Teece to move.',null,!!st.may);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const d=(st.range==='tele'?ALL().filter(x=>x!==c):ADJ[c]).filter(j=>!b[j].teece);
+    const t=b[c].teece;
+    const dst=await chooseCell(p,d,'Choose where it moves.',
+      {skip:true,mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);}});
+    if(dst!=null&&dst!=='CANCEL'){moveT(b,c,dst,true);log(nm(t)+' moves to the '+CN[dst]+'.');await fireMove(c,dst,p);}
+    return;}
+  case 'shatter':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.equips.length)cands.push(i);}
+    if(!cands.length){log('No equips in play.');return;}
+    const c=await pickCell(cands,'Choose a Teece: destroy one of its equips.',
+      (bb,i)=>{bb[i].teece.equips.pop();},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece;
+    let ei=0;
+    if(t.equips.length>1){
+      const ch=await chooseOption(p,t.equips.map((e,x)=>({v:x,lbl:CARDS[e.cardId].name})),'Destroy which equip?');
+      ei=ch==null?0:ch;
+    }
+    const e=t.equips.splice(ei,1)[0];
+    G.players[e.owner].grave.push(e.cardId);
+    log(CARDS[e.cardId].name+' is destroyed.');
+    return;}
+  case 'quake':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].ground)cands.push(i);
+    if(!cands.length){log('No battleground in play.');return;}
+    const c=await pickCell(cands,'Choose a battleground to destroy.',
+      (bb,i)=>{bb[i].ground=null;},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const g=b[c].ground;
+    log(CARDS[g.cardId].name+' crumbles.');
+    await clearGroundAt(c,p);
+    if(!b[c].teece){
+      const tk=makeTeece('T4',p);
+      putTeece(b,c,tk,true);
+      log('A 4/4/4/4 Token rises from the rubble at the '+CN[c]+'.');
+    }
+    return;}
+  case 'terra':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].ground)cands.push(i);
+    if(!cands.length){log('No battleground to move.');return;}
+    const c=await pickCell(cands,'Choose a battleground to move.',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const dests=[];for(let i=0;i<BN;i++)if(i!==c)dests.push(i);
+    const dst=await chooseCell(p,dests,'Choose its new panel.',{skip:true,mut:(bb,j)=>{
+      if(bb[j].ground)bb[j].ground=null; bb[j].ground=bb[c].ground; bb[c].ground=null;}});
+    if(dst==null||dst==='CANCEL')return;
+    if(G.board[dst].ground){const old=G.board[dst].ground;G.players[old.owner].grave.push(old.cardId);
+      log(CARDS[old.cardId].name+' is buried.');}
+    G.board[dst].ground=G.board[c].ground;G.board[c].ground=null;
+    log(CARDS[G.board[dst].ground.cardId].name+' shifts to the '+CN[dst]+'.');
+    return;}
+  case 'kwT':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p)cands.push(i);}
+    if(!cands.length){log('No ally to target.');return;}
+    const kdur=st.perm?' permanently.':' until end of turn.';
+    const c=await pickCell(cands,'Choose an ally: it gains '+st.kw+kdur,
+      (bb,i)=>{(st.perm?bb[i].teece.kwPerm:bb[i].teece.kwTemp).push(st.kw);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    (st.perm?b[c].teece.kwPerm:b[c].teece.kwTemp).push(st.kw);
+    ctx.last=c;
+    log(nm(b[c].teece)+' gains '+st.kw+kdur);
+    await anim([c],'zap');
+    return;}
+  case 'mine':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(!b[i].teece&&!b[i].mine)cands.push(i);
+    if(!cands.length){log('Nowhere to place a Mine.');return;}
+    const c=await pickCell(cands,'Choose an unoccupied panel for the Mine.',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    b[c].mine={owner:p};
+    log(pname(p)+' places a Mine at the '+CN[c]+'.');
+    await anim([c],'zap');
+    return;}
+  case 'push':{
+    const i=ctx.cell;
+    const away=(from,to)=>{const dst=to+(to-from);
+      if(dst<0||dst>=BN)return -1;
+      if(row(from)===row(to)&&row(to)!==row(dst))return -1;
+      return dst;};
+    const cands=ADJ[i].filter(j=>{const o=b[j].teece;if(!o||sameTeam(o.owner,p)||hasKw(b,j,'immovable'))return false;
+      const dst=away(i,j);return dst>=0&&!b[dst].teece;});
+    if(!cands.length){log('No enemy can be pushed.');return;}
+    const c=await pickCell(cands,'Choose an adjacent enemy to push away.',
+      (bb,j)=>{moveT(bb,j,away(i,j),false);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece,dst=away(i,c);
+    moveT(b,c,dst,true);
+    log(nm(t)+' is shoved to the '+CN[dst]+'.');
+    await fireMove(c,dst,p);
+    return;}
+  case 'delayDraw':{
+    const pl=G.players[p],key='dd'+(ctx.t?ctx.t.cardId:'x');
+    if(pl.onceUsed[key]){log('It has already been used this game.');return;}
+    pl.onceUsed[key]=true;
+    pl.pendingDraw+=st.n;
+    log(pname(p)+' will draw '+st.n+' cards at the start of their next turn.');
+    return;}
+  case 'destroy':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(!t||!canTarget(b,i,p))continue;
+      if(st.nonBoss&&isBossCard(t.cardId))continue;
+      cands.push(i);
+    }
+    if(!cands.length){log('Nothing can be destroyed.');return;}
+    const c=await pickCell(cands,'Choose a Teece to destroy.',(bb,i)=>{bb[i].teece=null;},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const vt=b[c].teece;
+    log(nm(vt)+' is destroyed outright.');
+    await anim([c],'dying',190);
+    await processDeath({cell:c,t:vt,killers:[]});
+    return;}
+  case 'destroyAdj':{
+    const hit=ADJ[ctx.cell].filter(j=>b[j].teece);
+    if(!hit.length){log('Nothing adjacent to destroy.');return;}
+    await anim(hit,'dying',190);
+    for(const j of hit){
+      const vt=b[j].teece;
+      if(vt)await processDeath({cell:j,t:vt,killers:[ctx.t?ctx.t.uid:null].filter(x=>x)});
+    }
+    return;}
+  case 'graveSummon':{
+    const pl=G.players[p];
+    const ids=pl.grave.filter(id=>CARDS[id].type==='teece'&&!isBossCard(id));
+    const empt=[];for(let i=0;i<BN;i++)if(!b[i].teece)empt.push(i);
+    if(!ids.length||!empt.length){log('Nothing to summon from the grave.');return;}
+    const pick=await chooseOption(p,ids.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Summon which card from the grave?');
+    if(pick==null)return;
+    const gi=pl.grave.indexOf(ids[parseInt(pick,10)]);
+    const cid=pl.grave.splice(gi,1)[0];
+    const c=await chooseCell(p,empt,'Choose a space for '+CARDS[cid].name+'.',
+      {mut:(bb,i)=>{putTeece(bb,i,makeTeece(cid,p),false);}});
+    if(c==null||c==='CANCEL'){pl.grave.push(cid);return;}
+    putTeece(b,c,makeTeece(cid,p),true);
+    log(pname(p)+' summons '+CARDS[cid].name+' from the grave.');
+    return;}
+  case 'graveToHand':{
+    const pl=G.players[p];
+    if(!pl.grave.length){log('The grave is empty.');return;}
+    const pick=await chooseOption(p,pl.grave.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Return which card to hand?');
+    if(pick==null)return;
+    const cid=pl.grave.splice(parseInt(pick,10),1)[0];
+    pl.hand.push(cid);
+    log(pname(p)+' returns '+CARDS[cid].name+' to hand.');
+    return;}
+  case 'toDeckOrField':{
+    return;}
+  case 'curse':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length){log('No enemy to curse.');return;}
+    const c=await pickCell(cands,'Choose an enemy: every move it makes costs it -2 permanently, for the rest of the game.',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece;
+    G.curses.push({cardId:t.cardId,owner:t.baseOwner});
+    log(nm(t)+' is cursed: -2 permanently whenever it moves.');
+    await anim([c],'zap');
+    return;}
+  case 'defMod':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;if(!t)continue;
+      if(st.who==='ally'&&!sameTeam(t.owner,p))continue;
+      if(st.who==='enemy'&&sameTeam(t.owner,p))continue;
+      if(!canTarget(b,i,p))continue;
+      cands.push(i);
+    }
+    if(!cands.length){log('No valid target.');return;}
+    const c=await pickCell(cands,'Choose a Teece: '+sgn(st.n)+' Defence.',(bb,i)=>{applyDef(bb[i].teece,st.n);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    applyDef(b[c].teece,st.n);
+    log(nm(b[c].teece)+' gets '+sgn(st.n)+' Defence.');
+    return;}
+  case 'defMark':{
+    const cands=[];for(let i=0;i<BN;i++)cands.push(i);
+    const c=await pickCell(cands,'Choose a panel: Teece on it get +'+st.n+' Defence while this stands.',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    b[c].defMark={uid:ctx.t?ctx.t.uid:null,n:st.n};
+    log('The '+CN[c]+' panel is fortified: +'+st.n+' Defence.');
+    return;}
+  case 'nextDef':{
+    G.players[ctx.deadOwner!=null?ctx.deadOwner:p].nextDefBonus+=st.n;
+    log('The next Teece played gets +'+st.n+' Defence.');
+    return;}
+  case 'moveTarget':{
+    const src=ctx.cell;
+    const pool=st.where==='adj'?ADJ[src]:ALL();
+    const cands=pool.filter(j=>{
+      const o=b[j].teece;
+      if(!o||hasKw(b,j,'immovable'))return false;
+      if(st.who==='enemy'&&sameTeam(o.owner,p))return false;
+      if(st.who==='ally'&&!sameTeam(o.owner,p))return false;
+      if(!canTarget(b,j,p))return false;
+      if(st.dir==='opposite'||st.dir==='away'){
+        const dst=oppositeCell(src,j);
+        return dst>=0&&!b[dst].teece;
+      }
+      return ADJ[j].some(k=>!b[k].teece)||true;
+    });
+    if(!cands.length){log('Nothing to move.');return;}
+    const c=await pickCell(cands,'Choose a Teece to move'+(st.may?', or skip.':'.'),null,!!st.may);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece;
+    let dst=null;
+    if(st.dir==='opposite'||st.dir==='away'){
+      dst=oppositeCell(src,c);
+      if(dst<0||b[dst].teece)dst=null;
+    }else if(st.dir==='toward'){
+      dst=null;
+      const step=(c>src?-1:1);
+      const cand=sameRow(src,c)?c+(src<c?-1:1):(sameCol(src,c)?c+(src<c?-BW:BW):null);
+      if(cand!=null&&cand>=0&&cand<BN&&!b[cand].teece)dst=cand;
+    }else{
+      const opts=ADJ[c].filter(j=>!b[j].teece);
+      if(opts.length){
+        const chooser=st.byController?t.owner:p;
+        const r=await chooseCell(chooser,opts,'Move '+nm(t)+' one space'+(st.byController?' (its controller chooses)':'')+(st.may?', or skip.':'.'),
+          {skip:!!st.may,mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);}});
+        if(r!=null&&r!=='CANCEL')dst=r;
+      }
+    }
+    if(dst==null){
+      if(st.elseDestroy){
+        log(nm(t)+' is pinned with nowhere to go and is destroyed.');
+        await anim([c],'dying',190);
+        await processDeath({cell:c,t,killers:[]});
+        return;
+      }
+      if(st.elseMod){applyModT(t,st.elseMod.n,st.elseMod.dur);log(nm(t)+' cannot move: '+sgn(st.elseMod.n)+durTxt(st.elseMod.dur)+'.');}
+      return;
+    }
+    moveT(b,c,dst,true);
+    log(nm(t)+' is moved to the '+CN[dst]+'.');
+    if(st.thenMod){applyModT(t,st.thenMod.n,st.thenMod.dur);log(nm(t)+' gets '+sgn(st.thenMod.n)+durTxt(st.thenMod.dur)+'.');}
+    await fireMove(c,dst,p);
+    if(!sameTeam(t.owner,p))noteTargeted(p);
+    return;}
+  case 'march':{
+    const src=ctx.cell, mt=b[src].teece;
+    if(!mt){log('Nothing to march.');return;}
+    if(hasKw(b,src,'immovable')){log(nm(mt)+' cannot move.');return;}
+    const dests=ADJ[src].filter(j=>!b[j].teece);
+    if(!dests.length){log('Nowhere to march.');return;}
+    const step=await chooseCell(p,dests,'March '+nm(mt)+' one space, or skip.',
+      {skip:true,mut:(bb,j)=>{if(bb[src].teece)moveT(bb,src,j,false);}});
+    if(step==null||step==='CANCEL')return;
+    moveT(b,src,step,true);
+    log(nm(mt)+' marches to the '+CN[step]+'.');
+    await fireMove(src,step,p);
+    if(!b[step].teece||b[step].teece.uid!==mt.uid)return;
+    for(const j of ADJ[step].slice()){
+      const o=b[j].teece;
+      if(!o||hasKw(b,j,'immovable'))continue;
+      const outs=ADJ[j].filter(k=>!b[k].teece);
+      if(!outs.length){log(nm(o)+' has nowhere to be shoved.');continue;}
+      const r=await chooseCell(p,outs,'Shove '+nm(o)+' one space, or skip.',
+        {skip:true,mut:(bb,k)=>{if(bb[j].teece)moveT(bb,j,k,false);}});
+      if(r==null||r==='CANCEL')continue;
+      moveT(b,j,r,true);
+      log(nm(o)+' is marched to the '+CN[r]+'.');
+      await fireMove(j,r,p);
+    }
+    return;}
+  case 'sacEquip':{
+    const et=ctx.t, key=ctx.ent&&ctx.ent.key;
+    if(!et||!key||key.charAt(0)!=='e')return;
+    const cid=key.slice(1).split('_')[0];
+    const ix=et.equips.findIndex(e=>String(e.cardId)===cid);
+    if(ix<0)return;
+    const eq=et.equips[ix];
+    et.equips.splice(ix,1);
+    toGrave(eq.owner,eq.cardId);
+    log(CARDS[eq.cardId].name+' snaps off '+nm(et)+' and is destroyed.');
+    return;}
+  case 'moveAllAdj':{
+    const src=ctx.cell;
+    for(const j of ADJ[src].slice()){
+      const t=b[j].teece;
+      if(!t||hasKw(b,j,'immovable'))continue;
+      const opts=ADJ[j].filter(k=>!b[k].teece);
+      if(opts.length){
+        const r=await chooseCell(p,opts,'Move '+nm(t)+' one space, or skip.',
+          {skip:true,mut:(bb,k)=>{if(bb[j].teece)moveT(bb,j,k,false);}});
+        if(r!=null&&r!=='CANCEL'){
+          moveT(b,j,r,true);
+          applyModT(b[r].teece,st.n,st.dur);
+          log(nm(t)+' is hurled to the '+CN[r]+' and gets '+sgn(st.n)+durTxt(st.dur)+'.');
+          await fireMove(j,r,p);
+          continue;
+        }
+      }
+      applyModT(t,st.n,st.dur);
+      log(nm(t)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');
+    }
+    return;}
+  case 'rowColMove':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!hasKw(b,i,'immovable'))cands.push(i);}
+    if(!cands.length){log('No Teece to roll.');return;}
+    const c=await pickCell(cands,'Choose one of your Teece to roll.',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const dests=[];
+    for(let j=0;j<BN;j++)if(j!==c&&!b[j].teece&&(sameRow(c,j)||sameCol(c,j)))dests.push(j);
+    if(!dests.length){log('Nowhere to roll.');return;}
+    const t=b[c].teece;
+    const dst=await chooseCell(p,dests,'Roll it along its row or column.',
+      {mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);}});
+    if(dst==null||dst==='CANCEL')return;
+    moveT(b,c,dst,true);
+    log(nm(t)+' rolls to the '+CN[dst]+'.');
+    await fireMove(c,dst,p);
+    for(const j of ADJ[dst]){
+      const o=b[j].teece;
+      if(o&&!sameTeam(o.owner,p)){applyModT(o,st.n,st.dur);log(nm(o)+' is battered: '+sgn(st.n)+durTxt(st.dur)+'.');}
+    }
+    return;}
+  case 'avalanche':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken)cands.push(i);}
+    if(!cands.length){log('No Teece to sacrifice.');return;}
+    const c=await pickCell(cands,'Sacrifice one of your Teece to start the avalanche.',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const vt=b[c].teece;
+    await processDeath({cell:c,t:vt,killers:[]});
+    log(nm(vt)+' is sacrificed.');
+    for(let j=c+BW;j<BN;j+=BW){
+      const o=b[j].teece;
+      if(o){applyModT(o,st.n,'temp');log(nm(o)+' is buried: '+st.n+' until end of turn.');}
+    }
+    if(!b[c].ground){b[c].ground={cardId:st.bg,owner:p,gid:G.groundSeq++};log('An Avalanche settles on the '+CN[c]+'.');}
+    return;}
+  case 'groundPound':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p)cands.push(i);}
+    if(!cands.length){log('No Teece to pound.');return;}
+    const c=await pickCell(cands,'Choose one of your Teece.',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(b[c].ground)G.players[b[c].ground.owner].grave.push(b[c].ground.cardId);
+    b[c].ground={cardId:st.bg,owner:p,gid:G.groundSeq++};
+    log('An Avalanche crashes onto the '+CN[c]+'.');
+    for(const j of ADJ[c].slice()){
+      const o=b[j].teece;
+      if(!o||hasKw(b,j,'immovable'))continue;
+      const opts=ADJ[j].filter(k=>!b[k].teece);
+      if(!opts.length)continue;
+      const r=await chooseCell(p,opts,'Shake '+nm(o)+' one space, or skip.',
+        {skip:true,mut:(bb,k)=>{if(bb[j].teece)moveT(bb,j,k,false);}});
+      if(r!=null&&r!=='CANCEL'){moveT(b,j,r,true);log(nm(o)+' is shaken to the '+CN[r]+'.');await fireMove(j,r,p);}
+    }
+    return;}
+  case 'discard':{
+    const pl=G.players[p];
+    if(pl.hand.length<st.n){log('Not enough cards to discard.');return 'ABORT';}
+    for(let k=0;k<st.n;k++){
+      const pick=await chooseOption(p,pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Discard a card.');
+      const idx=pick==null?0:parseInt(pick,10);
+      const cid=pl.hand.splice(idx,1)[0];
+      toGrave(p,cid);
+      log(pname(p)+' discards '+CARDS[cid].name+'.');
+    }
+    return;}
+  case 'modalNext':{
+    const who=ctx.deadOwner!=null?ctx.deadOwner:p;
+    setModalNext(who,st);
+    return;}
+  case 'revealBonus':{
+    if(G.viaReveal)return;
+    if(ctx.t){applyModT(ctx.t,st.n,'perm');log(nm(ctx.t)+' unfolds the slow way: '+sgn(st.n)+'.');}
+    return;}
+  case 'calibrate':{
+    const opts=[];for(let x=0;x<=8;x++)opts.push({v:String(x),lbl:String(x)+'/'+x+'/'+x+'/'+x+'  \u2192  +'+(9-x)});
+    const pick=await chooseOption(p,opts,'Calibration Dial: set X.');
+    if(pick==null)return;
+    const x=parseInt(pick,10);
+    G.players[p].calib={x,n:9-x};
+    log(pname(p)+' sets the dial to '+x+'.');
+    return;}
+  case 'armTrap':{
+    if(ctx.t){ctx.t.trapArmed=true;log(nm(ctx.t)+' is armed: destroying it costs the next Teece played against it.');}
+    return;}
+  case 'allMod':{
+    let n=0;
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;if(!t)continue;
+      applyModT(t,st.n,st.dur);n++;
+    }
+    if(n)log('Every Teece on the board gets '+sgn(st.n)+durTxt(st.dur)+'.');
+    return;}
+  case 'trapCheck':{
+    if(!ctx.t||!ctx.t.trapArmed)return;
+    G.trap={by:ctx.deadOwner!=null?ctx.deadOwner:p};
+    log('The trap springs: the next Teece played against '+pname(G.trap.by)+' is destroyed.');
+    return;}
+  case 'springTrap':{
+    G.trap={by:ctx.deadOwner!=null?ctx.deadOwner:p};
+    log('The trap is sprung: the next Teece played against '+pname(G.trap.by)+' is destroyed.');
+    return;}
+  case 'oppDraw':{
+    const foes=enemySeats(p);
+    if(!foes.length){log('No opponent to draw.');return;}
+    drawCards(foes[0],st.n||1);
+    return;}
+  case 'handToDeck':{
+    const pl=G.players[p];
+    if(!pl.hand.length){log('No card to stack back.');return;}
+    const pick=await chooseOption(p,pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Put which card on top of your deck?');
+    if(pick==null)return;
+    const cid=pl.hand.splice(parseInt(pick,10),1)[0];
+    pl.deck.push(cid);
+    log(pname(p)+' stacks a card on top of the deck.');
+    return;}
+  case 'modSide':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;if(!t)continue;
+      if(st.who==='ally'&&!sameTeam(t.owner,p))continue;
+      if(st.who==='enemy'&&sameTeam(t.owner,p))continue;
+      if(!canTarget(b,i,p))continue;
+      cands.push(i);
+    }
+    if(!cands.length){log('No valid target.');return;}
+    const c=await pickCell(cands,'Choose a Teece: one side gets '+sgn(st.n)+'.',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece;
+    const k=await pickSide(p,'Which side of '+nm(t)+'?');
+    if(k==null)return;
+    if(st.n<0&&isSteadfast(t)){log(nm(t)+' will not give ground.');return;}
+    t.perm[k]+=st.n;
+    log(nm(t)+' takes '+sgn(st.n)+' on its '+SIDE_NAMES[k]+' side.');
+    await anim([c],'zap');
+    return;}
+  case 'setSide':{
+    let c=ctx.cell;
+    if(st.who!=='self'){
+      const cands=[];for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+      if(!cands.length)return;
+      c=await pickCell(cands,'Choose a Teece.',null,false);
+      if(c==='CANCEL')return 'ABORT';
+      if(c==null)return;
+    }
+    const t=c!=null?b[c].teece:ctx.t;
+    if(!t)return;
+    const k=await pickSide(p,'Which side of '+nm(t)+' drops to '+(st.v||0)+'?');
+    if(k==null)return;
+    t.base[k]=st.v||0;t.perm[k]=0;t.temp[k]=0;
+    log(nm(t)+"'s "+SIDE_NAMES[k]+' side is governed down to '+(st.v||0)+'.');
+    return;}
+  case 'scrub':{
+    const cands=[];for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length){log('No valid target.');return;}
+    const c=await pickCell(cands,'Strip every bonus and penalty off which Teece?',
+      (bb,i)=>{bb[i].teece.perm=[0,0,0,0];bb[i].teece.temp=[0,0,0,0];},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece;
+    t.perm=[0,0,0,0];t.temp=[0,0,0,0];t.defPerm=0;
+    log(nm(t)+' is stripped back to '+t.base.join('/')+'.');
+    await anim([c],'zap');
+    return;}
+  case 'prime':{
+    const cands=[];for(let i=0;i<BN;i++)if(!b[i].teece)cands.push(i);
+    if(!cands.length){log('Every panel is occupied.');return;}
+    const c=await pickCell(cands,'Prime which empty panel?',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    b[c].prime={n:st.n||3,owner:p};
+    log('The '+CN[c]+' is primed: the next Teece to arrive there gets '+sgn(st.n||3)+'.');
+    return;}
+  case 'rotTarget':{
+    const cands=[];for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length){log('No valid target.');return;}
+    const spin=(bb,i)=>{const tt=bb[i].teece,bs=tt.base;
+      tt.base=st.dir==='cw'?[bs[3],bs[0],bs[1],bs[2]]:[bs[1],bs[2],bs[3],bs[0]];};
+    const c=await pickCell(cands,'Rotate which Teece '+(st.dir==='cw'?'clockwise':'counter-clockwise')+'?',spin,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    spin(b,c);
+    log(nm(b[c].teece)+' turns '+(st.dir==='cw'?'clockwise':'counter-clockwise')+'.');
+    await anim([c],'zap');
+    return;}
+  case 'kwSelf':{
+    const t=ctx.t;if(!t)return;
+    if(t.kwPerm.indexOf(st.kw)<0)t.kwPerm.push(st.kw);
+    log(nm(t)+' gains '+st.kw+'.');
+    return;}
+  case 'defSelf':{
+    const t=ctx.t;if(!t)return;
+    applyDef(t,st.n);
+    log(nm(t)+' gets '+sgn(st.n)+' Defence.');
+    return;}
+  case 'choose':{
+    const ctl=modalCtl(p,ctx.cell);
+    if(ctl.off){log('Safety Interlock holds: the modality does nothing.');return;}
+    if(ctl.all){
+      log('Every mode fires'+(ctl.times>1?', twice over.':'.'));
+      for(let r=0;r<ctl.times;r++){
+        for(const o of st.opts){
+          const ok=await runSteps(o.steps,ctx);
+          if(!ok&&r===0)return 'ABORT';
+          if(G.over)break;
+        }
+        if(G.over)break;
+      }
+      fireModal(p);
+      return;
+    }
+    const opts=st.opts.map((o,x)=>({v:String(x),lbl:o.lbl}));
+    const pick=await chooseOption(p,opts,st.msg||'Choose one.');
+    if(pick==null)return;
+    const chosen=st.opts[parseInt(pick,10)];
+    if(ctl.times>1)log(chosen.lbl+' fires twice.');
+    for(let r=0;r<ctl.times;r++){
+      const ok=await runSteps(chosen.steps,ctx);
+      if(!ok&&r===0)return 'ABORT';
+      if(G.over)break;
+    }
+    fireModal(p);
+    return;}
+  case 'movedMod':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&G.movedThisTurn.indexOf(t.uid)>=0&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length){log('Nothing has moved this turn.');return 'ABORT';}
+    const c=await pickCell(cands,'Choose a Teece that moved this turn.',(bb,i)=>{applyModT(bb[i].teece,st.n,st.dur);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    applyModT(b[c].teece,st.n,st.dur);
+    log(nm(b[c].teece)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');
+    return;}
+  case 'movedToken':{
+    if(!G.movedThisTurn.length){log('Nothing has moved this turn.');return 'ABORT';}
+    const empt=[];for(let i=0;i<BN;i++)if(!b[i].teece)empt.push(i);
+    if(!empt.length){log('No space for the Ogre.');return;}
+    const c=await pickCell(empt,'Choose a space for an 8/8/8/8 Ogre Token.',
+      (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,p),false);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    putTeece(b,c,makeTeece(st.tok,p),true);
+    log('An Ogre Token stomps in at the '+CN[c]+'.');
+    return;}
+  case 'selfDestruct':{
+    const opts=[{v:'yes',lbl:'Blow up'},{v:'no',lbl:'Stay put'}];
+    const pick=await chooseOption(p,opts,'Destroy '+nm(ctx.t)+' to blast everything adjacent?');
+    if(pick!=='yes')return;
+    const src=ctx.cell;
+    for(const j of ADJ[src].slice()){
+      const o=b[j].teece;
+      if(!o)continue;
+      applyModT(o,st.n,st.dur);
+      log(nm(o)+' is caught in the blast: '+sgn(st.n)+durTxt(st.dur)+'.');
+      const opt2=ADJ[j].filter(k=>!b[k].teece);
+      if(opt2.length&&!hasKw(b,j,'immovable')){
+        const r=await chooseCell(p,opt2,'Blow '+nm(o)+' one space, or skip.',
+          {skip:true,mut:(bb,k)=>{if(bb[j].teece)moveT(bb,j,k,false);}});
+        if(r!=null&&r!=='CANCEL'){moveT(b,j,r,true);await fireMove(j,r,p);}
+      }
+    }
+    const me=b[src].teece;
+    if(me)await processDeath({cell:src,t:me,killers:[]});
+    return;}
+  case 'handOrMove':{
+    const cands=ADJ[ctx.cell].filter(j=>b[j].teece&&canTarget(b,j,p));
+    if(!cands.length){log('Nothing adjacent.');return;}
+    const c=await pickCell(cands,'Choose an adjacent Teece.',null,true);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece;
+    const pick=await chooseOption(p,[{v:'hand',lbl:'Return to hand'},{v:'move',lbl:'Move it one space'}],'What happens to '+nm(t)+'?');
+    if(pick==='hand'){
+      b[c].teece=null;
+      for(const uid of t.controls)revertControl(b,uid,true);
+      if(t.isToken||t.isCopy)log(nm(t)+' vanishes.');
+      else{
+        G.players[t.baseOwner].hand.push(t.cardId);
+        for(const e of t.equips)G.players[e.owner].hand.push(e.cardId);
+        log(nm(t)+' is returned to '+pname(t.baseOwner)+"'s hand.");
+      }
+    }else{
+      const opts=ADJ[c].filter(j=>!b[j].teece);
+      if(!opts.length){log('Nowhere to move it.');return;}
+      const r=await chooseCell(p,opts,'Move it one space.',{mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);}});
+      if(r==null||r==='CANCEL')return;
+      moveT(b,c,r,true);
+      log(nm(t)+' is moved to the '+CN[r]+'.');
+      await fireMove(c,r,p);
+    }
+    return;}
+  case 'toDeck':{
+    const t=ctx.t;
+    if(t&&!t.isToken&&!t.isCopy){
+      G.players[t.baseOwner].deck.push(t.cardId);
+      shuffle(G.players[t.baseOwner].deck);
+      ctx.consumed=true;
+      log(nm(t)+' slips back into the deck.');
+    }
+    return;}
+  case 'resummonAny':{
+    const t=ctx.t;
+    const empt=[];for(let i=0;i<BN;i++)if(!b[i].teece)empt.push(i);
+    if(!empt.length){log('No space to resummon.');return;}
+    const c=await chooseCell(t.baseOwner,empt,'Resummon '+DEF(t).name+' anywhere.',
+      {skip:true,mut:(bb,i)=>{putTeece(bb,i,makeTeece(t.cardId,t.baseOwner),false);}});
+    if(c==null||c==='CANCEL')return;
+    const nt=makeTeece(t.cardId,t.baseOwner);
+    nt.resummoned=true;
+    putTeece(b,c,nt,true);
+    ctx.consumed=true;
+    log(DEF(t).name+' hauls itself back up at the '+CN[c]+'.');
+    return;}
+  case 'selfToHand':{
+    const t=ctx.t;
+    if(t&&!t.isToken&&!t.isCopy){
+      G.players[t.baseOwner].hand.push(t.cardId);
+      ctx.consumed=true;
+      log(nm(t)+' scrambles back to '+pname(t.baseOwner)+"'s hand.");
+    }
+    return;}
+  case 'dragToward':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(!t||sameTeam(t.owner,p)||hasKw(b,i,'immovable')||!canTarget(b,i,p))continue;
+      const hasAlly=b.some((c2,j)=>c2.teece&&sameTeam(c2.teece.owner,p)&&j!==i&&(sameRow(i,j)||sameCol(i,j)));
+      if(!hasAlly)continue;
+      cands.push(i);
+    }
+    if(!cands.length){log('No enemy lined up with your Teece.');return 'ABORT';}
+    const c=await pickCell(cands,'Choose an enemy to drag toward one of your Teece.',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const allies=[];
+    for(let j=0;j<BN;j++)if(b[j].teece&&sameTeam(b[j].teece.owner,p)&&j!==c&&(sameRow(c,j)||sameCol(c,j)))allies.push(j);
+    const toward=allies.length===1?allies[0]:await chooseCell(p,allies,'Drag it toward which of your Teece?',{});
+    if(toward==null||toward==='CANCEL')return;
+    let dst;
+    if(sameRow(c,toward))dst=c+(toward>c?1:-1);
+    else dst=c+(toward>c?3:-3);
+    if(dst<0||dst>=BN||b[dst].teece){log('It cannot be dragged any closer.');return;}
+    const t=b[c].teece;
+    moveT(b,c,dst,true);
+    log(nm(t)+' is dragged to the '+CN[dst]+'.');
+    await fireMove(c,dst,p);
+    noteTargeted(p);
+    return;}
+  case 'fastForward':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(!t)continue;
+      if(st.who==='ally'&&!sameTeam(t.owner,p))continue;
+      if(!canTarget(b,i,p))continue;
+      cands.push(i);
+    }
+    if(!cands.length){log('No Teece to hurry along.');return 'ABORT';}
+    const c=await pickCell(cands,'Choose a Teece: advance its clock by '+st.n+'.',
+      (bb,i)=>{bb[i].teece.age=(bb[i].teece.age||0)+st.n;checkTimer(bb,i);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    ageOne(b,c,st.n);
+    log(nm(b[c].teece)+"'s clock jumps forward "+st.n+'.');
+    await anim([c],'zap');
+    return;}
+  case 'ageAll':{
+    const hit=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(!t)continue;
+      if(st.who==='ally'&&!sameTeam(t.owner,p))continue;
+      if(st.who==='enemy'&&sameTeam(t.owner,p))continue;
+      if(st.notSelf&&ctx.t&&t.uid===ctx.t.uid)continue;
+      ageOne(b,i,st.n);
+      hit.push(i);
+    }
+    if(hit.length)log('Time lurches forward '+st.n+'.');
+    await anim(hit,'zap');
+    return;}
+  case 'ageSelf':{
+    const i=ctx.cell;
+    if(b[i].teece){ageOne(b,i,st.n);log(nm(b[i].teece)+' hurries its own clock.');}
+    return;}
+  case 'resetAge':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length){log('No enemy to stall.');return 'ABORT';}
+    const c=await pickCell(cands,'Choose an enemy: it gets '+st.n+' and its clock resets.',
+      (bb,i)=>{applyModT(bb[i].teece,st.n,'perm');bb[i].teece.age=0;},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece;
+    applyModT(t,st.n,'perm');
+    t.age=0;
+    log(nm(t)+' is stalled: '+sgn(st.n)+' and back to nothing.');
+    await anim([c],'zap');
+    return;}
+  case 'pause':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length){log('No Teece to pause.');return 'ABORT';}
+    const c=await pickCell(cands,'Choose a Teece: it cannot be destroyed until the start of your next turn.',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    b[c].teece.immortalOwner=p;
+    log(nm(b[c].teece)+' is held outside time until your next turn.');
+    await anim([c],'zap');
+    return;}
+  case 'rewind':{
+    const mine=G.graveThisTurn.filter(g=>g.owner===p);
+    if(!mine.length){log('Nothing of yours reached a graveyard this turn.');return 'ABORT';}
+    const pick=await chooseOption(p,mine.map((g,x)=>({v:String(x),lbl:CARDS[g.cardId].name})),'Rewind which card?');
+    if(pick==null)return;
+    const entry=mine[parseInt(pick,10)];
+    const gi=G.players[entry.owner].grave.lastIndexOf(entry.cardId);
+    if(gi<0){log('It is no longer there.');return;}
+    G.players[entry.owner].grave.splice(gi,1);
+    G.players[entry.owner].hand.push(entry.cardId);
+    const gx=G.graveThisTurn.indexOf(entry);
+    if(gx>=0)G.graveThisTurn.splice(gx,1);
+    log(CARDS[entry.cardId].name+' is pulled back out of the grave.');
+    return;}
+  case 'sacToHand':{
+    if(ctx.sacked&&ctx.sacked.length){
+      for(const cid of ctx.sacked)G.players[p].hand.push(cid);
+      log('The sacrificed Teece returns to '+pname(p)+"'s hand.");
+    }
+    return;}
+  case 'swap':{
+    const i=ctx.cell;
+    const enemy=st.who==='enemy';
+    const pool=enemy?ALL():ADJ[i];
+    const cands=pool.filter(j=>{
+      const o=b[j].teece;
+      if(!o||j===i||hasKw(b,j,'immovable'))return false;
+      return enemy?!sameTeam(o.owner,p):sameTeam(o.owner,p);
+    });
+    if(hasKw(b,i,'immovable')||!cands.length){log(enemy?'No enemy to swap with.':'No ally to swap with.');return;}
+    const c=await pickCell(cands,enemy?'Choose any enemy Teece to swap places with.':'Choose an adjacent ally to swap with.',
+      (bb,j)=>{const a=bb[i].teece;bb[i].teece=bb[j].teece;bb[j].teece=a;},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const a=b[i].teece,o=b[c].teece;
+    b[i].teece=null;b[c].teece=null;
+    putTeece(b,c,a,true);putTeece(b,i,o,true);
+    log(nm(a)+' and '+nm(o)+' swap places.');
+    await anim([i,c],'zap');
+    return;}
+  case 'move':{
+    const i=ctx.cell;
+    if(hasKw(b,i,'immovable')){log('It cannot move.');return;}
+    let pool;
+    if(st.range==='orth')pool=ADJ[i];
+    else if(st.range==='any')pool=ADJ[i];
+    else{pool=[];for(let j=0;j<BN;j++)if(j!==i)pool.push(j);}
+    const d=pool.filter(j=>!b[j].teece);
+    if(!d.length){log('Nowhere to move.');return;}
+    const t=b[i].teece;
+    const c=await pickCell(d,'Choose where '+DEF(t).name+' moves.',
+      (bb,j)=>{if(bb[i].teece)moveT(bb,i,j,false);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    moveT(b,i,c,true);
+    log(nm(t)+' moves to the '+CN[c]+'.');
+    await fireMove(i,c,p);
+    return;}
+  }
+}
+function noteTargeted(byPlayer){
+  const b=G.board;
+  for(let i=0;i<BN;i++){
+    const w=b[i].teece;
+    if(!w||w.owner!==byPlayer)continue;
+    const wd=DEF(w);
+    if(wd.onAllyTargets){applyModT(w,wd.onAllyTargets.n,wd.onAllyTargets.dur);
+      log(nm(w)+' gets '+sgn(wd.onAllyTargets.n)+durTxt(wd.onAllyTargets.dur)+'.');}
+  }
+}
+function oppositeCell(from,through){
+  const dst=through+(through-from);
+  if(dst<0||dst>=BN)return -1;
+  if(row(from)===row(through)&&row(through)!==row(dst))return -1;
+  if(col(from)===col(through)&&col(through)!==col(dst))return -1;
+  return dst;
+}
+function toGrave(owner,cardId){
+  G.players[owner].grave.push(cardId);
+  G.graveThisTurn.push({owner,cardId});
+}
+function drawCards(p,n){
+  const pl=G.players[p];
+  let got=0;
+  for(let i=0;i<n;i++){if(!pl.deck.length)break;pl.hand.push(pl.deck.pop());got++;}
+  if(got)log(pname(p)+' draws '+(got===1?'a card':got+' cards')+'.');
+  else log(pname(p)+' has nothing left to draw.');
+}
+function revertControl(b,uid,liveLog){
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(t&&t.uid===uid&&t.owner!==t.baseOwner){
+      t.owner=t.baseOwner;
+      if(liveLog)log(nm(t)+' snaps back to '+pname(t.baseOwner)+"'s control.");
+    }
+  }
+}
+/* ============ deaths & combat ============ */
+async function processDeath(d){
+  const b=G.board,t=d.t,cell=d.cell;
+  if(b[cell].teece!==t)return;
+  b[cell].teece=null;
+  G.eventFlag=true;
+  log(nm(t)+' is destroyed.');
+  for(let i=0;i<BN;i++){
+    const w=b[i].teece;
+    if(!w||w.uid===t.uid||!sameTeam(w.owner,t.owner))continue;
+    const wd=DEF(w);
+    if(wd.onAllyDeath){
+      applyModT(w,wd.onAllyDeath.n,wd.onAllyDeath.dur);
+      log(nm(w)+' gets '+sgn(wd.onAllyDeath.n)+durTxt(wd.onAllyDeath.dur)+'.');
+    }
+  }
+  const ctx={p:t.owner,deadCell:cell,deadOwner:t.owner,cell,t};
+  /* killers' own on-kill rewards */
+  for(const kuid of d.killers){
+    for(let i=0;i<BN;i++){
+      const k=b[i].teece;
+      if(!k||k.uid!==kuid)continue;
+      const oks=[];
+      const kd=DEF(k); if(kd.onKill)oks.push(kd.onKill);
+      for(const e of k.equips){const g=CARDS[e.cardId].grants;if(g&&g.onKill)oks.push(g.onKill);}
+      for(const ok of oks){
+        if(ok.draw)drawCards(k.owner,ok.draw);
+        else{applyModT(k,ok.n,ok.dur);log(nm(k)+' gets '+sgn(ok.n)+durTxt(ok.dur)+' for the kill.');}
+      }
+    }
+  }
+  /* victim's death effects, then equip-granted ones */
+  let deathFx=(DEF(t).onDeath||[]).slice();
+  if(cell!=null&&G.board[cell]&&G.board[cell].ground&&groundFlag(G.board[cell].ground,'gDeathModal')){
+    deathFx.push({fx:'choose',modal:true,msg:'The Platform gives out:',opts:[
+      {lbl:'Every Teece gets +2',steps:[{fx:'allMod',n:2,dur:'perm'}]},
+      {lbl:'Every Teece gets -2',steps:[{fx:'allMod',n:-2,dur:'perm'}]}]});
+  }
+  for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.onDeath)deathFx.push(...g.onDeath);}
+  const dblG=G.board[cell].ground&&CARDS[G.board[cell].ground.cardId].gDouble;
+  if(dblG)deathFx=deathFx.concat(deathFx.filter(x=>x.fx!=='resummon'&&x.once!=='game'));
+  let resFx=null;
+  for(const st of deathFx){
+    if(st.fx==='resummon'){resFx=st;continue;}
+    if(st.once==='game'){
+      const key='od'+t.cardId;
+      if(G.players[t.baseOwner].onceUsed[key])continue;
+      G.players[t.baseOwner].onceUsed[key]=true;
+    }
+    if(st.fx==='killer'){
+      for(const kuid of d.killers)for(let i=0;i<BN;i++){
+        const k=b[i].teece;
+        if(k&&k.uid===kuid){applyModT(k,st.n,st.dur);log(nm(k)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');}
+      }
+      continue;
+    }
+    await runSteps([st],ctx);
+  }
+  /* linked tokens die with it */
+  for(const uid of t.links){
+    for(let i=0;i<BN;i++){
+      const o=b[i].teece;
+      if(o&&o.uid===uid){b[i].teece=null;log(nm(o)+' collapses with its summoner.');}
+    }
+  }
+  for(const uid of t.controls)revertControl(b,uid,true);
+  /* resummon */
+  let gone=!!ctx.consumed;
+  if(!gone&&resFx&&!t.resummoned&&!t.isToken&&!t.isCopy){
+    const empt=[];for(let i=0;i<BN;i++)if(!b[i].teece)empt.push(i);
+    if(empt.length){
+      const c=await chooseCell(t.baseOwner,empt,DEF(t).name+' can resummon'+(resFx.bonus?' with +'+resFx.bonus:'')+'. Choose a space, or skip.',
+        {skip:true,mut:(bb,i)=>{const nt=makeTeece(t.cardId,t.baseOwner);nt.resummoned=true;
+          if(resFx.bonus)for(let k=0;k<4;k++)nt.perm[k]+=resFx.bonus;putTeece(bb,i,nt,false);}});
+      if(c!=null&&c!=='CANCEL'){
+        for(const e of t.equips)G.players[e.owner].grave.push(e.cardId);
+        const nt=makeTeece(t.cardId,t.baseOwner);nt.resummoned=true;
+        if(resFx.bonus)for(let k=0;k<4;k++)nt.perm[k]+=resFx.bonus;
+        putTeece(G.board,c,nt,true);
+        log(DEF(t).name+' resummons at the '+CN[c]+(resFx.bonus?' with +'+resFx.bonus:'')+'.');
+        gone=true;
+      }
+    }
+  }
+  if(!gone){
+    let handed=false;
+    for(const e of t.equips){
+      const g=CARDS[e.cardId].grants;
+      if(g&&g.teeceReturn&&!handed&&!t.isToken&&!t.isCopy){
+        G.players[t.baseOwner].hand.push(t.cardId);
+        log(nm(t)+' returns to '+pname(t.baseOwner)+"'s hand.");
+        handed=true;
+      }
+    }
+    const gr=G.board[cell].ground,grd=gr?CARDS[gr.cardId]:null;
+    const salvage=grd&&grd.gSalvage&&gr.owner===t.baseOwner;
+    for(const e of t.equips){
+      const eg=CARDS[e.cardId].grants;
+      if(eg&&eg.reequip){
+        const hosts=[];
+        for(let i2=0;i2<9;i2++)if(G.board[i2].teece&&G.board[i2].teece.owner===e.owner)hosts.push(i2);
+        if(hosts.length){
+          const c2=await chooseCell(e.owner,hosts,'Move '+CARDS[e.cardId].name+' to another Teece, or let it go.',
+            {skip:true,mut:(bb,i3)=>{bb[i3].teece.equips.push({cardId:e.cardId,owner:e.owner});}});
+          if(c2!=null&&c2!=='CANCEL'){
+            G.board[c2].teece.equips.push({cardId:e.cardId,owner:e.owner});
+            log(CARDS[e.cardId].name+' clings to '+nm(G.board[c2].teece)+'.');
+            continue;
+          }
+        }
+      }
+      if(salvage&&e.owner===gr.owner)G.players[e.owner].hand.push(e.cardId);
+      else toGrave(e.owner,e.cardId);
+    }
+    if(!handed&&!t.isToken&&!t.isCopy){
+      if(salvage){G.players[t.baseOwner].hand.push(t.cardId);log(nm(t)+' is salvaged back to hand.');}
+      else toGrave(t.baseOwner,t.cardId);
+    }
+  }
+}
+async function resolveCombat(){
+  if(!G)return;
+  const ep=G.epoch;
+  let guard=0;
+  while(G&&!G.over){
+    if(stale(ep))return;
+    let deaths=scanDeaths(G.board);
+    if(!deaths.length)break;
+    let dodged=false;
+    for(const d of deaths){
+      const gsv=G.board[d.cell].ground;
+      if(gsv&&CARDS[gsv.cardId].gSave&&G.board[d.cell].teece===d.t&&G.players[d.t.owner].hand.length){
+        const yes=await chooseOption(d.t.owner,[{v:'y',lbl:'Discard a card to save it'},{v:'n',lbl:'Let it die'}],
+          nm(d.t)+' stands in a Stasis Field. Discard a card to save it?');
+        if(yes==='y'){
+          await runSteps([{fx:'discard',n:1}],{p:d.t.owner,first:false});
+          d.t.immortalOwner=d.t.owner;
+          log(nm(d.t)+' phases out of time and survives.');
+          dodged=true;
+          continue;
+        }
+      }
+      const dd=DEF(d.t);
+      if(dd.dodge&&!d.t.dodged&&G.board[d.cell].teece===d.t){
+        d.t.dodged=true;
+        applyModT(d.t,dd.dodge.n,'perm');
+        log(nm(d.t)+' rolls clear: '+sgn(dd.dodge.n)+'.');
+        const empt=ADJ[d.cell].filter(j=>!G.board[j].teece);
+        if(empt.length){
+          const c=await chooseCell(d.t.owner,empt,'Roll '+DEF(d.t).name+' to an empty space, or skip.',
+            {skip:true,mut:(bb,j)=>{if(bb[d.cell].teece)moveT(bb,d.cell,j,false);}});
+          if(c!=null&&c!=='CANCEL'){moveT(G.board,d.cell,c,true);await fireMove(d.cell,c,d.t.owner);}
+        }
+        dodged=true;
+      }
+    }
+    if(dodged){deaths=scanDeaths(G.board);if(!deaths.length)break;}
+    await anim(deaths.map(d=>d.cell),'dying',190);
+    for(const d of deaths)await processDeath(d);
+    if(HAS_DOM)render();
+    if(stale(ep))return;
+    checkElimination();
+    if(++guard>30)break;
+  }
+  if(!stale(ep))checkElimination();
+}
+/* ============ win checks ============ */
+function livingCount(p){let n=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p)n++;}return n;}
+function realCount(p){let n=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p&&!t.isToken)n++;}return n;}
+function totalTeece(p){
+  let n=realCount(p);
+  for(const id of G.players[p].hand)if(CARDS[id].type==='teece')n++;
+  for(const id of G.players[p].deck)if(CARDS[id].type==='teece')n++;
+  return n;
+}
+/* team totals: a team is out when nobody on it has a Teece anywhere */
+function teamReal(tm){let n=0;for(const q of seatsOnTeam(tm))n+=realCount(q);return n;}
+function teamTotal(tm){let n=0;for(const q of seatsOnTeam(tm))n+=totalTeece(q);return n;}
+/* a seat is skipped once its whole team is eliminated */
+function seatAlive(p){return teamTotal(teamOf(p))>0;}
+function nextLiveSeat(from){
+  const n=PLAYERS();
+  for(let k=1;k<=n;k++){
+    const q=(from+k)%n;
+    if(seatAlive(q))return q;
+  }
+  return (from+1)%n;
+}
+function scoreLine(){
+  return teamsInPlay().map(tm=>teamName(tm)+' '+teamReal(tm)).join(', ');
+}
+function checkElimination(){
+  if(G.over)return;
+  const live=teamsInPlay().filter(tm=>teamTotal(tm)>0);
+  if(live.length===0){endGame(null,'Every side ran out of Teece.');return;}
+  if(live.length===1&&teamsInPlay().length>1){
+    endGame(live[0],'Every other side has no Teece left anywhere.');
+  }
+}
+function checkDomination(){
+  if(G.over)return;
+  const tms=teamsInPlay();
+  if(tms.length<2)return;
+  const counts=tms.map(tm=>({tm,n:teamReal(tm)}));
+  counts.sort((x,y)=>y.n-x.n);
+  const lead=counts[0],second=counts[1];
+  if(lead.n-second.n>=4){
+    endGame(lead.tm,teamName(lead.tm)+' ends the turn four Teece ahead of the field ('+
+      scoreLine()+'). Tokens do not count.');
+  }
+}
+function deckOut(p){
+  const counts=teamsInPlay().map(tm=>({tm,n:teamReal(tm)}));
+  counts.sort((x,y)=>y.n-x.n);
+  const who=(counts.length>1&&counts[0].n===counts[1].n)?null:counts[0].tm;
+  endGame(who,pname(p)+' had no cards left to draw, so the game ends there. Teece on the field: '+scoreLine()+'.');
+}
+function endGame(winner,why){
+  if(G.over)return;
+  G.over=true;G.winner=winner;G.pending=null;
+  log('GAME OVER: '+(winner==null?'Draw.':teamName(winner)+' wins.')+' '+why);
+  if(HAS_DOM){
+    const t=document.getElementById('endTitle'),x=document.getElementById('endText'),btn=document.getElementById('endRestart');
+    if(G.mode==='rogue')rogueEnd(winner,why,t,x,btn);
+    else{
+      t.textContent=winner==null?'A draw':teamName(winner)+' wins';
+      x.textContent=why;
+      btn.textContent='New game';btn.onclick=restart;
+    }
+    document.getElementById('endOverlay').classList.remove('hidden');
+    render();
+  }
+}
+const ROGUE_LEVELS=4;
+let R=null;
+function rogueEnd(winner,why,t,x,btn){
+  const lv=R.level;
+  if(winner===teamOf(0)&&lv>=ROGUE_LEVELS){
+    t.textContent='Run complete';
+    x.textContent='Level '+ROGUE_LEVELS+' cleared. '+why;
+    btn.textContent='New run';btn.onclick=restart;
+  }else if(winner===teamOf(0)){
+    t.textContent='Level '+lv+' cleared';
+    x.textContent=why+' Next: draft five more cards. Enemy Teece will have +'+lv+' on every side.';
+    btn.textContent='Draft for level '+(lv+1);btn.onclick=()=>{R.level++;rogueLevel();};
+  }else if(winner===1){
+    t.textContent='Run over at level '+lv;
+    x.textContent=why;
+    btn.textContent='New run';btn.onclick=restart;
+  }else{
+    t.textContent='Level '+lv+' stalls out';
+    x.textContent=why+' The level replays with the same decks.';
+    btn.textContent='Retry level '+lv;btn.onclick=()=>rogueLevel(true);
+  }
+}
+async function rogueLevel(replay){
+  document.getElementById('endOverlay').classList.add('hidden');
+  if(!replay){
+    G_DRAFT={decks:[R.deck,[]],vsAI:true,total:R.deck.length+5,
+      title:'Level '+R.level+' draft',info:'Add five cards to your deck.'};
+    await humanDraftInto(0,R.deck,R.queue,5);
+    document.getElementById('draftOverlay').classList.add('hidden');
+    R.oppDeck=aiDraftDeck(R.deck.length);
+  }
+  G=newState('rogue',true,[R.deck.slice(),R.oppDeck.slice()],{enemyBonus:R.level-1,level:R.level});
+  render();
+  await startTurn();
+}
+/* ============ plays ============ */
+function sacsNeeded(id){return CARDS[id].sac||0;}
+async function playHandDiscard(p,handIdx){
+  if(G.over||G.pending)return false;
+  if(p!==G.turn)return false;
+  const pl=G.players[p],id=pl.hand[handIdx],d=CARDS[id];
+  if(!d||!d.handDiscard)return false;
+  const ok=await runSteps(d.handDiscard,{p,cell:null,t:null,first:true});
+  if(!ok)return false;
+  const idx=pl.hand.indexOf(id);
+  if(idx>=0)pl.hand.splice(idx,1);
+  toGrave(p,id);
+  log(pname(p)+' discards '+d.name+' from hand.');
+  await resolveCombat();
+  render();
+  return true;
+}
+async function playFromHand(p,handIdx){
+  if(G.over||G.pending)return false;
+  if(p!==G.turn)return false;
+  const pl=G.players[p];
+  const id=pl.hand[handIdx];
+  if(id==null)return false;
+  const d=CARDS[id];
+  let ok=false;
+  if(d.type==='teece')ok=await playTeece(p,handIdx);
+  else if(d.type==='equip')ok=await playEquip(p,handIdx);
+  else if(d.type==='magic')ok=await playMagic(p,handIdx);
+  else if(d.type==='ground')ok=await playGround(p,handIdx);
+  if(ok)G.eventFlag=true;
+  return ok;
+}
+async function playTeece(p,handIdx){
+  const pl=G.players[p],id=pl.hand[handIdx],d=CARDS[id],b=G.board;
+  if(G.teecePlayed&&!G.viaReveal){toast('Only one Teece per turn.');return false;}
+  const need=sacsNeeded(id);
+  const sacables=[];for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken)sacables.push(i);}
+  if(sacables.length<need){toast('Not enough Teece to sacrifice.');return false;}
+  const empt=[];for(let i=0;i<BN;i++)if(!b[i].teece)empt.push(i);
+  if(!empt.length){toast('No empty space.');return false;}
+  const plan=(isAIP(p)&&AI_TEECE_PLAN)?AI_TEECE_PLAN:null;
+  const sacP=[];
+  for(let s=0;s<need;s++){
+    const c=plan?plan.sacP[s]:await chooseCell(p,sacables.filter(i=>sacP.indexOf(i)<0),'Choose a Teece to sacrifice ('+(s+1)+' of '+need+').',
+      {cancel:true,mut:null});
+    if(c==null||c==='CANCEL')return false;
+    sacP.push(c);
+  }
+  const spot=plan?plan.c:await chooseCell(p,empt,'Choose a space for '+d.name+'.',{cancel:true,mut:null});
+  if(spot==null||spot==='CANCEL')return false;
+  const sacked=[];
+  for(const c of sacP){
+    const t=b[c].teece;
+    if(!t.isToken&&!t.isCopy)sacked.push(t.cardId);
+    await processDeath({cell:c,t,killers:[]});
+    log(nm(t)+' is sacrificed.');
+  }
+  pl.hand.splice(handIdx,1);
+  const t=makeTeece(id,p);
+  if(plan&&plan.rot){
+    const bs=t.base;
+    t.base=plan.rot===1?[bs[3],bs[0],bs[1],bs[2]]:[bs[1],bs[2],bs[3],bs[0]];
+  }
+  putTeece(b,spot,t,true);
+  if(!G.viaReveal)G.teecePlayed=true;
+  log(pname(p)+' plays '+d.name+' at the '+CN[spot]+(G.viaReveal?' — revealed, so it doesn’t use this turn’s Teece play.':'.'));
+  await anim([spot],'placed',140);
+  if(pl.nextDefBonus){applyDef(t,pl.nextDefBonus);log(nm(t)+' arrives with +'+pl.nextDefBonus+' Defence.');pl.nextDefBonus=0;}
+  if(pl.calib&&t.base.every(v=>v===pl.calib.x)){
+    const cn=pl.calib.n;pl.calib=null;
+    for(let k=0;k<4;k++)t.perm[k]+=cn;
+    log(nm(t)+' matches the dial: '+sgn(cn)+'.');
+  }
+  if(G.trap&&!sameTeam(p,G.trap.by)){
+    G.trap=null;
+    log(nm(t)+' walks straight into the trap.');
+    await processDeath({cell:spot,t,killers:[]});
+    await resolveCombat();render();
+    return true;
+  }
+  for(let i=0;i<BN;i++){
+    const w=b[i].teece;
+    if(!w||sameTeam(w.owner,p))continue;
+    const wd=DEF(w);
+    if(wd.onEnemyPlay){applyModT(t,wd.onEnemyPlay.n,wd.onEnemyPlay.dur);
+      log(nm(t)+' is met by '+nm(w)+': '+sgn(wd.onEnemyPlay.n)+durTxt(wd.onEnemyPlay.dur)+'.');}
+  }
+  const dbl=b[spot].ground&&CARDS[b[spot].ground.cardId].gDouble?2:1;
+  if(d.onPlay)for(let k=0;k<dbl;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked});
+  await resolveCombat();
+  render();
+  return true;
+}
+async function playEquip(p,handIdx){
+  const pl=G.players[p],id=pl.hand[handIdx],b=G.board,ed=CARDS[id];
+  const cands=[];
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(!t||t.owner!==p)continue;
+    if(ed.onlyToken&&!t.isToken)continue;
+    cands.push(i);
+  }
+  if(!cands.length){toast(ed.onlyToken?'No Drone to equip.':'No allied Teece to equip.');return false;}
+  const c=await chooseCell(p,cands,'Choose a Teece for '+CARDS[id].name+'.',
+    {cancel:true,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}});
+  if(c==null||c==='CANCEL')return false;
+  pl.hand.splice(handIdx,1);
+  b[c].teece.equips.push({cardId:id,owner:p});
+  log(pname(p)+' equips '+CARDS[id].name+' to '+nm(b[c].teece)+'.');
+  const eg=CARDS[id].grants;
+  if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:c,t:b[c].teece,first:false});
+  await resolveCombat();
+  render();
+  return true;
+}
+function groundCells(anchor,shape){
+  if(shape==='1x1')return [anchor];
+  if(shape==='2x1'){
+    if(col(anchor)>1)return null;
+    return [anchor,anchor+1];
+  }
+  if(col(anchor)>1||row(anchor)>1)return null;
+  return [anchor,anchor+1,anchor+3,anchor+4];
+}
+async function clearGroundAt(i,breaker){
+  const b=G.board,g=b[i].ground;
+  if(!g)return;
+  const gd=CARDS[g.cardId];
+  const cells=[];
+  for(let j=0;j<BN;j++)if(b[j].ground&&(g.gid?b[j].ground.gid===g.gid:j===i))cells.push(j);
+  for(const j of cells)b[j].ground=null;
+  G.players[g.owner].grave.push(g.cardId);
+  if(gd.gDiscardOnBreak&&breaker!=null&&breaker!==g.owner){
+    log(pname(breaker)+' broke '+gd.name+' and must discard '+gd.gDiscardOnBreak+'.');
+    await runSteps([{fx:'discard',n:gd.gDiscardOnBreak}],{p:breaker,first:false});
+  }
+}
+async function playGround(p,handIdx){
+  const pl=G.players[p],id=pl.hand[handIdx],b=G.board,d=CARDS[id];
+  let shape='1x1';
+  let gmode=null;
+  if(d.gModal){
+    const ctl=modalCtl(p,null);
+    if(ctl.off){log('Safety Interlock holds: '+d.name+' is laid inert.');gmode={};}
+    else if(ctl.all){gmode=Object.assign({},...d.gModal.map(m=>{const o=Object.assign({},m);delete o.lbl;delete o.gmod;return o;}));
+      gmode.gmod=0;log('Every mode of '+d.name+' fires: it doubles bonuses and penalties alike.');}
+    else{
+      const pick=await chooseOption(p,d.gModal.map((m,x)=>({v:String(x),lbl:m.lbl})),d.name+':');
+      if(pick==null)return false;
+      const m=d.gModal[parseInt(pick,10)];
+      gmode=Object.assign({},m);delete gmode.lbl;
+    }
+    if(!ctl.off)fireModal(p);
+  }
+  if(d.gShape){
+    const pick=await chooseOption(p,[{v:'1x1',lbl:'One panel'},{v:'2x1',lbl:'Two panels'},{v:'2x2',lbl:'Four panels'}],
+      'How large is '+d.name+'?');
+    if(pick==null)return false;
+    shape=pick;
+  }
+  const cands=[];
+  for(let i=0;i<BN;i++)if(groundCells(i,shape))cands.push(i);
+  if(!cands.length){toast('No room for it.');return false;}
+  const c=await chooseCell(p,cands,'Choose where '+d.name+' goes.',
+    {cancel:true,mut:(bb,i)=>{for(const j of groundCells(i,shape))bb[j].ground=Object.assign({cardId:id,owner:p},gmode||{});}});
+  if(c==null||c==='CANCEL')return false;
+  pl.hand.splice(handIdx,1);
+  const cells=groundCells(c,shape);
+  const cleared=[];
+  for(const j of cells){
+    if(b[j].ground&&cleared.indexOf(b[j].ground.gid||('c'+j))<0){
+      cleared.push(b[j].ground.gid||('c'+j));
+      await clearGroundAt(j,p);
+    }
+  }
+  const gid=G.groundSeq++;
+  const extra=Object.assign({},gmode||{});
+  if(d.gShapeModal){
+    if(cells.length===1)extra.gModalAll=true;
+    else if(cells.length===2)extra.gModalTwice=true;
+    else extra.gDeathModal=true;
+  }
+  for(const j of cells)b[j].ground=Object.assign({cardId:id,owner:p,gid},extra);
+  if(d.gShapeModal){
+    log(cells.length===1?'The Platform is set to fire every mode.':
+        cells.length===2?'The Platform is set to fire the chosen mode twice.':
+        'The wide Platform arms everything on it with a parting shot.');
+  }
+  log(pname(p)+' lays '+d.name+(cells.length>1?' across '+cells.length+' panels.':' on the '+CN[c]+'.'));
+  await resolveCombat();
+  render();
+  return true;
+}
+async function playMagic(p,handIdx){
+  const pl=G.players[p],id=pl.hand[handIdx],d=CARDS[id];
+  const ok=await runSteps(d.cast,{p,cell:null,t:null,first:true});
+  if(!ok)return false;
+  pl.hand.splice(handIdx,1);
+  log(pname(p)+' casts '+d.name+'.');
+  if(d.rebound&&!pl.onceUsed['rb'+id]){
+    pl.onceUsed['rb'+id]=true;
+    pl.hand.push(id);
+    log(d.name+' returns to '+pname(p)+"'s hand.");
+  }else toGrave(p,id);
+  await resolveCombat();
+  render();
+  return true;
+}
+async function runAct(p,cell,ent){
+  if(G.over||G.pending)return false;
+  if(p!==G.turn)return false;
+  const b=G.board,t=b[cell].teece;
+  if(!t||t.owner!==p)return false;
+  if(!actAvailable(t,ent))return false;
+  const ok=await runSteps(ent.act.steps,{p,cell,t,first:true,ent});
+  if(!ok){render();return false;}
+  if(ent.act.once==='game')t.actUsedGame[ent.key]=true;
+  t.actUsedTurn[ent.key]=(t.actUsedTurn[ent.key]||0)+1;
+  G.detailLock=null;
+  await resolveCombat();
+  render();
+  return true;
+}
+/* ============ turn flow ============ */
+async function endTurn(){
+  if(!G||G.over||G.pending)return;
+  const ep=G.epoch;
+  const p=G.turn;
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(t){t.temp=[0,0,0,0];t.kwTemp=[];}
+  }
+  for(let i=0;i<BN;i++){
+    const g=G.board[i].ground;
+    if(!g)continue;
+    const gd=CARDS[g.cardId];
+    if(gd.gEndTurn&&g.owner===p&&!G.board[i].teece){
+      putTeece(G.board,i,makeTeece(gd.gEndTurn,g.owner),true);
+      log(gd.name+' builds a Drone at the '+CN[i]+'.');
+    }
+  }
+  await resolveCombat();
+  if(stale(ep))return;
+  checkDomination();
+  if(!G.over&&G.mode==='rogue')checkStalemate();
+  if(G.over)return;
+  G.turn=nextLiveSeat(p);G.turnNum++;G.teecePlayed=false;
+  await startTurn();
+}
+function checkStalemate(){
+  if(G.over)return;
+  if(G.eventFlag){G.quiet=0;G.eventFlag=false;return;}
+  G.quiet++;
+  if(G.quiet>=6){
+    const cs=teamsInPlay().map(tm=>({tm,n:teamReal(tm)}));
+    cs.sort((x,y)=>y.n-x.n);
+    const who=(cs.length>1&&cs[0].n===cs[1].n)?null:cs[0].tm;
+    endGame(who,'Six turns passed with nothing played and nothing destroyed. Field: '+scoreLine()+'.');
+  }
+}
+async function startTurn(){
+  if(!G)return;
+  const ep=G.epoch;
+  const p=G.turn,pl=G.players[p];
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(t&&t.owner===p){t.actUsedTurn={};t.dodged=false;}
+    if(t&&t.immortalOwner===p)t.immortalOwner=null;
+  }
+  G.movedThisTurn=[];
+  G.graveThisTurn=[];
+  await resolveCombat();
+  if(stale(ep)||G.over)return;
+  await ageTurn(p);
+  if(stale(ep)||G.over)return;
+  if(pl.pendingDraw){const n=pl.pendingDraw;pl.pendingDraw=0;drawCards(p,n);}
+  if(G.turnNum>1){
+    if(!pl.deck.length&&G.mode!=='rogue'&&!pl.noDeckOut){deckOut(p);return;}
+    if(pl.deck.length){drawCards(p,1);await offerReveal(p);}
+  }
+  log('--- Turn '+G.turnNum+': '+pname(p)+' ---');
+  render();
+  if(stale(ep)||G.over)return;
+  if(isAIP(p)){await wait(420);if(stale(ep))return;await aiTurn();}
+}
+const wait=ms=>HAS_DOM?new Promise(r=>setTimeout(r,ms)):Promise.resolve();
+async function anim(cells,cls,ms){
+  if(!HAS_DOM||!G||!cells||!cells.length)return;
+  G.anim={cells:cells.filter(c=>c!=null),cls};
+  render();
+  await wait(ms||150);
+  G.anim=null;
+  render();
+}
+function toast(m){
+  if(!HAS_DOM)return;
+  const t=document.getElementById('toast');
+  t.textContent=m;t.classList.add('show');
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),1600);
+}
+/* ============ simulation (no prompts, no rng) ============ */
+function cloneBoard(b){
+  return b.map(c=>({
+    teece:c.teece?Object.assign({},c.teece,{base:c.teece.base.slice(),perm:c.teece.perm.slice(),
+      temp:c.teece.temp.slice(),equips:c.teece.equips.slice(),kwTemp:c.teece.kwTemp.slice(),
+      kwPerm:(c.teece.kwPerm||[]).slice(),defPerm:c.teece.defPerm||0,dodged:c.teece.dodged,
+      age:c.teece.age||0,transformed:c.teece.transformed,tickTotal:c.teece.tickTotal||0,
+      immortalOwner:c.teece.immortalOwner,
+      links:c.teece.links.slice(),controls:c.teece.controls.slice(),
+      actUsedTurn:Object.assign({},c.teece.actUsedTurn),actUsedGame:Object.assign({},c.teece.actUsedGame)}):null,
+    ground:c.ground?Object.assign({},c.ground):null,
+    mine:c.mine?Object.assign({},c.mine):null
+  }));
+}
+function simDeath(b,d){
+  const t=d.t,cell=d.cell;
+  if(b[cell].teece!==t)return;
+  b[cell].teece=null;
+  for(const kuid of d.killers){
+    for(let i=0;i<BN;i++){
+      const k=b[i].teece;
+      if(!k||k.uid!==kuid)continue;
+      const oks=[];const kd=DEF(k);if(kd.onKill)oks.push(kd.onKill);
+      for(const e of k.equips){const g=CARDS[e.cardId].grants;if(g&&g.onKill)oks.push(g.onKill);}
+      for(const ok of oks)if(!ok.draw)applyModT(k,ok.n,ok.dur);
+    }
+  }
+  const fx=(DEF(t).onDeath||[]).slice();
+  for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.onDeath)fx.push(...g.onDeath);}
+  for(const st of fx){
+    if(st.fx==='killer'){
+      for(const kuid of d.killers)for(let i=0;i<BN;i++){
+        const k=b[i].teece;if(k&&k.uid===kuid)applyModT(k,st.n,st.dur);
+      }
+    }else if(st.fx==='aoe'){
+      for(const j of ADJ[cell]){
+        const o=b[j].teece;if(!o)continue;
+        const ally=sameTeam(o.owner,t.owner);
+        if(st.who==='ally'&&!ally)continue;
+        if(st.who==='enemy'&&ally)continue;
+        applyModT(o,st.n,st.dur);
+      }
+    }else if(st.fx==='mass'){
+      for(let i=0;i<BN;i++){
+        const o=b[i].teece;if(!o)continue;
+        const ally=sameTeam(o.owner,t.owner);
+        if(st.who==='ally'&&!ally)continue;
+        if(st.who==='enemy'&&ally)continue;
+        applyModT(o,st.n,st.dur);
+      }
+    }else if(st.fx==='token'&&st.where==='here'){
+      if(!b[cell].teece)putTeece(b,cell,makeTeece(st.tok,t.owner),false);
+    }
+  }
+  for(const uid of t.links)for(let i=0;i<BN;i++){
+    const o=b[i].teece;if(o&&o.uid===uid)b[i].teece=null;
+  }
+  for(const uid of t.controls)revertControl(b,uid,false);
+}
+function simCombat(b){
+  let guard=0;
+  while(guard++<30){
+    const deaths=scanDeaths(b);
+    if(!deaths.length)break;
+    for(const d of deaths)simDeath(b,d);
+  }
+}
+function boardValue(b,p){
+  let v=0;
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;if(!t)continue;
+    const s=effSides(b,i);
+    let w=(t.isToken?2:8)+(s[0]+s[1]+s[2]+s[3])*0.15+t.equips.length*0.6;
+    if(kwOf(b,i).indexOf('ranged')>=0)w+=1.2;
+    v+=sameTeam(t.owner,p)?w:-w;
+  }
+  return v;
+}
+/* approximate on-play triggers when simming a placement */
+function simOnPlay(b,cell,id,p){
+  const d=CARDS[id],t=b[cell].teece;
+  for(const st of d.onPlay||[]){
+    if(st.fx==='mod'){
+      if(st.who==='self'){applyModT(t,st.n,st.dur);continue;}
+      let best=-1,bs=-1;
+      for(let i=0;i<BN;i++){
+        const o=b[i].teece;if(!o)continue;
+        if(st.notSelf&&o.uid===t.uid)continue;
+        if(st.who==='ally'&&!sameTeam(o.owner,p))continue;
+        if(st.who==='enemy'&&sameTeam(o.owner,p))continue;
+        if(st.where==='rowcol'&&!(sameRow(i,cell)||sameCol(i,cell)))continue;
+        if(st.where==='adj'&&ADJ[cell].indexOf(i)<0)continue;
+        const tot=effSides(b,i).reduce((a,c)=>a+c,0);
+        if(tot>bs){bs=tot;best=i;}
+      }
+      if(st.who==='ally'&&!st.notSelf)best=cell;
+      if(best>=0)applyModT(b[best].teece,st.n,st.dur);
+    }else if(st.fx==='aoe'){
+      for(const j of ADJ[cell]){
+        const o=b[j].teece;if(!o)continue;
+        const ally=sameTeam(o.owner,p);
+        if(st.who==='ally'&&!ally)continue;
+        if(st.who==='enemy'&&ally)continue;
+        applyModT(o,st.n,st.dur);
+      }
+    }else if(st.fx==='copy'){
+      const e=ADJ[cell].filter(j=>!b[j].teece);
+      if(e.length){const cp=makeTeece(id,p);cp.isCopy=true;putTeece(b,e[0],cp,false);}
+    }else if(st.fx==='token'){
+      let placed=0;
+      const pool=(st.where==='adj'?ADJ[cell]:ALL());
+      for(const j of pool){
+        if(placed>=(st.count||1))break;
+        if(!b[j].teece){const tk=makeTeece(st.tok,p);putTeece(b,j,tk,false);
+          if(st.linked)t.links.push(tk.uid);placed++;}
+      }
+    }else if(st.fx==='control'){
+      let best=-1,bs=-1;
+      for(let i=0;i<BN;i++){
+        const o=b[i].teece;
+        if(o&&!sameTeam(o.owner,p)){const tot=effSides(b,i).reduce((a,c)=>a+c,0);if(tot>bs){bs=tot;best=i;}}
+      }
+      if(best>=0){b[best].teece.owner=p;t.controls.push(b[best].teece.uid);}
+    }
+  }
+}
+/* ============ AI choice plumbing ============ */
+let AI_MUT_CTX=null;
+function aiPickCell(cells,opt){
+  if(!cells.length)return opt&&opt.skip?null:(opt&&opt.cancel?'CANCEL':null);
+  if(!opt||!opt.mut){
+    return cells[Math.floor(Math.random()*cells.length)];
+  }
+  const p=G.turn;
+  let best=null,bg=-1e9;
+  const base=boardValue(G.board,p);
+  for(const c of cells){
+    const bb=cloneBoard(G.board);
+    try{opt.mut(bb,c);}catch(e){}
+    simCombat(bb);
+    const g=boardValue(bb,p)-base;
+    if(g>bg){bg=g;best=c;}
+  }
+  if(opt.skip&&bg<0.05)return null;
+  return best;
+}
+function aiPickOpt(opts){
+  return opts.length?opts[Math.floor(Math.random()*opts.length)].v:null;
+}
+/* ============ AI planning ============ */
+function aiPlanFor(id){
+  const d=CARDS[id],b=G.board,p=G.turn;
+  if(d.type==='equip'){
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(!t||t.owner!==p)continue;
+      if(d.onlyToken&&!t.isToken)continue;
+      cands.push(i);
+    }
+    if(!cands.length)return null;
+    return {thr:0.8,cands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
+  }
+  if(d.type==='ground'){
+    const cands=[];for(let i=0;i<BN;i++)if(!b[i].ground)cands.push(i);
+    if(!cands.length)return null;
+    return {thr:0.8,cands,mut:(bb,i)=>{bb[i].ground={cardId:id,owner:p};}};
+  }
+  if(d.type!=='magic')return null;
+  const st=d.cast[0];
+  if(st.fx==='mod'){
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;if(!t)continue;
+      if(st.who==='ally'&&!sameTeam(t.owner,p))continue;
+      if(st.who==='enemy'&&sameTeam(t.owner,p))continue;
+      cands.push(i);
+    }
+    if(!cands.length)return null;
+    return {thr:2.2,cands,mut:(bb,i)=>{
+      for(const s2 of d.cast)if(s2.fx==='mod'&&(s2===st||s2.who==='last'))applyModT(bb[i].teece,s2.n,s2.dur);
+    }};
+  }
+  if(st.fx==='mass')return {thr:1.8,cands:[0],mut:(bb)=>{
+    for(let i=0;i<BN;i++){
+      const o=bb[i].teece;if(!o)continue;
+      const ally=sameTeam(o.owner,p);
+      if(st.who==='ally'&&!ally)continue;
+      if(st.who==='enemy'&&ally)continue;
+      applyModT(o,st.n,st.dur);
+    }}};
+  if(st.fx==='bolt'){
+    const cands=[];
+    for(let c=0;c<3;c++)for(let r=0;r<3;r++){const i=r*3+c;if(b[i].teece){cands.push(i);break;}}
+    const en=cands.filter(i=>!sameTeam(b[i].teece.owner,p));
+    if(!en.length)return null;
+    return {thr:2.2,cands:en,mut:(bb,i)=>{applyModT(bb[i].teece,st.n,'perm');}};
+  }
+  if(st.fx==='bounce'){
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&!isBossCard(t.cardId))cands.push(i);}
+    if(!cands.length)return null;
+    return {thr:2.5,cands,mut:(bb,i)=>{bb[i].teece=null;}};
+  }
+  if(st.fx==='token'){
+    return {thr:1.2,cands:[0],mut:(bb)=>{
+      let placed=0;
+      for(let j=0;j<BN&&placed<(st.count||1);j++)if(!bb[j].teece&&!(st.where==='adj')){putTeece(bb,j,makeTeece(st.tok,p),false);placed++;}
+    }};
+  }
+  if(st.fx==='draw'){
+    if(G.players[p].hand.length<6&&G.players[p].deck.length>2)return {thr:0.5,pseudo:0.9,cands:[0],mut:null};
+    return null;
+  }
+  if(st.fx==='shatter'){
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&t.equips.length)cands.push(i);}
+    if(!cands.length)return null;
+    return {thr:0.8,cands,mut:(bb,i)=>{bb[i].teece.equips.pop();}};
+  }
+  if(st.fx==='flip'){
+    let any=false;for(let i=0;i<BN;i++)if(b[i].teece)any=true;
+    if(!any)return null;
+    return {thr:1.5,cands:[0],mut:null,pseudo:1.6};
+  }
+  if(st.fx==='kwT'){
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&kwOf(b,i).indexOf(st.kw)<0)cands.push(i);}
+    if(!cands.length)return null;
+    return {thr:0.5,cands,mut:(bb,i)=>{(st.perm?bb[i].teece.kwPerm:bb[i].teece.kwTemp).push(st.kw);}};
+  }
+  if(st.fx==='gust'){
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(t&&!hasKw(b,i,'immovable')&&ADJ[i].some(j=>!b[j].teece))cands.push(i);
+    }
+    if(!cands.length)return null;
+    return {thr:0.6,cands:[0],mut:null,pseudo:0.7};
+  }
+  if(st.fx==='quake'){
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].ground)cands.push(i);
+    if(!cands.length)return null;
+    return {thr:0.8,cands,mut:(bb,i)=>{bb[i].ground=null;}};
+  }
+  return null;
+}
+async function aiSupport(){
+  const p=G.turn,pl=G.players[p];
+  let acted=false;
+  for(let h=0;h<pl.hand.length;h++){
+    if(G.over)return acted;
+    const id=pl.hand[h];
+    if(CARDS[id].type==='teece')continue;
+    const plan=aiPlanFor(id);
+    if(!plan)continue;
+    const base=boardValue(G.board,p);
+    let best=null,bg=-1e9;
+    for(const c of plan.cands){
+      if(plan.mut){
+        const bb=cloneBoard(G.board);
+        try{plan.mut(bb,c);}catch(e){continue;}
+        simCombat(bb);
+        const g=boardValue(bb,p)-base;
+        if(g>bg){bg=g;best=c;}
+      }else{bg=plan.pseudo||0;best=c;}
+    }
+    if(best!=null&&bg>=plan.thr){
+      AI_MUT_CTX={plan,best};
+      const ok=await playFromHand(p,h);
+      AI_MUT_CTX=null;
+      if(ok){acted=true;await wait(300);return true;}
+    }
+  }
+  return acted;
+}
+async function aiPlayTeece(){
+  const p=G.turn,pl=G.players[p],b=G.board;
+  if(G.teecePlayed)return false;
+  const empt=[];for(let i=0;i<BN;i++)if(!b[i].teece)empt.push(i);
+  if(!empt.length)return false;
+  const base=boardValue(b,p);
+  let best=null,bg=-1e9;
+  for(let h=0;h<pl.hand.length;h++){
+    const id=pl.hand[h],d=CARDS[id];
+    if(d.type!=='teece')continue;
+    const need=d.sac||0;
+    const sacables=[];for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken)sacables.push(i);}
+    if(sacables.length<need)continue;
+    if(need>0&&realCount(p)-need<1&&totalTeece(p)-need<2)continue;
+    let sacP=[];
+    if(need>0){
+      const scored=sacables.map(i=>({i,v:effSides(b,i).reduce((a,c)=>a+c,0)})).sort((a,c)=>a.v-c.v);
+      sacP=scored.slice(0,need).map(x=>x.i);
+    }
+    const rots=(d.onPlay||[]).some(s=>s.fx==='rot')?[0,1,-1]:[0];
+    for(const c of empt){
+      for(const rot of rots){
+        const bb=cloneBoard(b);
+        for(const sc of sacP)simDeath(bb,{cell:sc,t:bb[sc].teece,killers:[]});
+        if(bb[c].teece)continue;
+        const t=makeTeece(id,p);
+        if(rot===1){const s=t.base;t.base=[s[3],s[0],s[1],s[2]];}
+        if(rot===-1){const s=t.base;t.base=[s[1],s[2],s[3],s[0]];}
+        putTeece(bb,c,t,false);
+        if(rots.length===1)simOnPlay(bb,c,id,p);
+        simCombat(bb);
+        const g=boardValue(bb,p)-base+2.2;
+        if(g>bg){bg=g;best={h,c,rot,sacP};}
+      }
+    }
+  }
+  if(!best)return false;
+  AI_TEECE_PLAN=best;
+  const ok=await playFromHand(p,best.h);
+  AI_TEECE_PLAN=null;
+  return ok;
+}
+let AI_TEECE_PLAN=null;
+async function aiActs(){
+  const p=G.turn,b=G.board;
+  let used=false;
+  for(let i=0;i<BN;i++){
+    if(G.over)return used;
+    const t=b[i].teece;
+    if(!t||t.owner!==p)continue;
+    for(const ent of actsOf(b,i)){
+      if(!actAvailable(t,ent))continue;
+      const st=ent.act.steps[0];
+      let gain=-1;
+      const base=boardValue(b,p);
+      if(st.fx==='mine'){
+        const anyEmpty=b.some((c,x)=>!c.teece&&!c.mine);
+        gain=(G.turnNum>=3&&anyEmpty)?0.75:-1;
+      }else if(st.fx==='draw'){
+        gain=G.players[p].hand.length<5?0.85:-1;
+      }else{
+        const muts=aiActMuts(i,ent);
+        for(const m of muts){
+          const bb=cloneBoard(b);
+          try{m(bb);}catch(e){continue;}
+          simCombat(bb);
+          const g=boardValue(bb,p)-base;
+          if(g>gain)gain=g;
+        }
+      }
+      if(gain>=0.7){
+        const ok=await runAct(p,i,ent);
+        if(ok){used=true;await wait(250);if(G.over)return used;}
+      }
+    }
+  }
+  return used;
+}
+function aiActMuts(cell,ent){
+  const b=G.board,p=G.turn,muts=[];
+  const st=ent.act.steps[0];
+  if(st.fx==='move'){
+    let pool;
+    if(st.range==='orth')pool=ADJ[cell];
+    else if(st.range==='any')pool=ADJ[cell];
+    else{pool=[];for(let j=0;j<BN;j++)if(j!==cell)pool.push(j);}
+    for(const j of pool)if(!b[j].teece)muts.push(bb=>{if(bb[cell].teece)moveT(bb,cell,j,false);});
+  }else if(st.fx==='push'){
+    const away=(from,to)=>{const dst=to+(to-from);if(dst<0||dst>=BN)return -1;
+      if(row(from)===row(to)&&row(to)!==row(dst))return -1;return dst;};
+    for(const j of ADJ[cell]){
+      const o=b[j].teece;if(!o||sameTeam(o.owner,p))continue;
+      const dst=away(cell,j);if(dst<0||b[dst].teece)continue;
+      muts.push(bb=>{if(bb[j].teece)moveT(bb,j,dst,false);});
+    }
+  }else if(st.fx==='swap'){
+    const pool=st.who==='enemy'?ALL():ADJ[cell];
+    for(const j of pool){
+      const o=b[j].teece;if(!o||j===cell)continue;
+      if(st.who==='enemy'?sameTeam(o.owner,p):!sameTeam(o.owner,p))continue;
+      muts.push(bb=>{const a=bb[cell].teece;bb[cell].teece=bb[j].teece;bb[j].teece=a;});
+    }
+  }else if(st.fx==='rot'){
+    muts.push(bb=>{const t=bb[cell].teece,s=t.base;t.base=[s[3],s[0],s[1],s[2]];});
+    muts.push(bb=>{const t=bb[cell].teece,s=t.base;t.base=[s[1],s[2],s[3],s[0]];});
+  }else if(st.fx==='mod'){
+    for(let j=0;j<BN;j++){
+      const o=b[j].teece;if(!o)continue;
+      if(st.notSelf&&o.uid===b[cell].teece.uid)continue;
+      if(st.who==='ally'&&!sameTeam(o.owner,p))continue;
+      if(st.who==='enemy'&&sameTeam(o.owner,p))continue;
+      if(st.where==='adj'&&ADJ[cell].indexOf(j)<0)continue;
+      muts.push(bb=>{
+        for(const s2 of ent.act.steps){
+          if(s2.fx==='mod'&&s2.who==='self')applyModT(bb[cell].teece,s2.n,s2.dur);
+          else if(s2.fx==='mod')applyModT(bb[j].teece,s2.n,s2.dur);
+        }
+      });
+    }
+  }
+  return muts;
+}
+async function aiTurn(){
+  if(!G||G.over)return;
+  const ep=G.epoch, p=G.turn;
+  for(let k=0;k<3;k++){if(!await aiSupport())break;if(stale(ep)||G.over)return;}
+  await aiPlayTeece();
+  if(stale(ep)||G.over)return;
+  for(let k=0;k<2;k++){if(!await aiSupport())break;if(stale(ep)||G.over)return;}
+  await aiActs();
+  if(stale(ep)||G.over)return;
+  await wait(300);
+  if(stale(ep))return;
+  await endTurn();
+}
+/* ============ draft ============ */
+function draftValue(d,drafted,total){
+  total=total||20;
+  const tc=drafted.filter(id=>CARDS[id].type==='teece').length;
+  const left=total-drafted.length;
+  const want=Math.ceil(total*0.65);
+  const need=want-tc;
+  let v=0;
+  if(d.type==='teece'){
+    v=2+d.sides.reduce((a,c)=>a+c,0)*0.16;
+    if(d.kw)v+=d.kw.length*1.4;
+    if(d.aura)v+=1.4;
+    if(d.onPlay)v+=1.0;
+    if(d.onDeath)v+=0.8;
+    if(d.onKill)v+=0.8;
+    if(d.act)v+=1.0;
+    v-=(d.sac||0)*1.6;
+    if(need>0)v+=2.5;
+    if(need<=0)v-=6;
+    if(need<=-2)v-=9;
+    if(need>=left)v+=8;
+  }else{
+    v=(d.type==='magic'?5.8:(d.type==='equip'?5.4:4.4));
+    if(need>=left)v-=99;
+    if(need>0&&drafted.length<total*0.4)v-=3.2;
+    if(drafted.length-tc>=Math.round(total*0.4))v-=3;
+  }
+  return v+Math.random()*1.2;
+}
+function buildOffer(queue,forceTeece){
+  if(forceTeece){
+    const offer=[];
+    for(let k=0;k<queue.length&&offer.length<3;k++){
+      if(CARDS[queue[k]].type==='teece')offer.push(queue.splice(k,1)[0]),k--;
+    }
+    if(offer.length)return offer;
+  }
+  const offer=queue.splice(0,3);
+  if(!offer.some(id=>CARDS[id].type==='teece')){
+    const k=queue.findIndex(id=>CARDS[id].type==='teece');
+    if(k>=0){const swap=queue.splice(k,1)[0];queue.unshift(offer.pop());offer.push(swap);}
+  }
+  return offer;
+}
+function aiDraftInto(deck,queue,count){
+  const total=deck.length+count;
+  for(let k=0;k<count;k++){
+    const offer=buildOffer(queue);
+    let best=offer[0],bv=-1e9;
+    for(const id of offer){
+      const v=draftValue(CARDS[id],deck,total);
+      if(v>bv){bv=v;best=id;}
+    }
+    deck.push(best);
+  }
+  return deck;
+}
+function aiDraftDeck(count){
+  return aiDraftInto([],shuffle(POOL.slice()),count||20);
+}
+function draftPick(p,offer,k){
+  if(!HAS_DOM)return Promise.resolve(offer[Math.floor(Math.random()*offer.length)]);
+  return new Promise(res=>{renderDraft(p,offer,k,res);});
+}
+let G_DRAFT=null;
+function hideHcapRow(){
+  const hr=document.getElementById('hcapRow');
+  if(hr){hr.classList.add('hidden');hr.innerHTML='';}
+}
+function pickDeck(who,opts){
+  opts=opts||{};
+  return new Promise(res=>{
+    const overlay=document.getElementById('draftOverlay');
+    overlay.classList.remove('hidden');
+    hideHcapRow();
+    document.getElementById('draftTitle').textContent=opts.title||(who+': choose a deck');
+    document.getElementById('draftInfo').textContent=opts.info||'Each deck plays very differently.';
+    const box=document.getElementById('draftCards');
+    box.innerHTML='';
+    for(const key of Object.keys(DECKS)){
+      const dk=DECKS[key];
+      const el=document.createElement('div');
+      el.className='dcard nostat';
+      el.innerHTML='<div class="dnm">'+dk.name+'</div><div class="dty">'+dk.cards.length+' cards</div>'+
+        '<div class="dtx">'+dk.blurb+'</div>';
+      el.addEventListener('click',()=>{overlay.classList.add('hidden');res(key);});
+      box.appendChild(el);
+    }
+    document.getElementById('draftDeck').textContent='';
+  });
+}
+const HCAPS=[{n:-3,lbl:'Gentle'},{n:-2,lbl:'Easy'},{n:-1,lbl:'Soft'},{n:0,lbl:'Even'},
+             {n:1,lbl:'Tough'},{n:2,lbl:'Harsh'},{n:3,lbl:'Brutal'}];
+/* three-player formats. teams[i] is the side seat i fights for. */
+const FORMATS=[
+  {key:'ffa',   name:'Free-for-all',      teams:[0,1,2],
+   blurb:'Three separate sides. Everyone is your enemy, and the first side four Teece ahead of the next best wins.'},
+  {key:'withAI',name:'You and one computer', teams:[0,0,1],
+   blurb:'You and the first computer fight as one side against the second. Allies never damage each other and win together.'},
+  {key:'vsBoth',name:'You against both',  teams:[0,1,1],
+   blurb:'Both computers are allied against you. Hardest of the three, and the reason the difficulty rating goes below zero.'}
+];
+function pickFormat(){
+  return new Promise(res=>{
+    const overlay=document.getElementById('draftOverlay');
+    overlay.classList.remove('hidden');
+    hideHcapRow();
+    document.getElementById('draftTitle').textContent='Three players: choose the sides';
+    document.getElementById('draftInfo').textContent='Four by four board, three seats, one Teece per turn each.';
+    const box=document.getElementById('draftCards');
+    box.innerHTML='';
+    document.getElementById('draftDeck').textContent='';
+    for(const f of FORMATS){
+      const el=document.createElement('div');
+      el.className='dcard nostat';
+      el.innerHTML='<div class="dnm">'+f.name+'</div><div class="dty">'+
+        (f.teams[0]===f.teams[1]?'2 v 1':(f.teams[1]===f.teams[2]?'1 v 2':'every seat alone'))+
+        '</div><div class="dtx">'+f.blurb+'</div>';
+      el.addEventListener('click',()=>{overlay.classList.add('hidden');res(f);});
+      box.appendChild(el);
+    }
+  });
+}
+function hcapLabel(n){return (n>0?'+':'')+n;}
+function pickHandicap(){
+  return new Promise(res=>{
+    const overlay=document.getElementById('draftOverlay');
+    overlay.classList.remove('hidden');
+    document.getElementById('draftTitle').textContent='Difficulty';
+    document.getElementById('draftInfo').textContent=
+      'Every Teece the computer fields gets this on all four sides, tokens included. '+
+      'Minus weakens it, plus strengthens it. A side never falls below zero, so a penalty can never kill outright.';
+    document.getElementById('draftCards').innerHTML='';
+    document.getElementById('draftDeck').textContent='';
+    const row=document.getElementById('hcapRow');
+    row.classList.remove('hidden');
+    row.innerHTML='';
+    for(const h of HCAPS){
+      const b=document.createElement('button');
+      b.className='hcap'+(h.n===0?' even':(h.n<0?' easy':' hard'));
+      b.innerHTML='<span class="hn">'+hcapLabel(h.n)+'</span><span class="hl">'+h.lbl+'</span>';
+      b.addEventListener('click',()=>{hideHcapRow();overlay.classList.add('hidden');res(h.n);});
+      row.appendChild(b);
+    }
+  });
+}
+async function humanDraftInto(p,deck,queue,count){
+  const start=deck.length;
+  for(let k=0;k<count;k++){
+    const last=k===count-1;
+    const noTeece=!deck.some(id=>CARDS[id].type==='teece');
+    const offer=buildOffer(queue,last&&noTeece);
+    const pick=await draftPick(p,offer,start+k);
+    deck.push(pick);
+    if(G_DRAFT)G_DRAFT.decks[p]=deck;
+  }
+  return deck;
+}
+async function humanDraftDeck(p){
+  return humanDraftInto(p,[],shuffle(POOL.slice()),20);
+}
+/* ============ rendering ============ */
+function renderBoard(){
+  const b=document.getElementById('board');
+  b.innerHTML='';
+  for(let i=0;i<BN;i++){
+    const cell=document.createElement('div');
+    cell.className='cell';
+    if(G.pending&&G.pending.kind==='cell'&&G.pending.cells.indexOf(i)>=0){cell.classList.add('target');}
+    if(G.detailLock===i)cell.classList.add('locked');
+    const an=G.anim&&G.anim.cells.indexOf(i)>=0?G.anim.cls:null;
+    if(an==='zap')cell.classList.add('zap');
+    cell.innerHTML='';
+    const bg=G.board[i].ground;
+    if(bg){
+      const gd=CARDS[bg.cardId];
+      const cls=gd.gmod>0?'bgplus':(gd.gmod<0?'bgminus':'bgutil');
+      cell.innerHTML+='<div class="bglayer '+cls+'">'+gd.name+'</div>';
+    }
+    const mine=G.board[i].mine;
+    if(mine)cell.innerHTML+='<div class="mineMark m'+mine.owner+'">⚠</div>';
+    const t=G.board[i].teece;
+    if(t){
+      const s=effSides(G.board,i),kws=kwOf(G.board,i),aul=actsOf(G.board,i);
+      const tp=document.createElement('div');
+      tp.className='teece o'+t.owner+((an==='dying'||an==='placed')?' '+an:'');
+      tp.innerHTML='<div class="nm">'+DEF(t).name+'</div>'+
+        '<div class="s s0 '+(s[0]>7?'up':'')+(s[0]<3?'down':'')+'">'+s[0]+'</div>'+
+        '<div class="s s1 '+(s[1]>7?'up':'')+(s[1]<3?'down':'')+'">'+s[1]+'</div>'+
+        '<div class="s s2 '+(s[2]>7?'up':'')+(s[2]<3?'down':'')+'">'+s[2]+'</div>'+
+        '<div class="s s3 '+(s[3]>7?'up':'')+(s[3]<3?'down':'')+'">'+s[3]+'</div>';
+      if(t.equips.length)tp.innerHTML+='<div class="eq">E'+t.equips.length+'</div>';
+      const hasActs=t.owner===G.turn&&aul.some(e=>actAvailable(t,e));
+      if(hasActs)tp.innerHTML+='<div class="actdot"></div>';
+      const kwd=kws.slice(0,2).map(k=>k[0].toUpperCase()).join('');
+      if(kwd)tp.innerHTML+='<div class="kwl">'+kwd+'</div>';
+      const dv=defOf(G.board,i);
+      const tmr=DEF(t).timer;
+      const left=tmr&&!t.transformed?Math.max(0,tmr.turns-(t.age||0)):0;
+      if(left>0)tp.innerHTML+='<div class="shield">'+left+' to go</div>';
+      else if(dv>0)tp.innerHTML+='<div class="shield">&#9679; '+dv+'</div>';
+      else if(t.isToken)tp.innerHTML+='<div class="tok">token</div>';
+      tp.addEventListener('click',e=>{
+        if(!HAS_DOM||G.over)return;
+        if(G.pending)return;
+        if(e&&e.stopPropagation)e.stopPropagation();
+        G.detailLock=(G.detailLock===i)?null:i;
+        G.detailHover=null;
+        render();
+      });
+      tp.addEventListener('mouseenter',()=>{if(G.detailLock==null){G.detailHover=i;showDetail(i);}});
+      tp.addEventListener('mouseleave',()=>{if(G.detailLock==null&&G.detailHover===i){G.detailHover=null;showDetail(null);}});
+      cell.appendChild(tp);
+    }
+    cell.addEventListener('click',async()=>{
+      if(G.pending&&G.pending.kind==='cell'&&G.pending.cells.indexOf(i)>=0){
+        resolvePending(i);
+        return;
+      }
+      if(!G.pending&&!G.board[i].teece&&G.detailLock!=null){G.detailLock=null;render();}
+    });
+    cell.addEventListener('mouseenter',()=>{
+      if(G.detailLock==null&&!G.board[i].teece){G.detailHover=i;showDetail(i);}
+    });
+    cell.addEventListener('mouseleave',()=>{
+      if(G.detailLock==null&&G.detailHover===i){G.detailHover=null;showDetail(null);}
+    });
+    b.appendChild(cell);
+  }
+}
+function showDetail(i){
+  const d=document.getElementById('detail');
+  if(i==null){d.innerHTML='<h2>Detail</h2><div class="dt">Hover a card, or click one of your Teece to select it and use its abilities.</div>';return;}
+  const t=G.board[i].teece;
+  if(!t){
+    d.innerHTML='<h2>Detail</h2>';
+    const bg=G.board[i].ground,mn=G.board[i].mine;
+    if(bg)d.innerHTML+='<div class="dn">'+CARDS[bg.cardId].name+'</div><div class="dt">'+CARDS[bg.cardId].text+'</div>';
+    if(mn)d.innerHTML+='<div class="dt">A Mine is buried here. The next Teece to enter gets -2.</div>';
+    if(!bg&&!mn)d.innerHTML+='<div class="dt">Empty.</div>';
+    return;
+  }
+  const cd=DEF(t);
+  const locked=G.detailLock===i;
+  let html=(locked?'<div class="dlock">Selected</div>':'')+
+    '<div class="dn">'+nm(t)+'</div><div class="dt">'+cd.text+'</div>';
+  const kws=kwOf(G.board,i);
+  if(kws.length)html+='<div class="dt" style="color:var(--gold)">'+kws.join(', ')+'</div>';
+  const dfv=defOf(G.board,i);
+  if(dfv>0)html+='<div class="dt" style="color:var(--gold)">Defence '+dfv+'</div>';
+  const tm=DEF(t).timer;
+  if(tm)html+='<div class="dt" style="color:var(--gold)">'+(t.transformed?'Fully grown.':
+    'Becomes '+tm.sides.join('/')+' in '+Math.max(0,tm.turns-(t.age||0))+' more of your turns.')+'</div>';
+  if(DEF(t).tick)html+='<div class="dt" style="color:var(--gold)">Ticks '+sgn(DEF(t).tick.n)+' each of your turns.</div>';
+
+  if(t.equips.length){
+    html+='<div class="dstats" style="color:var(--gold)">Equips:</div>';
+    for(const e of t.equips)html+='<div class="dstats" style="font-size:11px">'+CARDS[e.cardId].name+'</div>';
+  }
+  d.innerHTML=html;
+  if(locked){
+    const un=document.createElement('button');
+    un.className='btn abtn';un.textContent='Deselect';
+    un.addEventListener('click',()=>{G.detailLock=null;render();showDetail(null);});
+    d.appendChild(un);
+  }
+  const acts=t.owner===G.turn?actsOf(G.board,i):[];
+  for(const ent of acts){
+    const av=actAvailable(t,ent)&&!G.pending&&!G.over;
+    const btn=document.createElement('button');
+    btn.className='btn abtn'+(av?' primary':'');
+    btn.textContent=ent.act.name+(actAvailable(t,ent)?'':' (used)');
+    btn.disabled=!av;
+    btn.addEventListener('click',()=>{runAct(G.turn,i,ent);});
+    d.appendChild(btn);
+  }
+}
+function handSlot(p){
+  if(p===0)return document.getElementById('myHand');
+  const box=document.getElementById('oppHands');
+  let el=document.getElementById('hand'+p);
+  if(!el){el=document.createElement('div');el.className='handrow';el.id='hand'+p;box.appendChild(el);}
+  return el;
+}
+function syncHandSlots(){
+  const box=document.getElementById('oppHands');
+  if(!box)return;
+  const want=[];for(let p=1;p<PLAYERS();p++)want.push('hand'+p);
+  for(const child of Array.from(box.children))if(want.indexOf(child.id)<0)child.remove();
+  for(let p=1;p<PLAYERS();p++)handSlot(p);
+}
+function renderHand(p){
+  const pl=G.players[p],h=handSlot(p);
+  if(!h)return;
+  h.innerHTML='<div class="handlbl">'+pname(p)+' hand</div>';
+  for(let i=0;i<pl.hand.length;i++){
+    const id=pl.hand[i],cd=CARDS[id];
+    const card=document.createElement('div');
+    card.className='card playable t-'+cd.type;
+    if(p!==G.turn||G.teecePlayed&&cd.type==='teece'||G.over)card.classList.add('dim');
+    if(cd.type==='teece'){
+      card.innerHTML='<div class="hs hs0">'+cd.sides[0]+'</div>'+
+        '<div class="hs hs1">'+cd.sides[1]+'</div>'+
+        '<div class="hs hs2">'+cd.sides[2]+'</div>'+
+        '<div class="hs hs3">'+cd.sides[3]+'</div>'+
+        '<div class="hcn cn">'+cd.name+'</div>';
+      if(cd.handDiscard){
+        const db=document.createElement('button');
+        db.className='discardBtn';
+        db.type='button';
+        db.textContent='Discard';
+        db.title='Discard '+cd.name+' from hand for its effect, instead of playing it.';
+        db.disabled=(p!==G.turn||G.over||!!G.pending);
+        db.addEventListener('click',(e)=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)playHandDiscard(p,i);});
+        card.appendChild(db);
+      }
+    }else{
+      card.innerHTML='<div class="ct">'+cd.type+'</div><div class="cn">'+cd.name+'</div><div class="cs">'+cd.text.split('\n')[0]+'</div>';
+    }
+    card.addEventListener('click',async()=>{if(p===G.turn&&!G.over)await playFromHand(p,i);});
+    card.addEventListener('mouseenter',()=>{if(G.detailLock==null){G.detailHover='h'+p+i;showDetailCard(id);}});
+    card.addEventListener('mouseleave',()=>{if(G.detailLock==null&&G.detailHover==='h'+p+i){G.detailHover=null;showDetail(null);}});
+    h.appendChild(card);
+  }
+}
+function showDetailCard(id){
+  const cd=CARDS[id],d=document.getElementById('detail');
+  let html='<div class="dn">'+cd.name+'</div><div class="dt">'+cd.text+'</div>';
+
+  d.innerHTML=html;
+}
+function renderCounts(){
+  const c=document.getElementById('counts');
+  c.innerHTML='';
+  const teamed=teamsInPlay().some(tm=>seatsOnTeam(tm).length>1);
+  for(let p=0;p<PLAYERS();p++){
+    const lc=realCount(p),field=livingCount(p),hand=G.players[p].hand.length,deck=G.players[p].deck.length;
+    const tag=teamed?' <span class="teamtag">side '+(teamOf(p)+1)+'</span>':'';
+    const out=seatAlive(p)?'':' <span class="teamtag">out</span>';
+    c.innerHTML+='<div><span class="dot d'+p+'"></span>'+pname(p)+tag+out+'</div>'+
+      '<div>'+field+' fielded ('+lc+' count)</div>'+
+      '<div>'+hand+' hand · '+deck+' deck'+(deck<=2?' (!)':'')+' · '+G.players[p].grave.length+' grave</div>';
+  }
+}
+function renderLog(){
+  const l=document.getElementById('log');
+  l.innerHTML=G.log.map(m=>'<div>'+m+'</div>').join('');
+}
+function renderPrompt(){
+  const pb=document.getElementById('promptBar'),pd=G.pending;
+  pb.classList.toggle('hot',!!pd);
+  if(!pd){pb.innerHTML='<span class="msg">&nbsp;</span>';return;}
+  pb.innerHTML='<span class="msg"></span>';
+  pb.firstChild.textContent=pd.msg;
+  const add=(lbl,val)=>{
+    const b=document.createElement('button');
+    b.className='btn';b.textContent=lbl;
+    b.addEventListener('click',()=>resolvePending(val));
+    pb.appendChild(b);
+  };
+  if(pd.kind==='cell'){
+    if(pd.opt.cancel)add('Cancel','CANCEL');
+    if(pd.opt.skip)add('Skip',null);
+  }else if(pd.kind==='opt'){
+    for(const o of pd.opts)add(o.lbl,o.v);
+  }
+}
+function renderActionBar(){
+  const ab=document.getElementById('actionBar');
+  if(!ab)return;
+  const i=G.detailLock;
+  const t=i!=null?G.board[i].teece:null;
+  if(t==null||G.over){ab.classList.add('hidden');ab.innerHTML='';return;}
+  ab.classList.remove('hidden');
+  ab.innerHTML='';
+  const who=document.createElement('span');
+  who.className='who';who.textContent=nm(t);
+  ab.appendChild(who);
+  const acts=t.owner===G.turn?actsOf(G.board,i):[];
+  if(!acts.length){
+    const n=document.createElement('span');
+    n.className='none';
+    n.textContent=t.owner===G.turn?'No abilities.':'Enemy Teece.';
+    ab.appendChild(n);
+  }
+  for(const ent of acts){
+    const usable=actAvailable(t,ent);
+    const av=usable&&!G.pending;
+    const btn=document.createElement('button');
+    btn.className='btn'+(av?' primary':'');
+    btn.textContent=ent.act.name+(usable?'':' (used)');
+    btn.disabled=!av;
+    btn.addEventListener('click',()=>{runAct(G.turn,i,ent);});
+    ab.appendChild(btn);
+  }
+  const un=document.createElement('button');
+  un.className='btn';un.textContent='Deselect';
+  un.addEventListener('click',()=>{G.detailLock=null;G.detailHover=null;render();showDetail(null);});
+  ab.appendChild(un);
+}
+function render(){
+  if(!HAS_DOM||!G)return;
+  syncHandSlots();
+  renderBoard();
+  for(let p=0;p<PLAYERS();p++)renderHand(p);
+  renderCounts();renderLog();renderPrompt();renderActionBar();
+  const bd=document.getElementById('board');
+  bd.style.setProperty('--bw',BW);
+  bd.style.setProperty('--cs',(BW>=4?'86px':'110px'));
+  bd.style.setProperty('--cs-sm',(BW>=4?'70px':'96px'));
+  document.getElementById('modeLbl').textContent=
+    G.mode==='rogue'?'roguelike · level '+G.level:
+    G.mode==='three'?((G.formatName||'three players')+' \u00b7 four by four'+
+      (G.enemyBonus?' \u00b7 enemy '+hcapLabel(G.enemyBonus):'')):
+    (G.mode==='deck'?(G.deckNames?G.deckNames[0]+' vs '+G.deckNames[1]+
+      (G.enemyBonus?' \u00b7 enemy '+hcapLabel(G.enemyBonus):''):'deck mode'):
+    (G.mode==='t100'?'draft mode':'three by three'));
+  if(!G.over){
+    const t=G.turn,d=document.getElementById('turnInfo');
+    d.innerHTML='<span class="dot d'+t+'"></span><strong>'+pname(t)+"'s turn</strong>";
+    document.getElementById('endTurn').disabled=false;
+  }else{
+    document.getElementById('endTurn').disabled=true;
+  }
+  if(G.detailLock!=null)showDetail(G.detailLock);
+  else if(G.detailHover==null)showDetail(null);
+}
+function draftName(p){
+  if(!G_DRAFT)return 'Player '+(p+1);
+  return G_DRAFT.vsAI?'You':'Player '+(p+1);
+}
+function renderDraft(p,offer,k,res){
+  const overlay=document.getElementById('draftOverlay');
+  overlay.classList.remove('hidden');
+  hideHcapRow();
+  const total=(G_DRAFT&&G_DRAFT.total)||20;
+  document.getElementById('draftTitle').textContent=((G_DRAFT&&G_DRAFT.title)||'Draft')+' — '+draftName(p)+' (pick '+(k+1)+' of '+total+')';
+  document.getElementById('draftInfo').textContent=(G_DRAFT&&G_DRAFT.info)||'Choose one card for your deck.';
+  const cards=document.getElementById('draftCards');
+  cards.innerHTML='';
+  for(const id of offer){
+    const cd=CARDS[id];
+    const dc=document.createElement('div');
+    dc.className='dcard t-'+cd.type+(cd.type==='teece'?'':' nostat');
+    if(cd.type==='teece'){
+      dc.innerHTML='<div class="ds ds0">'+cd.sides[0]+'</div>'+
+        '<div class="ds ds1">'+cd.sides[1]+'</div>'+
+        '<div class="ds ds2">'+cd.sides[2]+'</div>'+
+        '<div class="ds ds3">'+cd.sides[3]+'</div>';
+    }
+    dc.innerHTML+='<div class="dnm">'+cd.name+'</div>';
+    if(cd.kw)dc.innerHTML+='<div class="dkw">'+cd.kw.join(' / ')+'</div>';
+    dc.innerHTML+='<div class="dty">'+cd.type+'</div><div class="dtx">'+cd.text.split('\n')[0]+'</div>';
+    dc.addEventListener('click',()=>{res(id);overlay.classList.add('hidden');});
+    cards.appendChild(dc);
+  }
+  const deck=document.getElementById('draftDeck');
+  const drafted=(G_DRAFT&&G_DRAFT.decks[p])||[];
+  deck.textContent=drafted.length?'Drafted so far: '+drafted.map(id=>CARDS[id].name).join(', '):'';
+}
+/* ============ boot & mode select ============ */
+async function start(mode,vsAI){
+  if(!HAS_DOM)return;
+  EPOCH++;                      /* abandon anything still running */
+  G=null;
+  try{ await startInner(mode,vsAI); }
+  catch(err){
+    const pb=document.getElementById('promptBar');
+    if(pb){pb.classList.add('hot');pb.textContent='Error starting game: '+err.message;}
+    throw err;
+  }
+}
+async function startInner(mode,vsAI){
+  document.getElementById('startOverlay').classList.add('hidden');
+  if(mode==='rogue'){
+    R={level:1,deck:[],queue:shuffle(POOL.slice()),oppDeck:[]};
+    await rogueLevel(false);
+    return;
+  }
+  if(mode==='three'){
+    const fmt=vsAI?await pickFormat():{key:'ffa',name:'Free-for-all',teams:[0,1,2]};
+    const keys=[];
+    keys.push(await pickDeck(vsAI?'You':'Player 1',
+      {title:vsAI?'Your deck':'Player 1: choose a deck'}));
+    for(let seat=1;seat<3;seat++){
+      const who=vsAI?('Computer '+seat):('Player '+(seat+1));
+      const rel=vsAI?(fmt.teams[seat]===fmt.teams[0]?' (your ally)':' (against you)'):'';
+      keys.push(await pickDeck(who,{title:'Choose '+who+'\u2019s deck'+rel,
+        info:'Any deck, including one already chosen.'}));
+    }
+    const hcap=vsAI?await pickHandicap():0;
+    G=newState('three',vsAI,keys.map(k=>DECKS[k].cards.slice()),
+      {seats:3,width:4,teams:fmt.teams,enemyBonus:hcap,aiSeats:vsAI?[1,2]:[]});
+    G.deckNames=keys.map(k=>DECKS[k].name);
+    for(let i=0;i<3;i++)G.players[i].noDeckOut=(keys[i]==='berserker');
+    G.formatName=fmt.name;
+    log(fmt.name+': '+keys.map((k,i)=>pname(i)+' brings '+DECKS[k].name).join(', ')+
+      (hcap?'. Every Teece against you carries '+hcapLabel(hcap)+'.':'.'));
+    render();
+    await startTurn();
+    return;
+  }
+  if(mode==='deck'){
+    const mine=await pickDeck(vsAI?'You':'Player 1');
+    let theirs,hcap=0;
+    if(vsAI){
+      theirs=await pickDeck('Computer',{title:'Choose the computer\u2019s deck',
+        info:'Pick what you want to play against. Choosing your own deck for a mirror match is allowed.'});
+      hcap=await pickHandicap();
+    }else theirs=await pickDeck('Player 2');
+    G=newState('deck',vsAI,[DECKS[mine].cards.slice(),DECKS[theirs].cards.slice()],{enemyBonus:hcap});
+    G.deckNames=[DECKS[mine].name,DECKS[theirs].name];
+    G.players[0].noDeckOut=(mine==='berserker');
+    G.players[1].noDeckOut=(theirs==='berserker');
+    log(DECKS[mine].name+' faces '+DECKS[theirs].name+
+      (hcap?', and every enemy Teece carries '+hcapLabel(hcap)+' on all four sides.':'.'));
+    render();
+    await startTurn();
+    return;
+  }
+  let decks=null;
+  if(mode==='t100'){
+    G_DRAFT={decks:[[],[]],vsAI};
+    const d0=await humanDraftDeck(0);
+    G_DRAFT.decks[0]=d0;
+    const d1=vsAI?aiDraftDeck():await humanDraftDeck(1);
+    G_DRAFT.decks[1]=d1;
+    document.getElementById('draftOverlay').classList.add('hidden');
+    decks=[d0,d1];
+  }
+  G=newState(mode,vsAI,decks);
+  render();
+  await startTurn();
+}
+function restart(){
+  if(G&&!G.over&&!confirm('Really restart?'))return;
+  EPOCH++;                      /* orphan any AI turn still in flight */
+  document.getElementById('endOverlay').classList.add('hidden');
+  document.getElementById('draftOverlay').classList.add('hidden');
+  document.getElementById('startOverlay').classList.remove('hidden');
+  G=null;G_DRAFT=null;R=null;
+  document.getElementById('board').innerHTML='';
+  document.getElementById('myHand').innerHTML='';
+  const oh=document.getElementById('oppHands');
+  if(oh)oh.innerHTML='';
+  buildGeometry(3);
+  document.getElementById('promptBar').innerHTML='<span class="msg">&nbsp;</span>';
+  document.getElementById('promptBar').classList.remove('hot');
+}
+if(HAS_DOM){
+  window.addEventListener('error',e=>{
+    const pb=document.getElementById('promptBar');
+    if(pb){pb.classList.add('hot');pb.textContent='Script error: '+(e.message||'unknown');}
+  });
+  document.getElementById('cAI').onclick=()=>start('classic',true);
+  document.getElementById('cHot').onclick=()=>start('classic',false);
+  document.getElementById('tAI').onclick=()=>start('t100',true);
+  document.getElementById('tHot').onclick=()=>start('t100',false);
+  document.getElementById('rAI').onclick=()=>start('rogue',true);
+  document.getElementById('dAI').onclick=()=>start('deck',true);
+  document.getElementById('p3AI').onclick=()=>start('three',true);
+  document.getElementById('p3Hot').onclick=()=>start('three',false);
+  document.getElementById('dHot').onclick=()=>start('deck',false);
+  document.getElementById('endTurn').onclick=endTurn;
+  document.getElementById('restart').onclick=restart;
+  document.getElementById('endRestart').onclick=restart;
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+      if(G&&G.pending&&(G.pending.opt&&G.pending.opt.cancel||G.pending.opt&&G.pending.opt.skip)){
+        resolvePending(G.pending.opt.cancel?'CANCEL':null);
+      }
+      if(G&&G.detailLock!=null){G.detailLock=null;G.detailHover=null;render();showDetail(null);}
+    }
+  });
+  render();
+}
+/* ============ exports for harness ============ */
+if(typeof module!=='undefined'){
+  module.exports={newState,playFromHand,endTurn,runAct,CARDS,POOL,CLASSIC,DECKS,makeTeece,defOf,canTarget,processDeath,resolveCombat,
+    startTurn,getG:()=>G,setG:s=>{G=s;},actsOf,actAvailable,effSides,scanDeaths,render,
+    aiDraftDeck,aiTurn,realCount,totalTeece,hcapLabel,HCAPS,
+    getGeom:()=>({BW,BN,ADJ,DIAG,CN}),buildGeometry,
+    teamOf,sameTeam,teamsInPlay,seatsOnTeam,teamReal,teamTotal,seatAlive,nextLiveSeat,FORMATS,teamName,
+    runSteps,fireMove,moveT,applyModT,hasKw,putTeece,actsOf,boardValue,
+    modalCtl,fireModal,setModalNext,kwOf,playTeece,offerReveal,groundFlag,enemySeats,
+    playHandDiscard,playFromHand};
+}
+</script>
+</body>
+</html>
