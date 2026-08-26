@@ -22,15 +22,6 @@ body{
   background:radial-gradient(120% 90% at 50% 0%, #241d15 0%, var(--table) 60%),var(--table);
   color:var(--cream); font-family:var(--body); font-size:14px;-webkit-font-smoothing:antialiased;
 }
-/* Deck-specific background colors */
-body[data-deck="classic"]{background:radial-gradient(120% 90% at 50% 0%, #1a2015 0%, #1a3020 60%),#0f1810;}
-body[data-deck="teece100"]{background:radial-gradient(120% 90% at 50% 0%, #201515 0%, #2a1515 60%),#150a0a;}
-body[data-deck="berserker"]{background:radial-gradient(120% 90% at 50% 0%, #2d1a1a 0%, #3d1515 60%),#1a0f0f;}
-body[data-deck="rock"]{background:radial-gradient(120% 90% at 50% 0%, #1a1a2d 0%, #1a1a3d 60%),#0f0f1a;}
-body[data-deck="ogre"]{background:radial-gradient(120% 90% at 50% 0%, #2a1f0f 0%, #3a2f1a 60%),#1a140a;}
-body[data-deck="robot"]{background:radial-gradient(120% 90% at 50% 0%, #1a2a2d 0%, #1a3a3d 60%),#0f1a1f;}
-body[data-deck="gadget"]{background:radial-gradient(120% 90% at 50% 0%, #2d1a2d 0%, #3d1a3d 60%),#1a0f1a;}
-body[data-deck="time"]{background:radial-gradient(120% 90% at 50% 0%, #2d2d1a 0%, #3d3d1a 60%),#1a1a0f;}
 button{font-family:var(--body);cursor:pointer}
 button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
@@ -75,28 +66,38 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card.playable:hover{transform:translateY(-3px);box-shadow:0 5px 0 rgba(0,0,0,.4)}
 
 /* Deck-specific card colors */
-body[data-deck="classic"] .card{background:#efe6d0;color:#241f18}
-body[data-deck="berserker"] .card{background:#8a2a2a;color:#f5e6e6;border-color:#5a1a1a}
-body[data-deck="berserker"] .card .kwl{color:#d4a4a4}
-body[data-deck="berserker"] .card .ct{color:#d4a4a4}
-body[data-deck="rock"] .card{background:#5a6b7a;color:#e8dcc8;border-color:#3a4b5a}
-body[data-deck="rock"] .card .kwl{color:#a4b4c4}
-body[data-deck="rock"] .card .ct{color:#a4b4c4}
-body[data-deck="ogre"] .card{background:#2d5a2d;color:#e8f0e8;border-color:#1a3a1a}
-body[data-deck="ogre"] .card .kwl{color:#8aae8a}
-body[data-deck="ogre"] .card .ct{color:#8aae8a}
-body[data-deck="robot"] .card{background:#4a6a8a;color:#e8eef5;border-color:#2a4a6a}
-body[data-deck="robot"] .card .kwl{color:#9ab4d4}
-body[data-deck="robot"] .card .ct{color:#9ab4d4}
-body[data-deck="gadget"] .card{background:#8a8a8a;color:#f5f5f5;border-color:#6a6a6a}
-body[data-deck="gadget"] .card .kwl{color:#d0d0d0}
-body[data-deck="gadget"] .card .ct{color:#d0d0d0}
-body[data-deck="time"] .card{background:#6b4a8a;color:#f0e8f8;border-color:#4a2a6a}
-body[data-deck="time"] .card .kwl{color:#c4a4d4}
-body[data-deck="time"] .card .ct{color:#c4a4d4}
-body[data-deck="teece100"] .card{background:#7a4a4a;color:#f0e8e8;border-color:#5a2a2a}
-body[data-deck="teece100"] .card .kwl{color:#d4a4a4}
-body[data-deck="teece100"] .card .ct{color:#d4a4a4}
+.card[data-card-deck="classic"]{background:#efe6d0;color:#241f18}
+.card[data-card-deck="berserker"]{background:#8a2a2a;color:#f5e6e6;border-color:#5a1a1a}
+.card[data-card-deck="berserker"] .kwl{color:#d4a4a4}
+.card[data-card-deck="berserker"] .ct{color:#d4a4a4}
+.card[data-card-deck="rock"]{background:#5a6b7a;color:#e8dcc8;border-color:#3a4b5a}
+.card[data-card-deck="rock"] .kwl{color:#a4b4c4}
+.card[data-card-deck="rock"] .ct{color:#a4b4c4}
+.card[data-card-deck="ogre"]{background:#2d5a2d;color:#e8f0e8;border-color:#1a3a1a}
+.card[data-card-deck="ogre"] .kwl{color:#8aae8a}
+.card[data-card-deck="ogre"] .ct{color:#8aae8a}
+.card[data-card-deck="robot"]{background:#4a6a8a;color:#e8eef5;border-color:#2a4a6a}
+.card[data-card-deck="robot"] .kwl{color:#9ab4d4}
+.card[data-card-deck="robot"] .ct{color:#9ab4d4}
+.card[data-card-deck="gadget"]{background:#8a8a8a;color:#f5f5f5;border-color:#6a6a6a}
+.card[data-card-deck="gadget"] .kwl{color:#d0d0d0}
+.card[data-card-deck="gadget"] .ct{color:#d0d0d0}
+.card[data-card-deck="time"]{background:#6b4a8a;color:#f0e8f8;border-color:#4a2a6a}
+.card[data-card-deck="time"] .kwl{color:#c4a4d4}
+.card[data-card-deck="time"] .ct{color:#c4a4d4}
+.card[data-card-deck="teece100"]{background:#7a4a4a;color:#f0e8e8;border-color:#5a2a2a}
+.card[data-card-deck="teece100"] .kwl{color:#d4a4a4}
+.card[data-card-deck="teece100"] .ct{color:#d4a4a4}
+
+/* Teece colors on the board */
+.teece[data-card-deck="berserker"]{background:#8a2a2a;color:#f5e6e6;border-color:#5a1a1a}
+.teece[data-card-deck="rock"]{background:#5a6b7a;color:#e8dcc8;border-color:#3a4b5a}
+.teece[data-card-deck="ogre"]{background:#2d5a2d;color:#e8f0e8;border-color:#1a3a1a}
+.teece[data-card-deck="robot"]{background:#4a6a8a;color:#e8eef5;border-color:#2a4a6a}
+.teece[data-card-deck="gadget"]{background:#8a8a8a;color:#f5f5f5;border-color:#6a6a6a}
+.teece[data-card-deck="time"]{background:#6b4a8a;color:#f0e8f8;border-color:#4a2a6a}
+.teece[data-card-deck="teece100"]{background:#7a4a4a;color:#f0e8e8;border-color:#5a2a2a}
+.teece[data-card-deck="classic"]{background:#efe6d0;color:#241f18}
 
 #board{display:grid;grid-template-columns:repeat(var(--bw,3),minmax(0,var(--cs,110px)));
   grid-auto-rows:var(--cs,110px);gap:8px}
@@ -334,6 +335,14 @@ async function loadDeckData(){
   }catch(e){console.error('Failed to load decks.json:',e);}
 }
 if(HAS_DOM)loadDeckData();
+
+function getCardDeck(cardId){
+  for(const [key,deck] of Object.entries(DECKS)){
+    if(deck.cards.includes(cardId))return key;
+  }
+  if(CLASSIC.includes(cardId))return 'classic';
+  return 'teece100';
+}
 
 /* fx vocabulary:
    mod{who:self|ally|enemy|any|last, where:any|rowcol|adj, n, dur:perm|temp, may, move:'any1', notSelf}
@@ -3589,6 +3598,7 @@ function renderBoard(){
       const s=effSides(G.board,i),kws=kwOf(G.board,i),aul=actsOf(G.board,i);
       const tp=document.createElement('div');
       tp.className='teece o'+t.owner+((an==='dying'||an==='placed')?' '+an:'');
+      tp.setAttribute('data-card-deck',getCardDeck(t.cardId));
       tp.innerHTML='<div class="nm">'+DEF(t).name+'</div>'+
         '<div class="s s0 '+(s[0]>7?'up':'')+(s[0]<3?'down':'')+'">'+s[0]+'</div>'+
         '<div class="s s1 '+(s[1]>7?'up':'')+(s[1]<3?'down':'')+'">'+s[1]+'</div>'+
@@ -3702,6 +3712,7 @@ function renderHand(p){
     const id=pl.hand[i],cd=CARDS[id];
     const card=document.createElement('div');
     card.className='card playable t-'+cd.type;
+    card.setAttribute('data-card-deck',getCardDeck(id));
     if(p!==G.turn||G.teecePlayed&&cd.type==='teece'||G.over)card.classList.add('dim');
     if(cd.type==='teece'){
       card.innerHTML='<div class="hs hs0">'+cd.sides[0]+'</div>'+
@@ -3813,13 +3824,6 @@ function render(){
   bd.style.setProperty('--bw',BW);
   bd.style.setProperty('--cs',(BW>=4?'86px':'110px'));
   bd.style.setProperty('--cs-sm',(BW>=4?'70px':'96px'));
-  let deckAttr='classic';
-  if(G.mode==='rogue')deckAttr='classic';
-  else if(G.mode==='three'&&G.deckNames)deckAttr=G.deckNames[0].toLowerCase();
-  else if(G.mode==='deck'&&G.deckNames)deckAttr=G.deckNames[0].toLowerCase();
-  else if(G.mode==='t100')deckAttr='teece100';
-  else if(G.mode==='classic')deckAttr='classic';
-  document.body.setAttribute('data-deck',deckAttr);
   document.getElementById('modeLbl').textContent=
     G.mode==='rogue'?'roguelike · level '+G.level:
     G.mode==='three'?((G.formatName||'three players')+' \u00b7 four by four'+
