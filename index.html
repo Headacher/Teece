@@ -27,6 +27,8 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outl
 
 #app{display:grid;grid-template-columns:1fr 300px;gap:18px;max-width:1120px;margin:0 auto;padding:16px;min-height:100%}
 @media(max-width:880px){#app{grid-template-columns:1fr}}
+#oppHands.collapsed{display:none}
+#log.collapsed{display:none}
 header{grid-column:1/-1;display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding-bottom:8px}
 header h1{font-family:var(--disp);font-size:34px;font-weight:400;margin:0;letter-spacing:.02em}
 header .sub{color:var(--muted);font-size:12px;letter-spacing:.16em;text-transform:uppercase}
@@ -231,6 +233,10 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
     <span class="sub" id="modeLbl">three by three</span>
   </header>
   <main>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h3 style="margin:0">Opponent Hands</h3>
+      <button class="btn" id="toggleOppHands" style="padding:4px 8px;font-size:12px">Hide</button>
+    </div>
     <div id="oppHands"></div>
     <div id="promptBar"><span class="msg">&nbsp;</span></div>
     <div id="board"></div>
@@ -247,7 +253,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
       </div>
     </div>
     <div class="panel" id="detail"><h2>Detail</h2><div class="dt">Hover or tap a card. Click one of your Teece to use its abilities.</div></div>
-    <div class="panel"><h2>Log</h2><div id="log"></div></div>
+    <div class="panel" id="logPanel"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Log</h2><button class="btn" id="toggleLog" style="padding:4px 8px;font-size:12px">Hide</button></div><div id="log"></div></div>
   </aside>
 </div>
 
@@ -342,6 +348,13 @@ function getCardDeck(cardId){
   }
   if(CLASSIC.includes(cardId))return 'classic';
   return 'teece100';
+}
+
+function canPlay(p,cardId){
+  if(!G||p!==G.turn||G.over)return false;
+  const cd=CARDS[cardId];
+  if(cd.type==='teece'&&G.teecePlayed)return false;
+  return true;
 }
 
 /* fx vocabulary:
@@ -2933,7 +2946,24 @@ async function runAct(p,cell,ent){
 }
 /* ============ turn flow ============ */
 async function endTurn(){
-  if(!G||G.over||G.pending)return;
+  if(!G||G.over||G.pending||G._endingTurn)return;
+  const pl=G.players[G.turn];
+  const controlsTeece=G.board.some(c=>c.teece&&c.teece.owner===G.turn);
+  const playableCards=pl.hand.filter(id=>canPlay(G.turn,id));
+  if(!controlsTeece&&playableCards.length>0){
+    log('You must play a card when you control no Teece.');
+    return;
+  }
+  if(pl.hand.length>6){
+    log('Hand limit exceeded! Discarding down to 6...');
+    const toDiscard=pl.hand.length-6;
+    for(let i=0;i<toDiscard;i++){
+      const idx=Math.floor(Math.random()*pl.hand.length);
+      G.players[G.turn].grave.push(pl.hand[idx]);
+      pl.hand.splice(idx,1);
+    }
+  }
+  G._endingTurn=true;
   const ep=G.epoch;
   const p=G.turn;
   for(let i=0;i<BN;i++){
@@ -2970,6 +3000,7 @@ function checkStalemate(){
 }
 async function startTurn(){
   if(!G)return;
+  G._endingTurn=false;
   const ep=G.epoch;
   const p=G.turn,pl=G.players[p];
   for(let i=0;i<BN;i++){
@@ -3980,6 +4011,18 @@ if(HAS_DOM){
   document.getElementById('endTurn').onclick=endTurn;
   document.getElementById('restart').onclick=restart;
   document.getElementById('endRestart').onclick=restart;
+  document.getElementById('toggleOppHands').onclick=()=>{
+    const oh=document.getElementById('oppHands');
+    const btn=document.getElementById('toggleOppHands');
+    oh.classList.toggle('collapsed');
+    btn.textContent=oh.classList.contains('collapsed')?'Show':'Hide';
+  };
+  document.getElementById('toggleLog').onclick=()=>{
+    const log=document.getElementById('logPanel');
+    const btn=document.getElementById('toggleLog');
+    log.classList.toggle('collapsed');
+    btn.textContent=log.classList.contains('collapsed')?'Show':'Hide';
+  };
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'){
       if(G&&G.pending&&(G.pending.opt&&G.pending.opt.cancel||G.pending.opt&&G.pending.opt.skip)){
