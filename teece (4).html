@@ -341,6 +341,9 @@ const CARDS = {
  T4:{name:'Token',type:'teece',token:true,sides:[4,4,4,4],text:'Token. Cannot be sacrificed; never counts toward winning.'},
  TR:{name:'Rock Token',type:'teece',token:true,sides:[0,0,0,0],def:6,text:'Token with Defence 6. Cannot be sacrificed; never counts toward winning.'},
  TD:{name:'Drone',type:'teece',token:true,sides:[3,3,3,3],kw:['flying'],text:'Drone Token. Flying: once per your turn, move one space. Never counts toward winning.'},
+ TB:{name:'Bomblet',type:'teece',token:true,sides:[3,3,3,3],
+    text:'Token. When destroyed: adjacent Teece get -2. Cannot be sacrificed; never counts toward winning.',
+    onDeath:[{fx:'aoe',n:-2,dur:'perm'}]},
  /* ---- Teece 100 pool: the twenty-two you specified ---- */
  101:{name:'Enforcer',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice one fielded Teece to play.'},
  102:{name:'Grudge',type:'teece',sides:[8,8,8,8],text:'When destroyed: all adjacent enemies get +1.',
@@ -832,7 +835,61 @@ const CARDS = {
     text:'Move one of your Teece, then it gets +3 until end of turn.',
     cast:[{fx:'moveTarget',where:'any',who:'ally',thenMod:{n:3,dur:'temp'}}]},
  430:{name:'Landing Pad',type:'ground',gEndTurn:'TD',
-    text:'At the end of your turn, if this panel is empty, a Drone is built on it.'}
+    text:'At the end of your turn, if this panel is empty, a Drone is built on it.'},
+ /* ---- Bomb: area denial, mines, and turning the damage into a boost ---- */
+ 471:{name:'Blast Ward',type:'equip',mod:0,
+    text:'When the equipped Teece would lose attributes, it gains that many instead.',
+    grants:{invertLoss:true}},
+ 472:{name:'Siege Plating',type:'equip',mod:2,
+    text:'Equipped Teece gets +2 and Ranged. It cannot lose attributes.',
+    grants:{kw:['ranged','steadfast']}},
+ 473:{name:'Bomb Lob',type:'equip',mod:0,
+    text:'Once per your turn: select a Teece on the same row or column as the equipped Teece; give it and all Teece adjacent to it -4.',
+    grants:{act:[{name:'Bomb Lob',once:'turn',steps:[{fx:'modSplash',where:'rowcol',n:-4,dur:'perm'}]}]}},
+ 474:{name:'Nuke',type:'magic',text:'All Teece get -6 until the end of the turn.',
+    cast:[{fx:'mass',n:-6,dur:'temp'}]},
+ 475:{name:'Carpet Mines',type:'magic',
+    text:'Place 4 Mines on unoccupied panels. When a Teece plays or moves onto a Mine, remove it and give that Teece -2.',
+    cast:[{fx:'mineAuto',count:4}]},
+ 476:{name:'Frag Charge',type:'magic',text:'Select a Teece and all Teece adjacent to it; give them -3.',
+    cast:[{fx:'modSplash',n:-3,dur:'perm'}]},
+ 477:{name:'Cluster Bomb',type:'teece',sides:[2,4,6,8],
+    text:'When played: select all Teece on a 1x2 area of the board; give them -3.',
+    onPlay:[{fx:'areaMod',shape:'1x2',n:-3,dur:'perm'}]},
+ 478:{name:'Shrapnel Trooper',type:'teece',sides:[5,6,7,4],
+    text:'When destroyed: all adjacent Teece get -3.',
+    onDeath:[{fx:'aoe',n:-3,dur:'perm'}]},
+ 479:{name:'Bomblet Rack',type:'teece',sides:[4,6,5,7],
+    text:'Once per your turn: summon a 3/3/3/3 Bomblet. When it is destroyed, all adjacent Teece get -2.',
+    act:[{name:'Deploy Bomblet',once:'turn',steps:[{fx:'token',tok:'TB',count:1}]}]},
+ 480:{name:'Trench Sapper',type:'teece',sides:[5,5,5,6],
+    text:'Once per your turn: place a Mine on an unoccupied panel. When a Teece plays or moves onto it, remove it and give that Teece -2.',
+    act:[{name:'Lay Mine',once:'turn',steps:[{fx:'mine'}]}]},
+ 481:{name:'Carpet Bomber',type:'teece',sides:[1,1,9,9],
+    text:'When played: select a 2x3 area of the board; give them -1.',
+    onPlay:[{fx:'areaMod',shape:'2x3',n:-1,dur:'perm'}]},
+ 482:{name:'Demolitionist',type:'teece',sides:[8,7,2,3],
+    text:'When played: select all Teece on a 2x2 area of the board; give them -2.',
+    onPlay:[{fx:'areaMod',shape:'2x2',n:-2,dur:'perm'}]},
+ 483:{name:'Unstable Warhead',type:'teece',sides:[9,10,8,10],dieOnTarget:true,dieOnLoss:true,
+    text:'When targeted, or when this loses attributes: destroy this.'},
+ 484:{name:'Booby Trap',type:'teece',sides:[7,6,6,7],
+    text:'When played: lay a Mine underneath this Teece.',
+    onPlay:[{fx:'mineSelf'}]},
+ 485:{name:'Blast-Proof Bunker',type:'teece',sides:[6,6,6,6],kw:['steadfast'],
+    text:'Immune to negative attribute effects.'},
+ 486:{name:'Chain Charge',type:'teece',sides:[3,3,3,3],mineSplash:true,
+    text:'When played: lay 2 Mines. While this stands, whenever a Mine goes off, it also gives -2 to all adjacent Teece. When destroyed: lay 2 Mines.',
+    onPlay:[{fx:'mineAuto',count:2}],onDeath:[{fx:'mineAuto',count:2}]},
+ 487:{name:'Avatar of the Nuclear Apocalypse',type:'teece',sides:[20,20,20,20],sac:1,kw:['flying'],dieAtEndOfTurn:true,
+    text:'Sacrifice one fielded Teece to play. Flying. Destroy this at the end of the turn.'},
+ 488:{name:'Overcharged Warhead',type:'teece',sides:[10,15,10,5],sac:2,mineDoubleAll:true,
+    text:'Sacrifice two fielded Teece to play. When played: lay a Mine on every unoccupied panel. Doubles the negative attribute effects of all Mines. When another Teece is played: give it -2.',
+    onPlay:[{fx:'mineAuto',count:99}],onAnyPlay:{n:-2,dur:'perm'}},
+ 489:{name:'Unstable Ground',type:'ground',gDoubleNeg:true,
+    text:'A Teece on this panel that loses attributes loses double instead.'},
+ 490:{name:'Minefield',type:'ground',gmod:-2,gPlayMod:-4,gmove:-4,gMineKill:true,
+    text:'A Teece on this panel gets -2. A Teece that plays or moves onto it gets -4 more. If a Mine goes off on this panel, it destroys that Teece.'}
 };
 const CLASSIC=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
 const POOL=[];
@@ -842,6 +899,7 @@ for(let i=321;i<=340;i++)POOL.push(i);
 for(let i=351;i<=370;i++)POOL.push(i);
 for(let i=381;i<=400;i++)POOL.push(i);
 for(let i=411;i<=430;i++)POOL.push(i);
+for(let i=471;i<=490;i++)POOL.push(i);
 const DECKS={
   berserker:{name:'Berserker',cards:[301,302,303,304,305,306,307,308,309,310,311,312],
     blurb:'Twelve cards, every one of them overpowered. Win before you run dry: your own empty deck never loses you the game, only your opponent\'s does.'},
@@ -854,7 +912,9 @@ const DECKS={
   gadget:{name:'Gadget',cards:[441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460],
     blurb:'Almost every card asks you to choose a mode. The deck is built to cheat that choice \u2014 fire every mode at once, fire the chosen one twice, or switch modes off for both players entirely.'},
   time:{name:'Time',cards:[381,382,383,384,385,386,387,388,389,390,391,392,393,394,395,396,397,398,399,400],
-    blurb:'Cards that grow or rot on a clock. Every Teece ages at the start of your turn; some come of age into something far bigger, others decay every turn you keep them.'}
+    blurb:'Cards that grow or rot on a clock. Every Teece ages at the start of your turn; some come of age into something far bigger, others decay every turn you keep them.'},
+  bomb:{name:'Bomb',cards:[471,472,473,474,475,476,477,478,479,480,481,482,483,484,485,486,487,488,489,490],
+    blurb:'Crazy area-of-effect damage that risks blowing itself up too. Lay Mines to control the board, then turn the damage into a boost with Blast Ward.'}
 };
 const DEF=t=>CARDS[t.cardId];
 const isBossCard=id=>(CARDS[id].sac||0)>=2;
@@ -1155,9 +1215,18 @@ function putTeece(b,i,t,live){
     if(live)log(nm(t)+' arrives on a primed panel: '+sgn(pr.n)+'.');
   }
   if(b[i].mine){
-    for(let k=0;k<4;k++)t.perm[k]-=2;
     b[i].mine=null;
-    if(live)log('A Mine detonates under '+nm(t)+': -2.');
+    const dbl=b.some(c=>c.teece&&DEF(c.teece).mineDoubleAll);
+    const n=dbl?-4:-2;
+    applyModT(t,n,'perm');
+    if(live)log('A Mine detonates under '+nm(t)+': '+n+'.');
+    if(b.some(c=>c.teece&&DEF(c.teece).mineSplash)){
+      for(const j of ADJ[i]){
+        const o=b[j].teece;
+        if(o&&o.uid!==t.uid){applyModT(o,n,'perm');if(live)log(nm(o)+' catches the blast: '+n+'.');}
+      }
+    }
+    if(b[i].ground&&groundFlag(b[i].ground,'gMineKill'))forceDeath(t);
   }
 }
 function moveT(b,from,to,live){
@@ -1326,12 +1395,18 @@ function scanDeaths(b){
 }
 
 /* ============ live prompts ============ */
+function markTargetDeath(v){
+  if(v==null||v==='CANCEL')return v;
+  const t=G.board[v]&&G.board[v].teece;
+  if(t&&DEF(t).dieOnTarget)forceDeath(t);
+  return v;
+}
 function chooseCell(p,cells,msg,opt){
   opt=opt||{};
   if(isAIP(p)||!HAS_DOM){
-    return Promise.resolve(aiPickCell(cells,opt));
+    return Promise.resolve(aiPickCell(cells,opt)).then(markTargetDeath);
   }
-  return new Promise(res=>{G.pending={kind:'cell',p,cells,msg,opt,res};render();});
+  return new Promise(res=>{G.pending={kind:'cell',p,cells,msg,opt,res:v=>res(markTargetDeath(v))};render();});
 }
 function chooseOption(p,opts,msg){
   if(isAIP(p)||!HAS_DOM){
@@ -1345,8 +1420,15 @@ function resolvePending(val){
 }
 
 /* ============ fx executor ============ */
+function hasInvertLoss(t){
+  return t.equips.some(e=>{const g=CARDS[e.cardId].grants;return g&&g.invertLoss;});
+}
+function forceDeath(t){ if(t)for(let k=0;k<4;k++)t.perm[k]=-999; }
 function applyModT(t,n,dur){
-  if(n<0&&isSteadfast(t))return;
+  if(n<0){
+    if(isSteadfast(t))return;
+    if(hasInvertLoss(t))n=-n;
+  }
   if(G&&G.board){
     const ci=G.board.findIndex(c=>c.teece===t);
     if(ci>=0&&G.board[ci].ground){
@@ -1357,6 +1439,7 @@ function applyModT(t,n,dur){
   }
   const a=dur==='temp'?t.temp:t.perm;
   for(let k=0;k<4;k++)a[k]+=n;
+  if(n<0&&DEF(t).dieOnLoss)forceDeath(t);
 }
 function applyDef(t,n){t.defPerm=(t.defPerm||0)+n;}
 const sgn=n=>(n>0?'+':'')+n;
@@ -1668,6 +1751,65 @@ async function FXRUN(st,ctx){
     b[c].mine={owner:p};
     log(pname(p)+' places a Mine at the '+CN[c]+'.');
     await anim([c],'zap');
+    return;}
+  case 'mineAuto':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(!b[i].teece&&!b[i].mine)cands.push(i);
+    if(!cands.length){log('No room for Mines.');return;}
+    shuffle(cands);
+    const chosen=cands.slice(0,st.count||1);
+    for(const c of chosen)b[c].mine={owner:p};
+    log(pname(p)+' seeds '+chosen.length+' Mine'+(chosen.length===1?'':'s')+' across the board.');
+    await anim(chosen,'zap');
+    return;}
+  case 'mineSelf':{
+    const i=ctx.cell;
+    if(i==null||b[i].mine)return;
+    b[i].mine={owner:p};
+    log('A Mine is buried beneath '+nm(b[i].teece)+'.');
+    return;}
+  case 'modSplash':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;if(!t)continue;
+      if(st.where==='rowcol'&&ctx.cell!=null&&!(sameRow(i,ctx.cell)||sameCol(i,ctx.cell)))continue;
+      cands.push(i);
+    }
+    if(!cands.length){log('No valid target.');return;}
+    const c=await pickCell(cands,'Choose a Teece: '+sgn(st.n)+' to it and everything adjacent to it.',
+      (bb,i)=>{applyModT(bb[i].teece,st.n,st.dur);for(const j of ADJ[i])if(bb[j].teece)applyModT(bb[j].teece,st.n,st.dur);});
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const hit=[c];
+    applyModT(b[c].teece,st.n,st.dur);
+    log(nm(b[c].teece)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');
+    if(!sameTeam(b[c].teece.owner,p))noteTargeted(p);
+    for(const j of ADJ[c]){
+      const o=b[j].teece;if(!o)continue;
+      applyModT(o,st.n,st.dur);
+      hit.push(j);
+      log(nm(o)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');
+    }
+    ctx.last=c;
+    await anim(hit,'zap');
+    return;}
+  case 'areaMod':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(areaShapeCells(i,st.shape))cands.push(i);
+    if(!cands.length){log('No room for the blast.');return;}
+    const c=await pickCell(cands,'Choose where the blast lands: '+sgn(st.n)+' to everything caught in it.',
+      (bb,i)=>{for(const j of areaShapeCells(i,st.shape))if(bb[j].teece)applyModT(bb[j].teece,st.n,st.dur);});
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const cells=areaShapeCells(c,st.shape),hit=[];
+    for(const j of cells){
+      const o=b[j].teece;if(!o)continue;
+      applyModT(o,st.n,st.dur);
+      hit.push(j);
+      log(nm(o)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');
+    }
+    ctx.last=c;
+    await anim(hit,'zap');
     return;}
   case 'push':{
     const i=ctx.cell;
@@ -2740,6 +2882,10 @@ async function playTeece(p,handIdx){
     t.base=plan.rot===1?[bs[3],bs[0],bs[1],bs[2]]:[bs[1],bs[2],bs[3],bs[0]];
   }
   putTeece(b,spot,t,true);
+  if(b[spot].ground){
+    const gd0=CARDS[b[spot].ground.cardId];
+    if(gd0.gPlayMod){applyModT(t,gd0.gPlayMod,'perm');log(nm(t)+' is played onto '+gd0.name+': '+sgn(gd0.gPlayMod)+'.');}
+  }
   if(!G.viaReveal)G.teecePlayed=true;
   log(pname(p)+' plays '+d.name+' at the '+CN[spot]+(G.viaReveal?' — revealed, so it doesn’t use this turn’s Teece play.':'.'));
   await anim([spot],'placed',140);
@@ -2758,10 +2904,12 @@ async function playTeece(p,handIdx){
   }
   for(let i=0;i<BN;i++){
     const w=b[i].teece;
-    if(!w||sameTeam(w.owner,p))continue;
+    if(!w||w.uid===t.uid)continue;
     const wd=DEF(w);
-    if(wd.onEnemyPlay){applyModT(t,wd.onEnemyPlay.n,wd.onEnemyPlay.dur);
+    if(!sameTeam(w.owner,p)&&wd.onEnemyPlay){applyModT(t,wd.onEnemyPlay.n,wd.onEnemyPlay.dur);
       log(nm(t)+' is met by '+nm(w)+': '+sgn(wd.onEnemyPlay.n)+durTxt(wd.onEnemyPlay.dur)+'.');}
+    if(wd.onAnyPlay){applyModT(t,wd.onAnyPlay.n,wd.onAnyPlay.dur);
+      log(nm(t)+' is rattled by '+nm(w)+': '+sgn(wd.onAnyPlay.n)+durTxt(wd.onAnyPlay.dur)+'.');}
   }
   const dbl=b[spot].ground&&CARDS[b[spot].ground.cardId].gDouble?2:1;
   if(d.onPlay)for(let k=0;k<dbl;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked});
@@ -2790,6 +2938,24 @@ async function playEquip(p,handIdx){
   await resolveCombat();
   render();
   return true;
+}
+function areaShapeCells(anchor,shape){
+  const rows=Math.floor(BN/BW);
+  if(shape==='1x2'){
+    if(col(anchor)>BW-2)return null;
+    return [anchor,anchor+1];
+  }
+  if(shape==='2x2'){
+    if(col(anchor)>BW-2||row(anchor)>rows-2)return null;
+    return [anchor,anchor+1,anchor+BW,anchor+BW+1];
+  }
+  if(shape==='2x3'){
+    if(col(anchor)!==0||row(anchor)>rows-2)return null;
+    const cells=[];
+    for(let r=0;r<2;r++)for(let c=0;c<BW;c++)cells.push(anchor+r*BW+c);
+    return cells;
+  }
+  return null;
 }
 function groundCells(anchor,shape){
   if(shape==='1x1')return [anchor];
@@ -2907,6 +3073,13 @@ async function endTurn(){
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
     if(t){t.temp=[0,0,0,0];t.kwTemp=[];}
+  }
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(t&&t.owner===p&&DEF(t).dieAtEndOfTurn){
+      log(nm(t)+' burns itself out.');
+      forceDeath(t);
+    }
   }
   for(let i=0;i<BN;i++){
     const g=G.board[i].ground;
@@ -3222,6 +3395,20 @@ function aiPlanFor(id){
     if(!cands.length)return null;
     return {thr:0.8,cands,mut:(bb,i)=>{bb[i].ground=null;}};
   }
+  if(st.fx==='mineAuto'){
+    const anyEmpty=b.some(c=>!c.teece&&!c.mine);
+    if(!anyEmpty)return null;
+    return {thr:0.5,cands:[0],mut:null,pseudo:G.turnNum>=2?0.8:0.3};
+  }
+  if(st.fx==='modSplash'){
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece)cands.push(i);
+    if(!cands.length)return null;
+    return {thr:2.5,cands,mut:(bb,i)=>{
+      applyModT(bb[i].teece,st.n,st.dur);
+      for(const j of ADJ[i])if(bb[j].teece)applyModT(bb[j].teece,st.n,st.dur);
+    }};
+  }
   return null;
 }
 async function aiSupport(){
@@ -3371,6 +3558,21 @@ function aiActMuts(cell,ent){
           else if(s2.fx==='mod')applyModT(bb[j].teece,s2.n,s2.dur);
         }
       });
+    }
+  }else if(st.fx==='modSplash'){
+    for(let j=0;j<BN;j++){
+      const t=b[j].teece;if(!t)continue;
+      if(st.where==='rowcol'&&!(sameRow(j,cell)||sameCol(j,cell)))continue;
+      muts.push(bb=>{
+        if(!bb[j].teece)return;
+        applyModT(bb[j].teece,st.n,st.dur);
+        for(const k of ADJ[j])if(bb[k].teece)applyModT(bb[k].teece,st.n,st.dur);
+      });
+    }
+  }else if(st.fx==='token'){
+    for(let j=0;j<BN;j++){
+      if(b[j].teece)continue;
+      muts.push(bb=>{if(!bb[j].teece)putTeece(bb,j,makeTeece(st.tok,p),false);});
     }
   }
   return muts;
