@@ -52,6 +52,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card .ct{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#7a6a4d}
 .card .cn{font-family:var(--disp);font-size:15px;line-height:1.05}
 .card .cs{font-size:11px;font-weight:700;margin-top:auto}
+.card .decksym{position:absolute;top:2px;right:3px;font-size:11px;line-height:1;opacity:.85;z-index:1}
 .discardBtn{position:absolute;left:4px;bottom:4px;font-size:9px;letter-spacing:.06em;text-transform:uppercase;
   background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:5px;padding:2px 5px;
   cursor:pointer;z-index:2}
@@ -96,6 +97,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece .s3{left:4px;top:50%;transform:translateY(-50%)}
 .teece .up{color:var(--up)} .teece .down{color:var(--down)}
 .teece .eq{position:absolute;top:2px;right:4px;font-size:8px;color:#7a6a4d;letter-spacing:.05em}
+.teece .rgd{position:absolute;left:0;right:0;top:calc(50% + 10px);text-align:center;font-size:9px;line-height:1}
 .teece .actdot{position:absolute;top:2px;left:4px;width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px var(--gold)}
 
 @keyframes dieShake{
@@ -169,6 +171,9 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .dcard .dkw{font-size:10px;letter-spacing:.1em;text-transform:uppercase;text-align:center;color:#8a6d3b}
 .dcard .dtx{font-size:11.5px;line-height:1.45;text-align:center;margin-top:auto;padding-top:34px}
 .dcard.nostat .dtx{padding-top:8px}
+.dcard.dsym{width:110px;min-height:110px;align-items:center;justify-content:center;gap:6px}
+.dcard.dsym .dsymbol{font-size:44px;line-height:1}
+.dcard.dsym .dnm{margin-top:0;font-size:15px}
 #draftDeck{font-size:11.5px;color:var(--muted);line-height:1.5;max-height:110px;overflow:auto;margin-top:8px}
 
 #hcapRow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:18px 0 6px}
@@ -916,6 +921,10 @@ const DECKS={
   bomb:{name:'Bomb',cards:[471,472,473,474,475,476,477,478,479,480,481,482,483,484,485,486,487,488,489,490],
     blurb:'Crazy area-of-effect damage that risks blowing itself up too. Lay Mines to control the board, then turn the damage into a boost with Blast Ward.'}
 };
+const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
+  gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}'};
+const ID_TO_DECK_SYM={};
+for(const key of Object.keys(DECKS))for(const id of DECKS[key].cards)ID_TO_DECK_SYM[id]=DECK_SYM[key];
 const DEF=t=>CARDS[t.cardId];
 const isBossCard=id=>(CARDS[id].sac||0)>=2;
 const FLY_ACT={name:'Fly',once:'turn',steps:[{fx:'move',range:'any'}]};
@@ -3672,9 +3681,9 @@ function pickDeck(who,opts){
     for(const key of Object.keys(DECKS)){
       const dk=DECKS[key];
       const el=document.createElement('div');
-      el.className='dcard nostat';
-      el.innerHTML='<div class="dnm">'+dk.name+'</div><div class="dty">'+dk.cards.length+' cards</div>'+
-        '<div class="dtx">'+dk.blurb+'</div>';
+      el.className='dcard nostat dsym';
+      el.title=dk.name+' — '+dk.cards.length+' cards\n'+dk.blurb;
+      el.innerHTML='<div class="dsymbol">'+(DECK_SYM[key]||'❓')+'</div><div class="dnm">'+dk.name+'</div>';
       el.addEventListener('click',()=>{overlay.classList.add('hidden');res(key);});
       box.appendChild(el);
     }
@@ -3786,6 +3795,7 @@ function renderBoard(){
       if(hasActs)tp.innerHTML+='<div class="actdot"></div>';
       const kwd=kws.slice(0,2).map(k=>k[0].toUpperCase()).join('');
       if(kwd)tp.innerHTML+='<div class="kwl">'+kwd+'</div>';
+      if(kws.indexOf('ranged')>=0)tp.innerHTML+='<div class="rgd" title="Ranged">\u{1F3F9}</div>';
       const dv=defOf(G.board,i);
       const tmr=DEF(t).timer;
       const left=tmr&&!t.transformed?Math.max(0,tmr.turns-(t.age||0)):0;
@@ -3890,6 +3900,7 @@ function renderHand(p){
     const card=document.createElement('div');
     card.className='card playable t-'+cd.type;
     if(p!==G.turn||G.teecePlayed&&cd.type==='teece'||G.over)card.classList.add('dim');
+    const dsym=ID_TO_DECK_SYM[id];
     if(cd.type==='teece'){
       card.innerHTML='<div class="hs hs0">'+cd.sides[0]+'</div>'+
         '<div class="hs hs1">'+cd.sides[1]+'</div>'+
@@ -3908,6 +3919,11 @@ function renderHand(p){
       }
     }else{
       card.innerHTML='<div class="ct">'+cd.type+'</div><div class="cn">'+cd.name+'</div><div class="cs">'+cd.text.split('\n')[0]+'</div>';
+    }
+    if(dsym){
+      const sy=document.createElement('div');
+      sy.className='decksym';sy.textContent=dsym;
+      card.appendChild(sy);
     }
     card.addEventListener('click',async()=>{if(p===G.turn&&!G.over)await playFromHand(p,i);});
     card.addEventListener('mouseenter',()=>{if(G.detailLock==null){G.detailHover='h'+p+i;showDetailCard(id);}});
