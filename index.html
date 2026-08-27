@@ -1042,7 +1042,7 @@ function newState(mode,vsAI,decks,extra){
   const teams=extra.teams||Array.from({length:nP},(_,i)=>i);
   buildGeometry(extra.width||3);
   const mk=p=>({deck:shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice()),hand:[],grave:[],onceUsed:{},pendingDraw:0,
-    nextDefBonus:0,noDeckOut:false});
+    nextDefBonus:0,noDeckOut:false,playedLastTurn:false,cardsPlayedThisTurn:0});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
     width:BW,
@@ -2750,7 +2750,7 @@ async function playFromHand(p,handIdx){
   else if(d.type==='equip')ok=await playEquip(p,handIdx);
   else if(d.type==='magic')ok=await playMagic(p,handIdx);
   else if(d.type==='ground')ok=await playGround(p,handIdx);
-  if(ok)G.eventFlag=true;
+  if(ok){G.eventFlag=true;pl.cardsPlayedThisTurn++;}
   return ok;
 }
 async function playTeece(p,handIdx){
@@ -2948,10 +2948,9 @@ async function runAct(p,cell,ent){
 async function endTurn(){
   if(!G||G.over||G.pending||G._endingTurn)return;
   const pl=G.players[G.turn];
-  const controlsTeece=G.board.some(c=>c.teece&&c.teece.owner===G.turn);
   const playableCards=pl.hand.filter(id=>canPlay(G.turn,id));
-  if(!controlsTeece&&playableCards.length>0){
-    log('You must play a card when you control no Teece.');
+  if(!pl.playedLastTurn&&pl.cardsPlayedThisTurn===0&&playableCards.length>0){
+    log('You must play a card since you didn\'t play last turn.');
     return;
   }
   if(pl.hand.length>6){
@@ -2984,6 +2983,7 @@ async function endTurn(){
   checkDomination();
   if(!G.over&&G.mode==='rogue')checkStalemate();
   if(G.over)return;
+  G.players[p].playedLastTurn=G.players[p].cardsPlayedThisTurn>0;
   G.turn=nextLiveSeat(p);G.turnNum++;G.teecePlayed=false;
   await startTurn();
 }
@@ -3003,6 +3003,7 @@ async function startTurn(){
   G._endingTurn=false;
   const ep=G.epoch;
   const p=G.turn,pl=G.players[p];
+  pl.cardsPlayedThisTurn=0;
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
     if(t&&t.owner===p){t.actUsedTurn={};t.dodged=false;}
