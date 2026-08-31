@@ -556,8 +556,8 @@ const CARDS = {
     onDeath:[{fx:'aoe',who:'ally',where:'adj',n:2,dur:'perm'}]},
  157:{name:'Stinger',type:'teece',sides:[7,7,6,6],text:'When destroyed: adjacent enemies get -2.',
     onDeath:[{fx:'aoe',who:'enemy',where:'adj',n:-2,dur:'perm'}]},
- 158:{name:'Husk',type:'teece',sides:[7,7,6,6],text:'When destroyed: leave a 4/4/4/4 Token where it stood.',
-    onDeath:[{fx:'token',tok:'T4',where:'here',count:1}]},
+ 158:{name:'Husk',type:'teece',sides:[7,7,6,6],text:'When destroyed: leave a 4/4/4/4 Token on a random adjacent space.',
+    onDeath:[{fx:'token',tok:'T4',where:'adj',count:1,random:true}]},
  159:{name:'Bramble',type:'teece',sides:[4,5,6,7],text:'When destroyed: its killer gets -3 until end of turn.',
     onDeath:[{fx:'killer',n:-3,dur:'temp'}]},
  160:{name:'Kindling',type:'teece',sides:[5,5,5,5],text:'When destroyed: all allied Teece get +1 permanently.',
@@ -1833,6 +1833,15 @@ async function FXRUN(st,ctx){
     for(let n=0;n<(st.count||1);n++){
       const pool=(st.where==='adj'?ADJ[ctx.cell]:ALL()).filter(j=>openAt(b,j));
       if(!pool.length){if(n===0)log('No space for a Token.');return;}
+      const owner=ctx.deadOwner!=null?ctx.deadOwner:p;
+      if(st.random){
+        const c=pool[Math.floor(Math.random()*pool.length)];
+        const tk=makeTeece(st.tok,owner);
+        putTeece(b,c,tk,true);
+        if(st.linked&&ctx.t){ctx.t.links.push(tk.uid);}
+        log('A '+CARDS[st.tok].sides.join('/')+' Token appears at the '+CN[c]+'.');
+        continue;
+      }
       const c=await pickCell(pool,'Choose a space for a '+CARDS[st.tok].sides.join('/')+' Token ('+(n+1)+' of '+(st.count||1)+'), or skip.',
         (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,p),false);},true);
       if(c==='CANCEL')return 'ABORT';
