@@ -980,9 +980,9 @@ const CARDS = {
     cast:[{fx:'choose',modal:true,msg:'Curse of Sacrifice:',opts:[
       {lbl:'Feast: they sacrifice, then bless a survivor',steps:[{fx:'sacrificeCurse',mode:'feast'}]},
       {lbl:'Famine: they sacrifice, then someone discards',steps:[{fx:'sacrificeCurse',mode:'famine'}]}]}]},
- 498:{name:'Curse of Stillness',type:'magic',
-    text:'Select a Teece: until the end of your next turn it cannot move, and its abilities cannot be activated.',
-    cast:[{fx:'stillness',count:2}]},
+ 498:{name:'Curse of Confusion',type:'magic',
+    text:'Select a Teece and turn it clockwise or counter-clockwise. Then select a player: the next Teece they play is turned the same way once it arrives.',
+    cast:[{fx:'confuse'}]},
  499:{name:'Hex Collector',type:'teece',sides:[0,0,0,0],
     text:'When played: add a magic card from either grave to your hand.',
     onPlay:[{fx:'graveMagicToHand'}]},
@@ -1172,13 +1172,6 @@ function tickHexes(seat){
     }
     pl.hexes=keep;
   }
-  const b=G.board;
-  for(let i=0;i<BN;i++){
-    const t=b[i].teece;
-    if(!t||!t.still||t.still.by!==seat)continue;
-    t.still.count--;
-    if(t.still.count<=0){t.still=null;log(nm(t)+' shakes off the Curse of Stillness.');}
-  }
 }
 /* "Select a player" prompt, skipping seats already carrying this hex. */
 async function pickPlayer(p,msg,exclude){
@@ -1318,7 +1311,7 @@ function makeTeece(cardId,owner){
   return {uid:UID++,cardId,owner,baseOwner:owner,base,perm:[0,0,0,0],temp:[0,0,0,0],
     equips:[],isToken:!!d.token,isCopy:false,resummoned:false,kwTemp:[],kwPerm:[],links:[],controls:[],
     defPerm:0,dodged:false,age:0,transformed:false,tickTotal:0,immortalOwner:null,
-    silenced:false,still:null,magicUsedTurn:0,
+    silenced:false,magicUsedTurn:0,
     actUsedTurn:{},actUsedGame:{}};
 }
 function newState(mode,vsAI,decks,extra){
@@ -1328,7 +1321,7 @@ function newState(mode,vsAI,decks,extra){
   buildGeometry(extra.width||3);
   const mk=p=>({deck:shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice()),hand:[],grave:[],onceUsed:{},pendingDraw:0,
     nextDefBonus:0,noDeckOut:false,playedLastTurn:false,cardsPlayedThisTurn:0,
-    hexes:[],forget:0});
+    hexes:[],forget:0,confuse:null});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
     width:BW,
@@ -1727,6 +1720,12 @@ function applyModT(t,n,dur){
 function applyDef(t,n){t.defPerm=(t.defPerm||0)+n;}
 const sgn=n=>(n>0?'+':'')+n;
 function durTxt(dur){return dur==='temp'?' until end of turn':' permanently';}
+/* One quarter turn. Sides run top, right, bottom, left. */
+function spinT(t,dir){
+  const s=t.base;
+  t.base=dir==='cw'?[s[3],s[0],s[1],s[2]]:[s[1],s[2],s[3],s[0]];
+}
+const dirTxt=d=>d==='cw'?'clockwise':'counter-clockwise';
 
 async function runSteps(steps,ctx){
   for(const st of steps||[]){
@@ -1874,10 +1873,7 @@ async function FXRUN(st,ctx){
         if(g>bv){bv=g;ch=o.v;}
       }
     }else ch=await chooseOption(p,opts,'Rotate '+DEF(t).name+'?');
-    const bse=t.base;
-    if(ch==='cw')t.base=[bse[3],bse[0],bse[1],bse[2]];
-    else if(ch==='ccw')t.base=[bse[1],bse[2],bse[3],bse[0]];
-    if(ch==='cw'||ch==='ccw')log(nm(t)+' rotates.');
+    if(ch==='cw'||ch==='ccw'){spinT(t,ch);log(nm(t)+' rotates.');}
     return;}
   case 'flip':{
     const cands=[];for(let i=0;i<BN;i++)if(b[i].teece)cands.push(i);
@@ -2514,13 +2510,12 @@ async function FXRUN(st,ctx){
   case 'rotTarget':{
     const cands=[];for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
     if(!cands.length){log('No valid target.');return;}
-    const spin=(bb,i)=>{const tt=bb[i].teece,bs=tt.base;
-      tt.base=st.dir==='cw'?[bs[3],bs[0],bs[1],bs[2]]:[bs[1],bs[2],bs[3],bs[0]];};
+    const spin=(bb,i)=>{spinT(bb[i].teece,st.dir);};
     const c=await pickCell(cands,'Rotate which Teece '+(st.dir==='cw'?'clockwise':'counter-clockwise')+'?',spin,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     spin(b,c);
-    log(nm(b[c].teece)+' turns '+(st.dir==='cw'?'clockwise':'counter-clockwise')+'.');
+    log(nm(b[c].teece)+' turns '+dirTxt(st.dir)+'.');
     await anim([c],'zap');
     return;}
   case 'kwSelf':{
@@ -2840,18 +2835,27 @@ async function FXRUN(st,ctx){
     }
     return;}
   /* ---- Witch: curses laid on Teece and panels ---- */
-  case 'stillness':{
+  case 'confuse':{
     const cands=[];
-    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!t.still&&canTarget(b,i,p))cands.push(i);}
-    if(!cands.length){log('No Teece to hold still.');return;}
-    const c=await pickCell(cands,'Choose a Teece: it cannot move and its abilities cannot be used.',null,false);
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length){log('No Teece to turn about.');return;}
+    const c=await pickCell(cands,'Choose a Teece to turn about.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     if(wardMagic(b,c,p)){await anim([c],'zap');return;}
-    b[c].teece.still={by:p,count:st.count||2};
-    log(nm(b[c].teece)+' is held still until the end of '+pname(p)+"'s next turn.");
+    const dir=await chooseOption(p,[{v:'cw',lbl:'Turn it clockwise'},{v:'ccw',lbl:'Turn it counter-clockwise'}],
+      'Which way does '+nm(b[c].teece)+' turn?');
+    if(dir==null)return;
+    spinT(b[c].teece,dir);
+    log(nm(b[c].teece)+' is turned '+dirTxt(dir)+'.');
     if(sameTeam(b[c].teece.owner,p))noteSelfTarget(p);else noteTargeted(p);
     await anim([c],'zap');
+    const who=await pickPlayer(p,'Whose next Teece arrives turned the same way?');
+    if(who==null)return;
+    for(const q of hexTargets(p,who)){
+      G.players[q].confuse={dir,by:p};
+      log('Confusion settles on '+pname(q)+': their next Teece arrives turned '+dirTxt(dir)+'.');
+    }
     return;}
   case 'akathisia':{
     if(ctx.cardId==null){log('Nothing to bind.');return;}
@@ -2976,12 +2980,8 @@ async function FXRUN(st,ctx){
     if(i==null||!t)return;
     const spin=await chooseOption(p,[{v:'cw',lbl:'Rotate clockwise'},{v:'ccw',lbl:'Rotate counter-clockwise'},
       {v:'no',lbl:'Do not rotate'}],nm(t)+': turn it?');
-    if(spin==='cw'||spin==='ccw'){
-      const bs=t.base;
-      t.base=spin==='cw'?[bs[3],bs[0],bs[1],bs[2]]:[bs[1],bs[2],bs[3],bs[0]];
-      log(nm(t)+' turns '+(spin==='cw'?'clockwise':'counter-clockwise')+'.');
-    }
-    if(t.still||hasKw(b,i,'immovable'))return;
+    if(spin==='cw'||spin==='ccw'){spinT(t,spin);log(nm(t)+' turns '+dirTxt(spin)+'.');}
+    if(hasKw(b,i,'immovable'))return;
     const dests=DIAG[i].filter(j=>openAt(b,j));
     if(!dests.length)return;
     const c=await chooseCell(p,dests,'Step '+nm(t)+' one space in any direction, or skip.',
@@ -2994,7 +2994,6 @@ async function FXRUN(st,ctx){
   case 'move':{
     const i=ctx.cell;
     if(hasKw(b,i,'immovable')){log('It cannot move.');return;}
-    if(b[i].teece&&b[i].teece.still){log(nm(b[i].teece)+' is held still.');return;}
     let pool;
     if(st.range==='orth')pool=ADJ[i];
     else{pool=[];for(let j=0;j<BN;j++)if(j!==i)pool.push(j);}
@@ -3434,10 +3433,7 @@ async function playTeece(p,handIdx){
   }
   pl.hand.splice(handIdx,1);
   const t=makeTeece(id,p);
-  if(plan&&plan.rot){
-    const bs=t.base;
-    t.base=plan.rot===1?[bs[3],bs[0],bs[1],bs[2]]:[bs[1],bs[2],bs[3],bs[0]];
-  }
+  if(plan&&plan.rot)spinT(t,plan.rot===1?'cw':'ccw');
   putTeece(b,spot,t,true);
   if(b[spot].ground){
     const gd0=CARDS[b[spot].ground.cardId];
@@ -3446,6 +3442,11 @@ async function playTeece(p,handIdx){
   if(!G.viaReveal)G.teecePlayed=true;
   log(pname(p)+' plays '+d.name+' at the '+CN[spot]+(G.viaReveal?' — revealed, so it doesn’t use this turn’s Teece play.':'.'));
   await anim([spot],'placed',140);
+  if(pl.confuse){
+    const cf=pl.confuse;pl.confuse=null;
+    spinT(t,cf.dir);
+    log(nm(t)+' arrives confused, turned '+dirTxt(cf.dir)+'.');
+  }
   if(pl.nextDefBonus){applyDef(t,pl.nextDefBonus);log(nm(t)+' arrives with +'+pl.nextDefBonus+' Defence.');pl.nextDefBonus=0;}
   if(pl.calib&&t.base.every(v=>v===pl.calib.x)){
     const cn=pl.calib.n;pl.calib=null;
@@ -3641,7 +3642,6 @@ async function runAct(p,cell,ent){
   const b=G.board,t=b[cell].teece;
   if(!t||t.owner!==p)return false;
   if(hexOn(p,'silence')){toast('Silenced: no abilities may be activated.');return false;}
-  if(t.still){toast(nm(t)+' is held still and cannot act.');return false;}
   if(!actAvailable(t,ent))return false;
   const ok=await runSteps(ent.act.steps,{p,cell,t,first:true,ent});
   if(!ok){render();return false;}
@@ -3715,7 +3715,7 @@ async function forcedMoves(p){
   const b=G.board;
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
-    if(!t||t.owner!==p||t.still)continue;
+    if(!t||t.owner!==p)continue;
     if(!t.equips.some(e=>{const g=CARDS[e.cardId].grants;return g&&g.mustMove;}))continue;
     if(hasKw(b,i,'immovable')){log(nm(t)+' cannot move, so the restlessness goes nowhere.');continue;}
     const dests=ADJ[i].filter(j=>openAt(b,j));
@@ -3791,8 +3791,7 @@ function cloneBoard(b){
       kwPerm:(c.teece.kwPerm||[]).slice(),defPerm:c.teece.defPerm||0,dodged:c.teece.dodged,
       age:c.teece.age||0,transformed:c.teece.transformed,tickTotal:c.teece.tickTotal||0,
       immortalOwner:c.teece.immortalOwner,
-      silenced:!!c.teece.silenced,still:c.teece.still?Object.assign({},c.teece.still):null,
-      magicUsedTurn:c.teece.magicUsedTurn||0,
+      silenced:!!c.teece.silenced,magicUsedTurn:c.teece.magicUsedTurn||0,
       links:c.teece.links.slice(),controls:c.teece.controls.slice(),
       actUsedTurn:Object.assign({},c.teece.actUsedTurn),actUsedGame:Object.assign({},c.teece.actUsedGame)}):null,
     ground:c.ground?Object.assign({},c.ground):null,
@@ -4038,12 +4037,10 @@ function aiPlanFor(id){
      so they are priced by a flat heuristic and guarded on having a target. */
   if(st.fx==='forget')return {thr:0.5,pseudo:0.8,cands:[0],mut:null};
   if(st.fx==='hexPlayer')return {thr:0.5,pseudo:1.0,cands:[0],mut:null};
-  if(st.fx==='stillness'){
-    const cands=[];
-    for(let i=0;i<BN;i++){const t=b[i].teece;
-      if(t&&!sameTeam(t.owner,p)&&!t.still&&canTarget(b,i,p))cands.push(i);}
-    if(!cands.length)return null;
-    return {thr:0.5,pseudo:1.0,cands:[0],mut:null};
+  if(st.fx==='confuse'){
+    let any=false;for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))any=true;
+    if(!any)return null;
+    return {thr:0.5,pseudo:0.9,cands:[0],mut:null};
   }
   if(st.fx==='akathisia'){
     const cands=[];
