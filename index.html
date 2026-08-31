@@ -177,6 +177,8 @@ button,.teece,.cell,.card{touch-action:manipulation}
 #promptBar{min-height:38px;width:100%;max-width:560px;display:flex;align-items:center;justify-content:center;
   gap:10px;padding:8px 12px;border:1px dashed var(--line);border-radius:8px;text-align:center;flex-wrap:wrap}
 #promptBar.hot{border-color:var(--gold);border-style:solid;background:rgba(201,162,39,.07)}
+#warnBar{margin-top:10px;padding:7px 9px;border-radius:7px;font-size:12px;line-height:1.35;
+  border:1px solid var(--gold);background:rgba(201,162,39,.1);color:var(--gold)}
 #promptBar .msg{font-size:13px}
 .btn{background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:6px;
   padding:6px 12px;font-size:12px;letter-spacing:.06em}
@@ -272,12 +274,13 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
     <div class="panel">
       <div class="turnline" id="turnInfo"></div>
       <div class="counts" id="counts"></div>
+      <div id="warnBar" class="hidden"></div>
       <div style="display:flex;gap:8px;margin-top:10px">
         <button class="btn primary" id="endTurn">End Turn</button>
         <button class="btn" id="restart">Restart</button>
       </div>
     </div>
-    <div class="panel" id="detail"><h2>Detail</h2><div class="dt">Hover or tap a card. Click one of your Teece to use its abilities.</div></div>
+    <div class="panel" id="detail"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Detail</h2><button class="btn" id="resetDetail" style="padding:4px 8px;font-size:12px" title="Unstick the inspector: clears the selected Teece and lets hovering work again.">Reset</button></div><div id="detailBody"><div class="dt">Hover or tap a card. Click one of your Teece to use its abilities.</div></div></div>
     <div class="panel" id="logPanel"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Log</h2><button class="btn" id="toggleLog" style="padding:4px 8px;font-size:12px">Hide</button></div><div id="log"></div></div>
   </aside>
 </div>
@@ -961,7 +964,7 @@ const CARDS = {
     text:'Select a player: the next card they draw is discarded on sight.',
     cast:[{fx:'forget',n:1,msg:'Whose next draw is forgotten?'}]},
  492:{name:'Curse of Akathisia',type:'magic',mod:-3,grants:{mustMove:true},
-    text:'Select a Teece and bind this to it. It gets -3, and its controller must move it at the end of each of their turns.',
+    text:'Select a Teece and bind this to it. It gets -3, and its controller must move it one space at the end of every turn.',
     cast:[{fx:'akathisia'}]},
  493:{name:'Curse of Silence',type:'magic',
     text:'Select a player: until the end of your next turn they cannot cast magic, and none of their Teece may use an activated ability.',
@@ -1320,7 +1323,7 @@ function newState(mode,vsAI,decks,extra){
   const teams=extra.teams||Array.from({length:nP},(_,i)=>i);
   buildGeometry(extra.width||3);
   const mk=p=>({deck:shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice()),hand:[],grave:[],onceUsed:{},pendingDraw:0,
-    nextDefBonus:0,noDeckOut:false,playedLastTurn:false,cardsPlayedThisTurn:0,
+    nextDefBonus:0,noDeckOut:false,teecePlayedLastTurn:false,teecePlayedThisTurn:0,turnsTaken:0,
     hexes:[],forget:0,confuse:null});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
@@ -1361,6 +1364,8 @@ function teamName(tm){
   return seats.map(pname).join(' and ');
 }
 function nm(t){const d=DEF(t);return d.name+(t.isCopy?' (copy)':'');}
+/* pname() returns "You" for the human seat, so any verb after it has to agree. */
+const vb=(p,third,second)=>(G&&G.vsAI&&p===0)?second:third;
 function log(m){G.log.unshift(m);if(G.log.length>140)G.log.pop();if(HAS_DOM)renderLog();}
 
 /* ============ derived stats, keywords, acts ============ */
@@ -2869,7 +2874,7 @@ async function FXRUN(st,ctx){
     if(wardMagic(b,c,p)){await anim([c],'zap');return;}
     b[c].teece.equips.push({cardId:ctx.cardId,owner:p});
     G.magicConsumed=true;
-    log(nm(b[c].teece)+' catches Akathisia: -3, and its controller must move it every turn.');
+    log(nm(b[c].teece)+' catches Akathisia: -3, and it must be moved at the end of every turn.');
     if(sameTeam(b[c].teece.owner,p))noteSelfTarget(p);else noteTargeted(p);
     await anim([c],'zap');
     return;}
@@ -3308,11 +3313,22 @@ function checkDomination(){
       scoreLine()+'). Tokens do not count.');
   }
 }
-function deckOut(p){
+/* Who takes it if a deck runs dry right now: most Teece on the field wins, a
+   tie at the top is a draw. deckOut and the last-card warning share this so the
+   warning can never disagree with the ending it is warning about. */
+function deckOutWinner(){
   const counts=teamsInPlay().map(tm=>({tm,n:teamReal(tm)}));
   counts.sort((x,y)=>y.n-x.n);
-  const who=(counts.length>1&&counts[0].n===counts[1].n)?null:counts[0].tm;
-  endGame(who,pname(p)+' had no cards left to draw, so the game ends there. Teece on the field: '+scoreLine()+'.');
+  return (counts.length>1&&counts[0].n===counts[1].n)?null:counts[0].tm;
+}
+/* p has drawn their last card, so the game ends the moment their turn comes
+   round again. Berserkers never deck out, and rogue mode has no deck-out. */
+function facingDeckOut(p){
+  const pl=G&&G.players[p];
+  return !!(pl&&!G.over&&!pl.deck.length&&G.mode!=='rogue'&&!pl.noDeckOut&&G.turnNum>1);
+}
+function deckOut(p){
+  endGame(deckOutWinner(),pname(p)+' had no cards left to draw, so the game ends there. Teece on the field: '+scoreLine()+'.');
 }
 function endGame(winner,why){
   if(G.over)return;
@@ -3394,7 +3410,7 @@ async function playFromHand(p,handIdx){
   else if(d.type==='equip')ok=await playEquip(p,handIdx);
   else if(d.type==='magic')ok=await playMagic(p,handIdx);
   else if(d.type==='ground')ok=await playGround(p,handIdx);
-  if(ok){G.eventFlag=true;pl.cardsPlayedThisTurn++;}
+  if(ok){G.eventFlag=true;if(d.type==='teece')pl.teecePlayedThisTurn++;}
   else{
     /* Some cards cannot resolve at all right now — a spell with no legal
        target aborts every time. Remember it, so the forced-play rule stops
@@ -3652,18 +3668,34 @@ async function runAct(p,cell,ent){
   render();
   return true;
 }
+/* You are held to playing a Teece only when all of this is true: it is not
+   your first turn, you hold nothing on the field, you played no Teece last
+   turn and none this turn — and you actually have one you can put down. That
+   last clause matters: a card that cannot be played, or one already tried and
+   refused this turn, does not count, or the rule would wedge the turn shut. */
+function mustPlayTeece(p){
+  const pl=G.players[p];
+  if(!pl||pl.turnsTaken<=1)return false;
+  if(pl.teecePlayedLastTurn||pl.teecePlayedThisTurn>0)return false;
+  if(G.board.some(c=>c.teece&&c.teece.owner===p))return false;
+  const failed=pl.failedThisTurn||[];
+  return pl.hand.some(id=>CARDS[id].type==='teece'&&canPlay(p,id)&&failed.indexOf(id)<0);
+}
 /* ============ turn flow ============ */
 async function endTurn(){
   if(!G||G.over||G.pending||G._endingTurn)return;
   const pl=G.players[G.turn];
-  const failed=pl.failedThisTurn||[];
-  const playableCards=pl.hand.filter(id=>canPlay(G.turn,id)&&failed.indexOf(id)<0);
-  if(!pl.playedLastTurn&&pl.cardsPlayedThisTurn===0&&playableCards.length>0){
-    log('You must play a card since you didn\'t play last turn.');
+  if(mustPlayTeece(G.turn)){
+    /* said once a turn, however many times End Turn gets pressed */
+    if(!pl.toldMustPlay){
+      pl.toldMustPlay=true;
+      log('You hold no Teece on the field and played none last turn, so you must play one now.');
+    }
+    toast('You must play a Teece: you hold none and played none last turn.');
     return;
   }
   if(pl.hand.length>6){
-    log('Hand limit: '+pname(G.turn)+' discards down to six.');
+    log('Hand limit: '+pname(G.turn)+' '+vb(G.turn,'discards','discard')+' down to six.');
     const dumped=[];
     while(pl.hand.length>6){
       const idx=Math.floor(Math.random()*pl.hand.length);
@@ -3675,7 +3707,7 @@ async function endTurn(){
   G._endingTurn=true;
   const ep=G.epoch;
   const p=G.turn;
-  await forcedMoves(p);
+  await forcedMoves();
   if(stale(ep))return;
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
@@ -3704,30 +3736,56 @@ async function endTurn(){
   checkDomination();
   if(!G.over&&G.mode==='rogue')checkStalemate();
   if(G.over)return;
-  G.players[p].playedLastTurn=G.players[p].cardsPlayedThisTurn>0;
+  G.players[p].teecePlayedLastTurn=G.players[p].teecePlayedThisTurn>0;
   tickHexes(p);
   G.turn=nextLiveSeat(p);G.turnNum++;G.teecePlayed=false;
   await startTurn();
 }
-/* Curse of Akathisia: its host has to keep moving, every turn, or it stays put
-   only because there is nowhere left to go. */
-async function forcedMoves(p){
+/* Curse of Akathisia: the host is dragged one space at the end of EVERY turn,
+   not just its controller's, and its controller is the one who picks where.
+   It stays put only when it is pinned or hemmed in. */
+async function forcedMoves(){
   const b=G.board;
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
-    if(!t||t.owner!==p)continue;
+    if(!t)continue;
     if(!t.equips.some(e=>{const g=CARDS[e.cardId].grants;return g&&g.mustMove;}))continue;
     if(hasKw(b,i,'immovable')){log(nm(t)+' cannot move, so the restlessness goes nowhere.');continue;}
     const dests=ADJ[i].filter(j=>openAt(b,j));
     if(!dests.length){log(nm(t)+' has nowhere to go and rides out the restlessness.');continue;}
-    const c=await chooseCell(p,dests,nm(t)+' is restless and must move one space.',
+    const owner=t.owner;
+    const c=await chooseCell(owner,dests,nm(t)+' is restless and must move one space.',
       {mut:(bb,j)=>{if(bb[i].teece)moveT(bb,i,j,false);}});
     if(c==null||c==='CANCEL')continue;
+    if(b[i].teece!==t||b[c].teece)continue;
     moveT(b,i,c,true);
     log(nm(t)+' is driven to the '+CN[c]+'.');
-    await fireMove(i,c,p);
+    await fireMove(i,c,owner);
     if(G.over)return;
   }
+}
+/* Fired once, on the turn the last card leaves the deck: from here the game
+   ends when this seat's turn comes round again, so say so while there is still
+   a turn left to do something about it. */
+function warnLastCard(p){
+  if(!facingDeckOut(p))return;
+  const win=deckOutWinner();
+  if(win===teamOf(p))return;
+  const verdict=win==null?'it is a draw as things stand':teamName(win)+' takes it as things stand';
+  log('LAST CARD: '+pname(p)+' '+vb(p,'has','have')+' nothing left to draw. The game ends when this turn comes round again, and '+
+    verdict+' — '+scoreLine()+'.');
+  if(!isAIP(p))toast('Last card. The game ends on your next turn and you are not ahead.');
+}
+/* Standing version of the same warning, so it stays on screen for the turn. */
+function renderWarn(){
+  const w=document.getElementById('warnBar');
+  if(!w)return;
+  const p=G.turn;
+  const win=G.over||!facingDeckOut(p)?undefined:deckOutWinner();
+  if(win===undefined||win===teamOf(p)){w.classList.add('hidden');w.textContent='';return;}
+  w.classList.remove('hidden');
+  w.textContent=pname(p)+' '+vb(p,'has','have')+' an empty deck: the game ends when this turn comes round again, and '+
+    (win==null?'it is a draw':teamName(win)+' wins')+' as things stand — '+scoreLine()+'.';
 }
 function checkStalemate(){
   if(G.over)return;
@@ -3745,8 +3803,10 @@ async function startTurn(){
   G._endingTurn=false;
   const ep=G.epoch;
   const p=G.turn,pl=G.players[p];
-  pl.cardsPlayedThisTurn=0;
+  pl.teecePlayedThisTurn=0;
   pl.failedThisTurn=[];
+  pl.toldMustPlay=false;
+  pl.turnsTaken=(pl.turnsTaken||0)+1;
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
     if(t&&t.owner===p){t.actUsedTurn={};t.dodged=false;t.magicUsedTurn=0;}
@@ -3763,6 +3823,7 @@ async function startTurn(){
     if(!pl.deck.length&&G.mode!=='rogue'&&!pl.noDeckOut){deckOut(p);return;}
     if(pl.deck.length){drawCards(p,1);await flushDiscards();await offerReveal(p);}
   }
+  warnLastCard(p);
   log('--- Turn '+G.turnNum+': '+pname(p)+' ---');
   render();
   if(stale(ep)||G.over)return;
@@ -4269,8 +4330,9 @@ async function aiTurn(){
    hand and then sit there. When the rule applies, make it put something down. */
 async function aiForcedPlay(){
   const p=G.turn,pl=G.players[p];
-  if(pl.playedLastTurn||pl.cardsPlayedThisTurn>0)return;
+  if(!mustPlayTeece(p))return;
   for(let h=0;h<pl.hand.length;h++){
+    if(CARDS[pl.hand[h]].type!=='teece')continue;
     if(!canPlay(p,pl.hand[h]))continue;
     const ok=await playFromHand(p,h);
     if(ok||G.over)return;
@@ -4504,11 +4566,12 @@ function renderBoard(){
   }
 }
 function showDetail(i){
-  const d=document.getElementById('detail');
-  if(i==null){d.innerHTML='<h2>Detail</h2><div class="dt">Hover a card, or click one of your Teece to select it and use its abilities.</div>';return;}
+  const d=document.getElementById('detailBody');
+  if(!d)return;
+  if(i==null){d.innerHTML='<div class="dt">Hover a card, or click one of your Teece to select it and use its abilities.</div>';return;}
   const t=G.board[i].teece;
   if(!t){
-    d.innerHTML='<h2>Detail</h2>';
+    d.innerHTML='';
     const bg=G.board[i].ground,mn=G.board[i].mine,cpd=G.board[i].curseP,rz=G.board[i].razed;
     if(bg)d.innerHTML+='<div class="dn">'+CARDS[bg.cardId].name+'</div><div class="dt">'+CARDS[bg.cardId].text+'</div>';
     if(mn)d.innerHTML+='<div class="dt">'+((mn.n||1)>1?mn.n+' Mines are buried here. The next Teece to enter gets -'+(2*mn.n)+'.':
@@ -4603,7 +4666,8 @@ function renderHand(p){
   }
 }
 function showDetailCard(id){
-  const cd=CARDS[id],d=document.getElementById('detail');
+  const cd=CARDS[id],d=document.getElementById('detailBody');
+  if(!d)return;
   let html='<div class="dn">'+cd.name+'</div><div class="dt">'+cd.text+'</div>';
 
   d.innerHTML=html;
@@ -4682,7 +4746,7 @@ function render(){
   syncHandSlots();
   renderBoard();
   for(let p=0;p<PLAYERS();p++)renderHand(p);
-  renderCounts();renderLog();renderPrompt();renderActionBar();
+  renderCounts();renderWarn();renderLog();renderPrompt();renderActionBar();
   const bd=document.getElementById('board');
   bd.style.setProperty('--bw',BW);
   bd.style.setProperty('--cs',(BW>=4?'86px':'110px'));
@@ -4701,6 +4765,7 @@ function render(){
   }else{
     document.getElementById('endTurn').disabled=true;
   }
+  if(G.detailLock!=null&&!G.board[G.detailLock].teece){G.detailLock=null;G.detailHover=null;}
   if(G.detailLock!=null)showDetail(G.detailLock);
   else if(G.detailHover==null)showDetail(null);
 }
@@ -4849,6 +4914,12 @@ if(HAS_DOM){
     oh.classList.toggle('collapsed');
     btn.textContent=oh.classList.contains('collapsed')?'Show':'Hide';
   };
+  document.getElementById('resetDetail').onclick=()=>{
+    if(!G)return;
+    G.detailLock=null;G.detailHover=null;
+    showDetail(null);
+    render();
+  };
   document.getElementById('toggleLog').onclick=()=>{
     const log=document.getElementById('logPanel');
     const btn=document.getElementById('toggleLog');
@@ -4876,7 +4947,8 @@ if(typeof module!=='undefined'){
     modalCtl,fireModal,setModalNext,kwOf,playTeece,offerReveal,groundFlag,enemySeats,
     playHandDiscard,playFromHand,
     canPlay,hexOn,addHex,tickHexes,hexTargets,drawCards,openAt,discardCard,castCard,
-    riseFromGrave,forcedMoves,fireMagic,flushDiscards,toGrave,isBossCard,playMagic};
+    riseFromGrave,forcedMoves,fireMagic,flushDiscards,toGrave,isBossCard,playMagic,
+    mustPlayTeece,facingDeckOut,deckOutWinner,spinT};
 }
 </script>
 </body>
