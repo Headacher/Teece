@@ -747,7 +747,7 @@ const CARDS = {
     onMove:[{fx:'selfDestruct',n:-3,dur:'perm'}]},
  362:{name:'Ogre Whelp',type:'teece',sides:[1,1,1,1],
     text:'When played: return an adjacent Teece to hand, or move it one space. When destroyed, once per game: return this to your hand.',
-    onPlay:[{fx:'handOrMove'}],grants:{},onDeath:[{fx:'selfToHand'}]},
+    onPlay:[{fx:'handOrMove'}],grants:{},onDeath:[{fx:'selfToHand',once:'game'}]},
  363:{name:'Rockslide Call',type:'magic',rebound:true,
     text:'Drag an enemy one space toward one of your Teece in its row or column. The first time you cast this each game, it returns to your hand.',
     cast:[{fx:'dragToward'}]},
