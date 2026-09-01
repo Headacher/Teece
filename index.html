@@ -546,8 +546,8 @@ const CARDS = {
     onPlay:[{fx:'mod',who:'enemy',where:'any',n:-2,dur:'perm'}]},
  152:{name:'Breeder',type:'teece',sides:[6,6,5,5],text:'When played: summon a 4/4/4/4 Token on an adjacent empty space.',
     onPlay:[{fx:'token',tok:'T4',where:'adj',count:1}]},
- 153:{name:'Latecomer',type:'teece',sides:[0,0,0,0],globalTimer:{turns:4,sides:[8,8,8,8]},
-    text:'Arrives at 0/0/0/0. After four turns pass — anyone’s, not just yours — it becomes 8/8/8/8.'},
+ 153:{name:'Latecomer',type:'teece',sides:[8,8,8,8],text:'When played: it gets -8 until end of turn.',
+    onPlay:[{fx:'mod',who:'self',n:-8,dur:'temp'}]},
  154:{name:'Donor',type:'teece',sides:[6,6,6,6],text:'When played: another allied Teece gets +2.',
     onPlay:[{fx:'mod',who:'ally',where:'any',n:2,dur:'perm',notSelf:true,may:true}]},
  /* ---- when destroyed ---- */
@@ -879,8 +879,8 @@ const CARDS = {
  389:{name:'Rewind',type:'magic',
     text:'Return a card that reached a graveyard this turn to its owner hand.',
     cast:[{fx:'rewind'}]},
- 390:{name:'Long Game',type:'teece',sides:[2,2,2,2],timer:{turns:4,sides:[12,12,12,12]},
-    text:'After four of your turns, it becomes 12/12/12/12.'},
+ 390:{name:'Long Game',type:'teece',sides:[2,2,2,2],timer:{turns:2,sides:[12,12,12,12]},
+    text:'After two of your turns, it becomes 12/12/12/12.'},
  391:{name:'Whetted Blade',type:'teece',sides:[5,5,7,7],timer:{turns:2,sides:[9,9,7,7]},
     text:"When played: advance an ally's clock by one turn. After two of your turns, it becomes 9/9/7/7.",
     onPlay:[{fx:'fastForward',n:1,who:'ally'}]},
@@ -1314,7 +1314,6 @@ function makeTeece(cardId,owner){
   return {uid:UID++,cardId,owner,baseOwner:owner,base,perm:[0,0,0,0],temp:[0,0,0,0],
     equips:[],isToken:!!d.token,isCopy:false,resummoned:false,kwTemp:[],kwPerm:[],links:[],controls:[],
     defPerm:0,dodged:false,age:0,transformed:false,tickTotal:0,immortalOwner:null,
-    bornTurn:G?G.turnNum:0,
     silenced:false,magicUsedTurn:0,
     actUsedTurn:{},actUsedGame:{}};
 }
@@ -1536,28 +1535,6 @@ function checkTimer(b,i){
   if(bonusApplies(t.owner))for(let k=0;k<4;k++)t.base[k]=Math.max(0,t.base[k]+G.enemyBonus);
   log(nm(t)+' comes of age: '+d.timer.sides.join('/')+'.');
   return true;
-}
-/* A globalTimer counts turns the way a clock on the wall does: every single
-   player's turn, not just its owner's. G.turnNum already advances once per
-   ended turn regardless of seat, so the count is just G.turnNum - bornTurn. */
-function checkGlobalTimer(b,i){
-  const t=b[i].teece; if(!t)return false;
-  const d=DEF(t);
-  if(!d.globalTimer||t.transformed||(G.turnNum-(t.bornTurn||0))<d.globalTimer.turns)return false;
-  t.transformed=true;
-  t.base=d.globalTimer.sides.slice();
-  if(bonusApplies(t.owner))for(let k=0;k<4;k++)t.base[k]=Math.max(0,t.base[k]+G.enemyBonus);
-  log(nm(t)+' comes of age: '+d.globalTimer.sides.join('/')+'.');
-  return true;
-}
-async function ageGlobal(){
-  const b=G.board;
-  let any=false;
-  for(let i=0;i<BN;i++){
-    if(!b[i].teece||!DEF(b[i].teece).globalTimer)continue;
-    if(checkGlobalTimer(b,i))any=true;
-  }
-  if(any)await resolveCombat();
 }
 function ageOne(b,i,n){
   const t=b[i].teece; if(!t)return;
@@ -3850,8 +3827,6 @@ async function startTurn(){
   if(stale(ep)||G.over)return;
   await ageTurn(p);
   if(stale(ep)||G.over)return;
-  await ageGlobal();
-  if(stale(ep)||G.over)return;
   if(pl.pendingDraw){const n=pl.pendingDraw;pl.pendingDraw=0;drawCards(p,n);}
   if(G.turnNum>1){
     if(!pl.deck.length&&G.mode!=='rogue'&&!pl.noDeckOut){deckOut(p);return;}
@@ -4566,9 +4541,8 @@ function renderBoard(){
       if(kwd)tp.innerHTML+='<div class="kwl">'+kwd+'</div>';
       if(kws.indexOf('ranged')>=0)tp.innerHTML+='<div class="rgd" title="Ranged">\u{1F3F9}</div>';
       const dv=defOf(G.board,i);
-      const tmr=DEF(t).timer,gtmr=DEF(t).globalTimer;
-      const left=tmr&&!t.transformed?Math.max(0,tmr.turns-(t.age||0)):
-        (gtmr&&!t.transformed?Math.max(0,gtmr.turns-(G.turnNum-(t.bornTurn||0))):0);
+      const tmr=DEF(t).timer;
+      const left=tmr&&!t.transformed?Math.max(0,tmr.turns-(t.age||0)):0;
       if(left>0)tp.innerHTML+='<div class="shield">'+left+' to go</div>';
       else if(dv>0)tp.innerHTML+='<div class="shield">&#9679; '+dv+'</div>';
       else if(t.isToken)tp.innerHTML+='<div class="tok">token</div>';
@@ -4627,9 +4601,6 @@ function showDetail(i){
   const tm=DEF(t).timer;
   if(tm)html+='<div class="dt" style="color:var(--gold)">'+(t.transformed?'Fully grown.':
     'Becomes '+tm.sides.join('/')+' in '+Math.max(0,tm.turns-(t.age||0))+' more of your turns.')+'</div>';
-  const gtm=DEF(t).globalTimer;
-  if(gtm)html+='<div class="dt" style="color:var(--gold)">'+(t.transformed?'Fully grown.':
-    'Becomes '+gtm.sides.join('/')+' in '+Math.max(0,gtm.turns-(G.turnNum-(t.bornTurn||0)))+' more turns, anyone’s.')+'</div>';
   if(DEF(t).tick)html+='<div class="dt" style="color:var(--gold)">Ticks '+sgn(DEF(t).tick.n)+' each of your turns.</div>';
 
   if(t.equips.length){
@@ -4986,7 +4957,7 @@ if(typeof module!=='undefined'){
     playHandDiscard,playFromHand,
     canPlay,hexOn,addHex,tickHexes,hexTargets,drawCards,openAt,discardCard,castCard,
     riseFromGrave,forcedMoves,fireMagic,flushDiscards,toGrave,isBossCard,playMagic,
-    mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkGlobalTimer,ageGlobal,checkTimer,ageTurn};
+    mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn};
 }
 </script>
 </body>
