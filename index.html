@@ -3568,12 +3568,13 @@ function areaShapeCells(anchor,shape){
 }
 function groundCells(anchor,shape){
   if(shape==='1x1')return [anchor];
+  const rows=Math.floor(BN/BW);
   if(shape==='2x1'){
-    if(col(anchor)>1)return null;
+    if(col(anchor)>BW-2)return null;
     return [anchor,anchor+1];
   }
-  if(col(anchor)>1||row(anchor)>1)return null;
-  return [anchor,anchor+1,anchor+3,anchor+4];
+  if(col(anchor)>BW-2||row(anchor)>rows-2)return null;
+  return [anchor,anchor+1,anchor+BW,anchor+BW+1];
 }
 async function clearGroundAt(i,breaker){
   const b=G.board,g=b[i].ground;
@@ -4983,7 +4984,8 @@ if(typeof module!=='undefined'){
     playHandDiscard,playFromHand,
     canPlay,hexOn,addHex,tickHexes,hexTargets,drawCards,openAt,discardCard,castCard,
     riseFromGrave,forcedMoves,fireMagic,flushDiscards,toGrave,isBossCard,playMagic,
-    mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn};
+    mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
+    groundCells,playGround,areaShapeCells};
 }
 </script>
 </body>
