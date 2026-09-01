@@ -2055,19 +2055,31 @@ async function FXRUN(st,ctx){
     await anim([c],'zap');
     return;}
   case 'mineAuto':{
-    const cands=[];
-    for(let i=0;i<BN;i++)if(!b[i].teece)cands.push(i);
-    if(!cands.length){log('No room for Mines.');return;}
-    shuffle(cands);
     const want=st.count||1;
-    const chosen=[];
-    for(let k=0;k<want;k++)chosen.push(cands[k%cands.length]);
-    for(const c of chosen){
-      if(b[c].mine)b[c].mine.n=(b[c].mine.n||1)+1;
-      else b[c].mine={owner:p,n:1};
+    const placeOne=c=>{if(b[c].mine)b[c].mine.n=(b[c].mine.n||1)+1;else b[c].mine={owner:p,n:1};};
+    const placed=[];
+    for(let n=0;n<want;n++){
+      const pool=[];for(let i=0;i<BN;i++)if(!b[i].teece)pool.push(i);
+      if(!pool.length)break;
+      /* Once every remaining open panel is about to take a Mine anyway (as
+         with Overcharged Warhead's blanket count of 99), there's no real
+         choice left to make — fill the rest without more prompts. Short of
+         that, the player picks each panel one at a time. */
+      if(pool.length<=want-n){
+        for(const c of pool){placeOne(c);placed.push(c);}
+        break;
+      }
+      const c=await pickCell(pool,'Choose a panel for a Mine ('+(n+1)+' of '+want+').',
+        (bb,i)=>{if(bb[i].mine)bb[i].mine.n=(bb[i].mine.n||1)+1;else bb[i].mine={owner:p,n:1};},false);
+      if(c==='CANCEL')return placed.length?undefined:'ABORT';
+      if(c==null)break;
+      placeOne(c);
+      placed.push(c);
+      ctx.first=false;
     }
-    log(pname(p)+' seeds '+chosen.length+' Mine'+(chosen.length===1?'':'s')+' across the board.');
-    await anim(chosen,'zap');
+    if(!placed.length){log('No room for Mines.');return;}
+    log(pname(p)+' seeds '+placed.length+' Mine'+(placed.length===1?'':'s')+' across the board.');
+    await anim(placed,'zap');
     return;}
   case 'mineSelf':{
     const i=ctx.cell;
