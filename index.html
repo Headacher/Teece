@@ -2251,13 +2251,21 @@ async function FXRUN(st,ctx){
   case 'moveTarget':{
     const src=ctx.cell;
     const pool=st.where==='adj'?ADJ[src]:ALL();
+    /* 'opposite' is a fixed destination: the panel diametrically across the
+       whole board from the caster's OWN cell (Ogre Hurler's "the panel
+       directly opposite this one"), the same spot no matter which adjacent
+       Teece gets thrown there. 'away' instead reflects each candidate
+       THROUGH the caster (Ogre Sharpshooter's "one space directly away from
+       this one"), so the landing spot depends on the target. */
+    const mirrorCell=BN-1-src;
     const cands=pool.filter(j=>{
       const o=b[j].teece;
       if(!o||hasKw(b,j,'immovable'))return false;
       if(st.who==='enemy'&&sameTeam(o.owner,p))return false;
       if(st.who==='ally'&&!sameTeam(o.owner,p))return false;
       if(!canTarget(b,j,p))return false;
-      if(st.dir==='opposite'||st.dir==='away'){
+      if(st.dir==='opposite')return mirrorCell!==src&&!b[mirrorCell].teece;
+      if(st.dir==='away'){
         const dst=oppositeCell(src,j);
         return dst>=0&&!b[dst].teece;
       }
@@ -2269,7 +2277,9 @@ async function FXRUN(st,ctx){
     if(c==null)return;
     const t=b[c].teece;
     let dst=null;
-    if(st.dir==='opposite'||st.dir==='away'){
+    if(st.dir==='opposite'){
+      dst=(mirrorCell!==src&&!b[mirrorCell].teece)?mirrorCell:null;
+    }else if(st.dir==='away'){
       dst=oppositeCell(src,c);
       if(dst<0||b[dst].teece)dst=null;
     }else if(st.dir==='toward'){
