@@ -1234,7 +1234,11 @@ async function fireMagic(caster){
     if(!t||t.owner!==caster||t.silenced)continue;
     const d=DEF(t);
     if(!d.onMagic)continue;
-    const cap=d.onMagicTimes||1;
+    /* Unlimited unless the card's own text says otherwise (only Familiar
+       Keeper does, with onMagicTimes:2 — "Up to twice a turn"). Groundcurser,
+       Silencer and Whirling Adept all say "When you play a magic card" with
+       no cap, so they fire on every one, all turn. */
+    const cap=d.onMagicTimes||Infinity;
     t.magicUsedTurn=t.magicUsedTurn||0;
     if(t.magicUsedTurn>=cap)continue;
     t.magicUsedTurn++;
