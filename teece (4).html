@@ -80,6 +80,8 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 #oppHands{width:100%;display:flex;flex-direction:column;gap:8px}
 .cell{position:relative;border:1px solid var(--line);border-radius:8px;background:#191410;overflow:hidden;cursor:default}
 .cell .coord{position:absolute;top:2px;left:4px;font-size:9px;color:#584a38;z-index:0}
+.cell.splash{background:rgba(201,162,39,.20);box-shadow:inset 0 0 0 2px rgba(201,162,39,.5)}
+.cell.splash .teece{box-shadow:0 0 0 2px var(--gold)}
 .cell.target{box-shadow:inset 0 0 0 2px var(--gold);cursor:pointer}
 .cell.target:hover{background:#231b12}
 .cell.locked{box-shadow:inset 0 0 0 2px rgba(239,230,208,.55)}
@@ -993,6 +995,7 @@ for(let i=351;i<=370;i++)POOL.push(i);
 for(let i=381;i<=400;i++)POOL.push(i);
 for(let i=411;i<=430;i++)POOL.push(i);
 for(let i=471;i<=490;i++)POOL.push(i);
+for(let i=501;i<=520;i++)POOL.push(i);
 const DECKS={
   berserker:{name:'Berserker',cards:[301,302,303,304,305,306,307,308,309,310,311,312],
     blurb:'Twelve cards, every one of them overpowered. Win before you run dry: your own empty deck never loses you the game, only your opponent\'s does.'},
@@ -1573,8 +1576,8 @@ async function runSteps(steps,ctx){
 }
 async function FXRUN(st,ctx){
   const b=G.board,p=ctx.p;
-  const pickCell=async(cands,msg,mut,skip)=>{
-    const r=await chooseCell(p,cands,msg,{cancel:!!ctx.first,skip:!!skip,mut});
+  const pickCell=async(cands,msg,mut,skip,foot)=>{
+    const r=await chooseCell(p,cands,msg,{cancel:!!ctx.first,skip:!!skip,mut,foot});
     return r;
   };
   switch(st.fx){
@@ -1895,7 +1898,8 @@ async function FXRUN(st,ctx){
     }
     if(!cands.length){log('No valid target.');return;}
     const c=await pickCell(cands,'Choose a Teece: '+sgn(st.n)+' to it and everything adjacent to it.',
-      (bb,i)=>{applyModT(bb[i].teece,st.n,st.dur);for(const j of ADJ[i])if(bb[j].teece)applyModT(bb[j].teece,st.n,st.dur);});
+      (bb,i)=>{applyModT(bb[i].teece,st.n,st.dur);for(const j of ADJ[i])if(bb[j].teece)applyModT(bb[j].teece,st.n,st.dur);},
+      false,i=>[i].concat(ADJ[i]));
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const hit=[c];
@@ -1916,7 +1920,8 @@ async function FXRUN(st,ctx){
     for(let i=0;i<BN;i++)if(areaShapeCells(i,st.shape))cands.push(i);
     if(!cands.length){log('No room for the blast.');return;}
     const c=await pickCell(cands,'Choose where the blast lands: '+sgn(st.n)+' to everything caught in it.',
-      (bb,i)=>{for(const j of areaShapeCells(i,st.shape))if(bb[j].teece)applyModT(bb[j].teece,st.n,st.dur);});
+      (bb,i)=>{for(const j of areaShapeCells(i,st.shape))if(bb[j].teece)applyModT(bb[j].teece,st.n,st.dur);},
+      false,i=>areaShapeCells(i,st.shape));
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const cells=areaShapeCells(c,st.shape),hit=[];
@@ -2201,7 +2206,7 @@ async function FXRUN(st,ctx){
     if(!dests.length){log('Nowhere to roll.');return;}
     const t=b[c].teece;
     const dst=await chooseCell(p,dests,'Roll it along its row or column.',
-      {mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);}});
+      {mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);},foot:j=>[j].concat(ADJ[j])});
     if(dst==null||dst==='CANCEL')return;
     moveT(b,c,dst,true);
     log(nm(t)+' rolls to the '+CN[dst]+'.');
@@ -2215,7 +2220,8 @@ async function FXRUN(st,ctx){
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken)cands.push(i);}
     if(!cands.length){log('No Teece to sacrifice.');return;}
-    const c=await pickCell(cands,'Sacrifice one of your Teece to start the avalanche.',null,false);
+    const c=await pickCell(cands,'Sacrifice one of your Teece to start the avalanche.',null,false,
+      i=>{const o=[i];for(let j=i+BW;j<BN;j+=BW)o.push(j);return o;});
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const vt=b[c].teece;
@@ -2231,7 +2237,7 @@ async function FXRUN(st,ctx){
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p)cands.push(i);}
     if(!cands.length){log('No Teece to pound.');return;}
-    const c=await pickCell(cands,'Choose one of your Teece.',null,false);
+    const c=await pickCell(cands,'Choose one of your Teece.',null,false,i=>[i].concat(ADJ[i]));
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     if(b[c].ground)G.players[b[c].ground.owner].grave.push(b[c].ground.cardId);
@@ -3156,7 +3162,8 @@ async function playGround(p,handIdx){
   for(let i=0;i<BN;i++)if(groundCells(i,shape))cands.push(i);
   if(!cands.length){toast('No room for it.');return false;}
   const c=await chooseCell(p,cands,'Choose where '+d.name+' goes.',
-    {cancel:true,mut:(bb,i)=>{for(const j of groundCells(i,shape))bb[j].ground=Object.assign({cardId:id,owner:p},gmode||{});}});
+    {cancel:true,mut:(bb,i)=>{for(const j of groundCells(i,shape))bb[j].ground=Object.assign({cardId:id,owner:p},gmode||{});},
+     foot:i=>groundCells(i,shape)});
   if(c==null||c==='CANCEL')return false;
   pl.hand.splice(handIdx,1);
   const cells=groundCells(c,shape);
@@ -3939,13 +3946,35 @@ async function humanDraftDeck(p){
   return humanDraftInto(p,[],shuffle(POOL.slice()),20);
 }
 /* ============ rendering ============ */
+/* An area effect only tells you where it lands once you hover a candidate
+   panel: paint every panel the shape will actually cover. */
+function clearFoot(){
+  const bd=document.getElementById('board');
+  if(!bd)return;
+  for(const el of bd.children)el.classList.remove('splash');
+}
+function paintFoot(foot,i){
+  clearFoot();
+  const bd=document.getElementById('board');
+  if(!bd)return;
+  let cs=[];
+  try{cs=foot(i)||[];}catch(e){cs=[];}
+  for(const j of cs){const el=bd.children[j];if(el)el.classList.add('splash');}
+}
 function renderBoard(){
   const b=document.getElementById('board');
   b.innerHTML='';
   for(let i=0;i<BN;i++){
     const cell=document.createElement('div');
     cell.className='cell';
-    if(G.pending&&G.pending.kind==='cell'&&G.pending.cells.indexOf(i)>=0){cell.classList.add('target');}
+    if(G.pending&&G.pending.kind==='cell'&&G.pending.cells.indexOf(i)>=0){
+      cell.classList.add('target');
+      const foot=G.pending.opt&&G.pending.opt.foot;
+      if(foot){
+        cell.addEventListener('mouseenter',()=>paintFoot(foot,i));
+        cell.addEventListener('mouseleave',clearFoot);
+      }
+    }
     if(G.detailLock===i)cell.classList.add('locked');
     const an=G.anim&&G.anim.cells.indexOf(i)>=0?G.anim.cls:null;
     if(an==='zap')cell.classList.add('zap');
