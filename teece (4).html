@@ -77,6 +77,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .cell.locked{box-shadow:inset 0 0 0 2px rgba(239,230,208,.55)}
 .mineMark{position:absolute;bottom:3px;right:5px;font-size:12px;z-index:1}
 .mineMark.m0{color:var(--p0)} .mineMark.m1{color:var(--p1)} .mineMark.m2{color:var(--p2)}
+.primeMark{position:absolute;bottom:3px;left:5px;font-size:11px;font-weight:700;color:var(--gold);z-index:1}
 .bglayer{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;
   font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding-bottom:2px}
 .bgplus{background:linear-gradient(180deg,rgba(201,162,39,.05),rgba(201,162,39,.28));color:var(--gold)}
@@ -122,6 +123,26 @@ button,.teece,.cell,.card{touch-action:manipulation}
   gap:10px;padding:8px 12px;border:1px dashed var(--line);border-radius:8px;text-align:center;flex-wrap:wrap}
 #promptBar.hot{border-color:var(--gold);border-style:solid;background:rgba(201,162,39,.07)}
 #promptBar .msg{font-size:13px}
+
+/* the status strip: standing curses and pending effects, between field and hand */
+#statusBar{width:100%;max-width:620px;display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:center;align-items:center}
+#statusBar .stgrp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center}
+#statusBar .stwho{display:inline-flex;align-items:center;gap:5px;color:var(--muted);
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.stchip{display:inline-flex;align-items:center;gap:6px;font-family:var(--body);font-size:11.5px;line-height:1;
+  padding:5px 9px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);
+  color:var(--cream);cursor:help;text-align:left}
+.stchip:hover{border-color:var(--cream2)}
+.stchip .stbang{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+  width:14px;height:14px;border-radius:50%;font-weight:700;font-size:11px;background:var(--muted);color:var(--ink)}
+.stchip.s-bad{border-color:var(--down);background:rgba(184,65,47,.15)}
+.stchip.s-bad .stbang{background:var(--down);color:#fff;animation:bangPulse 1.7s ease-in-out infinite}
+.stchip.s-warn{border-color:var(--gold);background:rgba(201,162,39,.12)}
+.stchip.s-warn .stbang{background:var(--gold);color:var(--ink)}
+.stchip.s-good{border-color:var(--up);background:rgba(47,143,91,.15)}
+.stchip.s-good .stbang{background:var(--up);color:#fff}
+@keyframes bangPulse{0%,100%{box-shadow:0 0 0 0 rgba(184,65,47,.55)}50%{box-shadow:0 0 0 4px rgba(184,65,47,0)}}
+@media(prefers-reduced-motion:reduce){.stchip.s-bad .stbang{animation:none}}
 .btn{background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:6px;
   padding:6px 12px;font-size:12px;letter-spacing:.06em}
 .btn:hover{background:#33291e}
@@ -206,6 +227,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
     <div id="promptBar"><span class="msg">&nbsp;</span></div>
     <div id="board"></div>
     <div id="actionBar" class="hidden"></div>
+    <div id="statusBar" class="hidden"></div>
     <div class="handrow" id="myHand"></div>
   </main>
   <aside>
@@ -3780,6 +3802,8 @@ function renderBoard(){
     }
     const mine=G.board[i].mine;
     if(mine)cell.innerHTML+='<div class="mineMark m'+mine.owner+'">⚠</div>';
+    const prm=G.board[i].prime;
+    if(prm)cell.innerHTML+='<div class="primeMark" title="Primed">'+sgn(prm.n)+'</div>';
     const t=G.board[i].teece;
     if(t){
       const s=effSides(G.board,i),kws=kwOf(G.board,i),aul=actsOf(G.board,i);
@@ -3839,7 +3863,9 @@ function showDetail(i){
     const bg=G.board[i].ground,mn=G.board[i].mine;
     if(bg)d.innerHTML+='<div class="dn">'+CARDS[bg.cardId].name+'</div><div class="dt">'+CARDS[bg.cardId].text+'</div>';
     if(mn)d.innerHTML+='<div class="dt">A Mine is buried here. The next Teece to enter gets -2.</div>';
-    if(!bg&&!mn)d.innerHTML+='<div class="dt">Empty.</div>';
+    const pm=G.board[i].prime;
+    if(pm)d.innerHTML+='<div class="dt">This panel is primed. The next Teece to arrive here gets '+sgn(pm.n)+'.</div>';
+    if(!bg&&!mn&&!pm)d.innerHTML+='<div class="dt">Empty.</div>';
     return;
   }
   const cd=DEF(t);
@@ -3937,6 +3963,162 @@ function showDetailCard(id){
 
   d.innerHTML=html;
 }
+/* ============ status notices ============
+   Everything standing over a player that the board itself does not show: a
+   sprung trap waiting on the next Teece, a curse, a dial that is still set,
+   a turn with no Teece play left in it. These are all public knowledge — the
+   log already announced each one — so the strip only saves you scrolling. */
+function teecePlayBlock(p){
+  const pl=G.players[p];
+  if(!pl)return null;
+  const held=pl.hand.filter(id=>CARDS[id].type==='teece');
+  if(!held.length)return 'You hold no Teece, so there is nothing to put on the field this turn.';
+  if(G.teecePlayed)return 'You have already played a Teece this turn, and only one Teece may be played per turn.';
+  let empty=0;for(let i=0;i<BN;i++)if(!G.board[i].teece)empty++;
+  if(!empty)return 'Every panel is occupied. A Teece needs an empty panel to arrive on.';
+  let own=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p&&!t.isToken)own++;}
+  if(held.every(id=>sacsNeeded(id)>own))
+    return 'Every Teece in your hand costs more sacrifices than you have Teece fielded to pay with.';
+  return null;
+}
+function statusesFor(p){
+  const out=[];
+  if(!G||G.over)return out;
+  const b=G.board,pl=G.players[p];
+  if(!pl)return out;
+  const push=(k,sev,label,text)=>out.push({k,sev,label,text});
+
+  /* --- can a Teece go down at all? --- */
+  if(G.turn===p){
+    const why=teecePlayBlock(p);
+    if(why)push('noteece','warn','No Teece play',why);
+  }
+
+  /* --- what is waiting for the next Teece you play --- */
+  if(G.trap){
+    if(!sameTeam(p,G.trap.by))
+      push('trap','bad','Next Teece dies','A trap is sprung against you. The next Teece you play is destroyed the moment it lands.');
+    else
+      push('trapset','good','Trap sprung','The next Teece played against you is destroyed the moment it lands.');
+  }
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(!t||!t.trapArmed)continue;
+    if(sameTeam(t.owner,p))
+      push('armed'+t.uid,'good','Trap armed: '+nm(t),nm(t)+' is armed. If it is destroyed, the next Teece played against you is destroyed.');
+    else
+      push('armed'+t.uid,'bad','Trap armed: '+nm(t),nm(t)+' is armed. If it is destroyed, the next Teece you play is destroyed.');
+  }
+  let arrive=0;const src=[];
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;if(!t)continue;
+    const d=DEF(t);
+    if(d.onEnemyPlay&&!sameTeam(t.owner,p)){arrive+=d.onEnemyPlay.n;src.push(nm(t));}
+    if(d.onAnyPlay){arrive+=d.onAnyPlay.n;src.push(nm(t));}
+  }
+  if(arrive)push('arrive',arrive<0?'bad':'good','Next Teece '+sgn(arrive),
+    'The next Teece you play arrives with '+sgn(arrive)+', from '+src.join(' and ')+'.');
+  if(pl.nextDefBonus)push('nextdef','good','Next Teece +'+pl.nextDefBonus+' Defence',
+    'The next Teece you play arrives with +'+pl.nextDefBonus+' Defence.');
+  if(pl.calib)push('calib','good','Dial set to '+pl.calib.x,
+    'The Calibration Dial is set to '+pl.calib.x+'. The next Teece you play whose four sides are all '+
+    pl.calib.x+' arrives with '+sgn(pl.calib.n)+'.');
+  if(pl.pendingDraw)push('pdraw','good','Draw '+pl.pendingDraw+' next turn',
+    'You draw '+pl.pendingDraw+' extra card'+(pl.pendingDraw===1?'':'s')+' at the start of your next turn.');
+
+  /* --- primed panels: nothing else on the field announces them --- */
+  for(let i=0;i<BN;i++){
+    const pr=b[i].prime;
+    if(!pr)continue;
+    push('prime'+i,'good','Primed: '+CN[i],'The '+CN[i]+' is primed. The next Teece to arrive there, either side, gets '+sgn(pr.n)+'.');
+  }
+
+  /* --- curses ride the card, not the copy on the field --- */
+  const mine=[],theirs=[];
+  for(const c of G.curses)(c.owner===p?mine:theirs).push(CARDS[c.cardId].name);
+  if(mine.length)push('cursed','bad','Cursed: '+mine.join(', '),
+    (mine.length===1?mine[0]+' is cursed':'These are cursed: '+mine.join(', '))+
+    '. Every move costs -2 permanently, for the rest of the game.');
+  if(theirs.length)push('cursedfoe','good','Enemy cursed: '+theirs.join(', '),
+    'Cursed for the rest of the game, losing 2 permanently on every move: '+theirs.join(', ')+'.');
+
+  /* --- modalities. Read the same sources as modalCtl, but never consume
+         G.modalNext, which only firing a modality is allowed to do. --- */
+  let off=false,all=false,twice=false;
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;if(!t)continue;
+    const d=DEF(t);
+    if(d.modalNone)off=true;
+    if(sameTeam(t.owner,p)){if(d.modalAll)all=true;if(d.modalTwice)twice=true;}
+  }
+  if(off)push('modaloff','bad','Modalities off',
+    'A Safety Interlock stands. No modality triggers at all, for either player, and cards that offer a choice simply do nothing.');
+  else{
+    if(all)push('modalall','good','Modalities: every mode','Your modalities trigger every one of their modes.');
+    if(twice)push('modaltwice','good','Modalities: twice','Each mode of your modalities triggers twice.');
+    const nx=G.modalNext;
+    if(nx&&nx.p===p)push('modalnext','good','Next modality '+(nx.all?'fires every mode':'fires twice'),
+      nx.all?'The next modality you trigger fires every one of its modes.'
+            :'The next modality you trigger fires its chosen mode twice.');
+  }
+
+  /* --- held outside time --- */
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(!t||t.immortalOwner==null)continue;
+    const ally=sameTeam(t.owner,p);
+    push('immortal'+t.uid,ally?'good':'bad',(ally?'Safe: ':'Untouchable: ')+nm(t),
+      nm(t)+' cannot be destroyed until the start of '+pname(t.immortalOwner)+"'s next turn.");
+  }
+
+  /* --- the deck --- */
+  if(G.mode!=='rogue'&&!pl.noDeckOut){
+    if(!pl.deck.length)push('deckout','bad','Deck empty',
+      'Your deck is empty. You lose at the start of your next turn unless the game ends first.');
+    else if(pl.deck.length<=2)push('decklow','warn','Deck: '+pl.deck.length+' left',
+      'Only '+pl.deck.length+' card'+(pl.deck.length===1?'':'s')+' left in your deck. Running it out loses the game.');
+  }
+  return out;
+}
+function showStatusDetail(s){
+  const d=document.getElementById('detail');
+  d.innerHTML='<div class="dlock">Status</div><div class="dn">'+s.label+'</div><div class="dt">'+s.text+'</div>';
+}
+function renderStatus(){
+  const bar=document.getElementById('statusBar');
+  if(!bar)return;
+  bar.innerHTML='';
+  const seats=[];
+  for(let p=0;p<PLAYERS();p++)if(!isAIP(p)&&seatAlive(p))seats.push(p);
+  if(!seats.length)seats.push(0);
+  const multi=seats.length>1;
+  let any=false;
+  for(const p of seats){
+    const list=statusesFor(p);
+    if(!list.length)continue;
+    any=true;
+    const grp=document.createElement('div');
+    grp.className='stgrp';
+    if(multi)grp.innerHTML='<span class="stwho"><span class="dot d'+p+'"></span>'+pname(p)+'</span>';
+    for(const st of list){
+      const key='st'+p+st.k;
+      const chip=document.createElement('button');
+      chip.type='button';
+      chip.className='stchip s-'+st.sev;
+      chip.innerHTML='<span class="stbang">!</span><span>'+st.label+'</span>';
+      chip.title=st.text;
+      const show=()=>{if(G.detailLock==null){G.detailHover=key;showStatusDetail(st);}};
+      chip.addEventListener('mouseenter',show);
+      chip.addEventListener('click',e=>{e.stopPropagation();show();});
+      chip.addEventListener('mouseleave',()=>{
+        if(G.detailLock==null&&G.detailHover===key){G.detailHover=null;showDetail(null);}
+      });
+      grp.appendChild(chip);
+    }
+    bar.appendChild(grp);
+  }
+  bar.classList.toggle('hidden',!any);
+}
 function renderCounts(){
   const c=document.getElementById('counts');
   c.innerHTML='';
@@ -4011,7 +4193,7 @@ function render(){
   syncHandSlots();
   renderBoard();
   for(let p=0;p<PLAYERS();p++)renderHand(p);
-  renderCounts();renderLog();renderPrompt();renderActionBar();
+  renderCounts();renderLog();renderPrompt();renderActionBar();renderStatus();
   const bd=document.getElementById('board');
   bd.style.setProperty('--bw',BW);
   bd.style.setProperty('--cs',(BW>=4?'86px':'110px'));
@@ -4191,7 +4373,7 @@ if(typeof module!=='undefined'){
     teamOf,sameTeam,teamsInPlay,seatsOnTeam,teamReal,teamTotal,seatAlive,nextLiveSeat,FORMATS,teamName,
     runSteps,fireMove,moveT,applyModT,hasKw,putTeece,actsOf,boardValue,
     modalCtl,fireModal,setModalNext,kwOf,playTeece,offerReveal,groundFlag,enemySeats,
-    playHandDiscard,playFromHand};
+    playHandDiscard,playFromHand,statusesFor,teecePlayBlock};
 }
 </script>
 </body>
