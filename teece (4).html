@@ -52,6 +52,14 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card .ct{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#7a6a4d}
 .card .cn{font-family:var(--disp);font-size:15px;line-height:1.05}
 .card .cs{font-size:11px;font-weight:700;margin-top:auto}
+.card .ascii{position:absolute;top:10px;right:8px;bottom:11px;left:8px;margin:0;z-index:0;
+  pointer-events:none;overflow:hidden;background:transparent;color:#2c7038;opacity:.72;
+  display:flex;align-items:center;justify-content:center;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Courier New',monospace;
+  font-size:8px;line-height:1.02;white-space:pre}
+/* the face has to stay readable over the drawing */
+.card.arted .hcn,.card.arted .hs{text-shadow:0 0 3px var(--cream),0 0 3px var(--cream),0 0 2px var(--cream)}
+.card.arted .hcn{position:relative;z-index:1}
 .card .decksym{position:absolute;top:2px;right:3px;font-size:11px;line-height:1;opacity:.85;z-index:1}
 .discardBtn{position:absolute;left:4px;bottom:4px;font-size:9px;letter-spacing:.06em;text-transform:uppercase;
   background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:5px;padding:2px 5px;
@@ -76,7 +84,9 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .cell.target:hover{background:#231b12}
 .cell.locked{box-shadow:inset 0 0 0 2px rgba(239,230,208,.55)}
 .mineMark{position:absolute;bottom:3px;right:5px;font-size:12px;z-index:1}
+.seedMark{position:absolute;top:3px;right:5px;font-size:10px;line-height:1;color:var(--up);z-index:1}
 .mineMark.m0{color:var(--p0)} .mineMark.m1{color:var(--p1)} .mineMark.m2{color:var(--p2)}
+.primeMark{position:absolute;bottom:3px;left:5px;font-size:11px;font-weight:700;color:var(--gold);z-index:1}
 .bglayer{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;
   font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding-bottom:2px}
 .bgplus{background:linear-gradient(180deg,rgba(201,162,39,.05),rgba(201,162,39,.28));color:var(--gold)}
@@ -122,6 +132,26 @@ button,.teece,.cell,.card{touch-action:manipulation}
   gap:10px;padding:8px 12px;border:1px dashed var(--line);border-radius:8px;text-align:center;flex-wrap:wrap}
 #promptBar.hot{border-color:var(--gold);border-style:solid;background:rgba(201,162,39,.07)}
 #promptBar .msg{font-size:13px}
+
+/* the status strip: standing curses and pending effects, between field and hand */
+#statusBar{width:100%;max-width:620px;display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:center;align-items:center}
+#statusBar .stgrp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center}
+#statusBar .stwho{display:inline-flex;align-items:center;gap:5px;color:var(--muted);
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.stchip{display:inline-flex;align-items:center;gap:6px;font-family:var(--body);font-size:11.5px;line-height:1;
+  padding:5px 9px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);
+  color:var(--cream);cursor:help;text-align:left}
+.stchip:hover{border-color:var(--cream2)}
+.stchip .stbang{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+  width:14px;height:14px;border-radius:50%;font-weight:700;font-size:11px;background:var(--muted);color:var(--ink)}
+.stchip.s-bad{border-color:var(--down);background:rgba(184,65,47,.15)}
+.stchip.s-bad .stbang{background:var(--down);color:#fff;animation:bangPulse 1.7s ease-in-out infinite}
+.stchip.s-warn{border-color:var(--gold);background:rgba(201,162,39,.12)}
+.stchip.s-warn .stbang{background:var(--gold);color:var(--ink)}
+.stchip.s-good{border-color:var(--up);background:rgba(47,143,91,.15)}
+.stchip.s-good .stbang{background:var(--up);color:#fff}
+@keyframes bangPulse{0%,100%{box-shadow:0 0 0 0 rgba(184,65,47,.55)}50%{box-shadow:0 0 0 4px rgba(184,65,47,0)}}
+@media(prefers-reduced-motion:reduce){.stchip.s-bad .stbang{animation:none}}
 .btn{background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:6px;
   padding:6px 12px;font-size:12px;letter-spacing:.06em}
 .btn:hover{background:#33291e}
@@ -206,6 +236,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
     <div id="promptBar"><span class="msg">&nbsp;</span></div>
     <div id="board"></div>
     <div id="actionBar" class="hidden"></div>
+    <div id="statusBar" class="hidden"></div>
     <div class="handrow" id="myHand"></div>
   </main>
   <aside>
@@ -349,6 +380,9 @@ const CARDS = {
  TB:{name:'Bomblet',type:'teece',token:true,sides:[3,3,3,3],
     text:'Token. When destroyed: adjacent Teece get -2. Cannot be sacrificed; never counts toward winning.',
     onDeath:[{fx:'aoe',n:-2,dur:'perm'}]},
+ TS:{name:'Sprout',type:'teece',token:true,sides:[3,3,3,3],
+    text:'Sprout Token. When destroyed: every other allied Teece gets +1. Cannot be sacrificed; never counts toward winning.',
+    onDeath:[{fx:'mass',who:'ally',n:1,dur:'perm'}]},
  /* ---- Teece 100 pool: the twenty-two you specified ---- */
  101:{name:'Enforcer',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice one fielded Teece to play.'},
  102:{name:'Grudge',type:'teece',sides:[8,8,8,8],text:'When destroyed: all adjacent enemies get +1.',
@@ -894,7 +928,61 @@ const CARDS = {
  489:{name:'Unstable Ground',type:'ground',gDoubleNeg:true,
     text:'A Teece on this panel that loses attributes loses double instead.'},
  490:{name:'Minefield',type:'ground',gmod:-2,gPlayMod:-4,gmove:-4,gMineKill:true,
-    text:'A Teece on this panel gets -2. A Teece that plays or moves onto it gets -4 more. If a Mine goes off on this panel, it destroys that Teece.'}
+    text:'A Teece on this panel gets -2. A Teece that plays or moves onto it gets -4 more. If a Mine goes off on this panel, it destroys that Teece.'},
+ /* ---- Nature: plants that feed each other, rooted and weak at the base ---- */
+ 501:{name:'Sapling',type:'teece',sides:[4,4,1,4],
+    text:'When played: select a Teece; give it +2.',
+    onPlay:[{fx:'mod',where:'global',n:2,dur:'perm'}]},
+ 502:{name:'Rotting Log',type:'teece',sides:[6,6,2,5],
+    text:'When destroyed: you may select a Teece; give it +2.',
+    onDeath:[{fx:'mod',where:'global',n:2,dur:'perm',may:true}]},
+ 503:{name:'Dandelion',type:'teece',sides:[5,5,4,5],
+    text:'When played: summon a 3/3/3/3 Sprout. When the Sprout is destroyed, every other allied Teece gets +1.',
+    onPlay:[{fx:'token',tok:'TS',count:1}]},
+ 504:{name:'Elder Willow',type:'teece',sides:[7,7,1,7],
+    text:'Once per your turn: select an adjacent Teece; give it +1.',
+    act:[{name:'Shade it',once:'turn',steps:[{fx:'mod',where:'adj',n:1,dur:'perm'}]}]},
+ 505:{name:'Hothouse Orchid',type:'teece',sides:[3,3,0,3],selfDoublePos:true,
+    text:'Every positive attribute effect on this Teece counts double.'},
+ 506:{name:'Bramble Wall',type:'teece',sides:[2,2,1,2],def:2,
+    text:'Defence 2. Every other allied Teece gets +2.',
+    aura:{who:'ally',where:'global',n:2}},
+ 507:{name:'Runner Bean',type:'teece',sides:[3,4,2,4],
+    text:'When played: the next Teece you play arrives with +2.',
+    onPlay:[{fx:'nextMod',n:2}]},
+ 508:{name:'Foxglove',type:'teece',sides:[6,6,5,7],
+    text:'When played: select a Teece; give it +2 until the end of the turn.',
+    onPlay:[{fx:'mod',where:'global',n:2,dur:'temp'}]},
+ 509:{name:'Creeping Ivy',type:'teece',sides:[2,6,2,6],endMod:{n:1},
+    text:'At the end of every turn, it gets +1 permanently.'},
+ 510:{name:'Spore Pod',type:'teece',sides:[5,5,3,5],
+    text:'You can discard this straight from your hand, any time on your turn, to summon a 3/3/3/3 Sprout. Played to the board instead, it summons one when it is destroyed. When a Sprout is destroyed, every other allied Teece gets +1.',
+    handDiscard:[{fx:'token',tok:'TS',count:1}],
+    onDeath:[{fx:'token',tok:'TS',count:1}]},
+ 511:{name:'Mother Tree',type:'teece',sides:[6,6,1,6],sac:1,
+    text:'Sacrifice one fielded Teece to play. Every other allied Teece gets +3.',
+    aura:{who:'ally',where:'global',n:3}},
+ 512:{name:'Ancient Redwood',type:'teece',sides:[10,10,10,10],sac:2,
+    text:'Sacrifice two fielded Teece to play.'},
+ 513:{name:'Quickening Sap',type:'magic',
+    text:'Select a Teece; give it +3 until the end of the turn, and you may then move it to any empty panel.',
+    cast:[{fx:'mod',where:'global',n:3,dur:'temp'},{fx:'teleLast'}]},
+ 514:{name:'Sow a Seed',type:'magic',
+    text:'Select a panel and plant a seed there. It grows after three of your turns: if the panel is empty then, you may raise one Teece out of your graveyard onto it with +1.',
+    cast:[{fx:'plantSeed',turns:3,n:1}]},
+ 515:{name:'Rain of Spring',type:'magic',text:'Every allied Teece gets +2.',
+    cast:[{fx:'mass',who:'ally',n:2,dur:'perm'}]},
+ 516:{name:'Plant Pot',type:'equip',mod:[0,0,20,0],
+    text:'The equipped Teece gets +20 on its bottom side alone.'},
+ 517:{name:'Fertile Soil',type:'equip',mod:3,
+    text:'The equipped Teece gets +3.'},
+ 518:{name:'Moving Roots',type:'equip',mod:0,
+    text:'The equipped Teece has Flying. When you equip it, the Teece gets +5 until the end of the turn.',
+    grants:{kw:['flying'],onEquip:[{fx:'mod',who:'self',n:5,dur:'temp'}]}},
+ 519:{name:'Sunlit Loam',type:'ground',gDoubleStats:true,
+    text:'A Teece on this panel has double attributes on every side.'},
+ 520:{name:'Rich Bed',type:'ground',gmod:3,
+    text:'A Teece on this panel gets +3.'}
 };
 const CLASSIC=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
 const POOL=[];
@@ -919,10 +1007,27 @@ const DECKS={
   time:{name:'Time',cards:[381,382,383,384,385,386,387,388,389,390,391,392,393,394,395,396,397,398,399,400],
     blurb:'Cards that grow or rot on a clock. Every Teece ages at the start of your turn; some come of age into something far bigger, others decay every turn you keep them.'},
   bomb:{name:'Bomb',cards:[471,472,473,474,475,476,477,478,479,480,481,482,483,484,485,486,487,488,489,490],
-    blurb:'Crazy area-of-effect damage that risks blowing itself up too. Lay Mines to control the board, then turn the damage into a boost with Blast Ward.'}
+    blurb:'Crazy area-of-effect damage that risks blowing itself up too. Lay Mines to control the board, then turn the damage into a boost with Blast Ward.'},
+  nature:{name:'Nature',cards:[501,502,503,504,505,506,507,508,509,510,511,512,513,514,515,516,517,518,519,520],
+    blurb:'Plants that feed each other. Almost every card hands out a permanent bonus, and the bonuses stack all game \u2014 but every plant is soft at the bottom, so watch the edge it is standing on.'}
 };
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
-  gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}'};
+  gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',nature:'\u{1F33F}'};
+/* ---- Nature hand art. Drawn behind the face of a plant Teece in hand,
+       transparent, so the four sides and the name still read over it. ---- */
+const NATURE_ART={
+  501:["  \\   |   /  ", "   \\  |  /   ", " ---(=+=)--- ", "     /|\\     ", "      |      ", "     \\|/     ", " ~~~~~~~~~~~ "],
+  502:["   ,     ,   ", "  (o)   (o)  ", "   |     |   ", " __|_____|__ ", "/===========\\", "\\___________/", " ~~~~~~~~~~~ "],
+  503:[" *   .   *   ", "   \\ * / .   ", " .  (***)    ", "     \\|/   * ", "      |      ", "     \\|/     ", " ~~~~~~~~~~~ "],
+  504:["   ,-~~~-,   ", " ,( ..... ), ", " ||||||||||| ", " ' | | | | ' ", "    \\  |  /  ", "     \\ | /   ", " ~~~~~~~~~~~ "],
+  505:["   __/\\__    ", "  / (@@) \\   ", " |  \\||/   | ", " |   ||    | ", " |  /||\\   | ", " '=========' "],
+  506:[" *><*><*><*  ", " ><*><*><*>  ", " *><*><*><*  ", "  |   |   |  ", "  |   |   |  ", " ~~~~~~~~~~~ "],
+  507:["     ,-o     ", "    (  |     ", "     `-o-,   ", "    ,-o   )  ", "   (  |  -'  ", "    `-o      ", " ~~~~~~~~~~~ "],
+  508:["     (o      ", "      o)     ", "     (o      ", "      o)     ", "       |     ", "      /|\\    ", " ~~~~~~~~~~~ "],
+  509:["  <>     <>  ", "    \\   /    ", " <>--\\-/--<> ", "      |      ", " <>---|---<> ", "      |      ", " ~~~~~~~~~~~ "],
+  510:["  .   .   .  ", " .  (@@@)  . ", "  .  \\|/  .  ", "      |      ", "     /|\\     ", " ~~~~~~~~~~~ "],
+  511:["  .-~~~~~-.  ", " ( ####### ) ", "  `-~~~~~-'  ", "    |||||    ", "    |||||    ", "   /|||||\\   ", " ~~~~~~~~~~~ "],
+  512:["      /\\     ", "     /##\\    ", "    /####\\   ", "   /######\\  ", "     |##|    ", "     |##|    ", " ~~~~~~~~~~~ "]};
 const ID_TO_DECK_SYM={};
 for(const key of Object.keys(DECKS))for(const id of DECKS[key].cards)ID_TO_DECK_SYM[id]=DECK_SYM[key];
 const DEF=t=>CARDS[t.cardId];
@@ -1065,11 +1170,11 @@ function newState(mode,vsAI,decks,extra){
   const teams=extra.teams||Array.from({length:nP},(_,i)=>i);
   buildGeometry(extra.width||3);
   const mk=p=>({deck:shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice()),hand:[],grave:[],onceUsed:{},pendingDraw:0,
-    nextDefBonus:0,noDeckOut:false});
+    nextDefBonus:0,nextMod:0,noDeckOut:false});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
     width:BW,
-    board:Array.from({length:BN},()=>({teece:null,ground:null,mine:null,defMark:null})),
+    board:Array.from({length:BN},()=>({teece:null,ground:null,mine:null,defMark:null,seed:null})),
     turn:Math.floor(Math.random()*nP),turnNum:1,teecePlayed:false,over:false,winner:null,pending:null,
     detailLock:null,detailHover:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],
     epoch:++EPOCH,
@@ -1143,6 +1248,8 @@ function effSides(b,i){
       for(let k=0;k<4;k++)s[k]+=amt;
     }
   }
+  /* Sunlit Loam doubles what is left, bonuses and penalties alike */
+  if(b[i].ground&&groundFlag(b[i].ground,'gDoubleStats'))for(let k=0;k<4;k++)s[k]*=2;
   return s;
 }
 function defOf(b,i){
@@ -1446,12 +1553,14 @@ function applyModT(t,n,dur){
       if(n<0&&groundFlag(g,'gDoubleNeg'))n*=2;
     }
   }
+  if(n>0&&DEF(t).selfDoublePos)n*=2;
   const a=dur==='temp'?t.temp:t.perm;
   for(let k=0;k<4;k++)a[k]+=n;
   if(n<0&&DEF(t).dieOnLoss)forceDeath(t);
 }
 function applyDef(t,n){t.defPerm=(t.defPerm||0)+n;}
 const sgn=n=>(n>0?'+':'')+n;
+const escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function durTxt(dur){return dur==='temp'?' until end of turn':' permanently';}
 
 async function runSteps(steps,ctx){
@@ -1936,6 +2045,37 @@ async function FXRUN(st,ctx){
   case 'nextDef':{
     G.players[ctx.deadOwner!=null?ctx.deadOwner:p].nextDefBonus+=st.n;
     log('The next Teece played gets +'+st.n+' Defence.');
+    return;}
+  case 'nextMod':{
+    const who=ctx.deadOwner!=null?ctx.deadOwner:p;
+    G.players[who].nextMod+=st.n;
+    log('The next Teece '+pname(who)+' plays arrives with '+sgn(st.n)+'.');
+    return;}
+  case 'teleLast':{
+    const c=ctx.last;
+    if(c==null||!b[c].teece)return;
+    if(hasKw(b,c,'immovable')){log('It cannot be moved.');return;}
+    const open=[];for(let j=0;j<BN;j++)if(j!==c&&!b[j].teece)open.push(j);
+    if(!open.length){log('There is nowhere to move it.');return;}
+    const t=b[c].teece;
+    const dst=await chooseCell(p,open,'Move '+nm(t)+' to any empty panel, or skip.',
+      {skip:true,mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);}});
+    if(dst==null||dst==='CANCEL')return;
+    moveT(b,c,dst,true);
+    ctx.last=dst;
+    log(nm(t)+' pulls up its roots and settles at the '+CN[dst]+'.');
+    await anim([dst],'placed',140);
+    await fireMove(c,dst,p);
+    return;}
+  case 'plantSeed':{
+    const cands=[];for(let i=0;i<BN;i++)if(!b[i].seed)cands.push(i);
+    if(!cands.length){log('Every panel already holds a seed.');return;}
+    const c=await pickCell(cands,'Plant a seed on which panel?',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    b[c].seed={owner:p,turns:st.turns||3,n:st.n||1};
+    log(pname(p)+' plants a seed at the '+CN[c]+'. It grows in '+(st.turns||3)+' turns.');
+    await anim([c],'zap');
     return;}
   case 'moveTarget':{
     const src=ctx.cell;
@@ -2899,6 +3039,7 @@ async function playTeece(p,handIdx){
   log(pname(p)+' plays '+d.name+' at the '+CN[spot]+(G.viaReveal?' — revealed, so it doesn’t use this turn’s Teece play.':'.'));
   await anim([spot],'placed',140);
   if(pl.nextDefBonus){applyDef(t,pl.nextDefBonus);log(nm(t)+' arrives with +'+pl.nextDefBonus+' Defence.');pl.nextDefBonus=0;}
+  if(pl.nextMod){const nmd=pl.nextMod;pl.nextMod=0;applyModT(t,nmd,'perm');log(nm(t)+' arrives with '+sgn(nmd)+'.');}
   if(pl.calib&&t.base.every(v=>v===pl.calib.x)){
     const cn=pl.calib.n;pl.calib=null;
     for(let k=0;k<4;k++)t.perm[k]+=cn;
@@ -3085,6 +3226,12 @@ async function endTurn(){
   }
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
+    if(!t)continue;
+    const em=DEF(t).endMod;
+    if(em){applyModT(t,em.n,'perm');log(nm(t)+' puts on another ring: '+sgn(em.n)+'.');}
+  }
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
     if(t&&t.owner===p&&DEF(t).dieAtEndOfTurn){
       log(nm(t)+' burns itself out.');
       forceDeath(t);
@@ -3118,6 +3265,32 @@ function checkStalemate(){
     endGame(who,'Six turns passed with nothing played and nothing destroyed. Field: '+scoreLine()+'.');
   }
 }
+async function growSeeds(p){
+  for(let i=0;i<BN;i++){
+    const sd=G.board[i].seed;
+    if(!sd||sd.owner!==p)continue;
+    sd.turns--;
+    if(sd.turns>0)continue;
+    G.board[i].seed=null;
+    if(G.board[i].teece){log('The seed at the '+CN[i]+' comes up under '+nm(G.board[i].teece)+' and is lost.');continue;}
+    const grave=G.players[p].grave.filter(id=>CARDS[id].type==='teece'&&!isBossCard(id));
+    if(!grave.length){log('The seed at the '+CN[i]+' grows, but there is nothing in the graveyard to raise.');continue;}
+    const opts=grave.map((id,x)=>({v:String(x),lbl:CARDS[id].name+' '+CARDS[id].sides.join('/')}));
+    opts.push({v:'no',lbl:'Let it lie'});
+    const pick=await chooseOption(p,opts,'The seed at the '+CN[i]+' grows. Raise which Teece, with +'+(sd.n||1)+'?');
+    if(pick==null||pick==='no'){log('The seed at the '+CN[i]+' grows and nothing is raised.');continue;}
+    const cid=grave[parseInt(pick,10)];
+    const gi=G.players[p].grave.lastIndexOf(cid);
+    if(gi<0)continue;
+    G.players[p].grave.splice(gi,1);
+    const t=makeTeece(cid,p);
+    for(let k=0;k<4;k++)t.perm[k]+=(sd.n||1);
+    putTeece(G.board,i,t,true);
+    log(CARDS[cid].name+' grows out of the seed at the '+CN[i]+' with '+sgn(sd.n||1)+'.');
+    await anim([i],'placed',140);
+    await resolveCombat();
+  }
+}
 async function startTurn(){
   if(!G)return;
   const ep=G.epoch;
@@ -3132,6 +3305,8 @@ async function startTurn(){
   await resolveCombat();
   if(stale(ep)||G.over)return;
   await ageTurn(p);
+  if(stale(ep)||G.over)return;
+  await growSeeds(p);
   if(stale(ep)||G.over)return;
   if(pl.pendingDraw){const n=pl.pendingDraw;pl.pendingDraw=0;drawCards(p,n);}
   if(G.turnNum>1){
@@ -3169,7 +3344,10 @@ function cloneBoard(b){
       links:c.teece.links.slice(),controls:c.teece.controls.slice(),
       actUsedTurn:Object.assign({},c.teece.actUsedTurn),actUsedGame:Object.assign({},c.teece.actUsedGame)}):null,
     ground:c.ground?Object.assign({},c.ground):null,
-    mine:c.mine?Object.assign({},c.mine):null
+    mine:c.mine?Object.assign({},c.mine):null,
+    prime:c.prime?Object.assign({},c.prime):null,
+    defMark:c.defMark?Object.assign({},c.defMark):null,
+    seed:c.seed?Object.assign({},c.seed):null
   }));
 }
 function simDeath(b,d){
@@ -3780,6 +3958,10 @@ function renderBoard(){
     }
     const mine=G.board[i].mine;
     if(mine)cell.innerHTML+='<div class="mineMark m'+mine.owner+'">⚠</div>';
+    const prm=G.board[i].prime;
+    if(prm)cell.innerHTML+='<div class="primeMark" title="Primed">'+sgn(prm.n)+'</div>';
+    const sd=G.board[i].seed;
+    if(sd)cell.innerHTML+='<div class="seedMark" title="A seed is planted here">\u{1F331}'+sd.turns+'</div>';
     const t=G.board[i].teece;
     if(t){
       const s=effSides(G.board,i),kws=kwOf(G.board,i),aul=actsOf(G.board,i);
@@ -3839,7 +4021,11 @@ function showDetail(i){
     const bg=G.board[i].ground,mn=G.board[i].mine;
     if(bg)d.innerHTML+='<div class="dn">'+CARDS[bg.cardId].name+'</div><div class="dt">'+CARDS[bg.cardId].text+'</div>';
     if(mn)d.innerHTML+='<div class="dt">A Mine is buried here. The next Teece to enter gets -2.</div>';
-    if(!bg&&!mn)d.innerHTML+='<div class="dt">Empty.</div>';
+    const pm=G.board[i].prime,sd=G.board[i].seed;
+    if(pm)d.innerHTML+='<div class="dt">This panel is primed. The next Teece to arrive here gets '+sgn(pm.n)+'.</div>';
+    if(sd)d.innerHTML+='<div class="dt">'+pname(sd.owner)+' has a seed planted here, '+sd.turns+' turn'+(sd.turns===1?'':'s')+
+      ' from growing. If the panel is empty then, a Teece is raised from the graveyard with '+sgn(sd.n||1)+'.</div>';
+    if(!bg&&!mn&&!pm&&!sd)d.innerHTML+='<div class="dt">Empty.</div>';
     return;
   }
   const cd=DEF(t);
@@ -3902,7 +4088,10 @@ function renderHand(p){
     if(p!==G.turn||G.teecePlayed&&cd.type==='teece'||G.over)card.classList.add('dim');
     const dsym=ID_TO_DECK_SYM[id];
     if(cd.type==='teece'){
-      card.innerHTML='<div class="hs hs0">'+cd.sides[0]+'</div>'+
+      const art=NATURE_ART[id];
+      if(art)card.classList.add('arted');
+      card.innerHTML=(art?'<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>':'')+
+        '<div class="hs hs0">'+cd.sides[0]+'</div>'+
         '<div class="hs hs1">'+cd.sides[1]+'</div>'+
         '<div class="hs hs2">'+cd.sides[2]+'</div>'+
         '<div class="hs hs3">'+cd.sides[3]+'</div>'+
@@ -3936,6 +4125,172 @@ function showDetailCard(id){
   let html='<div class="dn">'+cd.name+'</div><div class="dt">'+cd.text+'</div>';
 
   d.innerHTML=html;
+}
+/* ============ status notices ============
+   Everything standing over a player that the board itself does not show: a
+   sprung trap waiting on the next Teece, a curse, a dial that is still set,
+   a turn with no Teece play left in it. These are all public knowledge — the
+   log already announced each one — so the strip only saves you scrolling. */
+function teecePlayBlock(p){
+  const pl=G.players[p];
+  if(!pl)return null;
+  const held=pl.hand.filter(id=>CARDS[id].type==='teece');
+  if(!held.length)return 'You hold no Teece, so there is nothing to put on the field this turn.';
+  if(G.teecePlayed)return 'You have already played a Teece this turn, and only one Teece may be played per turn.';
+  let empty=0;for(let i=0;i<BN;i++)if(!G.board[i].teece)empty++;
+  if(!empty)return 'Every panel is occupied. A Teece needs an empty panel to arrive on.';
+  let own=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p&&!t.isToken)own++;}
+  if(held.every(id=>sacsNeeded(id)>own))
+    return 'Every Teece in your hand costs more sacrifices than you have Teece fielded to pay with.';
+  return null;
+}
+function statusesFor(p){
+  const out=[];
+  if(!G||G.over)return out;
+  const b=G.board,pl=G.players[p];
+  if(!pl)return out;
+  const push=(k,sev,label,text)=>out.push({k,sev,label,text});
+
+  /* --- can a Teece go down at all? --- */
+  if(G.turn===p){
+    const why=teecePlayBlock(p);
+    if(why)push('noteece','warn','No Teece play',why);
+  }
+
+  /* --- what is waiting for the next Teece you play --- */
+  if(G.trap){
+    if(!sameTeam(p,G.trap.by))
+      push('trap','bad','Next Teece dies','A trap is sprung against you. The next Teece you play is destroyed the moment it lands.');
+    else
+      push('trapset','good','Trap sprung','The next Teece played against you is destroyed the moment it lands.');
+  }
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(!t||!t.trapArmed)continue;
+    if(sameTeam(t.owner,p))
+      push('armed'+t.uid,'good','Trap armed: '+nm(t),nm(t)+' is armed. If it is destroyed, the next Teece played against you is destroyed.');
+    else
+      push('armed'+t.uid,'bad','Trap armed: '+nm(t),nm(t)+' is armed. If it is destroyed, the next Teece you play is destroyed.');
+  }
+  let arrive=0;const src=[];
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;if(!t)continue;
+    const d=DEF(t);
+    if(d.onEnemyPlay&&!sameTeam(t.owner,p)){arrive+=d.onEnemyPlay.n;src.push(nm(t));}
+    if(d.onAnyPlay){arrive+=d.onAnyPlay.n;src.push(nm(t));}
+  }
+  if(arrive)push('arrive',arrive<0?'bad':'good','Next Teece '+sgn(arrive),
+    'The next Teece you play arrives with '+sgn(arrive)+', from '+src.join(' and ')+'.');
+  if(pl.nextDefBonus)push('nextdef','good','Next Teece +'+pl.nextDefBonus+' Defence',
+    'The next Teece you play arrives with +'+pl.nextDefBonus+' Defence.');
+  if(pl.nextMod)push('nextmod',pl.nextMod<0?'bad':'good','Next Teece '+sgn(pl.nextMod),
+    'The next Teece you play arrives with '+sgn(pl.nextMod)+'.');
+  if(pl.calib)push('calib','good','Dial set to '+pl.calib.x,
+    'The Calibration Dial is set to '+pl.calib.x+'. The next Teece you play whose four sides are all '+
+    pl.calib.x+' arrives with '+sgn(pl.calib.n)+'.');
+  if(pl.pendingDraw)push('pdraw','good','Draw '+pl.pendingDraw+' next turn',
+    'You draw '+pl.pendingDraw+' extra card'+(pl.pendingDraw===1?'':'s')+' at the start of your next turn.');
+
+  /* --- primed panels: nothing else on the field announces them --- */
+  for(let i=0;i<BN;i++){
+    const pr=b[i].prime;
+    if(!pr)continue;
+    push('prime'+i,'good','Primed: '+CN[i],'The '+CN[i]+' is primed. The next Teece to arrive there, either side, gets '+sgn(pr.n)+'.');
+  }
+  for(let i=0;i<BN;i++){
+    const sd=b[i].seed;
+    if(!sd)continue;
+    const mine=sameTeam(p,sd.owner);
+    push('seed'+i,mine?'good':'warn',(mine?'Seed at ':'Enemy seed at ')+CN[i]+': '+sd.turns,
+      (mine?'Your seed':pname(sd.owner)+"'s seed")+' at the '+CN[i]+' grows in '+sd.turns+' turn'+(sd.turns===1?'':'s')+
+      '. If the panel is empty then, a Teece is raised out of the graveyard onto it with '+sgn(sd.n||1)+'.');
+  }
+
+  /* --- curses ride the card, not the copy on the field --- */
+  const mine=[],theirs=[];
+  for(const c of G.curses)(c.owner===p?mine:theirs).push(CARDS[c.cardId].name);
+  if(mine.length)push('cursed','bad','Cursed: '+mine.join(', '),
+    (mine.length===1?mine[0]+' is cursed':'These are cursed: '+mine.join(', '))+
+    '. Every move costs -2 permanently, for the rest of the game.');
+  if(theirs.length)push('cursedfoe','good','Enemy cursed: '+theirs.join(', '),
+    'Cursed for the rest of the game, losing 2 permanently on every move: '+theirs.join(', ')+'.');
+
+  /* --- modalities. Read the same sources as modalCtl, but never consume
+         G.modalNext, which only firing a modality is allowed to do. --- */
+  let off=false,all=false,twice=false;
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;if(!t)continue;
+    const d=DEF(t);
+    if(d.modalNone)off=true;
+    if(sameTeam(t.owner,p)){if(d.modalAll)all=true;if(d.modalTwice)twice=true;}
+  }
+  if(off)push('modaloff','bad','Modalities off',
+    'A Safety Interlock stands. No modality triggers at all, for either player, and cards that offer a choice simply do nothing.');
+  else{
+    if(all)push('modalall','good','Modalities: every mode','Your modalities trigger every one of their modes.');
+    if(twice)push('modaltwice','good','Modalities: twice','Each mode of your modalities triggers twice.');
+    const nx=G.modalNext;
+    if(nx&&nx.p===p)push('modalnext','good','Next modality '+(nx.all?'fires every mode':'fires twice'),
+      nx.all?'The next modality you trigger fires every one of its modes.'
+            :'The next modality you trigger fires its chosen mode twice.');
+  }
+
+  /* --- held outside time --- */
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(!t||t.immortalOwner==null)continue;
+    const ally=sameTeam(t.owner,p);
+    push('immortal'+t.uid,ally?'good':'bad',(ally?'Safe: ':'Untouchable: ')+nm(t),
+      nm(t)+' cannot be destroyed until the start of '+pname(t.immortalOwner)+"'s next turn.");
+  }
+
+  /* --- the deck --- */
+  if(G.mode!=='rogue'&&!pl.noDeckOut){
+    if(!pl.deck.length)push('deckout','bad','Deck empty',
+      'Your deck is empty. You lose at the start of your next turn unless the game ends first.');
+    else if(pl.deck.length<=2)push('decklow','warn','Deck: '+pl.deck.length+' left',
+      'Only '+pl.deck.length+' card'+(pl.deck.length===1?'':'s')+' left in your deck. Running it out loses the game.');
+  }
+  return out;
+}
+function showStatusDetail(s){
+  const d=document.getElementById('detail');
+  d.innerHTML='<div class="dlock">Status</div><div class="dn">'+s.label+'</div><div class="dt">'+s.text+'</div>';
+}
+function renderStatus(){
+  const bar=document.getElementById('statusBar');
+  if(!bar)return;
+  bar.innerHTML='';
+  const seats=[];
+  for(let p=0;p<PLAYERS();p++)if(!isAIP(p)&&seatAlive(p))seats.push(p);
+  if(!seats.length)seats.push(0);
+  const multi=seats.length>1;
+  let any=false;
+  for(const p of seats){
+    const list=statusesFor(p);
+    if(!list.length)continue;
+    any=true;
+    const grp=document.createElement('div');
+    grp.className='stgrp';
+    if(multi)grp.innerHTML='<span class="stwho"><span class="dot d'+p+'"></span>'+pname(p)+'</span>';
+    for(const st of list){
+      const key='st'+p+st.k;
+      const chip=document.createElement('button');
+      chip.type='button';
+      chip.className='stchip s-'+st.sev;
+      chip.innerHTML='<span class="stbang">!</span><span>'+st.label+'</span>';
+      chip.title=st.text;
+      const show=()=>{if(G.detailLock==null){G.detailHover=key;showStatusDetail(st);}};
+      chip.addEventListener('mouseenter',show);
+      chip.addEventListener('click',e=>{e.stopPropagation();show();});
+      chip.addEventListener('mouseleave',()=>{
+        if(G.detailLock==null&&G.detailHover===key){G.detailHover=null;showDetail(null);}
+      });
+      grp.appendChild(chip);
+    }
+    bar.appendChild(grp);
+  }
+  bar.classList.toggle('hidden',!any);
 }
 function renderCounts(){
   const c=document.getElementById('counts');
@@ -4011,7 +4366,7 @@ function render(){
   syncHandSlots();
   renderBoard();
   for(let p=0;p<PLAYERS();p++)renderHand(p);
-  renderCounts();renderLog();renderPrompt();renderActionBar();
+  renderCounts();renderLog();renderPrompt();renderActionBar();renderStatus();
   const bd=document.getElementById('board');
   bd.style.setProperty('--bw',BW);
   bd.style.setProperty('--cs',(BW>=4?'86px':'110px'));
@@ -4191,7 +4546,7 @@ if(typeof module!=='undefined'){
     teamOf,sameTeam,teamsInPlay,seatsOnTeam,teamReal,teamTotal,seatAlive,nextLiveSeat,FORMATS,teamName,
     runSteps,fireMove,moveT,applyModT,hasKw,putTeece,actsOf,boardValue,
     modalCtl,fireModal,setModalNext,kwOf,playTeece,offerReveal,groundFlag,enemySeats,
-    playHandDiscard,playFromHand};
+    playHandDiscard,playFromHand,statusesFor,teecePlayBlock,growSeeds,NATURE_ART,DECK_SYM};
 }
 </script>
 </body>
