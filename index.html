@@ -2301,7 +2301,7 @@ async function FXRUN(st,ctx){
     log(nm(t)+' gets '+sgn(st.n)+' Defence.');
     return;}
   case 'choose':{
-    const ctl=modalCtl(p,ctx.cell);
+    const ctl=ctx.noModal?{all:false,times:1,off:false}:modalCtl(p,ctx.cell);
     if(ctl.off){log('Safety Interlock holds: the modality does nothing.');return;}
     if(ctl.all){
       log('Every mode fires'+(ctl.times>1?', twice over.':'.'));
@@ -2626,19 +2626,21 @@ async function processDeath(d){
       log(nm(w)+' gets '+sgn(wd.onAllyDeath.n)+durTxt(wd.onAllyDeath.dur)+'.');
     }
   }
-  const ctx={p:t.owner,deadCell:cell,deadOwner:t.owner,cell,t};
-  /* killers' own on-kill rewards */
+  const ctx={p:t.owner,deadCell:cell,deadOwner:t.owner,cell,t,noModal:true};
+  /* killers' own on-kill rewards: a killer that also died this same combat wave
+     (simultaneous mutual kills) is gone from the board, so fall back to the
+     wave's own death registry rather than losing the reward. */
   for(const kuid of d.killers){
-    for(let i=0;i<BN;i++){
-      const k=b[i].teece;
-      if(!k||k.uid!==kuid)continue;
-      const oks=[];
-      const kd=DEF(k); if(kd.onKill)oks.push(kd.onKill);
-      for(const e of k.equips){const g=CARDS[e.cardId].grants;if(g&&g.onKill)oks.push(g.onKill);}
-      for(const ok of oks){
-        if(ok.draw)drawCards(k.owner,ok.draw);
-        else{applyModT(k,ok.n,ok.dur);log(nm(k)+' gets '+sgn(ok.n)+durTxt(ok.dur)+' for the kill.');}
-      }
+    let k=null;
+    for(let i=0;i<BN;i++){const w=b[i].teece;if(w&&w.uid===kuid){k=w;break;}}
+    if(!k&&G._deathWave)k=G._deathWave[kuid]||null;
+    if(!k)continue;
+    const oks=[];
+    const kd=DEF(k); if(kd.onKill)oks.push(kd.onKill);
+    for(const e of k.equips){const g=CARDS[e.cardId].grants;if(g&&g.onKill)oks.push(g.onKill);}
+    for(const ok of oks){
+      if(ok.draw)drawCards(k.owner,ok.draw);
+      else{applyModT(k,ok.n,ok.dur);log(nm(k)+' gets '+sgn(ok.n)+durTxt(ok.dur)+' for the kill.');}
     }
   }
   /* victim's death effects, then equip-granted ones */
@@ -2768,7 +2770,10 @@ async function resolveCombat(){
     }
     if(dodged){deaths=scanDeaths(G.board);if(!deaths.length)break;}
     await anim(deaths.map(d=>d.cell),'dying',190);
+    G._deathWave={};
+    for(const d of deaths)G._deathWave[d.t.uid]=d.t;
     for(const d of deaths)await processDeath(d);
+    G._deathWave=null;
     if(HAS_DOM)render();
     if(stale(ep))return;
     checkElimination();
