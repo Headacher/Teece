@@ -1474,8 +1474,8 @@ const CARDS = {
  538:{name:'Moving Roots',type:'equip',mod:0,
     text:'The equipped Teece has Flying. When you equip it, the Teece gets +5 until the end of the turn.',
     grants:{kw:['flying'],onEquip:[{fx:'mod',who:'self',n:5,dur:'temp'}]}},
- 539:{name:'Sunlit Loam',type:'ground',gDoubleStats:true,
-    text:'A Teece on this panel has double attributes on every side.'},
+ 539:{name:'Sunlit Loam',type:'ground',gDoublePosAll:true,
+    text:'Every positive attribute effect on a Teece on this panel counts double. Its own attributes are untouched.'},
  540:{name:'Rich Bed',type:'ground',gmod:3,
     text:'A Teece on this panel gets +3.'}
 };
@@ -1793,8 +1793,9 @@ function effSides(b,i){
   for(let k=0;k<4;k++)s[k]=t.base[k]+t.perm[k]+t.temp[k];
   /* Hothouse Orchid doubles every positive effect on it. Perm and temp were
      already doubled as they were applied, so only the standing sources --
-     equips, the battleground under it, auras -- are doubled here. */
-  const selfDbl=!!DEF(t).selfDoublePos;
+     equips, the battleground under it, auras -- are doubled here. Sunlit Loam
+     hands the same rule to whatever is standing on it. */
+  const selfDbl=!!DEF(t).selfDoublePos||groundFlag(b[i].ground,'gDoublePosAll');
   const addMod=(sum,m)=>{
     if(m==null)return;
     if(Array.isArray(m)){for(let k=0;k<4;k++)sum[k]+=(selfDbl&&m[k]>0)?m[k]*2:m[k];}
@@ -1831,8 +1832,6 @@ function effSides(b,i){
       for(let k=0;k<4;k++)s[k]+=amt;
     }
   }
-  /* Sunlit Loam doubles what is left, bonuses and penalties alike */
-  if(b[i].ground&&groundFlag(b[i].ground,'gDoubleStats'))for(let k=0;k<4;k++)s[k]*=2;
   return s;
 }
 function defOf(b,i){
@@ -2139,15 +2138,19 @@ function applyModT(t,n,dur){
     if(isSteadfast(t))return;
     if(hasInvertLoss(t))n=-n;
   }
+  /* Doubling is a state, not a stacking multiplier: two sources saying
+     "positive effects count double" still only double it once. */
+  let dblPos=!!DEF(t).selfDoublePos,dblNeg=false;
   if(G&&G.board){
     const ci=G.board.findIndex(c=>c.teece===t);
     if(ci>=0&&G.board[ci].ground){
       const g=G.board[ci].ground;
-      if(n>0&&groundFlag(g,'gDoublePos'))n*=2;
-      if(n<0&&groundFlag(g,'gDoubleNeg'))n*=2;
+      if(groundFlag(g,'gDoublePos')||groundFlag(g,'gDoublePosAll'))dblPos=true;
+      if(groundFlag(g,'gDoubleNeg'))dblNeg=true;
     }
   }
-  if(n>0&&DEF(t).selfDoublePos)n*=2;
+  if(n>0&&dblPos)n*=2;
+  if(n<0&&dblNeg)n*=2;
   const a=dur==='temp'?t.temp:t.perm;
   for(let k=0;k<4;k++)a[k]+=n;
   if(n<0&&DEF(t).dieOnLoss)forceDeath(t);
