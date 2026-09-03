@@ -344,20 +344,6 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
        Win by wiping out every enemy Teece, ending a turn with four more Teece fielded (Tokens never count),
        or having the bigger field when a player must draw from an empty deck.
        Any Teece whose attributes drop below zero dies on the spot.</p>
-    <h3>Classic</h3>
-    <p>Both sides play the identical fixed twenty-card deck.</p>
-    <div class="row">
-      <button class="btn primary" id="cAI">vs Computer</button>
-      <button class="btn" id="cHot">Hotseat</button>
-    </div>
-    <h3>Teece 100</h3>
-    <p>Draft your own twenty-card deck: twenty picks, three cards offered per pick, from every card in the game —
-       the hundred draft designs plus all seventy-two deck cards. Ranged, Flying, Teleport, Defence, clocks, Mines,
-       activated abilities (select your Teece on the board to use them), mind control and more.</p>
-    <div class="row">
-      <button class="btn primary" id="tAI">vs Computer</button>
-      <button class="btn" id="tHot">Hotseat</button>
-    </div>
     <h3>Decks</h3>
     <p>Pick a prebuilt deck, choose which deck the computer brings, and set how hard it hits: every enemy Teece
        can carry anywhere from &minus;3 to +3 on all four sides. Each deck has its own machinery: Berserker is twelve
@@ -427,6 +413,7 @@ const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
 const CARD_ART={
+  "T9":["  \\\\  ^  //  ", "  ( O   O )  ", "  /[#####]\\  ", "  |  ###  |  ", "  /  | |  \\  "],
   "TFAM":["  \\  /\\_/\\  /", "   \\( o o )/ ", "   ==[###]== ", "    /  |  \\  ", "    '  '  '  "],
   1:["     ,-.     ", "    ( o )    ", "   /[###]\\   ", "  ' / | \\ '  ", "  _/     \\_  "],
   2:["  \\  ,-.  /  ", "   \\( ^ )/   ", "    [###]    ", "    / | \\    ", "   _/   \\_   "],
@@ -728,6 +715,17 @@ const CARD_ART={
   "TD":["  \\   _   /  ", "   \\ (o) /   ", "  ==[###]==  ", "   / | | \\   ", "   '  '  '   "],
   "TR":["    .---.    ", "  ,'#####',  ", " /#########\\ ", " \\#########/ ", "  `-------'  "],
   "TS":["    \\ | /    ", "     \\|/     ", "   .--+--.   ", "      |      ", " ~~~~~~~~~~~ "]};
+/* Roguelike drafts from the whole card list, not the curated POOL: every
+   card in the game that is not a Token can turn up. */
+function allDraftable(){
+  const out=[];
+  for(const k of Object.keys(CARDS)){
+    if(CARDS[k].token)continue;
+    const id=Number(k);
+    if(Number.isFinite(id))out.push(id);
+  }
+  return out;
+}
 function getCardDeck(cardId){
   for(const [key,deck] of Object.entries(DECKS)){
     if(deck.cards.includes(cardId))return key;
@@ -815,6 +813,7 @@ const CARDS = {
  T2:{name:'Token',type:'teece',token:true,sides:[2,2,2,2],text:'Token. Cannot be sacrificed; never counts toward winning.'},
  T3:{name:'Token',type:'teece',token:true,sides:[3,3,3,3],text:'Token. Cannot be sacrificed; never counts toward winning.'},
  T8:{name:'Token',type:'teece',token:true,sides:[8,8,8,8],text:'Token. Cannot be sacrificed; never counts toward winning.'},
+ T9:{name:'Ogre Token',type:'teece',token:true,sides:[9,9,9,9],text:'Token. Cannot be sacrificed; never counts toward winning.'},
  T4:{name:'Token',type:'teece',token:true,sides:[4,4,4,4],text:'Token. Cannot be sacrificed; never counts toward winning.'},
  TR:{name:'Rock Token',type:'teece',token:true,sides:[0,0,0,0],def:6,text:'Token with Defence 6. Cannot be sacrificed; never counts toward winning.'},
  TD:{name:'Drone',type:'teece',token:true,sides:[3,3,3,3],kw:['flying'],text:'Drone Token. Flying: once per your turn, move one space. Never counts toward winning.'},
@@ -1074,7 +1073,7 @@ const CARDS = {
     text:'When played: you may move an adjacent Teece one space. If you do, it gets -2 permanently.',
     onPlay:[{fx:'moveTarget',where:'adj',may:true,thenMod:{n:-2,dur:'perm'}}]},
  352:{name:'Ogre Hurler',type:'teece',sides:[4,4,8,8],
-    text:'When played: you may throw an adjacent Teece to the panel directly opposite this one. If you do, it gets -2 permanently.',
+    text:'When played: you may throw an adjacent Teece clean over this one, to the far end of the row or column it shares with it. If you do, it gets -2 permanently.',
     onPlay:[{fx:'moveTarget',where:'adj',dir:'opposite',may:true,thenMod:{n:-2,dur:'perm'}}]},
  353:{name:'Ogre Sharpshooter',type:'teece',sides:[4,5,8,7],kw:['ranged'],
     text:'Ranged. When played: you may knock any Teece one space directly away from this one. If you do, it gets -2 permanently.',
@@ -1105,7 +1104,7 @@ const CARDS = {
     text:'When it moves: you may destroy it to give every adjacent Teece -3 and blow them one space.',
     onMove:[{fx:'selfDestruct',n:-3,dur:'perm'}]},
  362:{name:'Ogre Whelp',type:'teece',sides:[1,1,1,1],
-    text:'When played: return an adjacent Teece to hand, or move it one space. When destroyed, once per game: return this to your hand.',
+    text:'When played: return an adjacent non-Boss Teece to hand, or move it one space. When destroyed, once per game: return this to your hand.',
     onPlay:[{fx:'handOrMove'}],grants:{},onDeath:[{fx:'selfToHand',once:'game'}]},
  363:{name:'Rockslide Call',type:'magic',rebound:true,
     text:'Drag an enemy one space toward one of your Teece in its row or column. The first time you cast this each game, it returns to your hand.',
@@ -1115,8 +1114,8 @@ const CARDS = {
     cast:[{fx:'choose',msg:'Second Wind:',opts:[
       {lbl:'Give it +3',steps:[{fx:'movedMod',n:3,dur:'perm'}]},
       {lbl:'Give it -3',steps:[{fx:'movedMod',n:-3,dur:'perm'}]}]}]},
- 365:{name:'Warstomp',type:'magic',text:'If any Teece moved this turn: summon an 8/8/8/8 Ogre Token.',
-    cast:[{fx:'movedToken',tok:'T8'}]},
+ 365:{name:'Warstomp',type:'magic',text:'If any Teece moved this turn: summon a 9/9/9/9 Ogre Token.',
+    cast:[{fx:'movedToken',tok:'T9'}]},
  366:{name:'Counterweight',type:'equip',mod:0,
     text:'Whenever an enemy moves, the equipped Teece gets +2 until end of turn and may move one space.',
     grants:{onEnemyMove:[{fx:'modSelf',n:2,dur:'temp'}]}},
@@ -1128,7 +1127,8 @@ const CARDS = {
     grants:{onEquip:[{fx:'moveTarget',where:'any',who:'enemy',may:true}]}},
  369:{name:'Sinkhole',type:'ground',gDestroyOnMove:true,
     text:'A Teece that moves onto this panel is destroyed.'},
- 370:{name:'Springshelf',type:'ground',gmove:3,text:'A Teece that moves onto this panel gets +3.'},
+ 370:{name:'Springshelf',type:'ground',gStand:5,
+    text:'A Teece that moves onto this panel gets +5 for as long as it stays there. A Teece played straight onto it gets nothing.'},
  /* ---- Gadget: modalities, and machines that bend them ---- */
  441:{name:'Spring-Loaded Scout',type:'teece',sides:[3,3,3,3],revealPlay:true,
     text:'When this is the first card you draw on your turn you may reveal it and play it at once. Played any other way it arrives with +3.',
@@ -1137,7 +1137,7 @@ const CARDS = {
     text:'When played: choose a number X from zero to eight. The next Teece you play whose four sides all equal X arrives with plus nine minus X.',
     onPlay:[{fx:'calibrate'}]},
  443:{name:'Pocket Multitool',type:'teece',sides:[1,1,1,1],
-    text:'When played, choose a modality: return a non-Boss Teece to its owner hand and send its equips with it, or arm this so that when it is destroyed the next Teece your opponent plays is destroyed.',
+    text:'When played, choose a modality: return a non-Boss Teece to its owner hand, or arm this so that when it is destroyed the next Teece your opponent plays is destroyed.',
     onPlay:[{fx:'choose',modal:true,msg:'Pocket Multitool:',opts:[
       {lbl:'Return a non-Boss Teece to hand',steps:[{fx:'bounce'}]},
       {lbl:'Arm the trap',steps:[{fx:'armTrap'}]}]}],
@@ -1236,7 +1236,7 @@ const CARDS = {
  388:{name:'Acorn',type:'teece',sides:[3,3,3,3],timer:{turns:2,sides:[10,10,10,10]},
     text:'After two of your turns, it becomes 10/10/10/10.'},
  389:{name:'Rewind',type:'magic',
-    text:'Return a card that reached a graveyard this turn to its owner hand.',
+    text:'Take a card that reached any graveyard last turn, yours or an enemy\u2019s, into your hand.',
     cast:[{fx:'rewind'}]},
  390:{name:'Long Game',type:'teece',sides:[2,2,2,2],timer:{turns:2,sides:[12,12,12,12]},
     text:'After two of your turns, it becomes 12/12/12/12.'},
@@ -1301,7 +1301,7 @@ const CARDS = {
  423:{name:'Mobile Frame',type:'teece',sides:[6,6,6,6],kw:['flying'],
     text:'Flying. Whenever it moves, it gets +1 permanently.',
     onMove:[{fx:'mod',who:'self',n:1,dur:'perm'}]},
- 424:{name:'Hangar Guard',type:'teece',sides:[7,7,7,7],kw:['flying'],
+ 424:{name:'Hangar Guard',type:'teece',sides:[4,6,5,7],kw:['flying'],
     text:'Flying. Adjacent allied Drones get +2.',aura:{who:'ally',where:'adj',n:2,tokenOnly:true}},
  425:{name:'Servo Rig',type:'equip',mod:1,
     text:'Equipped Teece gets +1 and may move one space up to three times each of your turns.',
@@ -1730,7 +1730,7 @@ function makeTeece(cardId,owner){
   if(bonusApplies(owner))for(let k=0;k<4;k++)base[k]=Math.max(0,base[k]+G.enemyBonus);
   return {uid:UID++,cardId,owner,baseOwner:owner,base,perm:[0,0,0,0],temp:[0,0,0,0],
     equips:[],isToken:!!d.token,isCopy:false,resummoned:false,kwTemp:[],kwPerm:[],links:[],controls:[],
-    defPerm:0,dodged:false,age:0,transformed:false,tickTotal:0,immortalOwner:null,
+    defPerm:0,dodged:false,age:0,standCell:null,transformed:false,tickTotal:0,immortalOwner:null,
     silenced:false,magicUsedTurn:0,
     actUsedTurn:{},actUsedGame:{}};
 }
@@ -1747,7 +1747,7 @@ function newState(mode,vsAI,decks,extra){
     width:BW,
     board:Array.from({length:BN},()=>({teece:null,ground:null,mine:null,defMark:null,razed:false,curseP:null,seed:null})),
     turn:Math.floor(Math.random()*nP),turnNum:1,teecePlayed:false,over:false,winner:null,pending:null,
-    detailLock:null,detailHover:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],
+    detailLock:null,detailHover:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],graveLastTurn:[],
     epoch:++EPOCH,
     enemyBonus:extra.enemyBonus||0,level:extra.level||0,quiet:0,eventFlag:false,
     modalNext:null,trap:null,tempControls:[],castingMagic:false,magicConsumed:false,
@@ -1810,6 +1810,7 @@ function effSides(b,i){
   if(b[i].ground){
     const gd=CARDS[b[i].ground.cardId];
     addMod(s,gd.gmod);
+    if(gd.gStand&&t.standCell===i)addMod(s,gd.gStand);
     if(b[i].ground.gmod!=null)addMod(s,b[i].ground.gmod);
     if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addMod(s,gd.gRangedPlus);
   }
@@ -2007,6 +2008,10 @@ async function fireMove(from,to,cause){
     return;
   }
   if(gd&&gd.gmove){applyModT(t,gd.gmove,'perm');log(nm(t)+' moves onto '+gd.name+': '+sgn(gd.gmove)+'.');}
+  /* A standing bonus only the arrival earns: the Teece remembers the panel
+     it sprang onto, so the bonus lapses the moment it leaves. */
+  if(gd&&gd.gStand){t.standCell=to;log(nm(t)+' settles onto '+gd.name+': '+sgn(gd.gStand)+' while it stays.');}
+  else if(t.standCell!=null)t.standCell=null;
   for(const c of G.curses){
     if(c.cardId===t.cardId&&c.owner===t.baseOwner){
       applyModT(t,-2,'perm');
@@ -2378,12 +2383,7 @@ async function FXRUN(st,ctx){
       const o=b[i].teece;if(o&&o.uid===uid){b[i].teece=null;log(nm(o)+' collapses with its summoner.');}
     }
     for(const uid of t.controls)revertControl(b,uid,true);
-    if(t.isToken||t.isCopy){log(nm(t)+' vanishes.');}
-    else{
-      G.players[t.baseOwner].hand.push(t.cardId);
-      for(const e of t.equips)G.players[e.owner].hand.push(e.cardId);
-      log(nm(t)+' returns to '+pname(t.baseOwner)+"'s hand"+(t.equips.length?' with its equips.':'.'));
-    }
+    bounceToHand(t);
     return;}
   case 'gust':{ /* one orthogonal step */
     const cands=[];
@@ -2714,20 +2714,28 @@ async function FXRUN(st,ctx){
   case 'moveTarget':{
     const src=ctx.cell;
     const pool=st.where==='adj'?ADJ[src]:ALL();
-    /* 'opposite' is a fixed destination: the panel diametrically across the
-       whole board from the caster's OWN cell (Ogre Hurler's "the panel
-       directly opposite this one"), the same spot no matter which adjacent
-       Teece gets thrown there. 'away' instead reflects each candidate
-       THROUGH the caster (Ogre Sharpshooter's "one space directly away from
-       this one"), so the landing spot depends on the target. */
-    const mirrorCell=BN-1-src;
+    /* 'opposite' throws the target clean over the caster: take the line from
+       the target through the caster and keep going to the last panel of that
+       row or column. Thrown from the top-middle, a Teece on the top-left ends
+       up on the top-right. 'away' instead moves it a single space along the
+       same line (Ogre Sharpshooter's "one space directly away from this one"). */
+    const farEnd=j=>{
+      if(j===src)return -1;
+      let step,onLine;
+      if(row(j)===row(src)){step=src>j?1:-1;onLine=x=>row(x)===row(src);}
+      else if(col(j)===col(src)){step=src>j?BW:-BW;onLine=x=>col(x)===col(src);}
+      else return -1;
+      let dst=src;
+      for(let next=src+step;next>=0&&next<BN&&onLine(next);next+=step)dst=next;
+      return dst===src?-1:dst;
+    };
     const cands=pool.filter(j=>{
       const o=b[j].teece;
       if(!o||hasKw(b,j,'immovable'))return false;
       if(st.who==='enemy'&&sameTeam(o.owner,p))return false;
       if(st.who==='ally'&&!sameTeam(o.owner,p))return false;
       if(!canTarget(b,j,p))return false;
-      if(st.dir==='opposite')return mirrorCell!==src&&!b[mirrorCell].teece;
+      if(st.dir==='opposite'){const e=farEnd(j);return e>=0&&openAt(b,e);}
       if(st.dir==='away'){
         const dst=oppositeCell(src,j);
         return dst>=0&&!b[dst].teece;
@@ -2741,7 +2749,8 @@ async function FXRUN(st,ctx){
     const t=b[c].teece;
     let dst=null;
     if(st.dir==='opposite'){
-      dst=(mirrorCell!==src&&!b[mirrorCell].teece)?mirrorCell:null;
+      const e=farEnd(c);
+      dst=(e>=0&&openAt(b,e))?e:null;
     }else if(st.dir==='away'){
       dst=oppositeCell(src,c);
       if(dst<0||b[dst].teece)dst=null;
@@ -3108,16 +3117,15 @@ async function FXRUN(st,ctx){
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const t=b[c].teece;
-    const pick=await chooseOption(p,[{v:'hand',lbl:'Return to hand'},{v:'move',lbl:'Move it one space'}],'What happens to '+nm(t)+'?');
+    const opts=[];
+    if(!isBossCard(t.cardId))opts.push({v:'hand',lbl:'Return to hand'});
+    else log(nm(t)+' is a Boss: it cannot be returned to hand.');
+    opts.push({v:'move',lbl:'Move it one space'});
+    const pick=opts.length===1?'move':await chooseOption(p,opts,'What happens to '+nm(t)+'?');
     if(pick==='hand'){
       b[c].teece=null;
       for(const uid of t.controls)revertControl(b,uid,true);
-      if(t.isToken||t.isCopy)log(nm(t)+' vanishes.');
-      else{
-        G.players[t.baseOwner].hand.push(t.cardId);
-        for(const e of t.equips)G.players[e.owner].hand.push(e.cardId);
-        log(nm(t)+' is returned to '+pname(t.baseOwner)+"'s hand.");
-      }
+      bounceToHand(t);
     }else{
       const opts=ADJ[c].filter(j=>openAt(b,j));
       if(!opts.length){log('Nowhere to move it.');return;}
@@ -3247,18 +3255,22 @@ async function FXRUN(st,ctx){
     await anim([c],'zap');
     return;}
   case 'rewind':{
-    const mine=G.graveThisTurn.filter(g=>g.owner===p);
-    if(!mine.length){log('Nothing of yours reached a graveyard this turn.');return 'ABORT';}
-    const pick=await chooseOption(p,mine.map((g,x)=>({v:String(x),lbl:CARDS[g.cardId].name,cid:g.cardId})),'Rewind which card?');
+    /* Everything that hit a graveyard during the turn just past, whoever
+       owned it. The card comes back to the caster's hand, not its owner's. */
+    const pool=(G.graveLastTurn||[]).filter(g=>G.players[g.owner].grave.indexOf(g.cardId)>=0);
+    if(!pool.length){log('Nothing reached a graveyard last turn.');return 'ABORT';}
+    const pick=await chooseOption(p,pool.map((g,x)=>({v:String(x),
+      lbl:CARDS[g.cardId].name+(g.owner===p?'':' \u00b7 '+pname(g.owner)),cid:g.cardId})),'Rewind which card?');
     if(pick==null)return;
-    const entry=mine[parseInt(pick,10)];
+    const entry=pool[parseInt(pick,10)];
     const gi=G.players[entry.owner].grave.lastIndexOf(entry.cardId);
     if(gi<0){log('It is no longer there.');return;}
     G.players[entry.owner].grave.splice(gi,1);
-    G.players[entry.owner].hand.push(entry.cardId);
-    const gx=G.graveThisTurn.indexOf(entry);
-    if(gx>=0)G.graveThisTurn.splice(gx,1);
-    log(CARDS[entry.cardId].name+' is pulled back out of the grave.');
+    G.players[p].hand.push(entry.cardId);
+    const gx=G.graveLastTurn.indexOf(entry);
+    if(gx>=0)G.graveLastTurn.splice(gx,1);
+    log(CARDS[entry.cardId].name+' is pulled back out of '+
+      (entry.owner===p?'the grave':pname(entry.owner)+"'s grave")+' and into '+pname(p)+"'s hand.");
     return;}
   case 'sacToHand':{
     if(ctx.sacked&&ctx.sacked.length){
@@ -3530,6 +3542,18 @@ function oppositeCell(from,through){
   if(row(from)===row(through)&&row(through)!==row(dst))return -1;
   if(col(from)===col(through)&&col(through)!==col(dst))return -1;
   return dst;
+}
+/* Bouncing a Teece off the field. Its equips do not go with it -- they were
+   attached to something that is no longer there, so they are destroyed, the
+   way any permanent loses its attachments. Tokens and copies simply stop
+   existing. Bosses are never bounced; callers filter them out first. */
+function bounceToHand(t){
+  for(const e of t.equips)toGrave(e.owner,e.cardId);
+  if(t.equips.length)log((t.equips.length===1?CARDS[t.equips[0].cardId].name+' is':'The equips on '+nm(t)+' are')+' destroyed.');
+  t.equips=[];
+  if(t.isToken||t.isCopy){log(nm(t)+' vanishes.');return;}
+  G.players[t.baseOwner].hand.push(t.cardId);
+  log(nm(t)+' returns to '+pname(t.baseOwner)+"'s hand.");
 }
 function toGrave(owner,cardId){
   G.players[owner].grave.push(cardId);
@@ -4353,6 +4377,7 @@ async function startTurn(){
     if(t&&t.immortalOwner===p)t.immortalOwner=null;
   }
   G.movedThisTurn=[];
+  G.graveLastTurn=G.graveThisTurn;
   G.graveThisTurn=[];
   await resolveCombat();
   if(stale(ep)||G.over)return;
@@ -4392,7 +4417,7 @@ function cloneBoard(b){
     teece:c.teece?Object.assign({},c.teece,{base:c.teece.base.slice(),perm:c.teece.perm.slice(),
       temp:c.teece.temp.slice(),equips:c.teece.equips.slice(),kwTemp:c.teece.kwTemp.slice(),
       kwPerm:(c.teece.kwPerm||[]).slice(),defPerm:c.teece.defPerm||0,dodged:c.teece.dodged,
-      age:c.teece.age||0,transformed:c.teece.transformed,tickTotal:c.teece.tickTotal||0,
+      age:c.teece.age||0,transformed:c.teece.transformed,standCell:c.teece.standCell,tickTotal:c.teece.tickTotal||0,
       immortalOwner:c.teece.immortalOwner,
       silenced:!!c.teece.silenced,magicUsedTurn:c.teece.magicUsedTurn||0,
       links:c.teece.links.slice(),controls:c.teece.controls.slice(),
@@ -4940,7 +4965,7 @@ function aiDraftInto(deck,queue,count){
   return deck;
 }
 function aiDraftDeck(count){
-  return aiDraftInto([],shuffle(POOL.slice()),count||20);
+  return aiDraftInto([],shuffle(allDraftable()),count||20);
 }
 function draftPick(p,offer,k){
   if(!HAS_DOM)return Promise.resolve(offer[Math.floor(Math.random()*offer.length)]);
@@ -5031,9 +5056,6 @@ async function humanDraftInto(p,deck,queue,count){
     if(G_DRAFT)G_DRAFT.decks[p]=deck;
   }
   return deck;
-}
-async function humanDraftDeck(p){
-  return humanDraftInto(p,[],shuffle(POOL.slice()),20);
 }
 /* ============ rendering ============ */
 /* An area effect only tells you where it lands once you hover a candidate
@@ -5553,7 +5575,7 @@ function render(){
       (G.enemyBonus?' \u00b7 enemy '+hcapLabel(G.enemyBonus):'')):
     (G.mode==='deck'?(G.deckNames?G.deckNames[0]+' vs '+G.deckNames[1]+
       (G.enemyBonus?' \u00b7 enemy '+hcapLabel(G.enemyBonus):''):'deck mode'):
-    (G.mode==='t100'?'draft mode':'three by three'));
+    'three by three');
   if(!G.over){
     const t=G.turn,d=document.getElementById('turnInfo');
     d.innerHTML='<span class="dot d'+t+'"></span><strong>'+pname(t)+"'s turn</strong>";
@@ -5613,7 +5635,7 @@ async function start(mode,vsAI){
 async function startInner(mode,vsAI){
   document.getElementById('startOverlay').classList.add('hidden');
   if(mode==='rogue'){
-    R={level:1,deck:[],queue:shuffle(POOL.slice()),oppDeck:[]};
+    R={level:1,deck:[],queue:shuffle(allDraftable()),oppDeck:[]};
     await rogueLevel(false);
     return;
   }
@@ -5658,17 +5680,7 @@ async function startInner(mode,vsAI){
     await startTurn();
     return;
   }
-  let decks=null;
-  if(mode==='t100'){
-    G_DRAFT={decks:[[],[]],vsAI};
-    const d0=await humanDraftDeck(0);
-    G_DRAFT.decks[0]=d0;
-    const d1=vsAI?aiDraftDeck():await humanDraftDeck(1);
-    G_DRAFT.decks[1]=d1;
-    document.getElementById('draftOverlay').classList.add('hidden');
-    decks=[d0,d1];
-  }
-  G=newState(mode,vsAI,decks);
+  G=newState(mode,vsAI,null);
   render();
   await startTurn();
 }
@@ -5692,10 +5704,6 @@ if(HAS_DOM){
     const pb=document.getElementById('promptBar');
     if(pb){pb.classList.add('hot');pb.textContent='Script error: '+(e.message||'unknown');}
   });
-  document.getElementById('cAI').onclick=()=>start('classic',true);
-  document.getElementById('cHot').onclick=()=>start('classic',false);
-  document.getElementById('tAI').onclick=()=>start('t100',true);
-  document.getElementById('tHot').onclick=()=>start('t100',false);
   document.getElementById('rAI').onclick=()=>start('rogue',true);
   document.getElementById('dAI').onclick=()=>start('deck',true);
   document.getElementById('p3AI').onclick=()=>start('three',true);
@@ -5747,7 +5755,7 @@ if(typeof module!=='undefined'){
     mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
     groundCells,playGround,areaShapeCells,
     statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,
-    getDecks:()=>DECKS,getPool:()=>POOL,
+    getDecks:()=>DECKS,getPool:()=>POOL,allDraftable,bounceToHand,cloneBoard,fireMove,isBossCard,
     setDeckData:d=>{DECKS=d.decks;FORMATS=d.formats;CLASSIC=d.classic;POOL=d.pool;}};
 }
 </script>
