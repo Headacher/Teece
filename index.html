@@ -1119,9 +1119,9 @@ const CARDS = {
  366:{name:'Counterweight',type:'equip',mod:0,
     text:'Whenever an enemy moves, the equipped Teece gets +2 until end of turn and may move one space.',
     grants:{onEnemyMove:[{fx:'modSelf',n:2,dur:'temp'}]}},
- 367:{name:'Grudge Chain',type:'equip',mod:0,
-    text:'Once per your turn: destroy this equip to move an enemy Teece one space.',
-    grants:{act:[{name:'Yank',once:'turn',steps:[
+ 367:{name:'Grudge Chain',type:'equip',mod:2,
+    text:'Equipped Teece gets +2 and Flying. Once per your turn: destroy this equip to move an enemy Teece one space.',
+    grants:{kw:['flying'],act:[{name:'Yank',once:'turn',steps:[
       {fx:'moveTarget',where:'any',who:'enemy'},{fx:'sacEquip'}]}]}},
  368:{name:'Shove Harness',type:'equip',mod:2,text:'Equipped Teece gets +2. When you equip it, shove an enemy one space.',
     grants:{onEquip:[{fx:'moveTarget',where:'any',who:'enemy',may:true}]}},
