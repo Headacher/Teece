@@ -1563,13 +1563,22 @@ const sgn=n=>(n>0?'+':'')+n;
 const escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function durTxt(dur){return dur==='temp'?' until end of turn':' permanently';}
 
+/* A step returns 'ABORT' when the player backs out, 'NONE' when it found
+   nothing at all to do, and undefined once it has changed something. An act
+   whose every step came back 'NONE' never happened, so runAct refuses to
+   charge it: 'NONE' travels back out of runSteps in place of true. Every
+   other caller only tests the result for truthiness, so a card played from
+   hand is still spent even when it fizzles. */
 async function runSteps(steps,ctx){
-  for(const st of steps||[]){
+  const list=steps||[];
+  let did=list.length===0;
+  for(const st of list){
     const r=await FXRUN(st,ctx);
     if(r==='ABORT')return false;
+    if(r!=='NONE')did=true;
     ctx.first=false;
   }
-  return true;
+  return did||'NONE';
 }
 async function FXRUN(st,ctx){
   const b=G.board,p=ctx.p;
@@ -1577,6 +1586,8 @@ async function FXRUN(st,ctx){
     const r=await chooseCell(p,cands,msg,{cancel:!!ctx.first,skip:!!skip,mut});
     return r;
   };
+  /* nothing to work with: say so and let the caller know none of it landed */
+  const none=msg=>{log(msg);ctx.noneMsg=msg;return 'NONE';};
   switch(st.fx){
   case 'mod':{
     if(st.who==='self'){if(ctx.t)applyModT(ctx.t,st.n,st.dur);return;}
@@ -1593,7 +1604,7 @@ async function FXRUN(st,ctx){
       if(st.where==='adj'&&ctx.cell!=null&&ADJ[ctx.cell].indexOf(i)<0)continue;
       cands.push(i);
     }
-    if(!cands.length){log('No valid target.');return;}
+    if(!cands.length)return none('No valid target.');
     const c=await pickCell(cands,'Choose a Teece: '+sgn(st.n)+durTxt(st.dur)+'.',
       (bb,i)=>{applyModT(bb[i].teece,st.n,st.dur);},!!st.may);
     if(c==='CANCEL')return 'ABORT';
@@ -1644,7 +1655,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'copy':{
     const empt=ADJ[ctx.cell].filter(j=>!b[j].teece);
-    if(!empt.length){log('No adjacent space for the copy.');return;}
+    if(!empt.length)return none('No adjacent space for the copy.');
     const c=await pickCell(empt,'Choose a space for the copy.',
       (bb,i)=>{const cp=makeTeece(ctx.t.cardId,p);cp.isCopy=true;putTeece(bb,i,cp,false);},true);
     if(c==='CANCEL')return 'ABORT';
@@ -1661,7 +1672,7 @@ async function FXRUN(st,ctx){
       return;}
     for(let n=0;n<(st.count||1);n++){
       const pool=(st.where==='adj'?ADJ[ctx.cell]:ALL()).filter(j=>!b[j].teece);
-      if(!pool.length){if(n===0)log('No space for a Token.');return;}
+      if(!pool.length){if(n===0)return none('No space for a Token.');return;}
       const c=await pickCell(pool,'Choose a space for a '+CARDS[st.tok].sides.join('/')+' Token ('+(n+1)+' of '+(st.count||1)+'), or skip.',
         (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,p),false);},true);
       if(c==='CANCEL')return 'ABORT';
@@ -1677,7 +1688,7 @@ async function FXRUN(st,ctx){
   case 'control':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p))cands.push(i);}
-    if(!cands.length){log('No enemy to control.');return;}
+    if(!cands.length)return none('No enemy to control.');
     const c=await pickCell(cands,'Choose an enemy Teece to control.',
       (bb,i)=>{bb[i].teece.owner=p;},false);
     if(c==='CANCEL')return 'ABORT';
@@ -1713,7 +1724,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'flip':{
     const cands=[];for(let i=0;i<BN;i++)if(b[i].teece)cands.push(i);
-    if(!cands.length){log('Nothing to flip.');return;}
+    if(!cands.length)return none('Nothing to flip.');
     const spin=(sd,n)=>{let r=sd.slice();for(let k=0;k<n;k++)r=[r[3],r[0],r[1],r[2]];return r;};
     if(isAIP(p)){
       const base=boardValue(b,p);
@@ -1744,7 +1755,7 @@ async function FXRUN(st,ctx){
   case 'bolt':{
     const cands=[];
     for(let c=0;c<3;c++){for(let r=0;r<3;r++){const i=r*3+c;if(b[i].teece){cands.push(i);break;}}}
-    if(!cands.length){log('No Teece to strike.');return;}
+    if(!cands.length)return none('No Teece to strike.');
     const c=await pickCell(cands,'Choose a column: its topmost Teece gets '+st.n+'.',
       (bb,i)=>{applyModT(bb[i].teece,st.n,'perm');},false);
     if(c==='CANCEL')return 'ABORT';
@@ -1756,7 +1767,7 @@ async function FXRUN(st,ctx){
   case 'bounce':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!isBossCard(t.cardId)&&canTarget(b,i,p))cands.push(i);}
-    if(!cands.length){log('No legal target.');return;}
+    if(!cands.length)return none('No legal target.');
     const c=await pickCell(cands,'Choose a non-Boss Teece to return to its owner hand.',
       (bb,i)=>{bb[i].teece=null;},false);
     if(c==='CANCEL')return 'ABORT';
@@ -1784,7 +1795,7 @@ async function FXRUN(st,ctx){
       if(!reach.some(j=>!b[j].teece))continue;
       cands.push(i);
     }
-    if(!cands.length){log('Nothing can move.');return;}
+    if(!cands.length)return none('Nothing can move.');
     const c=await pickCell(cands,'Choose a Teece to move.',null,!!st.may);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -1797,7 +1808,7 @@ async function FXRUN(st,ctx){
   case 'shatter':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.equips.length)cands.push(i);}
-    if(!cands.length){log('No equips in play.');return;}
+    if(!cands.length)return none('No equips in play.');
     const c=await pickCell(cands,'Choose a Teece: destroy one of its equips.',
       (bb,i)=>{bb[i].teece.equips.pop();},false);
     if(c==='CANCEL')return 'ABORT';
@@ -1815,7 +1826,7 @@ async function FXRUN(st,ctx){
   case 'quake':{
     const cands=[];
     for(let i=0;i<BN;i++)if(b[i].ground)cands.push(i);
-    if(!cands.length){log('No battleground in play.');return;}
+    if(!cands.length)return none('No battleground in play.');
     const c=await pickCell(cands,'Choose a battleground to destroy.',
       (bb,i)=>{bb[i].ground=null;},false);
     if(c==='CANCEL')return 'ABORT';
@@ -1832,7 +1843,7 @@ async function FXRUN(st,ctx){
   case 'terra':{
     const cands=[];
     for(let i=0;i<BN;i++)if(b[i].ground)cands.push(i);
-    if(!cands.length){log('No battleground to move.');return;}
+    if(!cands.length)return none('No battleground to move.');
     const c=await pickCell(cands,'Choose a battleground to move.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -1848,7 +1859,7 @@ async function FXRUN(st,ctx){
   case 'kwT':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p)cands.push(i);}
-    if(!cands.length){log('No ally to target.');return;}
+    if(!cands.length)return none('No ally to target.');
     const kdur=st.perm?' permanently.':' until end of turn.';
     const c=await pickCell(cands,'Choose an ally: it gains '+st.kw+kdur,
       (bb,i)=>{(st.perm?bb[i].teece.kwPerm:bb[i].teece.kwTemp).push(st.kw);},false);
@@ -1862,7 +1873,7 @@ async function FXRUN(st,ctx){
   case 'mine':{
     const cands=[];
     for(let i=0;i<BN;i++)if(!b[i].teece&&!b[i].mine)cands.push(i);
-    if(!cands.length){log('Nowhere to place a Mine.');return;}
+    if(!cands.length)return none('Nowhere to place a Mine.');
     const c=await pickCell(cands,'Choose an unoccupied panel for the Mine.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -1873,7 +1884,7 @@ async function FXRUN(st,ctx){
   case 'mineAuto':{
     const cands=[];
     for(let i=0;i<BN;i++)if(!b[i].teece&&!b[i].mine)cands.push(i);
-    if(!cands.length){log('No room for Mines.');return;}
+    if(!cands.length)return none('No room for Mines.');
     shuffle(cands);
     const chosen=cands.slice(0,st.count||1);
     for(const c of chosen)b[c].mine={owner:p};
@@ -1893,7 +1904,7 @@ async function FXRUN(st,ctx){
       if(st.where==='rowcol'&&ctx.cell!=null&&!(sameRow(i,ctx.cell)||sameCol(i,ctx.cell)))continue;
       cands.push(i);
     }
-    if(!cands.length){log('No valid target.');return;}
+    if(!cands.length)return none('No valid target.');
     const c=await pickCell(cands,'Choose a Teece: '+sgn(st.n)+' to it and everything adjacent to it.',
       (bb,i)=>{applyModT(bb[i].teece,st.n,st.dur);for(const j of ADJ[i])if(bb[j].teece)applyModT(bb[j].teece,st.n,st.dur);});
     if(c==='CANCEL')return 'ABORT';
@@ -1914,7 +1925,7 @@ async function FXRUN(st,ctx){
   case 'areaMod':{
     const cands=[];
     for(let i=0;i<BN;i++)if(areaShapeCells(i,st.shape))cands.push(i);
-    if(!cands.length){log('No room for the blast.');return;}
+    if(!cands.length)return none('No room for the blast.');
     const c=await pickCell(cands,'Choose where the blast lands: '+sgn(st.n)+' to everything caught in it.',
       (bb,i)=>{for(const j of areaShapeCells(i,st.shape))if(bb[j].teece)applyModT(bb[j].teece,st.n,st.dur);});
     if(c==='CANCEL')return 'ABORT';
@@ -1937,7 +1948,7 @@ async function FXRUN(st,ctx){
       return dst;};
     const cands=ADJ[i].filter(j=>{const o=b[j].teece;if(!o||sameTeam(o.owner,p)||hasKw(b,j,'immovable'))return false;
       const dst=away(i,j);return dst>=0&&!b[dst].teece;});
-    if(!cands.length){log('No enemy can be pushed.');return;}
+    if(!cands.length)return none('No enemy can be pushed.');
     const c=await pickCell(cands,'Choose an adjacent enemy to push away.',
       (bb,j)=>{moveT(bb,j,away(i,j),false);},false);
     if(c==='CANCEL')return 'ABORT';
@@ -1949,7 +1960,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'delayDraw':{
     const pl=G.players[p],key='dd'+(ctx.t?ctx.t.cardId:'x');
-    if(pl.onceUsed[key]){log('It has already been used this game.');return;}
+    if(pl.onceUsed[key])return none('It has already been used this game.');
     pl.onceUsed[key]=true;
     pl.pendingDraw+=st.n;
     log(pname(p)+' will draw '+st.n+' cards at the start of their next turn.');
@@ -1962,7 +1973,7 @@ async function FXRUN(st,ctx){
       if(st.nonBoss&&isBossCard(t.cardId))continue;
       cands.push(i);
     }
-    if(!cands.length){log('Nothing can be destroyed.');return;}
+    if(!cands.length)return none('Nothing can be destroyed.');
     const c=await pickCell(cands,'Choose a Teece to destroy.',(bb,i)=>{bb[i].teece=null;},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -1973,7 +1984,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'destroyAdj':{
     const hit=ADJ[ctx.cell].filter(j=>b[j].teece);
-    if(!hit.length){log('Nothing adjacent to destroy.');return;}
+    if(!hit.length)return none('Nothing adjacent to destroy.');
     await anim(hit,'dying',190);
     for(const j of hit){
       const vt=b[j].teece;
@@ -1984,7 +1995,7 @@ async function FXRUN(st,ctx){
     const pl=G.players[p];
     const ids=pl.grave.filter(id=>CARDS[id].type==='teece'&&!isBossCard(id));
     const empt=[];for(let i=0;i<BN;i++)if(!b[i].teece)empt.push(i);
-    if(!ids.length||!empt.length){log('Nothing to summon from the grave.');return;}
+    if(!ids.length||!empt.length)return none('Nothing to summon from the grave.');
     const pick=await chooseOption(p,ids.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Summon which card from the grave?');
     if(pick==null)return;
     const gi=pl.grave.indexOf(ids[parseInt(pick,10)]);
@@ -1997,7 +2008,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'graveToHand':{
     const pl=G.players[p];
-    if(!pl.grave.length){log('The grave is empty.');return;}
+    if(!pl.grave.length)return none('The grave is empty.');
     const pick=await chooseOption(p,pl.grave.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Return which card to hand?');
     if(pick==null)return;
     const cid=pl.grave.splice(parseInt(pick,10),1)[0];
@@ -2009,7 +2020,7 @@ async function FXRUN(st,ctx){
   case 'curse':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p))cands.push(i);}
-    if(!cands.length){log('No enemy to curse.');return;}
+    if(!cands.length)return none('No enemy to curse.');
     const c=await pickCell(cands,'Choose an enemy: every move it makes costs it -2 permanently, for the rest of the game.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2027,7 +2038,7 @@ async function FXRUN(st,ctx){
       if(!canTarget(b,i,p))continue;
       cands.push(i);
     }
-    if(!cands.length){log('No valid target.');return;}
+    if(!cands.length)return none('No valid target.');
     const c=await pickCell(cands,'Choose a Teece: '+sgn(st.n)+' Defence.',(bb,i)=>{applyDef(bb[i].teece,st.n);},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2054,9 +2065,9 @@ async function FXRUN(st,ctx){
   case 'teleLast':{
     const c=ctx.last;
     if(c==null||!b[c].teece)return;
-    if(hasKw(b,c,'immovable')){log('It cannot be moved.');return;}
+    if(hasKw(b,c,'immovable'))return none('It cannot be moved.');
     const open=[];for(let j=0;j<BN;j++)if(j!==c&&!b[j].teece)open.push(j);
-    if(!open.length){log('There is nowhere to move it.');return;}
+    if(!open.length)return none('There is nowhere to move it.');
     const t=b[c].teece;
     const dst=await chooseCell(p,open,'Move '+nm(t)+' to any empty panel, or skip.',
       {skip:true,mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);}});
@@ -2069,7 +2080,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'plantSeed':{
     const cands=[];for(let i=0;i<BN;i++)if(!b[i].seed)cands.push(i);
-    if(!cands.length){log('Every panel already holds a seed.');return;}
+    if(!cands.length)return none('Every panel already holds a seed.');
     const c=await pickCell(cands,'Plant a seed on which panel?',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2092,7 +2103,7 @@ async function FXRUN(st,ctx){
       }
       return ADJ[j].some(k=>!b[k].teece)||true;
     });
-    if(!cands.length){log('Nothing to move.');return;}
+    if(!cands.length)return none('Nothing to move.');
     const c=await pickCell(cands,'Choose a Teece to move'+(st.may?', or skip.':'.'),null,!!st.may);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2133,10 +2144,10 @@ async function FXRUN(st,ctx){
     return;}
   case 'march':{
     const src=ctx.cell, mt=b[src].teece;
-    if(!mt){log('Nothing to march.');return;}
-    if(hasKw(b,src,'immovable')){log(nm(mt)+' cannot move.');return;}
+    if(!mt)return none('Nothing to march.');
+    if(hasKw(b,src,'immovable'))return none(nm(mt)+' cannot move.');
     const dests=ADJ[src].filter(j=>!b[j].teece);
-    if(!dests.length){log('Nowhere to march.');return;}
+    if(!dests.length)return none('Nowhere to march.');
     const step=await chooseCell(p,dests,'March '+nm(mt)+' one space, or skip.',
       {skip:true,mut:(bb,j)=>{if(bb[src].teece)moveT(bb,src,j,false);}});
     if(step==null||step==='CANCEL')return;
@@ -2192,7 +2203,7 @@ async function FXRUN(st,ctx){
   case 'rowColMove':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!hasKw(b,i,'immovable'))cands.push(i);}
-    if(!cands.length){log('No Teece to roll.');return;}
+    if(!cands.length)return none('No Teece to roll.');
     const c=await pickCell(cands,'Choose one of your Teece to roll.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2214,7 +2225,7 @@ async function FXRUN(st,ctx){
   case 'avalanche':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken)cands.push(i);}
-    if(!cands.length){log('No Teece to sacrifice.');return;}
+    if(!cands.length)return none('No Teece to sacrifice.');
     const c=await pickCell(cands,'Sacrifice one of your Teece to start the avalanche.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2230,7 +2241,7 @@ async function FXRUN(st,ctx){
   case 'groundPound':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p)cands.push(i);}
-    if(!cands.length){log('No Teece to pound.');return;}
+    if(!cands.length)return none('No Teece to pound.');
     const c=await pickCell(cands,'Choose one of your Teece.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2296,12 +2307,12 @@ async function FXRUN(st,ctx){
     return;}
   case 'oppDraw':{
     const foes=enemySeats(p);
-    if(!foes.length){log('No opponent to draw.');return;}
+    if(!foes.length)return none('No opponent to draw.');
     drawCards(foes[0],st.n||1);
     return;}
   case 'handToDeck':{
     const pl=G.players[p];
-    if(!pl.hand.length){log('No card to stack back.');return;}
+    if(!pl.hand.length)return none('No card to stack back.');
     const pick=await chooseOption(p,pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Put which card on top of your deck?');
     if(pick==null)return;
     const cid=pl.hand.splice(parseInt(pick,10),1)[0];
@@ -2317,7 +2328,7 @@ async function FXRUN(st,ctx){
       if(!canTarget(b,i,p))continue;
       cands.push(i);
     }
-    if(!cands.length){log('No valid target.');return;}
+    if(!cands.length)return none('No valid target.');
     const c=await pickCell(cands,'Choose a Teece: one side gets '+sgn(st.n)+'.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2347,7 +2358,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'scrub':{
     const cands=[];for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
-    if(!cands.length){log('No valid target.');return;}
+    if(!cands.length)return none('No valid target.');
     const c=await pickCell(cands,'Strip every bonus and penalty off which Teece?',
       (bb,i)=>{bb[i].teece.perm=[0,0,0,0];bb[i].teece.temp=[0,0,0,0];},false);
     if(c==='CANCEL')return 'ABORT';
@@ -2359,7 +2370,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'prime':{
     const cands=[];for(let i=0;i<BN;i++)if(!b[i].teece)cands.push(i);
-    if(!cands.length){log('Every panel is occupied.');return;}
+    if(!cands.length)return none('Every panel is occupied.');
     const c=await pickCell(cands,'Prime which empty panel?',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2368,7 +2379,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'rotTarget':{
     const cands=[];for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
-    if(!cands.length){log('No valid target.');return;}
+    if(!cands.length)return none('No valid target.');
     const spin=(bb,i)=>{const tt=bb[i].teece,bs=tt.base;
       tt.base=st.dir==='cw'?[bs[3],bs[0],bs[1],bs[2]]:[bs[1],bs[2],bs[3],bs[0]];};
     const c=await pickCell(cands,'Rotate which Teece '+(st.dir==='cw'?'clockwise':'counter-clockwise')+'?',spin,false);
@@ -2390,7 +2401,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'choose':{
     const ctl=modalCtl(p,ctx.cell);
-    if(ctl.off){log('Safety Interlock holds: the modality does nothing.');return;}
+    if(ctl.off)return none('Safety Interlock holds: the modality does nothing.');
     if(ctl.all){
       log('Every mode fires'+(ctl.times>1?', twice over.':'.'));
       for(let r=0;r<ctl.times;r++){
@@ -2429,7 +2440,7 @@ async function FXRUN(st,ctx){
   case 'movedToken':{
     if(!G.movedThisTurn.length){log('Nothing has moved this turn.');return 'ABORT';}
     const empt=[];for(let i=0;i<BN;i++)if(!b[i].teece)empt.push(i);
-    if(!empt.length){log('No space for the Ogre.');return;}
+    if(!empt.length)return none('No space for the Ogre.');
     const c=await pickCell(empt,'Choose a space for an 8/8/8/8 Ogre Token.',
       (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,p),false);},false);
     if(c==='CANCEL')return 'ABORT';
@@ -2459,7 +2470,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'handOrMove':{
     const cands=ADJ[ctx.cell].filter(j=>b[j].teece&&canTarget(b,j,p));
-    if(!cands.length){log('Nothing adjacent.');return;}
+    if(!cands.length)return none('Nothing adjacent.');
     const c=await pickCell(cands,'Choose an adjacent Teece.',null,true);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2496,7 +2507,7 @@ async function FXRUN(st,ctx){
   case 'resummonAny':{
     const t=ctx.t;
     const empt=[];for(let i=0;i<BN;i++)if(!b[i].teece)empt.push(i);
-    if(!empt.length){log('No space to resummon.');return;}
+    if(!empt.length)return none('No space to resummon.');
     const c=await chooseCell(t.baseOwner,empt,'Resummon '+DEF(t).name+' anywhere.',
       {skip:true,mut:(bb,i)=>{putTeece(bb,i,makeTeece(t.cardId,t.baseOwner),false);}});
     if(c==null||c==='CANCEL')return;
@@ -2631,7 +2642,7 @@ async function FXRUN(st,ctx){
       if(!o||j===i||hasKw(b,j,'immovable'))return false;
       return enemy?!sameTeam(o.owner,p):sameTeam(o.owner,p);
     });
-    if(hasKw(b,i,'immovable')||!cands.length){log(enemy?'No enemy to swap with.':'No ally to swap with.');return;}
+    if(hasKw(b,i,'immovable')||!cands.length)return none(enemy?'No enemy to swap with.':'No ally to swap with.');
     const c=await pickCell(cands,enemy?'Choose any enemy Teece to swap places with.':'Choose an adjacent ally to swap with.',
       (bb,j)=>{const a=bb[i].teece;bb[i].teece=bb[j].teece;bb[j].teece=a;},false);
     if(c==='CANCEL')return 'ABORT';
@@ -2644,13 +2655,13 @@ async function FXRUN(st,ctx){
     return;}
   case 'move':{
     const i=ctx.cell;
-    if(hasKw(b,i,'immovable')){log('It cannot move.');return;}
+    if(hasKw(b,i,'immovable'))return none('It cannot move.');
     let pool;
     if(st.range==='orth')pool=ADJ[i];
     else if(st.range==='any')pool=ADJ[i];
     else{pool=[];for(let j=0;j<BN;j++)if(j!==i)pool.push(j);}
     const d=pool.filter(j=>!b[j].teece);
-    if(!d.length){log('Nowhere to move.');return;}
+    if(!d.length)return none('Nowhere to move.');
     const t=b[i].teece;
     const c=await pickCell(d,'Choose where '+DEF(t).name+' moves.',
       (bb,j)=>{if(bb[i].teece)moveT(bb,i,j,false);},false);
@@ -3206,8 +3217,11 @@ async function runAct(p,cell,ent){
   const b=G.board,t=b[cell].teece;
   if(!t||t.owner!==p)return false;
   if(!actAvailable(t,ent))return false;
-  const ok=await runSteps(ent.act.steps,{p,cell,t,first:true,ent});
+  const ctx={p,cell,t,first:true,ent};
+  const ok=await runSteps(ent.act.steps,ctx);
   if(!ok){render();return false;}
+  /* the ability found nothing to do, so it keeps its charge for this turn */
+  if(ok==='NONE'){toast(ctx.noneMsg||'Nothing for that ability to do.');render();return false;}
   if(ent.act.once==='game')t.actUsedGame[ent.key]=true;
   t.actUsedTurn[ent.key]=(t.actUsedTurn[ent.key]||0)+1;
   G.detailLock=null;
