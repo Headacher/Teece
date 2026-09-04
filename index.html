@@ -1073,7 +1073,7 @@ const CARDS = {
     text:'When played: you may move an adjacent Teece one space. If you do, it gets -2 permanently.',
     onPlay:[{fx:'moveTarget',where:'adj',may:true,thenMod:{n:-2,dur:'perm'}}]},
  352:{name:'Ogre Hurler',type:'teece',sides:[4,4,8,8],
-    text:'When played: you may throw an adjacent Teece clean over this one, to the far end of the row or column it shares with it. If you do, it gets -2 permanently.',
+    text:'When played: you may throw an adjacent Teece clean over this one, onto the panel on its far side. If you do, it gets -2 permanently.',
     onPlay:[{fx:'moveTarget',where:'adj',dir:'opposite',may:true,thenMod:{n:-2,dur:'perm'}}]},
  353:{name:'Ogre Sharpshooter',type:'teece',sides:[4,5,8,7],kw:['ranged'],
     text:'Ranged. When played: you may knock any Teece one space directly away from this one. If you do, it gets -2 permanently.',
@@ -1137,7 +1137,7 @@ const CARDS = {
     text:'When played: choose a number X from zero to eight. The next Teece you play whose four sides all equal X arrives with plus nine minus X.',
     onPlay:[{fx:'calibrate'}]},
  443:{name:'Pocket Multitool',type:'teece',sides:[1,1,1,1],
-    text:'When played, choose a modality: return a non-Boss Teece to its owner hand, or arm this so that when it is destroyed the next Teece your opponent plays is destroyed.',
+    text:'When played, choose a modality: return a non-Boss Teece to its owner hand and send its equips with it, or arm this so that when it is destroyed the next Teece your opponent plays is destroyed.',
     onPlay:[{fx:'choose',modal:true,msg:'Pocket Multitool:',opts:[
       {lbl:'Return a non-Boss Teece to hand',steps:[{fx:'bounce'}]},
       {lbl:'Arm the trap',steps:[{fx:'armTrap'}]}]}],
@@ -2383,7 +2383,7 @@ async function FXRUN(st,ctx){
       const o=b[i].teece;if(o&&o.uid===uid){b[i].teece=null;log(nm(o)+' collapses with its summoner.');}
     }
     for(const uid of t.controls)revertControl(b,uid,true);
-    bounceToHand(t);
+    bounceToHand(t,true);
     return;}
   case 'gust':{ /* one orthogonal step */
     const cands=[];
@@ -2714,28 +2714,19 @@ async function FXRUN(st,ctx){
   case 'moveTarget':{
     const src=ctx.cell;
     const pool=st.where==='adj'?ADJ[src]:ALL();
-    /* 'opposite' throws the target clean over the caster: take the line from
-       the target through the caster and keep going to the last panel of that
-       row or column. Thrown from the top-middle, a Teece on the top-left ends
-       up on the top-right. 'away' instead moves it a single space along the
-       same line (Ogre Sharpshooter's "one space directly away from this one"). */
-    const farEnd=j=>{
-      if(j===src)return -1;
-      let step,onLine;
-      if(row(j)===row(src)){step=src>j?1:-1;onLine=x=>row(x)===row(src);}
-      else if(col(j)===col(src)){step=src>j?BW:-BW;onLine=x=>col(x)===col(src);}
-      else return -1;
-      let dst=src;
-      for(let next=src+step;next>=0&&next<BN&&onLine(next);next+=step)dst=next;
-      return dst===src?-1:dst;
-    };
+    /* 'opposite' throws the target over the caster and sets it down on the
+       caster's far side -- still touching it, just on the other edge. Thrown
+       from the top-middle, a Teece on the top-left lands on the top-right.
+       'away' is the mirror image: one step past the TARGET, away from the
+       caster (Ogre Sharpshooter's "one space directly away from this one"). */
+    const overCaster=j=>oppositeCell(j,src);
     const cands=pool.filter(j=>{
       const o=b[j].teece;
       if(!o||hasKw(b,j,'immovable'))return false;
       if(st.who==='enemy'&&sameTeam(o.owner,p))return false;
       if(st.who==='ally'&&!sameTeam(o.owner,p))return false;
       if(!canTarget(b,j,p))return false;
-      if(st.dir==='opposite'){const e=farEnd(j);return e>=0&&openAt(b,e);}
+      if(st.dir==='opposite'){const e=overCaster(j);return e>=0&&openAt(b,e);}
       if(st.dir==='away'){
         const dst=oppositeCell(src,j);
         return dst>=0&&!b[dst].teece;
@@ -2749,7 +2740,7 @@ async function FXRUN(st,ctx){
     const t=b[c].teece;
     let dst=null;
     if(st.dir==='opposite'){
-      const e=farEnd(c);
+      const e=overCaster(c);
       dst=(e>=0&&openAt(b,e))?e:null;
     }else if(st.dir==='away'){
       dst=oppositeCell(src,c);
@@ -3543,13 +3534,19 @@ function oppositeCell(from,through){
   if(col(from)===col(through)&&col(through)!==col(dst))return -1;
   return dst;
 }
-/* Bouncing a Teece off the field. Its equips do not go with it -- they were
-   attached to something that is no longer there, so they are destroyed, the
-   way any permanent loses its attachments. Tokens and copies simply stop
-   existing. Bosses are never bounced; callers filter them out first. */
-function bounceToHand(t){
-  for(const e of t.equips)toGrave(e.owner,e.cardId);
-  if(t.equips.length)log((t.equips.length===1?CARDS[t.equips[0].cardId].name+' is':'The equips on '+nm(t)+' are')+' destroyed.');
+/* Bouncing a Teece off the field. Two flavours, and the difference is the
+   whole point: by default the equips it was wearing are destroyed, which is
+   what makes a bounce hurt; keepEquips sends them back to their owners' hands
+   with it, which is the gentler version a card has to pay for and print.
+   Tokens and copies simply stop existing either way. Bosses are never
+   bounced; callers filter them out first. */
+function bounceToHand(t,keepEquips){
+  for(const e of t.equips){
+    if(keepEquips)G.players[e.owner].hand.push(e.cardId);
+    else toGrave(e.owner,e.cardId);
+  }
+  if(t.equips.length)log((t.equips.length===1?CARDS[t.equips[0].cardId].name:'The equips on '+nm(t))+
+    (keepEquips?' '+(t.equips.length===1?'goes':'go')+' back to hand.':' '+(t.equips.length===1?'is':'are')+' destroyed.'));
   t.equips=[];
   if(t.isToken||t.isCopy){log(nm(t)+' vanishes.');return;}
   G.players[t.baseOwner].hand.push(t.cardId);
@@ -5212,11 +5209,12 @@ function showDetail(i){
     d.appendChild(un);
   }
   const acts=t.owner===G.turn?actsOf(G.board,i):[];
+  const gagged=hexOn(t.owner,'silence');
   for(const ent of acts){
-    const av=actAvailable(t,ent)&&!G.pending&&!G.over;
+    const av=actAvailable(t,ent)&&!gagged&&!G.pending&&!G.over;
     const btn=document.createElement('button');
     btn.className='btn abtn'+(av?' primary':'');
-    btn.textContent=ent.act.name+(actAvailable(t,ent)?'':' (used)');
+    btn.textContent=ent.act.name+(gagged?' (silenced)':actAvailable(t,ent)?'':' (used)');
     btn.disabled=!av;
     btn.addEventListener('click',()=>{runAct(G.turn,i,ent);});
     d.appendChild(btn);
@@ -5544,12 +5542,13 @@ function renderActionBar(){
     n.textContent=t.owner===G.turn?'No abilities.':'Enemy Teece.';
     ab.appendChild(n);
   }
+  const gagged=hexOn(t.owner,'silence');
   for(const ent of acts){
-    const usable=actAvailable(t,ent);
+    const usable=actAvailable(t,ent)&&!gagged;
     const av=usable&&!G.pending;
     const btn=document.createElement('button');
     btn.className='btn'+(av?' primary':'');
-    btn.textContent=ent.act.name+(usable?'':' (used)');
+    btn.textContent=ent.act.name+(gagged?' (silenced)':actAvailable(t,ent)?'':' (used)');
     btn.disabled=!av;
     btn.addEventListener('click',()=>{runAct(G.turn,i,ent);});
     ab.appendChild(btn);
