@@ -79,6 +79,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card.playable:hover{transform:translateY(-3px);box-shadow:0 5px 0 rgba(0,0,0,.4)}
 .card.target{box-shadow:inset 0 0 0 2px var(--gold),0 2px 0 rgba(0,0,0,.35);cursor:pointer}
 .card.target:hover{transform:translateY(-3px)}
+.card .hs.pl{color:var(--gold)}
 .card .plated{position:absolute;top:2px;left:4px;font-size:8px;letter-spacing:.05em;z-index:2;
   color:#5d4a22;background:rgba(201,168,90,.55);border-radius:3px;padding:0 3px}
 
@@ -414,7 +415,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:3,date:'2026-09-05'};
+const VERSION={build:4,date:'2026-09-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1805,6 +1806,23 @@ function handTake(p,idx){
 function plateOf(p,idx){
   const pl=G.players[p];
   return (pl&&pl.plate&&pl.plate[idx])||[];
+}
+/* What a Teece in hand reads as once the equips plated onto it are counted, so
+   the card in your hand shows what it will actually arrive as. Only the
+   standing mod is included: modPerDef and modPerAge depend on a board it has
+   not reached yet. A card that doubles positive effects doubles these too. */
+function platedSides(cardId,worn){
+  const cd=CARDS[cardId];
+  const s=cd.sides.slice();
+  if(!worn||!worn.length)return s;
+  const selfDbl=!!cd.selfDoublePos;
+  for(const e of worn){
+    const m=CARDS[e.cardId].mod;
+    if(m==null)continue;
+    if(Array.isArray(m))for(let k=0;k<4;k++)s[k]+=(selfDbl&&m[k]>0)?m[k]*2:m[k];
+    else{const v=(selfDbl&&m>0)?m*2:m;for(let k=0;k<4;k++)s[k]+=v;}
+  }
+  return s;
 }
 /* plating whose Teece never reaches the board is scrapped with it */
 function dumpPlate(plate,why){
@@ -5428,6 +5446,7 @@ function renderHand(p){
   const targeting=!!(pd&&pd.kind==='cell'&&pd.hands&&pd.p===p);
   for(let i=0;i<pl.hand.length;i++){
     const id=pl.hand[i],cd=CARDS[id];
+    const worn=plateOf(p,i);
     const isTarget=targeting&&pd.hands.indexOf(i)>=0;
     const card=document.createElement('div');
     card.className='card playable t-'+cd.type+(isTarget?' target':'');
@@ -5436,11 +5455,13 @@ function renderHand(p){
     const art=CARD_ART[id];
     if(art)card.classList.add('arted');
     if(cd.type==='teece'){
+      const ps=platedSides(id,worn);
+      const sc=k=>'hs hs'+k+(ps[k]!==cd.sides[k]?' pl':'');
       card.innerHTML=(art?'<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>':'')+
-        '<div class="hs hs0">'+cd.sides[0]+'</div>'+
-        '<div class="hs hs1">'+cd.sides[1]+'</div>'+
-        '<div class="hs hs2">'+cd.sides[2]+'</div>'+
-        '<div class="hs hs3">'+cd.sides[3]+'</div>'+
+        '<div class="'+sc(0)+'">'+ps[0]+'</div>'+
+        '<div class="'+sc(1)+'">'+ps[1]+'</div>'+
+        '<div class="'+sc(2)+'">'+ps[2]+'</div>'+
+        '<div class="'+sc(3)+'">'+ps[3]+'</div>'+
         '<div class="hcn cn">'+cd.name+'</div>';
       if(cd.handDiscard){
         const db=document.createElement('button');
@@ -5456,7 +5477,6 @@ function renderHand(p){
       card.innerHTML=(art?'<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>':'')+
         '<div class="ct">'+cd.type+'</div><div class="cn">'+cd.name+'</div><div class="cs">'+cd.text.split('\n')[0]+'</div>';
     }
-    const worn=plateOf(p,i);
     if(worn.length){
       const pb=document.createElement('div');
       pb.className='plated';
@@ -5477,8 +5497,10 @@ function renderHand(p){
 function showDetailCard(id,worn){
   const cd=CARDS[id],d=document.getElementById('detailBody');
   if(!d)return;
+  const ps=cd.type==='teece'?platedSides(id,worn):null;
   let html='<div class="dn">'+cd.name+'</div>'+
-    (cd.type==='teece'?'<div class="dstats" style="color:var(--gold)">'+cd.sides.join(' / ')+
+    (cd.type==='teece'?'<div class="dstats" style="color:var(--gold)">'+ps.join(' / ')+
+      (worn&&worn.length&&ps.join()!==cd.sides.join()?' (plated, from '+cd.sides.join('/')+')':'')+
       (cd.sac?' \u00b7 sacrifice '+cd.sac:'')+(cd.def?' \u00b7 Defence '+cd.def:'')+'</div>':
       '<div class="dstats" style="color:var(--gold)">'+cd.type+'</div>')+
     '<div class="dt">'+cd.text+'</div>';
@@ -5965,7 +5987,7 @@ if(typeof module!=='undefined'){
     mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
     groundCells,playGround,areaShapeCells,
     statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,
-    plateHand,plateOf,handPush,handTake,playEquip,queueFx,resolvePending,VERSION,
+    plateHand,plateOf,platedSides,handPush,handTake,playEquip,queueFx,resolvePending,VERSION,
     getDecks:()=>DECKS,getPool:()=>POOL,allDraftable,bounceToHand,cloneBoard,fireMove,isBossCard,
     setDeckData:d=>{DECKS=d.decks;FORMATS=d.formats;CLASSIC=d.classic;POOL=d.pool;}};
 }
