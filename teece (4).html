@@ -1248,8 +1248,15 @@ function effSides(b,i){
       for(let k=0;k<4;k++)s[k]+=amt;
     }
   }
-  /* Sunlit Loam doubles what is left, bonuses and penalties alike */
-  if(b[i].ground&&groundFlag(b[i].ground,'gDoubleStats'))for(let k=0;k<4;k++)s[k]*=2;
+  /* Sunlit Loam doubles what is left, bonuses and penalties alike. That
+     doubling is itself a positive attribute effect, so on a Teece that counts
+     those double it lands twice and the side quadruples -- but only where the
+     side is positive: doubling a penalty harder is not what Hothouse Orchid
+     does, so a side at or below zero still only doubles. */
+  if(b[i].ground&&groundFlag(b[i].ground,'gDoubleStats')){
+    const selfDbl=!!DEF(t).selfDoublePos;
+    for(let k=0;k<4;k++)s[k]*=(selfDbl&&s[k]>0)?4:2;
+  }
   return s;
 }
 function defOf(b,i){
