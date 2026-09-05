@@ -698,7 +698,7 @@ const CARDS = {
     text:'When played: choose a number X from zero to eight. The next Teece you play whose four sides all equal X arrives with plus nine minus X.',
     onPlay:[{fx:'calibrate'}]},
  443:{name:'Pocket Multitool',type:'teece',sides:[1,1,1,1],
-    text:'When played, choose a modality: return a non-Boss Teece to its owner hand and send its equips with it, or arm this so that when it is destroyed the next Teece your opponent plays is destroyed the moment it lands, before it can fight or trigger anything.',
+    text:'When played, choose a modality: return a non-Boss Teece to its owner hand and send its equips with it, or arm this so that when it is destroyed the next Teece your opponent plays is destroyed.',
     onPlay:[{fx:'choose',modal:true,msg:'Pocket Multitool:',opts:[
       {lbl:'Return a non-Boss Teece to hand',steps:[{fx:'bounce'}]},
       {lbl:'Arm the trap',steps:[{fx:'armTrap'}]}]}],
@@ -2348,11 +2348,11 @@ async function FXRUN(st,ctx){
   case 'trapCheck':{
     if(!ctx.t||!ctx.t.trapArmed)return;
     G.trap={by:ctx.deadOwner!=null?ctx.deadOwner:p};
-    log('The trap springs: the next Teece played against '+pname(G.trap.by)+' is destroyed.');
+    log('The trap is set: the next Teece played against '+pname(G.trap.by)+' is destroyed as it lands.');
     return;}
   case 'springTrap':{
     G.trap={by:ctx.deadOwner!=null?ctx.deadOwner:p};
-    log('The trap is sprung: the next Teece played against '+pname(G.trap.by)+' is destroyed.');
+    log('The trap is set: the next Teece played against '+pname(G.trap.by)+' is destroyed as it lands.');
     return;}
   case 'oppDraw':{
     const foes=enemySeats(p);
@@ -2766,24 +2766,6 @@ async function processDeath(d){
   b[cell].teece=null;
   G.eventFlag=true;
   log(nm(t)+' is destroyed.');
-  /* A silent death is a removal, not a death the rest of the board answers.
-     The Teece is gone before it can do anything: no on-death effect of its
-     own, no resummon, no ally mourning it, no equip clinging on somewhere
-     else. Everything it carried goes to the graveyard. Pocket Multitool's
-     trap uses this -- a Teece played into it should cost its owner the card
-     and nothing else, not pay out a full death first. */
-  if(d.silent){
-    for(const uid of t.links){
-      for(let i=0;i<BN;i++){
-        const o=b[i].teece;
-        if(o&&o.uid===uid){b[i].teece=null;log(nm(o)+' collapses with its summoner.');}
-      }
-    }
-    for(const uid of t.controls)revertControl(b,uid,true);
-    for(const e of t.equips)toGrave(e.owner,e.cardId);
-    if(!t.isToken&&!t.isCopy)toGrave(t.baseOwner,t.cardId);
-    return;
-  }
   for(let i=0;i<BN;i++){
     const w=b[i].teece;
     if(!w||w.uid===t.uid||!sameTeam(w.owner,t.owner))continue;
@@ -3137,7 +3119,7 @@ async function playTeece(p,handIdx){
   if(G.trap&&!sameTeam(p,G.trap.by)){
     G.trap=null;
     log(nm(t)+' walks straight into the trap.');
-    await processDeath({cell:spot,t,killers:[],silent:true});
+    await processDeath({cell:spot,t,killers:[]});
     await resolveCombat();render();
     return true;
   }
@@ -4320,9 +4302,9 @@ function statusesFor(p){
   /* --- what is waiting for the next Teece you play --- */
   if(G.trap){
     if(!sameTeam(p,G.trap.by))
-      push('trap','bad','Next Teece dies','A trap is sprung against you. The next Teece you play is destroyed the moment it lands, before it can fight or trigger anything.');
+      push('trap','bad','Next Teece dies','A trap is set against you. The next Teece you play is destroyed the moment it lands.');
     else
-      push('trapset','good','Trap sprung','The next Teece played against you is destroyed the moment it lands, before it can fight or trigger anything.');
+      push('trapset','good','Trap set','The next Teece played against you is destroyed the moment it lands.');
   }
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
