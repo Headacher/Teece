@@ -113,6 +113,9 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="bomb"] .kwl,.dcard[data-card-deck="bomb"] .dkw{color:#e0b088}
 .card[data-card-deck="bomb"] .ct,.dcard[data-card-deck="bomb"] .dty{color:#e0b088}
 .card[data-card-deck="nature"],.dcard[data-card-deck="nature"]{--cardbg:#6b8f2a;background:var(--cardbg);color:#f6faea;border-color:#48611a}
+.card[data-card-deck="pixie"],.dcard[data-card-deck="pixie"]{--cardbg:#7a4a8f;--artink:#f6ecff;background:var(--cardbg);color:#f4e9fb;border-color:#54306a}
+.card[data-card-deck="pixie"] .kwl,.dcard[data-card-deck="pixie"] .dkw{color:#dcbcf0}
+.card[data-card-deck="pixie"] .ct,.dcard[data-card-deck="pixie"] .dty{color:#dcbcf0}
 .card[data-card-deck="nature"] .kwl,.dcard[data-card-deck="nature"] .dkw{color:#d5e8a4}
 .card[data-card-deck="nature"] .ct,.dcard[data-card-deck="nature"] .dty{color:#d5e8a4}
 
@@ -128,6 +131,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="bomb"]::after,.dcard[data-card-deck="bomb"]::after{content:'💣'}
 .card[data-card-deck="witch"]::after,.dcard[data-card-deck="witch"]::after{content:'🧙'}
 .card[data-card-deck="nature"]::after,.dcard[data-card-deck="nature"]::after{content:'🌿'}
+.card[data-card-deck="pixie"]::after,.dcard[data-card-deck="pixie"]::after{content:'🧚'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -139,6 +143,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece[data-card-deck="witch"]{--cardbg:#1f3a30;--artink:#f2f7e6;background:var(--cardbg);color:#d9f0e2;border-color:#12241d}
 .teece[data-card-deck="bomb"]{--cardbg:#8a4a1a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e8d8;border-color:#5a2e0a}
 .teece[data-card-deck="nature"]{--cardbg:#6b8f2a;--artink:#f2f7e6;background:var(--cardbg);color:#f6faea;border-color:#48611a}
+.teece[data-card-deck="pixie"]{--cardbg:#7a4a8f;--artink:#f6ecff;background:var(--cardbg);color:#f4e9fb;border-color:#54306a}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -419,7 +424,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:6,date:'2026-09-05'};
+const VERSION={build:7,date:'2026-09-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -438,11 +443,33 @@ async function loadDeckData(){
 if(HAS_DOM)loadDeckData();
 
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
-  gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}'};
+  gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
 const CARD_ART={
+  541:["  \\  .-.  /  ", "   \\( o )/   ", "    (/|\\)    ", "    _/ \\_    ", "   [$]  ...  "],
+  542:["  \\  .-.  /  ", "   \\( - )/   ", "    (/|\\)    ", "   _/   \\_   ", "  |RIP| ...  "],
+  543:["  \\ .-. .-.  ", "  ( o ) : )  ", "   (/|\\)/|\\  ", "   _/ \\ / \\_ ", "   .  ...  . "],
+  544:["  \\\\ .-. //  ", "  \\( ^ )/    ", "   [=====]   ", "   /| | |\\   ", "  ^^^ ^ ^^^  "],
+  545:["  \\  .-.  /  ", "   \\( x )/   ", "    (/|\\)    ", "   _/ ! \\_   ", "   /\\   /\\   "],
+  546:["   . .-. .   ", "  ~ ( o ) ~  ", "    (/|\\)    ", "   _/   \\_   ", "  ~   ~   ~  "],
+  547:["  \\  .-.  /  ", "   \\( * )/   ", "    (/|\\)    ", "   _/   \\_   ", "  [ * * * ]  "],
+  548:["  \\ (.-.) /  ", "   \\( O )/   ", "   .(/|\\).   ", "  (o) _ (o)  ", "   ~  ~  ~   "],
+  549:["  \\  .-.  /  ", "   \\( @ )/   ", "   ~(/|\\)~   ", "   _/   \\_   ", "  ?   ?   ?  "],
+  550:["   .  .  .   ", "    ( . )    ", "     (|)     ", "    _/ \\_    ", "   .  .  .   "],
+  551:["  \\  .-.  /  ", "   \\( + )/   ", "   *(/|\\)*   ", "   _/   \\_   ", "  +  ***  +  "],
+  552:["  \\ \\|/  /   ", "  \\( ^o^ )/  ", "   [#####]   ", "   /| | |\\   ", "  ^^^^^^^^^  "],
+  553:["   .-----.   ", "  ( @ | @ )  ", "   \\ >o< /   ", "    | | |    ", "    ~ ~ ~    "],
+  554:["  .-.  .-.   ", " ( : )( : )  ", "  (/|\\)/|\\)  ", "  _/ \\_/ \\_  ", "  : : : : :  "],
+  555:["      ^      ", "    /   \\    ", "   < BIG >   ", "    \\   /    ", "      v      "],
+  556:["      v      ", "    \\   /    ", "   > sml <   ", "    /   \\    ", "      ^      "],
+  557:["  \\\\\\   ///  ", "  \\\\\\_ _///  ", "   ==(o)==   ", "    // \\\\    ", "   //   \\\\   "],
+  558:["   .-----.   ", "  (  ---  )  ", "   | -X- |   ", "    \\ _ /    ", "     ...     "],
+  559:["   . . . .   ", "  . ( ) .    ", "   . /|\\ .   ", "  .  / \\  .  ", "   . . . .   "],
+  560:["   *  .  *   ", "  .  .-.  .  ", "  *  ( )  *  ", "  .  \\_/  .  ", "   *  .  *   "],
+  "T6":["   .-----.   ", "  ( * * * )  ", "  |  ###  |  ", "   \\ | | /   ", "    ~~~~~    "],
+
   "T9":["  \\\\  ^  //  ", "  ( O   O )  ", "  /[#####]\\  ", "  |  ###  |  ", "  /  | |  \\  "],
   "TFAM":["  \\  /\\_/\\  /", "   \\( o o )/ ", "   ==[###]== ", "    /  |  \\  ", "    '  '  '  "],
   1:["     ,-.     ", "    ( o )    ", "   /[###]\\   ", "  ' / | \\ '  ", "  _/     \\_  "],
@@ -844,6 +871,7 @@ const CARDS = {
  T3:{name:'Token',type:'teece',token:true,sides:[3,3,3,3],text:'Token. Cannot be sacrificed; never counts toward winning.'},
  T8:{name:'Token',type:'teece',token:true,sides:[8,8,8,8],text:'Token. Cannot be sacrificed; never counts toward winning.'},
  T9:{name:'Ogre Token',type:'teece',token:true,sides:[9,9,9,9],text:'Token. Cannot be sacrificed; never counts toward winning.'},
+ T6:{name:'Token',type:'teece',token:true,sides:[6,6,6,6],text:'Token. Cannot be sacrificed; never counts toward winning.'},
  T4:{name:'Token',type:'teece',token:true,sides:[4,4,4,4],text:'Token. Cannot be sacrificed; never counts toward winning.'},
  TR:{name:'Rock Token',type:'teece',token:true,sides:[0,0,0,0],def:6,text:'Token with Defence 6. Cannot be sacrificed; never counts toward winning.'},
  TD:{name:'Drone',type:'teece',token:true,sides:[3,3,3,3],kw:['flying'],text:'Drone Token. Flying: once per your turn, move one space. Never counts toward winning.'},
@@ -1505,10 +1533,76 @@ const CARDS = {
  539:{name:'Sunlit Loam',type:'ground',gDoublePosAll:true,
     text:'Every positive attribute effect on a Teece on this panel counts double. Its own attributes are untouched.'},
  540:{name:'Rich Bed',type:'ground',gmod:3,
-    text:'A Teece on this panel gets +3.'}
+    text:'A Teece on this panel gets +3.'},
+ /* ---- Pixie: tiny, weak, and made almost entirely of magic. Every pixie
+        flies, and the deck plays off the magic it keeps pulling back. ---- */
+ 541:{name:'Thieving Sprite',type:'teece',sides:[1,2,1,3],pixie:true,kw:['flying'],
+    text:'Flying. When this moves: take a magic card out of any graveyard into your hand.',
+    onMove:[{fx:'graveMagicToHand'}]},
+ 542:{name:'Grave Pixie',type:'teece',sides:[2,4,3,1],pixie:true,kw:['flying'],
+    text:'Flying. When played: take a magic card out of any graveyard into your hand.',
+    onPlay:[{fx:'graveMagicToHand'}]},
+ 543:{name:'Echo Pixie',type:'teece',sides:[3,3,3,3],pixie:true,kw:['flying'],
+    text:'Flying. When destroyed: copy a magic card out of your deck or your graveyard into your hand. The original stays where it lies.',
+    onDeath:[{fx:'copyMagic'}]},
+ 544:{name:'Updraught Pixie',type:'teece',sides:[2,2,2,2],def:6,pixie:true,kw:['flying'],pixieFly:{n:5,dur:'temp'},
+    text:'Flying, Defence 6. Whenever another of your pixies flies, it gets +5 until the end of the turn.'},
+ 545:{name:'Spiteful Pixie',type:'teece',sides:[2,3,5,1],pixie:true,kw:['flying'],
+    text:'Flying. Whatever destroys this is destroyed with it, unless it is a Boss.',
+    onDeath:[{fx:'killerDies'}]},
+ 546:{name:'Flitting Pixie',type:'teece',sides:[1,1,1,1],pixie:true,kw:['flying'],dodge:{n:0},
+    text:'Flying. When it would be destroyed, it may dart one space instead, once per turn.'},
+ 547:{name:'Enchanter Pixie',type:'teece',sides:[1,2,4,3],pixie:true,kw:['flying'],
+    text:'Flying. When this moves: enchant the panel it left. The next ally to arrive there becomes ten on every side, with all of its own effects negated.',
+    onMove:[{fx:'enchantCell'}]},
+ 548:{name:'Swarm Mother',type:'teece',sides:[2,3,1,4],pixie:true,kw:['flying'],
+    text:'Flying. When played: summon two Tokens with 6 on every side, which are destroyed with it. When this moves: summon another.',
+    onPlay:[{fx:'token',tok:'T6',where:'any',count:2,linked:true}],
+    onMove:[{fx:'token',tok:'T6',where:'any',count:1,linked:true}]},
+ 549:{name:'Trickspinner',type:'teece',sides:[2,2,2,2],pixie:true,kw:['flying'],
+    text:'Flying. Once per your turn: conjure two random magic cards from anywhere in the game into your hand.',
+    act:[{name:'Spin a trick',once:'turn',steps:[{fx:'conjure',n:2}]}]},
+ 550:{name:'Wisp of Nothing',type:'teece',sides:[0,0,0,0],pixie:true,kw:['flying'],
+    text:'Flying. When played: conjure a random magic card from anywhere in the game. When this moves: conjure two.',
+    onPlay:[{fx:'conjure',n:1}],onMove:[{fx:'conjure',n:2}]},
+ 551:{name:'Spellbound Pixie',type:'teece',sides:[3,1,4,1],sac:1,pixie:true,kw:['flying'],
+    text:'Flying. Sacrifice one fielded Teece to play. Whenever you play a magic card: this gets +5 until the end of the turn, +2 permanently, and may move one space.',
+    onMagic:[{fx:'mod',who:'self',n:5,dur:'temp'},{fx:'mod',who:'self',n:2,dur:'perm'},{fx:'move',range:'orth',may:true}]},
+ 552:{name:'Pixie Queen',type:'teece',sides:[4,4,4,4],sac:2,pixie:true,kw:['flying'],
+    text:'Boss. Flying. Sacrifice two fielded Teece to play. Every other pixie of yours gets +10.',
+    aura:{who:'ally',where:'global',n:10,pixieOnly:true}},
+ 553:{name:'Mind Control',type:'magic',
+    text:'Take control of a non-Boss enemy Teece until the end of the turn.',
+    cast:[{fx:'controlTemp'}]},
+ 554:{name:'Pixie Projection',type:'magic',
+    text:'Every pixie of yours gains +8 Defence until the end of your next turn.',
+    cast:[{fx:'pixieDef',n:8}]},
+ 555:{name:'Enlarge',type:'magic',
+    text:'Select a Teece; it gets +10 until the end of your next turn.',
+    cast:[{fx:'modNext',n:10}]},
+ 556:{name:'Shrink',type:'magic',
+    text:'Select a Teece; it is 3 on every side until the end of the turn. Anything stacked on top of it still counts.',
+    cast:[{fx:'shrink',n:3}]},
+ 557:{name:'Magic Wings',type:'magic',
+    text:'Select a flying Teece; it may fly twice more this turn.',
+    cast:[{fx:'flyBoost',n:2}]},
+ 558:{name:'Silence',type:'magic',
+    text:'Select a Teece; strip every bonus and penalty off it and negate its effects for the rest of the game.',
+    cast:[{fx:'unmake'}]},
+ 559:{name:'Invisibility',type:'magic',
+    text:'Select one of your pixies; it cannot be destroyed until the end of your next turn.',
+    cast:[{fx:'invis'}]},
+ 560:{name:'Enchantment',type:'magic',
+    text:'Conjure two random magic cards from anywhere in the game into your hand.',
+    cast:[{fx:'conjure',n:2}]}
 };
 const DEF=t=>CARDS[t.cardId];
 const isBossCard=id=>(CARDS[id].sac||0)>=2;
+/* "Until the end of your next turn" outlives temp, which endTurn empties every
+   turn. These carry the turn number they die at: your next turn is PLAYERS()
+   turns away, so something laid on turn N clears at the end of turn N+PLAYERS().
+   endTurn does the clearing, so it lapses at the end of that turn exactly. */
+const nextTurnExpiry=()=>G.turnNum+PLAYERS();
 const FLY_ACT={name:'Fly',once:'turn',steps:[{fx:'move',range:'any'}]};
 const TELE_ACT={name:'Teleport',once:'turn',steps:[{fx:'move',range:'tele'}]};
 
@@ -1772,6 +1866,7 @@ function makeTeece(cardId,owner){
     equips:[],isToken:!!d.token,isCopy:false,resummoned:false,kwTemp:[],kwPerm:[],links:[],controls:[],
     defPerm:0,dodged:false,age:0,standCell:null,transformed:false,tickTotal:0,immortalOwner:null,
     silenced:false,magicUsedTurn:0,
+    temp2:[0,0,0,0],temp2Until:0,defTemp2:0,defTemp2Until:0,baseTemp:null,flyExtra:0,immortalUntil:0,
     actUsedTurn:{},actUsedGame:{}};
 }
 function newState(mode,vsAI,decks,extra){
@@ -1785,7 +1880,7 @@ function newState(mode,vsAI,decks,extra){
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
     width:BW,
-    board:Array.from({length:BN},()=>({teece:null,ground:null,mine:null,defMark:null,razed:false,curseP:null,seed:null})),
+    board:Array.from({length:BN},()=>({teece:null,ground:null,mine:null,defMark:null,razed:false,curseP:null,seed:null,enchant:null})),
     turn:Math.floor(Math.random()*nP),turnNum:1,teecePlayed:false,over:false,winner:null,pending:null,
     detailLock:null,detailHover:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],graveLastTurn:[],
     epoch:++EPOCH,
@@ -1880,7 +1975,10 @@ function addMod(sum,m){if(m==null)return;if(Array.isArray(m)){for(let k=0;k<4;k+
 function effSides(b,i){
   const t=b[i].teece; if(!t)return[0,0,0,0];
   const s=[0,0,0,0];
-  for(let k=0;k<4;k++)s[k]=t.base[k]+t.perm[k]+t.temp[k];
+  /* Shrink replaces what the card was printed with for the turn; everything
+     stacked on top of it still counts. */
+  const bs=t.baseTemp||t.base;
+  for(let k=0;k<4;k++)s[k]=bs[k]+t.perm[k]+t.temp[k]+((t.temp2&&t.temp2[k])||0);
   /* Hothouse Orchid doubles every positive effect on it. Perm and temp were
      already doubled as they were applied, so only the standing sources --
      equips, the battleground under it, auras -- are doubled here. Sunlit Loam
@@ -1918,6 +2016,7 @@ function effSides(b,i){
       if(a.where==='row'&&!sameRow(i,j))continue;
       if(a.where==='col'&&!sameCol(i,j))continue;
       if(a.tokenOnly&&!t.isToken)continue;
+      if(a.pixieOnly&&!DEF(t).pixie)continue;
       const amt0=a.byDef?defOf(b,i):a.n;
       const amt=(selfDbl&&amt0>0)?amt0*2:amt0;
       for(let k=0;k<4;k++)s[k]+=amt;
@@ -1927,7 +2026,7 @@ function effSides(b,i){
 }
 function defOf(b,i){
   const t=b[i].teece; if(!t)return 0;
-  let d=(DEF(t).def||0)+(t.defPerm||0);
+  let d=(DEF(t).def||0)+(t.defPerm||0)+(t.defTemp2||0);
   for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.def)d+=g.def;}
   if(b[i].ground){const gd=CARDS[b[i].ground.cardId];if(gd.gdef)d+=gd.gdef;}
   if(b[i].defMark&&b.some(c=>c.teece&&c.teece.uid===b[i].defMark.uid))d+=b[i].defMark.n;
@@ -2002,6 +2101,9 @@ function negatedActs(b,i){
 }
 function actAvailable(t,ent){
   if(ent.act.once==='game'&&t.actUsedGame[ent.key])return false;
+  /* Magic Wings buys flights for the turn, so Fly is not always once */
+  if(ent.key==='kfly'&&t.flyExtra)
+    return (t.actUsedTurn[ent.key]||0)<((ent.act.times||1)+t.flyExtra);
   const cap=ent.act.times||1;
   return (t.actUsedTurn[ent.key]||0)<cap;
 }
@@ -2009,6 +2111,15 @@ function actAvailable(t,ent){
 /* ============ board entry (mines) ============ */
 function putTeece(b,i,t,live){
   b[i].teece=t;
+  /* The enchantment is spent by the first ally to arrive, however it arrives:
+     played onto it or moved onto it. It rewrites what the Teece is -- ten on
+     every side -- and negates whatever it was going to do. */
+  if(b[i].enchant&&sameTeam(t.owner,b[i].enchant.owner)){
+    b[i].enchant=null;
+    t.base=[10,10,10,10];
+    t.silenced=true;
+    if(live)log(nm(t)+' steps into the enchantment: ten on every side, and every effect of its own negated.');
+  }
   if(b[i].prime){
     const pr=b[i].prime;b[i].prime=null;
     for(let k=0;k<4;k++)t.perm[k]+=pr.n;
@@ -2109,6 +2220,17 @@ async function fireMove(from,to,cause){
   if(gd&&gd.gmove){applyModT(t,gd.gmove,'perm');log(nm(t)+' moves onto '+gd.name+': '+sgn(gd.gmove)+'.');}
   /* A standing bonus only the arrival earns: the Teece remembers the panel
      it sprang onto, so the bonus lapses the moment it leaves. */
+  /* Somebody on the field pays pixies to use their wings. */
+  if(DEF(t).pixie&&hasKw(b,to,'flying')){
+    for(let j=0;j<BN;j++){
+      const w=b[j].teece;
+      if(!w||w.silenced||w.uid===t.uid||!sameTeam(w.owner,t.owner))continue;
+      const pf=DEF(w).pixieFly;
+      if(!pf)continue;
+      applyModT(t,pf.n,pf.dur||'temp');
+      log(nm(t)+' catches the updraught from '+nm(w)+': '+sgn(pf.n)+durTxt(pf.dur||'temp')+'.');
+    }
+  }
   if(gd&&gd.gStand){t.standCell=to;log(nm(t)+' settles onto '+gd.name+': '+sgn(gd.gStand)+' while it stays.');}
   else if(t.standCell!=null)t.standCell=null;
   for(const c of G.curses){
@@ -2120,7 +2242,7 @@ async function fireMove(from,to,cause){
   const d=DEF(t);
   const selfHooks=(d.onMove||[]).slice();
   for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.onMove)selfHooks.push(...g.onMove);}
-  for(const h of selfHooks)await runSteps([h],{p:t.owner,cell:to,t,first:false});
+  for(const h of selfHooks)await runSteps([h],{p:t.owner,cell:to,fromCell:from,t,first:false});
   for(let i=0;i<BN;i++){
     const w=b[i].teece;
     if(!w||w.uid===t.uid)continue;
@@ -3536,6 +3658,129 @@ async function FXRUN(st,ctx){
     await anim([c],'zap');
     return;}
   /* ---- Witch: Teece abilities ---- */
+  /* ---- Pixie: magic conjured, borrowed and stretched ---- */
+  case 'conjure':{
+    /* Pixies pull magic out of the air: any magic card in the game, not just
+       the deck you brought. */
+    const pool=Object.keys(CARDS).filter(k=>/^[0-9]+$/.test(k)&&CARDS[k].type==='magic').map(Number);
+    if(!pool.length)return none('There is no magic to conjure.');
+    const got=[];
+    for(let k=0;k<(st.n||1);k++){
+      const cid=pool[Math.floor(Math.random()*pool.length)];
+      handPush(p,cid);got.push(CARDS[cid].name);
+    }
+    log(pname(p)+' conjures '+got.join(' and ')+' out of the air.');
+    return;}
+  case 'copyMagic':{
+    /* A copy: the original stays where it lies. */
+    const opts=[];
+    const pl=G.players[p];
+    pl.deck.forEach(cid=>{if(CARDS[cid].type==='magic'&&!opts.some(o=>o.cid===cid))opts.push({v:String(cid),lbl:CARDS[cid].name+' — your deck',cid});});
+    pl.grave.forEach(cid=>{if(CARDS[cid].type==='magic'&&!opts.some(o=>o.cid===cid))opts.push({v:String(cid),lbl:CARDS[cid].name+' — your grave',cid});});
+    if(!opts.length)return none('No magic card in your deck or your grave.');
+    const pick=await chooseOption(p,opts,'Copy which magic card into your hand?');
+    if(pick==null)return;
+    const cid=parseInt(pick,10);
+    handPush(p,cid);
+    log(pname(p)+' copies '+CARDS[cid].name+' into hand.');
+    return;}
+  case 'killerDies':{
+    /* Whatever struck it down goes with it -- unless it is a Boss, which this
+       cannot touch. The kill is stacked, so it lands before the next scan. */
+    let n=0;
+    for(const kuid of (ctx.killers||[])){
+      for(let i=0;i<BN;i++){
+        const k=b[i].teece;
+        if(!k||k.uid!==kuid||isBossCard(k.cardId))continue;
+        queueFx({kill:k.uid,msg:nm(k)+' is dragged down with '+nm(ctx.t)+'.'});n++;
+      }
+    }
+    if(!n)return none('Nothing non-Boss struck it down.');
+    return;}
+  case 'enchantCell':{
+    /* The panel it left, not the one it went to. */
+    const i=ctx.fromCell!=null?ctx.fromCell:ctx.cell;
+    if(i==null)return none('No panel to enchant.');
+    b[i].enchant={owner:p};
+    log('The '+CN[i]+' is enchanted: the next ally to arrive there becomes ten on every side, with its own effects negated.');
+    return;}
+  case 'flyBoost':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&hasKw(b,i,'flying')&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return none('Nothing on the field can fly.');
+    const c=await pickCell(cands,'Give which flier '+(st.n||2)+' more flights this turn?',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)){await anim([c],'zap');return;}
+    b[c].teece.flyExtra=(b[c].teece.flyExtra||0)+(st.n||2);
+    log(nm(b[c].teece)+' can fly '+(st.n||2)+' more times this turn.');
+    return;}
+  case 'shrink':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return none('No valid target.');
+    const c=await pickCell(cands,'Shrink which Teece to '+(st.n||3)+' on every side for the turn?',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)){await anim([c],'zap');return;}
+    const v=st.n||3;
+    b[c].teece.baseTemp=[v,v,v,v];
+    log(nm(b[c].teece)+' shrinks to '+v+' on every side until the end of the turn.');
+    await anim([c],'zap');
+    return;}
+  case 'modNext':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return none('No valid target.');
+    const c=await pickCell(cands,'Give which Teece '+sgn(st.n)+' until the end of your next turn?',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)){await anim([c],'zap');return;}
+    const tt=b[c].teece;
+    for(let k=0;k<4;k++)tt.temp2[k]+=st.n;
+    tt.temp2Until=Math.max(tt.temp2Until||0,nextTurnExpiry());
+    log(nm(tt)+' gets '+sgn(st.n)+' until the end of your next turn.');
+    await anim([c],'zap');
+    return;}
+  case 'pixieDef':{
+    let n=0;
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(!t||!DEF(t).pixie||!sameTeam(t.owner,p))continue;
+      t.defTemp2=(t.defTemp2||0)+(st.n||8);
+      t.defTemp2Until=Math.max(t.defTemp2Until||0,nextTurnExpiry());n++;
+    }
+    if(!n)return none('You have no pixie on the field.');
+    log('Every pixie of '+pname(p)+' flickers out of focus: '+sgn(st.n||8)+' Defence until the end of your next turn.');
+    return;}
+  case 'invis':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&DEF(t).pixie&&sameTeam(t.owner,p))cands.push(i);}
+    if(!cands.length)return none('You have no pixie to hide.');
+    const c=await pickCell(cands,'Hide which pixie until the end of your next turn?',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const tt=b[c].teece;
+    tt.immortalOwner=p;
+    tt.immortalUntil=nextTurnExpiry();
+    log(nm(tt)+' winks out of sight: it cannot be destroyed until the end of your next turn.');
+    await anim([c],'zap');
+    return;}
+  case 'unmake':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return none('No valid target.');
+    const c=await pickCell(cands,'Strip and silence which Teece?',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)){await anim([c],'zap');return;}
+    const tt=b[c].teece;
+    tt.perm=[0,0,0,0];tt.temp=[0,0,0,0];tt.temp2=[0,0,0,0];tt.temp2Until=0;
+    tt.defPerm=0;tt.defTemp2=0;tt.defTemp2Until=0;tt.baseTemp=null;
+    tt.kwTemp=[];tt.kwPerm=[];tt.silenced=true;
+    log(nm(tt)+' is stripped back to the bare card, and everything it does is negated.');
+    await anim([c],'zap');
+    return;}
   case 'graveMagicToHand':{
     const opts=[];
     for(let q=0;q<PLAYERS();q++)
@@ -3775,7 +4020,7 @@ async function processDeath(d){
       log(nm(w)+' gets '+sgn(wd.onAllyDeath.n)+durTxt(wd.onAllyDeath.dur)+'.');
     }
   }
-  const ctx={p:t.owner,deadCell:cell,deadOwner:t.owner,cell,t,noModal:true};
+  const ctx={p:t.owner,deadCell:cell,deadOwner:t.owner,cell,t,killers:d.killers||[],noModal:true};
   /* killers' own on-kill rewards: a killer that also died this same combat wave
      (simultaneous mutual kills) is gone from the board, so fall back to the
      wave's own death registry rather than losing the reward. */
@@ -3915,8 +4160,23 @@ async function resolveCombat(){
         log(nm(d.t)+' rolls clear: '+sgn(dd.dodge.n)+'.');
         const empt=ADJ[d.cell].filter(j=>!G.board[j].teece);
         if(empt.length){
-          const c=await chooseCell(d.t.owner,empt,'Roll '+DEF(d.t).name+' to an empty space, or skip.',
-            {skip:true,mut:(bb,j)=>{if(bb[d.cell].teece)moveT(bb,d.cell,j,false);}});
+          let c;
+          if(isAIP(d.t.owner)||!HAS_DOM){
+            /* Staying is death -- the baseline aiPickCell compares against does
+               not know that, so it read every way out as no gain and skipped,
+               which simply killed the Teece. The only question worth asking is
+               which way out survives. */
+            c=empt.find(j=>{
+              const bb=cloneBoard(G.board);
+              if(!bb[d.cell].teece)return false;
+              moveT(bb,d.cell,j,false);simCombat(bb);
+              return !!(bb[j].teece&&bb[j].teece.uid===d.t.uid);
+            });
+            if(c==null)c=empt[0];
+          }else{
+            c=await chooseCell(d.t.owner,empt,'Roll '+DEF(d.t).name+' to an empty space, or skip.',
+              {skip:true,mut:(bb,j)=>{if(bb[d.cell].teece)moveT(bb,d.cell,j,false);}});
+          }
           if(c!=null&&c!=='CANCEL'){moveT(G.board,d.cell,c,true);await fireMove(d.cell,c,d.t.owner);}
         }
         dodged=true;
@@ -4440,7 +4700,13 @@ async function endTurn(){
   if(stale(ep))return;
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
-    if(t){t.temp=[0,0,0,0];t.kwTemp=[];}
+    if(t){
+      t.temp=[0,0,0,0];t.kwTemp=[];
+      t.baseTemp=null;t.flyExtra=0;
+      if(t.temp2Until&&G.turnNum>=t.temp2Until){t.temp2=[0,0,0,0];t.temp2Until=0;}
+      if(t.defTemp2Until&&G.turnNum>=t.defTemp2Until){t.defTemp2=0;t.defTemp2Until=0;}
+      if(t.immortalUntil&&G.turnNum>=t.immortalUntil){t.immortalOwner=null;t.immortalUntil=0;}
+    }
   }
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
@@ -4600,7 +4866,7 @@ async function startTurn(){
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
     if(t&&t.owner===p){t.actUsedTurn={};t.dodged=false;t.magicUsedTurn=0;}
-    if(t&&t.immortalOwner===p)t.immortalOwner=null;
+    if(t&&t.immortalOwner===p&&!t.immortalUntil)t.immortalOwner=null;
   }
   G.movedThisTurn=[];
   G.graveLastTurn=G.graveThisTurn;
@@ -4647,9 +4913,14 @@ function cloneBoard(b){
       immortalOwner:c.teece.immortalOwner,
       silenced:!!c.teece.silenced,magicUsedTurn:c.teece.magicUsedTurn||0,
       links:c.teece.links.slice(),controls:c.teece.controls.slice(),
+      temp2:(c.teece.temp2||[0,0,0,0]).slice(),temp2Until:c.teece.temp2Until||0,
+      defTemp2:c.teece.defTemp2||0,defTemp2Until:c.teece.defTemp2Until||0,
+      baseTemp:c.teece.baseTemp?c.teece.baseTemp.slice():null,flyExtra:c.teece.flyExtra||0,
+      immortalUntil:c.teece.immortalUntil||0,
       actUsedTurn:Object.assign({},c.teece.actUsedTurn),actUsedGame:Object.assign({},c.teece.actUsedGame)}):null,
     ground:c.ground?Object.assign({},c.ground):null,
     mine:c.mine?Object.assign({},c.mine):null,
+    enchant:c.enchant?Object.assign({},c.enchant):null,
     razed:!!c.razed,
     curseP:c.curseP?Object.assign({},c.curseP):null,
     prime:c.prime?Object.assign({},c.prime):null,

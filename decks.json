@@ -224,6 +224,32 @@
         540
       ],
       "blurb": "Plants that feed each other. Almost every card hands out a permanent bonus, and the bonuses stack all game — but every plant is soft at the bottom, so watch the edge it is standing on."
+    },
+    "pixie": {
+      "name": "Pixie",
+      "cards": [
+        541,
+        542,
+        543,
+        544,
+        545,
+        546,
+        547,
+        548,
+        549,
+        550,
+        551,
+        552,
+        553,
+        554,
+        555,
+        556,
+        557,
+        558,
+        559,
+        560
+      ],
+      "blurb": "Tiny flying creatures with almost no numbers and an enormous amount of magic. Every pixie flies, and the deck keeps pulling magic back out of graveyards, decks and thin air — then bends what is on the field with it: minds taken, Teece stretched or shrunk, wings bought by the turn."
     }
   },
   "formats": [
@@ -531,6 +557,26 @@
     537,
     538,
     539,
-    540
+    540,
+    541,
+    542,
+    543,
+    544,
+    545,
+    546,
+    547,
+    548,
+    549,
+    550,
+    551,
+    552,
+    553,
+    554,
+    555,
+    556,
+    557,
+    558,
+    559,
+    560
   ]
 }
