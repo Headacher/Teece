@@ -1183,7 +1183,7 @@ function newState(mode,vsAI,decks,extra){
     detailLock:null,detailHover:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],
     epoch:++EPOCH,
     enemyBonus:extra.enemyBonus||0,level:extra.level||0,quiet:0,eventFlag:false,
-    modalNext:null,trap:null,
+    modalNext:null,trap:null,pendingFx:[],
     seatNames:extra.seatNames||null};
   for(const p of s.players){for(let i=0;i<5&&p.deck.length;i++){p.hand.push(p.deck.pop());p.plate.push([]);}}
   return s;
@@ -2759,6 +2759,34 @@ function revertControl(b,uid,liveLog){
     }
   }
 }
+/* ============ the effect stack ============
+   Effects that have to land before a single side is compared. Pocket
+   Multitool's trap stacks a kill here the moment the Teece touches the board
+   rather than reaching in and destroying it on the spot, and the stack drains
+   at the top of every combat resolution. So whatever else runs between the
+   Teece landing and the next scan, the kill is ahead of it in the queue and
+   the Teece never gets a fight. The death itself is an ordinary one: on-death
+   effects, resummons and salvage all pay out as they always do. */
+function queueFx(fx){(G.pendingFx||(G.pendingFx=[])).push(fx);}
+async function drainFx(){
+  if(!G||!G.pendingFx||!G.pendingFx.length)return false;
+  const ep=G.epoch;
+  let any=false;
+  while(G.pendingFx.length){
+    const fx=G.pendingFx.shift();
+    if(fx.kill==null)continue;
+    for(let i=0;i<BN;i++){
+      const t=G.board[i].teece;
+      if(!t||t.uid!==fx.kill)continue;
+      if(fx.msg)log(fx.msg);
+      await processDeath({cell:i,t,killers:[]});
+      any=true;
+      break;
+    }
+    if(stale(ep))return any;
+  }
+  return any;
+}
 /* ============ deaths & combat ============ */
 async function processDeath(d){
   const b=G.board,t=d.t,cell=d.cell;
@@ -2885,6 +2913,9 @@ async function resolveCombat(){
   let guard=0;
   while(G&&!G.over){
     if(stale(ep))return;
+    /* stacked effects resolve first: nothing fights while a kill is pending */
+    await drainFx();
+    if(stale(ep)||G.over)return;
     let deaths=scanDeaths(G.board);
     if(!deaths.length)break;
     let dodged=false;
@@ -3095,6 +3126,16 @@ async function playTeece(p,handIdx){
     t.base=plan.rot===1?[bs[3],bs[0],bs[1],bs[2]]:[bs[1],bs[2],bs[3],bs[0]];
   }
   putTeece(b,spot,t,true);
+  /* The trap catches it as it lands. The kill goes on the effect stack right
+     here, before anything else in this play can run, and the stack drains
+     ahead of every combat scan -- so the Teece cannot trade with a neighbour
+     on its way out no matter what happens in between. */
+  let trapped=false;
+  if(G.trap&&!sameTeam(p,G.trap.by)){
+    G.trap=null;
+    trapped=true;
+    queueFx({kill:t.uid,msg:nm(t)+' walks straight into the trap.'});
+  }
   if(b[spot].ground){
     const gd0=CARDS[b[spot].ground.cardId];
     if(gd0.gPlayMod){applyModT(t,gd0.gPlayMod,'perm');log(nm(t)+' is played onto '+gd0.name+': '+sgn(gd0.gPlayMod)+'.');}
@@ -3116,10 +3157,7 @@ async function playTeece(p,handIdx){
     for(let k=0;k<4;k++)t.perm[k]+=cn;
     log(nm(t)+' matches the dial: '+sgn(cn)+'.');
   }
-  if(G.trap&&!sameTeam(p,G.trap.by)){
-    G.trap=null;
-    log(nm(t)+' walks straight into the trap.');
-    await processDeath({cell:spot,t,killers:[]});
+  if(trapped){
     await resolveCombat();render();
     return true;
   }
