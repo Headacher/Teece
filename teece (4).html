@@ -185,6 +185,8 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .overlay h2{font-family:var(--disp);font-weight:400;font-size:30px;margin:0 0 8px}
 .overlay h3{font-family:var(--disp);font-weight:400;font-size:19px;margin:14px 0 2px}
 .overlay p{color:var(--muted);font-size:13px;line-height:1.6;margin:6px 0}
+.overlay h2 .ver{font-family:var(--ui,inherit);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);vertical-align:middle;margin-left:10px}
 .overlay .row{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
 .hidden{display:none!important}
 
@@ -259,7 +261,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 
 <div class="overlay" id="startOverlay">
   <div class="box">
-    <h2>Teece</h2>
+    <h2>Teece <span class="ver" id="verTag"></span></h2>
     <p>Adjacent enemy Teece compare touching edge numbers; the smaller one dies, ties do nothing, and every stat
        change anywhere re-checks the whole board. One Teece per turn; equips, magic and battlegrounds are unlimited.
        Win by wiping out every enemy Teece, ending a turn with four more Teece fielded (Tokens never count),
@@ -327,6 +329,13 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 <div id="toast"></div>
 <script>
 /* ============ card registry ============ */
+/* ============ version ============
+   Shown on the start screen so a player can always name the build in front of
+   them. Bump this in the same commit as anything that gets pushed: raise
+   `build` by one and set `date` to the day of the push. See CLAUDE.md. */
+const VERSION={build:1,date:'2026-09-05'};
+const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
+
 const HAS_DOM = typeof document !== 'undefined';
 
 /* fx vocabulary:
@@ -4711,6 +4720,8 @@ if(HAS_DOM){
     const pb=document.getElementById('promptBar');
     if(pb){pb.classList.add('hot');pb.textContent='Script error: '+(e.message||'unknown');}
   });
+  const vt=document.getElementById('verTag');
+  if(vt)vt.textContent=versionLabel();
   document.getElementById('cAI').onclick=()=>start('classic',true);
   document.getElementById('cHot').onclick=()=>start('classic',false);
   document.getElementById('tAI').onclick=()=>start('t100',true);
