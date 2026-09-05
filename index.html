@@ -415,7 +415,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:4,date:'2026-09-05'};
+const VERSION={build:5,date:'2026-09-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1976,6 +1976,15 @@ function actsOf(b,i){
   if(hasKw(b,i,'teleport'))out.push({key:'ktele',act:TELE_ACT});
   if(b[i].ground){const gd=CARDS[b[i].ground.cardId];if(gd.gact)gd.gact.forEach((a,x)=>out.push({key:'g'+b[i].ground.cardId+'_'+x,act:a}));}
   return out;
+}
+/* A Teece silenced by Silencer keeps none of its own acts in actsOf, so the
+   panel used to read "No abilities." while the card still promised one. These
+   are the abilities silence took away: shown, and disabled, the way a Curse of
+   Silence on the player already reads. */
+function negatedActs(b,i){
+  const t=b[i].teece;
+  if(!t||!t.silenced)return [];
+  return (DEF(t).act||[]).map((a,x)=>({key:'c'+x,act:a}));
 }
 function actAvailable(t,ent){
   if(ent.act.once==='game'&&t.actUsedGame[ent.key])return false;
@@ -5423,6 +5432,14 @@ function showDetail(i){
     btn.addEventListener('click',()=>{runAct(G.turn,i,ent);});
     d.appendChild(btn);
   }
+  for(const ent of (t.owner===G.turn?negatedActs(G.board,i):[])){
+    const btn=document.createElement('button');
+    btn.className='btn abtn';
+    btn.textContent=ent.act.name+' (silenced)';
+    btn.title=nm(t)+' was silenced: this ability is negated for the rest of the game.';
+    btn.disabled=true;
+    d.appendChild(btn);
+  }
 }
 function handSlot(p){
   if(p===0)return document.getElementById('myHand');
@@ -5481,7 +5498,7 @@ function renderHand(p){
       const pb=document.createElement('div');
       pb.className='plated';
       pb.textContent='E'+worn.length;
-      pb.title='Plated with '+worn.map(e=>CARDS[e.cardId].name).join(', ');
+      pb.title=worn.map(e=>CARDS[e.cardId].name+' — '+CARDS[e.cardId].text).join('\n\n');
       card.appendChild(pb);
     }
     card.addEventListener('click',async()=>{
@@ -5506,7 +5523,8 @@ function showDetailCard(id,worn){
     '<div class="dt">'+cd.text+'</div>';
   if(worn&&worn.length){
     html+='<div class="dstats" style="color:var(--gold)">Plated, and arrives wearing:</div>';
-    for(const e of worn)html+='<div class="dstats" style="font-size:11px">'+CARDS[e.cardId].name+'</div>';
+    for(const e of worn)html+='<div class="dstats" style="font-size:11px">'+CARDS[e.cardId].name+
+      ' &mdash; '+CARDS[e.cardId].text+'</div>';
   }
   d.innerHTML=html;
 }
@@ -5550,6 +5568,16 @@ function statusesFor(p){
     'Curse of Confusion: the next Teece you play arrives turned '+dirTxt(pl.confuse.dir)+', whichever way you meant to set it down.');
   if(pl.forget)push('forget','bad','Next draw forgotten',
     'A Curse of Forgetting is on you: your next '+(pl.forget===1?'draw is':pl.forget+' draws are')+' discarded on sight.');
+
+  /* --- abilities that have been negated outright --- */
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(!t||!t.silenced||!sameTeam(t.owner,p))continue;
+    if(!(DEF(t).act||[]).length)continue;
+    push('silenced'+t.uid,'bad','Silenced: '+nm(t),
+      nm(t)+' was silenced. Its '+(DEF(t).act||[]).map(a=>a.name).join(' and ')+
+      ' cannot be activated again for the rest of the game, though the card still describes it.');
+  }
 
   /* --- what is waiting for the next Teece you play --- */
   if(G.trap){
@@ -5762,7 +5790,8 @@ function renderActionBar(){
   who.className='who';who.textContent=nm(t);
   ab.appendChild(who);
   const acts=t.owner===G.turn?actsOf(G.board,i):[];
-  if(!acts.length){
+  const negated=t.owner===G.turn?negatedActs(G.board,i):[];
+  if(!acts.length&&!negated.length){
     const n=document.createElement('span');
     n.className='none';
     n.textContent=t.owner===G.turn?'No abilities.':'Enemy Teece.';
@@ -5777,6 +5806,14 @@ function renderActionBar(){
     btn.textContent=ent.act.name+(gagged?' (silenced)':actAvailable(t,ent)?'':' (used)');
     btn.disabled=!av;
     btn.addEventListener('click',()=>{runAct(G.turn,i,ent);});
+    ab.appendChild(btn);
+  }
+  for(const ent of negated){
+    const btn=document.createElement('button');
+    btn.className='btn';
+    btn.textContent=ent.act.name+' (silenced)';
+    btn.title=nm(t)+' was silenced: this ability is negated for the rest of the game.';
+    btn.disabled=true;
     ab.appendChild(btn);
   }
   const un=document.createElement('button');
