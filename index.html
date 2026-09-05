@@ -264,6 +264,10 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   justify-content:center;padding:20px;z-index:20;overflow:auto}
 .overlay .box{max-width:640px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px}
 .overlay h2{font-family:var(--disp);font-weight:400;font-size:30px;margin:0 0 8px}
+.sdia{display:inline-grid;grid-template-columns:repeat(3,1.35em);grid-template-rows:repeat(3,1.15em);
+  vertical-align:middle;text-align:center;font-style:normal;font-variant-numeric:tabular-nums;line-height:1.15em}
+.sdia i{font-style:normal}
+.sdia .t{grid-area:1/2} .sdia .l{grid-area:2/1} .sdia .r{grid-area:2/3} .sdia .b{grid-area:3/2}
 .overlay h2 .ver{font-size:11px;letter-spacing:.08em;text-transform:uppercase;
   color:var(--muted);vertical-align:middle;margin-left:10px;font-family:inherit}
 .overlay h3{font-family:var(--disp);font-weight:400;font-size:19px;margin:14px 0 2px}
@@ -415,7 +419,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:5,date:'2026-09-05'};
+const VERSION={build:6,date:'2026-09-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -830,7 +834,7 @@ const CARDS = {
  16:{name:'Hex',type:'magic',text:'An enemy Teece gets -2.',cast:[{fx:'mod',who:'enemy',where:'any',n:-2,dur:'perm'}]},
  17:{name:'Surge',type:'magic',text:'An allied Teece gets +2 and may move one space.',
     cast:[{fx:'mod',who:'ally',where:'any',n:2,dur:'perm',move:'any1'}]},
- 18:{name:'Swarm',type:'magic',text:'Summon up to four 0/0/0/0 Tokens. Tokens cannot be sacrificed and never count toward winning.',
+ 18:{name:'Swarm',type:'magic',text:'Summon up to four Tokens with 0 on every side. Tokens cannot be sacrificed and never count toward winning.',
     cast:[{fx:'token',tok:'T0',where:'any',count:4}]},
  19:{name:'High Ground',type:'ground',gmod:3,text:'A Teece on this panel gets +3.'},
  20:{name:'Low Ground',type:'ground',gmod:-3,text:'A Teece on this panel gets -3.'},
@@ -866,7 +870,7 @@ const CARDS = {
     onPlay:[{fx:'copy'}]},
  108:{name:'Comeback',type:'teece',sides:[2,2,2,2],text:'When destroyed, once per game: resummon with +3.',
     onDeath:[{fx:'resummon',bonus:3}]},
- 109:{name:'Puppeteer',type:'teece',sides:[1,1,1,1],text:'When played: summon an 8/8/8/8 Token on any empty space. It is destroyed when this is destroyed.',
+ 109:{name:'Puppeteer',type:'teece',sides:[1,1,1,1],text:'When played: summon a Token with 8 on every side on any empty space. It is destroyed when this is destroyed.',
     onPlay:[{fx:'token',tok:'T8',where:'any',count:1,linked:true}]},
  110:{name:'Hypnotist',type:'teece',sides:[0,0,0,0],text:'When played: control an enemy Teece until this is destroyed.',
     onPlay:[{fx:'control'}]},
@@ -899,7 +903,7 @@ const CARDS = {
  128:{name:'Beam',type:'teece',sides:[6,5,8,8],text:'No effect.'},
  129:{name:'Wedge',type:'teece',sides:[8,8,7,3],text:'No effect.'},
  130:{name:'Blink',type:'teece',sides:[5,5,5,5],kw:['teleport'],text:'Teleport: once per your turn, move to any empty space on the board.'},
- /* ---- Ranged: priced a little under the 7/7/7/7 baseline ---- */
+ /* ---- Ranged: priced a little under the 7-on-every-side baseline ---- */
  131:{name:'Archer',type:'teece',sides:[6,6,6,6],kw:['ranged'],text:'Ranged.'},
  132:{name:'Crossbow',type:'teece',sides:[7,7,4,4],kw:['ranged'],text:'Ranged.'},
  133:{name:'Longshot',type:'teece',sides:[8,3,3,3],kw:['ranged'],text:'Ranged.'},
@@ -928,7 +932,7 @@ const CARDS = {
     onPlay:[{fx:'gust',who:'ally',may:true}]},
  151:{name:'Bruiser',type:'teece',sides:[7,7,3,3],text:'When played: an enemy Teece gets -2.',
     onPlay:[{fx:'mod',who:'enemy',where:'any',n:-2,dur:'perm'}]},
- 152:{name:'Breeder',type:'teece',sides:[6,6,5,5],text:'When played: summon a 4/4/4/4 Token on an adjacent empty space.',
+ 152:{name:'Breeder',type:'teece',sides:[6,6,5,5],text:'When played: summon a Token with 4 on every side on an adjacent empty space.',
     onPlay:[{fx:'token',tok:'T4',where:'adj',count:1}]},
  153:{name:'Latecomer',type:'teece',sides:[8,8,8,8],text:'When played: it gets -8 until end of turn.',
     onPlay:[{fx:'mod',who:'self',n:-8,dur:'temp'}]},
@@ -940,7 +944,7 @@ const CARDS = {
     onDeath:[{fx:'aoe',who:'ally',where:'adj',n:2,dur:'perm'}]},
  157:{name:'Stinger',type:'teece',sides:[7,7,6,6],text:'When destroyed: adjacent enemies get -2.',
     onDeath:[{fx:'aoe',who:'enemy',where:'adj',n:-2,dur:'perm'}]},
- 158:{name:'Husk',type:'teece',sides:[7,7,6,6],text:'When destroyed: leave a 4/4/4/4 Token on a random adjacent space.',
+ 158:{name:'Husk',type:'teece',sides:[7,7,6,6],text:'When destroyed: leave a Token with 4 on every side on a random adjacent space.',
     onDeath:[{fx:'token',tok:'T4',where:'adj',count:1,random:true}]},
  159:{name:'Bramble',type:'teece',sides:[4,5,6,7],text:'When destroyed: its killer gets -3 permanently.',
     onDeath:[{fx:'killer',n:-3,dur:'perm'}]},
@@ -997,9 +1001,9 @@ const CARDS = {
  186:{name:'Rally',type:'magic',text:'All your Teece get +2 permanently.',cast:[{fx:'mass',who:'ally',n:2,dur:'perm'}]},
  187:{name:'Panic',type:'magic',text:'All enemy Teece get -2 permanently.',cast:[{fx:'mass',who:'enemy',n:-2,dur:'perm'}]},
  188:{name:'Shatter',type:'magic',text:'Destroy an equip card, then draw a card.',cast:[{fx:'shatter'},{fx:'draw',n:1}]},
- 189:{name:'Quake',type:'magic',text:'Destroy a battleground. If that panel is empty, summon a 4/4/4/4 Token on it.',cast:[{fx:'quake'}]},
+ 189:{name:'Quake',type:'magic',text:'Destroy a battleground. If that panel is empty, summon a Token with 4 on every side on it.',cast:[{fx:'quake'}]},
  190:{name:'Study',type:'magic',text:'Draw three cards.',cast:[{fx:'draw',n:3}]},
- 191:{name:'Reinforce',type:'magic',text:'Summon two 4/4/4/4 Tokens on empty spaces.',
+ 191:{name:'Reinforce',type:'magic',text:'Summon two Tokens with 4 on every side on empty spaces.',
     cast:[{fx:'token',tok:'T4',where:'any',count:2}]},
  192:{name:'Overload',type:'magic',text:'An allied Teece gets +6 until end of turn and -2 permanently.',
     cast:[{fx:'mod',who:'ally',where:'any',n:6,dur:'temp'},{fx:'mod',who:'last',n:-2,dur:'perm'}]},
@@ -1064,7 +1068,7 @@ const CARDS = {
     text:'When played: choose a panel. Teece on it get +2 Defence while Barricade Builder stands.',
     onPlay:[{fx:'defMark',n:2}]},
  327:{name:'Rolling Stone',type:'teece',sides:[3,3,3,3],dodge:{n:-3},
-    text:'When it would be destroyed: it gets -3 and rolls one space instead, once per turn. When it moves: summon a 0/0/0/0 Rock Token with Defence 6 beside it.',
+    text:'When it would be destroyed: it gets -3 and rolls one space instead, once per turn. When it moves: summon a Rock Token with 0 on every side with Defence 6 beside it.',
     onMove:[{fx:'token',tok:'TR',where:'adj',count:1}]},
  328:{name:'Rock Sergeant',type:'teece',sides:[7,7,7,7],def:1,sac:1,
     text:'Sacrifice one fielded Teece to play. Defence 1. Every other ally gets +X, where X is its own Defence.',
@@ -1140,7 +1144,7 @@ const CARDS = {
     cast:[{fx:'choose',msg:'Second Wind:',opts:[
       {lbl:'Give it +3',steps:[{fx:'movedMod',n:3,dur:'perm'}]},
       {lbl:'Give it -3',steps:[{fx:'movedMod',n:-3,dur:'perm'}]}]}]},
- 365:{name:'Warstomp',type:'magic',text:'If any Teece moved this turn: summon a 9/9/9/9 Ogre Token.',
+ 365:{name:'Warstomp',type:'magic',text:'If any Teece moved this turn: summon an Ogre Token with 9 on every side.',
     cast:[{fx:'movedToken',tok:'T9'}]},
  366:{name:'Counterweight',type:'equip',mod:0,
     text:'Whenever an enemy moves, the equipped Teece gets +2 until end of turn and may move one space.',
@@ -1172,11 +1176,11 @@ const CARDS = {
     text:'When played: the next modality triggers every mode. When destroyed: the next modality triggers its mode twice.',
     onPlay:[{fx:'modalNext',all:true}],onDeath:[{fx:'modalNext',twice:true}]},
  445:{name:'Assembly Line',type:'teece',sides:[4,4,4,4],
-    text:'Once per your turn, choose a modality: build one 4/4/4/4 Token, or two 2/2/2/2 Tokens, or three 0/0/0/0 Tokens.',
+    text:'Once per your turn, choose a modality: build one Token with 4 on every side, or two with 2, or three with 0.',
     act:[{name:'Run the line',once:'turn',steps:[{fx:'choose',modal:true,msg:'Assembly Line:',opts:[
-      {lbl:'One 4/4/4/4 Token',steps:[{fx:'token',tok:'T4',count:1}]},
-      {lbl:'Two 2/2/2/2 Tokens',steps:[{fx:'token',tok:'T2',count:2}]},
-      {lbl:'Three 0/0/0/0 Tokens',steps:[{fx:'token',tok:'T0',count:3}]}]}]}]},
+      {lbl:'One Token, 4 on every side',steps:[{fx:'token',tok:'T4',count:1}]},
+      {lbl:'Two Tokens, 2 on every side',steps:[{fx:'token',tok:'T2',count:2}]},
+      {lbl:'Three Tokens, 0 on every side',steps:[{fx:'token',tok:'T0',count:3}]}]}]}]},
  446:{name:'Supply Cache',type:'teece',sides:[5,5,5,5],
     text:'When played, choose a modality: draw a card then put a card from your hand on top of your deck, or discard a card then take a card from your grave.',
     onPlay:[{fx:'choose',modal:true,msg:'Supply Cache:',opts:[
@@ -1188,7 +1192,7 @@ const CARDS = {
       {lbl:'An ally gains +2 on one side',steps:[{fx:'modSide',who:'ally',n:2}]},
       {lbl:'An enemy loses 2 on one side',steps:[{fx:'modSide',who:'enemy',n:-2}]}]}]},
  448:{name:'Spare Parts',type:'teece',sides:[7,7,7,7],
-    text:'You can discard this straight from your hand, any time on your turn, to choose a modality: give an allied Teece +2, or move an allied Teece one space. Played to the board instead, it fights as a plain 7/7/7/7; when destroyed, choose a modality: an enemy Teece gets +2, or your opponent draws a card.',
+    text:'You can discard this straight from your hand, any time on your turn, to choose a modality: give an allied Teece +2, or move an allied Teece one space. Played to the board instead, it fights as a plain 7 on every side; when destroyed, choose a modality: an enemy Teece gets +2, or your opponent draws a card.',
     handDiscard:[{fx:'choose',modal:true,msg:'Discard Spare Parts:',opts:[
       {lbl:'An ally gets +2',steps:[{fx:'mod',who:'ally',where:'global',n:2,dur:'perm'}]},
       {lbl:'Move an ally one space',steps:[{fx:'moveTarget',where:'any',who:'ally'}]}]}],
@@ -1248,11 +1252,11 @@ const CARDS = {
  381:{name:'Baby Dragon',type:'teece',sides:[4,4,4,4],tick:{n:2,cap:6},
     text:'At the start of each of your turns it gets +2, up to +6 in all.'},
  382:{name:'Chrysalis',type:'teece',sides:[4,4,8,8],timer:{turns:2,sides:[10,10,8,8]},
-    text:'After two of your turns, it becomes 10/10/8/8.'},
+    text:'After two of your turns, it becomes ↑10 →10 ↓8 ←8.'},
  383:{name:'Green Shoot',type:'teece',sides:[8,9,1,1],timer:{turns:3,sides:[8,9,11,11]},
-    text:'After three of your turns, it becomes 8/9/11/11.'},
+    text:'After three of your turns, it becomes ↑8 →9 ↓11 ←11.'},
  384:{name:'Cut Flower',type:'teece',sides:[9,9,9,9],timer:{turns:2,sides:[5,5,5,5]},
-    text:'After two of your turns, it wilts to 5/5/5/5.'},
+    text:'After two of your turns, it wilts to 5 on every side.'},
  385:{name:'Hourglass Knight',type:'teece',sides:[9,9,9,9],tick:{n:-1},kw:['flying'],
     text:'Flying. At the start of each of your turns, it gets -1.'},
  386:{name:'Fast Forward',type:'magic',text:"Advance a Teece's clock by two turns.",
@@ -1260,17 +1264,17 @@ const CARDS = {
  387:{name:'Time Warp',type:'ground',gAgeRate:2,gDouble:true,
     text:'A Teece on this panel ages twice as fast, and its when-played and when-destroyed effects happen twice.'},
  388:{name:'Acorn',type:'teece',sides:[3,3,3,3],timer:{turns:2,sides:[10,10,10,10]},
-    text:'After two of your turns, it becomes 10/10/10/10.'},
+    text:'After two of your turns, it becomes 10 on every side.'},
  389:{name:'Rewind',type:'magic',
     text:'Take a card that reached any graveyard last turn, yours or an enemy\u2019s, into your hand.',
     cast:[{fx:'rewind'}]},
  390:{name:'Long Game',type:'teece',sides:[2,2,2,2],timer:{turns:2,sides:[12,12,12,12]},
-    text:'After two of your turns, it becomes 12/12/12/12.'},
+    text:'After two of your turns, it becomes 12 on every side.'},
  391:{name:'Whetted Blade',type:'teece',sides:[5,5,7,7],timer:{turns:2,sides:[9,9,7,7]},
-    text:"When played: advance an ally's clock by one turn. After two of your turns, it becomes 9/9/7/7.",
+    text:"When played: advance an ally's clock by one turn. After two of your turns, it becomes ↑9 →9 ↓7 ←7.",
     onPlay:[{fx:'fastForward',n:1,who:'ally'}]},
  392:{name:'Heir Apparent',type:'teece',sides:[8,8,8,8],sac:1,timer:{turns:1,sides:[12,12,12,12]},
-    text:'Sacrifice one fielded Teece to play. It becomes 12/12/12/12 at the start of your next turn, or the moment its clock is moved forward at all.'},
+    text:'Sacrifice one fielded Teece to play. It becomes 12 on every side at the start of your next turn, or the moment its clock is moved forward at all.'},
  393:{name:'Fading Titan',type:'teece',sides:[15,15,15,15],sac:2,tick:{n:-1},
     text:'Sacrifice two fielded Teece to play. At the start of each of your turns, it gets -1.'},
  394:{name:'Timekeeper',type:'teece',sides:[4,4,4,4],
@@ -1364,10 +1368,8 @@ const CARDS = {
     text:'Select an unoccupied panel: no Teece may ever be played or moved onto it again.',
     cast:[{fx:'raze'}]},
  497:{name:'Curse of Sacrifice',type:'magic',
-    text:'Choose a modality, feast or famine, then select a player. They must sacrifice a Teece. After the feast they may give another of their Teece +2; after the famine they choose a player to discard a card.',
-    cast:[{fx:'choose',modal:true,msg:'Curse of Sacrifice:',opts:[
-      {lbl:'Feast: they sacrifice, then bless a survivor',steps:[{fx:'sacrificeCurse',mode:'feast'}]},
-      {lbl:'Famine: they sacrifice, then someone discards',steps:[{fx:'sacrificeCurse',mode:'famine'}]}]}]},
+    text:'Select a player; they sacrifice a Teece. The next Teece they play arrives with half of what was sacrificed, side for side, rounded down.',
+    cast:[{fx:'sacrificeCurse'}]},
  498:{name:'Curse of Confusion',type:'magic',
     text:'Select a Teece and turn it clockwise or counter-clockwise. Then select a player: the next Teece they play is turned the same way once it arrives.',
     cast:[{fx:'confuse'}]},
@@ -1387,7 +1389,7 @@ const CARDS = {
  505:{name:'Silencer',type:'teece',sides:[6,6,4,4],onMagic:[{fx:'silenceCard'}],
     text:'When you play a magic card: you may choose a Teece on the field and silence it. Its abilities are negated permanently.'},
  506:{name:'Familiar Keeper',type:'teece',sides:[3,6,7,7],onMagic:[{fx:'familiar'}],onMagicTimes:2,
-    text:'Up to twice a turn, when you play a magic card: summon a 4/4/4/4 Familiar. Familiars fly, and get +2 until end of turn whenever you play a magic card.'},
+    text:'Up to twice a turn, when you play a magic card: summon a Familiar with 4 on every side. Familiars fly, and get +2 until end of turn whenever you play a magic card.'},
  507:{name:'Groundcurser',type:'teece',sides:[7,4,5,6],onMagic:[{fx:'curseCell',n:-2}],
     text:'When you play a magic card: curse an unoccupied panel. The next enemy to arrive there gets -2.'},
  508:{name:'Witch Doctor',type:'teece',sides:[5,11,4,6],sac:1,
@@ -1420,7 +1422,7 @@ const CARDS = {
     text:'When destroyed: all adjacent Teece get -3.',
     onDeath:[{fx:'aoe',n:-3,dur:'perm'}]},
  479:{name:'Bomblet Rack',type:'teece',sides:[4,6,5,7],
-    text:'Once per your turn: summon a 3/3/3/3 Bomblet. When it is destroyed, all adjacent Teece get -2.',
+    text:'Once per your turn: summon a Bomblet with 3 on every side. When it is destroyed, all adjacent Teece get -2.',
     act:[{name:'Deploy Bomblet',once:'turn',steps:[{fx:'token',tok:'TB',count:1}]}]},
  480:{name:'Trench Sapper',type:'teece',sides:[5,5,5,6],
     text:'Once per your turn: place a Mine on an unoccupied panel. When a Teece plays or moves onto it, remove it and give that Teece -2.',
@@ -1458,7 +1460,7 @@ const CARDS = {
     text:'When destroyed: you may select a Teece; give it +2.',
     onDeath:[{fx:'mod',where:'global',n:2,dur:'perm',may:true}]},
  523:{name:'Dandelion',type:'teece',sides:[5,5,4,5],
-    text:'When played: summon a 3/3/3/3 Sprout. When the Sprout is destroyed, every other allied Teece gets +1.',
+    text:'When played: summon a Sprout with 3 on every side. When the Sprout is destroyed, every other allied Teece gets +1.',
     onPlay:[{fx:'token',tok:'TS',count:1}]},
  524:{name:'Elder Willow',type:'teece',sides:[7,7,1,7],
     text:'Once per your turn: select an adjacent Teece; give it +1.',
@@ -1477,7 +1479,7 @@ const CARDS = {
  529:{name:'Creeping Ivy',type:'teece',sides:[2,6,2,6],endMod:{n:1},
     text:'At the end of every turn, it gets +1 permanently.'},
  530:{name:'Spore Pod',type:'teece',sides:[5,5,3,5],
-    text:'You can discard this straight from your hand, any time on your turn, to summon a 3/3/3/3 Sprout. Played to the board instead, it summons one when it is destroyed. When a Sprout is destroyed, every other allied Teece gets +1.',
+    text:'You can discard this straight from your hand, any time on your turn, to summon a Sprout with 3 on every side. Played to the board instead, it summons one when it is destroyed. When a Sprout is destroyed, every other allied Teece gets +1.',
     handDiscard:[{fx:'token',tok:'TS',count:1}],
     onDeath:[{fx:'token',tok:'TS',count:1}]},
  531:{name:'Mother Tree',type:'teece',sides:[6,6,1,6],sac:1,
@@ -1513,6 +1515,18 @@ const TELE_ACT={name:'Teleport',once:'turn',steps:[{fx:'move',range:'tele'}]};
 /* ============ modalities ============
    A modality is any effect that offers a choice. Gadget bends them: fire every
    mode, fire the chosen mode twice, or switch them off for both sides. */
+/* ---- reading a Teece aloud ----
+   Attributes are positions on the card, not a list, so they are never written
+   as a run of slashes. Inline -- logs, buttons, card text -- they read
+   directionally; an even spread just says so once. Where there is room to draw,
+   sidesBlock lays them out where they actually sit. Index order is
+   SIDE_NAMES: top, right, bottom, left. */
+const sidesLine=s=>
+  (s[0]===s[1]&&s[1]===s[2]&&s[2]===s[3])
+    ? s[0]+' on every side'
+    : '\u2191'+s[0]+' \u2192'+s[1]+' \u2193'+s[2]+' \u2190'+s[3];
+const sidesBlock=s=>'<span class="sdia"><i class="t">'+s[0]+'</i><i class="l">'+s[3]+
+  '</i><i class="r">'+s[1]+'</i><i class="b">'+s[2]+'</i></span>';
 const SIDE_NAMES=['top','right','bottom','left'];
 function groundFlag(g,key){
   if(!g)return false;
@@ -1766,7 +1780,7 @@ function newState(mode,vsAI,decks,extra){
   const teams=extra.teams||Array.from({length:nP},(_,i)=>i);
   buildGeometry(extra.width||3);
   const mk=p=>({deck:shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice()),hand:[],plate:[],grave:[],onceUsed:{},pendingDraw:0,
-    nextDefBonus:0,nextMod:0,noDeckOut:false,teecePlayedLastTurn:false,teecePlayedThisTurn:0,turnsTaken:0,
+    nextDefBonus:0,nextMod:0,nextSides:null,noDeckOut:false,teecePlayedLastTurn:false,teecePlayedThisTurn:0,turnsTaken:0,
     hexes:[],forget:0,confuse:null});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
@@ -2047,7 +2061,7 @@ function checkTimer(b,i){
   t.transformed=true;
   t.base=d.timer.sides.slice();
   if(bonusApplies(t.owner))for(let k=0;k<4;k++)t.base[k]=Math.max(0,t.base[k]+G.enemyBonus);
-  log(nm(t)+' comes of age: '+d.timer.sides.join('/')+'.');
+  log(nm(t)+' comes of age: '+sidesLine(d.timer.sides)+'.');
   return true;
 }
 function ageOne(b,i,n){
@@ -2368,7 +2382,7 @@ async function FXRUN(st,ctx){
     if(st.where==='here'){
       const i=ctx.deadCell;
       if(i!=null&&openAt(b,i)){const tk=makeTeece(st.tok,ctx.deadOwner!=null?ctx.deadOwner:p);
-        putTeece(b,i,tk,true);log('A '+CARDS[st.tok].sides.join('/')+' Token appears at the '+CN[i]+'.');}
+        putTeece(b,i,tk,true);log('A Token ('+sidesLine(CARDS[st.tok].sides)+') appears at the '+CN[i]+'.');}
       return;}
     for(let n=0;n<(st.count||1);n++){
       const pool=(st.where==='adj'?ADJ[ctx.cell]:ALL()).filter(j=>openAt(b,j));
@@ -2379,17 +2393,17 @@ async function FXRUN(st,ctx){
         const tk=makeTeece(st.tok,owner);
         putTeece(b,c,tk,true);
         if(st.linked&&ctx.t){ctx.t.links.push(tk.uid);}
-        log('A '+CARDS[st.tok].sides.join('/')+' Token appears at the '+CN[c]+'.');
+        log('A Token ('+sidesLine(CARDS[st.tok].sides)+') appears at the '+CN[c]+'.');
         continue;
       }
-      const c=await pickCell(pool,'Choose a space for a '+CARDS[st.tok].sides.join('/')+' Token ('+(n+1)+' of '+(st.count||1)+'), or skip.',
+      const c=await pickCell(pool,'Choose a space for a Token ('+sidesLine(CARDS[st.tok].sides)+') ('+(n+1)+' of '+(st.count||1)+'), or skip.',
         (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,p),false);},true);
       if(c==='CANCEL')return 'ABORT';
       if(c==null)return;
       const tk=makeTeece(st.tok,p);
       putTeece(b,c,tk,true);
       if(st.linked&&ctx.t){ctx.t.links.push(tk.uid);}
-      log('A '+CARDS[st.tok].sides.join('/')+' Token appears at the '+CN[c]+'.');
+      log('A Token ('+sidesLine(CARDS[st.tok].sides)+') appears at the '+CN[c]+'.');
       ctx.first=false;
       render();
     }
@@ -2539,7 +2553,7 @@ async function FXRUN(st,ctx){
     if(!b[c].teece){
       const tk=makeTeece('T4',p);
       putTeece(b,c,tk,true);
-      log('A 4/4/4/4 Token rises from the rubble at the '+CN[c]+'.');
+      log('A Token with 4 on every side rises from the rubble at the '+CN[c]+'.');
     }
     return;}
   case 'terra':{
@@ -3177,7 +3191,7 @@ async function FXRUN(st,ctx){
     if(!G.movedThisTurn.length){log('Nothing has moved this turn.');return 'ABORT';}
     const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
     if(!empt.length)return none('No space for the Ogre.');
-    const c=await pickCell(empt,'Choose a space for an 8/8/8/8 Ogre Token.',
+    const c=await pickCell(empt,'Choose a space for an Ogre Token with 8 on every side.',
       (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,p),false);},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -3424,23 +3438,20 @@ async function FXRUN(st,ctx){
       const c=await chooseCell(q,sacs,'Choose one of your Teece to sacrifice.',{mut:null});
       if(c==null||c==='CANCEL')continue;
       const victim=b[c].teece;
-      log(nm(victim)+' is sacrificed by '+pname(q)+'.');
+      /* What it was worth standing there, halved side for side and rounded
+         down, waits for the next Teece its owner plays. Read before the death,
+         because processDeath takes it off the board. */
+      const was=effSides(b,c);
+      const half=was.map(v=>Math.floor(v/2));
+      log(nm(victim)+' is sacrificed by '+pname(q)+' ('+sidesLine(was)+').');
       await processDeath({cell:c,t:victim,killers:[]});
       if(G.over)return;
-      if(st.mode==='feast'){
-        const ups=[];
-        for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===q)ups.push(i);}
-        if(!ups.length){log('Nothing left to bless.');continue;}
-        const u=await chooseCell(q,ups,'The feast: give one of your Teece +2, or skip.',
-          {skip:true,mut:(bb,i)=>{applyModT(bb[i].teece,2,'perm');}});
-        if(u==null||u==='CANCEL')continue;
-        applyModT(b[u].teece,2,'perm');
-        log(nm(b[u].teece)+' feasts: +2.');
+      if(half.some(v=>v!==0)){
+        const pq=G.players[q];
+        pq.nextSides=(pq.nextSides||[0,0,0,0]).map((v,k)=>v+half[k]);
+        log('The altar pays out: the next Teece '+pname(q)+' plays arrives with '+sidesLine(pq.nextSides)+'.');
       }else{
-        const target=await pickPlayer(q,'The famine: who discards a card?');
-        if(target==null)continue;
-        if(!G.players[target].hand.length){log('Nothing left in '+pname(target)+"'s hand to discard.");continue;}
-        await runSteps([{fx:'discard',n:1}],{p:target,first:false});
+        log('There was nothing left in '+nm(victim)+' to pay forward.');
       }
     }
     return;}
@@ -4145,6 +4156,11 @@ async function playTeece(p,handIdx){
   }
   if(pl.nextDefBonus){applyDef(t,pl.nextDefBonus);log(nm(t)+' arrives with +'+pl.nextDefBonus+' Defence.');pl.nextDefBonus=0;}
   if(pl.nextMod){const nmd=pl.nextMod;pl.nextMod=0;applyModT(t,nmd,'perm');log(nm(t)+' arrives with '+sgn(nmd)+'.');}
+  if(pl.nextSides){
+    const ns=pl.nextSides;pl.nextSides=null;
+    for(let k=0;k<4;k++)t.perm[k]+=ns[k];
+    log(nm(t)+' arrives carrying the altar: '+sidesLine(ns)+'.');
+  }
   if(pl.calib&&t.base.every(v=>v===pl.calib.x)){
     const cn=pl.calib.n;pl.calib=null;
     for(let k=0;k<4;k++)t.perm[k]+=cn;
@@ -4556,7 +4572,7 @@ async function growSeeds(p){
     if(G.board[i].razed){log('The seed at the '+CN[i]+' finds nothing but razed ground.');continue;}
     const grave=G.players[p].grave.filter(id=>CARDS[id].type==='teece'&&!isBossCard(id));
     if(!grave.length){log('The seed at the '+CN[i]+' grows, but there is nothing in the graveyard to raise.');continue;}
-    const opts=grave.map((id,x)=>({v:String(x),lbl:CARDS[id].name+' '+CARDS[id].sides.join('/'),cid:id}));
+    const opts=grave.map((id,x)=>({v:String(x),lbl:CARDS[id].name+' ('+sidesLine(CARDS[id].sides)+')',cid:id}));
     opts.push({v:'no',lbl:'Let it lie'});
     const pick=await chooseOption(p,opts,'The seed at the '+CN[i]+' grows. Raise which Teece, with +'+(sd.n||1)+'?');
     if(pick==null||pick==='no'){log('The seed at the '+CN[i]+' grows and nothing is raised.');continue;}
@@ -5405,7 +5421,7 @@ function showDetail(i){
   if(dfv>0)html+='<div class="dt" style="color:var(--gold)">Defence '+dfv+'</div>';
   const tm=DEF(t).timer;
   if(tm)html+='<div class="dt" style="color:var(--gold)">'+(t.transformed?'Fully grown.':
-    'Becomes '+tm.sides.join('/')+' in '+Math.max(0,tm.turns-(t.age||0))+' more of your turns.')+'</div>';
+    'Becomes '+sidesLine(tm.sides)+' in '+Math.max(0,tm.turns-(t.age||0))+' more of your turns.')+'</div>';
   if(DEF(t).tick)html+='<div class="dt" style="color:var(--gold)">Ticks '+sgn(DEF(t).tick.n)+' each of your turns.</div>';
 
   if(t.equips.length){
@@ -5516,8 +5532,8 @@ function showDetailCard(id,worn){
   if(!d)return;
   const ps=cd.type==='teece'?platedSides(id,worn):null;
   let html='<div class="dn">'+cd.name+'</div>'+
-    (cd.type==='teece'?'<div class="dstats" style="color:var(--gold)">'+ps.join(' / ')+
-      (worn&&worn.length&&ps.join()!==cd.sides.join()?' (plated, from '+cd.sides.join('/')+')':'')+
+    (cd.type==='teece'?'<div class="dstats" style="color:var(--gold)">'+sidesBlock(ps)+
+      (worn&&worn.length&&ps.join()!==cd.sides.join()?' &nbsp;plated, from '+sidesBlock(cd.sides):'')+
       (cd.sac?' \u00b7 sacrifice '+cd.sac:'')+(cd.def?' \u00b7 Defence '+cd.def:'')+'</div>':
       '<div class="dstats" style="color:var(--gold)">'+cd.type+'</div>')+
     '<div class="dt">'+cd.text+'</div>';
@@ -5605,6 +5621,8 @@ function statusesFor(p){
     'The next Teece you play arrives with '+sgn(arrive)+', from '+src.join(' and ')+'.');
   if(pl.nextDefBonus)push('nextdef','good','Next Teece +'+pl.nextDefBonus+' Defence',
     'The next Teece you play arrives with +'+pl.nextDefBonus+' Defence.');
+  if(pl.nextSides)push('nextsides','good','Next Teece carries the altar',
+    'The next Teece you play arrives with '+sidesLine(pl.nextSides)+', half of what was sacrificed to the Curse of Sacrifice.');
   if(pl.nextMod)push('nextmod',pl.nextMod<0?'bad':'good','Next Teece '+sgn(pl.nextMod),
     'The next Teece you play arrives with '+sgn(pl.nextMod)+'.');
   if(pl.calib)push('calib','good','Dial set to '+pl.calib.x,
