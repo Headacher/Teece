@@ -424,7 +424,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:7,date:'2026-09-05'};
+const VERSION={build:8,date:'2026-09-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -2094,6 +2094,20 @@ function actsOf(b,i){
    panel used to read "No abilities." while the card still promised one. These
    are the abilities silence took away: shown, and disabled, the way a Curse of
    Silence on the player already reads. */
+/* Why an ability cannot be used right now, in a couple of words, so a button
+   that will not work says so instead of being tapped and doing nothing. Only
+   the movement acts are worked out here -- they are the ones that quietly have
+   nowhere to go on a crowded board, and Fly reaches the whole board, so on a
+   3x3 it takes only eight bodies to pin one down. */
+function actBlockedReason(b,i,ent){
+  const t=b[i].teece;
+  if(!t)return null;
+  const st=ent.act.steps&&ent.act.steps[0];
+  if(!st||st.fx!=='move')return null;
+  if(hasKw(b,i,'immovable'))return 'held';
+  const pool=st.range==='orth'?ADJ[i]:ALL().filter(j=>j!==i);
+  return pool.some(j=>openAt(b,j))?null:'nowhere to go';
+}
 function negatedActs(b,i){
   const t=b[i].teece;
   if(!t||!t.silenced)return [];
@@ -5711,10 +5725,12 @@ function showDetail(i){
   const acts=t.owner===G.turn?actsOf(G.board,i):[];
   const gagged=hexOn(t.owner,'silence');
   for(const ent of acts){
-    const av=actAvailable(t,ent)&&!gagged&&!G.pending&&!G.over;
+    const blocked=gagged?null:actBlockedReason(G.board,i,ent);
+    const av=actAvailable(t,ent)&&!gagged&&!blocked&&!G.pending&&!G.over;
     const btn=document.createElement('button');
     btn.className='btn abtn'+(av?' primary':'');
-    btn.textContent=ent.act.name+(gagged?' (silenced)':actAvailable(t,ent)?'':' (used)');
+    btn.textContent=ent.act.name+(gagged?' (silenced)':!actAvailable(t,ent)?' (used)':blocked?' ('+blocked+')':'');
+    if(blocked)btn.title=nm(t)+' has no open panel to move to.';
     btn.disabled=!av;
     btn.addEventListener('click',()=>{runAct(G.turn,i,ent);});
     d.appendChild(btn);
@@ -6079,6 +6095,12 @@ function renderActionBar(){
   who.className='who';who.textContent=nm(t);
   ab.appendChild(who);
   const acts=t.owner===G.turn?actsOf(G.board,i):[];
+  if(G.pending){
+    const w=document.createElement('span');
+    w.className='none';
+    w.textContent='Answer the question above first.';
+    ab.appendChild(w);
+  }
   const negated=t.owner===G.turn?negatedActs(G.board,i):[];
   if(!acts.length&&!negated.length){
     const n=document.createElement('span');
@@ -6088,11 +6110,13 @@ function renderActionBar(){
   }
   const gagged=hexOn(t.owner,'silence');
   for(const ent of acts){
-    const usable=actAvailable(t,ent)&&!gagged;
+    const blocked=gagged?null:actBlockedReason(G.board,i,ent);
+    const usable=actAvailable(t,ent)&&!gagged&&!blocked;
     const av=usable&&!G.pending;
     const btn=document.createElement('button');
     btn.className='btn'+(av?' primary':'');
-    btn.textContent=ent.act.name+(gagged?' (silenced)':actAvailable(t,ent)?'':' (used)');
+    btn.textContent=ent.act.name+(gagged?' (silenced)':!actAvailable(t,ent)?' (used)':blocked?' ('+blocked+')':'');
+    if(blocked)btn.title=nm(t)+' has no open panel to move to.';
     btn.disabled=!av;
     btn.addEventListener('click',()=>{runAct(G.turn,i,ent);});
     ab.appendChild(btn);
