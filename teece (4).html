@@ -333,7 +333,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed: raise
    `build` by one and set `date` to the day of the push. See CLAUDE.md. */
-const VERSION={build:1,date:'2026-09-05'};
+const VERSION={build:2,date:'2026-09-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';

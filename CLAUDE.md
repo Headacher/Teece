@@ -4,6 +4,10 @@ A card/board game in one self-contained file: `teece (4).html`. Cards, rules, AI
 rendering and all styling live in that file's single `<script>` and `<style>`
 block. There is no build step and no dependencies — open the file and it runs.
 
+`index.html` is a redirect to it, and exists only so a host serving this repo
+answers its root with the game: the real filename carries a space and
+parentheses, which makes a poor URL. All work goes in `teece (4).html`.
+
 ## Bump the version on every push
 
 `VERSION` sits near the top of the script and is printed on the start screen next
