@@ -962,8 +962,8 @@ const CARDS = {
  511:{name:'Mother Tree',type:'teece',sides:[6,6,1,6],sac:1,
     text:'Sacrifice one fielded Teece to play. Every other allied Teece gets +3.',
     aura:{who:'ally',where:'global',n:3}},
- 512:{name:'Ancient Redwood',type:'teece',sides:[10,10,10,10],sac:2,
-    text:'Sacrifice two fielded Teece to play.'},
+ 512:{name:'Ancient Redwood',type:'teece',sides:[10,10,10,10],sac:2,endAura:{who:'ally',n:1},
+    text:'Sacrifice two fielded Teece to play. At the end of every turn, every other allied Teece gets +1 permanently.'},
  513:{name:'Quickening Sap',type:'magic',
     text:'Select a Teece; give it +3 until the end of the turn, and you may then move it to any empty panel.',
     cast:[{fx:'mod',where:'global',n:3,dur:'temp'},{fx:'teleLast'}]},
@@ -3244,6 +3244,27 @@ async function endTurn(){
     const em=DEF(t).endMod;
     if(em){applyModT(t,em.n,'perm');log(nm(t)+' puts on another ring: '+sgn(em.n)+'.');}
   }
+  /* endAura pays out to everyone else at the end of every turn, either side's,
+     the way endMod pays out to its own Teece. Auras proper are recomputed in
+     effSides and vanish with their source; this is banked permanently instead. */
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(!t)continue;
+    const ea=DEF(t).endAura;
+    if(!ea)continue;
+    let n=0;
+    for(let j=0;j<BN;j++){
+      if(j===i)continue;
+      const o=G.board[j].teece;
+      if(!o)continue;
+      const ally=sameTeam(o.owner,t.owner);
+      if(ea.who==='ally'&&!ally)continue;
+      if(ea.who==='enemy'&&ally)continue;
+      applyModT(o,ea.n,'perm');n++;
+    }
+    if(n)log(nm(t)+' spreads '+sgn(ea.n)+' to '+n+' other '+
+      (ea.who==='enemy'?'enemy':'allied')+' Teece.');
+  }
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
     if(t&&t.owner===p&&DEF(t).dieAtEndOfTurn){
@@ -3803,6 +3824,7 @@ function draftValue(d,drafted,total){
     v=2+d.sides.reduce((a,c)=>a+c,0)*0.16;
     if(d.kw)v+=d.kw.length*1.4;
     if(d.aura)v+=1.4;
+    if(d.endAura)v+=2.2;
     if(d.onPlay)v+=1.0;
     if(d.onDeath)v+=0.8;
     if(d.onKill)v+=0.8;
