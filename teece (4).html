@@ -3410,20 +3410,27 @@ async function endTurn(){
   await resolveCombat();
   if(stale(ep))return;
   checkDomination();
-  if(!G.over&&G.mode==='rogue')checkStalemate();
+  if(!G.over)checkStalemate();
   if(G.over)return;
   G.turn=nextLiveSeat(p);G.turnNum++;G.teecePlayed=false;
   await startTurn();
 }
+/* Three passed turns each and the game is decided on the field, in every mode
+   rather than only in a roguelike run. A turn counts as passed when nothing
+   was played, nothing moved and nothing was destroyed anywhere -- any of those
+   resets the count for everyone. Without this a Berserker mirror never ends:
+   neither deck can deck the other out, so once both hands are empty and the
+   board has settled the two sides just hand the turn back and forth. */
+const QUIET_LIMIT=()=>3*PLAYERS();
 function checkStalemate(){
   if(G.over)return;
   if(G.eventFlag){G.quiet=0;G.eventFlag=false;return;}
   G.quiet++;
-  if(G.quiet>=6){
+  if(G.quiet>=QUIET_LIMIT()){
     const cs=teamsInPlay().map(tm=>({tm,n:teamReal(tm)}));
     cs.sort((x,y)=>y.n-x.n);
     const who=(cs.length>1&&cs[0].n===cs[1].n)?null:cs[0].tm;
-    endGame(who,'Six turns passed with nothing played and nothing destroyed. Field: '+scoreLine()+'.');
+    endGame(who,'Three turns passed by every player with nothing played, nothing moved and nothing destroyed. Field: '+scoreLine()+'.');
   }
 }
 async function growSeeds(p){
@@ -4422,6 +4429,15 @@ function statusesFor(p){
     const ally=sameTeam(t.owner,p);
     push('immortal'+t.uid,ally?'good':'bad',(ally?'Safe: ':'Untouchable: ')+nm(t),
       nm(t)+' cannot be destroyed until the start of '+pname(t.immortalOwner)+"'s next turn.");
+  }
+
+  /* --- the game running out of things to do --- */
+  if(G.quiet>0){
+    const left=QUIET_LIMIT()-G.quiet;
+    push('quiet',left<=2?'warn':'good','Quiet: '+G.quiet+' turn'+(G.quiet===1?'':'s'),
+      G.quiet+' turn'+(G.quiet===1?' has':'s have')+' passed with nothing played, nothing moved and nothing '+
+      'destroyed. After '+left+' more the game is decided on Teece standing: '+scoreLine()+
+      '. Anything played, moved or destroyed resets it.');
   }
 
   /* --- the deck --- */
