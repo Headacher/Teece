@@ -73,6 +73,10 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card.dim{opacity:.45}
 .card.playable{cursor:pointer}
 .card.playable:hover{transform:translateY(-3px);box-shadow:0 5px 0 rgba(0,0,0,.4)}
+.card.target{box-shadow:inset 0 0 0 2px var(--gold),0 2px 0 rgba(0,0,0,.35);cursor:pointer}
+.card.target:hover{transform:translateY(-3px)}
+.card .plated{position:absolute;top:2px;left:4px;font-size:8px;letter-spacing:.05em;z-index:2;
+  color:#5d4a22;background:rgba(201,168,90,.4);border-radius:3px;padding:0 3px}
 
 #board{display:grid;grid-template-columns:repeat(var(--bw,3),minmax(0,var(--cs,110px)));
   grid-auto-rows:var(--cs,110px);gap:8px}
@@ -800,8 +804,8 @@ const CARDS = {
  391:{name:'Whetted Blade',type:'teece',sides:[5,5,7,7],timer:{turns:2,sides:[9,9,7,7]},
     text:"When played: advance an ally's clock by one turn. After two of your turns, it becomes 9/9/7/7.",
     onPlay:[{fx:'fastForward',n:1,who:'ally'}]},
- 392:{name:'Heir Apparent',type:'teece',sides:[8,8,8,8],sac:1,timer:{turns:3,sides:[12,12,12,12]},
-    text:'Sacrifice one fielded Teece to play. After three of your turns, it becomes 12/12/12/12.'},
+ 392:{name:'Heir Apparent',type:'teece',sides:[8,8,8,8],sac:1,timer:{turns:1,sides:[12,12,12,12]},
+    text:'Sacrifice one fielded Teece to play. It becomes 12/12/12/12 at the start of your next turn, or the moment its clock is moved forward at all.'},
  393:{name:'Fading Titan',type:'teece',sides:[15,15,15,15],sac:2,tick:{n:-1},
     text:'Sacrifice two fielded Teece to play. At the start of each of your turns, it gets -1.'},
  394:{name:'Timekeeper',type:'teece',sides:[4,4,4,4],
@@ -824,7 +828,7 @@ const CARDS = {
  411:{name:'Assembler',type:'teece',sides:[5,5,5,5],kw:['flying'],
     text:'Flying. When played: build two Drones on adjacent empty panels.',
     onPlay:[{fx:'token',tok:'TD',where:'adj',count:2}]},
- 412:{name:'Launch Bay',type:'teece',sides:[6,6,6,6],kw:['flying'],
+ 412:{name:'Launch Bay',type:'teece',sides:[5,6,6,5],kw:['flying'],
     text:'Flying. When played: build a Drone on any empty panel.',
     onPlay:[{fx:'token',tok:'TD',where:'any',count:1}]},
  413:{name:'Wreckage Core',type:'teece',sides:[6,6,6,6],kw:['flying'],
@@ -844,7 +848,7 @@ const CARDS = {
  418:{name:'Drone Foundry',type:'teece',sides:[4,4,4,4],kw:['flying'],
     text:'Flying. Once per your turn: build a Drone on an adjacent empty panel.',
     act:[{name:'Fabricate',once:'turn',steps:[{fx:'token',tok:'TD',where:'adj',count:1}]}]},
- 419:{name:'Salvager',type:'teece',sides:[6,6,5,5],kw:['flying'],
+ 419:{name:'Salvager',type:'teece',sides:[6,5,4,3],kw:['flying'],
     text:'Flying. When destroyed: build a Drone and draw a card.',
     onDeath:[{fx:'token',tok:'TD',where:'any',count:1},{fx:'draw',n:1}]},
  420:{name:'Swarm Node',type:'teece',sides:[5,5,5,5],kw:['flying'],
@@ -858,7 +862,7 @@ const CARDS = {
  423:{name:'Mobile Frame',type:'teece',sides:[6,6,6,6],kw:['flying'],
     text:'Flying. Whenever it moves, it gets +1 permanently.',
     onMove:[{fx:'mod',who:'self',n:1,dur:'perm'}]},
- 424:{name:'Hangar Guard',type:'teece',sides:[7,7,7,7],kw:['flying'],
+ 424:{name:'Hangar Guard',type:'teece',sides:[5,7,5,7],kw:['flying'],
     text:'Flying. Adjacent allied Drones get +2.',aura:{who:'ally',where:'adj',n:2,tokenOnly:true}},
  425:{name:'Servo Rig',type:'equip',mod:1,
     text:'Equipped Teece gets +1 and may move one space up to three times each of your turns.',
@@ -962,8 +966,8 @@ const CARDS = {
  511:{name:'Mother Tree',type:'teece',sides:[6,6,1,6],sac:1,
     text:'Sacrifice one fielded Teece to play. Every other allied Teece gets +3.',
     aura:{who:'ally',where:'global',n:3}},
- 512:{name:'Ancient Redwood',type:'teece',sides:[10,10,10,10],sac:2,
-    text:'Sacrifice two fielded Teece to play.'},
+ 512:{name:'Ancient Redwood',type:'teece',sides:[10,10,10,10],sac:2,endAura:{who:'ally',n:1},
+    text:'Sacrifice two fielded Teece to play. At the end of every turn, every other allied Teece gets +1 permanently.'},
  513:{name:'Quickening Sap',type:'magic',
     text:'Select a Teece; give it +3 until the end of the turn, and you may then move it to any empty panel.',
     cast:[{fx:'mod',where:'global',n:3,dur:'temp'},{fx:'teleLast'}]},
@@ -1169,7 +1173,7 @@ function newState(mode,vsAI,decks,extra){
   const nP=extra.seats||2;
   const teams=extra.teams||Array.from({length:nP},(_,i)=>i);
   buildGeometry(extra.width||3);
-  const mk=p=>({deck:shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice()),hand:[],grave:[],onceUsed:{},pendingDraw:0,
+  const mk=p=>({deck:shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice()),hand:[],plate:[],grave:[],onceUsed:{},pendingDraw:0,
     nextDefBonus:0,nextMod:0,noDeckOut:false});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
@@ -1179,10 +1183,43 @@ function newState(mode,vsAI,decks,extra){
     detailLock:null,detailHover:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],
     epoch:++EPOCH,
     enemyBonus:extra.enemyBonus||0,level:extra.level||0,quiet:0,eventFlag:false,
-    modalNext:null,trap:null,
+    modalNext:null,trap:null,pendingFx:[],
     seatNames:extra.seatNames||null};
-  for(const p of s.players){for(let i=0;i<5&&p.deck.length;i++)p.hand.push(p.deck.pop());}
+  for(const p of s.players){for(let i=0;i<5&&p.deck.length;i++){p.hand.push(p.deck.pop());p.plate.push([]);}}
   return s;
+}
+/* ---- hand plating ----
+   An equip can be bolted onto a Teece still in hand: it rides along and is
+   already worn when that Teece reaches the board. Hand entries stay plain card
+   ids because every rule in the game indexes the hand by position, so the
+   plating lives in a parallel array and the two must always be spliced
+   together. handPush and handTake are the only places allowed to touch either,
+   which is what keeps them the same length. */
+function handPush(p,id,plate){
+  const pl=G.players[p];
+  if(!pl.plate)pl.plate=pl.hand.map(()=>[]);
+  pl.hand.push(id);
+  pl.plate.push(plate&&plate.length?plate:[]);
+  return pl.hand.length-1;
+}
+function handTake(p,idx){
+  const pl=G.players[p];
+  if(!pl.plate)pl.plate=pl.hand.map(()=>[]);
+  if(idx<0||idx>=pl.hand.length)return null;
+  const id=pl.hand.splice(idx,1)[0];
+  const plate=pl.plate.splice(idx,1)[0]||[];
+  return {id,plate};
+}
+function plateOf(p,idx){
+  const pl=G.players[p];
+  return (pl&&pl.plate&&pl.plate[idx])||[];
+}
+/* plating whose Teece never reaches the board is scrapped with it */
+function dumpPlate(plate,why){
+  for(const e of plate||[]){
+    toGrave(e.owner,e.cardId);
+    if(why)log(CARDS[e.cardId].name+' is scrapped '+why+'.');
+  }
 }
 /* ---- teams. In a two-player game teams are [0,1], so sameTeam is
        exactly owner-equality and every rule below behaves as before. ---- */
@@ -1248,8 +1285,15 @@ function effSides(b,i){
       for(let k=0;k<4;k++)s[k]+=amt;
     }
   }
-  /* Sunlit Loam doubles what is left, bonuses and penalties alike */
-  if(b[i].ground&&groundFlag(b[i].ground,'gDoubleStats'))for(let k=0;k<4;k++)s[k]*=2;
+  /* Sunlit Loam doubles what is left, bonuses and penalties alike. That
+     doubling is itself a positive attribute effect, so on a Teece that counts
+     those double it lands twice and the side quadruples -- but only where the
+     side is positive: doubling a penalty harder is not what Hothouse Orchid
+     does, so a side at or below zero still only doubles. */
+  if(b[i].ground&&groundFlag(b[i].ground,'gDoubleStats')){
+    const selfDbl=!!DEF(t).selfDoublePos;
+    for(let k=0;k<4;k++)s[k]*=(selfDbl&&s[k]>0)?4:2;
+  }
   return s;
 }
 function defOf(b,i){
@@ -1517,12 +1561,17 @@ function markTargetDeath(v){
   if(t&&DEF(t).dieOnTarget)forceDeath(t);
   return v;
 }
+/* opt.hands lists hand positions that are targets alongside the board cells;
+   picking one resolves to 'h<index>' instead of a cell number. The computer
+   never takes that branch -- aiPickCell only ever looks at the board -- so an
+   AI turn behaves exactly as it did before hand targets existed. */
 function chooseCell(p,cells,msg,opt){
   opt=opt||{};
   if(isAIP(p)||!HAS_DOM){
     return Promise.resolve(aiPickCell(cells,opt)).then(markTargetDeath);
   }
-  return new Promise(res=>{G.pending={kind:'cell',p,cells,msg,opt,res:v=>res(markTargetDeath(v))};render();});
+  return new Promise(res=>{G.pending={kind:'cell',p,cells,hands:opt.hands||null,msg,opt,
+    res:v=>res(markTargetDeath(v))};render();});
 }
 function chooseOption(p,opts,msg){
   if(isAIP(p)||!HAS_DOM){
@@ -1563,13 +1612,22 @@ const sgn=n=>(n>0?'+':'')+n;
 const escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function durTxt(dur){return dur==='temp'?' until end of turn':' permanently';}
 
+/* A step returns 'ABORT' when the player backs out, 'NONE' when it found
+   nothing at all to do, and undefined once it has changed something. An act
+   whose every step came back 'NONE' never happened, so runAct refuses to
+   charge it: 'NONE' travels back out of runSteps in place of true. Every
+   other caller only tests the result for truthiness, so a card played from
+   hand is still spent even when it fizzles. */
 async function runSteps(steps,ctx){
-  for(const st of steps||[]){
+  const list=steps||[];
+  let did=list.length===0;
+  for(const st of list){
     const r=await FXRUN(st,ctx);
     if(r==='ABORT')return false;
+    if(r!=='NONE')did=true;
     ctx.first=false;
   }
-  return true;
+  return did||'NONE';
 }
 async function FXRUN(st,ctx){
   const b=G.board,p=ctx.p;
@@ -1577,6 +1635,8 @@ async function FXRUN(st,ctx){
     const r=await chooseCell(p,cands,msg,{cancel:!!ctx.first,skip:!!skip,mut});
     return r;
   };
+  /* nothing to work with: say so and let the caller know none of it landed */
+  const none=msg=>{log(msg);ctx.noneMsg=msg;return 'NONE';};
   switch(st.fx){
   case 'mod':{
     if(st.who==='self'){if(ctx.t)applyModT(ctx.t,st.n,st.dur);return;}
@@ -1593,7 +1653,7 @@ async function FXRUN(st,ctx){
       if(st.where==='adj'&&ctx.cell!=null&&ADJ[ctx.cell].indexOf(i)<0)continue;
       cands.push(i);
     }
-    if(!cands.length){log('No valid target.');return;}
+    if(!cands.length)return none('No valid target.');
     const c=await pickCell(cands,'Choose a Teece: '+sgn(st.n)+durTxt(st.dur)+'.',
       (bb,i)=>{applyModT(bb[i].teece,st.n,st.dur);},!!st.may);
     if(c==='CANCEL')return 'ABORT';
@@ -1644,7 +1704,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'copy':{
     const empt=ADJ[ctx.cell].filter(j=>!b[j].teece);
-    if(!empt.length){log('No adjacent space for the copy.');return;}
+    if(!empt.length)return none('No adjacent space for the copy.');
     const c=await pickCell(empt,'Choose a space for the copy.',
       (bb,i)=>{const cp=makeTeece(ctx.t.cardId,p);cp.isCopy=true;putTeece(bb,i,cp,false);},true);
     if(c==='CANCEL')return 'ABORT';
@@ -1661,7 +1721,7 @@ async function FXRUN(st,ctx){
       return;}
     for(let n=0;n<(st.count||1);n++){
       const pool=(st.where==='adj'?ADJ[ctx.cell]:ALL()).filter(j=>!b[j].teece);
-      if(!pool.length){if(n===0)log('No space for a Token.');return;}
+      if(!pool.length){if(n===0)return none('No space for a Token.');return;}
       const c=await pickCell(pool,'Choose a space for a '+CARDS[st.tok].sides.join('/')+' Token ('+(n+1)+' of '+(st.count||1)+'), or skip.',
         (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,p),false);},true);
       if(c==='CANCEL')return 'ABORT';
@@ -1677,7 +1737,7 @@ async function FXRUN(st,ctx){
   case 'control':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p))cands.push(i);}
-    if(!cands.length){log('No enemy to control.');return;}
+    if(!cands.length)return none('No enemy to control.');
     const c=await pickCell(cands,'Choose an enemy Teece to control.',
       (bb,i)=>{bb[i].teece.owner=p;},false);
     if(c==='CANCEL')return 'ABORT';
@@ -1713,7 +1773,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'flip':{
     const cands=[];for(let i=0;i<BN;i++)if(b[i].teece)cands.push(i);
-    if(!cands.length){log('Nothing to flip.');return;}
+    if(!cands.length)return none('Nothing to flip.');
     const spin=(sd,n)=>{let r=sd.slice();for(let k=0;k<n;k++)r=[r[3],r[0],r[1],r[2]];return r;};
     if(isAIP(p)){
       const base=boardValue(b,p);
@@ -1744,7 +1804,7 @@ async function FXRUN(st,ctx){
   case 'bolt':{
     const cands=[];
     for(let c=0;c<3;c++){for(let r=0;r<3;r++){const i=r*3+c;if(b[i].teece){cands.push(i);break;}}}
-    if(!cands.length){log('No Teece to strike.');return;}
+    if(!cands.length)return none('No Teece to strike.');
     const c=await pickCell(cands,'Choose a column: its topmost Teece gets '+st.n+'.',
       (bb,i)=>{applyModT(bb[i].teece,st.n,'perm');},false);
     if(c==='CANCEL')return 'ABORT';
@@ -1756,7 +1816,7 @@ async function FXRUN(st,ctx){
   case 'bounce':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!isBossCard(t.cardId)&&canTarget(b,i,p))cands.push(i);}
-    if(!cands.length){log('No legal target.');return;}
+    if(!cands.length)return none('No legal target.');
     const c=await pickCell(cands,'Choose a non-Boss Teece to return to its owner hand.',
       (bb,i)=>{bb[i].teece=null;},false);
     if(c==='CANCEL')return 'ABORT';
@@ -1768,8 +1828,8 @@ async function FXRUN(st,ctx){
     for(const uid of t.controls)revertControl(b,uid,true);
     if(t.isToken||t.isCopy){log(nm(t)+' vanishes.');}
     else{
-      G.players[t.baseOwner].hand.push(t.cardId);
-      for(const e of t.equips)G.players[e.owner].hand.push(e.cardId);
+      handPush(t.baseOwner,t.cardId);
+      for(const e of t.equips)handPush(e.owner,e.cardId);
       log(nm(t)+' returns to '+pname(t.baseOwner)+"'s hand"+(t.equips.length?' with its equips.':'.'));
     }
     return;}
@@ -1784,7 +1844,7 @@ async function FXRUN(st,ctx){
       if(!reach.some(j=>!b[j].teece))continue;
       cands.push(i);
     }
-    if(!cands.length){log('Nothing can move.');return;}
+    if(!cands.length)return none('Nothing can move.');
     const c=await pickCell(cands,'Choose a Teece to move.',null,!!st.may);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -1797,7 +1857,7 @@ async function FXRUN(st,ctx){
   case 'shatter':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.equips.length)cands.push(i);}
-    if(!cands.length){log('No equips in play.');return;}
+    if(!cands.length)return none('No equips in play.');
     const c=await pickCell(cands,'Choose a Teece: destroy one of its equips.',
       (bb,i)=>{bb[i].teece.equips.pop();},false);
     if(c==='CANCEL')return 'ABORT';
@@ -1815,7 +1875,7 @@ async function FXRUN(st,ctx){
   case 'quake':{
     const cands=[];
     for(let i=0;i<BN;i++)if(b[i].ground)cands.push(i);
-    if(!cands.length){log('No battleground in play.');return;}
+    if(!cands.length)return none('No battleground in play.');
     const c=await pickCell(cands,'Choose a battleground to destroy.',
       (bb,i)=>{bb[i].ground=null;},false);
     if(c==='CANCEL')return 'ABORT';
@@ -1832,7 +1892,7 @@ async function FXRUN(st,ctx){
   case 'terra':{
     const cands=[];
     for(let i=0;i<BN;i++)if(b[i].ground)cands.push(i);
-    if(!cands.length){log('No battleground to move.');return;}
+    if(!cands.length)return none('No battleground to move.');
     const c=await pickCell(cands,'Choose a battleground to move.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -1848,7 +1908,7 @@ async function FXRUN(st,ctx){
   case 'kwT':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p)cands.push(i);}
-    if(!cands.length){log('No ally to target.');return;}
+    if(!cands.length)return none('No ally to target.');
     const kdur=st.perm?' permanently.':' until end of turn.';
     const c=await pickCell(cands,'Choose an ally: it gains '+st.kw+kdur,
       (bb,i)=>{(st.perm?bb[i].teece.kwPerm:bb[i].teece.kwTemp).push(st.kw);},false);
@@ -1862,7 +1922,7 @@ async function FXRUN(st,ctx){
   case 'mine':{
     const cands=[];
     for(let i=0;i<BN;i++)if(!b[i].teece&&!b[i].mine)cands.push(i);
-    if(!cands.length){log('Nowhere to place a Mine.');return;}
+    if(!cands.length)return none('Nowhere to place a Mine.');
     const c=await pickCell(cands,'Choose an unoccupied panel for the Mine.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -1873,7 +1933,7 @@ async function FXRUN(st,ctx){
   case 'mineAuto':{
     const cands=[];
     for(let i=0;i<BN;i++)if(!b[i].teece&&!b[i].mine)cands.push(i);
-    if(!cands.length){log('No room for Mines.');return;}
+    if(!cands.length)return none('No room for Mines.');
     shuffle(cands);
     const chosen=cands.slice(0,st.count||1);
     for(const c of chosen)b[c].mine={owner:p};
@@ -1893,7 +1953,7 @@ async function FXRUN(st,ctx){
       if(st.where==='rowcol'&&ctx.cell!=null&&!(sameRow(i,ctx.cell)||sameCol(i,ctx.cell)))continue;
       cands.push(i);
     }
-    if(!cands.length){log('No valid target.');return;}
+    if(!cands.length)return none('No valid target.');
     const c=await pickCell(cands,'Choose a Teece: '+sgn(st.n)+' to it and everything adjacent to it.',
       (bb,i)=>{applyModT(bb[i].teece,st.n,st.dur);for(const j of ADJ[i])if(bb[j].teece)applyModT(bb[j].teece,st.n,st.dur);});
     if(c==='CANCEL')return 'ABORT';
@@ -1914,7 +1974,7 @@ async function FXRUN(st,ctx){
   case 'areaMod':{
     const cands=[];
     for(let i=0;i<BN;i++)if(areaShapeCells(i,st.shape))cands.push(i);
-    if(!cands.length){log('No room for the blast.');return;}
+    if(!cands.length)return none('No room for the blast.');
     const c=await pickCell(cands,'Choose where the blast lands: '+sgn(st.n)+' to everything caught in it.',
       (bb,i)=>{for(const j of areaShapeCells(i,st.shape))if(bb[j].teece)applyModT(bb[j].teece,st.n,st.dur);});
     if(c==='CANCEL')return 'ABORT';
@@ -1937,7 +1997,7 @@ async function FXRUN(st,ctx){
       return dst;};
     const cands=ADJ[i].filter(j=>{const o=b[j].teece;if(!o||sameTeam(o.owner,p)||hasKw(b,j,'immovable'))return false;
       const dst=away(i,j);return dst>=0&&!b[dst].teece;});
-    if(!cands.length){log('No enemy can be pushed.');return;}
+    if(!cands.length)return none('No enemy can be pushed.');
     const c=await pickCell(cands,'Choose an adjacent enemy to push away.',
       (bb,j)=>{moveT(bb,j,away(i,j),false);},false);
     if(c==='CANCEL')return 'ABORT';
@@ -1949,7 +2009,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'delayDraw':{
     const pl=G.players[p],key='dd'+(ctx.t?ctx.t.cardId:'x');
-    if(pl.onceUsed[key]){log('It has already been used this game.');return;}
+    if(pl.onceUsed[key])return none('It has already been used this game.');
     pl.onceUsed[key]=true;
     pl.pendingDraw+=st.n;
     log(pname(p)+' will draw '+st.n+' cards at the start of their next turn.');
@@ -1962,7 +2022,7 @@ async function FXRUN(st,ctx){
       if(st.nonBoss&&isBossCard(t.cardId))continue;
       cands.push(i);
     }
-    if(!cands.length){log('Nothing can be destroyed.');return;}
+    if(!cands.length)return none('Nothing can be destroyed.');
     const c=await pickCell(cands,'Choose a Teece to destroy.',(bb,i)=>{bb[i].teece=null;},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -1973,7 +2033,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'destroyAdj':{
     const hit=ADJ[ctx.cell].filter(j=>b[j].teece);
-    if(!hit.length){log('Nothing adjacent to destroy.');return;}
+    if(!hit.length)return none('Nothing adjacent to destroy.');
     await anim(hit,'dying',190);
     for(const j of hit){
       const vt=b[j].teece;
@@ -1984,7 +2044,7 @@ async function FXRUN(st,ctx){
     const pl=G.players[p];
     const ids=pl.grave.filter(id=>CARDS[id].type==='teece'&&!isBossCard(id));
     const empt=[];for(let i=0;i<BN;i++)if(!b[i].teece)empt.push(i);
-    if(!ids.length||!empt.length){log('Nothing to summon from the grave.');return;}
+    if(!ids.length||!empt.length)return none('Nothing to summon from the grave.');
     const pick=await chooseOption(p,ids.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Summon which card from the grave?');
     if(pick==null)return;
     const gi=pl.grave.indexOf(ids[parseInt(pick,10)]);
@@ -1997,11 +2057,11 @@ async function FXRUN(st,ctx){
     return;}
   case 'graveToHand':{
     const pl=G.players[p];
-    if(!pl.grave.length){log('The grave is empty.');return;}
+    if(!pl.grave.length)return none('The grave is empty.');
     const pick=await chooseOption(p,pl.grave.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Return which card to hand?');
     if(pick==null)return;
     const cid=pl.grave.splice(parseInt(pick,10),1)[0];
-    pl.hand.push(cid);
+    handPush(p,cid);
     log(pname(p)+' returns '+CARDS[cid].name+' to hand.');
     return;}
   case 'toDeckOrField':{
@@ -2009,7 +2069,7 @@ async function FXRUN(st,ctx){
   case 'curse':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p))cands.push(i);}
-    if(!cands.length){log('No enemy to curse.');return;}
+    if(!cands.length)return none('No enemy to curse.');
     const c=await pickCell(cands,'Choose an enemy: every move it makes costs it -2 permanently, for the rest of the game.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2027,7 +2087,7 @@ async function FXRUN(st,ctx){
       if(!canTarget(b,i,p))continue;
       cands.push(i);
     }
-    if(!cands.length){log('No valid target.');return;}
+    if(!cands.length)return none('No valid target.');
     const c=await pickCell(cands,'Choose a Teece: '+sgn(st.n)+' Defence.',(bb,i)=>{applyDef(bb[i].teece,st.n);},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2054,9 +2114,9 @@ async function FXRUN(st,ctx){
   case 'teleLast':{
     const c=ctx.last;
     if(c==null||!b[c].teece)return;
-    if(hasKw(b,c,'immovable')){log('It cannot be moved.');return;}
+    if(hasKw(b,c,'immovable'))return none('It cannot be moved.');
     const open=[];for(let j=0;j<BN;j++)if(j!==c&&!b[j].teece)open.push(j);
-    if(!open.length){log('There is nowhere to move it.');return;}
+    if(!open.length)return none('There is nowhere to move it.');
     const t=b[c].teece;
     const dst=await chooseCell(p,open,'Move '+nm(t)+' to any empty panel, or skip.',
       {skip:true,mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);}});
@@ -2069,7 +2129,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'plantSeed':{
     const cands=[];for(let i=0;i<BN;i++)if(!b[i].seed)cands.push(i);
-    if(!cands.length){log('Every panel already holds a seed.');return;}
+    if(!cands.length)return none('Every panel already holds a seed.');
     const c=await pickCell(cands,'Plant a seed on which panel?',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2092,7 +2152,7 @@ async function FXRUN(st,ctx){
       }
       return ADJ[j].some(k=>!b[k].teece)||true;
     });
-    if(!cands.length){log('Nothing to move.');return;}
+    if(!cands.length)return none('Nothing to move.');
     const c=await pickCell(cands,'Choose a Teece to move'+(st.may?', or skip.':'.'),null,!!st.may);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2133,10 +2193,10 @@ async function FXRUN(st,ctx){
     return;}
   case 'march':{
     const src=ctx.cell, mt=b[src].teece;
-    if(!mt){log('Nothing to march.');return;}
-    if(hasKw(b,src,'immovable')){log(nm(mt)+' cannot move.');return;}
+    if(!mt)return none('Nothing to march.');
+    if(hasKw(b,src,'immovable'))return none(nm(mt)+' cannot move.');
     const dests=ADJ[src].filter(j=>!b[j].teece);
-    if(!dests.length){log('Nowhere to march.');return;}
+    if(!dests.length)return none('Nowhere to march.');
     const step=await chooseCell(p,dests,'March '+nm(mt)+' one space, or skip.',
       {skip:true,mut:(bb,j)=>{if(bb[src].teece)moveT(bb,src,j,false);}});
     if(step==null||step==='CANCEL')return;
@@ -2192,7 +2252,7 @@ async function FXRUN(st,ctx){
   case 'rowColMove':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!hasKw(b,i,'immovable'))cands.push(i);}
-    if(!cands.length){log('No Teece to roll.');return;}
+    if(!cands.length)return none('No Teece to roll.');
     const c=await pickCell(cands,'Choose one of your Teece to roll.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2214,7 +2274,7 @@ async function FXRUN(st,ctx){
   case 'avalanche':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken)cands.push(i);}
-    if(!cands.length){log('No Teece to sacrifice.');return;}
+    if(!cands.length)return none('No Teece to sacrifice.');
     const c=await pickCell(cands,'Sacrifice one of your Teece to start the avalanche.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2230,7 +2290,7 @@ async function FXRUN(st,ctx){
   case 'groundPound':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p)cands.push(i);}
-    if(!cands.length){log('No Teece to pound.');return;}
+    if(!cands.length)return none('No Teece to pound.');
     const c=await pickCell(cands,'Choose one of your Teece.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2253,8 +2313,8 @@ async function FXRUN(st,ctx){
     for(let k=0;k<st.n;k++){
       const pick=await chooseOption(p,pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Discard a card.');
       const idx=pick==null?0:parseInt(pick,10);
-      const cid=pl.hand.splice(idx,1)[0];
-      toGrave(p,cid);
+      const gone=handTake(p,idx);const cid=gone.id;
+      toGrave(p,cid);dumpPlate(gone.plate,"with the card it was bolted to");
       log(pname(p)+' discards '+CARDS[cid].name+'.');
     }
     return;}
@@ -2288,24 +2348,24 @@ async function FXRUN(st,ctx){
   case 'trapCheck':{
     if(!ctx.t||!ctx.t.trapArmed)return;
     G.trap={by:ctx.deadOwner!=null?ctx.deadOwner:p};
-    log('The trap springs: the next Teece played against '+pname(G.trap.by)+' is destroyed.');
+    log('The trap is set: the next Teece played against '+pname(G.trap.by)+' is destroyed as it lands.');
     return;}
   case 'springTrap':{
     G.trap={by:ctx.deadOwner!=null?ctx.deadOwner:p};
-    log('The trap is sprung: the next Teece played against '+pname(G.trap.by)+' is destroyed.');
+    log('The trap is set: the next Teece played against '+pname(G.trap.by)+' is destroyed as it lands.');
     return;}
   case 'oppDraw':{
     const foes=enemySeats(p);
-    if(!foes.length){log('No opponent to draw.');return;}
+    if(!foes.length)return none('No opponent to draw.');
     drawCards(foes[0],st.n||1);
     return;}
   case 'handToDeck':{
     const pl=G.players[p];
-    if(!pl.hand.length){log('No card to stack back.');return;}
+    if(!pl.hand.length)return none('No card to stack back.');
     const pick=await chooseOption(p,pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Put which card on top of your deck?');
     if(pick==null)return;
-    const cid=pl.hand.splice(parseInt(pick,10),1)[0];
-    pl.deck.push(cid);
+    const gone=handTake(p,parseInt(pick,10));const cid=gone.id;
+    pl.deck.push(cid);dumpPlate(gone.plate,"off a card stacked back onto the deck");
     log(pname(p)+' stacks a card on top of the deck.');
     return;}
   case 'modSide':{
@@ -2317,7 +2377,7 @@ async function FXRUN(st,ctx){
       if(!canTarget(b,i,p))continue;
       cands.push(i);
     }
-    if(!cands.length){log('No valid target.');return;}
+    if(!cands.length)return none('No valid target.');
     const c=await pickCell(cands,'Choose a Teece: one side gets '+sgn(st.n)+'.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2347,7 +2407,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'scrub':{
     const cands=[];for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
-    if(!cands.length){log('No valid target.');return;}
+    if(!cands.length)return none('No valid target.');
     const c=await pickCell(cands,'Strip every bonus and penalty off which Teece?',
       (bb,i)=>{bb[i].teece.perm=[0,0,0,0];bb[i].teece.temp=[0,0,0,0];},false);
     if(c==='CANCEL')return 'ABORT';
@@ -2359,7 +2419,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'prime':{
     const cands=[];for(let i=0;i<BN;i++)if(!b[i].teece)cands.push(i);
-    if(!cands.length){log('Every panel is occupied.');return;}
+    if(!cands.length)return none('Every panel is occupied.');
     const c=await pickCell(cands,'Prime which empty panel?',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2368,7 +2428,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'rotTarget':{
     const cands=[];for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
-    if(!cands.length){log('No valid target.');return;}
+    if(!cands.length)return none('No valid target.');
     const spin=(bb,i)=>{const tt=bb[i].teece,bs=tt.base;
       tt.base=st.dir==='cw'?[bs[3],bs[0],bs[1],bs[2]]:[bs[1],bs[2],bs[3],bs[0]];};
     const c=await pickCell(cands,'Rotate which Teece '+(st.dir==='cw'?'clockwise':'counter-clockwise')+'?',spin,false);
@@ -2390,7 +2450,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'choose':{
     const ctl=modalCtl(p,ctx.cell);
-    if(ctl.off){log('Safety Interlock holds: the modality does nothing.');return;}
+    if(ctl.off)return none('Safety Interlock holds: the modality does nothing.');
     if(ctl.all){
       log('Every mode fires'+(ctl.times>1?', twice over.':'.'));
       for(let r=0;r<ctl.times;r++){
@@ -2429,7 +2489,7 @@ async function FXRUN(st,ctx){
   case 'movedToken':{
     if(!G.movedThisTurn.length){log('Nothing has moved this turn.');return 'ABORT';}
     const empt=[];for(let i=0;i<BN;i++)if(!b[i].teece)empt.push(i);
-    if(!empt.length){log('No space for the Ogre.');return;}
+    if(!empt.length)return none('No space for the Ogre.');
     const c=await pickCell(empt,'Choose a space for an 8/8/8/8 Ogre Token.',
       (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,p),false);},false);
     if(c==='CANCEL')return 'ABORT';
@@ -2459,7 +2519,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'handOrMove':{
     const cands=ADJ[ctx.cell].filter(j=>b[j].teece&&canTarget(b,j,p));
-    if(!cands.length){log('Nothing adjacent.');return;}
+    if(!cands.length)return none('Nothing adjacent.');
     const c=await pickCell(cands,'Choose an adjacent Teece.',null,true);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2470,8 +2530,8 @@ async function FXRUN(st,ctx){
       for(const uid of t.controls)revertControl(b,uid,true);
       if(t.isToken||t.isCopy)log(nm(t)+' vanishes.');
       else{
-        G.players[t.baseOwner].hand.push(t.cardId);
-        for(const e of t.equips)G.players[e.owner].hand.push(e.cardId);
+        handPush(t.baseOwner,t.cardId);
+        for(const e of t.equips)handPush(e.owner,e.cardId);
         log(nm(t)+' is returned to '+pname(t.baseOwner)+"'s hand.");
       }
     }else{
@@ -2496,7 +2556,7 @@ async function FXRUN(st,ctx){
   case 'resummonAny':{
     const t=ctx.t;
     const empt=[];for(let i=0;i<BN;i++)if(!b[i].teece)empt.push(i);
-    if(!empt.length){log('No space to resummon.');return;}
+    if(!empt.length)return none('No space to resummon.');
     const c=await chooseCell(t.baseOwner,empt,'Resummon '+DEF(t).name+' anywhere.',
       {skip:true,mut:(bb,i)=>{putTeece(bb,i,makeTeece(t.cardId,t.baseOwner),false);}});
     if(c==null||c==='CANCEL')return;
@@ -2509,7 +2569,7 @@ async function FXRUN(st,ctx){
   case 'selfToHand':{
     const t=ctx.t;
     if(t&&!t.isToken&&!t.isCopy){
-      G.players[t.baseOwner].hand.push(t.cardId);
+      handPush(t.baseOwner,t.cardId);
       ctx.consumed=true;
       log(nm(t)+' scrambles back to '+pname(t.baseOwner)+"'s hand.");
     }
@@ -2611,14 +2671,14 @@ async function FXRUN(st,ctx){
     const gi=G.players[entry.owner].grave.lastIndexOf(entry.cardId);
     if(gi<0){log('It is no longer there.');return;}
     G.players[entry.owner].grave.splice(gi,1);
-    G.players[entry.owner].hand.push(entry.cardId);
+    handPush(entry.owner,entry.cardId);
     const gx=G.graveThisTurn.indexOf(entry);
     if(gx>=0)G.graveThisTurn.splice(gx,1);
     log(CARDS[entry.cardId].name+' is pulled back out of the grave.');
     return;}
   case 'sacToHand':{
     if(ctx.sacked&&ctx.sacked.length){
-      for(const cid of ctx.sacked)G.players[p].hand.push(cid);
+      for(const cid of ctx.sacked)handPush(p,cid);
       log('The sacrificed Teece returns to '+pname(p)+"'s hand.");
     }
     return;}
@@ -2631,7 +2691,7 @@ async function FXRUN(st,ctx){
       if(!o||j===i||hasKw(b,j,'immovable'))return false;
       return enemy?!sameTeam(o.owner,p):sameTeam(o.owner,p);
     });
-    if(hasKw(b,i,'immovable')||!cands.length){log(enemy?'No enemy to swap with.':'No ally to swap with.');return;}
+    if(hasKw(b,i,'immovable')||!cands.length)return none(enemy?'No enemy to swap with.':'No ally to swap with.');
     const c=await pickCell(cands,enemy?'Choose any enemy Teece to swap places with.':'Choose an adjacent ally to swap with.',
       (bb,j)=>{const a=bb[i].teece;bb[i].teece=bb[j].teece;bb[j].teece=a;},false);
     if(c==='CANCEL')return 'ABORT';
@@ -2644,13 +2704,13 @@ async function FXRUN(st,ctx){
     return;}
   case 'move':{
     const i=ctx.cell;
-    if(hasKw(b,i,'immovable')){log('It cannot move.');return;}
+    if(hasKw(b,i,'immovable'))return none('It cannot move.');
     let pool;
     if(st.range==='orth')pool=ADJ[i];
     else if(st.range==='any')pool=ADJ[i];
     else{pool=[];for(let j=0;j<BN;j++)if(j!==i)pool.push(j);}
     const d=pool.filter(j=>!b[j].teece);
-    if(!d.length){log('Nowhere to move.');return;}
+    if(!d.length)return none('Nowhere to move.');
     const t=b[i].teece;
     const c=await pickCell(d,'Choose where '+DEF(t).name+' moves.',
       (bb,j)=>{if(bb[i].teece)moveT(bb,i,j,false);},false);
@@ -2686,7 +2746,7 @@ function toGrave(owner,cardId){
 function drawCards(p,n){
   const pl=G.players[p];
   let got=0;
-  for(let i=0;i<n;i++){if(!pl.deck.length)break;pl.hand.push(pl.deck.pop());got++;}
+  for(let i=0;i<n;i++){if(!pl.deck.length)break;handPush(p,pl.deck.pop());got++;}
   if(got)log(pname(p)+' draws '+(got===1?'a card':got+' cards')+'.');
   else log(pname(p)+' has nothing left to draw.');
 }
@@ -2698,6 +2758,34 @@ function revertControl(b,uid,liveLog){
       if(liveLog)log(nm(t)+' snaps back to '+pname(t.baseOwner)+"'s control.");
     }
   }
+}
+/* ============ the effect stack ============
+   Effects that have to land before a single side is compared. Pocket
+   Multitool's trap stacks a kill here the moment the Teece touches the board
+   rather than reaching in and destroying it on the spot, and the stack drains
+   at the top of every combat resolution. So whatever else runs between the
+   Teece landing and the next scan, the kill is ahead of it in the queue and
+   the Teece never gets a fight. The death itself is an ordinary one: on-death
+   effects, resummons and salvage all pay out as they always do. */
+function queueFx(fx){(G.pendingFx||(G.pendingFx=[])).push(fx);}
+async function drainFx(){
+  if(!G||!G.pendingFx||!G.pendingFx.length)return false;
+  const ep=G.epoch;
+  let any=false;
+  while(G.pendingFx.length){
+    const fx=G.pendingFx.shift();
+    if(fx.kill==null)continue;
+    for(let i=0;i<BN;i++){
+      const t=G.board[i].teece;
+      if(!t||t.uid!==fx.kill)continue;
+      if(fx.msg)log(fx.msg);
+      await processDeath({cell:i,t,killers:[]});
+      any=true;
+      break;
+    }
+    if(stale(ep))return any;
+  }
+  return any;
 }
 /* ============ deaths & combat ============ */
 async function processDeath(d){
@@ -2788,7 +2876,7 @@ async function processDeath(d){
     for(const e of t.equips){
       const g=CARDS[e.cardId].grants;
       if(g&&g.teeceReturn&&!handed&&!t.isToken&&!t.isCopy){
-        G.players[t.baseOwner].hand.push(t.cardId);
+        handPush(t.baseOwner,t.cardId);
         log(nm(t)+' returns to '+pname(t.baseOwner)+"'s hand.");
         handed=true;
       }
@@ -2810,11 +2898,11 @@ async function processDeath(d){
           }
         }
       }
-      if(salvage&&e.owner===gr.owner)G.players[e.owner].hand.push(e.cardId);
+      if(salvage&&e.owner===gr.owner)handPush(e.owner,e.cardId);
       else toGrave(e.owner,e.cardId);
     }
     if(!handed&&!t.isToken&&!t.isCopy){
-      if(salvage){G.players[t.baseOwner].hand.push(t.cardId);log(nm(t)+' is salvaged back to hand.');}
+      if(salvage){handPush(t.baseOwner,t.cardId);log(nm(t)+' is salvaged back to hand.');}
       else toGrave(t.baseOwner,t.cardId);
     }
   }
@@ -2825,6 +2913,9 @@ async function resolveCombat(){
   let guard=0;
   while(G&&!G.over){
     if(stale(ep))return;
+    /* stacked effects resolve first: nothing fights while a kill is pending */
+    await drainFx();
+    if(stale(ep)||G.over)return;
     let deaths=scanDeaths(G.board);
     if(!deaths.length)break;
     let dodged=false;
@@ -2977,8 +3068,9 @@ async function playHandDiscard(p,handIdx){
   const ok=await runSteps(d.handDiscard,{p,cell:null,t:null,first:true});
   if(!ok)return false;
   const idx=pl.hand.indexOf(id);
-  if(idx>=0)pl.hand.splice(idx,1);
+  const gone=idx>=0?handTake(p,idx):null;
   toGrave(p,id);
+  if(gone)dumpPlate(gone.plate,"with the card it was bolted to");
   log(pname(p)+' discards '+d.name+' from hand.');
   await resolveCombat();
   render();
@@ -3024,13 +3116,26 @@ async function playTeece(p,handIdx){
     await processDeath({cell:c,t,killers:[]});
     log(nm(t)+' is sacrificed.');
   }
-  pl.hand.splice(handIdx,1);
+  const worn=handTake(p,handIdx).plate;
   const t=makeTeece(id,p);
+  /* anything plated onto it in hand is already bolted on when it lands, so the
+     board sees the equipped stats from the first moment -- mines and all */
+  for(const e of worn)t.equips.push(e);
   if(plan&&plan.rot){
     const bs=t.base;
     t.base=plan.rot===1?[bs[3],bs[0],bs[1],bs[2]]:[bs[1],bs[2],bs[3],bs[0]];
   }
   putTeece(b,spot,t,true);
+  /* The trap catches it as it lands. The kill goes on the effect stack right
+     here, before anything else in this play can run, and the stack drains
+     ahead of every combat scan -- so the Teece cannot trade with a neighbour
+     on its way out no matter what happens in between. */
+  let trapped=false;
+  if(G.trap&&!sameTeam(p,G.trap.by)){
+    G.trap=null;
+    trapped=true;
+    queueFx({kill:t.uid,msg:nm(t)+' walks straight into the trap.'});
+  }
   if(b[spot].ground){
     const gd0=CARDS[b[spot].ground.cardId];
     if(gd0.gPlayMod){applyModT(t,gd0.gPlayMod,'perm');log(nm(t)+' is played onto '+gd0.name+': '+sgn(gd0.gPlayMod)+'.');}
@@ -3038,6 +3143,13 @@ async function playTeece(p,handIdx){
   if(!G.viaReveal)G.teecePlayed=true;
   log(pname(p)+' plays '+d.name+' at the '+CN[spot]+(G.viaReveal?' — revealed, so it doesn’t use this turn’s Teece play.':'.'));
   await anim([spot],'placed',140);
+  if(worn.length){
+    log(nm(t)+' arrives already plated with '+worn.map(e=>CARDS[e.cardId].name).join(', ')+'.');
+    for(const e of worn){
+      const eg=CARDS[e.cardId].grants;
+      if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:spot,t,first:false});
+    }
+  }
   if(pl.nextDefBonus){applyDef(t,pl.nextDefBonus);log(nm(t)+' arrives with +'+pl.nextDefBonus+' Defence.');pl.nextDefBonus=0;}
   if(pl.nextMod){const nmd=pl.nextMod;pl.nextMod=0;applyModT(t,nmd,'perm');log(nm(t)+' arrives with '+sgn(nmd)+'.');}
   if(pl.calib&&t.base.every(v=>v===pl.calib.x)){
@@ -3045,10 +3157,7 @@ async function playTeece(p,handIdx){
     for(let k=0;k<4;k++)t.perm[k]+=cn;
     log(nm(t)+' matches the dial: '+sgn(cn)+'.');
   }
-  if(G.trap&&!sameTeam(p,G.trap.by)){
-    G.trap=null;
-    log(nm(t)+' walks straight into the trap.');
-    await processDeath({cell:spot,t,killers:[]});
+  if(trapped){
     await resolveCombat();render();
     return true;
   }
@@ -3067,6 +3176,21 @@ async function playTeece(p,handIdx){
   render();
   return true;
 }
+/* Bolt an equip onto a Teece still in your hand. It rides there until that
+   Teece is played, then arrives already wearing it. */
+function plateHand(p,equipIdx,targetIdx){
+  const pl=G.players[p],id=pl.hand[equipIdx];
+  if(equipIdx===targetIdx)return false;
+  const tid=pl.hand[targetIdx];
+  if(!tid||CARDS[tid].type!=='teece')return false;
+  const gone=handTake(p,equipIdx);
+  if(!gone)return false;
+  /* taking the equip out shifts everything after it down one */
+  const ti=targetIdx>equipIdx?targetIdx-1:targetIdx;
+  pl.plate[ti].push({cardId:gone.id,owner:p});
+  log(pname(p)+' plates '+CARDS[gone.id].name+' onto '+CARDS[tid].name+' in hand.');
+  return true;
+}
 async function playEquip(p,handIdx){
   const pl=G.players[p],id=pl.hand[handIdx],b=G.board,ed=CARDS[id];
   const cands=[];
@@ -3076,11 +3200,24 @@ async function playEquip(p,handIdx){
     if(ed.onlyToken&&!t.isToken)continue;
     cands.push(i);
   }
-  if(!cands.length){toast(ed.onlyToken?'No Drone to equip.':'No allied Teece to equip.');return false;}
-  const c=await chooseCell(p,cands,'Choose a Teece for '+CARDS[id].name+'.',
-    {cancel:true,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}});
+  /* Teece still in hand are targets too. Not for a Drone-only equip: no Drone
+     is ever a card in hand, so there is nothing there for it to bolt onto. */
+  const hands=[];
+  if(!ed.onlyToken)for(let h=0;h<pl.hand.length;h++){
+    if(h===handIdx)continue;
+    if(CARDS[pl.hand[h]].type==='teece')hands.push(h);
+  }
+  if(!cands.length&&!hands.length){toast(ed.onlyToken?'No Drone to equip.':'No Teece to equip, on the board or in hand.');return false;}
+  const c=await chooseCell(p,cands,'Choose a Teece for '+CARDS[id].name+
+    (hands.length?', on the board or in your hand.':'.'),
+    {cancel:true,hands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}});
   if(c==null||c==='CANCEL')return false;
-  pl.hand.splice(handIdx,1);
+  if(typeof c==='string'&&c[0]==='h'){
+    if(!plateHand(p,handIdx,parseInt(c.slice(1),10)))return false;
+    render();
+    return true;
+  }
+  handTake(p,handIdx);
   b[c].teece.equips.push({cardId:id,owner:p});
   log(pname(p)+' equips '+CARDS[id].name+' to '+nm(b[c].teece)+'.');
   const eg=CARDS[id].grants;
@@ -3158,7 +3295,7 @@ async function playGround(p,handIdx){
   const c=await chooseCell(p,cands,'Choose where '+d.name+' goes.',
     {cancel:true,mut:(bb,i)=>{for(const j of groundCells(i,shape))bb[j].ground=Object.assign({cardId:id,owner:p},gmode||{});}});
   if(c==null||c==='CANCEL')return false;
-  pl.hand.splice(handIdx,1);
+  handTake(p,handIdx);
   const cells=groundCells(c,shape);
   const cleared=[];
   for(const j of cells){
@@ -3189,11 +3326,11 @@ async function playMagic(p,handIdx){
   const pl=G.players[p],id=pl.hand[handIdx],d=CARDS[id];
   const ok=await runSteps(d.cast,{p,cell:null,t:null,first:true});
   if(!ok)return false;
-  pl.hand.splice(handIdx,1);
+  handTake(p,handIdx);
   log(pname(p)+' casts '+d.name+'.');
   if(d.rebound&&!pl.onceUsed['rb'+id]){
     pl.onceUsed['rb'+id]=true;
-    pl.hand.push(id);
+    handPush(p,id);
     log(d.name+' returns to '+pname(p)+"'s hand.");
   }else toGrave(p,id);
   await resolveCombat();
@@ -3206,8 +3343,11 @@ async function runAct(p,cell,ent){
   const b=G.board,t=b[cell].teece;
   if(!t||t.owner!==p)return false;
   if(!actAvailable(t,ent))return false;
-  const ok=await runSteps(ent.act.steps,{p,cell,t,first:true,ent});
+  const ctx={p,cell,t,first:true,ent};
+  const ok=await runSteps(ent.act.steps,ctx);
   if(!ok){render();return false;}
+  /* the ability found nothing to do, so it keeps its charge for this turn */
+  if(ok==='NONE'){toast(ctx.noneMsg||'Nothing for that ability to do.');render();return false;}
   if(ent.act.once==='game')t.actUsedGame[ent.key]=true;
   t.actUsedTurn[ent.key]=(t.actUsedTurn[ent.key]||0)+1;
   G.detailLock=null;
@@ -3230,6 +3370,27 @@ async function endTurn(){
     const em=DEF(t).endMod;
     if(em){applyModT(t,em.n,'perm');log(nm(t)+' puts on another ring: '+sgn(em.n)+'.');}
   }
+  /* endAura pays out to everyone else at the end of every turn, either side's,
+     the way endMod pays out to its own Teece. Auras proper are recomputed in
+     effSides and vanish with their source; this is banked permanently instead. */
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(!t)continue;
+    const ea=DEF(t).endAura;
+    if(!ea)continue;
+    let n=0;
+    for(let j=0;j<BN;j++){
+      if(j===i)continue;
+      const o=G.board[j].teece;
+      if(!o)continue;
+      const ally=sameTeam(o.owner,t.owner);
+      if(ea.who==='ally'&&!ally)continue;
+      if(ea.who==='enemy'&&ally)continue;
+      applyModT(o,ea.n,'perm');n++;
+    }
+    if(n)log(nm(t)+' spreads '+sgn(ea.n)+' to '+n+' other '+
+      (ea.who==='enemy'?'enemy':'allied')+' Teece.');
+  }
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
     if(t&&t.owner===p&&DEF(t).dieAtEndOfTurn){
@@ -3249,20 +3410,27 @@ async function endTurn(){
   await resolveCombat();
   if(stale(ep))return;
   checkDomination();
-  if(!G.over&&G.mode==='rogue')checkStalemate();
+  if(!G.over)checkStalemate();
   if(G.over)return;
   G.turn=nextLiveSeat(p);G.turnNum++;G.teecePlayed=false;
   await startTurn();
 }
+/* Three passed turns each and the game is decided on the field, in every mode
+   rather than only in a roguelike run. A turn counts as passed when nothing
+   was played, nothing moved and nothing was destroyed anywhere -- any of those
+   resets the count for everyone. Without this a Berserker mirror never ends:
+   neither deck can deck the other out, so once both hands are empty and the
+   board has settled the two sides just hand the turn back and forth. */
+const QUIET_LIMIT=()=>3*PLAYERS();
 function checkStalemate(){
   if(G.over)return;
   if(G.eventFlag){G.quiet=0;G.eventFlag=false;return;}
   G.quiet++;
-  if(G.quiet>=6){
+  if(G.quiet>=QUIET_LIMIT()){
     const cs=teamsInPlay().map(tm=>({tm,n:teamReal(tm)}));
     cs.sort((x,y)=>y.n-x.n);
     const who=(cs.length>1&&cs[0].n===cs[1].n)?null:cs[0].tm;
-    endGame(who,'Six turns passed with nothing played and nothing destroyed. Field: '+scoreLine()+'.');
+    endGame(who,'Three turns passed by every player with nothing played, nothing moved and nothing destroyed. Field: '+scoreLine()+'.');
   }
 }
 async function growSeeds(p){
@@ -3789,6 +3957,7 @@ function draftValue(d,drafted,total){
     v=2+d.sides.reduce((a,c)=>a+c,0)*0.16;
     if(d.kw)v+=d.kw.length*1.4;
     if(d.aura)v+=1.4;
+    if(d.endAura)v+=2.2;
     if(d.onPlay)v+=1.0;
     if(d.onDeath)v+=0.8;
     if(d.onKill)v+=0.8;
@@ -4081,11 +4250,14 @@ function renderHand(p){
   const pl=G.players[p],h=handSlot(p);
   if(!h)return;
   h.innerHTML='<div class="handlbl">'+pname(p)+' hand</div>';
+  const pd=G.pending;
+  const targeting=!!(pd&&pd.kind==='cell'&&pd.hands&&pd.p===p);
   for(let i=0;i<pl.hand.length;i++){
     const id=pl.hand[i],cd=CARDS[id];
+    const isTarget=targeting&&pd.hands.indexOf(i)>=0;
     const card=document.createElement('div');
-    card.className='card playable t-'+cd.type;
-    if(p!==G.turn||G.teecePlayed&&cd.type==='teece'||G.over)card.classList.add('dim');
+    card.className='card playable t-'+cd.type+(isTarget?' target':'');
+    if(!isTarget&&(p!==G.turn||G.teecePlayed&&cd.type==='teece'||G.over))card.classList.add('dim');
     const dsym=ID_TO_DECK_SYM[id];
     if(cd.type==='teece'){
       const art=NATURE_ART[id];
@@ -4114,16 +4286,31 @@ function renderHand(p){
       sy.className='decksym';sy.textContent=dsym;
       card.appendChild(sy);
     }
-    card.addEventListener('click',async()=>{if(p===G.turn&&!G.over)await playFromHand(p,i);});
-    card.addEventListener('mouseenter',()=>{if(G.detailLock==null){G.detailHover='h'+p+i;showDetailCard(id);}});
+    const worn=plateOf(p,i);
+    if(worn.length){
+      const pb=document.createElement('div');
+      pb.className='plated';
+      pb.textContent='E'+worn.length;
+      pb.title='Plated with '+worn.map(e=>CARDS[e.cardId].name).join(', ');
+      card.appendChild(pb);
+    }
+    card.addEventListener('click',async()=>{
+      if(isTarget){resolvePending('h'+i);return;}
+      if(G.pending)return;
+      if(p===G.turn&&!G.over)await playFromHand(p,i);
+    });
+    card.addEventListener('mouseenter',()=>{if(G.detailLock==null){G.detailHover='h'+p+i;showDetailCard(id,worn);}});
     card.addEventListener('mouseleave',()=>{if(G.detailLock==null&&G.detailHover==='h'+p+i){G.detailHover=null;showDetail(null);}});
     h.appendChild(card);
   }
 }
-function showDetailCard(id){
+function showDetailCard(id,worn){
   const cd=CARDS[id],d=document.getElementById('detail');
   let html='<div class="dn">'+cd.name+'</div><div class="dt">'+cd.text+'</div>';
-
+  if(worn&&worn.length){
+    html+='<div class="dstats" style="color:var(--gold)">Plated, and arrives wearing:</div>';
+    for(const e of worn)html+='<div class="dstats" style="font-size:11px">'+CARDS[e.cardId].name+'</div>';
+  }
   d.innerHTML=html;
 }
 /* ============ status notices ============
@@ -4160,9 +4347,9 @@ function statusesFor(p){
   /* --- what is waiting for the next Teece you play --- */
   if(G.trap){
     if(!sameTeam(p,G.trap.by))
-      push('trap','bad','Next Teece dies','A trap is sprung against you. The next Teece you play is destroyed the moment it lands.');
+      push('trap','bad','Next Teece dies','A trap is set against you. The next Teece you play is destroyed the moment it lands.');
     else
-      push('trapset','good','Trap sprung','The next Teece played against you is destroyed the moment it lands.');
+      push('trapset','good','Trap set','The next Teece played against you is destroyed the moment it lands.');
   }
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
@@ -4242,6 +4429,15 @@ function statusesFor(p){
     const ally=sameTeam(t.owner,p);
     push('immortal'+t.uid,ally?'good':'bad',(ally?'Safe: ':'Untouchable: ')+nm(t),
       nm(t)+' cannot be destroyed until the start of '+pname(t.immortalOwner)+"'s next turn.");
+  }
+
+  /* --- the game running out of things to do --- */
+  if(G.quiet>0){
+    const left=QUIET_LIMIT()-G.quiet;
+    push('quiet',left<=2?'warn':'good','Quiet: '+G.quiet+' turn'+(G.quiet===1?'':'s'),
+      G.quiet+' turn'+(G.quiet===1?' has':'s have')+' passed with nothing played, nothing moved and nothing '+
+      'destroyed. After '+left+' more the game is decided on Teece standing: '+scoreLine()+
+      '. Anything played, moved or destroyed resets it.');
   }
 
   /* --- the deck --- */
@@ -4546,7 +4742,8 @@ if(typeof module!=='undefined'){
     teamOf,sameTeam,teamsInPlay,seatsOnTeam,teamReal,teamTotal,seatAlive,nextLiveSeat,FORMATS,teamName,
     runSteps,fireMove,moveT,applyModT,hasKw,putTeece,actsOf,boardValue,
     modalCtl,fireModal,setModalNext,kwOf,playTeece,offerReveal,groundFlag,enemySeats,
-    playHandDiscard,playFromHand,statusesFor,teecePlayBlock,growSeeds,NATURE_ART,DECK_SYM};
+    playHandDiscard,playFromHand,statusesFor,teecePlayBlock,growSeeds,NATURE_ART,DECK_SYM,
+    playEquip,plateHand,plateOf,handPush,handTake,drawCards,resolvePending,toGrave};
 }
 </script>
 </body>
