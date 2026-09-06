@@ -217,6 +217,17 @@ button,.teece,.cell,.card{touch-action:manipulation}
 #promptBar{min-height:38px;width:100%;max-width:560px;display:flex;align-items:center;justify-content:center;
   gap:10px;padding:8px 12px;border:1px dashed var(--line);border-radius:8px;text-align:center;flex-wrap:wrap}
 #promptBar.hot{border-color:var(--gold);border-style:solid;background:rgba(201,162,39,.07)}
+/* On a narrow screen the prompt bar sits far above the board, so once you have
+   scrolled down to play, a question asked of you is off the top of the screen
+   and the board just looks dead -- every tap refused because something is
+   pending. While a question is open it pins itself to the top of the viewport
+   instead, opaque, so it is never the thing you cannot see. */
+@media(max-width:880px){
+  #promptBar.hot{position:fixed;top:0;left:0;right:0;width:auto;max-width:none;
+    margin:0;border-radius:0;border-width:0 0 1px 0;z-index:15;
+    background:#1d1710;box-shadow:0 4px 14px rgba(0,0,0,.55)}
+  #promptBar.hot .msg{font-size:14px}
+}
 #warnBar{margin-top:10px;padding:7px 9px;border-radius:7px;font-size:12px;line-height:1.35;
   border:1px solid var(--gold);background:rgba(201,162,39,.1);color:var(--gold)}
 #promptBar .msg{font-size:13px}
@@ -424,7 +435,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:9,date:'2026-09-05'};
+const VERSION={build:10,date:'2026-09-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
