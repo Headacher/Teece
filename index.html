@@ -473,7 +473,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:15,date:'2026-09-06'};
+const VERSION={build:16,date:'2026-09-06'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -915,22 +915,22 @@ const CARDS = {
  19:{name:'High Ground',type:'ground',gmod:3,text:'A Teece on this panel gets +3.'},
  20:{name:'Low Ground',type:'ground',gmod:-3,text:'A Teece on this panel gets -3.'},
  /* ---- tokens ---- */
- T0:{name:'Token',type:'teece',token:true,sides:[0,0,0,0],text:'Token. Cannot be sacrificed; never counts toward winning.'},
- T2:{name:'Token',type:'teece',token:true,sides:[2,2,2,2],text:'Token. Cannot be sacrificed; never counts toward winning.'},
- T3:{name:'Token',type:'teece',token:true,sides:[3,3,3,3],text:'Token. Cannot be sacrificed; never counts toward winning.'},
- T8:{name:'Token',type:'teece',token:true,sides:[8,8,8,8],text:'Token. Cannot be sacrificed; never counts toward winning.'},
- T9:{name:'Ogre Token',type:'teece',token:true,sides:[9,9,9,9],text:'Token. Cannot be sacrificed; never counts toward winning.'},
- T6:{name:'Token',type:'teece',token:true,sides:[6,6,6,6],text:'Token. Cannot be sacrificed; never counts toward winning.'},
- T4:{name:'Token',type:'teece',token:true,sides:[4,4,4,4],text:'Token. Cannot be sacrificed; never counts toward winning.'},
- TR:{name:'Rock Token',type:'teece',token:true,sides:[0,0,0,0],def:6,text:'Token with Defence 6. Cannot be sacrificed; never counts toward winning.'},
+ T0:{name:'Token',type:'teece',token:true,sides:[0,0,0,0],text:'Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ T2:{name:'Token',type:'teece',token:true,sides:[2,2,2,2],text:'Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ T3:{name:'Token',type:'teece',token:true,sides:[3,3,3,3],text:'Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ T8:{name:'Token',type:'teece',token:true,sides:[8,8,8,8],text:'Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ T9:{name:'Ogre Token',type:'teece',token:true,sides:[9,9,9,9],text:'Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ T6:{name:'Token',type:'teece',token:true,sides:[6,6,6,6],text:'Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ T4:{name:'Token',type:'teece',token:true,sides:[4,4,4,4],text:'Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ TR:{name:'Rock Token',type:'teece',token:true,sides:[0,0,0,0],def:6,text:'Token with Defence 6. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  TD:{name:'Drone',type:'teece',token:true,sides:[3,3,3,3],kw:['flying'],text:'Drone Token. Flying: once per your turn, move one space. Never counts toward winning.'},
  TFAM:{name:'Familiar',type:'teece',token:true,sides:[4,4,4,4],kw:['flying'],onOwnerMagic:{n:2,dur:'temp'},
     text:'Familiar Token. Flies, and gets +2 until end of turn whenever its controller plays a magic card. Never counts toward winning.'},
  TB:{name:'Bomblet',type:'teece',token:true,sides:[3,3,3,3],
-    text:'Token. When destroyed: adjacent Teece get -2. Cannot be sacrificed; never counts toward winning.',
+    text:'Token. When destroyed: adjacent Teece get -2. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.',
     onDeath:[{fx:'aoe',n:-2,dur:'perm'}]},
  TS:{name:'Sprout',type:'teece',token:true,sides:[3,3,3,3],
-    text:'Sprout Token. When destroyed: every other allied Teece gets +1. Cannot be sacrificed; never counts toward winning.',
+    text:'Sprout Token. When destroyed: every other allied Teece gets +1. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.',
     onDeath:[{fx:'mass',who:'ally',n:1,dur:'perm'}]},
  /* ---- Teece 100 pool: the twenty-two you specified ---- */
  101:{name:'Enforcer',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice one fielded Teece to play.'},
@@ -3212,8 +3212,11 @@ async function FXRUN(st,ctx){
     }
     return;}
   case 'avalanche':{
+    /* Tokens count here. The two exclusions that remain are deliberate -- a
+       token cannot pay a Teece's play cost, and cannot be fed to a curse that
+       measures what it took -- but starting an avalanche with one is fair. */
     const cands=[];
-    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken)cands.push(i);}
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p)cands.push(i);}
     if(!cands.length)return none('No Teece to sacrifice.');
     const c=await pickCell(cands,'Sacrifice one of your Teece to start the avalanche.',null,false,
       i=>{const o=[i];for(let j=i+BW;j<BN;j+=BW)o.push(j);return o;});
