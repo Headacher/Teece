@@ -291,6 +291,9 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .d0{background:var(--p0)} .d1{background:var(--p1)} .d2{background:var(--p2)}
 .teamtag{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .counts{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12px;color:var(--muted);margin-top:6px}
+/* Where the race stands, across the full width under both seats. */
+.counts .racern{grid-column:1/-1;margin-top:7px;padding-top:6px;border-top:1px solid var(--line);
+  color:var(--gold);font-size:11.5px;line-height:1.4}
 #detail .dn{font-family:var(--disp);font-size:20px}
 #detail .dsep{margin-top:9px;padding-top:7px;border-top:1px solid var(--line);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .optcard{border-color:var(--gold)!important}
@@ -470,7 +473,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:13,date:'2026-09-06'};
+const VERSION={build:14,date:'2026-09-06'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4334,19 +4337,30 @@ function checkElimination(){
     endGame(live[0],'Every other side has no Teece left anywhere.');
   }
 }
-function checkDomination(){
-  if(G.over)return;
+/* The win is a LEAD of four, not four Teece on the board, and Tokens are not
+   Teece for it. Both of those surprise people, so the number lives here once
+   and the counts panel reads the same state the check does -- what the player
+   is told and what the game does can never disagree. */
+const WIN_LEAD=4;
+function leadState(){
   const tms=teamsInPlay();
-  if(tms.length<2)return;
+  if(tms.length<2)return null;
   const counts=tms.map(tm=>({tm,n:teamReal(tm)}));
   counts.sort((x,y)=>y.n-x.n);
   const lead=counts[0],second=counts[1];
-  if(seatsOnTeam(lead.tm).some(s=>hexOn(s,'nowin'))){
-    if(lead.n-second.n>=4)log('The Curse of Freezing holds the win back for now.');
+  return {lead,second,gap:lead.n-second.n,
+          blocked:seatsOnTeam(lead.tm).some(s=>hexOn(s,'nowin'))};
+}
+function checkDomination(){
+  if(G.over)return;
+  const st=leadState();
+  if(!st)return;
+  if(st.blocked){
+    if(st.gap>=WIN_LEAD)log('The Curse of Freezing holds the win back for now.');
     return;
   }
-  if(lead.n-second.n>=4){
-    endGame(lead.tm,teamName(lead.tm)+' ends the turn four Teece ahead of the field ('+
+  if(st.gap>=WIN_LEAD){
+    endGame(st.lead.tm,teamName(st.lead.tm)+' ends the turn four Teece ahead of the field ('+
       scoreLine()+'). Tokens do not count.');
   }
 }
@@ -6191,6 +6205,19 @@ function renderCounts(){
     c.innerHTML+='<div><span class="dot d'+p+'"></span>'+pname(p)+tag+out+'</div>'+
       '<div>'+field+' fielded ('+lc+' count)</div>'+
       '<div>'+hand+' hand · '+deck+' deck'+(deck<=2?' (!)':'')+' · '+G.players[p].grave.length+' grave</div>';
+  }
+  /* Where the race actually stands. "Four fielded" is not a win and never was;
+     without this the only place that says so is the start screen. */
+  const st=leadState();
+  if(st){
+    const who=teamName(st.lead.tm),s=(who==='You'?'':'s');
+    let msg;
+    if(st.gap===0)msg='Level. '+WIN_LEAD+' ahead at the end of a turn wins.';
+    else if(st.gap>=WIN_LEAD)msg=who+' lead'+s+' by '+st.gap+' — enough to win at the end of a turn.';
+    else msg=who+' lead'+s+' by '+st.gap+', and need'+s+' '+(WIN_LEAD-st.gap)+' more. '+
+      WIN_LEAD+' ahead at the end of a turn wins.';
+    if(st.blocked)msg+=' The Curse of Freezing is holding the win back.';
+    c.innerHTML+='<div class="racern">'+msg+'</div>';
   }
 }
 function renderLog(){
