@@ -473,7 +473,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:14,date:'2026-09-06'};
+const VERSION={build:15,date:'2026-09-06'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1046,7 +1046,7 @@ const CARDS = {
     act:[{name:'Stride',once:'turn',steps:[{fx:'move',range:'orth'}]}]},
  169:{name:'Sapper',type:'teece',sides:[5,5,5,5],text:'Once per your turn: place a Mine on an unoccupied panel. Mines stack. The next Teece to enter it gets -2 for each Mine; they are all removed.',
     act:[{name:'Lay Mine',once:'turn',steps:[{fx:'mine'}]}]},
- 170:{name:'Feeder',type:'teece',sides:[7,7,7,7],text:'Once per your turn: this gets -1 permanently and another ally gets +2 permanently.',
+ 170:{name:'Feeder',type:'teece',sides:[5,6,5,7],text:'Once per your turn: this gets -1 permanently and another ally gets +2 permanently.',
     act:[{name:'Feed',once:'turn',steps:[{fx:'mod',who:'self',n:-1,dur:'perm'},{fx:'mod',who:'ally',where:'any',n:2,dur:'perm',notSelf:true}]}]},
  171:{name:'Heckler',type:'teece',sides:[6,6,6,6],text:'Once per your turn: an adjacent enemy gets -2 until end of turn.',
     act:[{name:'Heckle',once:'turn',steps:[{fx:'mod',who:'enemy',where:'adj',n:-2,dur:'temp'}]}]},
@@ -1405,7 +1405,7 @@ const CARDS = {
  422:{name:'War Machine',type:'teece',sides:[11,11,11,11],sac:2,kw:['flying'],
     text:'Flying. Sacrifice two fielded Teece to play. When played: build three Drones on any empty panels.',
     onPlay:[{fx:'token',tok:'TD',where:'any',count:3}]},
- 423:{name:'Mobile Frame',type:'teece',sides:[6,6,6,6],kw:['flying'],
+ 423:{name:'Mobile Frame',type:'teece',sides:[5,6,4,6],kw:['flying'],
     text:'Flying. Whenever it moves, it gets +1 permanently.',
     onMove:[{fx:'mod',who:'self',n:1,dur:'perm'}]},
  424:{name:'Hangar Guard',type:'teece',sides:[5,7,5,7],kw:['flying'],
@@ -1602,7 +1602,7 @@ const CARDS = {
  546:{name:'Flitting Pixie',type:'teece',sides:[1,1,1,1],pixie:true,kw:['flying'],dodge:{n:0},
     text:'Flying. When it would be destroyed, it may dart one space instead, once per turn.'},
  547:{name:'Enchanter Pixie',type:'teece',sides:[1,2,4,3],pixie:true,kw:['flying'],
-    text:'Flying. When this moves: enchant the panel it left. The next ally to arrive there becomes ten on every side, with all of its own effects negated.',
+    text:'Flying. When this moves: enchant the panel it left. The next ally to arrive there gets +5 permanently.',
     onMove:[{fx:'enchantCell'}]},
  548:{name:'Swarm Mother',type:'teece',sides:[2,3,1,4],pixie:true,kw:['flying'],
     text:'Flying. When played: summon two Tokens with 6 on every side, which are destroyed with it. When this moves: summon another.',
@@ -1627,8 +1627,8 @@ const CARDS = {
     text:'Every pixie of yours gains +8 Defence until the end of your next turn.',
     cast:[{fx:'pixieDef',n:8}]},
  555:{name:'Enlarge',type:'magic',
-    text:'Select a Teece; it gets +10 until the end of your next turn.',
-    cast:[{fx:'modNext',n:10}]},
+    text:'Select a Teece; it gets +10 until the end of the turn.',
+    cast:[{fx:'mod',where:'global',n:10,dur:'temp'}]},
  556:{name:'Shrink',type:'magic',
     text:'Select a Teece; it is 3 on every side until the end of the turn. Anything stacked on top of it still counts.',
     cast:[{fx:'shrink',n:3}]},
@@ -1652,7 +1652,24 @@ const isBossCard=id=>(CARDS[id].sac||0)>=2;
    turns away, so something laid on turn N clears at the end of turn N+PLAYERS().
    endTurn does the clearing, so it lapses at the end of that turn exactly. */
 const nextTurnExpiry=()=>G.turnNum+PLAYERS();
-const FLY_ACT={name:'Fly',once:'turn',steps:[{fx:'move',range:'any'}]};
+/* What an enchanted panel pays the first ally to arrive. Named once: the card
+   text, the log line, the corner marker and the panel readout all read it. */
+const ENCHANT_N=5;
+/* Where a move of a given range may land. Flying is one space with diagonals
+   allowed -- which is what every flier's card text says, and what the Flying
+   section comment has always said -- so it is NOT the whole board. Teleport is
+   the one that goes anywhere; before this they shared a branch and Fly was
+   simply a second Teleport. One definition, because actBlockedReason needs the
+   same answer to label "(nowhere to go)". */
+function movePool(i,range){
+  if(range==='orth')return ADJ[i];
+  /* DIAG is misleadingly named: it holds all eight neighbours, orthogonals
+     included, so it is already "one space, diagonals allowed" on its own. */
+  if(range==='step')return DIAG[i];
+  const all=[];for(let j=0;j<BN;j++)if(j!==i)all.push(j);
+  return all;
+}
+const FLY_ACT={name:'Fly',once:'turn',steps:[{fx:'move',range:'step'}]};
 const TELE_ACT={name:'Teleport',once:'turn',steps:[{fx:'move',range:'tele'}]};
 
 /* ============ modalities ============
@@ -2188,8 +2205,7 @@ function actBlockedReason(b,i,ent){
   const st=ent.act.steps&&ent.act.steps[0];
   if(!st||st.fx!=='move')return null;
   if(hasKw(b,i,'immovable'))return 'held';
-  const pool=st.range==='orth'?ADJ[i]:ALL().filter(j=>j!==i);
-  return pool.some(j=>openAt(b,j))?null:'nowhere to go';
+  return movePool(i,st.range).some(j=>openAt(b,j))?null:'nowhere to go';
 }
 function negatedActs(b,i){
   const t=b[i].teece;
@@ -2209,13 +2225,12 @@ function actAvailable(t,ent){
 function putTeece(b,i,t,live){
   b[i].teece=t;
   /* The enchantment is spent by the first ally to arrive, however it arrives:
-     played onto it or moved onto it. It rewrites what the Teece is -- ten on
-     every side -- and negates whatever it was going to do. */
+     played onto it or moved onto it. A straight bonus -- it does not silence
+     what walks into it, so the Teece keeps everything it came with. */
   if(b[i].enchant&&sameTeam(t.owner,b[i].enchant.owner)){
     b[i].enchant=null;
-    t.base=[10,10,10,10];
-    t.silenced=true;
-    if(live)log(nm(t)+' steps into the enchantment: ten on every side, and every effect of its own negated.');
+    for(let k=0;k<4;k++)t.perm[k]+=ENCHANT_N;
+    if(live)log(nm(t)+' steps into the enchantment: '+sgn(ENCHANT_N)+'.');
   }
   if(b[i].prime){
     const pr=b[i].prime;b[i].prime=null;
@@ -3811,7 +3826,7 @@ async function FXRUN(st,ctx){
     const i=ctx.fromCell!=null?ctx.fromCell:ctx.cell;
     if(i==null)return none('No panel to enchant.');
     b[i].enchant={owner:p};
-    log('The '+CN[i]+' is enchanted: the next ally to arrive there becomes ten on every side, with its own effects negated.');
+    log('The '+CN[i]+' is enchanted: the next ally to arrive there gets '+sgn(ENCHANT_N)+' permanently.');
     return;}
   case 'flyBoost':{
     const cands=[];
@@ -3969,10 +3984,7 @@ async function FXRUN(st,ctx){
   case 'move':{
     const i=ctx.cell;
     if(hasKw(b,i,'immovable'))return none('It cannot move.');
-    let pool;
-    if(st.range==='orth')pool=ADJ[i];
-    else{pool=[];for(let j=0;j<BN;j++)if(j!==i)pool.push(j);}
-    const d=pool.filter(j=>openAt(b,j));
+    const d=movePool(i,st.range).filter(j=>openAt(b,j));
     if(!d.length)return none('Nowhere to move.');
     const t=b[i].teece;
     const c=await pickCell(d,'Choose where '+DEF(t).name+' moves.',
@@ -5441,11 +5453,8 @@ function aiActMuts(cell,ent){
   const b=G.board,p=G.turn,muts=[];
   const st=ent.act.steps[0];
   if(st.fx==='move'){
-    let pool;
-    if(st.range==='orth')pool=ADJ[cell];
-    else if(st.range==='any')pool=ADJ[cell];
-    else{pool=[];for(let j=0;j<BN;j++)if(j!==cell)pool.push(j);}
-    for(const j of pool)if(openAt(b,j))muts.push(bb=>{if(bb[cell].teece)moveT(bb,cell,j,false);});
+    for(const j of movePool(cell,st.range))
+      if(openAt(b,j))muts.push(bb=>{if(bb[cell].teece)moveT(bb,cell,j,false);});
   }else if(st.fx==='push'){
     const away=(from,to)=>{const dst=to+(to-from);if(dst<0||dst>=BN)return -1;
       if(row(from)===row(to)&&row(to)!==row(dst))return -1;return dst;};
@@ -5724,7 +5733,7 @@ function renderBoard(){
     if(sdm)cell.innerHTML+='<div class="seedMark" title="A seed is planted here">\u{1F331}'+sdm.turns+'</div>';
     const ench=G.board[i].enchant;
     if(ench)cell.innerHTML+='<div class="enchMark m'+ench.owner+'" title="'+escHtml(enchantText(ench))+
-      '">✧ 10</div>';
+      '">✧ '+sgn(ENCHANT_N)+'</div>';
     if(G.board[i].razed)cell.classList.add('razed');
     const t=G.board[i].teece;
     if(t){
@@ -5808,7 +5817,7 @@ function enchantText(e){
   /* Phrased around the owner rather than starting with them, because pname(0)
      is "You" and "You has enchanted" is not a sentence. */
   return 'This panel is enchanted. The next ally of '+pposs(e.owner)+' to arrive '+
-    'here becomes ten on every side, with all of its own effects negated.';
+    'here gets '+sgn(ENCHANT_N)+' permanently.';
 }
 function panelHtml(i){
   const c=G.board[i];
