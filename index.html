@@ -213,6 +213,25 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
   flex-wrap:wrap;padding:8px 10px;border:1px solid var(--gold);border-radius:8px;background:rgba(201,162,39,.08)}
 #actionBar .who{font-family:var(--disp);font-size:15px;margin-right:2px}
 #actionBar .none{color:var(--muted);font-size:12px}
+/* The action bar is the only way to reach a Teece's activated abilities, and it
+   sits under the board. On a phone the board fills the screen, so the bar lands
+   below the fold: you tap a Teece, it selects, and nothing appears to happen --
+   every activated ability in the game looked broken for that reason alone.
+   While a Teece is selected the bar pins itself to the bottom of the viewport,
+   where the thumb already is, and the page grows a matching gap at its end so
+   nothing ends up buried. It does not pin while a question is open,
+   because then it holds nothing but disabled buttons and would only cover the
+   board cells the question is asking you to tap. */
+@media(max-width:880px){
+  #actionBar.pin{position:fixed;left:0;right:0;bottom:0;width:auto;max-width:none;
+    margin:0;border-radius:0;border-width:1px 0 0 0;z-index:16;
+    background:#1d1710;box-shadow:0 -4px 14px rgba(0,0,0,.55);
+    padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+  /* The gap goes at the end of the page, not the end of main: on a phone the
+     side panel stacks below main, so the pinned bar overlays that, and it is
+     the last thing on the page that has to be able to scroll out from under. */
+  body.actpin #app{padding-bottom:var(--actpin,110px)}
+}
 button,.teece,.cell,.card{touch-action:manipulation}
 #promptBar{min-height:38px;width:100%;max-width:560px;display:flex;align-items:center;justify-content:center;
   gap:10px;padding:8px 12px;border:1px dashed var(--line);border-radius:8px;text-align:center;flex-wrap:wrap}
@@ -435,7 +454,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:10,date:'2026-09-05'};
+const VERSION={build:12,date:'2026-09-06'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1370,7 +1389,7 @@ const CARDS = {
  423:{name:'Mobile Frame',type:'teece',sides:[6,6,6,6],kw:['flying'],
     text:'Flying. Whenever it moves, it gets +1 permanently.',
     onMove:[{fx:'mod',who:'self',n:1,dur:'perm'}]},
- 424:{name:'Hangar Guard',type:'teece',sides:[4,6,5,7],kw:['flying'],
+ 424:{name:'Hangar Guard',type:'teece',sides:[5,7,5,7],kw:['flying'],
     text:'Flying. Adjacent allied Drones get +2.',aura:{who:'ally',where:'adj',n:2,tokenOnly:true}},
  425:{name:'Servo Rig',type:'equip',mod:1,
     text:'Equipped Teece gets +1 and may move one space up to three times each of your turns.',
@@ -5677,7 +5696,16 @@ function renderBoard(){
         resolvePending(i);
         return;
       }
-      if(!G.pending&&!G.board[i].teece&&G.detailLock!=null){G.detailLock=null;render();}
+      /* Every tap is refused while a question is open -- selecting a Teece
+         included, which is how you reach its abilities. Rather than do nothing
+         and look broken, say what is being waited on. A tap on a Teece falls
+         through to here, because that handler bows out before it stops the
+         event. */
+      if(G.pending){
+        toast(G.pending.msg||'Answer the question at the top of the screen first.');
+        return;
+      }
+      if(!G.board[i].teece&&G.detailLock!=null){G.detailLock=null;render();}
     });
     cell.addEventListener('mouseenter',()=>{
       if(G.detailLock==null&&!G.board[i].teece){G.detailHover=i;showDetail(i);}
@@ -6106,7 +6134,8 @@ function renderActionBar(){
   if(!ab)return;
   const i=G.detailLock;
   const t=i!=null?G.board[i].teece:null;
-  if(t==null||G.over){ab.classList.add('hidden');ab.innerHTML='';return;}
+  if(t==null||G.over){ab.classList.add('hidden');ab.classList.remove('pin');
+    document.body.classList.remove('actpin');ab.innerHTML='';return;}
   ab.classList.remove('hidden');
   ab.innerHTML='';
   const who=document.createElement('span');
@@ -6151,6 +6180,13 @@ function renderActionBar(){
   un.className='btn';un.textContent='Deselect';
   un.addEventListener('click',()=>{G.detailLock=null;G.detailHover=null;render();showDetail(null);});
   ab.appendChild(un);
+  /* Pin it to the bottom of a phone screen, then measure what it actually came
+     out as -- it wraps, so a Teece with three abilities is taller than one with
+     none -- and hold that much room open at the end of the page. */
+  const pin=!G.pending;
+  ab.classList.toggle('pin',pin);
+  document.body.classList.toggle('actpin',pin);
+  if(pin)document.body.style.setProperty('--actpin',(ab.offsetHeight+14)+'px');
 }
 function render(){
   if(!HAS_DOM||!G)return;

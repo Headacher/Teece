@@ -66,6 +66,28 @@ needs a real origin and fails on `file://`. Chromium is preinstalled at
 `/opt/pw-browsers`; never run `playwright install`. Top-level `let` bindings like
 `G` and `DECKS` are reachable from `page.evaluate` as bare identifiers.
 
+### "It doesn't work on mobile" usually means "I can't reach it"
+
+Three separate reports — a pixie that could not fly, then the same again, then
+Spin a trick — were all one bug: the control was rendered, enabled and working,
+and sitting off the bottom or top of a phone screen. Nothing in the game state
+looks wrong, so a test that builds a position with `page.evaluate` and clicks by
+selector will pass every time while the real page is unusable.
+
+To catch this class, a phone test has to fail the way a thumb fails:
+
+- Drive the actual flow (draft → handicap → play), on a phone viewport, rather
+  than assembling the board through `evaluate`.
+- Never click by selector. Playwright's `click`/`tap` scroll the element into
+  view first, which is the exact bug hiding itself. Read `boundingBox()`, check
+  it lies inside `innerHeight`, and click the coordinates with `page.mouse`.
+- Check the whole loop: the control on screen, the question it opens on screen,
+  and a destination cell not covered by whatever just pinned itself.
+
+Anything pinned to a viewport edge needs matching room held open at that end of
+the page, or it buries the content underneath. On a phone `aside` stacks below
+`main`, so the end of the page is the side panel — pad `#app`, not `main`.
+
 ## House rules for the game code
 
 - Cards are data in `CARDS`, keyed by id. Prefer adding a field the engine reads
