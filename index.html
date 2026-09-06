@@ -113,9 +113,9 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="bomb"] .kwl,.dcard[data-card-deck="bomb"] .dkw{color:#e0b088}
 .card[data-card-deck="bomb"] .ct,.dcard[data-card-deck="bomb"] .dty{color:#e0b088}
 .card[data-card-deck="nature"],.dcard[data-card-deck="nature"]{--cardbg:#6b8f2a;background:var(--cardbg);color:#f6faea;border-color:#48611a}
-.card[data-card-deck="pixie"],.dcard[data-card-deck="pixie"]{--cardbg:#7a4a8f;--artink:#f6ecff;background:var(--cardbg);color:#f4e9fb;border-color:#54306a}
-.card[data-card-deck="pixie"] .kwl,.dcard[data-card-deck="pixie"] .dkw{color:#dcbcf0}
-.card[data-card-deck="pixie"] .ct,.dcard[data-card-deck="pixie"] .dty{color:#dcbcf0}
+.card[data-card-deck="pixie"],.dcard[data-card-deck="pixie"]{--cardbg:#b1258e;--artink:#fdeaf7;background:var(--cardbg);color:#f4e9fb;border-color:#7a1861}
+.card[data-card-deck="pixie"] .kwl,.dcard[data-card-deck="pixie"] .dkw{color:#f2b0da}
+.card[data-card-deck="pixie"] .ct,.dcard[data-card-deck="pixie"] .dty{color:#f2b0da}
 .card[data-card-deck="nature"] .kwl,.dcard[data-card-deck="nature"] .dkw{color:#d5e8a4}
 .card[data-card-deck="nature"] .ct,.dcard[data-card-deck="nature"] .dty{color:#d5e8a4}
 
@@ -143,7 +143,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece[data-card-deck="witch"]{--cardbg:#1f3a30;--artink:#f2f7e6;background:var(--cardbg);color:#d9f0e2;border-color:#12241d}
 .teece[data-card-deck="bomb"]{--cardbg:#8a4a1a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e8d8;border-color:#5a2e0a}
 .teece[data-card-deck="nature"]{--cardbg:#6b8f2a;--artink:#f2f7e6;background:var(--cardbg);color:#f6faea;border-color:#48611a}
-.teece[data-card-deck="pixie"]{--cardbg:#7a4a8f;--artink:#f6ecff;background:var(--cardbg);color:#f4e9fb;border-color:#54306a}
+.teece[data-card-deck="pixie"]{--cardbg:#b1258e;--artink:#fdeaf7;background:var(--cardbg);color:#f4e9fb;border-color:#7a1861}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -164,6 +164,12 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .curseMark.m0{color:var(--p0)} .curseMark.m1{color:var(--p1)} .curseMark.m2{color:var(--p2)}
 .primeMark{position:absolute;top:3px;left:5px;font-size:11px;font-weight:700;color:var(--gold);z-index:1}
 .seedMark{position:absolute;top:3px;right:5px;font-size:10px;line-height:1;color:var(--up);z-index:1}
+/* The four corners are spoken for, so the enchantment takes the top edge. It
+   has to survive a Teece standing on the panel: an enemy arriving does not
+   spend it, so it can sit there under someone for turns. */
+.enchMark{position:absolute;top:2px;left:50%;transform:translateX(-50%);font-size:10px;
+  line-height:1;font-weight:700;letter-spacing:.02em;white-space:nowrap;z-index:1}
+.enchMark.m0{color:var(--p0)} .enchMark.m1{color:var(--p1)} .enchMark.m2{color:var(--p2)}
 .cell.razed{background-image:repeating-linear-gradient(45deg,rgba(0,0,0,.42) 0 6px,transparent 6px 12px)}
 .bglayer{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;
   font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding-bottom:2px}
@@ -290,6 +296,16 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .optcard{border-color:var(--gold)!important}
 #detail .dt{font-size:12px;color:var(--muted);line-height:1.45;margin-top:4px}
 #detail .dstats{font-size:12px;margin-top:6px;font-variant-numeric:tabular-nums}
+/* One line per buff or debuff standing on a Teece: what did it, and by how
+   much. Names go left, amounts right, so a column of them can be read down. */
+#detail .dpart{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  font-size:11.5px;margin-top:3px;line-height:1.35;font-variant-numeric:tabular-nums}
+#detail .dpart .pl{color:var(--cream2);min-width:0}
+#detail .dpart .pv{color:var(--muted);white-space:nowrap;flex:0 0 auto}
+#detail .dpart.up .pv{color:var(--up)}
+#detail .dpart.down .pv{color:var(--down)}
+#detail .dpart.base{border-bottom:1px dotted var(--line);padding-bottom:3px}
+#detail .dpart.note{display:block;color:var(--gold);font-size:11px}
 #detail .abtn{margin-top:8px;margin-right:6px}
 #log{height:180px;overflow:auto;font-size:11.5px;line-height:1.5;color:var(--muted)}
 #log div{padding:1px 0;border-bottom:1px solid rgba(255,255,255,.04)}
@@ -454,7 +470,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:12,date:'2026-09-06'};
+const VERSION={build:13,date:'2026-09-06'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1912,7 +1928,7 @@ function newState(mode,vsAI,decks,extra){
     width:BW,
     board:Array.from({length:BN},()=>({teece:null,ground:null,mine:null,defMark:null,razed:false,curseP:null,seed:null,enchant:null})),
     turn:Math.floor(Math.random()*nP),turnNum:1,teecePlayed:false,over:false,winner:null,pending:null,
-    detailLock:null,detailHover:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],graveLastTurn:[],
+    detailLock:null,detailHover:null,panelTap:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],graveLastTurn:[],
     epoch:++EPOCH,
     enemyBonus:extra.enemyBonus||0,level:extra.level||0,quiet:0,eventFlag:false,
     modalNext:null,trap:null,pendingFx:[],tempControls:[],castingMagic:false,magicConsumed:false,
@@ -1990,6 +2006,12 @@ function pname(p){
   if(G&&G.vsAI)return p===0?'You':(PLAYERS()>2?'Computer '+p:'Computer');
   return 'Player '+(p+1);
 }
+/* The possessive of pname(). "an ally of You" is not English, and the human
+   seat is the one that reads wrong, so it becomes "yours". */
+function pposs(p){
+  const n=pname(p);
+  return n==='You'?'yours':n+"'s";
+}
 function teamName(tm){
   const seats=seatsOnTeam(tm);
   if(seats.length===1)return pname(seats[0]);
@@ -2002,35 +2024,48 @@ function log(m){G.log.unshift(m);if(G.log.length>140)G.log.pop();if(HAS_DOM)rend
 
 /* ============ derived stats, keywords, acts ============ */
 function addMod(sum,m){if(m==null)return;if(Array.isArray(m)){for(let k=0;k<4;k++)sum[k]+=m[k];}else{for(let k=0;k<4;k++)sum[k]+=m;}}
-function effSides(b,i){
+/* Pass `parts` and every contribution is recorded into it as it is applied, so
+   a player can be shown how a Teece got to the numbers it is showing. It is the
+   same arithmetic either way -- there is no second implementation to drift. */
+function effSides(b,i,parts){
   const t=b[i].teece; if(!t)return[0,0,0,0];
   const s=[0,0,0,0];
+  const put=(label,d)=>{if(parts&&d.some(v=>v))parts.push({label,amt:d.slice()});};
   /* Shrink replaces what the card was printed with for the turn; everything
      stacked on top of it still counts. */
   const bs=t.baseTemp||t.base;
   for(let k=0;k<4;k++)s[k]=bs[k]+t.perm[k]+t.temp[k]+((t.temp2&&t.temp2[k])||0);
+  if(parts){
+    parts.push({label:t.baseTemp?'Printed, replaced for the turn':'Printed',amt:bs.slice(),base:true});
+    put('Permanent',t.perm);
+    put('Until the end of this turn',t.temp);
+    if(t.temp2)put('Until the end of your next turn',t.temp2);
+  }
   /* Hothouse Orchid doubles every positive effect on it. Perm and temp were
      already doubled as they were applied, so only the standing sources --
      equips, the battleground under it, auras -- are doubled here. Sunlit Loam
      hands the same rule to whatever is standing on it. */
   const selfDbl=!!DEF(t).selfDoublePos||groundFlag(b[i].ground,'gDoublePosAll');
-  const addMod=(sum,m)=>{
+  const addMod=(sum,m,label)=>{
     if(m==null)return;
-    if(Array.isArray(m)){for(let k=0;k<4;k++)sum[k]+=(selfDbl&&m[k]>0)?m[k]*2:m[k];}
-    else{const v=(selfDbl&&m>0)?m*2:m;for(let k=0;k<4;k++)sum[k]+=v;}
+    const d=[0,0,0,0];
+    if(Array.isArray(m)){for(let k=0;k<4;k++)d[k]=(selfDbl&&m[k]>0)?m[k]*2:m[k];}
+    else{const v=(selfDbl&&m>0)?m*2:m;for(let k=0;k<4;k++)d[k]=v;}
+    for(let k=0;k<4;k++)sum[k]+=d[k];
+    put(label,d);
   };
   for(const e of t.equips){
     const ed=CARDS[e.cardId];
-    addMod(s,ed.mod);
-    if(ed.modPerDef)addMod(s,ed.modPerDef*defOf(b,i));
-    if(ed.modPerAge)addMod(s,ed.modPerAge*(t.age||0));
+    addMod(s,ed.mod,ed.name);
+    if(ed.modPerDef)addMod(s,ed.modPerDef*defOf(b,i),ed.name+', per point of Defence');
+    if(ed.modPerAge)addMod(s,ed.modPerAge*(t.age||0),ed.name+', per turn stood');
   }
   if(b[i].ground){
     const gd=CARDS[b[i].ground.cardId];
-    addMod(s,gd.gmod);
-    if(gd.gStand&&t.standCell===i)addMod(s,gd.gStand);
-    if(b[i].ground.gmod!=null)addMod(s,b[i].ground.gmod);
-    if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addMod(s,gd.gRangedPlus);
+    addMod(s,gd.gmod,gd.name+', the ground here');
+    if(gd.gStand&&t.standCell===i)addMod(s,gd.gStand,gd.name+', for standing still');
+    if(b[i].ground.gmod!=null)addMod(s,b[i].ground.gmod,gd.name+', the ground here');
+    if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addMod(s,gd.gRangedPlus,gd.name+', for being Ranged');
   }
   for(let j=0;j<BN;j++){
     if(j===i)continue;
@@ -2050,10 +2085,25 @@ function effSides(b,i){
       const amt0=a.byDef?defOf(b,i):a.n;
       const amt=(selfDbl&&amt0>0)?amt0*2:amt0;
       for(let k=0;k<4;k++)s[k]+=amt;
+      put(nm(o)+(sameTeam(o.owner,t.owner)?', an ally at the ':', an enemy at the ')+CN[j],
+        [amt,amt,amt,amt]);
     }
   }
+  if(parts&&selfDbl)parts.push({label:DEF(t).selfDoublePos
+    ?'Every positive effect on it counts double'
+    :'The ground here doubles every positive effect',note:true});
   return s;
 }
+/* The panel readout's account of how a Teece reached the numbers it is showing:
+   every contribution effSides applied, in the order it applied them. */
+function sidesParts(b,i){
+  const parts=[];
+  const total=effSides(b,i,parts);
+  return {parts,total};
+}
+const partLine=a=>(a[0]===a[1]&&a[1]===a[2]&&a[2]===a[3])
+  ? sgn(a[0])+' to every side'
+  : SIDE_NAMES.map((n,k)=>a[k]?sgn(a[k])+' '+n:null).filter(Boolean).join(', ');
 function defOf(b,i){
   const t=b[i].teece; if(!t)return 0;
   let d=(DEF(t).def||0)+(t.defPerm||0)+(t.defTemp2||0);
@@ -2392,11 +2442,11 @@ function chooseCell(p,cells,msg,opt){
   return new Promise(res=>{G.pending={kind:'cell',p,cells,hands:opt.hands||null,msg,opt,
     res:v=>res(markTargetDeath(v))};render();});
 }
-function chooseOption(p,opts,msg){
+function chooseOption(p,opts,msg,cancel){
   if(isAIP(p)||!HAS_DOM){
     return Promise.resolve(aiPickOpt(opts));
   }
-  return new Promise(res=>{G.pending={kind:'opt',p,opts,msg,res};render();});
+  return new Promise(res=>{G.pending={kind:'opt',p,opts,msg,cancel:!!cancel,res};render();});
 }
 function resolvePending(val){
   const pd=G.pending; if(!pd)return;
@@ -3339,7 +3389,12 @@ async function FXRUN(st,ctx){
       return;
     }
     const opts=st.opts.map((o,x)=>({v:String(x),lbl:o.lbl}));
-    const pick=await chooseOption(p,opts,st.msg||'Choose one.');
+    /* Reading the modes is not committing to one. While this is still the first
+       step nothing has happened yet -- the card is in hand, the ability keeps
+       its charge -- so the question can be called off, exactly as a cell prompt
+       can. Past the first step it cannot, and no Cancel is offered. */
+    const pick=await chooseOption(p,opts,st.msg||'Choose one.',ctx.first);
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const chosen=st.opts[parseInt(pick,10)];
     if(ctl.times>1)log(chosen.lbl+' fires twice.');
@@ -5653,6 +5708,9 @@ function renderBoard(){
     if(prm)cell.innerHTML+='<div class="primeMark" title="Primed">'+sgn(prm.n)+'</div>';
     const sdm=G.board[i].seed;
     if(sdm)cell.innerHTML+='<div class="seedMark" title="A seed is planted here">\u{1F331}'+sdm.turns+'</div>';
+    const ench=G.board[i].enchant;
+    if(ench)cell.innerHTML+='<div class="enchMark m'+ench.owner+'" title="'+escHtml(enchantText(ench))+
+      '">✧ 10</div>';
     if(G.board[i].razed)cell.classList.add('razed');
     const t=G.board[i].teece;
     if(t){
@@ -5685,9 +5743,10 @@ function renderBoard(){
         if(e&&e.stopPropagation)e.stopPropagation();
         G.detailLock=(G.detailLock===i)?null:i;
         G.detailHover=null;
+        G.panelTap=null;
         render();
       });
-      tp.addEventListener('mouseenter',()=>{if(G.detailLock==null){G.detailHover=i;showDetail(i);}});
+      tp.addEventListener('mouseenter',()=>{if(G.detailLock==null){G.panelTap=null;G.detailHover=i;showDetail(i);}});
       tp.addEventListener('mouseleave',()=>{if(G.detailLock==null&&G.detailHover===i){G.detailHover=null;showDetail(null);}});
       cell.appendChild(tp);
     }
@@ -5705,19 +5764,38 @@ function renderBoard(){
         toast(G.pending.msg||'Answer the question at the top of the screen first.');
         return;
       }
-      if(!G.board[i].teece&&G.detailLock!=null){G.detailLock=null;render();}
+      /* An empty panel is not nothing: it can be carrying an enchantment, a
+         mine, a curse, a seed or a ground, and a phone has no hover to reveal
+         any of it. Tapping one shows what it holds. */
+      if(!G.board[i].teece){
+        if(G.detailLock!=null){G.detailLock=null;render();}
+        /* A tap has to stick. A phone synthesises a mouseleave right after the
+           tap, and the plain hover handler below would wipe the readout again
+           before it could be read. panelTap says this one was asked for. */
+        G.panelTap=i;
+        G.detailHover=i;
+        showDetail(i);
+      }
     });
     cell.addEventListener('mouseenter',()=>{
-      if(G.detailLock==null&&!G.board[i].teece){G.detailHover=i;showDetail(i);}
+      if(G.detailLock==null&&!G.board[i].teece){G.panelTap=null;G.detailHover=i;showDetail(i);}
     });
     cell.addEventListener('mouseleave',()=>{
-      if(G.detailLock==null&&G.detailHover===i){G.detailHover=null;showDetail(null);}
+      if(G.detailLock==null&&G.detailHover===i&&G.panelTap!==i){G.detailHover=null;showDetail(null);}
     });
     b.appendChild(cell);
   }
 }
 /* Everything on one panel besides the Teece: the battleground, Mines, a
    Curse, a razing, a priming, a seed. Hovering a panel should show the lot. */
+/* Said the same way in the corner marker's tooltip and in the panel readout, so
+   the two can never drift. */
+function enchantText(e){
+  /* Phrased around the owner rather than starting with them, because pname(0)
+     is "You" and "You has enchanted" is not a sentence. */
+  return 'This panel is enchanted. The next ally of '+pposs(e.owner)+' to arrive '+
+    'here becomes ten on every side, with all of its own effects negated.';
+}
 function panelHtml(i){
   const c=G.board[i];
   if(!c)return '';
@@ -5725,11 +5803,12 @@ function panelHtml(i){
   if(c.ground)h+='<div class="dn">'+CARDS[c.ground.cardId].name+'</div><div class="dt">'+CARDS[c.ground.cardId].text+'</div>';
   if(c.mine)h+='<div class="dt">'+((c.mine.n||1)>1?c.mine.n+' Mines are buried here. The next Teece to enter gets -'+(2*c.mine.n)+'.':
     'A Mine is buried here. The next Teece to enter gets -2.')+'</div>';
-  if(c.curseP)h+='<div class="dt">This panel is cursed. The next enemy of '+pname(c.curseP.owner)+' to arrive here gets '+sgn(c.curseP.n)+'.</div>';
+  if(c.curseP)h+='<div class="dt">This panel is cursed. The next enemy of '+pposs(c.curseP.owner)+' to arrive here gets '+sgn(c.curseP.n)+'.</div>';
   if(c.razed)h+='<div class="dt">Razed. No Teece may be played or moved onto this panel.</div>';
   if(c.prime)h+='<div class="dt">This panel is primed. The next Teece to arrive here gets '+sgn(c.prime.n)+'.</div>';
   if(c.seed)h+='<div class="dt">'+pname(c.seed.owner)+' has a seed planted here, '+c.seed.turns+' turn'+(c.seed.turns===1?'':'s')+
     ' from growing. If the panel is empty then, a Teece is raised from the graveyard with '+sgn(c.seed.n||1)+'.</div>';
+  if(c.enchant)h+='<div class="dt" style="color:var(--gold)">'+enchantText(c.enchant)+'</div>';
   return h;
 }
 function showDetail(i){
@@ -5760,6 +5839,21 @@ function showDetail(i){
     for(const e of t.equips)html+='<div class="dstats" style="font-size:11px">'+CARDS[e.cardId].name+
       ' &mdash; '+CARDS[e.cardId].text+'</div>';
   }
+  /* How it came to be showing the numbers it is showing: every buff and debuff
+     standing on it, named, in the order the engine applies them. Straight out
+     of effSides, so it can never disagree with the numbers on the card. */
+  const br=sidesParts(G.board,i);
+  html+='<div class="dsep">Attributes</div>'+
+    '<div class="dstats" style="color:var(--gold)">'+sidesBlock(br.total)+'</div>';
+  for(const pt of br.parts){
+    if(pt.note){html+='<div class="dpart note">'+escHtml(pt.label)+'</div>';continue;}
+    const up=pt.amt.some(v=>v>0),down=pt.amt.some(v=>v<0);
+    const cls=pt.base?' base':(up&&!down?' up':(down&&!up?' down':''));
+    html+='<div class="dpart'+cls+'"><span class="pl">'+escHtml(pt.label)+'</span>'+
+      '<span class="pv">'+(pt.base?sidesLine(pt.amt):partLine(pt.amt))+'</span></div>';
+  }
+  if(br.parts.filter(x=>!x.note).length<2)
+    html+='<div class="dpart note">Nothing has changed it.</div>';
   if(panel)html+='<div class="dsep">This panel</div>'+panel;
   d.innerHTML=html;
   if(locked){
@@ -6127,6 +6221,7 @@ function renderPrompt(){
     if(pd.opt.skip)add('Skip',null);
   }else if(pd.kind==='opt'){
     pd.opts.forEach((o,x)=>add(o.lbl,o.v,o.cid,'opt'+x));
+    if(pd.cancel)add('Cancel','CANCEL');
   }
 }
 function renderActionBar(){
@@ -6178,7 +6273,7 @@ function renderActionBar(){
   }
   const un=document.createElement('button');
   un.className='btn';un.textContent='Deselect';
-  un.addEventListener('click',()=>{G.detailLock=null;G.detailHover=null;render();showDetail(null);});
+  un.addEventListener('click',()=>{G.detailLock=null;G.detailHover=null;G.panelTap=null;render();showDetail(null);});
   ab.appendChild(un);
   /* Pin it to the bottom of a phone screen, then measure what it actually came
      out as -- it wraps, so a Teece with three abilities is taller than one with
@@ -6356,7 +6451,7 @@ if(HAS_DOM){
   };
   document.getElementById('resetDetail').onclick=()=>{
     if(!G)return;
-    G.detailLock=null;G.detailHover=null;
+    G.detailLock=null;G.detailHover=null;G.panelTap=null;
     showDetail(null);
     render();
   };
@@ -6371,7 +6466,7 @@ if(HAS_DOM){
       if(G&&G.pending&&(G.pending.opt&&G.pending.opt.cancel||G.pending.opt&&G.pending.opt.skip)){
         resolvePending(G.pending.opt.cancel?'CANCEL':null);
       }
-      if(G&&G.detailLock!=null){G.detailLock=null;G.detailHover=null;render();showDetail(null);}
+      if(G&&G.detailLock!=null){G.detailLock=null;G.detailHover=null;G.panelTap=null;render();showDetail(null);}
     }
   });
   render();
