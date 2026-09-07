@@ -333,7 +333,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed: raise
    `build` by one and set `date` to the day of the push. See CLAUDE.md. */
-const VERSION={build:3,date:'2026-09-07'};
+const VERSION={build:4,date:'2026-09-07'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1119,8 +1119,9 @@ async function offerReveal(p){
   try{ await playTeece(p,pl.hand.length-1); }
   finally{ G.viaReveal=false; }
 }
-async function pickSide(p,msg){
-  const o=await chooseOption(p,SIDE_NAMES.map((s,x)=>({v:String(x),lbl:s})),msg);
+async function pickSide(p,msg,canCancel){
+  const o=await chooseOption(p,SIDE_NAMES.map((s,x)=>({v:String(x),lbl:s})),msg,{cancel:!!canCancel});
+  if(o==='CANCEL')return 'CANCEL';
   return o==null?null:parseInt(o,10);
 }
 /* ============ state ============ */
@@ -1582,11 +1583,12 @@ function chooseCell(p,cells,msg,opt){
   return new Promise(res=>{G.pending={kind:'cell',p,cells,hands:opt.hands||null,msg,opt,
     res:v=>res(markTargetDeath(v))};render();});
 }
-function chooseOption(p,opts,msg){
+function chooseOption(p,opts,msg,opt){
+  opt=opt||{};
   if(isAIP(p)||!HAS_DOM){
     return Promise.resolve(aiPickOpt(opts));
   }
-  return new Promise(res=>{G.pending={kind:'opt',p,opts,msg,res};render();});
+  return new Promise(res=>{G.pending={kind:'opt',p,opts,msg,opt,res};render();});
 }
 function resolvePending(val){
   const pd=G.pending; if(!pd)return;
@@ -1644,6 +1646,12 @@ async function FXRUN(st,ctx){
     const r=await chooseCell(p,cands,msg,{cancel:!!ctx.first,skip:!!skip,mut});
     return r;
   };
+  /* An option prompt backs out on the same terms as a cell prompt: only while
+     nothing has happened yet, which is the first step of the card or ability.
+     Once an earlier step has moved something there is nothing coherent to undo,
+     so the way out closes. Pass ok=false to hold it shut anyway -- a step that
+     asks more than once has already spent the first answer by the second ask. */
+  const pickOpt=(opts,msg,ok)=>chooseOption(p,opts,msg,{cancel:!!ctx.first&&ok!==false});
   /* nothing to work with: say so and let the caller know none of it landed */
   const none=msg=>{log(msg);ctx.noneMsg=msg;return 'NONE';};
   switch(st.fx){
@@ -1774,7 +1782,10 @@ async function FXRUN(st,ctx){
         const g=boardValue(bb,p)-base+(o.v==='no'?0.01:0);
         if(g>bv){bv=g;ch=o.v;}
       }
-    }else ch=await chooseOption(p,opts,'Rotate '+DEF(t).name+'?');
+    }else{
+      ch=await pickOpt(opts,'Rotate '+DEF(t).name+'?');
+      if(ch==='CANCEL')return 'ABORT';
+    }
     const bse=t.base;
     if(ch==='cw')t.base=[bse[3],bse[0],bse[1],bse[2]];
     else if(ch==='ccw')t.base=[bse[1],bse[2],bse[3],bse[0]];
@@ -1802,8 +1813,9 @@ async function FXRUN(st,ctx){
     const c=await pickCell(cands,'Choose a Teece to rotate clockwise.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
-    const n=await chooseOption(p,[{v:'1',lbl:'Once'},{v:'2',lbl:'Twice'},{v:'3',lbl:'Three times'}],
+    const n=await pickOpt([{v:'1',lbl:'Once'},{v:'2',lbl:'Twice'},{v:'3',lbl:'Three times'}],
       'How many clockwise turns?');
+    if(n==='CANCEL')return 'ABORT';
     const times=parseInt(n||'1',10);
     const ft=b[c].teece;
     ft.base=spin(ft.base,times);
@@ -1874,7 +1886,8 @@ async function FXRUN(st,ctx){
     const t=b[c].teece;
     let ei=0;
     if(t.equips.length>1){
-      const ch=await chooseOption(p,t.equips.map((e,x)=>({v:x,lbl:CARDS[e.cardId].name})),'Destroy which equip?');
+      const ch=await pickOpt(t.equips.map((e,x)=>({v:x,lbl:CARDS[e.cardId].name})),'Destroy which equip?');
+      if(ch==='CANCEL')return 'ABORT';
       ei=ch==null?0:ch;
     }
     const e=t.equips.splice(ei,1)[0];
@@ -2054,7 +2067,8 @@ async function FXRUN(st,ctx){
     const ids=pl.grave.filter(id=>CARDS[id].type==='teece'&&!isBossCard(id));
     const empt=[];for(let i=0;i<BN;i++)if(!b[i].teece)empt.push(i);
     if(!ids.length||!empt.length)return none('Nothing to summon from the grave.');
-    const pick=await chooseOption(p,ids.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Summon which card from the grave?');
+    const pick=await pickOpt(ids.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Summon which card from the grave?');
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const gi=pl.grave.indexOf(ids[parseInt(pick,10)]);
     const cid=pl.grave.splice(gi,1)[0];
@@ -2067,7 +2081,8 @@ async function FXRUN(st,ctx){
   case 'graveToHand':{
     const pl=G.players[p];
     if(!pl.grave.length)return none('The grave is empty.');
-    const pick=await chooseOption(p,pl.grave.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Return which card to hand?');
+    const pick=await pickOpt(pl.grave.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Return which card to hand?');
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const cid=pl.grave.splice(parseInt(pick,10),1)[0];
     handPush(p,cid);
@@ -2320,7 +2335,9 @@ async function FXRUN(st,ctx){
     const pl=G.players[p];
     if(pl.hand.length<st.n){log('Not enough cards to discard.');return 'ABORT';}
     for(let k=0;k<st.n;k++){
-      const pick=await chooseOption(p,pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Discard a card.');
+      /* only the first ask is a way out: by the second, a card is already gone */
+      const pick=await pickOpt(pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Discard a card.',k===0);
+      if(pick==='CANCEL')return 'ABORT';
       const idx=pick==null?0:parseInt(pick,10);
       const gone=handTake(p,idx);const cid=gone.id;
       toGrave(p,cid);dumpPlate(gone.plate,"with the card it was bolted to");
@@ -2337,7 +2354,8 @@ async function FXRUN(st,ctx){
     return;}
   case 'calibrate':{
     const opts=[];for(let x=0;x<=8;x++)opts.push({v:String(x),lbl:String(x)+'/'+x+'/'+x+'/'+x+'  \u2192  +'+(9-x)});
-    const pick=await chooseOption(p,opts,'Calibration Dial: set X.');
+    const pick=await pickOpt(opts,'Calibration Dial: set X.');
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const x=parseInt(pick,10);
     G.players[p].calib={x,n:9-x};
@@ -2371,7 +2389,8 @@ async function FXRUN(st,ctx){
   case 'handToDeck':{
     const pl=G.players[p];
     if(!pl.hand.length)return none('No card to stack back.');
-    const pick=await chooseOption(p,pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Put which card on top of your deck?');
+    const pick=await pickOpt(pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Put which card on top of your deck?');
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const gone=handTake(p,parseInt(pick,10));const cid=gone.id;
     pl.deck.push(cid);dumpPlate(gone.plate,"off a card stacked back onto the deck");
@@ -2391,7 +2410,8 @@ async function FXRUN(st,ctx){
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const t=b[c].teece;
-    const k=await pickSide(p,'Which side of '+nm(t)+'?');
+    const k=await pickSide(p,'Which side of '+nm(t)+'?',!!ctx.first);
+    if(k==='CANCEL')return 'ABORT';
     if(k==null)return;
     if(st.n<0&&isSteadfast(t)){log(nm(t)+' will not give ground.');return;}
     t.perm[k]+=st.n;
@@ -2409,7 +2429,8 @@ async function FXRUN(st,ctx){
     }
     const t=c!=null?b[c].teece:ctx.t;
     if(!t)return;
-    const k=await pickSide(p,'Which side of '+nm(t)+' drops to '+(st.v||0)+'?');
+    const k=await pickSide(p,'Which side of '+nm(t)+' drops to '+(st.v||0)+'?',!!ctx.first);
+    if(k==='CANCEL')return 'ABORT';
     if(k==null)return;
     t.base[k]=st.v||0;t.perm[k]=0;t.temp[k]=0;
     log(nm(t)+"'s "+SIDE_NAMES[k]+' side is governed down to '+(st.v||0)+'.');
@@ -2474,7 +2495,8 @@ async function FXRUN(st,ctx){
       return;
     }
     const opts=st.opts.map((o,x)=>({v:String(x),lbl:o.lbl}));
-    const pick=await chooseOption(p,opts,st.msg||'Choose one.');
+    const pick=await pickOpt(opts,st.msg||'Choose one.');
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const chosen=st.opts[parseInt(pick,10)];
     if(ctl.times>1)log(chosen.lbl+' fires twice.');
@@ -2533,7 +2555,8 @@ async function FXRUN(st,ctx){
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const t=b[c].teece;
-    const pick=await chooseOption(p,[{v:'hand',lbl:'Return to hand'},{v:'move',lbl:'Move it one space'}],'What happens to '+nm(t)+'?');
+    const pick=await pickOpt([{v:'hand',lbl:'Return to hand'},{v:'move',lbl:'Move it one space'}],'What happens to '+nm(t)+'?');
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==='hand'){
       b[c].teece=null;
       for(const uid of t.controls)revertControl(b,uid,true);
@@ -2674,7 +2697,8 @@ async function FXRUN(st,ctx){
   case 'rewind':{
     const mine=G.graveThisTurn.filter(g=>g.owner===p);
     if(!mine.length){log('Nothing of yours reached a graveyard this turn.');return 'ABORT';}
-    const pick=await chooseOption(p,mine.map((g,x)=>({v:String(x),lbl:CARDS[g.cardId].name})),'Rewind which card?');
+    const pick=await pickOpt(mine.map((g,x)=>({v:String(x),lbl:CARDS[g.cardId].name})),'Rewind which card?');
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const entry=mine[parseInt(pick,10)];
     const gi=G.players[entry.owner].grave.lastIndexOf(entry.cardId);
@@ -2715,8 +2739,12 @@ async function FXRUN(st,ctx){
     const i=ctx.cell;
     if(hasKw(b,i,'immovable'))return none('It cannot move.');
     let pool;
+    /* 'orth' walks the four sides; 'any' is Flying, which is the one move in
+       the game that also takes the diagonals -- that is the whole difference
+       between Flying and Stride, and a Robot boxed in by its own Drones has
+       nowhere to go without it. 'tele' is the rest of the board. */
     if(st.range==='orth')pool=ADJ[i];
-    else if(st.range==='any')pool=ADJ[i];
+    else if(st.range==='any')pool=DIAG[i];
     else{pool=[];for(let j=0;j<BN;j++)if(j!==i)pool.push(j);}
     const d=pool.filter(j=>!b[j].teece);
     if(!d.length)return none('Nowhere to move.');
@@ -3279,23 +3307,28 @@ async function playGround(p,handIdx){
   const pl=G.players[p],id=pl.hand[handIdx],b=G.board,d=CARDS[id];
   let shape='1x1';
   let gmode=null;
+  /* Every question here comes before the card leaves your hand, so every one of
+     them can be backed out of. The modality only fires once the ground is
+     actually down -- spinning up your Teece and then letting you cancel would
+     leave the board changed by a card you never played. */
+  let modalFires=false;
   if(d.gModal){
     const ctl=modalCtl(p,null);
     if(ctl.off){log('Safety Interlock holds: '+d.name+' is laid inert.');gmode={};}
     else if(ctl.all){gmode=Object.assign({},...d.gModal.map(m=>{const o=Object.assign({},m);delete o.lbl;delete o.gmod;return o;}));
       gmode.gmod=0;log('Every mode of '+d.name+' fires: it doubles bonuses and penalties alike.');}
     else{
-      const pick=await chooseOption(p,d.gModal.map((m,x)=>({v:String(x),lbl:m.lbl})),d.name+':');
-      if(pick==null)return false;
+      const pick=await chooseOption(p,d.gModal.map((m,x)=>({v:String(x),lbl:m.lbl})),d.name+':',{cancel:true});
+      if(pick==null||pick==='CANCEL')return false;
       const m=d.gModal[parseInt(pick,10)];
       gmode=Object.assign({},m);delete gmode.lbl;
     }
-    if(!ctl.off)fireModal(p);
+    modalFires=!ctl.off;
   }
   if(d.gShape){
     const pick=await chooseOption(p,[{v:'1x1',lbl:'One panel'},{v:'2x1',lbl:'Two panels'},{v:'2x2',lbl:'Four panels'}],
-      'How large is '+d.name+'?');
-    if(pick==null)return false;
+      'How large is '+d.name+'?',{cancel:true});
+    if(pick==null||pick==='CANCEL')return false;
     shape=pick;
   }
   const cands=[];
@@ -3305,6 +3338,7 @@ async function playGround(p,handIdx){
     {cancel:true,mut:(bb,i)=>{for(const j of groundCells(i,shape))bb[j].ground=Object.assign({cardId:id,owner:p},gmode||{});}});
   if(c==null||c==='CANCEL')return false;
   handTake(p,handIdx);
+  if(modalFires)fireModal(p);
   const cells=groundCells(c,shape);
   const cleared=[];
   for(const j of cells){
@@ -3923,7 +3957,7 @@ function aiActMuts(cell,ent){
   if(st.fx==='move'){
     let pool;
     if(st.range==='orth')pool=ADJ[cell];
-    else if(st.range==='any')pool=ADJ[cell];
+    else if(st.range==='any')pool=DIAG[cell];   /* Flying: diagonals too */
     else{pool=[];for(let j=0;j<BN;j++)if(j!==cell)pool.push(j);}
     for(const j of pool)if(!b[j].teece)muts.push(bb=>{if(bb[cell].teece)moveT(bb,cell,j,false);});
   }else if(st.fx==='push'){
@@ -4566,6 +4600,8 @@ function renderPrompt(){
     if(pd.opt.skip)add('Skip',null);
   }else if(pd.kind==='opt'){
     for(const o of pd.opts)add(o.lbl,o.v);
+    /* after the real choices, so it never sits where a mode button was */
+    if(pd.opt&&pd.opt.cancel)add('Cancel','CANCEL');
   }
 }
 function renderActionBar(){
