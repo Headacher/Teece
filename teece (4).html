@@ -333,7 +333,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed: raise
    `build` by one and set `date` to the day of the push. See CLAUDE.md. */
-const VERSION={build:2,date:'2026-09-05'};
+const VERSION={build:3,date:'2026-09-07'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3580,6 +3580,10 @@ function simCombat(b){
     for(const d of deaths)simDeath(b,d);
   }
 }
+/* boardValue counts a Teece's four sides flat, without caring which way it
+   faces. Every AI threshold in this file is tuned against that scale, so it
+   stays that way; orientation is added on top at the one decision it settles,
+   which is the panel a Teece is played on -- see orientGain. */
 function boardValue(b,p){
   let v=0;
   for(let i=0;i<BN;i++){
@@ -3590,6 +3594,37 @@ function boardValue(b,p){
     v+=sameTeam(t.owner,p)?w:-w;
   }
   return v;
+}
+/* A side pressed against the board edge never meets anything: it neither kills
+   nor dies. So a panel is worth different things to different Teece -- a side
+   facing the board counts what it shows, a side facing the wall counts the
+   Teece's own average instead, plus WALL_EDGE for the attack surface the wall
+   takes away. Scoring a walled side as the average keeps four equal sides
+   worth the same wherever they sit, and the difference from it pays a lopsided
+   Teece for turning its weak sides into the wall: 9/9/2/2 wants the bottom-left
+   corner, where both nines still face the board and neither two can ever be
+   answered. Without this the AI opened top-left with everything, throwing a
+   nine into the wall and leaving a two in the open.
+   WALL_EDGE is the part that says a side you never have to defend is worth
+   something on its own. At 1 it sends a Teece with a single soft side, like
+   8/8/7/3, to the corner that buries that side rather than to an edge panel
+   that merely shows one side fewer. Higher crowds everything into the corners
+   for no gain. */
+const WALL_EDGE=1;
+function facing(i,s){
+  const r=row(i),c=col(i);
+  const open=[r>0,c<BW-1,r<BW-1,c>0];
+  const avg=(s[0]+s[1]+s[2]+s[3])/4;
+  let v=0;
+  for(let k=0;k<4;k++)v+=open[k]?s[k]:avg+WALL_EDGE;
+  return v;
+}
+/* what this panel is worth to the Teece now standing on it, over the flat
+   side-total boardValue has already counted for it */
+function orientGain(b,cell){
+  const t=b[cell].teece;if(!t)return 0;   /* it died in the sim */
+  const s=effSides(b,cell);
+  return (facing(cell,s)-(s[0]+s[1]+s[2]+s[3]))*0.15;
 }
 /* approximate on-play triggers when simming a placement */
 function simOnPlay(b,cell,id,p){
@@ -3835,7 +3870,7 @@ async function aiPlayTeece(){
         putTeece(bb,c,t,false);
         if(rots.length===1)simOnPlay(bb,c,id,p);
         simCombat(bb);
-        const g=boardValue(bb,p)-base+2.2;
+        const g=boardValue(bb,p)-base+2.2+orientGain(bb,c);
         if(g>bg){bg=g;best={h,c,rot,sacP};}
       }
     }
