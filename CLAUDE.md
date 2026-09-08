@@ -4,24 +4,35 @@ A card/board game in `index.html` — one self-contained file holding cards,
 rules, AI, rendering and styling — plus `decks.json`, which lists the decks,
 formats and draft pool. No build step.
 
-## THIS is the branch that ships
+## Check which branch you are on before you touch anything
 
-**GitHub Pages serves this branch**, `claude/overclocker-fly-gadget-bugs-rvlhsg`,
-at https://headacher.github.io/Teece/. It does **not** serve `main`.
+**GitHub Pages serves `claude/overclocker-fly-gadget-bugs-rvlhsg`** at
+https://headacher.github.io/Teece/. That branch, and only that branch, reaches a
+player. Run `git rev-parse --abbrev-ref HEAD`. If it does not say that, switch:
 
-`main` is a stale fork carrying an older, differently-numbered codebase in a file
-called `teece (4).html`. The two have no shared history. Work merged to `main`
-never reaches players, and this has already cost two sessions' work — once in
-early September, and again in the session that wrote this file, where nine
-commits went to `main` and vanished.
+```
+git checkout claude/overclocker-fly-gadget-bugs-rvlhsg
+```
 
-So: **do the work here.** Before believing anything is live, check the deployment
-rather than the push — the Pages build shows up as a `pages build and deployment`
-workflow run, and its `head_branch` tells you what is actually being served.
+This has already cost three sessions' work. Twice, nine commits went to `main`
+and vanished. The third time, a session started on `main`, spent a day adding a
+whole deck plus a UI pass to a file called `teece (4).html` — an older,
+differently-numbered codebase that `main` used to carry — and every push
+succeeded while none of it reached the game. The pushes are never the problem.
+The branch is.
 
-Card ids differ between the two branches. Nature is 521–540 here (Witch holds
-491–509), but 501–520 on `main`. Never port a change by card id without checking
-the name.
+`main` now carries this same tree, so a session that starts there is at least
+working on the right code; it still has to move to the shipping branch before
+pushing, because Pages does not build `main`.
+
+Before believing anything is live, check the deployment rather than the push. The
+Pages build shows up as a `pages build and deployment` workflow run, and its
+`head_branch` tells you what is actually being served.
+
+Card ids on the retired `teece (4).html` lineage do not match this one — Nature
+is 521–540 here and 501–520 there, and Witch (491–509), Pixie (541–560) and
+Spider (561–580) do not exist there at all. Never port a change by card id
+without checking the name.
 
 ## Bump the version on every push
 
