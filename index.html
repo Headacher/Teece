@@ -49,8 +49,6 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card .hs3{left:6px;top:50%;transform:translateY(-50%)}
 .card .hcn{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
   text-align:center;padding:0 15px;font-size:12.5px;line-height:1.05}
-.card .kwl{position:absolute;left:0;right:0;top:65%;text-align:center;font-size:8px;
-  letter-spacing:.1em;text-transform:uppercase;color:#8a6d3b}
 .card .ct{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#7a6a4d}
 .card .cn{font-family:var(--disp);font-size:15px;line-height:1.05}
 .card .cs{font-size:11px;font-weight:700;margin-top:auto}
@@ -147,6 +145,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece[data-card-deck="bomb"]{--cardbg:#8a4a1a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e8d8;border-color:#5a2e0a}
 .teece[data-card-deck="nature"]{--cardbg:#6b8f2a;--artink:#f2f7e6;background:var(--cardbg);color:#f6faea;border-color:#48611a}
 .teece[data-card-deck="pixie"]{--cardbg:#b1258e;--artink:#fdeaf7;background:var(--cardbg);color:#f4e9fb;border-color:#7a1861}
+.teece[data-card-deck="spider"]{--cardbg:#3b3350;--artink:#efe9ff;background:var(--cardbg);color:#e6e0f5;border-color:#241e33}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -194,7 +193,10 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece .s3{left:4px;top:50%;transform:translateY(-50%)}
 .teece .up{color:var(--up)} .teece .down{color:var(--down)}
 .teece .eq{position:absolute;top:2px;right:4px;font-size:8px;color:#7a6a4d;letter-spacing:.05em}
-.teece .rgd{position:absolute;left:0;right:0;top:calc(50% + 10px);text-align:center;font-size:9px;line-height:1}
+.teece .rgd{position:absolute;left:0;right:0;top:calc(50% + 10px);display:flex;line-height:1;
+  align-items:center;justify-content:center;gap:7px;font-size:11px}
+.teece .rgd .dfn{display:inline-flex;align-items:center;gap:2px;font-weight:700;
+  font-variant-numeric:tabular-nums}
 .teece .ascii{position:absolute;top:12px;right:5px;bottom:12px;left:5px;margin:0;z-index:0;
   pointer-events:none;overflow:hidden;background:transparent;color:var(--artink);opacity:.46;
   display:flex;align-items:center;justify-content:center;
@@ -292,14 +294,13 @@ button,.teece,.cell,.card{touch-action:manipulation}
        toward the lead that ends the game. ---- */
 .boardrow{display:flex;align-items:stretch;justify-content:center;gap:12px}
 .dombar{width:26px;display:flex;flex-direction:column;gap:5px}
-.dommeter{flex:1;display:flex;flex-direction:column;overflow:hidden;
+.dommeter{flex:1;display:flex;flex-direction:column-reverse;gap:3px;padding:3px;
   border:1px solid var(--line);border-radius:7px;background:#191410}
-.domband{display:flex;align-items:center;justify-content:center;min-height:0;
-  font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:#12100c;
-  transition:flex-grow .25s ease}
-.domband.t0{background:var(--p0)} .domband.t1{background:var(--p1);color:#f6e8e4}
-.domband.t2{background:var(--p2);color:#150e21}
-.domband.empty{background:repeating-linear-gradient(-45deg,#221a10 0 5px,#191410 5px 10px)}
+.domseg{flex:1;min-height:0;border-radius:3px;background:#241c12;
+  transition:background .25s ease,box-shadow .25s ease}
+.domseg.on.t0{background:var(--p0);box-shadow:0 0 5px rgba(63,160,138,.5)}
+.domseg.on.t1{background:var(--p1);box-shadow:0 0 5px rgba(192,57,43,.5)}
+.domseg.on.t2{background:var(--p2);box-shadow:0 0 5px rgba(155,123,212,.5)}
 .domlead{text-align:center;font-size:10px;font-weight:700;letter-spacing:.04em;
   font-variant-numeric:tabular-nums;color:var(--muted)}
 .domlead.near{color:var(--gold);animation:domNear 1.4s ease-in-out infinite}
@@ -537,7 +538,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:17,date:'2026-09-08'};
+const VERSION={build:18,date:'2026-09-08'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1012,8 +1013,8 @@ const CARDS = {
  TB:{name:'Bomblet',type:'teece',token:true,sides:[3,3,3,3],
     text:'Token. When destroyed: adjacent Teece get -2. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.',
     onDeath:[{fx:'aoe',n:-2,dur:'perm'}]},
- TSP:{name:'Spiderling',type:'teece',token:true,sides:[4,4,4,4],
-    text:'Spiderling Token. Bigger than most Tokens, and the currency the whole Spider deck spends. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ TSP:{name:'Spiderling',type:'teece',token:true,sides:[4,4,4,4],spider:true,
+    text:'Spiderling Token. On the Web it has +1 Defence and Skitter \u2014 once per your turn, move one space. Bigger than most Tokens, and the currency the whole Spider deck spends. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  TS:{name:'Sprout',type:'teece',token:true,sides:[3,3,3,3],
     text:'Sprout Token. When destroyed: every other allied Teece gets +1. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.',
     onDeath:[{fx:'mass',who:'ally',n:1,dur:'perm'}]},
@@ -1731,50 +1732,52 @@ const CARDS = {
     cast:[{fx:'conjure',n:2}]},
  /* ---- Spider: a cannibal swarm that lives on the Web ----
     The Web is board state rather than a card. A deck that carries it lays it
-    at setup over every panel but the corners, it belongs to neither side, and
-    a battleground laid on a panel is the last word on that panel \u2014 so ordinary
-    ground buries the silk under it and Spider ground spins its own. ---- */
- 561:{name:'Immobilizing Spider',type:'teece',sides:[6,7,7,7],webLock:true,
+    at setup over every panel but the corners. A Spiderling standing on it has
+    +1 Defence, and every Spider Teece and Spiderling on it has Skitter: once
+    per your turn, move one space. A battleground laid on a panel is the last
+    word on that panel \u2014 so ordinary ground buries the silk under it and
+    Spider ground spins its own. ---- */
+ 561:{name:'Immobilizing Spider',type:'teece',sides:[6,7,7,7],spider:true,webLock:true,
     text:'Enemy Teece standing on the Web cannot move at all.'},
- 562:{name:'Trapdoor Spider',type:'teece',sides:[8,0,8,8],
+ 562:{name:'Trapdoor Spider',type:'teece',sides:[8,0,8,8],spider:true,
     text:'When played onto the Web: +8 on its right side alone.',
     onPlay:[{fx:'webSides',mod:[0,8,0,0]}]},
- 563:{name:'Brood Daughter',type:'teece',sides:[5,5,5,5],
+ 563:{name:'Brood Daughter',type:'teece',sides:[5,5,5,5],spider:true,
     text:'When played: summon two 4/4/4/4 Spiderlings.',
     onPlay:[{fx:'spiderling',count:2}]},
- 564:{name:'Writhing Egg Sac',type:'teece',sides:[2,7,2,6],
+ 564:{name:'Writhing Egg Sac',type:'teece',sides:[2,7,2,6],spider:true,
     text:'When destroyed: a 4/4/4/4 Spiderling boils out onto every empty adjacent panel.',
     onDeath:[{fx:'spiderling',where:'adjAll'}]},
- 565:{name:'Spiderlingling',type:'teece',sides:[2,2,2,2],onSpiderling:{n:1},
+ 565:{name:'Spiderlingling',type:'teece',sides:[2,2,2,2],spider:true,onSpiderling:{n:1},
     text:'Whenever a Spiderling is summoned or destroyed anywhere, either side\u2019s: +1 permanently.'},
- 566:{name:'Spider',type:'teece',sides:[8,8,8,8],
+ 566:{name:'Spider',type:'teece',sides:[8,8,8,8],spider:true,
     text:'When played: sacrifice a Spiderling, or this Teece gets -4.',
     onPlay:[{fx:'sacSpiderling',elseMod:{n:-4,dur:'perm'}}]},
- 567:{name:'Web Crawler',type:'teece',sides:[5,4,5,4],
+ 567:{name:'Web Crawler',type:'teece',sides:[5,4,5,4],spider:true,
     text:'While it stands on the Web, once per your turn: sacrifice a Spiderling; an enemy on the Web gets -3.',
     act:[{name:'Drag it under',once:'turn',needWeb:true,
       steps:[{fx:'sacSpiderling',req:true},{fx:'mod',who:'enemy',where:'web',n:-3,dur:'perm'}]}]},
- 568:{name:'Spider Nurser',type:'teece',sides:[6,6,6,6],
+ 568:{name:'Spider Nurser',type:'teece',sides:[6,6,6,6],spider:true,
     text:'When played: select a Teece on the Web and move it one space. If it was a Spiderling, it gets +2.',
     onPlay:[{fx:'moveTarget',web:true,thenSpiderMod:{n:2,dur:'perm'}}]},
- 569:{name:'Spinneret',type:'teece',sides:[7,3,7,3],
+ 569:{name:'Spinneret',type:'teece',sides:[7,3,7,3],spider:true,
     text:'Once each of your turns: summon a 4/4/4/4 Spiderling onto an empty Web panel. If you do, select an enemy Teece; it gets -1.',
     act:[{name:'Spin one out',once:'turn',
       steps:[{fx:'spiderling',where:'web',req:true},{fx:'mod',who:'enemy',where:'any',n:-1,dur:'perm'}]}]},
- 570:{name:'Spider Guard',type:'teece',sides:[3,3,3,3],
+ 570:{name:'Spider Guard',type:'teece',sides:[3,3,3,3],spider:true,
     text:'When played: sacrifice any number of Spiderlings, then return that many Teece to their owners\u2019 hands.',
     onPlay:[{fx:'sacSpiderling',any:true},{fx:'bounce',countFrom:'sac'}]},
- 571:{name:'Broodfather',type:'teece',sides:[8,8,8,8],sac:1,
+ 571:{name:'Broodfather',type:'teece',sides:[8,8,8,8],spider:true,sac:1,
     text:'Sacrifice one fielded Teece to play. When played: a 4/4/4/4 Spiderling appears on every empty Web panel.',
     onPlay:[{fx:'spiderling',where:'webAll'}]},
- 572:{name:'Brood Mother',type:'teece',sides:[8,8,8,8],sac:2,webBrood:true,
+ 572:{name:'Brood Mother',type:'teece',sides:[8,8,8,8],spider:true,sac:2,webBrood:true,
     text:'Sacrifice two fielded Teece to play. While she stands, every Spiderling on the Web \u2014 either side\u2019s \u2014 has base 12/12/12/12 and can no longer be sacrificed.'},
  573:{name:'Burst',type:'magic',
     text:'Select up to four empty Web panels; a 4/4/4/4 Spiderling appears on each.',
     cast:[{fx:'spiderling',where:'web',count:4,may:true}]},
  574:{name:'Eaten Alive',type:'magic',
-    text:'Select a Teece standing next to one of your Spiderlings; destroy it.',
-    cast:[{fx:'destroy',nearSpiderling:true}]},
+    text:'Sacrifice three Spiderlings, then select any Teece; destroy it.',
+    cast:[{fx:'sacSpiderling',need:3},{fx:'destroy'}]},
  575:{name:'Spider Cannibalism',type:'magic',
     text:'Sacrifice a Spiderling, then select a Teece on the Web: it gets +5 or -5 until the end of the turn, and may then move to any empty Web panel.',
     cast:[{fx:'sacSpiderling',req:true},
@@ -1783,8 +1786,8 @@ const CARDS = {
         {lbl:'It gets -5 until end of turn',steps:[{fx:'mod',where:'web',n:-5,dur:'temp'}]}]},
       {fx:'teleLast',web:true}]},
  576:{name:'Skitter',type:'equip',mod:4,onlySpiderling:true,
-    text:'Equip to a Spiderling. It gets +4 and may move one space once per your turn.',
-    grants:{act:[{name:'Skitter',once:'turn',steps:[{fx:'move',range:'orth'}]}]}},
+    text:'Equip to a Spiderling. It gets +4 and keeps Skitter wherever it stands, not only on the Web: once per your turn, move one space.',
+    grants:{kw:['skitter']}},
  577:{name:'Dragline',type:'equip',mod:2,
     text:'The equipped Teece gets +2 and, once per your turn, may run a line to any empty Web panel however far away.',
     grants:{act:[{name:'Cast a line',once:'turn',steps:[{fx:'move',range:'web'}]}]}},
@@ -1792,7 +1795,7 @@ const CARDS = {
     text:'The equipped Teece gets +2 Defence, and counts +2 on whichever edge it fights with against an enemy standing on the Web.',
     grants:{def:2,webCombat:2}},
  579:{name:'Spun Nest',type:'ground',gWeb:true,gWebAdj:true,gSpiderDef:1,
-    text:'This panel and every panel adjacent to it count as Web. While it stands, every Spiderling on the Web has +1 Defence.'},
+    text:'This panel and every panel adjacent to it count as Web. While it stands, every Spiderling on the Web has +1 Defence on top of the +1 the Web already gives it.'},
  580:{name:'Egg Nest',type:'ground',gWeb:true,gEndTurn:'TSP',
     text:'This panel counts as Web. At the end of your turn, if nothing stands on it, a 4/4/4/4 Spiderling hatches here.'},
 };
@@ -1823,6 +1826,10 @@ function movePool(i,range){
 }
 const FLY_ACT={name:'Fly',once:'turn',steps:[{fx:'move',range:'step'}]};
 const TELE_ACT={name:'Teleport',once:'turn',steps:[{fx:'move',range:'tele'}]};
+/* Skitter is one orthogonal space, which is what keeps it distinct from Flying:
+   a flier crosses corners, a spider runs the strands. Spiders and Spiderlings
+   have it while they stand on the Web, and the Skitter equip carries it off. */
+const SKITTER_ACT={name:'Skitter',once:'turn',steps:[{fx:'move',range:'orth'}]};
 
 /* ============ modalities ============
    A modality is any effect that offers a choice. Gadget bends them: fire every
@@ -2218,7 +2225,9 @@ function addMod(sum,m){if(m==null)return;if(Array.isArray(m)){for(let k=0;k<4;k+
 /* ============ the Web ============
    A panel is silk if the base Web was laid there, or if Spider ground spins it.
    A battleground standing on a panel is the whole story for that panel, so an
-   ordinary one buries the silk under it and only a Spider one keeps it. */
+   ordinary one buries the silk under it and only a Spider one keeps it.
+   The Web itself is worth WEB_DEF Defence to any Spiderling standing on it,
+   with no card needed; Spun Nest adds to that rather than granting it. */
 function isWebbed(b,i){
   if(!G||!b||!b[i])return false;
   const g=b[i].ground;
@@ -2230,6 +2239,7 @@ function isWebbed(b,i){
   }
   return false;
 }
+const WEB_DEF=1;
 const isSpiderling=t=>!!t&&t.cardId==='TSP';
 function webBrood(b){
   for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!t.silenced&&DEF(t).webBrood)return true;}
@@ -2346,6 +2356,7 @@ function defOf(b,i){
   if(b[i].ground){const gd=CARDS[b[i].ground.cardId];if(gd.gdef)d+=gd.gdef;}
   if(b[i].defMark&&b.some(c=>c.teece&&c.teece.uid===b[i].defMark.uid))d+=b[i].defMark.n;
   if(isSpiderling(t)&&isWebbed(b,i)){
+    d+=WEB_DEF;
     for(let j=0;j<BN;j++){
       const g=b[j].ground;if(!g||!groundFlag(g,'gSpiderDef'))continue;
       d+=(g.gSpiderDef!=null?g.gSpiderDef:CARDS[g.cardId].gSpiderDef)||0;
@@ -2383,6 +2394,7 @@ function kwOf(b,i,noGround){
   const t=b[i].teece; if(!t)return[];
   const ks=[]; const d=DEF(t);
   if(d.kw)ks.push(...d.kw);
+  if((d.spider||t.cardId==='TSP')&&isWebbed(b,i))ks.push('skitter');
   ks.push(...t.kwTemp);
   if(t.kwPerm)ks.push(...t.kwPerm);
   for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.kw)ks.push(...g.kw);}
@@ -2413,6 +2425,7 @@ function actsOf(b,i){
     if(g&&g.act)g.act.forEach((a,x)=>out.push({key:'e'+e.cardId+'_'+x,act:a}));
   }
   if(hasKw(b,i,'flying'))out.push({key:'kfly',act:FLY_ACT});
+  if(hasKw(b,i,'skitter'))out.push({key:'kskit',act:SKITTER_ACT});
   if(hasKw(b,i,'teleport'))out.push({key:'ktele',act:TELE_ACT});
   if(b[i].ground){const gd=CARDS[b[i].ground.cardId];if(gd.gact)gd.gact.forEach((a,x)=>out.push({key:'g'+b[i].ground.cardId+'_'+x,act:a}));}
   return out;
@@ -2912,15 +2925,26 @@ async function FXRUN(st,ctx){
      leaves the tally in ctx.sacN for the step that spends it. */
   case 'sacSpiderling':{
     const feedable=()=>{const o=[];for(let j=0;j<BN;j++)if(b[j].teece&&sameTeam(b[j].teece.owner,p)&&canEatSpiderling(b,j))o.push(j);return o;};
+    /* need:N is a price rather than an option -- the whole effect is off unless
+       all N can be paid, and only the first pick may be backed out of, before
+       anything has been eaten. */
+    const need=st.need||0;
+    if(need&&feedable().length<need){
+      toast('That needs '+need+' Spiderlings to feed the swarm.');
+      return 'ABORT';
+    }
     let done=0;
     while(true){
       const mine=feedable();
       if(!mine.length)break;
-      if(!st.any&&done)break;
-      const c=await pickCell(mine,st.any
+      if(need){if(done>=need)break;}
+      else if(!st.any&&done)break;
+      const c=await pickCell(mine,need
+        ?'Sacrifice a Spiderling ('+(done+1)+' of '+need+').'
+        :st.any
         ?'Sacrifice a Spiderling'+(done?' ('+done+' fed so far)':'')+', or stop.'
         :'Sacrifice a Spiderling'+(st.req?'.':', or skip and take the penalty.'),
-        (bb,i)=>{bb[i].teece=null;},!!st.any||!st.req);
+        (bb,i)=>{bb[i].teece=null;},need?false:(!!st.any||!st.req));
       if(c==='CANCEL')return 'ABORT';
       if(c==null)break;
       const o=b[c].teece;
@@ -2933,6 +2957,7 @@ async function FXRUN(st,ctx){
       render();
     }
     ctx.sacN=done;
+    if(need&&done<need)return 'ABORT';
     if(done)return;
     if(st.req)return 'ABORT';
     if(st.elseMod&&ctx.t){
@@ -3255,10 +3280,9 @@ async function FXRUN(st,ctx){
       const t=b[i].teece;
       if(!t||!canTarget(b,i,p))continue;
       if(st.nonBoss&&isBossCard(t.cardId))continue;
-      if(st.nearSpiderling&&!ADJ[i].some(j=>{const o=b[j].teece;return isSpiderling(o)&&sameTeam(o.owner,p);}))continue;
       cands.push(i);
     }
-    if(!cands.length)return none(st.nearSpiderling?'No Teece is standing next to one of your Spiderlings.':'Nothing can be destroyed.');
+    if(!cands.length)return none('Nothing can be destroyed.');
     const c=await pickCell(cands,'Choose a Teece to destroy.',(bb,i)=>{bb[i].teece=null;},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -5701,26 +5725,40 @@ function aiPlanFor(id){
       const t=b[i].teece;
       if(!t||sameTeam(t.owner,p)||!canTarget(b,i,p))continue;
       if(st.nonBoss&&isBossCard(t.cardId))continue;
-      if(st.nearSpiderling&&!ADJ[i].some(j=>{const o=b[j].teece;return isSpiderling(o)&&sameTeam(o.owner,p);}))continue;
       cands.push(i);
     }
     if(!cands.length)return null;
     return {thr:2.5,cands,mut:(bb,i)=>{bb[i].teece=null;}};
   }
-  /* Spider Cannibalism. The sign is a modality, so it is chosen at random --
-     but the target is picked to suit whichever sign came up, so both halves
-     land somewhere useful. This weighs the good half. */
+  /* Two cards open their cast by feeding the swarm, and they are worth very
+     different things. Both plans eat the price in the simulation so the AI is
+     weighing the trade rather than the payoff alone. */
   if(st.fx==='sacSpiderling'){
-    let fed=false;
-    for(let i=0;i<BN;i++)if(b[i].teece&&sameTeam(b[i].teece.owner,p)&&canEatSpiderling(b,i))fed=true;
-    if(!fed)return null;
+    const fed=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&sameTeam(b[i].teece.owner,p)&&canEatSpiderling(b,i))fed.push(i);
+    const price=st.need||1;
+    if(fed.length<price)return null;
+    const eat=(bb,n)=>{let k=0;for(const j of fed){if(k>=n)break;if(bb[j].teece){bb[j].teece=null;k++;}}};
+    /* Eaten Alive: three Spiderlings for any one Teece off the board. */
+    if((d.cast||[]).some(x=>x.fx==='destroy')){
+      const cands=[];
+      for(let i=0;i<BN;i++){
+        const t=b[i].teece;
+        if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p))cands.push(i);
+      }
+      if(!cands.length)return null;
+      return {thr:1.0,cands,mut:(bb,i)=>{eat(bb,price);bb[i].teece=null;}};
+    }
+    /* Spider Cannibalism. The sign is a modality, so it is chosen at random --
+       but the target is picked to suit whichever sign came up, so both halves
+       land somewhere useful. This weighs the good half. */
     const cands=[];
     for(let i=0;i<BN;i++)if(b[i].teece&&isWebbed(b,i)&&canTarget(b,i,p))cands.push(i);
     if(!cands.length)return null;
     return {thr:1.2,cands,mut:(bb,i)=>{
       const o=bb[i].teece;if(!o)return;
       applyModT(o,sameTeam(o.owner,p)?5:-5,'temp');
-      for(let j=0;j<BN;j++)if(bb[j].teece&&sameTeam(bb[j].teece.owner,p)&&canEatSpiderling(bb,j)){bb[j].teece=null;break;}
+      eat(bb,price);
     }};
   }
   return null;
@@ -6168,14 +6206,17 @@ function renderBoard(){
       if(t.equips.length)tp.innerHTML+='<div class="eq">E'+t.equips.length+'</div>';
       const hasActs=t.owner===G.turn&&aul.some(e=>actAvailable(t,e));
       if(hasActs)tp.innerHTML+='<div class="actdot"></div>';
-      const kwd=kws.slice(0,2).map(k=>k[0].toUpperCase()).join('');
-      if(kwd)tp.innerHTML+='<div class="kwl">'+kwd+'</div>';
-      if(kws.indexOf('ranged')>=0)tp.innerHTML+='<div class="rgd" title="Ranged">\u{1F3F9}</div>';
+      /* One badge row under the name: a bow for Ranged, a shield and its number
+         for Defence. The keyword initials that used to sit in the corner were
+         unpositioned and landed on top of the card. */
+      const badges=[];
+      if(kws.indexOf('ranged')>=0)badges.push('<span title="Ranged">\u{1F3F9}</span>');
       const dv=defOf(G.board,i);
+      if(dv>0)badges.push('<span class="dfn" title="Defence '+dv+'">\u{1F6E1}\uFE0F'+dv+'</span>');
+      if(badges.length)tp.innerHTML+='<div class="rgd">'+badges.join('')+'</div>';
       const tmr=DEF(t).timer;
       const left=tmr&&!t.transformed?Math.max(0,tmr.turns-(t.age||0)):0;
       if(left>0)tp.innerHTML+='<div class="shield">'+left+' to go</div>';
-      else if(dv>0)tp.innerHTML+='<div class="shield">&#9679; '+dv+'</div>';
       else if(t.isToken)tp.innerHTML+='<div class="tok">token</div>';
       tp.addEventListener('click',e=>{
         if(!HAS_DOM||G.over)return;
@@ -6249,7 +6290,7 @@ function panelHtml(i){
   if(c.seed)h+='<div class="dt">'+pname(c.seed.owner)+' has a seed planted here, '+c.seed.turns+' turn'+(c.seed.turns===1?'':'s')+
     ' from growing. If the panel is empty then, a Teece is raised from the graveyard with '+sgn(c.seed.n||1)+'.</div>';
   if(c.enchant)h+='<div class="dt" style="color:var(--gold)">'+enchantText(c.enchant)+'</div>';
-  if(isWebbed(G.board,i))h+='<div class="dt" style="color:var(--gold)">This panel is Web. It belongs to neither side.</div>';
+  if(isWebbed(G.board,i))h+='<div class="dt" style="color:var(--gold)">Web. Spiders and Spiderlings standing here can Skitter one space once per your turn, and a Spiderling has +'+WEB_DEF+' Defence.</div>';
   return h;
 }
 function showDetail(i){
@@ -6576,7 +6617,8 @@ function statusesFor(p){
          None of it is printed anywhere else on the board. --- */
   let silk=0;for(let i=0;i<BN;i++)if(isWebbed(b,i))silk++;
   if(silk)push('web','good','Web: '+silk+' panel'+(silk===1?'':'s'),
-    'The Web covers '+silk+' panel'+(silk===1?'':'s')+' and belongs to neither side \u2014 both decks stand on it. '+
+    'The Web covers '+silk+' panel'+(silk===1?'':'s')+'. Every Spider Teece and Spiderling standing on it has Skitter \u2014 '+
+    'once per your turn, move one space \u2014 and a Spiderling has +'+WEB_DEF+' Defence besides. '+
     'A battleground laid on a panel buries the silk under it unless the battleground spins its own.');
   for(let i=0;i<BN;i++){
     const wt=b[i].teece;
@@ -6672,26 +6714,22 @@ function domTitle(rows,st){
 function renderDom(){
   const el=document.getElementById('domBar');
   if(!el||!G)return;
-  let me=0;
-  for(let q=0;q<PLAYERS();q++)if(!isAIP(q)){me=q;break;}
-  const mine=teamOf(me);
   const rows=teamsInPlay().map(tm=>({tm,n:teamReal(tm)}));
-  const total=rows.reduce((a,r)=>a+r.n,0);
   const st=leadState();
-  const gap=st?st.gap:0;
-  const leader=(st&&gap>0)?st.lead.tm:null;
-  const seatOf=tm=>seatsOnTeam(tm)[0];
-  const cls=(st&&st.blocked&&gap>=WIN_LEAD)?' held':(gap>=WIN_LEAD-1?' near':'');
-  const tint=(cls||leader==null)?'':' style="color:var(--p'+seatOf(leader)+')"';
+  const raw=st?st.gap:0;
+  const gap=Math.min(raw,WIN_LEAD);
+  const leader=raw>0?st.lead.tm:null;
+  const seat=leader!=null?seatsOnTeam(leader)[0]:null;
+  const cls=(st&&st.blocked&&raw>=WIN_LEAD)?' held':(gap>=WIN_LEAD-1?' near':'');
+  const tint=(cls||seat==null)?'':' style="color:var(--p'+seat+')"';
   let h='<div class="domlead'+cls+'"'+tint+'>'+gap+'/'+WIN_LEAD+'</div>'+
     '<div class="dommeter" title="'+escHtml(domTitle(rows,st))+'">';
-  if(!total)h+='<div class="domband empty" style="flex-grow:1"></div>';
-  /* everyone else stacks above; your own share fills from the bottom up */
-  else for(const r of rows.filter(x=>x.tm!==mine).concat(rows.filter(x=>x.tm===mine))){
-    if(!r.n)continue;
-    h+='<div class="domband t'+seatOf(r.tm)+'" style="flex-grow:'+r.n+'">'+
-      (r.n/total>=0.18?r.n:'')+'</div>';
-  }
+  /* One segment per Teece of the lead. Level is a blank gauge; each Teece a
+     side goes ahead lights one more in that side's colour, and a full gauge is
+     the win. The bar shows the race, not the pile: holding the whole board
+     while level lights nothing. Laid out bottom-up. */
+  for(let k=1;k<=WIN_LEAD;k++)
+    h+='<div class="domseg'+(k<=gap?' on t'+seat:'')+'"></div>';
   el.innerHTML=h+'</div>';
 }
 function renderLog(){
