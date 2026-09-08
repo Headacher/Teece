@@ -538,7 +538,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:20,date:'2026-09-08'};
+const VERSION={build:21,date:'2026-09-08'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1775,9 +1775,10 @@ const CARDS = {
     text:'When played: sacrifice a Spiderling, or this Teece gets -4.',
     onPlay:[{fx:'sacSpiderling',elseMod:{n:-4,dur:'perm'}}]},
  567:{name:'Web Crawler',type:'teece',sides:[5,4,5,4],spider:true,
-    text:'While it stands on the Web, once per your turn: sacrifice a Spiderling; an enemy on the Web gets -3.',
+    text:'When played: summon a 4/4/4/4 Spiderling that cannot be destroyed until the end of the turn. While it stands on the Web, once per your turn: sacrifice a Spiderling; an enemy on the Web gets -5.',
+    onPlay:[{fx:'spiderling',count:1,shield:true}],
     act:[{name:'Drag it under',once:'turn',needWeb:true,
-      steps:[{fx:'sacSpiderling',req:true},{fx:'mod',who:'enemy',where:'web',n:-3,dur:'perm'}]}]},
+      steps:[{fx:'sacSpiderling',req:true},{fx:'mod',who:'enemy',where:'web',n:-5,dur:'perm'}]}]},
  568:{name:'Spider Nurser',type:'teece',sides:[6,6,6,6],spider:true,
     text:'When played: select a Teece on the Web and move it one space. If it was a Spiderling, it gets +2.',
     onPlay:[{fx:'moveTarget',web:true,thenSpiderMod:{n:2,dur:'perm'}}]},
@@ -2919,11 +2920,20 @@ async function FXRUN(st,ctx){
     const own=ctx.deadOwner!=null?ctx.deadOwner:p;
     const onWeb=st.where==='web'||st.where==='webAll';
     const open=j=>openAt(b,j)&&(!onWeb||isWebbed(b,j));
+    /* shield:true holds the new Spiderling out of reach for the rest of this
+       turn -- immortalUntil is read at the end of every turn, so setting it to
+       the turn in play lapses tonight rather than tomorrow. It guards against
+       being killed, not against being spent: its own side can still feed it to
+       an ability, which is the point of the ones that arrive with a Crawler. */
+    const guard=tk=>{
+      if(st.shield&&tk){tk.immortalOwner=tk.owner;tk.immortalUntil=G.turnNum;}
+      return tk;
+    };
     if(st.where==='webAll'||st.where==='adjAll'){
       const base=st.where==='adjAll'?ADJ[ctx.deadCell!=null?ctx.deadCell:ctx.cell]:ALL();
       const pool=base.filter(open);
       if(!pool.length)return st.req?'ABORT':none('No room for a Spiderling.');
-      for(const j of pool)summonToken(b,j,'TSP',own,true);
+      for(const j of pool)guard(summonToken(b,j,'TSP',own,true));
       log(pool.length===1?'A Spiderling appears at the '+CN[pool[0]]+'.'
         :pool.length+' Spiderlings boil out across the field.');
       await anim(pool,'placed',140);
@@ -2936,8 +2946,8 @@ async function FXRUN(st,ctx){
         (bb,i)=>{putTeece(bb,i,makeTeece('TSP',p),false);},!!st.may);
       if(c==='CANCEL')return 'ABORT';
       if(c==null)return k===0&&st.req?'ABORT':undefined;
-      summonToken(b,c,'TSP',p,true);
-      log('A Spiderling appears at the '+CN[c]+'.');
+      guard(summonToken(b,c,'TSP',p,true));
+      log('A Spiderling appears at the '+CN[c]+(st.shield?', out of reach until the end of the turn.':'.'));
       ctx.first=false;
       render();
     }
@@ -6660,8 +6670,11 @@ function statusesFor(p){
     const t=b[i].teece;
     if(!t||t.immortalOwner==null)continue;
     const ally=sameTeam(t.owner,p);
+    const until=t.immortalUntil
+      ? (t.immortalUntil<=G.turnNum?'the end of this turn':'the end of turn '+t.immortalUntil)
+      : 'the start of '+pname(t.immortalOwner)+"'s next turn";
     push('immortal'+t.uid,ally?'good':'bad',(ally?'Safe: ':'Untouchable: ')+nm(t),
-      nm(t)+' cannot be destroyed until the start of '+pname(t.immortalOwner)+"'s next turn.");
+      nm(t)+' cannot be destroyed until '+until+'.');
   }
 
   /* --- the Web, and the two cards that change what standing on it means.
