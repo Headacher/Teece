@@ -166,6 +166,26 @@ button,.teece,.cell,.card{touch-action:manipulation}
 .btn.primary:hover{background:#4fb69e}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 
+/* ---- domination meter. The bar beside the board is the field itself: each
+       side's share of the non-Token Teece standing on it, yours filling from
+       the bottom. The chip above it counts the leader toward the four-Teece
+       lead that ends the game. ---- */
+.boardrow{display:flex;align-items:stretch;justify-content:center;gap:12px}
+.dombar{width:26px;display:flex;flex-direction:column;gap:5px}
+.dommeter{flex:1;display:flex;flex-direction:column;overflow:hidden;
+  border:1px solid var(--line);border-radius:7px;background:#191410}
+.domband{display:flex;align-items:center;justify-content:center;min-height:0;
+  font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:#12100c;
+  transition:flex-grow .25s ease}
+.domband.t0{background:var(--p0)} .domband.t1{background:var(--p1);color:#f6e8e4}
+.domband.t2{background:var(--p2);color:#150e21}
+.domband.empty{background:repeating-linear-gradient(-45deg,#221a10 0 5px,#191410 5px 10px)}
+.domlead{text-align:center;font-size:10px;font-weight:700;letter-spacing:.04em;
+  font-variant-numeric:tabular-nums;color:var(--muted)}
+.domlead.near{color:var(--gold);animation:domNear 1.4s ease-in-out infinite}
+@keyframes domNear{0%,100%{opacity:1}50%{opacity:.45}}
+@media(prefers-reduced-motion:reduce){.domlead.near{animation:none}}
+
 aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
 .panel h2{font-family:var(--disp);font-weight:400;font-size:16px;margin:0 0 6px}
@@ -173,7 +193,12 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
 .d0{background:var(--p0)} .d1{background:var(--p1)} .d2{background:var(--p2)}
 .teamtag{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.counts{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12px;color:var(--muted);margin-top:6px}
+.counts{display:grid;grid-template-columns:1fr auto auto auto;gap:3px 12px;
+  align-items:baseline;font-size:12px;color:var(--muted);margin-top:8px}
+.counts .ch{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#6d5f4c;text-align:right}
+.counts .cn{color:var(--cream2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.counts .cv{text-align:right;font-variant-numeric:tabular-nums;color:var(--cream2)}
+.counts .cv.low{color:var(--down);font-weight:700}
 #detail .dn{font-family:var(--disp);font-size:20px}
 #detail .dt{font-size:12px;color:var(--muted);line-height:1.45;margin-top:4px}
 #detail .dstats{font-size:12px;margin-top:6px;font-variant-numeric:tabular-nums}
@@ -192,6 +217,27 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   text-transform:uppercase;color:var(--muted);vertical-align:middle;margin-left:10px}
 .overlay .row{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
 .hidden{display:none!important}
+
+/* ---- start menu. A masthead, the rules in three lines, then one card per
+       mode: its name, a single line saying what it is, and its buttons. ---- */
+#startOverlay .box{max-width:700px;width:100%}
+#startOverlay h2{margin:0}
+#startOverlay .sub{font-size:12px;letter-spacing:.05em;color:var(--muted);margin:2px 0 0;
+  padding-bottom:13px;border-bottom:1px solid var(--line)}
+.rules{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;align-items:start;
+  background:rgba(201,162,39,.05);border:1px solid var(--line);border-radius:10px;
+  padding:13px 15px;margin:16px 0 18px;font-size:12.5px;line-height:1.5;color:var(--muted)}
+.rules .rk{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);
+  white-space:nowrap;padding-top:3px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mode{display:flex;flex-direction:column;background:var(--panel2);
+  border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+.mode.feature{grid-column:1/-1;border-color:rgba(201,162,39,.4);
+  background:linear-gradient(180deg,rgba(201,162,39,.10),var(--panel2))}
+.overlay .mode h3{font-size:21px;margin:0}
+.overlay .mode p{font-size:12.5px;line-height:1.5;margin:5px 0 0}
+.overlay .mode .row{margin-top:auto;padding-top:12px}
+@media(max-width:560px){.modes{grid-template-columns:1fr}}
 
 #draftOverlay .box{max-width:760px;width:100%}
 #draftCards{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:14px 0}
@@ -243,7 +289,10 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   <main>
     <div id="oppHands"></div>
     <div id="promptBar"><span class="msg">&nbsp;</span></div>
-    <div id="board"></div>
+    <div class="boardrow">
+      <div id="board"></div>
+      <div class="dombar" id="domBar"></div>
+    </div>
     <div id="actionBar" class="hidden"></div>
     <div id="statusBar" class="hidden"></div>
     <div class="handrow" id="myHand"></div>
@@ -265,50 +314,63 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 <div class="overlay" id="startOverlay">
   <div class="box">
     <h2>Teece <span class="ver" id="verTag"></span></h2>
-    <p>Adjacent enemy Teece compare touching edge numbers; the smaller one dies, ties do nothing, and every stat
-       change anywhere re-checks the whole board. One Teece per turn; equips, magic and battlegrounds are unlimited.
-       Win by wiping out every enemy Teece, ending a turn with four more Teece fielded (Tokens never count),
-       or having the bigger field when a player must draw from an empty deck.
-       Any Teece whose attributes drop below zero dies on the spot.</p>
-    <h3>Classic</h3>
-    <p>Both sides play the identical fixed twenty-card deck.</p>
-    <div class="row">
-      <button class="btn primary" id="cAI">vs Computer</button>
-      <button class="btn" id="cHot">Hotseat</button>
+    <p class="sub" id="startSub"></p>
+
+    <div class="rules">
+      <span class="rk">Combat</span>
+      <span>Adjacent enemies compare the edge numbers that touch; the smaller one dies and ties do nothing.
+            Any Teece whose attributes fall below zero dies on the spot, and every change anywhere re-checks the whole board.</span>
+      <span class="rk">Each turn</span>
+      <span>One Teece. Equips, magic and battlegrounds are unlimited.</span>
+      <span class="rk">Winning</span>
+      <span>Wipe out every enemy Teece, end a turn four Teece ahead (Tokens never count),
+            or hold the bigger field when a player must draw from an empty deck.</span>
     </div>
-    <h3>Teece 100</h3>
-    <p>Draft your own twenty-card deck: twenty picks, three cards offered per pick, from every card in the game —
-       the hundred draft designs plus all seventy-two deck cards. Ranged, Flying, Teleport, Defence, clocks, Mines,
-       activated abilities (select your Teece on the board to use them), mind control and more.</p>
-    <div class="row">
-      <button class="btn primary" id="tAI">vs Computer</button>
-      <button class="btn" id="tHot">Hotseat</button>
-    </div>
-    <h3>Decks</h3>
-    <p>Pick a prebuilt deck, choose which deck the computer brings, and set how hard it hits: every enemy Teece
-       can carry anywhere from &minus;3 to +3 on all four sides. Each deck has its own machinery: Berserker is twelve
-       overpowered cards racing the clock, Rock soaks hits with Defence, Ogre shoves everything around the board and the damage it deals sticks.
-       Spider brings the Web with it &mdash; every panel but the corners, on the field from the first turn, belonging to neither side and read by
-       both decks &mdash; then pours 4/4/4/4 Spiderlings onto it and eats them to pay for everything else.</p>
-    <div class="row">
-      <button class="btn primary" id="dAI">vs Computer</button>
-      <button class="btn" id="dHot">Hotseat</button>
-    </div>
-    <h3>Three players</h3>
-    <p>A four by four board and three seats. Play a free-for-all where every other seat is an enemy,
-       or take a side in two versus one. Allies never fight each other, they win and lose together, and
-       a seat is skipped once its whole side is wiped out. Four Teece ahead of the <em>next best</em> side
-       still wins it.</p>
-    <div class="row">
-      <button class="btn primary" id="p3AI">vs Computers</button>
-      <button class="btn" id="p3Hot">Hotseat</button>
-    </div>
-    <h3>Roguelike</h3>
-    <p>Draft five cards and beat the computer. Clear a level and you draft five more, but the enemy's Teece
-       grow: +1 on every side at level two, +2 at level three, +3 at level four. Running out of cards never ends
-       a level; only wiping out the enemy's Teece, or ending a turn four Teece ahead, does.</p>
-    <div class="row">
-      <button class="btn primary" id="rAI">Start run</button>
+
+    <div class="modes">
+      <div class="mode feature">
+        <h3>Roguelike</h3>
+        <p>Draft random cards from all decks and try to beat an increasingly powerful computer.</p>
+        <div class="row">
+          <button class="btn primary" id="rAI">Start run</button>
+        </div>
+      </div>
+
+      <div class="mode">
+        <h3>Decks</h3>
+        <p>Pick prebuilt decks to battle.</p>
+        <div class="row">
+          <button class="btn primary" id="dAI">vs Computer</button>
+          <button class="btn" id="dHot">Hotseat</button>
+        </div>
+      </div>
+
+      <div class="mode">
+        <h3>Classic</h3>
+        <p>Both sides play the same fixed twenty-card deck.</p>
+        <div class="row">
+          <button class="btn primary" id="cAI">vs Computer</button>
+          <button class="btn" id="cHot">Hotseat</button>
+        </div>
+      </div>
+
+      <div class="mode">
+        <h3>Teece 100</h3>
+        <p>Draft a twenty-card deck of your own, three cards offered per pick, from every card in the game.</p>
+        <div class="row">
+          <button class="btn primary" id="tAI">vs Computer</button>
+          <button class="btn" id="tHot">Hotseat</button>
+        </div>
+      </div>
+
+      <div class="mode">
+        <h3>Three players</h3>
+        <p>Play 1v1v1 or 2v1.</p>
+        <div class="row">
+          <button class="btn primary" id="p3AI">vs Computers</button>
+          <button class="btn" id="p3Hot">Hotseat</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -338,7 +400,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed: raise
    `build` by one and set `date` to the day of the push. See CLAUDE.md. */
-const VERSION={build:3,date:'2026-09-08'};
+const VERSION={build:4,date:'2026-09-08'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1214,6 +1276,15 @@ const sameRow=(a,b)=>row(a)===row(b), sameCol=(a,b)=>col(a)===col(b);
 /* The four corners are the only panels the Web never reaches: on 3x3 that
    leaves five silk panels, on 4x4 twelve. */
 const isCornerCell=i=>{const r=row(i),c=col(i);return (r===0||r===BW-1)&&(c===0||c===BW-1);};
+/* The panel that side k touches (0 top, 1 right, 2 bottom, 3 left), or -1 when
+   that side is pressed against the rim of the board and can never be fought. */
+function sideNbr(i,k){
+  const r=row(i),c=col(i);
+  if(k===0)return r>0?i-BW:-1;
+  if(k===1)return c<BW-1?i+1:-1;
+  if(k===2)return r<BW-1?i+BW:-1;
+  return c>0?i-1:-1;
+}
 function bandName(k,n){
   if(n<=1)return '';
   if(k===0)return 'top';
@@ -3819,13 +3890,27 @@ function simCombat(b){
     for(const d of deaths)simDeath(b,d);
   }
 }
+/* Which side faces which panel is the whole of basic positioning. A side
+   pressed against the rim of the board is never fought over, so it counts for
+   nothing either way: an 8/8/0/0 wants its two zeroes against the wall and its
+   eights facing the field. Of the sides that do face the field, the total is
+   the pressure this Teece puts on its neighbours, and anything under a Grunt's
+   seven is a way in for theirs. A body on a panel is never worth less than
+   nothing, however soft it is -- it still holds the panel. */
 function boardValue(b,p){
   let v=0;
   for(let i=0;i<BN;i++){
     const t=b[i].teece;if(!t)continue;
     const s=effSides(b,i);
-    let w=(t.isToken?2:8)+(s[0]+s[1]+s[2]+s[3])*0.15+t.equips.length*0.6;
+    let sum=0,risk=0;
+    for(let k=0;k<4;k++){
+      if(sideNbr(i,k)<0)continue;
+      sum+=s[k];
+      if(s[k]<6)risk+=(6-s[k])*0.22;
+    }
+    let w=(t.isToken?2:8)+sum*0.13-risk+t.equips.length*0.6;
     if(kwOf(b,i).indexOf('ranged')>=0)w+=1.2;
+    if(w<1)w=1;
     v+=sameTeam(t.owner,p)?w:-w;
   }
   return v;
@@ -4838,16 +4923,51 @@ function renderStatus(){
 }
 function renderCounts(){
   const c=document.getElementById('counts');
-  c.innerHTML='';
   const teamed=teamsInPlay().some(tm=>seatsOnTeam(tm).length>1);
+  /* what the meter cannot say: cards, not panels */
+  let h='<span></span><span class="ch">hand</span><span class="ch">deck</span><span class="ch">grave</span>';
   for(let p=0;p<PLAYERS();p++){
-    const lc=realCount(p),field=livingCount(p),hand=G.players[p].hand.length,deck=G.players[p].deck.length;
+    const pl=G.players[p];
     const tag=teamed?' <span class="teamtag">side '+(teamOf(p)+1)+'</span>':'';
     const out=seatAlive(p)?'':' <span class="teamtag">out</span>';
-    c.innerHTML+='<div><span class="dot d'+p+'"></span>'+pname(p)+tag+out+'</div>'+
-      '<div>'+field+' fielded ('+lc+' count)</div>'+
-      '<div>'+hand+' hand · '+deck+' deck'+(deck<=2?' (!)':'')+' · '+G.players[p].grave.length+' grave</div>';
+    h+='<span class="cn"><span class="dot d'+p+'"></span>'+pname(p)+tag+out+'</span>'+
+      '<span class="cv">'+pl.hand.length+'</span>'+
+      '<span class="cv'+(pl.deck.length<=2&&!pl.noDeckOut&&G.mode!=='rogue'?' low':'')+'">'+pl.deck.length+'</span>'+
+      '<span class="cv">'+pl.grave.length+'</span>';
   }
+  c.innerHTML=h;
+}
+/* The meter reads the same numbers checkDomination does, so what it shows and
+   what ends the game can never drift apart. */
+function domTitle(rows,lead,leader){
+  const parts=rows.map(r=>teamName(r.tm)+' '+r.n).join(', ');
+  const rule=' Ending a turn four Teece ahead wins it, and Tokens never count.';
+  if(leader==null)return 'Level on the field — '+parts+'.'+rule;
+  return teamName(leader)+' leads by '+lead+' — '+parts+'.'+rule;
+}
+function renderDom(){
+  const el=document.getElementById('domBar');
+  if(!el||!G)return;
+  let me=0;
+  for(let q=0;q<PLAYERS();q++)if(!isAIP(q)){me=q;break;}
+  const mine=teamOf(me);
+  const rows=teamsInPlay().map(tm=>({tm,n:teamReal(tm)}));
+  const total=rows.reduce((a,r)=>a+r.n,0);
+  const ranked=rows.slice().sort((a,b)=>b.n-a.n);
+  const lead=ranked.length>1?ranked[0].n-ranked[1].n:(ranked.length?ranked[0].n:0);
+  const leader=lead>0?ranked[0].tm:null;
+  const seatOf=tm=>seatsOnTeam(tm)[0];
+  const tint=(lead>=3||leader==null)?'':' style="color:var(--p'+seatOf(leader)+')"';
+  let h='<div class="domlead'+(lead>=3?' near':'')+'"'+tint+'>'+lead+'/4</div>'+
+    '<div class="dommeter" title="'+escHtml(domTitle(rows,lead,leader))+'">';
+  if(!total)h+='<div class="domband empty" style="flex-grow:1"></div>';
+  /* everyone else stacks above; your own share fills from the bottom up */
+  else for(const r of rows.filter(x=>x.tm!==mine).concat(rows.filter(x=>x.tm===mine))){
+    if(!r.n)continue;
+    h+='<div class="domband t'+seatOf(r.tm)+'" style="flex-grow:'+r.n+'">'+
+      (r.n/total>=0.18?r.n:'')+'</div>';
+  }
+  el.innerHTML=h+'</div>';
 }
 function renderLog(){
   const l=document.getElementById('log');
@@ -4910,7 +5030,7 @@ function render(){
   syncHandSlots();
   renderBoard();
   for(let p=0;p<PLAYERS();p++)renderHand(p);
-  renderCounts();renderLog();renderPrompt();renderActionBar();renderStatus();
+  renderCounts();renderDom();renderLog();renderPrompt();renderActionBar();renderStatus();
   const bd=document.getElementById('board');
   bd.style.setProperty('--bw',BW);
   bd.style.setProperty('--cs',(BW>=4?'86px':'110px'));
@@ -5047,6 +5167,8 @@ function restart(){
   document.getElementById('startOverlay').classList.remove('hidden');
   G=null;G_DRAFT=null;R=null;
   document.getElementById('board').innerHTML='';
+  const db=document.getElementById('domBar');
+  if(db)db.innerHTML='';
   document.getElementById('myHand').innerHTML='';
   const oh=document.getElementById('oppHands');
   if(oh)oh.innerHTML='';
@@ -5061,6 +5183,8 @@ if(HAS_DOM){
   });
   const vt=document.getElementById('verTag');
   if(vt)vt.textContent=versionLabel();
+  const sub=document.getElementById('startSub');
+  if(sub)sub.textContent=Object.keys(DECKS).length+' prebuilt decks, five ways to play.';
   document.getElementById('cAI').onclick=()=>start('classic',true);
   document.getElementById('cHot').onclick=()=>start('classic',false);
   document.getElementById('tAI').onclick=()=>start('t100',true);
