@@ -78,11 +78,14 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card .plated{position:absolute;top:2px;left:4px;font-size:8px;letter-spacing:.05em;z-index:2;
   color:#5d4a22;background:rgba(201,168,90,.4);border-radius:3px;padding:0 3px}
 
+/* Tracks cap at --cs but may shrink, and the cells square themselves off
+   whatever width that lands on, so the board gives way to the meter beside it
+   on a narrow screen instead of running off the edge. */
 #board{display:grid;grid-template-columns:repeat(var(--bw,3),minmax(0,var(--cs,110px)));
-  grid-auto-rows:var(--cs,110px);gap:8px}
+  grid-auto-rows:auto;gap:8px;min-width:0}
 @media(max-width:420px){#board{--cs:var(--cs-sm,96px)}}
 #oppHands{width:100%;display:flex;flex-direction:column;gap:8px}
-.cell{position:relative;border:1px solid var(--line);border-radius:8px;background:#191410;overflow:hidden;cursor:default}
+.cell{position:relative;aspect-ratio:1;border:1px solid var(--line);border-radius:8px;background:#191410;overflow:hidden;cursor:default}
 .cell .coord{position:absolute;top:2px;left:4px;font-size:9px;color:#584a38;z-index:0}
 .cell.target{box-shadow:inset 0 0 0 2px var(--gold);cursor:pointer}
 .cell.target:hover{background:#231b12}
@@ -170,7 +173,11 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
 .d0{background:var(--p0)} .d1{background:var(--p1)} .d2{background:var(--p2)}
 .teamtag{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.counts{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12px;color:var(--muted);margin-top:6px}
+/* one line each, and no board counts: the meter beside the board carries those */
+.counts{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted);margin-top:6px}
+.crow{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.crow .cwho{color:var(--cream);white-space:nowrap}
+.crow .cnum{font-variant-numeric:tabular-nums;text-align:right}
 #detail .dn{font-family:var(--disp);font-size:20px}
 #detail .dt{font-size:12px;color:var(--muted);line-height:1.45;margin-top:4px}
 #detail .dstats{font-size:12px;margin-top:6px;font-variant-numeric:tabular-nums}
@@ -189,6 +196,36 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   text-transform:uppercase;color:var(--muted);vertical-align:middle;margin-left:10px}
 .overlay .row{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
 .hidden{display:none!important}
+
+/* ---- board domination meter ----
+   The game is won by ending a turn WIN_LEAD real Teece ahead, so the meter is
+   that lead and nothing else: one segment per Teece, your colour rising from
+   your end of the table towards the far end. Fill it and you have won; lose it
+   all and they have. Level standing sits on the bright middle line. Tokens
+   never count here, exactly as they never count in the win check. */
+#boardWrap{display:flex;align-items:stretch;gap:10px;max-width:100%}
+/* balances the meter so the board stays centred under the hands; on a narrow
+   screen the space is worth more than the symmetry */
+#boardWrap::after{content:'';flex:0 0 30px}
+@media(max-width:440px){#boardWrap::after{display:none}}
+#domBar{flex:0 0 auto;width:30px;display:flex;flex-direction:column;
+  border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#191410;
+  font-variant-numeric:tabular-nums;user-select:none}
+#domBar .dnum{flex:0 0 auto;text-align:center;font-size:11px;font-weight:700;
+  line-height:1.3;padding:3px 0;background:#0f0c09}
+#domBar .dnum.top{color:var(--theirs);border-bottom:1px solid var(--line)}
+#domBar .dnum.bot{color:var(--mine);border-top:1px solid var(--line)}
+#domBar .dtrack{position:relative;flex:1 1 auto;background:var(--theirs)}
+#domBar .dfill{position:absolute;left:0;right:0;bottom:0;height:50%;background:var(--mine);
+  transition:height .45s cubic-bezier(.4,0,.2,1)}
+#domBar .dgrid{position:absolute;inset:0;display:flex;flex-direction:column;pointer-events:none}
+#domBar .dgrid i{flex:1 1 0;border-top:1px solid rgba(0,0,0,.42)}
+#domBar .dgrid i:first-child{border-top:0}
+#domBar .dgrid i.mid{border-top:2px solid rgba(239,230,208,.7)}
+/* one Teece from the end, either way. Sits outside the bar: the track paints
+   its own opaque colour, so an inset ring would be buried under it. */
+#domBar.near{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,162,39,.55)}
+@media(max-width:420px){#boardWrap{gap:6px}#domBar{width:22px}#domBar .dnum{font-size:10px;padding:2px 0}}
 
 #draftOverlay .box{max-width:760px;width:100%}
 #draftCards{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:14px 0}
@@ -240,7 +277,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   <main>
     <div id="oppHands"></div>
     <div id="promptBar"><span class="msg">&nbsp;</span></div>
-    <div id="board"></div>
+    <div id="boardWrap"><div id="domBar" class="hidden"></div><div id="board"></div></div>
     <div id="actionBar" class="hidden"></div>
     <div id="statusBar" class="hidden"></div>
     <div class="handrow" id="myHand"></div>
@@ -333,7 +370,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed: raise
    `build` by one and set `date` to the day of the push. See CLAUDE.md. */
-const VERSION={build:4,date:'2026-09-07'};
+const VERSION={build:5,date:'2026-09-08'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1045,6 +1082,9 @@ const ID_TO_DECK_SYM={};
 for(const key of Object.keys(DECKS))for(const id of DECKS[key].cards)ID_TO_DECK_SYM[id]=DECK_SYM[key];
 const DEF=t=>CARDS[t.cardId];
 const isBossCard=id=>(CARDS[id].sac||0)>=2;
+/* How far ahead in real Teece ends the game. checkDomination decides the win on
+   it and the meter beside the board is drawn to it, so they cannot drift. */
+const WIN_LEAD=4;
 const FLY_ACT={name:'Fly',once:'turn',steps:[{fx:'move',range:'any'}]};
 const TELE_ACT={name:'Teleport',once:'turn',steps:[{fx:'move',range:'tele'}]};
 
@@ -2994,7 +3034,6 @@ async function resolveCombat(){
   if(!stale(ep))checkElimination();
 }
 /* ============ win checks ============ */
-function livingCount(p){let n=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p)n++;}return n;}
 function realCount(p){let n=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p&&!t.isToken)n++;}return n;}
 function totalTeece(p){
   let n=realCount(p);
@@ -3033,7 +3072,7 @@ function checkDomination(){
   const counts=tms.map(tm=>({tm,n:teamReal(tm)}));
   counts.sort((x,y)=>y.n-x.n);
   const lead=counts[0],second=counts[1];
-  if(lead.n-second.n>=4){
+  if(lead.n-second.n>=WIN_LEAD){
     endGame(lead.tm,teamName(lead.tm)+' ends the turn four Teece ahead of the field ('+
       scoreLine()+'). Tokens do not count.');
   }
@@ -4571,13 +4610,64 @@ function renderCounts(){
   c.innerHTML='';
   const teamed=teamsInPlay().some(tm=>seatsOnTeam(tm).length>1);
   for(let p=0;p<PLAYERS();p++){
-    const lc=realCount(p),field=livingCount(p),hand=G.players[p].hand.length,deck=G.players[p].deck.length;
+    const pl=G.players[p],deck=pl.deck.length;
     const tag=teamed?' <span class="teamtag">side '+(teamOf(p)+1)+'</span>':'';
     const out=seatAlive(p)?'':' <span class="teamtag">out</span>';
-    c.innerHTML+='<div><span class="dot d'+p+'"></span>'+pname(p)+tag+out+'</div>'+
-      '<div>'+field+' fielded ('+lc+' count)</div>'+
-      '<div>'+hand+' hand · '+deck+' deck'+(deck<=2?' (!)':'')+' · '+G.players[p].grave.length+' grave</div>';
+    /* what is on the board is the meter's job; this line is only what is not */
+    c.innerHTML+='<div class="crow"><span class="cwho"><span class="dot d'+p+'"></span>'+pname(p)+tag+out+'</span>'+
+      '<span class="cnum">'+pl.hand.length+' hand · '+deck+' deck'+(deck<=2?' (!)':'')+
+      ' · '+pl.grave.length+' grave</span></div>';
   }
+}
+/* ---- the domination meter beside the board ---- */
+const SEAT_TINT=['var(--p0)','var(--p1)','var(--p2)'];
+function teamTint(tm){const s=seatsOnTeam(tm);return SEAT_TINT[(s.length?s[0]:0)%SEAT_TINT.length];}
+/* Seat 0 is the near side of the table -- its hand sits under the board -- so
+   the meter reads from there: its colour rises out of the bottom as it pulls
+   ahead. The lead is measured against whichever rival is doing best, which is
+   the same comparison checkDomination wins the game on, so a full bar and a
+   won game are the same moment. */
+function domState(){
+  const me=teamOf(0);
+  let rival=null,best=-1;
+  for(const tm of teamsInPlay()){
+    if(tm===me)continue;
+    const n=teamReal(tm);
+    if(n>best){best=n;rival=tm;}
+  }
+  if(rival==null)return null;
+  const mine=teamReal(me),raw=mine-best;
+  return {me,rival,mine,theirs:best,raw,lead:Math.max(-WIN_LEAD,Math.min(WIN_LEAD,raw))};
+}
+function renderDomBar(){
+  const el=document.getElementById('domBar');
+  if(!el)return;
+  const st=domState();
+  if(!st){el.classList.add('hidden');return;}
+  el.classList.remove('hidden');
+  const seg=WIN_LEAD*2;
+  /* built once and then only retuned, so the fill has something to slide along */
+  if(el.dataset.seg!==String(seg)){
+    el.dataset.seg=String(seg);
+    let grid='';
+    for(let i=0;i<seg;i++)grid+='<i'+(i===seg/2?' class="mid"':'')+'></i>';
+    el.innerHTML='<div class="dnum top"></div>'+
+      '<div class="dtrack"><div class="dfill"></div><div class="dgrid">'+grid+'</div></div>'+
+      '<div class="dnum bot"></div>';
+  }
+  el.style.setProperty('--mine',teamTint(st.me));
+  el.style.setProperty('--theirs',teamTint(st.rival));
+  el.querySelector('.dfill').style.height=(100*(st.lead+WIN_LEAD)/seg)+'%';
+  el.querySelector('.dnum.top').textContent=st.theirs;
+  el.querySelector('.dnum.bot').textContent=st.mine;
+  el.classList.toggle('near',Math.abs(st.lead)>=WIN_LEAD-1);
+  const who=st.raw>0?teamName(st.me):teamName(st.rival);
+  const txt=teamName(st.me)+' '+st.mine+' fielded, '+teamName(st.rival)+' '+st.theirs+'. '+
+    (st.raw===0?'Level.':who+' '+Math.abs(st.raw)+' ahead.')+
+    ' Ending a turn '+WIN_LEAD+' ahead wins. Tokens never count.';
+  el.title=txt;
+  el.setAttribute('role','img');
+  el.setAttribute('aria-label',txt);
 }
 function renderLog(){
   const l=document.getElementById('log');
@@ -4642,7 +4732,7 @@ function render(){
   syncHandSlots();
   renderBoard();
   for(let p=0;p<PLAYERS();p++)renderHand(p);
-  renderCounts();renderLog();renderPrompt();renderActionBar();renderStatus();
+  renderCounts();renderDomBar();renderLog();renderPrompt();renderActionBar();renderStatus();
   const bd=document.getElementById('board');
   bd.style.setProperty('--bw',BW);
   bd.style.setProperty('--cs',(BW>=4?'86px':'110px'));
