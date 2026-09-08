@@ -116,6 +116,9 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="pixie"],.dcard[data-card-deck="pixie"]{--cardbg:#b1258e;--artink:#fdeaf7;background:var(--cardbg);color:#f4e9fb;border-color:#7a1861}
 .card[data-card-deck="pixie"] .kwl,.dcard[data-card-deck="pixie"] .dkw{color:#f2b0da}
 .card[data-card-deck="pixie"] .ct,.dcard[data-card-deck="pixie"] .dty{color:#f2b0da}
+.card[data-card-deck="spider"],.dcard[data-card-deck="spider"]{--cardbg:#3b3350;--artink:#efe9ff;background:var(--cardbg);color:#e6e0f5;border-color:#241e33}
+.card[data-card-deck="spider"] .kwl,.dcard[data-card-deck="spider"] .dkw{color:#b3a6d4}
+.card[data-card-deck="spider"] .ct,.dcard[data-card-deck="spider"] .dty{color:#b3a6d4}
 .card[data-card-deck="nature"] .kwl,.dcard[data-card-deck="nature"] .dkw{color:#d5e8a4}
 .card[data-card-deck="nature"] .ct,.dcard[data-card-deck="nature"] .dty{color:#d5e8a4}
 
@@ -283,6 +286,27 @@ button,.teece,.cell,.card{touch-action:manipulation}
 .btn.primary:hover{background:#4fb69e}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 
+/* ---- domination meter. The bar beside the board is the field itself: each
+       side's share of the non-Token Teece standing on it, in that side's
+       colour, yours filling from the bottom. The chip above counts the leader
+       toward the lead that ends the game. ---- */
+.boardrow{display:flex;align-items:stretch;justify-content:center;gap:12px}
+.dombar{width:26px;display:flex;flex-direction:column;gap:5px}
+.dommeter{flex:1;display:flex;flex-direction:column;overflow:hidden;
+  border:1px solid var(--line);border-radius:7px;background:#191410}
+.domband{display:flex;align-items:center;justify-content:center;min-height:0;
+  font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:#12100c;
+  transition:flex-grow .25s ease}
+.domband.t0{background:var(--p0)} .domband.t1{background:var(--p1);color:#f6e8e4}
+.domband.t2{background:var(--p2);color:#150e21}
+.domband.empty{background:repeating-linear-gradient(-45deg,#221a10 0 5px,#191410 5px 10px)}
+.domlead{text-align:center;font-size:10px;font-weight:700;letter-spacing:.04em;
+  font-variant-numeric:tabular-nums;color:var(--muted)}
+.domlead.near{color:var(--gold);animation:domNear 1.4s ease-in-out infinite}
+.domlead.held{color:var(--violet)}
+@keyframes domNear{0%,100%{opacity:1}50%{opacity:.45}}
+@media(prefers-reduced-motion:reduce){.domlead.near{animation:none}}
+
 aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
 .panel h2{font-family:var(--disp);font-weight:400;font-size:16px;margin:0 0 6px}
@@ -290,10 +314,12 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
 .d0{background:var(--p0)} .d1{background:var(--p1)} .d2{background:var(--p2)}
 .teamtag{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.counts{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12px;color:var(--muted);margin-top:6px}
-/* Where the race stands, across the full width under both seats. */
-.counts .racern{grid-column:1/-1;margin-top:7px;padding-top:6px;border-top:1px solid var(--line);
-  color:var(--gold);font-size:11.5px;line-height:1.4}
+.counts{display:grid;grid-template-columns:1fr auto auto auto;gap:3px 12px;
+  align-items:baseline;font-size:12px;color:var(--muted);margin-top:8px}
+.counts .ch{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#6d5f4c;text-align:right}
+.counts .cn{color:var(--cream2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.counts .cv{text-align:right;font-variant-numeric:tabular-nums;color:var(--cream2)}
+.counts .cv.low{color:var(--down);font-weight:700}
 #detail .dn{font-family:var(--disp);font-size:20px}
 #detail .dsep{margin-top:9px;padding-top:7px;border-top:1px solid var(--line);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .optcard{border-color:var(--gold)!important}
@@ -328,6 +354,30 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .overlay p{color:var(--muted);font-size:13px;line-height:1.6;margin:6px 0}
 .overlay .row{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
 .hidden{display:none!important}
+.weblayer{position:absolute;inset:0;pointer-events:none;opacity:.6;
+  background:repeating-conic-gradient(from 15deg at 50% 50%,rgba(226,220,205,.34) 0 1deg,transparent 1deg 30deg),
+             repeating-radial-gradient(circle at 50% 50%,transparent 0 17px,rgba(226,220,205,.30) 17px 18px)}
+
+/* ---- start menu. A masthead, the rules in three lines, then one card per
+       mode: its name, a single line saying what it is, and its buttons. ---- */
+#startOverlay .box{max-width:700px;width:100%}
+#startOverlay h2{margin:0}
+#startOverlay .sub{font-size:12px;letter-spacing:.05em;color:var(--muted);margin:2px 0 0;
+  padding-bottom:13px;border-bottom:1px solid var(--line)}
+.rules{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;align-items:start;
+  background:rgba(201,162,39,.05);border:1px solid var(--line);border-radius:10px;
+  padding:13px 15px;margin:16px 0 18px;font-size:12.5px;line-height:1.5;color:var(--muted)}
+.rules .rk{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);
+  white-space:nowrap;padding-top:3px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mode{display:flex;flex-direction:column;background:var(--panel2);
+  border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+.mode.feature{grid-column:1/-1;border-color:rgba(201,162,39,.4);
+  background:linear-gradient(180deg,rgba(201,162,39,.10),var(--panel2))}
+.overlay .mode h3{font-size:21px;margin:0}
+.overlay .mode p{font-size:12.5px;line-height:1.5;margin:5px 0 0}
+.overlay .mode .row{margin-top:auto;padding-top:12px}
+@media(max-width:560px){.modes{grid-template-columns:1fr}}
 
 #draftOverlay .box{max-width:760px;width:100%}
 #draftCards{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:14px 0}
@@ -394,7 +444,10 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
     </div>
     <div id="oppHands"></div>
     <div id="promptBar"><span class="msg">&nbsp;</span></div>
-    <div id="board"></div>
+    <div class="boardrow">
+      <div id="board"></div>
+      <div class="dombar" id="domBar"></div>
+    </div>
     <div id="actionBar" class="hidden"></div>
     <div id="statusBar" class="hidden"></div>
     <div class="handrow" id="myHand"></div>
@@ -417,34 +470,45 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 <div class="overlay" id="startOverlay">
   <div class="box">
     <h2>Teece <span class="ver" id="verTag"></span></h2>
-    <p>Adjacent enemy Teece compare touching edge numbers; the smaller one dies, ties do nothing, and every stat
-       change anywhere re-checks the whole board. One Teece per turn; equips, magic and battlegrounds are unlimited.
-       Win by wiping out every enemy Teece, ending a turn with four more Teece fielded (Tokens never count),
-       or having the bigger field when a player must draw from an empty deck.
-       Any Teece whose attributes drop below zero dies on the spot.</p>
-    <h3>Decks</h3>
-    <p>Pick a prebuilt deck, choose which deck the computer brings, and set how hard it hits: every enemy Teece
-       can carry anywhere from &minus;3 to +3 on all four sides. Each deck has its own machinery: Berserker is twelve
-       overpowered cards racing the clock, Rock soaks hits with Defence, Ogre shoves everything around the board and the damage it deals sticks.</p>
-    <div class="row">
-      <button class="btn primary" id="dAI">vs Computer</button>
-      <button class="btn" id="dHot">Hotseat</button>
+    <p class="sub" id="startSub"></p>
+
+    <div class="rules">
+      <span class="rk">Combat</span>
+      <span>Adjacent enemies compare the edge numbers that touch; the smaller one dies and ties do nothing.
+            Any Teece whose attributes fall below zero dies on the spot, and every change anywhere re-checks the whole board.</span>
+      <span class="rk">Each turn</span>
+      <span>One Teece. Equips, magic and battlegrounds are unlimited.</span>
+      <span class="rk">Winning</span>
+      <span>Wipe out every enemy Teece, end a turn four Teece ahead (Tokens never count),
+            or hold the bigger field when a player must draw from an empty deck.</span>
     </div>
-    <h3>Three players</h3>
-    <p>A four by four board and three seats. Play a free-for-all where every other seat is an enemy,
-       or take a side in two versus one. Allies never fight each other, they win and lose together, and
-       a seat is skipped once its whole side is wiped out. Four Teece ahead of the <em>next best</em> side
-       still wins it.</p>
-    <div class="row">
-      <button class="btn primary" id="p3AI">vs Computers</button>
-      <button class="btn" id="p3Hot">Hotseat</button>
-    </div>
-    <h3>Roguelike</h3>
-    <p>Draft five cards and beat the computer. Clear a level and you draft five more, but the enemy's Teece
-       grow: +1 on every side at level two, +2 at level three, +3 at level four. Running out of cards never ends
-       a level; only wiping out the enemy's Teece, or ending a turn four Teece ahead, does.</p>
-    <div class="row">
-      <button class="btn primary" id="rAI">Start run</button>
+
+    <div class="modes">
+      <div class="mode feature">
+        <h3>Roguelike</h3>
+        <p>Draft random cards from all decks and try to beat an increasingly powerful computer.</p>
+        <div class="row">
+          <button class="btn primary" id="rAI">Start run</button>
+        </div>
+      </div>
+
+      <div class="mode">
+        <h3>Decks</h3>
+        <p>Pick prebuilt decks to battle.</p>
+        <div class="row">
+          <button class="btn primary" id="dAI">vs Computer</button>
+          <button class="btn" id="dHot">Hotseat</button>
+        </div>
+      </div>
+
+      <div class="mode">
+        <h3>Three players</h3>
+        <p>Play 1v1v1 or 2v1.</p>
+        <div class="row">
+          <button class="btn primary" id="p3AI">vs Computers</button>
+          <button class="btn" id="p3Hot">Hotseat</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -473,7 +537,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:16,date:'2026-09-06'};
+const VERSION={build:17,date:'2026-09-08'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -487,12 +551,31 @@ async function loadDeckData(){
     FORMATS=data.formats;
     CLASSIC=data.classic;
     POOL=data.pool;
+    rebuildWebCards();
+    startSubtitle();
   }catch(e){console.error('Failed to load decks.json:',e);}
+}
+/* Counted rather than written down, so it cannot go stale the next time a deck
+   is added. The decks arrive over fetch, so this runs when they land. */
+function startSubtitle(){
+  if(!HAS_DOM)return;
+  const el=document.getElementById('startSub');
+  if(!el)return;
+  const n=Object.keys(DECKS).length;
+  el.textContent=n?(n+' prebuilt decks, three ways to play.'):'Three ways to play.';
 }
 if(HAS_DOM)loadDeckData();
 
+/* Cards that bring the Web with them. Rebuilt whenever deck data lands, since
+   the decks arrive over fetch rather than being written into this file. */
+let WEB_CARDS={};
+function rebuildWebCards(){
+  WEB_CARDS={};
+  for(const key of Object.keys(DECKS||{}))
+    if(DECKS[key].web)for(const id of DECKS[key].cards)WEB_CARDS[id]=true;
+}
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
-  gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}'};
+  gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -929,6 +1012,8 @@ const CARDS = {
  TB:{name:'Bomblet',type:'teece',token:true,sides:[3,3,3,3],
     text:'Token. When destroyed: adjacent Teece get -2. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.',
     onDeath:[{fx:'aoe',n:-2,dur:'perm'}]},
+ TSP:{name:'Spiderling',type:'teece',token:true,sides:[4,4,4,4],
+    text:'Spiderling Token. Bigger than most Tokens, and the currency the whole Spider deck spends. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  TS:{name:'Sprout',type:'teece',token:true,sides:[3,3,3,3],
     text:'Sprout Token. When destroyed: every other allied Teece gets +1. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.',
     onDeath:[{fx:'mass',who:'ally',n:1,dur:'perm'}]},
@@ -1643,7 +1728,73 @@ const CARDS = {
     cast:[{fx:'invis'}]},
  560:{name:'Enchantment',type:'magic',
     text:'Conjure two random magic cards from anywhere in the game into your hand.',
-    cast:[{fx:'conjure',n:2}]}
+    cast:[{fx:'conjure',n:2}]},
+ /* ---- Spider: a cannibal swarm that lives on the Web ----
+    The Web is board state rather than a card. A deck that carries it lays it
+    at setup over every panel but the corners, it belongs to neither side, and
+    a battleground laid on a panel is the last word on that panel \u2014 so ordinary
+    ground buries the silk under it and Spider ground spins its own. ---- */
+ 561:{name:'Immobilizing Spider',type:'teece',sides:[6,7,7,7],webLock:true,
+    text:'Enemy Teece standing on the Web cannot move at all.'},
+ 562:{name:'Trapdoor Spider',type:'teece',sides:[8,0,8,8],
+    text:'When played onto the Web: +8 on its right side alone.',
+    onPlay:[{fx:'webSides',mod:[0,8,0,0]}]},
+ 563:{name:'Brood Daughter',type:'teece',sides:[5,5,5,5],
+    text:'When played: summon two 4/4/4/4 Spiderlings.',
+    onPlay:[{fx:'spiderling',count:2}]},
+ 564:{name:'Writhing Egg Sac',type:'teece',sides:[2,7,2,6],
+    text:'When destroyed: a 4/4/4/4 Spiderling boils out onto every empty adjacent panel.',
+    onDeath:[{fx:'spiderling',where:'adjAll'}]},
+ 565:{name:'Spiderlingling',type:'teece',sides:[2,2,2,2],onSpiderling:{n:1},
+    text:'Whenever a Spiderling is summoned or destroyed anywhere, either side\u2019s: +1 permanently.'},
+ 566:{name:'Spider',type:'teece',sides:[8,8,8,8],
+    text:'When played: sacrifice a Spiderling, or this Teece gets -4.',
+    onPlay:[{fx:'sacSpiderling',elseMod:{n:-4,dur:'perm'}}]},
+ 567:{name:'Web Crawler',type:'teece',sides:[5,4,5,4],
+    text:'While it stands on the Web, once per your turn: sacrifice a Spiderling; an enemy on the Web gets -3.',
+    act:[{name:'Drag it under',once:'turn',needWeb:true,
+      steps:[{fx:'sacSpiderling',req:true},{fx:'mod',who:'enemy',where:'web',n:-3,dur:'perm'}]}]},
+ 568:{name:'Spider Nurser',type:'teece',sides:[6,6,6,6],
+    text:'When played: select a Teece on the Web and move it one space. If it was a Spiderling, it gets +2.',
+    onPlay:[{fx:'moveTarget',web:true,thenSpiderMod:{n:2,dur:'perm'}}]},
+ 569:{name:'Spinneret',type:'teece',sides:[7,3,7,3],
+    text:'Once each of your turns: summon a 4/4/4/4 Spiderling onto an empty Web panel. If you do, select an enemy Teece; it gets -1.',
+    act:[{name:'Spin one out',once:'turn',
+      steps:[{fx:'spiderling',where:'web',req:true},{fx:'mod',who:'enemy',where:'any',n:-1,dur:'perm'}]}]},
+ 570:{name:'Spider Guard',type:'teece',sides:[3,3,3,3],
+    text:'When played: sacrifice any number of Spiderlings, then return that many Teece to their owners\u2019 hands.',
+    onPlay:[{fx:'sacSpiderling',any:true},{fx:'bounce',countFrom:'sac'}]},
+ 571:{name:'Broodfather',type:'teece',sides:[8,8,8,8],sac:1,
+    text:'Sacrifice one fielded Teece to play. When played: a 4/4/4/4 Spiderling appears on every empty Web panel.',
+    onPlay:[{fx:'spiderling',where:'webAll'}]},
+ 572:{name:'Brood Mother',type:'teece',sides:[8,8,8,8],sac:2,webBrood:true,
+    text:'Sacrifice two fielded Teece to play. While she stands, every Spiderling on the Web \u2014 either side\u2019s \u2014 has base 12/12/12/12 and can no longer be sacrificed.'},
+ 573:{name:'Burst',type:'magic',
+    text:'Select up to four empty Web panels; a 4/4/4/4 Spiderling appears on each.',
+    cast:[{fx:'spiderling',where:'web',count:4,may:true}]},
+ 574:{name:'Eaten Alive',type:'magic',
+    text:'Select a Teece standing next to one of your Spiderlings; destroy it.',
+    cast:[{fx:'destroy',nearSpiderling:true}]},
+ 575:{name:'Spider Cannibalism',type:'magic',
+    text:'Sacrifice a Spiderling, then select a Teece on the Web: it gets +5 or -5 until the end of the turn, and may then move to any empty Web panel.',
+    cast:[{fx:'sacSpiderling',req:true},
+      {fx:'choose',msg:'Spider Cannibalism:',opts:[
+        {lbl:'It gets +5 until end of turn',steps:[{fx:'mod',where:'web',n:5,dur:'temp'}]},
+        {lbl:'It gets -5 until end of turn',steps:[{fx:'mod',where:'web',n:-5,dur:'temp'}]}]},
+      {fx:'teleLast',web:true}]},
+ 576:{name:'Skitter',type:'equip',mod:4,onlySpiderling:true,
+    text:'Equip to a Spiderling. It gets +4 and may move one space once per your turn.',
+    grants:{act:[{name:'Skitter',once:'turn',steps:[{fx:'move',range:'orth'}]}]}},
+ 577:{name:'Dragline',type:'equip',mod:2,
+    text:'The equipped Teece gets +2 and, once per your turn, may run a line to any empty Web panel however far away.',
+    grants:{act:[{name:'Cast a line',once:'turn',steps:[{fx:'move',range:'web'}]}]}},
+ 578:{name:'Carapace',type:'equip',mod:0,
+    text:'The equipped Teece gets +2 Defence, and counts +2 on whichever edge it fights with against an enemy standing on the Web.',
+    grants:{def:2,webCombat:2}},
+ 579:{name:'Spun Nest',type:'ground',gWeb:true,gWebAdj:true,gSpiderDef:1,
+    text:'This panel and every panel adjacent to it count as Web. While it stands, every Spiderling on the Web has +1 Defence.'},
+ 580:{name:'Egg Nest',type:'ground',gWeb:true,gEndTurn:'TSP',
+    text:'This panel counts as Web. At the end of your turn, if nothing stands on it, a 4/4/4/4 Spiderling hatches here.'},
 };
 const DEF=t=>CARDS[t.cardId];
 const isBossCard=id=>(CARDS[id].sac||0)>=2;
@@ -1663,6 +1814,7 @@ const ENCHANT_N=5;
    same answer to label "(nowhere to go)". */
 function movePool(i,range){
   if(range==='orth')return ADJ[i];
+  if(range==='web'){const w=[];for(let j=0;j<BN;j++)if(j!==i&&isWebbed(G.board,j))w.push(j);return w;}
   /* DIAG is misleadingly named: it holds all eight neighbours, orthogonals
      included, so it is already "one space, diagonals allowed" on its own. */
   if(range==='step')return DIAG[i];
@@ -1888,6 +2040,16 @@ let ADJ=[],DIAG=[],CN=[];
 const ALL=()=>{const a=[];for(let i=0;i<BN;i++)a.push(i);return a;};
 const row=i=>Math.floor(i/BW), col=i=>i%BW;
 const sameRow=(a,b)=>row(a)===row(b), sameCol=(a,b)=>col(a)===col(b);
+/* The panel that side k touches (0 top, 1 right, 2 bottom, 3 left), or -1 when
+   that side is pressed against the rim of the board and can never be fought. */
+function sideNbr(i,k){
+  const r=row(i),c=col(i);
+  if(k===0)return r>0?i-BW:-1;
+  if(k===1)return c<BW-1?i+1:-1;
+  if(k===2)return r<BW-1?i+BW:-1;
+  return c>0?i-1:-1;
+}
+const isCornerCell=i=>{const r=row(i),c=col(i);return (r===0||r===BW-1)&&(c===0||c===BW-1);};
 function bandName(k,n){
   if(n<=1)return '';
   if(k===0)return 'top';
@@ -1936,6 +2098,11 @@ function makeTeece(cardId,owner){
     actUsedTurn:{},actUsedGame:{}};
 }
 function newState(mode,vsAI,decks,extra){
+  /* The Web is not a card and has no owner. It is here from the first turn if
+     either deck brought it, over every panel but the corners, and both sides
+     play on it. */
+  const _spun=(extra&&extra.web!=null)?!!extra.web
+    :(decks||[]).some(d=>d&&d.some(id=>WEB_CARDS[id]));
   UID=1;extra=extra||{};
   const nP=extra.seats||2;
   const teams=extra.teams||Array.from({length:nP},(_,i)=>i);
@@ -1946,6 +2113,7 @@ function newState(mode,vsAI,decks,extra){
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
     width:BW,
+    web:Array.from({length:BN},(_,i)=>_spun&&!isCornerCell(i)),
     board:Array.from({length:BN},()=>({teece:null,ground:null,mine:null,defMark:null,razed:false,curseP:null,seed:null,enchant:null})),
     turn:Math.floor(Math.random()*nP),turnNum:1,teecePlayed:false,over:false,winner:null,pending:null,
     detailLock:null,detailHover:null,panelTap:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],graveLastTurn:[],
@@ -2047,6 +2215,49 @@ function addMod(sum,m){if(m==null)return;if(Array.isArray(m)){for(let k=0;k<4;k+
 /* Pass `parts` and every contribution is recorded into it as it is applied, so
    a player can be shown how a Teece got to the numbers it is showing. It is the
    same arithmetic either way -- there is no second implementation to drift. */
+/* ============ the Web ============
+   A panel is silk if the base Web was laid there, or if Spider ground spins it.
+   A battleground standing on a panel is the whole story for that panel, so an
+   ordinary one buries the silk under it and only a Spider one keeps it. */
+function isWebbed(b,i){
+  if(!G||!b||!b[i])return false;
+  const g=b[i].ground;
+  if(g)return groundFlag(g,'gWeb');
+  if(G.web&&G.web[i])return true;
+  for(let j=0;j<BN;j++){
+    const gg=b[j].ground;
+    if(gg&&groundFlag(gg,'gWebAdj')&&ADJ[j].indexOf(i)>=0)return true;
+  }
+  return false;
+}
+const isSpiderling=t=>!!t&&t.cardId==='TSP';
+function webBrood(b){
+  for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!t.silenced&&DEF(t).webBrood)return true;}
+  return false;
+}
+/* A Spiderling on the Web under a Brood Mother cannot be spent. Everything that
+   eats one asks here first. */
+function canEatSpiderling(b,i){
+  const t=b[i].teece;
+  if(!isSpiderling(t))return false;
+  return !(webBrood(b)&&isWebbed(b,i));
+}
+function bumpSpiderWatchers(b,why,live){
+  for(let j=0;j<BN;j++){
+    const w=b[j].teece;if(!w||w.silenced)continue;
+    const os=DEF(w).onSpiderling;if(!os)continue;
+    applyModT(w,os.n,os.dur||'perm');
+    if(live)log(nm(w)+' feels a Spiderling '+why+': '+sgn(os.n)+durTxt(os.dur||'perm')+'.');
+  }
+}
+/* Every Token that reaches the board comes through here, which is the one place
+   Spiderlingling has to watch. */
+function summonToken(b,i,tok,owner,live){
+  const tk=makeTeece(tok,owner);
+  putTeece(b,i,tk,live);
+  if(isSpiderling(tk))bumpSpiderWatchers(b,'hatch',live);
+  return tk;
+}
 function effSides(b,i,parts){
   const t=b[i].teece; if(!t)return[0,0,0,0];
   const s=[0,0,0,0];
@@ -2054,7 +2265,11 @@ function effSides(b,i,parts){
   /* Shrink replaces what the card was printed with for the turn; everything
      stacked on top of it still counts. */
   const bs=t.baseTemp||t.base;
-  for(let k=0;k<4;k++)s[k]=bs[k]+t.perm[k]+t.temp[k]+((t.temp2&&t.temp2[k])||0);
+  /* Brood Mother reprints a Spiderling on the Web at 12/12/12/12, carrying
+     whatever handicap the Token was made with. Shrink still wins: a replaced
+     base is the printed line for the turn, and the swell has nothing to lift. */
+  const swell=(t.cardId==='TSP'&&!t.baseTemp&&webBrood(b)&&isWebbed(b,i))?8:0;
+  for(let k=0;k<4;k++)s[k]=Math.max(0,bs[k]+swell)+t.perm[k]+t.temp[k]+((t.temp2&&t.temp2[k])||0);
   if(parts){
     parts.push({label:t.baseTemp?'Printed, replaced for the turn':'Printed',amt:bs.slice(),base:true});
     put('Permanent',t.perm);
@@ -2130,6 +2345,12 @@ function defOf(b,i){
   for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.def)d+=g.def;}
   if(b[i].ground){const gd=CARDS[b[i].ground.cardId];if(gd.gdef)d+=gd.gdef;}
   if(b[i].defMark&&b.some(c=>c.teece&&c.teece.uid===b[i].defMark.uid))d+=b[i].defMark.n;
+  if(isSpiderling(t)&&isWebbed(b,i)){
+    for(let j=0;j<BN;j++){
+      const g=b[j].ground;if(!g||!groundFlag(g,'gSpiderDef'))continue;
+      d+=(g.gSpiderDef!=null?g.gSpiderDef:CARDS[g.cardId].gSpiderDef)||0;
+    }
+  }
   for(let j=0;j<BN;j++){
     if(j===i)continue;
     const o=b[j].teece;if(!o||o.silenced)continue;
@@ -2166,11 +2387,17 @@ function kwOf(b,i,noGround){
   if(t.kwPerm)ks.push(...t.kwPerm);
   for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.kw)ks.push(...g.kw);}
   if(b[i].ground&&!noGround){const gd=CARDS[b[i].ground.cardId];if(gd.gkw)ks.push(...gd.gkw);}
+  let onSilk=null;
   for(let j=0;j<BN;j++){
     if(j===i)continue;
     const o=b[j].teece;if(!o||o.silenced)continue;
     const a=DEF(o).aura;
     if(a&&a.kw&&((a.who==='ally')===sameTeam(o.owner,t.owner))&&a.where==='global')ks.push(...a.kw);
+    /* an enemy spider holds everything caught in the silk still */
+    if(DEF(o).webLock&&!sameTeam(o.owner,t.owner)){
+      if(onSilk===null)onSilk=isWebbed(b,i);
+      if(onSilk)ks.push('immovable');
+    }
   }
   return ks;
 }
@@ -2180,7 +2407,7 @@ const openAt=(b,i)=>!b[i].teece&&!b[i].razed;
 function actsOf(b,i){
   const t=b[i].teece; if(!t)return[];
   const out=[]; const d=DEF(t);
-  if(!t.silenced)(d.act||[]).forEach((a,x)=>out.push({key:'c'+x,act:a}));
+  if(!t.silenced)(d.act||[]).forEach((a,x)=>{if(a.needWeb&&!isWebbed(b,i))return;out.push({key:'c'+x,act:a});});
   for(const e of t.equips){
     const g=CARDS[e.cardId].grants;
     if(g&&g.act)g.act.forEach((a,x)=>out.push({key:'e'+e.cardId+'_'+x,act:a}));
@@ -2399,6 +2626,15 @@ function scanDeaths(b){
   const mark=(vi,ki)=>{const v=b[vi].teece;if(!dead[vi])dead[vi]={cell:vi,t:v,killers:[]};
     if(ki!=null&&dead[vi].killers.indexOf(b[ki].teece.uid)<0)dead[vi].killers.push(b[ki].teece.uid);};
   const immune=i=>b[i].teece&&b[i].teece.immortalOwner!=null;
+  /* Carapace: its wearer swings two harder at anything standing on silk. The
+     bonus is on the pairing, not on the Teece, so it never shows in effSides. */
+  const webEdge=(ai,di)=>{
+    const t=b[ai].teece;
+    if(!t||!t.equips.length||!isWebbed(b,di))return 0;
+    let n=0;
+    for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.webCombat)n+=g.webCombat;}
+    return n;
+  };
   for(let i=0;i<BN;i++){
     if(!b[i].teece||immune(i))continue;
     if(eff[i].some(v=>v<0))mark(i,null);
@@ -2411,7 +2647,7 @@ function scanDeaths(b){
       let mi,oj;
       if(j===i+1){mi=1;oj=3;} else if(j===i-1){mi=3;oj=1;}
       else if(j===i+BW){mi=2;oj=0;} else {mi=0;oj=2;}
-      const a=eff[i][mi], c=eff[j][oj];
+      const a=eff[i][mi]+webEdge(i,j), c=eff[j][oj]+webEdge(j,i);
       if(a-c>dfn[j]&&canKill(i)&&!immune(j))mark(j,i);
       else if(c-a>dfn[i]&&canKill(j)&&!immune(i))mark(i,j);
     }
@@ -2430,7 +2666,7 @@ function scanDeaths(b){
         if(b[j].teece){
           if(d>1&&!sameTeam(b[j].teece.owner,t.owner)){
             const os=(ms+2)%4;
-            if(eff[i][ms]-eff[j][os]>dfn[j]&&canKill(i)&&!immune(j))mark(j,i);
+            if(eff[i][ms]+webEdge(i,j)-eff[j][os]>dfn[j]&&canKill(i)&&!immune(j))mark(j,i);
           }
           break;
         }
@@ -2548,10 +2784,11 @@ async function FXRUN(st,ctx){
       if(!canTarget(b,i,p))continue;
       if(st.where==='rowcol'&&ctx.cell!=null&&!(sameRow(i,ctx.cell)||sameCol(i,ctx.cell)))continue;
       if(st.where==='adj'&&ctx.cell!=null&&ADJ[ctx.cell].indexOf(i)<0)continue;
+      if(st.where==='web'&&!isWebbed(b,i))continue;
       cands.push(i);
     }
-    if(!cands.length)return none('No valid target.');
-    const c=await pickCell(cands,'Choose a Teece: '+sgn(st.n)+durTxt(st.dur)+'.',
+    if(!cands.length)return none(st.where==='web'?'Nothing is standing on the Web.':'No valid target.');
+    const c=await pickCell(cands,'Choose a Teece'+(st.where==='web'?' on the Web':'')+': '+sgn(st.n)+durTxt(st.dur)+'.',
       (bb,i)=>{applyModT(bb[i].teece,st.n,st.dur);},!!st.may);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -2615,8 +2852,8 @@ async function FXRUN(st,ctx){
   case 'token':{
     if(st.where==='here'){
       const i=ctx.deadCell;
-      if(i!=null&&openAt(b,i)){const tk=makeTeece(st.tok,ctx.deadOwner!=null?ctx.deadOwner:p);
-        putTeece(b,i,tk,true);log('A Token ('+sidesLine(CARDS[st.tok].sides)+') appears at the '+CN[i]+'.');}
+      if(i!=null&&openAt(b,i)){summonToken(b,i,st.tok,ctx.deadOwner!=null?ctx.deadOwner:p,true);
+        log('A Token ('+sidesLine(CARDS[st.tok].sides)+') appears at the '+CN[i]+'.');}
       return;}
     for(let n=0;n<(st.count||1);n++){
       const pool=(st.where==='adj'?ADJ[ctx.cell]:ALL()).filter(j=>openAt(b,j));
@@ -2624,8 +2861,7 @@ async function FXRUN(st,ctx){
       const owner=ctx.deadOwner!=null?ctx.deadOwner:p;
       if(st.random){
         const c=pool[Math.floor(Math.random()*pool.length)];
-        const tk=makeTeece(st.tok,owner);
-        putTeece(b,c,tk,true);
+        const tk=summonToken(b,c,st.tok,owner,true);
         if(st.linked&&ctx.t){ctx.t.links.push(tk.uid);}
         log('A Token ('+sidesLine(CARDS[st.tok].sides)+') appears at the '+CN[c]+'.');
         continue;
@@ -2634,13 +2870,83 @@ async function FXRUN(st,ctx){
         (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,p),false);},true);
       if(c==='CANCEL')return 'ABORT';
       if(c==null)return;
-      const tk=makeTeece(st.tok,p);
-      putTeece(b,c,tk,true);
+      const tk=summonToken(b,c,st.tok,p,true);
       if(st.linked&&ctx.t){ctx.t.links.push(tk.uid);}
       log('A Token ('+sidesLine(CARDS[st.tok].sides)+') appears at the '+CN[c]+'.');
       ctx.first=false;
       render();
     }
+    return;}
+  /* Spiderlings. where:'web' keeps them on silk, 'webAll' fills every empty
+     silk panel at once, 'adjAll' every empty panel around the one that died.
+     req:true aborts the whole ability when none can be placed, which is what
+     lets an 'if you do' clause hold: the ability keeps its charge instead. */
+  case 'spiderling':{
+    const own=ctx.deadOwner!=null?ctx.deadOwner:p;
+    const silk=st.where==='web'||st.where==='webAll';
+    const open=j=>openAt(b,j)&&(!silk||isWebbed(b,j));
+    if(st.where==='webAll'||st.where==='adjAll'){
+      const base=st.where==='adjAll'?ADJ[ctx.deadCell!=null?ctx.deadCell:ctx.cell]:ALL();
+      const pool=base.filter(open);
+      if(!pool.length)return st.req?'ABORT':none('No room for a Spiderling.');
+      for(const j of pool)summonToken(b,j,'TSP',own,true);
+      log(pool.length===1?'A Spiderling appears at the '+CN[pool[0]]+'.'
+        :pool.length+' Spiderlings boil out across the field.');
+      await anim(pool,'placed',140);
+      return;}
+    const want=st.count||1;
+    for(let k=0;k<want;k++){
+      const pool=ALL().filter(open);
+      if(!pool.length){if(k===0)return st.req?'ABORT':none(silk?'No empty Web panel for a Spiderling.':'No room for a Spiderling.');return;}
+      const c=await pickCell(pool,'Choose'+(silk?' an empty Web panel':' a space')+' for a Spiderling ('+(k+1)+' of '+want+')'+(st.may?', or skip.':'.'),
+        (bb,i)=>{putTeece(bb,i,makeTeece('TSP',p),false);},!!st.may);
+      if(c==='CANCEL')return 'ABORT';
+      if(c==null)return k===0&&st.req?'ABORT':undefined;
+      summonToken(b,c,'TSP',p,true);
+      log('A Spiderling appears at the '+CN[c]+'.');
+      ctx.first=false;
+      render();
+    }
+    return;}
+  /* Feeding the swarm. any:true eats as many as the player will part with and
+     leaves the tally in ctx.sacN for the step that spends it. */
+  case 'sacSpiderling':{
+    const feedable=()=>{const o=[];for(let j=0;j<BN;j++)if(b[j].teece&&sameTeam(b[j].teece.owner,p)&&canEatSpiderling(b,j))o.push(j);return o;};
+    let done=0;
+    while(true){
+      const mine=feedable();
+      if(!mine.length)break;
+      if(!st.any&&done)break;
+      const c=await pickCell(mine,st.any
+        ?'Sacrifice a Spiderling'+(done?' ('+done+' fed so far)':'')+', or stop.'
+        :'Sacrifice a Spiderling'+(st.req?'.':', or skip and take the penalty.'),
+        (bb,i)=>{bb[i].teece=null;},!!st.any||!st.req);
+      if(c==='CANCEL')return 'ABORT';
+      if(c==null)break;
+      const o=b[c].teece;
+      if(!isSpiderling(o))break;
+      log(nm(o)+' is fed to the swarm.');
+      await anim([c],'dying',190);
+      await processDeath({cell:c,t:o,killers:[]});
+      done++;
+      ctx.first=false;
+      render();
+    }
+    ctx.sacN=done;
+    if(done)return;
+    if(st.req)return 'ABORT';
+    if(st.elseMod&&ctx.t){
+      applyModT(ctx.t,st.elseMod.n,st.elseMod.dur);
+      log(nm(ctx.t)+' goes unfed: '+sgn(st.elseMod.n)+durTxt(st.elseMod.dur)+'.');
+      return;}
+    return none('No Spiderling to sacrifice.');}
+  /* A bonus printed on one side alone, and only if it landed on silk. */
+  case 'webSides':{
+    if(ctx.cell==null||!ctx.t)return;
+    if(!isWebbed(b,ctx.cell))return none(nm(ctx.t)+' did not land on the Web.');
+    for(let k=0;k<4;k++)ctx.t.perm[k]+=(st.mod[k]||0);
+    log(nm(ctx.t)+' braces against the silk: '+st.mod.map(sgn).join('/')+'.');
+    await anim([ctx.cell],'zap');
     return;}
   case 'control':{
     const cands=[];
@@ -2720,19 +3026,25 @@ async function FXRUN(st,ctx){
     await anim([c],'zap',200);
     return;}
   case 'bounce':{
-    const cands=[];
-    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!isBossCard(t.cardId)&&canTarget(b,i,p))cands.push(i);}
-    if(!cands.length)return none('No legal target.');
-    const c=await pickCell(cands,'Choose a non-Boss Teece to return to its owner hand.',
-      (bb,i)=>{bb[i].teece=null;},false);
-    if(c==='CANCEL')return 'ABORT';
-    if(c==null)return;
-    const t=b[c].teece;b[c].teece=null;
-    for(const uid of t.links)for(let i=0;i<BN;i++){
-      const o=b[i].teece;if(o&&o.uid===uid){b[i].teece=null;log(nm(o)+' collapses with its summoner.');}
+    const reps=st.countFrom==='sac'?(ctx.sacN||0):(st.count||1);
+    if(reps<1)return none('Nothing was fed to the swarm, so nothing is pulled back.');
+    for(let r=0;r<reps;r++){
+      const cands=[];
+      for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!isBossCard(t.cardId)&&canTarget(b,i,p))cands.push(i);}
+      if(!cands.length){if(r===0)return none('No legal target.');return;}
+      const c=await pickCell(cands,'Choose a non-Boss Teece to return to its owner hand'+
+        (reps>1?' ('+(r+1)+' of '+reps+')':'')+'.',
+        (bb,i)=>{bb[i].teece=null;},false);
+      if(c==='CANCEL')return 'ABORT';
+      if(c==null)return;
+      const t=b[c].teece;b[c].teece=null;
+      for(const uid of t.links)for(let i=0;i<BN;i++){
+        const o=b[i].teece;if(o&&o.uid===uid){b[i].teece=null;log(nm(o)+' collapses with its summoner.');}
+      }
+      for(const uid of t.controls)revertControl(b,uid,true);
+      bounceToHand(t,true);
+      ctx.first=false;
     }
-    for(const uid of t.controls)revertControl(b,uid,true);
-    bounceToHand(t,true);
     return;}
   case 'gust':{ /* one orthogonal step */
     const cands=[];
@@ -2943,9 +3255,10 @@ async function FXRUN(st,ctx){
       const t=b[i].teece;
       if(!t||!canTarget(b,i,p))continue;
       if(st.nonBoss&&isBossCard(t.cardId))continue;
+      if(st.nearSpiderling&&!ADJ[i].some(j=>{const o=b[j].teece;return isSpiderling(o)&&sameTeam(o.owner,p);}))continue;
       cands.push(i);
     }
-    if(!cands.length)return none('Nothing can be destroyed.');
+    if(!cands.length)return none(st.nearSpiderling?'No Teece is standing next to one of your Spiderlings.':'Nothing can be destroyed.');
     const c=await pickCell(cands,'Choose a Teece to destroy.',(bb,i)=>{bb[i].teece=null;},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -3045,15 +3358,15 @@ async function FXRUN(st,ctx){
     const c=ctx.last;
     if(c==null||!b[c].teece)return;
     if(hasKw(b,c,'immovable'))return none('It cannot be moved.');
-    const open=[];for(let j=0;j<BN;j++)if(j!==c&&openAt(b,j))open.push(j);
-    if(!open.length)return none('There is nowhere to move it.');
+    const open=[];for(let j=0;j<BN;j++)if(j!==c&&openAt(b,j)&&(!st.web||isWebbed(b,j)))open.push(j);
+    if(!open.length)return none(st.web?'There is no empty Web panel to move it to.':'There is nowhere to move it.');
     const t=b[c].teece;
-    const dst=await chooseCell(p,open,'Move '+nm(t)+' to any empty panel, or skip.',
+    const dst=await chooseCell(p,open,'Move '+nm(t)+' to any empty '+(st.web?'Web panel':'panel')+', or skip.',
       {skip:true,mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);}});
     if(dst==null||dst==='CANCEL')return;
     moveT(b,c,dst,true);
     ctx.last=dst;
-    log(nm(t)+' pulls up its roots and settles at the '+CN[dst]+'.');
+    log(nm(t)+(st.web?' runs down a silk line to the ':' pulls up its roots and settles at the ')+CN[dst]+'.');
     await anim([dst],'placed',140);
     await fireMove(c,dst,p);
     return;}
@@ -3087,9 +3400,10 @@ async function FXRUN(st,ctx){
         const dst=oppositeCell(src,j);
         return dst>=0&&!b[dst].teece;
       }
+      if(st.web)return isWebbed(b,j)&&ADJ[j].some(k=>openAt(b,k));
       return ADJ[j].some(k=>!b[k].teece)||true;
     });
-    if(!cands.length)return none('Nothing to move.');
+    if(!cands.length)return none(st.web?'Nothing on the Web has anywhere to go.':'Nothing to move.');
     const c=await pickCell(cands,'Choose a Teece to move'+(st.may?', or skip.':'.'),null,!!st.may);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -3128,6 +3442,8 @@ async function FXRUN(st,ctx){
     moveT(b,c,dst,true);
     log(nm(t)+' is moved to the '+CN[dst]+'.');
     if(st.thenMod){applyModT(t,st.thenMod.n,st.thenMod.dur);log(nm(t)+' gets '+sgn(st.thenMod.n)+durTxt(st.thenMod.dur)+'.');}
+    if(st.thenSpiderMod&&isSpiderling(t)){applyModT(t,st.thenSpiderMod.n,st.thenSpiderMod.dur);
+      log(nm(t)+' is nursed along: '+sgn(st.thenSpiderMod.n)+durTxt(st.thenSpiderMod.dur)+'.');}
     await fireMove(c,dst,p);
     if(!sameTeam(t.owner,p))noteTargeted(p);
     return;}
@@ -4144,6 +4460,7 @@ async function processDeath(d){
       log(nm(w)+' gets '+sgn(wd.onAllyDeath.n)+durTxt(wd.onAllyDeath.dur)+'.');
     }
   }
+  if(isSpiderling(t))bumpSpiderWatchers(b,'die',true);
   const ctx={p:t.owner,deadCell:cell,deadOwner:t.owner,cell,t,killers:d.killers||[],noModal:true};
   /* killers' own on-kill rewards: a killer that also died this same combat wave
      (simultaneous mutual kills) is gone from the board, so fall back to the
@@ -4602,16 +4919,18 @@ async function playEquip(p,handIdx){
     const t=b[i].teece;
     if(!t||t.owner!==p)continue;
     if(ed.onlyToken&&!t.isToken)continue;
+    if(ed.onlySpiderling&&!isSpiderling(t))continue;
     cands.push(i);
   }
   /* Teece still in hand are targets too. Not for a Drone-only equip: no Drone
      is ever a card in hand, so there is nothing there for it to bolt onto. */
   const hands=[];
-  if(!ed.onlyToken)for(let h=0;h<pl.hand.length;h++){
+  if(!ed.onlyToken&&!ed.onlySpiderling)for(let h=0;h<pl.hand.length;h++){
     if(h===handIdx)continue;
     if(CARDS[pl.hand[h]].type==='teece')hands.push(h);
   }
-  if(!cands.length&&!hands.length){toast(ed.onlyToken?'No Drone to equip.':'No Teece to equip, on the board or in hand.');return false;}
+  if(!cands.length&&!hands.length){toast(ed.onlySpiderling?'No Spiderling to equip.':
+    ed.onlyToken?'No Drone to equip.':'No Teece to equip, on the board or in hand.');return false;}
   const c=await chooseCell(p,cands,'Choose a Teece for '+CARDS[id].name+
     (hands.length?', on the board or in your hand.':'.'),
     {cancel:true,hands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}});
@@ -4884,8 +5203,8 @@ async function endTurn(){
     if(!g)continue;
     const gd=CARDS[g.cardId];
     if(gd.gEndTurn&&g.owner===p&&!G.board[i].teece){
-      putTeece(G.board,i,makeTeece(gd.gEndTurn,g.owner),true);
-      log(gd.name+' builds a Drone at the '+CN[i]+'.');
+      summonToken(G.board,i,gd.gEndTurn,g.owner,true);
+      log(gd.name+' fields a '+CARDS[gd.gEndTurn].name+' at the '+CN[i]+'.');
     }
   }
   await resolveCombat();
@@ -5116,13 +5435,27 @@ function simCombat(b){
     for(const d of deaths)simDeath(b,d);
   }
 }
+/* Which side faces which panel is the whole of basic positioning. A side
+   pressed against the rim of the board is never fought over, so it counts for
+   nothing either way: an 8/8/0/0 wants its two zeroes against the wall and its
+   eights facing the field. Of the sides that do face the field, the total is
+   the pressure this Teece puts on its neighbours, and anything under a Grunt's
+   seven is a way in for theirs. A body on a panel is never worth less than
+   nothing, however soft -- it still holds the panel. */
 function boardValue(b,p){
   let v=0;
   for(let i=0;i<BN;i++){
     const t=b[i].teece;if(!t)continue;
     const s=effSides(b,i);
-    let w=(t.isToken?2:8)+(s[0]+s[1]+s[2]+s[3])*0.15+t.equips.length*0.6;
+    let sum=0,risk=0;
+    for(let k=0;k<4;k++){
+      if(sideNbr(i,k)<0)continue;
+      sum+=s[k];
+      if(s[k]<6)risk+=(6-s[k])*0.22;
+    }
+    let w=(t.isToken?2:8)+sum*0.13-risk+t.equips.length*0.6;
     if(kwOf(b,i).indexOf('ranged')>=0)w+=1.2;
+    if(w<1)w=1;
     v+=sameTeam(t.owner,p)?w:-w;
   }
   return v;
@@ -5165,6 +5498,14 @@ function simOnPlay(b,cell,id,p){
         if(openAt(b,j)){const tk=makeTeece(st.tok,p);putTeece(b,j,tk,false);
           if(st.linked)t.links.push(tk.uid);placed++;}
       }
+    }else if(st.fx==='spiderling'){
+      const silk=st.where==='web'||st.where==='webAll';
+      const pool=(st.where==='adjAll'?ADJ[cell]:ALL()).filter(j=>openAt(b,j)&&(!silk||isWebbed(b,j)));
+      const lim=(st.where==='webAll'||st.where==='adjAll')?pool.length:(st.count||1);
+      let placed=0;
+      for(const j of pool){if(placed>=lim)break;putTeece(b,j,makeTeece('TSP',p),false);placed++;}
+    }else if(st.fx==='webSides'){
+      if(isWebbed(b,cell))for(let k=0;k<4;k++)t.perm[k]+=(st.mod[k]||0);
     }else if(st.fx==='control'){
       let best=-1,bs=-1;
       for(let i=0;i<BN;i++){
@@ -5207,6 +5548,7 @@ function aiPlanFor(id){
       const t=b[i].teece;
       if(!t||t.owner!==p)continue;
       if(d.onlyToken&&!t.isToken)continue;
+      if(d.onlySpiderling&&!isSpiderling(t))continue;
       cands.push(i);
     }
     if(!cands.length)return null;
@@ -5343,6 +5685,44 @@ function aiPlanFor(id){
       for(const j of ADJ[i])if(bb[j].teece)applyModT(bb[j].teece,st.n,st.dur);
     }};
   }
+  if(st.fx==='spiderling'){
+    const silk=st.where==='web'||st.where==='webAll';
+    const pool=[];for(let i=0;i<BN;i++)if(openAt(b,i)&&(!silk||isWebbed(b,i)))pool.push(i);
+    if(!pool.length)return null;
+    return {thr:1.2,cands:[0],mut:(bb)=>{
+      const lim=st.where==='webAll'?pool.length:(st.count||1);
+      let placed=0;
+      for(const j of pool){if(placed>=lim)break;if(!bb[j].teece){putTeece(bb,j,makeTeece('TSP',p),false);placed++;}}
+    }};
+  }
+  if(st.fx==='destroy'){
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(!t||sameTeam(t.owner,p)||!canTarget(b,i,p))continue;
+      if(st.nonBoss&&isBossCard(t.cardId))continue;
+      if(st.nearSpiderling&&!ADJ[i].some(j=>{const o=b[j].teece;return isSpiderling(o)&&sameTeam(o.owner,p);}))continue;
+      cands.push(i);
+    }
+    if(!cands.length)return null;
+    return {thr:2.5,cands,mut:(bb,i)=>{bb[i].teece=null;}};
+  }
+  /* Spider Cannibalism. The sign is a modality, so it is chosen at random --
+     but the target is picked to suit whichever sign came up, so both halves
+     land somewhere useful. This weighs the good half. */
+  if(st.fx==='sacSpiderling'){
+    let fed=false;
+    for(let i=0;i<BN;i++)if(b[i].teece&&sameTeam(b[i].teece.owner,p)&&canEatSpiderling(b,i))fed=true;
+    if(!fed)return null;
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&isWebbed(b,i)&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return null;
+    return {thr:1.2,cands,mut:(bb,i)=>{
+      const o=bb[i].teece;if(!o)return;
+      applyModT(o,sameTeam(o.owner,p)?5:-5,'temp');
+      for(let j=0;j<BN;j++)if(bb[j].teece&&sameTeam(bb[j].teece.owner,p)&&canEatSpiderling(bb,j)){bb[j].teece=null;break;}
+    }};
+  }
   return null;
 }
 async function aiSupport(){
@@ -5458,6 +5838,39 @@ function aiActMuts(cell,ent){
   if(st.fx==='move'){
     for(const j of movePool(cell,st.range))
       if(openAt(b,j))muts.push(bb=>{if(bb[cell].teece)moveT(bb,cell,j,false);});
+  }else if(st.fx==='spiderling'){
+    const silk=st.where==='web'||st.where==='webAll';
+    const after=ent.act.steps.find(s2=>s2.fx==='mod');
+    for(let j=0;j<BN;j++){
+      if(!openAt(b,j)||(silk&&!isWebbed(b,j)))continue;
+      muts.push(bb=>{
+        if(bb[j].teece)return;
+        putTeece(bb,j,makeTeece('TSP',p),false);
+        if(!after)return;
+        /* the '-1 to an enemy' half of Spinneret, spent on the weakest one */
+        let best=-1,bs=1e9;
+        for(let k2=0;k2<BN;k2++){
+          const o=bb[k2].teece;if(!o||sameTeam(o.owner,p))continue;
+          const tot=effSides(bb,k2).reduce((a,c)=>a+c,0);
+          if(tot<bs){bs=tot;best=k2;}
+        }
+        if(best>=0)applyModT(bb[best].teece,after.n,after.dur);
+      });
+    }
+  }else if(st.fx==='sacSpiderling'){
+    const after=ent.act.steps.find(s2=>s2.fx==='mod');
+    for(let f=0;f<BN;f++){
+      if(!b[f].teece||!sameTeam(b[f].teece.owner,p)||!canEatSpiderling(b,f))continue;
+      for(let j=0;j<BN;j++){
+        const o=b[j].teece;
+        if(!o||j===f||sameTeam(o.owner,p)||!canTarget(b,j,p))continue;
+        if(after&&after.where==='web'&&!isWebbed(b,j))continue;
+        muts.push(bb=>{
+          bb[f].teece=null;
+          if(after&&bb[j].teece)applyModT(bb[j].teece,after.n,after.dur);
+        });
+      }
+    }
   }else if(st.fx==='push'){
     const away=(from,to)=>{const dst=to+(to-from);if(dst<0||dst>=BN)return -1;
       if(row(from)===row(to)&&row(to)!==row(dst))return -1;return dst;};
@@ -5720,6 +6133,7 @@ function renderBoard(){
     const an=G.anim&&G.anim.cells.indexOf(i)>=0?G.anim.cls:null;
     if(an==='zap')cell.classList.add('zap');
     cell.innerHTML='';
+    if(isWebbed(G.board,i))cell.innerHTML+='<div class="weblayer"></div>';
     const bg=G.board[i].ground;
     if(bg){
       const gd=CARDS[bg.cardId];
@@ -5835,6 +6249,7 @@ function panelHtml(i){
   if(c.seed)h+='<div class="dt">'+pname(c.seed.owner)+' has a seed planted here, '+c.seed.turns+' turn'+(c.seed.turns===1?'':'s')+
     ' from growing. If the panel is empty then, a Teece is raised from the graveyard with '+sgn(c.seed.n||1)+'.</div>';
   if(c.enchant)h+='<div class="dt" style="color:var(--gold)">'+enchantText(c.enchant)+'</div>';
+  if(isWebbed(G.board,i))h+='<div class="dt" style="color:var(--gold)">This panel is Web. It belongs to neither side.</div>';
   return h;
 }
 function showDetail(i){
@@ -6157,6 +6572,24 @@ function statusesFor(p){
       nm(t)+' cannot be destroyed until the start of '+pname(t.immortalOwner)+"'s next turn.");
   }
 
+  /* --- the Web, and the two cards that change what standing on it means.
+         None of it is printed anywhere else on the board. --- */
+  let silk=0;for(let i=0;i<BN;i++)if(isWebbed(b,i))silk++;
+  if(silk)push('web','good','Web: '+silk+' panel'+(silk===1?'':'s'),
+    'The Web covers '+silk+' panel'+(silk===1?'':'s')+' and belongs to neither side \u2014 both decks stand on it. '+
+    'A battleground laid on a panel buries the silk under it unless the battleground spins its own.');
+  for(let i=0;i<BN;i++){
+    const wt=b[i].teece;
+    if(!wt||wt.silenced)continue;
+    const ally=sameTeam(wt.owner,p);
+    if(DEF(wt).webLock)push('weblock'+wt.uid,ally?'good':'bad',
+      (ally?'Web holds them: ':'Web holds you: ')+nm(wt),
+      nm(wt)+' pins every enemy of '+pname(wt.owner)+' that stands on the Web: they cannot move at all, by any card or ability.');
+    if(DEF(wt).webBrood)push('brood'+wt.uid,ally?'good':'warn','Brood Mother stands',
+      'While '+nm(wt)+' stands, every Spiderling on the Web \u2014 either side\u2019s \u2014 counts as 12/12/12/12 '+
+      'and can no longer be sacrificed, including by its own side.');
+  }
+
   /* --- the deck --- */
   if(G.mode!=='rogue'&&!pl.noDeckOut){
     if(!pl.deck.length)push('deckout','bad','Deck empty',
@@ -6208,29 +6641,58 @@ function renderStatus(){
 }
 function renderCounts(){
   const c=document.getElementById('counts');
-  c.innerHTML='';
   const teamed=teamsInPlay().some(tm=>seatsOnTeam(tm).length>1);
+  /* Fielded counts belong to the meter beside the board. What is left here is
+     what the meter cannot show: cards, not panels. */
+  let h='<span></span><span class="ch">hand</span><span class="ch">deck</span><span class="ch">grave</span>';
   for(let p=0;p<PLAYERS();p++){
-    const lc=realCount(p),field=livingCount(p),hand=G.players[p].hand.length,deck=G.players[p].deck.length;
+    const pl=G.players[p];
     const tag=teamed?' <span class="teamtag">side '+(teamOf(p)+1)+'</span>':'';
     const out=seatAlive(p)?'':' <span class="teamtag">out</span>';
-    c.innerHTML+='<div><span class="dot d'+p+'"></span>'+pname(p)+tag+out+'</div>'+
-      '<div>'+field+' fielded ('+lc+' count)</div>'+
-      '<div>'+hand+' hand · '+deck+' deck'+(deck<=2?' (!)':'')+' · '+G.players[p].grave.length+' grave</div>';
+    h+='<span class="cn"><span class="dot d'+p+'"></span>'+pname(p)+tag+out+'</span>'+
+      '<span class="cv">'+pl.hand.length+'</span>'+
+      '<span class="cv'+(pl.deck.length<=2&&!pl.noDeckOut&&G.mode!=='rogue'?' low':'')+'">'+pl.deck.length+'</span>'+
+      '<span class="cv">'+pl.grave.length+'</span>';
   }
-  /* Where the race actually stands. "Four fielded" is not a win and never was;
-     without this the only place that says so is the start screen. */
+  c.innerHTML=h;
+}
+/* ---- the meter ----
+   Where the race stands, drawn rather than written. "Four fielded" is not a
+   win and never was, so the chip counts the gap toward WIN_LEAD rather than
+   the pile. It reads leadState, the same call checkDomination decides on, so
+   what it shows and what ends the game cannot drift apart. */
+function domTitle(rows,st){
+  const parts=rows.map(r=>teamName(r.tm)+' '+r.n).join(', ');
+  const rule=' '+WIN_LEAD+' ahead at the end of a turn wins it, and Tokens never count.';
+  if(!st||st.gap===0)return 'Level on the field — '+parts+'.'+rule;
+  const who=teamName(st.lead.tm),pl=(who==='You'?'':'s');
+  return who+' lead'+pl+' by '+st.gap+' — '+parts+'.'+rule+
+    (st.blocked?' The Curse of Freezing is holding that win back.':'');
+}
+function renderDom(){
+  const el=document.getElementById('domBar');
+  if(!el||!G)return;
+  let me=0;
+  for(let q=0;q<PLAYERS();q++)if(!isAIP(q)){me=q;break;}
+  const mine=teamOf(me);
+  const rows=teamsInPlay().map(tm=>({tm,n:teamReal(tm)}));
+  const total=rows.reduce((a,r)=>a+r.n,0);
   const st=leadState();
-  if(st){
-    const who=teamName(st.lead.tm),s=(who==='You'?'':'s');
-    let msg;
-    if(st.gap===0)msg='Level. '+WIN_LEAD+' ahead at the end of a turn wins.';
-    else if(st.gap>=WIN_LEAD)msg=who+' lead'+s+' by '+st.gap+' — enough to win at the end of a turn.';
-    else msg=who+' lead'+s+' by '+st.gap+', and need'+s+' '+(WIN_LEAD-st.gap)+' more. '+
-      WIN_LEAD+' ahead at the end of a turn wins.';
-    if(st.blocked)msg+=' The Curse of Freezing is holding the win back.';
-    c.innerHTML+='<div class="racern">'+msg+'</div>';
+  const gap=st?st.gap:0;
+  const leader=(st&&gap>0)?st.lead.tm:null;
+  const seatOf=tm=>seatsOnTeam(tm)[0];
+  const cls=(st&&st.blocked&&gap>=WIN_LEAD)?' held':(gap>=WIN_LEAD-1?' near':'');
+  const tint=(cls||leader==null)?'':' style="color:var(--p'+seatOf(leader)+')"';
+  let h='<div class="domlead'+cls+'"'+tint+'>'+gap+'/'+WIN_LEAD+'</div>'+
+    '<div class="dommeter" title="'+escHtml(domTitle(rows,st))+'">';
+  if(!total)h+='<div class="domband empty" style="flex-grow:1"></div>';
+  /* everyone else stacks above; your own share fills from the bottom up */
+  else for(const r of rows.filter(x=>x.tm!==mine).concat(rows.filter(x=>x.tm===mine))){
+    if(!r.n)continue;
+    h+='<div class="domband t'+seatOf(r.tm)+'" style="flex-grow:'+r.n+'">'+
+      (r.n/total>=0.18?r.n:'')+'</div>';
   }
+  el.innerHTML=h+'</div>';
 }
 function renderLog(){
   const l=document.getElementById('log');
@@ -6327,7 +6789,7 @@ function render(){
   syncHandSlots();
   renderBoard();
   for(let p=0;p<PLAYERS();p++)renderHand(p);
-  renderCounts();renderWarn();renderLog();renderPrompt();renderActionBar();renderStatus();
+  renderCounts();renderDom();renderWarn();renderLog();renderPrompt();renderActionBar();renderStatus();
   const bd=document.getElementById('board');
   bd.style.setProperty('--bw',BW);
   bd.style.setProperty('--cs',(BW>=4?'86px':'110px'));
@@ -6460,6 +6922,8 @@ function restart(){
   document.getElementById('startOverlay').classList.remove('hidden');
   G=null;G_DRAFT=null;R=null;
   document.getElementById('board').innerHTML='';
+  const db=document.getElementById('domBar');
+  if(db)db.innerHTML='';
   document.getElementById('myHand').innerHTML='';
   const oh=document.getElementById('oppHands');
   if(oh)oh.innerHTML='';
@@ -6474,6 +6938,7 @@ if(HAS_DOM){
   });
   const vt=document.getElementById('verTag');
   if(vt)vt.textContent=versionLabel();
+  startSubtitle();
   document.getElementById('rAI').onclick=()=>start('rogue',true);
   document.getElementById('dAI').onclick=()=>start('deck',true);
   document.getElementById('p3AI').onclick=()=>start('three',true);
@@ -6527,7 +6992,8 @@ if(typeof module!=='undefined'){
     statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,
     plateHand,plateOf,platedSides,handPush,handTake,playEquip,queueFx,resolvePending,VERSION,
     getDecks:()=>DECKS,getPool:()=>POOL,allDraftable,bounceToHand,cloneBoard,fireMove,isBossCard,
-    setDeckData:d=>{DECKS=d.decks;FORMATS=d.formats;CLASSIC=d.classic;POOL=d.pool;}};
+    setDeckData:d=>{DECKS=d.decks;FORMATS=d.formats;CLASSIC=d.classic;POOL=d.pool;rebuildWebCards();},
+    isWebbed,isSpiderling,webBrood,canEatSpiderling,summonToken,isCornerCell,sideNbr};
 }
 </script>
 </body>
