@@ -538,7 +538,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:19,date:'2026-09-08'};
+const VERSION={build:20,date:'2026-09-08'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4858,7 +4858,10 @@ async function playTeece(p,handIdx){
   const sacables=[];for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken)sacables.push(i);}
   if(sacables.length<need){toast('Not enough Teece to sacrifice.');return false;}
   const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
-  if(!empt.length){toast('No empty space.');return false;}
+  /* A sacrifice empties the panel it was standing on, and that panel is a place
+     the new Teece may land. So a full board is only a wall when the card pays
+     for nothing. */
+  if(!empt.length&&!need){toast('No empty space.');return false;}
   const plan=(isAIP(p)&&AI_TEECE_PLAN)?AI_TEECE_PLAN:null;
   const sacP=[];
   for(let s=0;s<need;s++){
@@ -4867,7 +4870,10 @@ async function playTeece(p,handIdx){
     if(c==null||c==='CANCEL')return false;
     sacP.push(c);
   }
-  const spot=plan?plan.c:await chooseCell(p,empt,'Choose a space for '+d.name+'.',{cancel:true,mut:null});
+  const spots=empt.slice();
+  for(const c of sacP)if(!b[c].razed&&spots.indexOf(c)<0)spots.push(c);
+  spots.sort((x,y)=>x-y);
+  let spot=plan?plan.c:await chooseCell(p,spots,'Choose a space for '+d.name+'.',{cancel:true,mut:null});
   if(spot==null||spot==='CANCEL')return false;
   const sacked=[];
   for(const c of sacP){
@@ -4875,6 +4881,23 @@ async function playTeece(p,handIdx){
     if(!t.isToken&&!t.isCopy)sacked.push(t.cardId);
     await processDeath({cell:c,t,killers:[]});
     log(nm(t)+' is sacrificed.');
+  }
+  /* A death can fill the very panel it emptied -- an Egg Sac boiling over, a
+     resummon, a Token that arrives where its summoner fell. Ask again rather
+     than dropping the new Teece on top of whatever moved in. */
+  if(!openAt(b,spot)){
+    const open2=[];for(let i=0;i<BN;i++)if(openAt(b,i))open2.push(i);
+    if(!open2.length){
+      const gone=handTake(p,handIdx);
+      toGrave(p,id);
+      if(gone)dumpPlate(gone.plate,'with the card it was bolted to');
+      log(d.name+' has nowhere left to land, and is discarded.');
+      if(!G.viaReveal)G.teecePlayed=true;
+      await resolveCombat();render();
+      return true;
+    }
+    const alt=await chooseCell(p,open2,'The '+CN[spot]+' filled up. Choose another space for '+d.name+'.',{mut:null});
+    spot=(alt==null||alt==='CANCEL')?open2[0]:alt;
   }
   const worn=handTake(p,handIdx).plate;
   const t=makeTeece(id,p);
@@ -5817,7 +5840,8 @@ async function aiPlayTeece(){
   const p=G.turn,pl=G.players[p],b=G.board;
   if(G.teecePlayed)return false;
   const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
-  if(!empt.length)return false;
+  const anySac=b.some(c=>c.teece&&c.teece.owner===p&&!c.teece.isToken);
+  if(!empt.length&&!anySac)return false;
   const base=boardValue(b,p);
   let best=null,bg=-1e9;
   for(let h=0;h<pl.hand.length;h++){
@@ -5833,7 +5857,10 @@ async function aiPlayTeece(){
       sacP=scored.slice(0,need).map(x=>x.i);
     }
     const rots=(d.onPlay||[]).some(s=>s.fx==='rot')?[0,1,-1]:[0];
-    for(const c of empt){
+    /* the panels a sacrifice is about to clear are landing spots too */
+    const spots=empt.slice();
+    for(const sc of sacP)if(!b[sc].razed&&spots.indexOf(sc)<0)spots.push(sc);
+    for(const c of spots){
       for(const rot of rots){
         const bb=cloneBoard(b);
         for(const sc of sacP)simDeath(bb,{cell:sc,t:bb[sc].teece,killers:[]});
@@ -6487,10 +6514,13 @@ function teecePlayBlock(p){
   if(hexOn(p,'freeze'))return 'A Curse of Freezing holds you: no Teece may be played at all.';
   if(G.teecePlayed)return 'You have already played a Teece this turn, and only one Teece may be played per turn.';
   let room=0;for(let i=0;i<BN;i++)if(openAt(G.board,i))room++;
-  if(!room)return 'No panel is open. A Teece needs an empty, unrazed panel to arrive on.';
   let own=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p&&!t.isToken)own++;}
   if(held.every(id=>(CARDS[id].sac||0)>own))
     return 'Every Teece in your hand costs more sacrifices than you have Teece fielded to pay with.';
+  /* A sacrifice clears the panel it stood on, so a full board only stops the
+     Teece that pay nothing for one. */
+  if(!room&&!held.some(id=>(CARDS[id].sac||0)>0&&(CARDS[id].sac||0)<=own))
+    return 'No panel is open. A Teece needs an empty, unrazed panel to arrive on, and nothing in your hand pays a sacrifice to clear one.';
   return null;
 }
 function statusesFor(p){
