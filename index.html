@@ -545,7 +545,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:22,date:'2026-09-09'};
+const VERSION={build:23,date:'2026-09-09'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4891,6 +4891,22 @@ function rogueEnd(winner,why,t,x,btn){
     btn.textContent='Retry level '+lv;btn.onclick=()=>rogueLevel(true);
   }
 }
+/* A tap must not fall through onto whatever replaces the screen it landed on.
+   A phone sends the second click of a quick double-tap a moment after the
+   first, and by then the button that was under the thumb has been swapped for
+   a card on the next overlay -- which takes the click and chooses for you. It
+   is how a perk screen can be picked before it is read, and how a draft pick
+   can vanish. Cards ignore clicks until they have been on screen long enough
+   to have been looked at. */
+const TAP_ARM_MS=400;
+/* Only the moment an overlay comes back into view is dangerous. Redrawing a
+   screen that was already up -- the draft between picks -- arms nothing, so
+   drafting quickly never loses a pick. Call it before the screen is shown. */
+function tapArm(overlay){
+  const fresh=overlay.classList.contains('hidden');
+  const t=Date.now()+(fresh?TAP_ARM_MS:0);
+  return ()=>Date.now()>=t;
+}
 /* Three perks, drawn from the ones the run has not exhausted. A perk that only
    makes sense held once drops out of the offer after it is taken. */
 function perkOffer(){
@@ -4902,6 +4918,7 @@ function pickPerk(){
   if(!offer.length)return Promise.resolve(null);
   return new Promise(res=>{
     const overlay=document.getElementById('draftOverlay');
+    const ready=tapArm(overlay);
     overlay.classList.remove('hidden');
     hideHcapRow();
     document.getElementById('draftTitle').textContent='Level '+R.level+': take a perk';
@@ -4916,6 +4933,7 @@ function pickPerk(){
         '<div class="dtx">'+escHtml(pk.text)+'</div>'+
         (have?'<div class="dkw">held \u00d7'+have+' already</div>':'');
       el.addEventListener('click',()=>{
+        if(!ready())return;
         R.perks[pk.key]=have+1;
         overlay.classList.add('hidden');
         res(pk);
@@ -7073,6 +7091,7 @@ function draftName(p){
 }
 function renderDraft(p,offer,k,res){
   const overlay=document.getElementById('draftOverlay');
+  const ready=tapArm(overlay);
   overlay.classList.remove('hidden');
   hideHcapRow();
   const total=(G_DRAFT&&G_DRAFT.total)||20;
@@ -7098,7 +7117,7 @@ function renderDraft(p,offer,k,res){
     dc.innerHTML+='<div class="dnm">'+cd.name+'</div>';
     if(cd.kw)dc.innerHTML+='<div class="dkw">'+cd.kw.join(' / ')+'</div>';
     dc.innerHTML+='<div class="dty">'+cd.type+'</div><div class="dtx">'+cd.text.split('\n')[0]+'</div>';
-    dc.addEventListener('click',()=>{res(id);overlay.classList.add('hidden');});
+    dc.addEventListener('click',()=>{if(!ready())return;res(id);overlay.classList.add('hidden');});
     cards.appendChild(dc);
   }
   const deck=document.getElementById('draftDeck');
