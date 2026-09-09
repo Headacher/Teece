@@ -494,7 +494,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
       <div class="mode feature">
         <h3>Roguelike</h3>
         <p>Draft random cards from all decks and try to beat an increasingly powerful computer.
-           It never ends: every level you clear, take one of three perks and draft again.</p>
+           Ten levels: every one you clear, take one of three perks and draft again. No perk twice.</p>
         <div class="row">
           <button class="btn primary" id="rAI">Start run</button>
         </div>
@@ -545,7 +545,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:23,date:'2026-09-09'};
+const VERSION={build:24,date:'2026-09-09'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -578,6 +578,7 @@ if(HAS_DOM)loadDeckData();
    the decks arrive over fetch rather than being written into this file. */
 let WEB_CARDS={};
 function rebuildWebCards(){
+  DECK_OF={};
   WEB_CARDS={};
   for(const key of Object.keys(DECKS||{}))
     if(DECKS[key].web)for(const id of DECKS[key].cards)WEB_CARDS[id]=true;
@@ -944,12 +945,17 @@ function allDraftable(){
   }
   return out;
 }
+/* Motley Band asks this of every Teece on the board inside effSides, which is
+   itself called for every panel of every combat scan, so the answer is kept. */
+let DECK_OF={};
 function getCardDeck(cardId){
+  if(DECK_OF[cardId]!==undefined)return DECK_OF[cardId];
+  let out='teece100';
   for(const [key,deck] of Object.entries(DECKS)){
-    if(deck.cards.includes(cardId))return key;
+    if(deck.cards.includes(cardId)){out=key;break;}
   }
-  if(CLASSIC.includes(cardId))return 'classic';
-  return 'teece100';
+  if(out==='teece100'&&CLASSIC.includes(cardId))out='classic';
+  return DECK_OF[cardId]=out;
 }
 
 /* Can this card actually be put down right now? The forced-play rule leans on
@@ -2080,6 +2086,13 @@ let ADJ=[],DIAG=[],CN=[];
 const ALL=()=>{const a=[];for(let i=0;i<BN;i++)a.push(i);return a;};
 const row=i=>Math.floor(i/BW), col=i=>i%BW;
 const sameRow=(a,b)=>row(a)===row(b), sameCol=(a,b)=>col(a)===col(b);
+/* Muster gives two Teece on your opening turn of a level and one thereafter.
+   G.teecePlayed keeps its old meaning -- no more Teece this turn -- and is only
+   raised once the allowance is spent, so every reader of it stays correct. */
+function teeceCap(p){
+  if(!G||!perkN('doublePlay')||!sameTeam(p,0))return 1;
+  return ((G.players[p]&&G.players[p].turnsTaken)||0)<=1?2:1;
+}
 /* The panel that side k touches (0 top, 1 right, 2 bottom, 3 left), or -1 when
    that side is pressed against the rim of the board and can never be fought. */
 function sideNbr(i,k){
@@ -2164,16 +2177,16 @@ function newState(mode,vsAI,decks,extra){
     detailLock:null,detailHover:null,panelTap:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],graveLastTurn:[],
     epoch:++EPOCH,
     enemyBonus:extra.enemyBonus||0,level:extra.level||0,quiet:0,eventFlag:false,
-    perks:pk,robbed:false,
+    perks:pk,robbed:false,mourned:false,teeceThisTurn:0,
     modalNext:null,trap:null,pendingFx:[],tempControls:[],castingMagic:false,magicConsumed:false,
     seatNames:extra.seatNames||null};
   /* Well Supplied and Cannonball both land in the opening hand. Only seat 0
      ever holds perks, which is the only seat a run gives a player. */
   for(let q=0;q<s.players.length;q++){
-    const pp=s.players[q],lim=5+(q===0?(pk.handMore||0):0);
+    const pp=s.players[q],lim=5+(q===0&&pk.handMore?1:0);
     for(let i=0;i<lim&&pp.deck.length;i++){pp.hand.push(pp.deck.pop());pp.plate.push([]);}
   }
-  for(let c=0;c<(pk.cannon||0);c++){s.players[0].hand.push(590);s.players[0].plate.push([]);}
+  if(pk.cannon){s.players[0].hand.push(590);s.players[0].plate.push([]);}
   if(pk.vanguard)s.turn=0;
   return s;
 }
@@ -2351,6 +2364,10 @@ function effSides(b,i,parts){
     if(perkN('equipPlus')&&sameTeam(t.owner,0))addMod(s,perkN('equipPlus'),ed.name+', honed over the run');
     if(ed.modPerDef)addMod(s,ed.modPerDef*defOf(b,i),ed.name+', per point of Defence');
     if(ed.modPerAge)addMod(s,ed.modPerAge*(t.age||0),ed.name+', per turn stood');
+  }
+  if(perkN('deckMix')){
+    const mix=mixBonus(b,i);
+    if(mix)addMod(s,mix,'Motley Band, one for each other deck standing with it');
   }
   if(b[i].ground){
     const gd=CARDS[b[i].ground.cardId];
@@ -4614,6 +4631,12 @@ async function processDeath(d){
   }
   if(!gone){
     let handed=false;
+    /* Wake: the first of your own to fall each level. Tokens are not mourned. */
+    if(perkN('mourning')&&!G.mourned&&!t.isToken&&sameTeam(t.baseOwner,0)){
+      G.mourned=true;
+      log(nm(t)+' falls, and you draw from the wake.');
+      drawCards(0,2);
+    }
     /* Grave Robber takes the first body of the level, whoever it belonged to. */
     if(perkN('firstDead')&&!G.robbed&&!t.isToken&&!t.isCopy){
       G.robbed=true;handed=true;
@@ -4767,9 +4790,9 @@ function checkElimination(){
    is told and what the game does can never disagree. */
 const WIN_LEAD=4;
 /* ============ roguelike perks ============
-   A permanent edge on the run, chosen three at a time between levels. The count
-   is how many of that perk you hold: most stack, and the ones marked `once` are
-   dropped from the offer once taken. Everything is read through perkN, which
+   A permanent edge on the run, chosen three at a time between levels. Each is
+   taken at most once -- a perk you hold is dropped from the offer, because
+   stacking them ran away with the game. Everything is read through perkN, which
    answers zero outside a run, so the rest of the engine carries these without
    knowing the roguelike exists. Perks belong to seat 0 -- the only seat a run
    ever has a player in. */
@@ -4778,19 +4801,22 @@ const PERKS=[
   {key:'tokenPlus',  name:'Fat Tokens',    text:'All your Tokens get +3 on every side.'},
   {key:'cannon',     name:'Cannonball',    text:'Start every level holding a Cannonball: give one side of one Teece -4.'},
   {key:'bossPlus',   name:'Warlords',      text:'Your Minibosses get +2 and your Bosses get +4.'},
-  {key:'firstDead',  name:'Grave Robber',  text:'The first Teece to die each level, either side\u2019s, goes to your hand.',once:true},
+  {key:'firstDead',  name:'Grave Robber',  text:'The first Teece to die each level, either side\u2019s, goes to your hand.'},
   {key:'needLess',   name:'Closing In',    text:'You win the field with one Teece fewer of a lead.'},
   {key:'foeMore',    name:'Dug In',        text:'The enemy needs one Teece more of a lead to win the field.'},
-  {key:'vanguard',   name:'First Strike',  text:'You take the first turn of every level.',once:true},
+  {key:'vanguard',   name:'First Strike',  text:'You take the first turn of every level.'},
   {key:'draftMore',  name:'Quartermaster', text:'Draft one more card between levels.'},
   {key:'armour',     name:'Reinforced',    text:'All your Teece have +1 Defence.'},
   {key:'handMore',   name:'Well Supplied', text:'Start every level holding one more card.'},
   {key:'equipPlus',  name:'Whetted Gear',  text:'Every equip of yours gives +1 more.'},
-  {key:'tokensCount',name:'Swarm Tactics', text:'Your Tokens count toward winning the field.',once:true},
-  {key:'endBoost',   name:'Second Wind',   text:'At the end of each of your turns, your weakest Teece gets +2.'}
+  {key:'tokensCount',name:'Swarm Tactics', text:'Your Tokens count toward winning the field.'},
+  {key:'endBoost',   name:'Second Wind',   text:'At the end of each of your turns, your weakest Teece gets +2.'},
+  {key:'mourning',   name:'Wake',          text:'The first time one of yours is destroyed each level, draw two cards.'},
+  {key:'deckMix',    name:'Motley Band',   text:'Each of your Teece gets +1 for every other deck standing among your Teece.'},
+  {key:'doublePlay', name:'Muster',        text:'Play two Teece on the first turn of every level.'}
 ];
 const PERK_BY_KEY={};for(const pk of PERKS)PERK_BY_KEY[pk.key]=pk;
-const perkN=k=>(G&&G.perks&&G.perks[k])||0;
+const perkN=k=>(G&&G.perks&&G.perks[k])?1:0;
 /* What the perks add to one of your Teece as it is made. */
 function perkBoon(d,owner){
   if(!G||!G.perks||!sameTeam(owner,0))return 0;
@@ -4800,6 +4826,22 @@ function perkBoon(d,owner){
   if(sac===1)n+=2*perkN('bossPlus');
   else if(sac>=2)n+=4*perkN('bossPlus');
   return n;
+}
+/* Motley Band: how many decks OTHER than this Teece's own are standing among
+   the Teece you control. One Teece alone is worth nothing; a mixed field pays
+   every one of them. Tokens are not drafted cards, so they do not add a deck --
+   they still collect the bonus like anything else of yours. */
+function mixBonus(b,i){
+  const t=b[i].teece;
+  if(!t||!sameTeam(t.owner,0))return 0;
+  const seen={};
+  for(let j=0;j<BN;j++){
+    const o=b[j].teece;
+    if(!o||o.isToken||!sameTeam(o.owner,0))continue;
+    seen[getCardDeck(o.cardId)]=true;
+  }
+  delete seen[getCardDeck(t.cardId)];
+  return Object.keys(seen).length;
 }
 /* The lead a side needs to take the field. Four, moved by whichever of the two
    domination perks are held, and never less than one. */
@@ -4829,7 +4871,9 @@ function checkDomination(){
     return;
   }
   if(st.gap>=st.need){
-    endGame(st.lead.tm,teamName(st.lead.tm)+' ends the turn '+st.need+' Teece ahead of the field ('+
+    /* pname(0) is "You", so the verb has to agree with it */
+    const who=teamName(st.lead.tm);
+    endGame(st.lead.tm,who+(who==='You'?' end':' ends')+' the turn '+st.need+' Teece ahead of the field ('+
       scoreLine()+').'+(perkN('tokensCount')?'':' Tokens do not count.'));
   }
 }
@@ -4866,20 +4910,26 @@ function endGame(winner,why){
     render();
   }
 }
-/* The run has no last level. The enemy's handicap climbs a point a level and
-   stops at ROGUE_MAX_BONUS; past that the only thing still growing is what you
-   have picked up along the way. */
+/* Ten levels to a run. The enemy's handicap climbs a point a level, so the last
+   of them is fought against +9. */
+const ROGUE_LEVELS=10;
 const ROGUE_MAX_BONUS=10;
 const rogueBonus=lv=>Math.min(ROGUE_MAX_BONUS,lv-1);
 let R=null;
-const runPerk=k=>(R&&R.perks&&R.perks[k])||0;
+const runPerk=k=>(R&&R.perks&&R.perks[k])?1:0;
 function rogueEnd(winner,why,t,x,btn){
   const lv=R.level;
-  if(winner===teamOf(0)){
+  if(winner===teamOf(0)&&lv>=ROGUE_LEVELS){
+    const held=Object.keys(R.perks||{}).filter(k=>PERK_BY_KEY[k]).map(k=>PERK_BY_KEY[k].name);
+    t.textContent='Run complete';
+    x.textContent='All '+ROGUE_LEVELS+' levels cleared. '+why+
+      (held.length?' You finished carrying '+held.join(', ')+'.':'');
+    btn.textContent='New run';btn.onclick=restart;
+  }else if(winner===teamOf(0)){
     const nb=rogueBonus(lv+1);
     t.textContent='Level '+lv+' cleared';
-    x.textContent=why+' Next: take a perk, then draft '+(5+runPerk('draftMore'))+' more cards. Enemy Teece will carry +'+nb+
-      ' on every side'+(nb>=ROGUE_MAX_BONUS?', which is as heavy as they get \u2014 from here only you grow.':'.');
+    x.textContent=why+' Next: take a perk, then draft '+(5+runPerk('draftMore'))+' more cards. '+
+      'Enemy Teece will carry +'+nb+' on every side. '+(ROGUE_LEVELS-lv)+' level'+(ROGUE_LEVELS-lv===1?'':'s')+' to go.';
     btn.textContent='On to level '+(lv+1);btn.onclick=()=>{R.level++;rogueLevel();};
   }else if(winner===1){
     t.textContent='Run over at level '+lv;
@@ -4907,10 +4957,9 @@ function tapArm(overlay){
   const t=Date.now()+(fresh?TAP_ARM_MS:0);
   return ()=>Date.now()>=t;
 }
-/* Three perks, drawn from the ones the run has not exhausted. A perk that only
-   makes sense held once drops out of the offer after it is taken. */
+/* Three perks, drawn from the ones you do not already hold. */
 function perkOffer(){
-  const pool=PERKS.filter(pk=>!(pk.once&&runPerk(pk.key)));
+  const pool=PERKS.filter(pk=>!runPerk(pk.key));
   return shuffle(pool.slice()).slice(0,3);
 }
 function pickPerk(){
@@ -4926,15 +4975,13 @@ function pickPerk(){
     const box=document.getElementById('draftCards');
     box.innerHTML='';
     for(const pk of offer){
-      const have=runPerk(pk.key);
       const el=document.createElement('div');
       el.className='dcard nostat perkcard';
       el.innerHTML='<div class="dty">perk</div><div class="dnm">'+escHtml(pk.name)+'</div>'+
-        '<div class="dtx">'+escHtml(pk.text)+'</div>'+
-        (have?'<div class="dkw">held \u00d7'+have+' already</div>':'');
+        '<div class="dtx">'+escHtml(pk.text)+'</div>';
       el.addEventListener('click',()=>{
         if(!ready())return;
-        R.perks[pk.key]=have+1;
+        R.perks[pk.key]=1;
         overlay.classList.add('hidden');
         res(pk);
       });
@@ -5004,9 +5051,13 @@ async function playFromHand(p,handIdx){
   }
   return ok;
 }
+function spendTeecePlay(p){
+  G.teeceThisTurn=(G.teeceThisTurn||0)+1;
+  if(G.teeceThisTurn>=teeceCap(p))G.teecePlayed=true;
+}
 async function playTeece(p,handIdx){
   const pl=G.players[p],id=pl.hand[handIdx],d=CARDS[id],b=G.board;
-  if(G.teecePlayed&&!G.viaReveal){toast('Only one Teece per turn.');return false;}
+  if(G.teecePlayed&&!G.viaReveal){toast(teeceCap(p)>1?'Both Teece already played.':'Only one Teece per turn.');return false;}
   if(hexOn(p,'freeze')){toast('Frozen: you cannot play Teece.');return false;}
   const need=sacsNeeded(id);
   const sacables=[];for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken)sacables.push(i);}
@@ -5046,7 +5097,7 @@ async function playTeece(p,handIdx){
       toGrave(p,id);
       if(gone)dumpPlate(gone.plate,'with the card it was bolted to');
       log(d.name+' has nowhere left to land, and is discarded.');
-      if(!G.viaReveal)G.teecePlayed=true;
+      if(!G.viaReveal)spendTeecePlay(p);
       await resolveCombat();render();
       return true;
     }
@@ -5073,7 +5124,7 @@ async function playTeece(p,handIdx){
     const gd0=CARDS[b[spot].ground.cardId];
     if(gd0.gPlayMod){applyModT(t,gd0.gPlayMod,'perm');log(nm(t)+' is played onto '+gd0.name+': '+sgn(gd0.gPlayMod)+'.');}
   }
-  if(!G.viaReveal)G.teecePlayed=true;
+  if(!G.viaReveal)spendTeecePlay(p);
   log(pname(p)+' plays '+d.name+' at the '+CN[spot]+(G.viaReveal?' — revealed, so it doesn’t use this turn’s Teece play.':'.'));
   await anim([spot],'placed',140);
   if(worn.length){
@@ -5452,7 +5503,7 @@ async function endTurn(){
   if(G.over)return;
   G.players[p].teecePlayedLastTurn=G.players[p].teecePlayedThisTurn>0;
   tickHexes(p);
-  G.turn=nextLiveSeat(p);G.turnNum++;G.teecePlayed=false;
+  G.turn=nextLiveSeat(p);G.turnNum++;G.teecePlayed=false;G.teeceThisTurn=0;
   await startTurn();
 }
 /* Curse of Akathisia: the host is dragged one space at the end of EVERY turn,
@@ -6682,7 +6733,9 @@ function teecePlayBlock(p){
   const held=pl.hand.filter(id=>CARDS[id].type==='teece');
   if(!held.length)return 'You hold no Teece, so there is nothing to put on the field this turn.';
   if(hexOn(p,'freeze'))return 'A Curse of Freezing holds you: no Teece may be played at all.';
-  if(G.teecePlayed)return 'You have already played a Teece this turn, and only one Teece may be played per turn.';
+  if(G.teecePlayed)return teeceCap(p)>1
+    ?'You have played both Teece you get on your opening turn.'
+    :'You have already played a Teece this turn, and only one Teece may be played per turn.';
   let room=0;for(let i=0;i<BN;i++)if(openAt(G.board,i))room++;
   let own=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p&&!t.isToken)own++;}
   if(held.every(id=>(CARDS[id].sac||0)>own))
@@ -6860,7 +6913,7 @@ function statusesFor(p){
   if(G.perks&&sameTeam(p,0)){
     const held=Object.keys(G.perks).filter(k=>G.perks[k]&&PERK_BY_KEY[k]);
     if(held.length){
-      const lines=held.map(k=>PERK_BY_KEY[k].name+(G.perks[k]>1?' \u00d7'+G.perks[k]:'')+' \u2014 '+PERK_BY_KEY[k].text);
+      const lines=held.map(k=>PERK_BY_KEY[k].name+' \u2014 '+PERK_BY_KEY[k].text);
       push('perks','good','Perks: '+held.length,lines.join(' '));
     }
   }
@@ -7268,7 +7321,7 @@ if(typeof module!=='undefined'){
     getDecks:()=>DECKS,getPool:()=>POOL,allDraftable,bounceToHand,cloneBoard,fireMove,isBossCard,
     setDeckData:d=>{DECKS=d.decks;FORMATS=d.formats;CLASSIC=d.classic;POOL=d.pool;rebuildWebCards();},
     isWebbed,isSpiderling,webBrood,canEatSpiderling,summonToken,isCornerCell,sideNbr,
-    PERKS,perkN,winLeadFor,leadState,WIN_LEAD};
+    PERKS,perkN,winLeadFor,leadState,WIN_LEAD,teeceCap,mixBonus,getCardDeck,ROGUE_LEVELS};
 }
 </script>
 </body>
