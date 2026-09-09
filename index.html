@@ -408,6 +408,12 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .dcard.arted .dnm,.dcard.arted .ds,.dcard.arted .dkw,.dcard.arted .dty{text-shadow:0 0 4px var(--cardbg,var(--cream)),0 0 4px var(--cardbg,var(--cream)),0 0 3px var(--cardbg,var(--cream))}
 .dcard .dnm,.dcard .dtx{position:relative;z-index:1}
 .dcard .ds{z-index:1}
+.dcard.perkcard{background:linear-gradient(180deg,#3a3223,#2a231a);color:var(--cream);
+  border-color:var(--gold);min-height:170px;justify-content:flex-start}
+.dcard.perkcard .dty{color:var(--gold)}
+.dcard.perkcard .dnm{margin-top:8px;color:var(--cream)}
+.dcard.perkcard .dtx{margin-top:10px;padding-top:0;color:var(--cream2)}
+.dcard.perkcard .dkw{margin-top:auto;padding-top:10px;color:var(--gold)}
 .dcard.dsym{width:110px;min-height:110px;align-items:center;justify-content:center;gap:6px}
 .dcard.dsym .dsymbol{font-size:44px;line-height:1}
 .dcard.dsym .dnm{margin-top:0;font-size:15px}
@@ -487,7 +493,8 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
     <div class="modes">
       <div class="mode feature">
         <h3>Roguelike</h3>
-        <p>Draft random cards from all decks and try to beat an increasingly powerful computer.</p>
+        <p>Draft random cards from all decks and try to beat an increasingly powerful computer.
+           It never ends: every level you clear, take one of three perks and draft again.</p>
         <div class="row">
           <button class="btn primary" id="rAI">Start run</button>
         </div>
@@ -538,7 +545,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:21,date:'2026-09-08'};
+const VERSION={build:22,date:'2026-09-09'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -931,7 +938,7 @@ const CARD_ART={
 function allDraftable(){
   const out=[];
   for(const k of Object.keys(CARDS)){
-    if(CARDS[k].token)continue;
+    if(CARDS[k].token||CARDS[k].perkOnly)continue;
     const id=Number(k);
     if(Number.isFinite(id))out.push(id);
   }
@@ -1818,6 +1825,10 @@ const CARDS = {
     grants:{def:2,webCombat:2}},
  579:{name:'Spun Nest',type:'ground',gWeb:true,gWebAdj:true,gSpiderDef:1,
     text:'This panel and every panel adjacent to it count as Web. While it stands, every Spiderling on the Web has +1 Defence on top of the +1 the Web already gives it.'},
+ /* Not in any deck: Cannonball is handed out by a roguelike perk. */
+ 590:{name:'Cannonball',type:'magic',perkOnly:true,
+    text:'Select a Teece and one of its sides; that side gets -4.',
+    cast:[{fx:'modSide',n:-4}]},
  580:{name:'Egg Nest',type:'ground',gWeb:true,gEndTurn:'TSP',
     text:'This panel counts as Web. At the end of your turn, if nothing stands on it, a 4/4/4/4 Spiderling hatches here.'},
 };
@@ -2119,6 +2130,8 @@ function makeTeece(cardId,owner){
   const d=CARDS[cardId];
   const base=d.sides.slice();
   if(bonusApplies(owner))for(let k=0;k<4;k++)base[k]=Math.max(0,base[k]+G.enemyBonus);
+  const boon=perkBoon(d,owner);
+  if(boon)for(let k=0;k<4;k++)base[k]=Math.max(0,base[k]+boon);
   return {uid:UID++,cardId,owner,baseOwner:owner,base,perm:[0,0,0,0],temp:[0,0,0,0],
     equips:[],isToken:!!d.token,isCopy:false,resummoned:false,kwTemp:[],kwPerm:[],links:[],controls:[],
     defPerm:0,dodged:false,age:0,standCell:null,transformed:false,tickTotal:0,immortalOwner:null,
@@ -2132,6 +2145,9 @@ function newState(mode,vsAI,decks,extra){
      play on it. */
   const _spun=(extra&&extra.web!=null)?!!extra.web
     :(decks||[]).some(d=>d&&d.some(id=>WEB_CARDS[id]));
+  /* Perks ride on the state so the engine reads them the same way every mode
+     reads enemyBonus, and a game built without a run behind it sees none. */
+  const pk=Object.assign({},(extra&&extra.perks)||{});
   UID=1;extra=extra||{};
   const nP=extra.seats||2;
   const teams=extra.teams||Array.from({length:nP},(_,i)=>i);
@@ -2148,9 +2164,17 @@ function newState(mode,vsAI,decks,extra){
     detailLock:null,detailHover:null,panelTap:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],graveLastTurn:[],
     epoch:++EPOCH,
     enemyBonus:extra.enemyBonus||0,level:extra.level||0,quiet:0,eventFlag:false,
+    perks:pk,robbed:false,
     modalNext:null,trap:null,pendingFx:[],tempControls:[],castingMagic:false,magicConsumed:false,
     seatNames:extra.seatNames||null};
-  for(const p of s.players){for(let i=0;i<5&&p.deck.length;i++){p.hand.push(p.deck.pop());p.plate.push([]);}}
+  /* Well Supplied and Cannonball both land in the opening hand. Only seat 0
+     ever holds perks, which is the only seat a run gives a player. */
+  for(let q=0;q<s.players.length;q++){
+    const pp=s.players[q],lim=5+(q===0?(pk.handMore||0):0);
+    for(let i=0;i<lim&&pp.deck.length;i++){pp.hand.push(pp.deck.pop());pp.plate.push([]);}
+  }
+  for(let c=0;c<(pk.cannon||0);c++){s.players[0].hand.push(590);s.players[0].plate.push([]);}
+  if(pk.vanguard)s.turn=0;
   return s;
 }
 /* ---- hand plating ----
@@ -2324,6 +2348,7 @@ function effSides(b,i,parts){
   for(const e of t.equips){
     const ed=CARDS[e.cardId];
     addMod(s,ed.mod,ed.name);
+    if(perkN('equipPlus')&&sameTeam(t.owner,0))addMod(s,perkN('equipPlus'),ed.name+', honed over the run');
     if(ed.modPerDef)addMod(s,ed.modPerDef*defOf(b,i),ed.name+', per point of Defence');
     if(ed.modPerAge)addMod(s,ed.modPerAge*(t.age||0),ed.name+', per turn stood');
   }
@@ -2377,6 +2402,7 @@ function defOf(b,i){
   for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.def)d+=g.def;}
   if(b[i].ground){const gd=CARDS[b[i].ground.cardId];if(gd.gdef)d+=gd.gdef;}
   if(b[i].defMark&&b.some(c=>c.teece&&c.teece.uid===b[i].defMark.uid))d+=b[i].defMark.n;
+  if(sameTeam(t.owner,0))d+=perkN('armour');
   if(isSpiderling(t)&&isWebbed(b,i)){
     d+=WEB_DEF;
     for(let j=0;j<BN;j++){
@@ -4588,6 +4614,12 @@ async function processDeath(d){
   }
   if(!gone){
     let handed=false;
+    /* Grave Robber takes the first body of the level, whoever it belonged to. */
+    if(perkN('firstDead')&&!G.robbed&&!t.isToken&&!t.isCopy){
+      G.robbed=true;handed=true;
+      handPush(0,t.cardId);
+      log(nm(t)+' is dragged off the field and into '+pname(0)+"'s hand.");
+    }
     for(const e of t.equips){
       const g=CARDS[e.cardId].grants;
       if(g&&g.teeceReturn&&!handed&&!t.isToken&&!t.isCopy){
@@ -4693,7 +4725,12 @@ async function resolveCombat(){
 }
 /* ============ win checks ============ */
 function livingCount(p){let n=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p)n++;}return n;}
-function realCount(p){let n=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p&&!t.isToken)n++;}return n;}
+function realCount(p){
+  /* Swarm Tactics lets your Tokens hold the field like anything else. */
+  const tok=!!perkN('tokensCount')&&sameTeam(p,0);
+  let n=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p&&(tok||!t.isToken))n++;}
+  return n;
+}
 function totalTeece(p){
   let n=realCount(p);
   for(const id of G.players[p].hand)if(CARDS[id].type==='teece')n++;
@@ -4729,13 +4766,58 @@ function checkElimination(){
    and the counts panel reads the same state the check does -- what the player
    is told and what the game does can never disagree. */
 const WIN_LEAD=4;
+/* ============ roguelike perks ============
+   A permanent edge on the run, chosen three at a time between levels. The count
+   is how many of that perk you hold: most stack, and the ones marked `once` are
+   dropped from the offer once taken. Everything is read through perkN, which
+   answers zero outside a run, so the rest of the engine carries these without
+   knowing the roguelike exists. Perks belong to seat 0 -- the only seat a run
+   ever has a player in. */
+const PERKS=[
+  {key:'allPlus',    name:'Swollen Ranks', text:'All your Teece get +1 on every side.'},
+  {key:'tokenPlus',  name:'Fat Tokens',    text:'All your Tokens get +3 on every side.'},
+  {key:'cannon',     name:'Cannonball',    text:'Start every level holding a Cannonball: give one side of one Teece -4.'},
+  {key:'bossPlus',   name:'Warlords',      text:'Your Minibosses get +2 and your Bosses get +4.'},
+  {key:'firstDead',  name:'Grave Robber',  text:'The first Teece to die each level, either side\u2019s, goes to your hand.',once:true},
+  {key:'needLess',   name:'Closing In',    text:'You win the field with one Teece fewer of a lead.'},
+  {key:'foeMore',    name:'Dug In',        text:'The enemy needs one Teece more of a lead to win the field.'},
+  {key:'vanguard',   name:'First Strike',  text:'You take the first turn of every level.',once:true},
+  {key:'draftMore',  name:'Quartermaster', text:'Draft one more card between levels.'},
+  {key:'armour',     name:'Reinforced',    text:'All your Teece have +1 Defence.'},
+  {key:'handMore',   name:'Well Supplied', text:'Start every level holding one more card.'},
+  {key:'equipPlus',  name:'Whetted Gear',  text:'Every equip of yours gives +1 more.'},
+  {key:'tokensCount',name:'Swarm Tactics', text:'Your Tokens count toward winning the field.',once:true},
+  {key:'endBoost',   name:'Second Wind',   text:'At the end of each of your turns, your weakest Teece gets +2.'}
+];
+const PERK_BY_KEY={};for(const pk of PERKS)PERK_BY_KEY[pk.key]=pk;
+const perkN=k=>(G&&G.perks&&G.perks[k])||0;
+/* What the perks add to one of your Teece as it is made. */
+function perkBoon(d,owner){
+  if(!G||!G.perks||!sameTeam(owner,0))return 0;
+  let n=perkN('allPlus');
+  if(d.token)n+=3*perkN('tokenPlus');
+  const sac=d.sac||0;
+  if(sac===1)n+=2*perkN('bossPlus');
+  else if(sac>=2)n+=4*perkN('bossPlus');
+  return n;
+}
+/* The lead a side needs to take the field. Four, moved by whichever of the two
+   domination perks are held, and never less than one. */
+function winLeadFor(tm){
+  let n=WIN_LEAD;
+  if(G&&G.perks){
+    if(sameTeam(tm,0))n-=perkN('needLess');
+    else n+=perkN('foeMore');
+  }
+  return Math.max(1,n);
+}
 function leadState(){
   const tms=teamsInPlay();
   if(tms.length<2)return null;
   const counts=tms.map(tm=>({tm,n:teamReal(tm)}));
   counts.sort((x,y)=>y.n-x.n);
   const lead=counts[0],second=counts[1];
-  return {lead,second,gap:lead.n-second.n,
+  return {lead,second,gap:lead.n-second.n,need:winLeadFor(lead.tm),
           blocked:seatsOnTeam(lead.tm).some(s=>hexOn(s,'nowin'))};
 }
 function checkDomination(){
@@ -4743,12 +4825,12 @@ function checkDomination(){
   const st=leadState();
   if(!st)return;
   if(st.blocked){
-    if(st.gap>=WIN_LEAD)log('The Curse of Freezing holds the win back for now.');
+    if(st.gap>=st.need)log('The Curse of Freezing holds the win back for now.');
     return;
   }
-  if(st.gap>=WIN_LEAD){
-    endGame(st.lead.tm,teamName(st.lead.tm)+' ends the turn four Teece ahead of the field ('+
-      scoreLine()+'). Tokens do not count.');
+  if(st.gap>=st.need){
+    endGame(st.lead.tm,teamName(st.lead.tm)+' ends the turn '+st.need+' Teece ahead of the field ('+
+      scoreLine()+').'+(perkN('tokensCount')?'':' Tokens do not count.'));
   }
 }
 /* Who takes it if a deck runs dry right now: most Teece on the field wins, a
@@ -4784,18 +4866,21 @@ function endGame(winner,why){
     render();
   }
 }
-const ROGUE_LEVELS=4;
+/* The run has no last level. The enemy's handicap climbs a point a level and
+   stops at ROGUE_MAX_BONUS; past that the only thing still growing is what you
+   have picked up along the way. */
+const ROGUE_MAX_BONUS=10;
+const rogueBonus=lv=>Math.min(ROGUE_MAX_BONUS,lv-1);
 let R=null;
+const runPerk=k=>(R&&R.perks&&R.perks[k])||0;
 function rogueEnd(winner,why,t,x,btn){
   const lv=R.level;
-  if(winner===teamOf(0)&&lv>=ROGUE_LEVELS){
-    t.textContent='Run complete';
-    x.textContent='Level '+ROGUE_LEVELS+' cleared. '+why;
-    btn.textContent='New run';btn.onclick=restart;
-  }else if(winner===teamOf(0)){
+  if(winner===teamOf(0)){
+    const nb=rogueBonus(lv+1);
     t.textContent='Level '+lv+' cleared';
-    x.textContent=why+' Next: draft five more cards. Enemy Teece will have +'+lv+' on every side.';
-    btn.textContent='Draft for level '+(lv+1);btn.onclick=()=>{R.level++;rogueLevel();};
+    x.textContent=why+' Next: take a perk, then draft '+(5+runPerk('draftMore'))+' more cards. Enemy Teece will carry +'+nb+
+      ' on every side'+(nb>=ROGUE_MAX_BONUS?', which is as heavy as they get \u2014 from here only you grow.':'.');
+    btn.textContent='On to level '+(lv+1);btn.onclick=()=>{R.level++;rogueLevel();};
   }else if(winner===1){
     t.textContent='Run over at level '+lv;
     x.textContent=why;
@@ -4806,16 +4891,57 @@ function rogueEnd(winner,why,t,x,btn){
     btn.textContent='Retry level '+lv;btn.onclick=()=>rogueLevel(true);
   }
 }
+/* Three perks, drawn from the ones the run has not exhausted. A perk that only
+   makes sense held once drops out of the offer after it is taken. */
+function perkOffer(){
+  const pool=PERKS.filter(pk=>!(pk.once&&runPerk(pk.key)));
+  return shuffle(pool.slice()).slice(0,3);
+}
+function pickPerk(){
+  const offer=perkOffer();
+  if(!offer.length)return Promise.resolve(null);
+  return new Promise(res=>{
+    const overlay=document.getElementById('draftOverlay');
+    overlay.classList.remove('hidden');
+    hideHcapRow();
+    document.getElementById('draftTitle').textContent='Level '+R.level+': take a perk';
+    document.getElementById('draftInfo').textContent='One of the three, kept for the rest of the run.';
+    const box=document.getElementById('draftCards');
+    box.innerHTML='';
+    for(const pk of offer){
+      const have=runPerk(pk.key);
+      const el=document.createElement('div');
+      el.className='dcard nostat perkcard';
+      el.innerHTML='<div class="dty">perk</div><div class="dnm">'+escHtml(pk.name)+'</div>'+
+        '<div class="dtx">'+escHtml(pk.text)+'</div>'+
+        (have?'<div class="dkw">held \u00d7'+have+' already</div>':'');
+      el.addEventListener('click',()=>{
+        R.perks[pk.key]=have+1;
+        overlay.classList.add('hidden');
+        res(pk);
+      });
+      box.appendChild(el);
+    }
+    document.getElementById('draftDeck').textContent='';
+  });
+}
 async function rogueLevel(replay){
   document.getElementById('endOverlay').classList.add('hidden');
   if(!replay){
-    G_DRAFT={decks:[R.deck,[]],vsAI:true,total:R.deck.length+5,
-      title:'Level '+R.level+' draft',info:'Add five cards to your deck.'};
-    await humanDraftInto(0,R.deck,R.queue,5);
+    if(R.level>1){
+      const took=await pickPerk();
+      document.getElementById('draftOverlay').classList.add('hidden');
+      if(took)R.perkLog.push(took.name);
+    }
+    const n=5+runPerk('draftMore');
+    G_DRAFT={decks:[R.deck,[]],vsAI:true,total:R.deck.length+n,
+      title:'Level '+R.level+' draft',info:'Add '+n+' cards to your deck.'};
+    await humanDraftInto(0,R.deck,R.queue,n);
     document.getElementById('draftOverlay').classList.add('hidden');
     R.oppDeck=aiDraftDeck(R.deck.length);
   }
-  G=newState('rogue',true,[R.deck.slice(),R.oppDeck.slice()],{enemyBonus:R.level-1,level:R.level});
+  G=newState('rogue',true,[R.deck.slice(),R.oppDeck.slice()],
+    {enemyBonus:rogueBonus(R.level),level:R.level,perks:R.perks});
   render();
   await startTurn();
 }
@@ -5283,6 +5409,22 @@ async function endTurn(){
     if(gd.gEndTurn&&g.owner===p&&!G.board[i].teece){
       summonToken(G.board,i,gd.gEndTurn,g.owner,true);
       log(gd.name+' fields a '+CARDS[gd.gEndTurn].name+' at the '+CN[i]+'.');
+    }
+  }
+  /* Second Wind shores up whichever of yours is thinnest, at the close of your
+     own turn only. */
+  if(sameTeam(p,0)&&perkN('endBoost')){
+    let pick=-1,lo=1e9;
+    for(let i=0;i<BN;i++){
+      const t=G.board[i].teece;
+      if(!t||!sameTeam(t.owner,0))continue;
+      const tot=effSides(G.board,i).reduce((a,c)=>a+c,0);
+      if(tot<lo){lo=tot;pick=i;}
+    }
+    if(pick>=0){
+      const n=2*perkN('endBoost');
+      applyModT(G.board[pick].teece,n,'perm');
+      log(nm(G.board[pick].teece)+' catches a second wind: '+sgn(n)+'.');
     }
   }
   await resolveCombat();
@@ -6696,6 +6838,15 @@ function statusesFor(p){
       'and can no longer be sacrificed, including by its own side.');
   }
 
+  /* --- what the run has handed you --- */
+  if(G.perks&&sameTeam(p,0)){
+    const held=Object.keys(G.perks).filter(k=>G.perks[k]&&PERK_BY_KEY[k]);
+    if(held.length){
+      const lines=held.map(k=>PERK_BY_KEY[k].name+(G.perks[k]>1?' \u00d7'+G.perks[k]:'')+' \u2014 '+PERK_BY_KEY[k].text);
+      push('perks','good','Perks: '+held.length,lines.join(' '));
+    }
+  }
+
   /* --- the deck --- */
   if(G.mode!=='rogue'&&!pl.noDeckOut){
     if(!pl.deck.length)push('deckout','bad','Deck empty',
@@ -6769,7 +6920,8 @@ function renderCounts(){
    what it shows and what ends the game cannot drift apart. */
 function domTitle(rows,st){
   const parts=rows.map(r=>teamName(r.tm)+' '+r.n).join(', ');
-  const rule=' '+WIN_LEAD+' ahead at the end of a turn wins it, and Tokens never count.';
+  const need=st?st.need:WIN_LEAD;
+  const rule=' '+need+' ahead at the end of a turn wins it'+(perkN('tokensCount')?'.':', and Tokens never count.');
   if(!st||st.gap===0)return 'Level on the field — '+parts+'.'+rule;
   const who=teamName(st.lead.tm),pl=(who==='You'?'':'s');
   return who+' lead'+pl+' by '+st.gap+' — '+parts+'.'+rule+
@@ -6781,18 +6933,19 @@ function renderDom(){
   const rows=teamsInPlay().map(tm=>({tm,n:teamReal(tm)}));
   const st=leadState();
   const raw=st?st.gap:0;
-  const gap=Math.min(raw,WIN_LEAD);
+  const need=st?st.need:WIN_LEAD;
+  const gap=Math.min(raw,need);
   const leader=raw>0?st.lead.tm:null;
   const seat=leader!=null?seatsOnTeam(leader)[0]:null;
-  const cls=(st&&st.blocked&&raw>=WIN_LEAD)?' held':(gap>=WIN_LEAD-1?' near':'');
+  const cls=(st&&st.blocked&&raw>=need)?' held':(gap>=need-1?' near':'');
   const tint=(cls||seat==null)?'':' style="color:var(--p'+seat+')"';
-  let h='<div class="domlead'+cls+'"'+tint+'>'+gap+'/'+WIN_LEAD+'</div>'+
+  let h='<div class="domlead'+cls+'"'+tint+'>'+gap+'/'+need+'</div>'+
     '<div class="dommeter" title="'+escHtml(domTitle(rows,st))+'">';
   /* One segment per Teece of the lead. Level is a blank gauge; each Teece a
      side goes ahead lights one more in that side's colour, and a full gauge is
      the win. The bar shows the race, not the pile: holding the whole board
      while level lights nothing. Laid out bottom-up. */
-  for(let k=1;k<=WIN_LEAD;k++)
+  for(let k=1;k<=need;k++)
     h+='<div class="domseg'+(k<=gap?' on t'+seat:'')+'"></div>';
   el.innerHTML=h+'</div>';
 }
@@ -6967,7 +7120,7 @@ async function start(mode,vsAI){
 async function startInner(mode,vsAI){
   document.getElementById('startOverlay').classList.add('hidden');
   if(mode==='rogue'){
-    R={level:1,deck:[],queue:shuffle(allDraftable()),oppDeck:[]};
+    R={level:1,deck:[],queue:shuffle(allDraftable()),oppDeck:[],perks:{},perkLog:[]};
     await rogueLevel(false);
     return;
   }
@@ -7095,7 +7248,8 @@ if(typeof module!=='undefined'){
     plateHand,plateOf,platedSides,handPush,handTake,playEquip,queueFx,resolvePending,VERSION,
     getDecks:()=>DECKS,getPool:()=>POOL,allDraftable,bounceToHand,cloneBoard,fireMove,isBossCard,
     setDeckData:d=>{DECKS=d.decks;FORMATS=d.formats;CLASSIC=d.classic;POOL=d.pool;rebuildWebCards();},
-    isWebbed,isSpiderling,webBrood,canEatSpiderling,summonToken,isCornerCell,sideNbr};
+    isWebbed,isSpiderling,webBrood,canEatSpiderling,summonToken,isCornerCell,sideNbr,
+    PERKS,perkN,winLeadFor,leadState,WIN_LEAD};
 }
 </script>
 </body>
