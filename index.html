@@ -549,7 +549,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:27,date:'2026-09-10'};
+const VERSION={build:28,date:'2026-09-10'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -961,11 +961,11 @@ const CARD_ART={
   "TR":["    .---.    ", "  ,'#####',  ", " /#########\\ ", " \\#########/ ", "  `-------'  "],
   "TS":["    \\ | /    ", "     \\|/     ", "   .--+--.   ", "      |      ", " ~~~~~~~~~~~ "]};
 /* Roguelike drafts from the whole card list, not the curated POOL: every
-   card in the game that is not a Token can turn up. */
+   card in the game that is not a Token or Spider can turn up. */
 function allDraftable(){
   const out=[];
   for(const k of Object.keys(CARDS)){
-    if(CARDS[k].token||CARDS[k].perkOnly)continue;
+    if(CARDS[k].token||CARDS[k].perkOnly||CARDS[k].spider)continue;
     const id=Number(k);
     if(Number.isFinite(id))out.push(id);
   }
@@ -1746,8 +1746,9 @@ const CARDS = {
  543:{name:'Echo Pixie',type:'teece',sides:[3,3,3,3],pixie:true,kw:['flying'],
     text:'Flying. When destroyed: copy a magic card out of your deck or your graveyard into your hand. The original stays where it lies.',
     onDeath:[{fx:'copyMagic'}]},
- 544:{name:'Updraught Pixie',type:'teece',sides:[2,2,2,2],def:6,pixie:true,kw:['flying'],pixieFly:{n:5,dur:'temp'},
-    text:'Flying, Defence 6. Whenever another of your pixies flies, it gets +5 until the end of the turn.'},
+ 544:{name:'Changeling',type:'teece',sides:[0,0,0,0],pixie:true,
+    text:'When played: select a Teece. This becomes an exact copy of it.',
+    onPlay:[{fx:'shapeshift'}]},
  545:{name:'Spiteful Pixie',type:'teece',sides:[2,3,5,1],pixie:true,kw:['flying'],
     text:'Flying. Whatever destroys this is destroyed with it, unless it is a Boss.',
     onDeath:[{fx:'killerDies'}]},
@@ -1761,10 +1762,10 @@ const CARDS = {
     onPlay:[{fx:'token',tok:'T6',where:'any',count:2,linked:true}],
     onMove:[{fx:'token',tok:'T6',where:'any',count:1,linked:true}]},
  549:{name:'Trickspinner',type:'teece',sides:[2,2,2,2],pixie:true,kw:['flying'],
-    text:'Flying. Once per your turn: conjure two random magic cards from anywhere in the game into your hand.',
+    text:'Flying. Once per your turn: conjure two random Pixie magic cards into your hand.',
     act:[{name:'Spin a trick',once:'turn',steps:[{fx:'conjure',n:2}]}]},
  550:{name:'Wisp of Nothing',type:'teece',sides:[0,0,0,0],pixie:true,kw:['flying'],
-    text:'Flying. When played: conjure a random magic card from anywhere in the game. When this moves: conjure two.',
+    text:'Flying. When played: conjure a random Pixie magic card. When this moves: conjure two.',
     onPlay:[{fx:'conjure',n:1}],onMove:[{fx:'conjure',n:2}]},
  551:{name:'Spellbound Pixie',type:'teece',sides:[3,1,4,1],sac:1,pixie:true,kw:['flying'],
     text:'Flying. Sacrifice one fielded Teece to play. Whenever you play a magic card: this gets +5 until the end of the turn, +2 permanently, and may move one space.',
@@ -1772,29 +1773,29 @@ const CARDS = {
  552:{name:'Pixie Queen',type:'teece',sides:[4,4,4,4],sac:2,pixie:true,kw:['flying'],
     text:'Boss. Flying. Sacrifice two fielded Teece to play. Every other pixie of yours gets +10.',
     aura:{who:'ally',where:'global',n:10,pixieOnly:true}},
- 553:{name:'Mind Control',type:'magic',
+ 553:{name:'Mind Control',type:'magic',pixie:true,
     text:'Take control of a non-Boss enemy Teece until the end of the turn.',
     cast:[{fx:'controlTemp'}]},
- 554:{name:'Pixie Projection',type:'magic',
+ 554:{name:'Pixie Projection',type:'magic',pixie:true,
     text:'Every pixie of yours gains +8 Defence until the end of your next turn.',
     cast:[{fx:'pixieDef',n:8}]},
- 555:{name:'Enlarge',type:'magic',
+ 555:{name:'Enlarge',type:'magic',pixie:true,
     text:'Select a Teece; it gets +10 until the end of the turn.',
     cast:[{fx:'mod',where:'global',n:10,dur:'temp'}]},
- 556:{name:'Shrink',type:'magic',
+ 556:{name:'Shrink',type:'magic',pixie:true,
     text:'Select a Teece; it is 3 on every side until the end of the turn. Anything stacked on top of it still counts.',
     cast:[{fx:'shrink',n:3}]},
- 557:{name:'Magic Wings',type:'magic',
+ 557:{name:'Magic Wings',type:'magic',pixie:true,
     text:'Select a flying Teece; it may fly twice more this turn.',
     cast:[{fx:'flyBoost',n:2}]},
- 558:{name:'Silence',type:'magic',
+ 558:{name:'Silence',type:'magic',pixie:true,
     text:'Select a Teece; strip every bonus and penalty off it and negate its effects for the rest of the game. The next Teece your opponent plays arrives with -2.',
     cast:[{fx:'unmake'},{fx:'nextMod',n:-2,who:'enemy'}]},
- 559:{name:'Invisibility',type:'magic',
+ 559:{name:'Invisibility',type:'magic',pixie:true,
     text:'Select one of your pixies; it cannot be destroyed until the end of your next turn.',
     cast:[{fx:'invis'}]},
- 560:{name:'Enchantment',type:'magic',
-    text:'Conjure two random magic cards from anywhere in the game into your hand.',
+ 560:{name:'Enchantment',type:'magic',pixie:true,
+    text:'Conjure two random Pixie magic cards into your hand.',
     cast:[{fx:'conjure',n:2}]},
  /* ---- Spider: a cannibal swarm that lives on the Web ----
     The Web is board state rather than a card. A deck that carries it lays it
@@ -1839,13 +1840,13 @@ const CARDS = {
     onPlay:[{fx:'spiderling',where:'webAll'}]},
  572:{name:'Brood Mother',type:'teece',sides:[8,8,8,8],spider:true,sac:2,webBrood:true,
     text:'Sacrifice two fielded Teece to play. While she stands, every Spiderling on the Web \u2014 either side\u2019s \u2014 has base 12/12/12/12 and can no longer be sacrificed.'},
- 573:{name:'Burst',type:'magic',
+ 573:{name:'Burst',type:'magic',spider:true,
     text:'Select up to four empty Web panels; a 4/4/4/4 Spiderling appears on each.',
     cast:[{fx:'spiderling',where:'web',count:4,may:true}]},
- 574:{name:'Eaten Alive',type:'magic',
+ 574:{name:'Eaten Alive',type:'magic',spider:true,
     text:'Sacrifice three Spiderlings, then select any Teece; destroy it.',
     cast:[{fx:'sacSpiderling',need:3},{fx:'destroy'}]},
- 575:{name:'Spider Cannibalism',type:'magic',
+ 575:{name:'Spider Cannibalism',type:'magic',spider:true,
     text:'Sacrifice a Spiderling, then select a Teece on the Web: it gets +5 or -5 until the end of the turn, and may then move to any empty Web panel.',
     cast:[{fx:'sacSpiderling',req:true},
       {fx:'choose',msg:'Spider Cannibalism:',opts:[
@@ -1890,8 +1891,8 @@ const CARDS = {
     text:'Twice per your turn: Drain 1, from an ally only. If it does not drain twice on your turn, by any means, it is destroyed.',
     act:[{name:'Drain an ally',once:'turn',times:2,steps:[{fx:'drain',n:1,allyOnly:true}]}]},
  609:{name:'Puppeteer Lord',type:'teece',sides:[8,8,8,8],vampire:true,
-    text:'When played: summon two 5/5/5/5 Meat Puppet Tokens that your opponent controls.',
-    onPlay:[{fx:'token',tok:'TMP',count:2,foe:true}]},
+    text:'When played: summon a 5/5/5/5 Meat Puppet Token that your opponent places.',
+    onPlay:[{fx:'token',tok:'TMP',count:1,foe:true}]},
  610:{name:'Transmogrifying Vampire',type:'teece',sides:[6,6,6,6],vampire:true,
     forms:[{name:'Humanoid',sides:[5,5,5,5],def:1,
             act:[{name:'Drain 1',once:'turn',steps:[{fx:'drain',n:1}]}]},
@@ -4523,6 +4524,28 @@ async function FXRUN(st,ctx){
     noteTargeted(p);
     await anim([c],'zap');
     return;}
+  case 'shapeshift':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(t&&canTarget(b,i,p))cands.push(i);
+    }
+    if(!cands.length)return none('There is no Teece to copy.');
+    const c=await pickCell(cands,'Choose a Teece to become.',
+      (bb,i)=>{const tgt=bb[i].teece;putTeece(bb,ctx.cell,makeTeece(tgt.cardId,p),false);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const target=b[c].teece;
+    const card=CARDS[target.cardId];
+    ctx.t.cardId=target.cardId;
+    ctx.t.base=card.sides.slice();
+    if(bonusApplies(ctx.t.owner))for(let k=0;k<4;k++)ctx.t.base[k]=Math.max(0,ctx.t.base[k]+G.enemyBonus);
+    const boon=perkBoon(card,ctx.t.owner);
+    if(boon)for(let k=0;k<4;k++)ctx.t.base[k]=Math.max(0,ctx.t.base[k]+boon);
+    ctx.t.temp=[0,0,0,0];
+    ctx.t.defTemp=0;
+    log(nm(ctx.t)+' becomes '+nm(target)+'.');
+    return;}
   case 'raze':{
     const cands=[];
     for(let i=0;i<BN;i++)if(!b[i].teece&&!b[i].razed)cands.push(i);
@@ -4549,9 +4572,11 @@ async function FXRUN(st,ctx){
   /* ---- Witch: Teece abilities ---- */
   /* ---- Pixie: magic conjured, borrowed and stretched ---- */
   case 'conjure':{
-    /* Pixies pull magic out of the air: any magic card in the game, not just
-       the deck you brought. */
-    const pool=Object.keys(CARDS).filter(k=>/^[0-9]+$/.test(k)&&CARDS[k].type==='magic').map(Number);
+    /* Pixie magic avoids Spider. */
+    const source=ctx.t||{cardId:-1};
+    const sourceCard=CARDS[source.cardId];
+    let pool=Object.keys(CARDS).filter(k=>/^[0-9]+$/.test(k)&&CARDS[k].type==='magic').map(Number);
+    if(sourceCard&&sourceCard.pixie)pool=pool.filter(cid=>!CARDS[cid].spider);
     if(!pool.length)return none('There is no magic to conjure.');
     const got=[];
     for(let k=0;k<(st.n||1);k++){
