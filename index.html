@@ -549,7 +549,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:26,date:'2026-09-10'};
+const VERSION={build:27,date:'2026-09-10'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1887,7 +1887,7 @@ const CARDS = {
     onEnemyLoss:{kw:['flying','ranged']},
     text:'When one of your effects costs an enemy attributes, this gains Flying and Ranged until the end of the turn.'},
  608:{name:'Parasite',type:'teece',sides:[7,7,7,7],vampire:true,mustDrain:2,
-    text:'Twice per your turn: Drain 1, from an ally only. If it does not drain twice on your turn, it is destroyed.',
+    text:'Twice per your turn: Drain 1, from an ally only. If it does not drain twice on your turn, by any means, it is destroyed.',
     act:[{name:'Drain an ally',once:'turn',times:2,steps:[{fx:'drain',n:1,allyOnly:true}]}]},
  609:{name:'Puppeteer Lord',type:'teece',sides:[8,8,8,8],vampire:true,
     text:'When played: summon two 5/5/5/5 Meat Puppet Tokens that your opponent controls.',
@@ -1973,6 +1973,12 @@ function drainMult(t){
   if(!t)return 1;
   for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.drainDouble)return 2;}
   return 1;
+}
+/* A Teece has fed. What is counted is the drinking, not the biting: Suck picks
+   its victim and its drinker separately, and the Teece that drank the blood is
+   the one that ate, whatever card poured it. The Parasite's quota reads this. */
+function noteFed(t){
+  if(t)t.drainsThisTurn=(t.drainsThisTurn||0)+1;
 }
 function applyDrain(b,i,amt,byPlayer,byTeece){
   const o=b[i].teece;
@@ -3189,7 +3195,7 @@ async function FXRUN(st,ctx){
       applyModT(drinker,lost,'perm');
       log(nm(drinker)+' swells by '+lost+'.');
     }
-    if(ctx.t)ctx.t.drainsThisTurn=(ctx.t.drainsThisTurn||0)+1;
+    noteFed(drinker);
     ctx.last=c;
     await anim([c],'zap');
     return;}
@@ -3209,7 +3215,7 @@ async function FXRUN(st,ctx){
     const lost=applyDrain(b,c,held,p,self);
     log(nm(b[c].teece)+' is drained of '+lost+' from the bank.');
     if(lost>0)applyModT(self,lost,'perm');
-    self.drainsThisTurn=(self.drainsThisTurn||0)+1;
+    noteFed(self);
     await anim([c],'zap');
     return;}
   /* Drain every enemy at once, for the one that does it every turn. */
@@ -3225,6 +3231,7 @@ async function FXRUN(st,ctx){
     if(!hit.length)return none('There is nobody to drain.');
     log(hit.length+' enemies are drained of '+got+' between them.');
     if(self&&got)applyModT(self,got,'perm');
+    noteFed(self);
     await anim(hit,'zap');
     return;}
   /* Switch shape, or pick one on the way in. */
@@ -3250,6 +3257,7 @@ async function FXRUN(st,ctx){
     const lost=applyDrain(b,c,amt,own,heir);
     log(nm(b[c].teece)+' is drained of '+lost+'.');
     if(lost>0){applyModT(heir,lost,'perm');log(nm(heir)+' swells by '+lost+'.');}
+    noteFed(heir);
     await anim([c],'zap');
     return;}
   case 'transform':{
@@ -5837,7 +5845,7 @@ async function endTurn(){
       if(!o||sameTeam(o.owner,t.owner)||!canTarget(G.board,j,t.owner))continue;
       got+=applyDrain(G.board,j,ed.n*drainMult(t),t.owner,t);
     }
-    if(got){applyModT(t,got,'perm');log(nm(t)+' feeds on the field: '+sgn(got)+'.');}
+    if(got){applyModT(t,got,'perm');log(nm(t)+' feeds on the field: '+sgn(got)+'.');noteFed(t);}
   }
   /* And the one that starves. It has to bite its quota on its own turn or it
      goes with the hunger. */
