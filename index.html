@@ -503,9 +503,9 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
       <span class="rk">Each turn</span>
       <span>One Teece. Equips, magic and battlegrounds are unlimited.</span>
       <span class="rk">Undying</span>
-      <span>A Zombie printed <i>X Undying Y</i> gets back up X times a game on the panel it fell on, each return
-            worth Y more than the last, and cannot be destroyed again until the end of the next turn.
-            Where no X is printed it is one.</span>
+      <span>A Zombie printed <i>X Undying Y</i> gets back up X times a game, on any free panel you choose, each
+            return worth Y more than the last. Nothing protects it once it is up, so where you stand it
+            is the whole of the decision. Where no X is printed it is one.</span>
       <span class="rk">Winning</span>
       <span>Wipe out every enemy Teece, end a turn four Teece ahead (Tokens never count),
             or hold the bigger field when a player must draw from an empty deck.</span>
@@ -566,7 +566,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:29,date:'2026-09-10'};
+const VERSION={build:30,date:'2026-09-10'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1984,11 +1984,11 @@ const CARDS = {
     one return at 0/0/0/0, a body with nothing left but the panel it holds.
     Where no X is written it is 1.
 
-    A body that has just hauled itself up is safe until the end of the next
-    turn. It gets up beside whatever killed it, so without that rule the same
-    combat can kill it again on the very next pass and burn several lives in
-    one exchange -- roughly halving how often a returned zombie is still
-    holding its panel a turn later. The measurement is in undyingReturn.
+    A body that gets back up comes back ANYWHERE there is room, and nothing
+    protects it once it is standing. Placing it is the whole of the defence:
+    put it back in front of the thing that killed it and the next life goes on
+    the same exchange, so the choice of panel is the decision the mechanic is
+    really handing the player.
 
     The tally belongs to the card and not to the body standing on the field, so
     bouncing a zombie to hand does not launder it. Two cards wind it back, and
@@ -5382,9 +5382,13 @@ async function drainFx(){
    Shroud, which was built to ride the corpse down and come back up with it. */
 async function undyingReturn(t,cell){
   const b=G.board,p=t.baseOwner,u=undyOf(t.cardId);
+  /* It comes back ANYWHERE there is room, not on the panel it fell on. That is
+     the whole of the zombie's defence: nothing protects the body once it is up,
+     so getting out of reach of whatever just killed it is the choice the player
+     is being handed. Coming back where it fell would stand it straight back in
+     front of its killer and spend the next life on the same exchange. */
   const spots=[];
-  if(openAt(b,cell))spots.push(cell);
-  for(let i=0;i<BN;i++)if(i!==cell&&openAt(b,i))spots.push(i);
+  for(let i=0;i<BN;i++)if(openAt(b,i))spots.push(i);
   if(!spots.length){
     log(nm(t)+' claws at the lid, but there is no room left on the field for it.');
     return false;
@@ -5393,33 +5397,23 @@ async function undyingReturn(t,cell){
   const pl=G.players[p];
   pl.undying=pl.undying||{};
   pl.undying[t.cardId]=n;
+  /* The bonus is on the preview too, so the panel a player is shown -- and the
+     board the computer scores -- is the one it will actually get. */
+  const bonus=(u.y||0)*n;
   let c=spots[0];
-  if(c!==cell){
-    const pick=await chooseCell(p,spots,CARDS[t.cardId].name+' will not stay down. Choose a space for it.',
-      {mut:(bb,i)=>{putTeece(bb,i,makeTeece(t.cardId,p),false);}});
+  if(spots.length>1){
+    const pick=await chooseCell(p,spots,CARDS[t.cardId].name+' will not stay down. Choose any space for it.',
+      {mut:(bb,i)=>{
+        const sim=makeTeece(t.cardId,p);
+        if(bonus)for(let k=0;k<4;k++)sim.perm[k]+=bonus;
+        putTeece(bb,i,sim,false);}});
     if(pick!=null&&pick!=='CANCEL')c=pick;
   }
   /* Made after the tally is written, so the new body carries the right count. */
   const nt=makeTeece(t.cardId,p);
-  /* It gets up where it fell, which is very often still right beside whatever
-     just killed it -- so without this the same combat resolution kills it
-     again on the next pass, and a zombie can spend several lives in one
-     exchange without ever holding a panel. So a body that has hauled itself up
-     is safe until the end of the NEXT turn: its owner gets one turn to move
-     it, reinforce it or spend it, and killing it again costs the attacker
-     another turn.
-
-     Measured over 24 headless games, zombie against each other deck both ways
-     round, counting turn-starts at which a returned body was still holding a
-     panel: 4.4 per game without this rule, 8.5 with it. The cards that lean
-     hardest on Undying gain the most -- the Undying Horror's seven lives went
-     from 21 turns held to 57. */
-  nt.immortalOwner=p;
-  nt.immortalUntil=G.turnNum+1;
   /* The return bonus is the card's own printed price for getting up, not an
      effect anybody worked on it, so it goes straight onto perm: Steadfast does
      not refuse it and no doubling ground bends it. */
-  const bonus=(u.y||0)*n;
   if(bonus)for(let k=0;k<4;k++)nt.perm[k]+=bonus;
   const riders=[];
   for(const e of t.equips){
@@ -5431,8 +5425,7 @@ async function undyingReturn(t,cell){
   putTeece(b,c,nt,true);
   const left=undyLeft(nt);
   log(nm(nt)+' gets back up at the '+CN[c]+(bonus?' with '+sgn(bonus):' unchanged')+
-    ' — '+(left?left+' more time'+(left===1?'':'s'):'the last time it can')+
-    ', and cannot be destroyed again until the end of the next turn.');
+    ' — '+(left?left+' more time'+(left===1?'':'s'):'the last time it can')+'.');
   for(const e of riders){
     const g=CARDS[e.cardId].grants;
     log(CARDS[e.cardId].name+' comes up out of the ground still buckled on.');
@@ -7988,7 +7981,7 @@ function statusesFor(p){
     push('undy'+t.uid,ally?'good':'warn',
       (ally?'Undying: ':'Undying enemy: ')+nm(t)+' \u00d7'+lives,
       nm(t)+' gets back up '+lives+' more time'+(lives===1?'':'s')+
-      ', on the panel it falls on, and cannot be destroyed again until the end of the turn after. '+
+      ', on any free panel its controller chooses, with no protection once it is standing. '+
       'The next return comes back with '+sgn(next)+
       (u.y?' — and every return after that is worth '+sgn(u.y)+' more.':'.'));
   }
