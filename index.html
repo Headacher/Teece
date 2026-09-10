@@ -566,7 +566,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:28,date:'2026-09-10'};
+const VERSION={build:29,date:'2026-09-10'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3633,7 +3633,7 @@ async function FXRUN(st,ctx){
       if(!isSpiderling(o))break;
       log(nm(o)+' is fed to the swarm.');
       await anim([c],'dying',190);
-      await processDeath({cell:c,t:o,killers:[]});
+      await processDeath({cell:c,t:o,killers:[],cost:true});
       done++;
       ctx.first=false;
       render();
@@ -3963,6 +3963,9 @@ async function FXRUN(st,ctx){
       const t=b[i].teece;
       if(!t||!canTarget(b,i,p))continue;
       if(st.nonBoss&&isBossCard(t.cardId))continue;
+      /* Not offered at all: picking one and watching nothing happen wastes the
+         card and reads as a bug. */
+      if(isHeldSafe(t))continue;
       cands.push(i);
     }
     if(!cands.length)return none('Nothing can be destroyed.');
@@ -3975,7 +3978,9 @@ async function FXRUN(st,ctx){
     await processDeath({cell:c,t:vt,killers:[]});
     return;}
   case 'destroyAdj':{
-    const hit=ADJ[ctx.cell].filter(j=>b[j].teece);
+    const hit=ADJ[ctx.cell].filter(j=>b[j].teece&&!isHeldSafe(b[j].teece));
+    for(const j of ADJ[ctx.cell])
+      if(b[j].teece&&isHeldSafe(b[j].teece))log(nm(b[j].teece)+' is held outside time, and rides it out.');
     if(!hit.length)return none('Nothing adjacent to destroy.');
     await anim(hit,'dying',190);
     for(const j of hit){
@@ -4044,7 +4049,7 @@ async function FXRUN(st,ctx){
     if(c==null)return 'ABORT';
     const victim=b[c].teece;
     log(nm(victim)+' is sacrificed.');
-    await processDeath({cell:c,t:victim,killers:[]});
+    await processDeath({cell:c,t:victim,killers:[],cost:true});
     return;}
   case 'breakGround':{
     const i=ctx.cell;
@@ -4345,6 +4350,13 @@ async function FXRUN(st,ctx){
     }
     if(dst==null){
       if(st.elseDestroy){
+        /* Pinned, but not necessarily doomed: a Teece held outside time cannot
+           be destroyed, and the Warden simply fails to shift it. Checked here
+           as well as in processDeath so it is not shown dying first. */
+        if(isHeldSafe(t)){
+          log(nm(t)+' is pinned with nowhere to go, but is held outside time and cannot be destroyed.');
+          return;
+        }
         log(nm(t)+' is pinned with nowhere to go and is destroyed.');
         await anim([c],'dying',190);
         await processDeath({cell:c,t,killers:[]});
@@ -4454,7 +4466,7 @@ async function FXRUN(st,ctx){
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const vt=b[c].teece;
-    await processDeath({cell:c,t:vt,killers:[]});
+    await processDeath({cell:c,t:vt,killers:[],cost:true});
     log(nm(vt)+' is sacrificed.');
     for(let j=c+BW;j<BN;j+=BW){
       const o=b[j].teece;
@@ -4696,7 +4708,7 @@ async function FXRUN(st,ctx){
       }
     }
     const me=b[src].teece;
-    if(me)await processDeath({cell:src,t:me,killers:[]});
+    if(me)await processDeath({cell:src,t:me,killers:[],cost:true});
     return;}
   case 'handOrMove':{
     const cands=ADJ[ctx.cell].filter(j=>b[j].teece&&canTarget(b,j,p));
@@ -4924,7 +4936,7 @@ async function FXRUN(st,ctx){
       const was=effSides(b,c);
       const half=was.map(v=>Math.floor(v/2));
       log(nm(victim)+' is sacrificed by '+pname(q)+' ('+sidesLine(was)+').');
-      await processDeath({cell:c,t:victim,killers:[]});
+      await processDeath({cell:c,t:victim,killers:[],cost:true});
       if(G.over)return;
       if(half.some(v=>v!==0)){
         const pq=G.players[q];
@@ -5434,9 +5446,28 @@ async function undyingReturn(t,cell){
   return true;
 }
 /* ============ deaths & combat ============ */
+/* Held outside time. Pause, a Stasis Field and a zombie that has just hauled
+   itself up all hang on the same flag, and "cannot be destroyed" has to mean it
+   everywhere rather than only in a fight. */
+const isHeldSafe=t=>!!t&&t.immortalOwner!=null;
 async function processDeath(d){
   const b=G.board,t=d.t,cell=d.cell;
   if(b[cell].teece!==t)return;
+  /* scanDeaths already refuses to mark a Teece that cannot be destroyed, so a
+     death arriving out of combat never gets here holding the flag. An effect
+     that destroys OUTRIGHT is the gap: it calls this function directly, and
+     every one of those walked straight past the protection -- an Ogre Warden
+     pinning a paused Baby Dragon killed it, and Destroy, Meltdown and the trap
+     did the same. The guard belongs here, where all of them meet, so a path
+     added later is protected without having to remember.
+
+     A cost is not a destruction. Sacrificing your own Teece to pay for a Boss,
+     feeding one to the swarm, or a card blowing itself up as its own price all
+     go through regardless, and say so with cost:true. */
+  if(!d.cost&&isHeldSafe(t)){
+    log(nm(t)+' is held outside time, and cannot be destroyed.');
+    return;
+  }
   b[cell].teece=null;
   G.eventFlag=true;
   log(nm(t)+' is destroyed.');
@@ -6029,7 +6060,7 @@ async function playTeece(p,handIdx){
        the next panel on the list. It is still a body paid. */
     if(!t){log('One of the Teece marked for sacrifice had already fallen with another.');continue;}
     if(!t.isToken&&!t.isCopy)sacked.push(t.cardId);
-    await processDeath({cell:c,t,killers:[]});
+    await processDeath({cell:c,t,killers:[],cost:true});
     log(nm(t)+' is sacrificed.');
   }
   /* A death can fill the very panel it emptied -- an Egg Sac boiling over, a
