@@ -503,9 +503,9 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
       <span class="rk">Each turn</span>
       <span>One Teece. Equips, magic and battlegrounds are unlimited.</span>
       <span class="rk">Undying</span>
-      <span>A Zombie printed <i>X Undying Y</i> gets back up X times a game, on any free panel you choose, each
-            return worth Y more than the last. Nothing protects it once it is up, so where you stand it
-            is the whole of the decision. Where no X is printed it is one.</span>
+      <span>A Zombie printed <i>X Undying Y</i> returns X times a game, on any free panel its controller
+            chooses, each return worth Y more than the last. It has no protection once it returns.
+            Where no X is printed, X is one.</span>
       <span class="rk">Winning</span>
       <span>Wipe out every enemy Teece, end a turn four Teece ahead (Tokens never count),
             or hold the bigger field when a player must draw from an empty deck.</span>
@@ -566,7 +566,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:30,date:'2026-09-10'};
+const VERSION={build:31,date:'2026-09-10'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1985,71 +1985,70 @@ const CARDS = {
     one return at 0/0/0/0, a body with nothing left but the panel it holds.
     Where no X is written it is 1.
 
-    A body that gets back up comes back ANYWHERE there is room, and nothing
-    protects it once it is standing. Placing it is the whole of the defence:
-    put it back in front of the thing that killed it and the next life goes on
-    the same exchange, so the choice of panel is the decision the mechanic is
-    really handing the player.
+    A returned Teece comes back on ANY free panel, chosen by its controller,
+    and has no protection once it is back. Placement is the only defence: put
+    it back next to whatever killed it and the next return is spent on the same
+    exchange.
 
     The tally belongs to the card and not to the body standing on the field, so
     bouncing a zombie to hand does not launder it. Two cards wind it back, and
     both say so. ---- */
  621:{name:'Fast Zombie',type:'teece',sides:[4,4,4,4],zombie:true,undying:{x:1,y:-1},
     act:[{name:'Sprint',once:'turn',steps:[{fx:'sprint',n:-2}]}],
-    text:'Undying -1. Once per your turn: Sprint up to two spaces. Every enemy standing beside the panel it drives THROUGH is bitten for -2 permanently — so a one-space step bites nobody, and the route is the point.'},
+    text:'Undying -1. Sprint, once per your turn: move up to two spaces. Every enemy adjacent to the panel it moves through gets -2 permanently.'},
  622:{name:'Shambler',type:'teece',sides:[5,5,5,5],zombie:true,undying:{x:1,y:1},
-    text:'Undying +1. Kill it once and it gets back up at 6/6/6/6.'},
+    text:'Undying +1.'},
  623:{name:'Revenant',type:'teece',sides:[4,5,3,2],zombie:true,undying:{x:2,y:1},
-    text:'2 Undying +1. It gets up twice: 5/6/4/3 the first time, 6/7/5/4 the second.'},
+    text:'2 Undying +1.'},
  624:{name:'Rotting Brute',type:'teece',sides:[6,6,6,6],zombie:true,undying:{x:1,y:-6},
-    text:'Undying -6. It comes back 0/0/0/0 — worth nothing in a fight, and still a body holding a panel.'},
+    text:'Undying -6.'},
  625:{name:'The Horde',type:'teece',sides:[5,6,5,2],zombie:true,undying:{x:1,y:-2},
     modPerAlly:2,onGraveReturn:{def:5},
-    text:'Undying -2. +2 for every other ally standing. Whenever an ally comes back out of a grave — itself included, and an Undying return counts — it gains 5 Defence until the end of your next turn, and that stacks with every body that gets up.'},
+    text:'Undying -2. +2 for every other allied Teece on the board. When an allied Teece returns from a graveyard, including itself: +5 Defence until the end of your next turn. Stacks.'},
  626:{name:'Bloated Zombie',type:'teece',sides:[3,3,3,3],zombie:true,undying:{x:1,y:-1},
     onDeath:[{fx:'allMod',n:-2,dur:'perm'}],
-    text:'Undying -1. When destroyed: every Teece on the board, either side’s, gets -2 permanently. It bursts a second time when it goes down for good.'},
+    text:'Undying -1. When destroyed: every Teece on the board gets -2 permanently.'},
  627:{name:'Plague Winds',type:'teece',sides:[2,3,3,1],zombie:true,
     defPerAlly:1,endAura:{who:'ally',n:1},
-    text:'+1 Defence for every ally standing, itself counted. At the end of every turn, either side’s, each of your other Teece gets +1 permanently.'},
+    text:'+1 Defence for every allied Teece on the board, itself included. At the end of every turn: each of your other Teece gets +1 permanently.'},
  628:{name:'Necromancer',type:'teece',sides:[2,2,2,2],def:4,zombie:true,
     onPlay:[{fx:'necroRaise',n:-2}],
-    text:'Defence 4. When played: raise a non-Boss Teece out of an ENEMY graveyard with -2, under your control. It stands only while the Necromancer does — kill the Necromancer and the body drops back into the grave it came from.'},
+    text:'Defence 4. When played: summon a non-Boss Teece from an enemy graveyard with -2, under your control. It is destroyed when this is destroyed, and returns to its owner\'s graveyard.'},
  629:{name:'Bone Thrower',type:'teece',sides:[2,9,1,7],zombie:true,undying:{x:1,y:-1},
-    act:[{name:'Throw a body',once:'turn',steps:[{fx:'sacAlly'},{fx:'mod',who:'enemy',n:-3,dur:'perm'}]}],
-    text:'Undying -1. Once per your turn: sacrifice an ally — this one counts — and an enemy gets -3 permanently. Throwing itself is not a waste while it can still get up.'},
+    act:[{name:'Sacrifice: enemy -3',once:'turn',steps:[{fx:'sacAlly'},{fx:'mod',who:'enemy',n:-3,dur:'perm'}]}],
+    text:'Undying -1. Once per your turn: sacrifice an allied Teece, this one included; an enemy gets -3 permanently.'},
  630:{name:'Queen of Bones',type:'teece',sides:[4,4,4,4],def:4,sac:1,zombie:true,
     onAllyDeath:{n:4,dur:'temp',kw:['teleport']},
-    text:'Sacrifice one fielded Teece to play. Defence 4. Whenever an ally is destroyed: +4 until the end of the turn, and it may Teleport to any empty panel this turn.'},
+    text:'Sacrifice one fielded Teece to play. Defence 4. When an allied Teece is destroyed: +4 and Teleport until the end of the turn.'},
  631:{name:'Undying Horror',type:'teece',sides:[7,7,7,7],sac:1,zombie:true,undying:{x:7,y:-1},
-    text:'Sacrifice one fielded Teece to play. 7 Undying -1. It gets up seven times, a point weaker each time, and only the eighth kill is the one that counts.'},
+    text:'Sacrifice one fielded Teece to play. 7 Undying -1.'},
  632:{name:"Death's Avatar",type:'teece',sides:[9,9,9,9],sac:2,zombie:true,
     onPlay:[{fx:'resurrect',count:2}],
-    text:'Sacrifice two fielded Teece to play. When played: resurrect two non-Boss Teece out of your own graveyard, and wind their Undying counters back to the start.'},
+    text:'Sacrifice two fielded Teece to play. When played: summon two non-Boss Teece from your graveyard and reset their Undying counters.'},
  633:{name:'Grave Shroud',type:'equip',mod:0,
     grants:{undyingRide:true,riseMod:5},
-    text:'When the Teece wearing this is destroyed, the Shroud goes into the ground with it rather than to the graveyard on its own. When that Teece comes back — Undying, resurrected, summoned or replayed — the Shroud is still buckled on, and the Teece gets +5 until the end of the turn.'},
+    text:'When the equipped Teece is destroyed, this goes with it instead of to the graveyard on its own. When that Teece returns to the field, this returns equipped to it and it gets +5 until the end of the turn.'},
  634:{name:'Puppet Strings',type:'equip',mod:0,graveEquip:true,
     grants:{holdsUp:true,riseBonus:2},
-    text:'Play this onto a non-Boss Teece lying in YOUR graveyard: it walks back onto the field with +2, wearing the Strings. The Strings are what is holding it up — if they are destroyed or pulled onto anything else, the Teece drops dead where it stands.'},
+    text:'Equip to a non-Boss Teece in your graveyard: it returns to the field with +2, wearing this. If this equip is destroyed or moved, the equipped Teece is destroyed.'},
  635:{name:'Mindless Hunger',type:'equip',mod:0,
     grants:{kw:['ward'],graft:true},
-    text:'Mindless: the equipped Teece cannot be targeted by your opponents’ cards or abilities at all. And what it kills, it keeps — it permanently gains the keywords, the activated abilities and the aura of every enemy it destroys.'},
+    text:'The equipped Teece cannot be targeted by your opponents. When it destroys an enemy, it permanently gains that card\'s keywords, activated abilities and aura.'},
  636:{name:'Infected Bite',type:'magic',
-    text:'Select a non-Boss enemy. From this moment it can never be sacrificed again, by either side, for a Boss or for any card effect. After three of its own controller’s turns, it turns: you take it for good, and it gets -2.',
+    text:'Select a non-Boss enemy. It can no longer be sacrificed by either player. After three of its controller\'s turns, you take control of it and it gets -2 permanently.',
     cast:[{fx:'infect',turns:3}]},
  637:{name:'Back Again',type:'magic',
-    text:'Add a Teece from your graveyard to your hand and wind its Undying counter back to the start.',
+    text:'Add a Teece from your graveyard to your hand and reset its Undying counter.',
     cast:[{fx:'graveToHandUndy'}]},
  638:{name:'Brief Return',type:'magic',
-    text:'Summon a Teece out of EITHER graveyard with +3, under your control. It falls apart at the end of the turn.',
+    text:'Summon a Teece from either graveyard with +3, under your control. Its when-played effect triggers. It is destroyed at the end of the turn.',
     cast:[{fx:'briefRaise',n:3}]},
  639:{name:'Graveyard',type:'ground',gInter:true,
-    gact:[{name:'Break it open',once:'turn',steps:[{fx:'breakGround'}]}],
-    text:'A Teece destroyed on this panel is laid in the Graveyard instead of being buried — buckled onto the battleground rather than sent to a grave. When the Graveyard is broken up, by anything, every card laid in it goes back to its owner’s HAND. While one of your Teece stands on it, once per your turn: break it open yourself.'},
+    gact:[{name:'Destroy this battleground',once:'turn',steps:[{fx:'breakGround'}]}],
+    text:'A Teece destroyed on this panel is equipped to this battleground instead of going to a graveyard. When this battleground is destroyed, every card equipped to it returns to its owner\'s hand. While one of your Teece stands on it, once per your turn: destroy this battleground.'},
  640:{name:'Bone Fields',type:'ground',gBone:true,
-    gact:[{name:'Harvest the bones',once:'turn',steps:[{fx:'sacAlly'},{fx:'breakGround'}]}],
-    text:'A bone counter goes down here every time a Teece is destroyed on this panel, and every time one climbs out of a grave onto it. Whatever stands here gets +1 for every bone counter. While one of your Teece stands on it, once per your turn: sacrifice an ally and break the Fields up.'},
+    gact:[{name:'Sacrifice: destroy this battleground',once:'turn',steps:[{fx:'sacAlly'},{fx:'breakGround'}]}],
+    text:'A bone counter is placed here whenever a Teece is destroyed on this panel or summoned from a graveyard onto it. A Teece on this panel gets +1 for each bone counter. While one of your Teece stands on it, once per your turn: sacrifice an allied Teece and destroy this battleground.'},
  /* Not in any deck: Cannonball is handed out by a roguelike perk. */
  590:{name:'Cannonball',type:'magic',perkOnly:true,
     text:'Select a Teece and one of its sides; that side gets -4.',
@@ -2180,8 +2179,8 @@ function undyReset(p,cardId){
 function addBone(g,live,why){
   g.bones=(g.bones||0)+1;
   g.gmod=g.bones;
-  if(live)log('A bone counter goes down on the Bone Fields as '+why+
-    ' — '+g.bones+' now, and whatever stands there gets +'+g.bones+'.');
+  if(live)log('Bone Fields: bone counter added ('+why+'). '+g.bones+' counter'+(g.bones===1?'':'s')+
+    ', so a Teece on it gets +'+g.bones+'.');
 }
 /* Every way a body gets back onto the field funnels through here, so the cards
    that watch for it fire from one place however the return was paid for: an
@@ -2197,11 +2196,11 @@ function noteGraveReturn(p,cell,live){
     if(!gr||!gr.def)continue;
     w.defTemp2=(w.defTemp2||0)+gr.def;
     w.defTemp2Until=nextTurnExpiry();
-    if(live)log(nm(w)+' swells as the dead get up: +'+gr.def+' Defence (now +'+w.defTemp2+
+    if(live)log(nm(w)+' gets +'+gr.def+' Defence (now +'+w.defTemp2+
       ') until the end of '+pname(p)+"'s next turn.");
   }
   if(cell!=null&&b[cell].ground&&groundFlag(b[cell].ground,'gBone'))
-    addBone(b[cell].ground,live,'something climbs out of it');
+    addBone(b[cell].ground,live,'a Teece was summoned onto it');
 }
 /* A Teece that may not be spent. Infected Bite marks one, and everything that
    pays a price in bodies asks here first. */
@@ -2603,11 +2602,11 @@ function attachRiders(p,cardId,nt,live){
   delete pl.riding[cardId];
   for(const e of rid){
     nt.equips.push(e);
-    if(live)log(CARDS[e.cardId].name+' comes back up out of the ground with '+CARDS[cardId].name+'.');
+    if(live)log(CARDS[e.cardId].name+' returns equipped to '+CARDS[cardId].name+'.');
     const g=CARDS[e.cardId].grants;
     if(g&&g.riseMod){
       applyModT(nt,g.riseMod,'temp');
-      if(live)log(nm(nt)+' surges as it rises: '+sgn(g.riseMod)+' until the end of the turn.');
+      if(live)log(nm(nt)+' gets '+sgn(g.riseMod)+' until the end of the turn.');
     }
   }
 }
@@ -2618,7 +2617,7 @@ function equipCameOff(t,e,live){
   if(!t||!e)return;
   const g=CARDS[e.cardId].grants;
   if(!g||!g.holdsUp)return;
-  if(live)log(CARDS[e.cardId].name+' comes away, and '+nm(t)+' drops where it stands.');
+  if(live)log(CARDS[e.cardId].name+' is removed, so '+nm(t)+' is destroyed.');
   forceDeath(t);
 }
 function plateOf(p,idx){
@@ -4016,14 +4015,14 @@ async function FXRUN(st,ctx){
       }
     }
     const dests=Object.keys(routes).map(Number);
-    if(!dests.length)return none('Nowhere to run.');
-    const c=await pickCell(dests,'Sprint up to two spaces. Anything it drives past is bitten for '+sgn(st.n)+'.',
+    if(!dests.length)return none('Nowhere to move.');
+    const c=await pickCell(dests,'Move up to two spaces. Enemies beside the panel it moves through get '+sgn(st.n)+'.',
       (bb,j)=>{if(bb[i].teece)moveT(bb,i,j,false);},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const via=routes[c].via;
     moveT(b,i,c,true);
-    log(nm(t)+' sprints to the '+CN[c]+(via!=null?', by way of the '+CN[via]:'')+'.');
+    log(nm(t)+' moves to the '+CN[c]+(via!=null?', through the '+CN[via]:'')+'.');
     if(via!=null){
       const hit=[];
       for(const k of ADJ[via]){
@@ -4032,10 +4031,10 @@ async function FXRUN(st,ctx){
         applyModT(o,st.n,'perm');
         noteEnemyLoss(p,k,-st.n,false,t);
         hit.push(k);
-        log(nm(o)+' is bitten in passing: '+sgn(st.n)+'.');
+        log(nm(o)+' gets '+sgn(st.n)+'.');
       }
       if(hit.length){noteTargeted(p);await anim(hit,'zap');}
-      else log('It drove past nobody.');
+      else log('No enemies beside that panel.');
     }
     await fireMove(i,c,p);
     return;}
@@ -4044,8 +4043,8 @@ async function FXRUN(st,ctx){
   case 'sacAlly':{
     const mine=[];
     for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&sameTeam(o.owner,p)&&canSacrifice(b,i))mine.push(i);}
-    if(!mine.length)return none('No ally to give up.');
-    const c=await pickCell(mine,'Choose an ally to sacrifice — this one counts.',null,false);
+    if(!mine.length)return none('No allied Teece to sacrifice.');
+    const c=await pickCell(mine,'Choose an allied Teece to sacrifice (this one included).',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return 'ABORT';
     const victim=b[c].teece;
@@ -4054,7 +4053,7 @@ async function FXRUN(st,ctx){
     return;}
   case 'breakGround':{
     const i=ctx.cell;
-    if(i==null||!b[i].ground)return none('No battleground underfoot to break.');
+    if(i==null||!b[i].ground)return none('No battleground on this panel.');
     log(CARDS[b[i].ground.cardId].name+' is broken up.');
     await clearGroundAt(i,p);
     return;}
@@ -4069,26 +4068,26 @@ async function FXRUN(st,ctx){
       for(const cid of G.players[q].grave)
         if(CARDS[cid].type==='teece'&&!isBossCard(cid))pool.push({q,cid});
     }
-    if(!pool.length)return none('No body in an enemy grave to raise.');
+    if(!pool.length)return none('No Teece in an enemy graveyard.');
     const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
-    if(!empt.length)return none('No room to raise anything.');
+    if(!empt.length)return none('No free panel.');
     const pick=await chooseOption(p,pool.map((e,x)=>({v:String(x),lbl:CARDS[e.cid].name+' — '+pname(e.q)+"'s grave",cid:e.cid})),
-      'Raise which body out of the enemy grave?');
+      'Summon which Teece from the enemy graveyard?');
     if(pick==null)return;
     const ent=pool[parseInt(pick,10)];
     const c=await chooseCell(p,empt,'Choose a space for '+CARDS[ent.cid].name+'.',
       {mut:(bb,i)=>{putTeece(bb,i,makeTeece(ent.cid,p),false);}});
     if(c==null||c==='CANCEL')return;
     const gi=G.players[ent.q].grave.lastIndexOf(ent.cid);
-    if(gi<0)return none('That body is gone.');
+    if(gi<0)return none('That card is no longer in the graveyard.');
     G.players[ent.q].grave.splice(gi,1);
     const nt=makeTeece(ent.cid,p);
     nt.baseOwner=ent.q;
     if(st.n)for(let k=0;k<4;k++)nt.perm[k]+=st.n;
     putTeece(b,c,nt,true);
     if(ctx.t)ctx.t.links.push(nt.uid);
-    log(pname(p)+' raises '+CARDS[ent.cid].name+' out of '+pname(ent.q)+"'s grave at the "+CN[c]+
-      (st.n?' with '+sgn(st.n):'')+'. It stands only while its raiser does.');
+    log(pname(p)+' summons '+CARDS[ent.cid].name+' from '+pname(ent.q)+"'s graveyard at the "+CN[c]+
+      (st.n?' with '+sgn(st.n):'')+'. It is destroyed if its summoner is.');
     noteGraveReturn(p,c,true);
     await anim([c],'placed',140);
     return;}
@@ -4098,29 +4097,36 @@ async function FXRUN(st,ctx){
     const pool=[];
     for(let q=0;q<PLAYERS();q++)
       for(const cid of G.players[q].grave)if(CARDS[cid].type==='teece')pool.push({q,cid});
-    if(!pool.length)return none('Every grave is empty of Teece.');
+    if(!pool.length)return none('No Teece in either graveyard.');
     const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
-    if(!empt.length)return none('No room to raise anything.');
+    if(!empt.length)return none('No free panel.');
     const pick=await chooseOption(p,pool.map((e,x)=>({v:String(x),
       lbl:CARDS[e.cid].name+' — '+(sameTeam(e.q,p)?'your grave':pname(e.q)+"'s grave"),cid:e.cid})),
-      'Raise which one for the turn?');
+      'Summon which Teece for the turn?');
     if(pick==null)return;
     const ent=pool[parseInt(pick,10)];
     const c=await chooseCell(p,empt,'Choose a space for '+CARDS[ent.cid].name+'.',
       {mut:(bb,i)=>{putTeece(bb,i,makeTeece(ent.cid,p),false);}});
     if(c==null||c==='CANCEL')return;
     const gi=G.players[ent.q].grave.lastIndexOf(ent.cid);
-    if(gi<0)return none('That body is gone.');
+    if(gi<0)return none('That card is no longer in the graveyard.');
     G.players[ent.q].grave.splice(gi,1);
     const nt=makeTeece(ent.cid,p);
     nt.baseOwner=ent.q;
     nt.dieEOT=true;
     if(st.n)for(let k=0;k<4;k++)nt.perm[k]+=st.n;
     putTeece(b,c,nt,true);
-    log(pname(p)+' hauls '+CARDS[ent.cid].name+' up at the '+CN[c]+(st.n?' with '+sgn(st.n):'')+
-      '. It falls apart at the end of the turn.');
+    log(pname(p)+' summons '+CARDS[ent.cid].name+' at the '+CN[c]+(st.n?' with '+sgn(st.n):'')+
+      '. It is destroyed at the end of the turn.');
     noteGraveReturn(p,c,true);
     await anim([c],'placed',140);
+    /* It arrives as a play, so its when-played effect fires -- under the
+       control of whoever summoned it, not of whoever's grave it came out of.
+       Read the Teece back off the board first: an arrival effect between
+       putTeece and here can already have moved or destroyed it. */
+    const nd=CARDS[ent.cid];
+    if(nd.onPlay&&b[c].teece&&b[c].teece.uid===nt.uid)
+      await runSteps(nd.onPlay,{p,cell:c,t:b[c].teece,first:false});
     return;}
   /* The Avatar empties your own grave back onto the field and winds every one
      of them back to a full set of lives. */
@@ -4151,13 +4157,13 @@ async function FXRUN(st,ctx){
       noteGraveReturn(p,c,true);
       await anim([c],'placed',140);
     }
-    if(!raised)return none('Nothing in your grave to resurrect.');
+    if(!raised)return none('No non-Boss Teece in your graveyard.');
     return;}
   case 'graveToHandUndy':{
     const pl=G.players[p];
     const ids=[];
     for(const cid of pl.grave)if(CARDS[cid].type==='teece'&&ids.indexOf(cid)<0)ids.push(cid);
-    if(!ids.length)return none('No Teece lies in your grave.');
+    if(!ids.length)return none('No Teece in your graveyard.');
     const pick=await chooseOption(p,ids.map((cid,x)=>({v:String(x),lbl:CARDS[cid].name,cid})),
       'Bring which one back to your hand?');
     if(pick==null)return;
@@ -4167,8 +4173,8 @@ async function FXRUN(st,ctx){
     pl.grave.splice(gi,1);
     handPush(p,cid);
     undyReset(p,cid);
-    log(CARDS[cid].name+' is dragged out of the grave and into '+pname(p)+"'s hand"+
-      (undyOf(cid)?', its Undying counter wiped clean':'')+'.');
+    log(CARDS[cid].name+' returns to '+pname(p)+"'s hand"+
+      (undyOf(cid)?', Undying counter reset':'')+'.');
     return;}
   /* The bite does nothing you can see for three of their turns. What it does
      at once is take the body off the table as a price: it can never be spent
@@ -4191,8 +4197,8 @@ async function FXRUN(st,ctx){
     vt.noSac=true;
     vt.infect={by:p,turns};
     noteTargeted(p);
-    log(nm(vt)+' is bitten: it can never be sacrificed again, and in '+turns+' of '+
-      pname(vt.owner)+"'s turns it turns.");
+    log(nm(vt)+' is infected: it can no longer be sacrificed, and after '+turns+' of '+
+      pname(vt.owner)+"'s turns "+pname(p)+' takes control of it.');
     await anim([c],'zap');
     return;}
   case 'graveSummon':{
@@ -5415,7 +5421,7 @@ async function undyingReturn(t,cell){
   const spots=[];
   for(let i=0;i<BN;i++)if(openAt(b,i))spots.push(i);
   if(!spots.length){
-    log(nm(t)+' claws at the lid, but there is no room left on the field for it.');
+    log(nm(t)+' cannot return: no free panel.');
     return false;
   }
   const n=(t.undyUsed||0)+1;
@@ -5427,7 +5433,7 @@ async function undyingReturn(t,cell){
   const bonus=(u.y||0)*n;
   let c=spots[0];
   if(spots.length>1){
-    const pick=await chooseCell(p,spots,CARDS[t.cardId].name+' will not stay down. Choose any space for it.',
+    const pick=await chooseCell(p,spots,CARDS[t.cardId].name+' returns. Choose any free panel.',
       {mut:(bb,i)=>{
         const sim=makeTeece(t.cardId,p);
         if(bonus)for(let k=0;k<4;k++)sim.perm[k]+=bonus;
@@ -5449,14 +5455,14 @@ async function undyingReturn(t,cell){
   for(const e of riders)nt.equips.push(e);
   putTeece(b,c,nt,true);
   const left=undyLeft(nt);
-  log(nm(nt)+' gets back up at the '+CN[c]+(bonus?' with '+sgn(bonus):' unchanged')+
-    ' — '+(left?left+' more time'+(left===1?'':'s'):'the last time it can')+'.');
+  log(nm(nt)+' returns at the '+CN[c]+(bonus?' with '+sgn(bonus):'')+
+    '. '+(left?left+' return'+(left===1?'':'s')+' left.':'No returns left.'));
   for(const e of riders){
     const g=CARDS[e.cardId].grants;
-    log(CARDS[e.cardId].name+' comes up out of the ground still buckled on.');
+    log(CARDS[e.cardId].name+' returns equipped to it.');
     if(g.riseMod){
       applyModT(nt,g.riseMod,'temp');
-      log(nm(nt)+' surges: '+sgn(g.riseMod)+' until the end of the turn.');
+      log(nm(nt)+' gets '+sgn(g.riseMod)+' until the end of the turn.');
     }
   }
   noteGraveReturn(p,c,true);
@@ -5525,7 +5531,7 @@ async function processDeath(d){
       k.grafts=k.grafts||[];
       if(k.grafts.indexOf(t.cardId)<0&&(DEF(t).kw||DEF(t).act||DEF(t).aura)){
         k.grafts.push(t.cardId);
-        log(nm(k)+' feeds, and takes what '+DEF(t).name+' was.');
+        log(nm(k)+' gains the effects of '+DEF(t).name+'.');
       }
     }
   }
@@ -5639,7 +5645,7 @@ async function processDeath(d){
         const pl2=G.players[t.baseOwner];
         pl2.riding=pl2.riding||{};
         (pl2.riding[t.cardId]=pl2.riding[t.cardId]||[]).push(e);
-        log(CARDS[e.cardId].name+' goes down still buckled to '+DEF(t).name+'.');
+        log(CARDS[e.cardId].name+' goes to the graveyard with '+DEF(t).name+'.');
         continue;
       }
       if(salvage&&e.owner===gr.owner)handPush(e.owner,e.cardId);
@@ -5653,7 +5659,7 @@ async function processDeath(d){
       else if(gr&&grd.gInter){
         gr.held=gr.held||[];
         gr.held.push({cardId:t.cardId,owner:t.baseOwner});
-        log(nm(t)+' is laid in the Graveyard rather than buried — '+gr.held.length+' interred.');
+        log(nm(t)+' is equipped to the Graveyard instead of going to a graveyard. '+gr.held.length+' held.');
       }
       else toGrave(t.baseOwner,t.cardId);
     }
@@ -5661,7 +5667,7 @@ async function processDeath(d){
   /* A Bone Field counts every body that falls on it, whether or not the body
      stayed down. */
   const bg=G.board[cell]&&G.board[cell].ground;
-  if(bg&&groundFlag(bg,'gBone')&&!t.isToken)addBone(bg,true,nm(t)+' falls on it');
+  if(bg&&groundFlag(bg,'gBone')&&!t.isToken)addBone(bg,true,nm(t)+' was destroyed on it');
 }
 async function resolveCombat(){
   if(!G)return;
@@ -6187,12 +6193,12 @@ async function playEquip(p,handIdx){
   if(ed.graveEquip){
     const ids=[];
     for(const cid of pl.grave)if(CARDS[cid].type==='teece'&&!isBossCard(cid)&&ids.indexOf(cid)<0)ids.push(cid);
-    if(!ids.length){toast('No non-Boss Teece in your grave to hook.');return false;}
+    if(!ids.length){toast('No non-Boss Teece in your graveyard.');return false;}
     const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
-    if(!empt.length){toast('No empty space to stand it up on.');return false;}
+    if(!empt.length){toast('No free panel.');return false;}
     const bonus=(ed.grants&&ed.grants.riseBonus)||0;
     const pick=await chooseOption(p,ids.map((cid,x)=>({v:String(x),lbl:CARDS[cid].name,cid})),
-      'Hook which body out of your grave?');
+      'Return which Teece from your graveyard?');
     if(pick==null)return false;
     const cid=ids[parseInt(pick,10)];
     const c=await chooseCell(p,empt,'Choose a space for '+CARDS[cid].name+'.',
@@ -6209,8 +6215,8 @@ async function playEquip(p,handIdx){
     nt.equips.push({cardId:id,owner:p});
     if(bonus)for(let k=0;k<4;k++)nt.perm[k]+=bonus;
     putTeece(b,c,nt,true);
-    log(pname(p)+' hooks '+CARDS[cid].name+' out of the grave at the '+CN[c]+
-      (bonus?' with '+sgn(bonus):'')+', strung up on '+ed.name+'.');
+    log(pname(p)+' returns '+CARDS[cid].name+' to the '+CN[c]+
+      (bonus?' with '+sgn(bonus):'')+', equipped with '+ed.name+'.');
     noteGraveReturn(p,c,true);
     await anim([c],'placed',140);
     await resolveCombat();
@@ -6293,7 +6299,7 @@ async function clearGroundAt(i,breaker){
      it, or a Quake. */
   for(const held of (g.held||[])){
     handPush(held.owner,held.cardId);
-    log(CARDS[held.cardId].name+' is dug back out of the Graveyard and into '+pname(held.owner)+"'s hand.");
+    log(CARDS[held.cardId].name+' returns from the Graveyard to '+pname(held.owner)+"'s hand.");
   }
   G.players[g.owner].grave.push(g.cardId);
   if(gd.gDiscardOnBreak&&breaker!=null&&breaker!==g.owner){
@@ -6520,14 +6526,14 @@ async function endTurn(){
     if(sameTeam(t.owner,t.infect.by))continue;
     t.infect.turns--;
     if(t.infect.turns>0){
-      log(nm(t)+' burns with the infection — '+t.infect.turns+' more turn'+(t.infect.turns===1?'':'s')+' of it.');
+      log(nm(t)+' is infected: '+t.infect.turns+' turn'+(t.infect.turns===1?'':'s')+' left.');
       continue;
     }
     const by=t.infect.by;
     t.infect=null;
     t.owner=by;t.baseOwner=by;
     applyModT(t,-2,'perm');
-    log(nm(t)+' dies on its feet and gets up on '+pname(by)+"'s side: -2.");
+    log(pname(by)+' takes control of '+nm(t)+': -2.');
   }
   for(let i=0;i<BN;i++){
     const g=G.board[i].ground;
@@ -8005,10 +8011,10 @@ function statusesFor(p){
     const next=(u.y||0)*((t.undyUsed||0)+1);
     push('undy'+t.uid,ally?'good':'warn',
       (ally?'Undying: ':'Undying enemy: ')+nm(t)+' \u00d7'+lives,
-      nm(t)+' gets back up '+lives+' more time'+(lives===1?'':'s')+
-      ', on any free panel its controller chooses, with no protection once it is standing. '+
-      'The next return comes back with '+sgn(next)+
-      (u.y?' — and every return after that is worth '+sgn(u.y)+' more.':'.'));
+      nm(t)+' returns '+lives+' more time'+(lives===1?'':'s')+
+      ', on any free panel its controller chooses, with no protection once it returns. '+
+      'The next return is at '+sgn(next)+
+      (u.y?', and each return after that is '+sgn(u.y)+' more.':'.'));
   }
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
