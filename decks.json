@@ -303,6 +303,32 @@
         620
       ],
       "blurb": "They grow by taking. Drain X pulls X off a Teece and hands the drinker exactly what it managed to take — which is not always X, because Steadfast gives up nothing and the deck's own castle, catalyst and fangs all bend the number on the way."
+    },
+    "zombie": {
+      "name": "Zombie",
+      "cards": [
+        621,
+        622,
+        623,
+        624,
+        625,
+        626,
+        627,
+        628,
+        629,
+        630,
+        631,
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638,
+        639,
+        640
+      ],
+      "blurb": "They come back when you kill them. \"X Undying Y\" is X returns a game, each one worth Y more than the last, and the body gets back up where it fell — safe there until the end of the next turn, so putting it down again costs you another turn. Killing this deck is not the problem. Killing it for the last time is."
     }
   },
   "formats": [
@@ -650,6 +676,26 @@
     617,
     618,
     619,
-    620
+    620,
+    621,
+    622,
+    623,
+    624,
+    625,
+    626,
+    627,
+    628,
+    629,
+    630,
+    631,
+    632,
+    633,
+    634,
+    635,
+    636,
+    637,
+    638,
+    639,
+    640
   ]
 }
