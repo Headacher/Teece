@@ -549,7 +549,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:25,date:'2026-09-10'};
+const VERSION={build:26,date:'2026-09-10'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3134,12 +3134,13 @@ async function FXRUN(st,ctx){
         log('A Token ('+sidesLine(CARDS[st.tok].sides)+') appears at the '+CN[c]+'.');
         continue;
       }
-      /* A Token handed to the enemy is a cost, not an offer. The side that will
-         control it places it, too -- let the caster choose and the drawback is
-         no drawback at all, since they would stand it somewhere it dies. */
+      /* A Token handed to the enemy is a cost, not an offer, so there is no
+         skip on it -- but the caster still chooses where it stands. The board
+         preview carries the Token's real owner, so what is being weighed is a
+         panel filling up with somebody else's body. */
       const c=st.foe
-        ? await chooseCell(owner,pool,'Place a Meat Puppet you will control ('+(n+1)+' of '+(st.count||1)+').',
-            {mut:(bb,i)=>{putTeece(bb,i,makeTeece(st.tok,owner),false);}})
+        ? await pickCell(pool,'Place a Meat Puppet your opponent will control ('+(n+1)+' of '+(st.count||1)+').',
+            (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,owner),false);},false)
         : await pickCell(pool,'Choose a space for a Token ('+sidesLine(CARDS[st.tok].sides)+') ('+(n+1)+' of '+(st.count||1)+'), or skip.',
             (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,p),false);},true);
       if(c==='CANCEL')return 'ABORT';
@@ -6180,9 +6181,9 @@ function simOnPlay(b,cell,id,p){
 /* ============ AI choice plumbing ============ */
 let AI_MUT_CTX=null;
 /* forP is the seat the question was put to, which is not always the seat whose
-   turn it is: a Meat Puppet is placed by the side that will control it, and a
-   shove chosen by its victim. Answering such a question in the asker's interest
-   rather than the answerer's turns a drawback into a gift. */
+   turn it is -- a shove is chosen by its victim, not by whoever pushed. Answering
+   such a question in the asker's interest rather than the answerer's turns a
+   drawback into a gift. */
 function aiPickCell(cells,opt,forP){
   if(!cells.length)return opt&&opt.skip?null:(opt&&opt.cancel?'CANCEL':null);
   if(!opt||!opt.mut){
