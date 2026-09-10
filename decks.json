@@ -277,6 +277,32 @@
       ],
       "web": true,
       "blurb": "A cannibal swarm. The Web is on the field from the first turn, covering every panel but the corners. Every Spider Teece and Spiderling standing on it can Skitter one space each turn, and a Spiderling has +1 Defence there. Spiders pour out 4/4/4/4 Spiderlings and then eat them to pay for everything else."
+    },
+    "vampire": {
+      "name": "Vampire",
+      "cards": [
+        601,
+        602,
+        603,
+        604,
+        605,
+        606,
+        607,
+        608,
+        609,
+        610,
+        611,
+        612,
+        613,
+        614,
+        615,
+        616,
+        617,
+        618,
+        619,
+        620
+      ],
+      "blurb": "They grow by taking. Drain X pulls X off a Teece and hands the drinker exactly what it managed to take — which is not always X, because Steadfast gives up nothing and the deck's own castle, catalyst and fangs all bend the number on the way."
     }
   },
   "formats": [
@@ -604,6 +630,26 @@
     557,
     558,
     559,
-    560
+    560,
+    601,
+    602,
+    603,
+    604,
+    605,
+    606,
+    607,
+    608,
+    609,
+    610,
+    611,
+    612,
+    613,
+    614,
+    615,
+    616,
+    617,
+    618,
+    619,
+    620
   ]
 }
