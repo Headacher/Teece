@@ -502,6 +502,9 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
             Any Teece whose attributes fall below zero dies on the spot, and every change anywhere re-checks the whole board.</span>
       <span class="rk">Each turn</span>
       <span>One Teece. Equips, magic and battlegrounds are unlimited.</span>
+      <span class="rk">Reviving</span>
+      <span>A Teece brought back from a graveyard is played: its when-played effect triggers, controlled by
+            whoever revived it.</span>
       <span class="rk">Undying</span>
       <span>A Zombie printed <i>X Undying Y</i> returns X times a game, on any free panel its controller
             chooses, each return worth Y more than the last. It has no protection once it returns.
@@ -566,7 +569,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:31,date:'2026-09-10'};
+const VERSION={build:32,date:'2026-09-11'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -2001,7 +2004,8 @@ const CARDS = {
  623:{name:'Revenant',type:'teece',sides:[4,5,3,2],zombie:true,undying:{x:2,y:1},
     text:'2 Undying +1.'},
  624:{name:'Rotting Brute',type:'teece',sides:[6,6,6,6],zombie:true,undying:{x:1,y:-6},
-    text:'Undying -6.'},
+    onDeath:[{fx:'aoe',n:-3,dur:'perm'}],
+    text:'Undying -6. When destroyed: every adjacent Teece gets -3 permanently.'},
  625:{name:'The Horde',type:'teece',sides:[5,6,5,2],zombie:true,undying:{x:1,y:-2},
     modPerAlly:2,onGraveReturn:{def:5},
     text:'Undying -2. +2 for every other allied Teece on the board. When an allied Teece returns from a graveyard, including itself: +5 Defence until the end of your next turn. Stacks.'},
@@ -2009,8 +2013,8 @@ const CARDS = {
     onDeath:[{fx:'allMod',n:-2,dur:'perm'}],
     text:'Undying -1. When destroyed: every Teece on the board gets -2 permanently.'},
  627:{name:'Plague Winds',type:'teece',sides:[2,3,3,1],zombie:true,
-    defPerAlly:1,endAura:{who:'ally',n:1},
-    text:'+1 Defence for every allied Teece on the board, itself included. At the end of every turn: each of your other Teece gets +1 permanently.'},
+    defPerAlly:1,endAura:{ally:1,enemy:-1,includeSelf:true},
+    text:'+1 Defence for every allied Teece on the board, itself included. At the end of every turn: every allied Teece including this one gets +1 permanently, and every enemy Teece gets -1 permanently.'},
  628:{name:'Necromancer',type:'teece',sides:[2,2,2,2],def:4,zombie:true,
     onPlay:[{fx:'necroRaise',n:-2}],
     text:'Defence 4. When played: summon a non-Boss Teece from an enemy graveyard with -2, under your control. It is destroyed when this is destroyed, and returns to its owner\'s graveyard.'},
@@ -2041,7 +2045,7 @@ const CARDS = {
     text:'Add a Teece from your graveyard to your hand and reset its Undying counter.',
     cast:[{fx:'graveToHandUndy'}]},
  638:{name:'Brief Return',type:'magic',
-    text:'Summon a Teece from either graveyard with +3, under your control. Its when-played effect triggers. It is destroyed at the end of the turn.',
+    text:'Summon a Teece from either graveyard with +3, under your control. It is destroyed at the end of the turn.',
     cast:[{fx:'briefRaise',n:3}]},
  639:{name:'Graveyard',type:'ground',gInter:true,
     gact:[{name:'Destroy this battleground',once:'turn',steps:[{fx:'breakGround'}]}],
@@ -2588,6 +2592,19 @@ function handTake(p,idx){
   const id=pl.hand.splice(idx,1)[0];
   const plate=pl.plate.splice(idx,1)[0]||[];
   return {id,plate};
+}
+/* Bringing a card back out of a graveyard is a PLAY: its when-played effect
+   fires, under the control of whoever revived it rather than whoever's
+   graveyard it came from. Every revive goes through here so they cannot drift
+   apart. The Teece is read back off the board first, because an arrival effect
+   -- a mine, a trap, a battleground -- can already have moved or destroyed it
+   between putTeece and now. */
+async function fireRevivedOnPlay(cardId,cell,owner,uid){
+  const d=CARDS[cardId];
+  if(!d||!d.onPlay||cell==null)return;
+  const t=G.board[cell]&&G.board[cell].teece;
+  if(!t||t.uid!==uid)return;
+  await runSteps(d.onPlay,{p:owner,cell,t,first:false});
 }
 /* A Grave Shroud that went into the ground with its wearer comes back up still
    buckled on, whichever way the wearer got back: hauled up by Undying, called
@@ -3553,7 +3570,8 @@ async function FXRUN(st,ctx){
     const pl=G.players[p];
     const ids=pl.grave.filter(id=>CARDS[id]&&CARDS[id].vampire);
     if(!ids.length)return none('No Vampire lies in your grave.');
-    const pick=await chooseOption(p,ids.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Raise which Vampire?');
+    const pick=await chooseOption(p,ids.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Raise which Vampire?',!!ctx.first);
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const cid=ids[parseInt(pick,10)];
     const gi=pl.grave.lastIndexOf(cid);
@@ -4090,6 +4108,7 @@ async function FXRUN(st,ctx){
       (st.n?' with '+sgn(st.n):'')+'. It is destroyed if its summoner is.');
     noteGraveReturn(p,c,true);
     await anim([c],'placed',140);
+    await fireRevivedOnPlay(ent.cid,c,p,nt.uid);
     return;}
   /* Borrowed, not raised: it walks for one turn and then falls apart. Either
      grave will do, so it doubles as a way to spend what you have killed. */
@@ -4102,12 +4121,16 @@ async function FXRUN(st,ctx){
     if(!empt.length)return none('No free panel.');
     const pick=await chooseOption(p,pool.map((e,x)=>({v:String(x),
       lbl:CARDS[e.cid].name+' — '+(sameTeam(e.q,p)?'your grave':pname(e.q)+"'s grave"),cid:e.cid})),
-      'Summon which Teece for the turn?');
+      'Summon which Teece for the turn?',!!ctx.first);
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const ent=pool[parseInt(pick,10)];
     const c=await chooseCell(p,empt,'Choose a space for '+CARDS[ent.cid].name+'.',
-      {mut:(bb,i)=>{putTeece(bb,i,makeTeece(ent.cid,p),false);}});
-    if(c==null||c==='CANCEL')return;
+      {cancel:!!ctx.first,mut:(bb,i)=>{putTeece(bb,i,makeTeece(ent.cid,p),false);}});
+    /* Nothing has been taken out of a graveyard yet, so backing out here is
+       free and the card is still in hand. */
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
     const gi=G.players[ent.q].grave.lastIndexOf(ent.cid);
     if(gi<0)return none('That card is no longer in the graveyard.');
     G.players[ent.q].grave.splice(gi,1);
@@ -4120,13 +4143,7 @@ async function FXRUN(st,ctx){
       '. It is destroyed at the end of the turn.');
     noteGraveReturn(p,c,true);
     await anim([c],'placed',140);
-    /* It arrives as a play, so its when-played effect fires -- under the
-       control of whoever summoned it, not of whoever's grave it came out of.
-       Read the Teece back off the board first: an arrival effect between
-       putTeece and here can already have moved or destroyed it. */
-    const nd=CARDS[ent.cid];
-    if(nd.onPlay&&b[c].teece&&b[c].teece.uid===nt.uid)
-      await runSteps(nd.onPlay,{p,cell:c,t:b[c].teece,first:false});
+    await fireRevivedOnPlay(ent.cid,c,p,nt.uid);
     return;}
   /* The Avatar empties your own grave back onto the field and winds every one
      of them back to a full set of lives. */
@@ -4150,12 +4167,14 @@ async function FXRUN(st,ctx){
       pl.grave.splice(gi,1);
       undyReset(p,cid);
       putTeece(b,c,makeTeece(cid,p),true);
+      const ruid=b[c].teece.uid;
       attachRiders(p,cid,b[c].teece,true);
       raised++;
       log(pname(p)+' resurrects '+CARDS[cid].name+' at the '+CN[c]+
         (undyOf(cid)?', its Undying wound back to the start':'')+'.');
       noteGraveReturn(p,c,true);
       await anim([c],'placed',140);
+      await fireRevivedOnPlay(cid,c,p,ruid);
     }
     if(!raised)return none('No non-Boss Teece in your graveyard.');
     return;}
@@ -4165,7 +4184,8 @@ async function FXRUN(st,ctx){
     for(const cid of pl.grave)if(CARDS[cid].type==='teece'&&ids.indexOf(cid)<0)ids.push(cid);
     if(!ids.length)return none('No Teece in your graveyard.');
     const pick=await chooseOption(p,ids.map((cid,x)=>({v:String(x),lbl:CARDS[cid].name,cid})),
-      'Bring which one back to your hand?');
+      'Bring which one back to your hand?',!!ctx.first);
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const cid=ids[parseInt(pick,10)];
     const gi=pl.grave.lastIndexOf(cid);
@@ -4206,7 +4226,8 @@ async function FXRUN(st,ctx){
     const ids=pl.grave.filter(id=>CARDS[id].type==='teece'&&!isBossCard(id));
     const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
     if(!ids.length||!empt.length)return none('Nothing to summon from the grave.');
-    const pick=await chooseOption(p,ids.map((id,x)=>({v:String(x),lbl:CARDS[id].name,cid:id})),'Summon which card from the grave?');
+    const pick=await chooseOption(p,ids.map((id,x)=>({v:String(x),lbl:CARDS[id].name,cid:id})),'Summon which card from the grave?',!!ctx.first);
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const gi=pl.grave.indexOf(ids[parseInt(pick,10)]);
     const cid=pl.grave.splice(gi,1)[0];
@@ -4214,13 +4235,16 @@ async function FXRUN(st,ctx){
       {mut:(bb,i)=>{putTeece(bb,i,makeTeece(cid,p),false);}});
     if(c==null||c==='CANCEL'){pl.grave.push(cid);return;}
     putTeece(b,c,makeTeece(cid,p),true);
+    const suid=b[c].teece.uid;
     attachRiders(p,cid,b[c].teece,true);
     log(pname(p)+' summons '+CARDS[cid].name+' from the grave.');
+    await fireRevivedOnPlay(cid,c,p,suid);
     return;}
   case 'graveToHand':{
     const pl=G.players[p];
     if(!pl.grave.length)return none('The grave is empty.');
-    const pick=await chooseOption(p,pl.grave.map((id,x)=>({v:String(x),lbl:CARDS[id].name,cid:id})),'Return which card to hand?');
+    const pick=await chooseOption(p,pl.grave.map((id,x)=>({v:String(x),lbl:CARDS[id].name,cid:id})),'Return which card to hand?',!!ctx.first);
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const cid=pl.grave.splice(parseInt(pick,10),1)[0];
     handPush(p,cid);
@@ -5079,7 +5103,8 @@ async function FXRUN(st,ctx){
     pl.deck.forEach(cid=>{if(CARDS[cid].type==='magic'&&!opts.some(o=>o.cid===cid))opts.push({v:String(cid),lbl:CARDS[cid].name+' — your deck',cid});});
     pl.grave.forEach(cid=>{if(CARDS[cid].type==='magic'&&!opts.some(o=>o.cid===cid))opts.push({v:String(cid),lbl:CARDS[cid].name+' — your grave',cid});});
     if(!opts.length)return none('No magic card in your deck or your grave.');
-    const pick=await chooseOption(p,opts,'Copy which magic card into your hand?');
+    const pick=await chooseOption(p,opts,'Copy which magic card into your hand?',!!ctx.first);
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const cid=parseInt(pick,10);
     handPush(p,cid);
@@ -5189,7 +5214,8 @@ async function FXRUN(st,ctx){
         if(CARDS[cid].type==='magic')opts.push({v:q+':'+x,lbl:CARDS[cid].name+' — '+pname(q),cid});
       });
     if(!opts.length)return none('No magic card lies in any grave.');
-    const pick=await chooseOption(p,opts,'Take which magic card?');
+    const pick=await chooseOption(p,opts,'Take which magic card?',!!ctx.first);
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const bits=pick.split(':');
     const q=parseInt(bits[0],10),x=parseInt(bits[1],10);
@@ -5216,7 +5242,8 @@ async function FXRUN(st,ctx){
     const pl=G.players[p];
     const ids=pl.hand.map((cid,x)=>({cid,x})).filter(o=>CARDS[o.cid].type==='magic');
     if(!ids.length)return none('No magic card in hand.');
-    const pick=await chooseOption(p,ids.map((o,y)=>({v:String(y),lbl:CARDS[o.cid].name,cid:o.cid})),'Cast which magic card?');
+    const pick=await chooseOption(p,ids.map((o,y)=>({v:String(y),lbl:CARDS[o.cid].name,cid:o.cid})),'Cast which magic card?',!!ctx.first);
+    if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const sel=ids[parseInt(pick,10)];
     handTake(p,sel.x);
@@ -5428,24 +5455,36 @@ async function undyingReturn(t,cell){
   const pl=G.players[p];
   pl.undying=pl.undying||{};
   pl.undying[t.cardId]=n;
-  /* The bonus is on the preview too, so the panel a player is shown -- and the
-     board the computer scores -- is the one it will actually get. */
   const bonus=(u.y||0)*n;
+  /* Built BEFORE the panel is chosen, because the player has to be told what
+     they are putting down. A returning zombie is not the card that was printed:
+     every return shifts it by another Y, so the same Shambler is 6/6/6/6 the
+     first time and the Rotting Brute arrives at 0/0/0/0. Made after the tally
+     is written, so the new body carries the right count.
+
+     The return bonus is the card's own printed price for getting up, not an
+     effect anybody worked on it, so it goes straight onto perm: Steadfast does
+     not refuse it and no doubling ground bends it. */
+  const nt=makeTeece(t.cardId,p);
+  if(bonus)for(let k=0;k<4;k++)nt.perm[k]+=bonus;
+  /* What it will stand up as, read the way effSides reads it: the printed line
+     floored at zero, then the return bonus on top. Panel-specific extras -- a
+     battleground, an aura, a mine -- are not in here because the panel is the
+     thing being chosen; the board preview shows those as the player hovers. */
+  const arriving=nt.base.map((v,k)=>Math.max(0,v)+nt.perm[k]);
   let c=spots[0];
   if(spots.length>1){
-    const pick=await chooseCell(p,spots,CARDS[t.cardId].name+' returns. Choose any free panel.',
+    const pick=await chooseCell(p,spots,
+      CARDS[t.cardId].name+' returns as '+sidesLine(arriving)+
+      (bonus?' ('+sgn(bonus)+')':'')+'. Choose any free panel.',
       {mut:(bb,i)=>{
+        /* A fresh body per preview: the same object placed on several simulated
+           boards would carry one board's modifiers onto the next. */
         const sim=makeTeece(t.cardId,p);
         if(bonus)for(let k=0;k<4;k++)sim.perm[k]+=bonus;
         putTeece(bb,i,sim,false);}});
     if(pick!=null&&pick!=='CANCEL')c=pick;
   }
-  /* Made after the tally is written, so the new body carries the right count. */
-  const nt=makeTeece(t.cardId,p);
-  /* The return bonus is the card's own printed price for getting up, not an
-     effect anybody worked on it, so it goes straight onto perm: Steadfast does
-     not refuse it and no doubling ground bends it. */
-  if(bonus)for(let k=0;k<4;k++)nt.perm[k]+=bonus;
   const riders=[];
   for(const e of t.equips){
     const g=CARDS[e.cardId].grants;
@@ -5455,7 +5494,8 @@ async function undyingReturn(t,cell){
   for(const e of riders)nt.equips.push(e);
   putTeece(b,c,nt,true);
   const left=undyLeft(nt);
-  log(nm(nt)+' returns at the '+CN[c]+(bonus?' with '+sgn(bonus):'')+
+  log(nm(nt)+' returns at the '+CN[c]+' as '+sidesLine(arriving)+
+    (bonus?' ('+sgn(bonus)+')':'')+
     '. '+(left?left+' return'+(left===1?'':'s')+' left.':'No returns left.'));
   for(const e of riders){
     const g=CARDS[e.cardId].grants;
@@ -6198,8 +6238,8 @@ async function playEquip(p,handIdx){
     if(!empt.length){toast('No free panel.');return false;}
     const bonus=(ed.grants&&ed.grants.riseBonus)||0;
     const pick=await chooseOption(p,ids.map((cid,x)=>({v:String(x),lbl:CARDS[cid].name,cid})),
-      'Return which Teece from your graveyard?');
-    if(pick==null)return false;
+      'Return which Teece from your graveyard?',true);
+    if(pick==null||pick==='CANCEL')return false;
     const cid=ids[parseInt(pick,10)];
     const c=await chooseCell(p,empt,'Choose a space for '+CARDS[cid].name+'.',
       {cancel:true,mut:(bb,i)=>{
@@ -6219,6 +6259,7 @@ async function playEquip(p,handIdx){
       (bonus?' with '+sgn(bonus):'')+', equipped with '+ed.name+'.');
     noteGraveReturn(p,c,true);
     await anim([c],'placed',140);
+    await fireRevivedOnPlay(cid,c,p,nt.uid);
     await resolveCombat();
     render();
     return true;
@@ -6485,26 +6526,41 @@ async function endTurn(){
     const em=DEF(t).endMod;
     if(em){applyModT(t,em.n,'perm');log(nm(t)+' puts on another ring: '+sgn(em.n)+'.');}
   }
-  /* endAura pays out to everyone else at the end of every turn, either side's,
-     the way endMod pays out to its own Teece. Auras proper are recomputed in
-     effSides and vanish with their source; this is banked permanently. */
+  /* endAura pays out at the end of every turn, either side's, the way endMod
+     pays out to its own Teece. Auras proper are recomputed in effSides and
+     vanish with their source; this is banked permanently.
+
+     Two shapes. {who,n} pays one side and never the source itself, which is
+     what the Ancient Redwood has always done. {ally,enemy} pays both sides at
+     once with a number each, and with includeSelf the source is one of the
+     allies it pays -- "all allies" meaning all of them. */
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
     if(!t)continue;
     const ea=DEF(t).endAura;
     if(!ea)continue;
-    let n=0;
+    const pair=(ea.ally!=null||ea.enemy!=null);
+    const amountFor=ally=>{
+      if(pair)return (ally?ea.ally:ea.enemy)||0;
+      if(ea.who==='ally')return ally?ea.n:0;
+      if(ea.who==='enemy')return ally?0:ea.n;
+      return ea.n;
+    };
+    let nAlly=0,nFoe=0;
     for(let j=0;j<BN;j++){
-      if(j===i)continue;
+      if(j===i&&!ea.includeSelf)continue;
       const o=G.board[j].teece;
       if(!o)continue;
       const ally=sameTeam(o.owner,t.owner);
-      if(ea.who==='ally'&&!ally)continue;
-      if(ea.who==='enemy'&&ally)continue;
-      applyModT(o,ea.n,'perm');n++;
+      const amt=amountFor(ally);
+      if(!amt)continue;
+      applyModT(o,amt,'perm');
+      if(ally)nAlly++;else nFoe++;
     }
-    if(n)log(nm(t)+' spreads '+sgn(ea.n)+' to '+n+' other '+
-      (ea.who==='enemy'?'enemy':'allied')+' Teece.');
+    const parts=[];
+    if(nAlly)parts.push(sgn(amountFor(true))+' to '+nAlly+' allied Teece');
+    if(nFoe)parts.push(sgn(amountFor(false))+' to '+nFoe+' enemy Teece');
+    if(parts.length)log(nm(t)+' spreads '+parts.join(' and ')+'.');
   }
   for(const uid of (G.tempControls||[]).slice())revertControl(G.board,uid,true);
   G.tempControls=[];
@@ -6684,6 +6740,7 @@ async function growSeeds(p){
     putTeece(G.board,i,t,true);
     log(CARDS[cid].name+' grows out of the seed at the '+CN[i]+' with '+sgn(sd.n||1)+'.');
     await anim([i],'placed',140);
+    await fireRevivedOnPlay(cid,i,p,t.uid);
     await resolveCombat();
   }
 }
@@ -8009,12 +8066,16 @@ function statusesFor(p){
     const u=undyOf(t.cardId);
     const ally=sameTeam(t.owner,p);
     const next=(u.y||0)*((t.undyUsed||0)+1);
+    /* The numbers it will actually stand up as, not just the modifier: a
+       Rotting Brute reading "-6" tells you nothing until you work out that it
+       comes back at 0 on every side. Same arithmetic undyingReturn uses. */
+    const nextLine=sidesLine(t.base.map(v=>Math.max(0,v)+next));
     push('undy'+t.uid,ally?'good':'warn',
       (ally?'Undying: ':'Undying enemy: ')+nm(t)+' \u00d7'+lives,
       nm(t)+' returns '+lives+' more time'+(lives===1?'':'s')+
       ', on any free panel its controller chooses, with no protection once it returns. '+
-      'The next return is at '+sgn(next)+
-      (u.y?', and each return after that is '+sgn(u.y)+' more.':'.'));
+      'The next return comes back as '+nextLine+(next?' ('+sgn(next)+')':'')+
+      ((u.y&&lives>1)?', and each return after that is '+sgn(u.y)+' more.':'.'));
   }
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
