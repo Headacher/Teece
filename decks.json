@@ -329,6 +329,32 @@
         640
       ],
       "blurb": "They come back when you kill them. X Undying Y means X returns a game, each worth Y more than the last, on any free panel you choose. A returned Teece has no protection, so placement is what keeps it alive. The rest of the deck works both graveyards: summoning out of them, stealing from the enemy's, and taking cards back to hand."
+    },
+    "tictactoe": {
+      "name": "Tic Tac Toe",
+      "cards": [
+        641,
+        642,
+        643,
+        644,
+        645,
+        646,
+        647,
+        648,
+        649,
+        650,
+        651,
+        652,
+        653,
+        654,
+        655,
+        656,
+        657,
+        658,
+        659,
+        660
+      ],
+      "blurb": "A second board laid over the first. Every Teece here is an X, an O, or both, and the two Toerrains mark a bare panel on their own. Three of one letter in a straight line takes the game at the end of that turn, however far behind you are on bodies."
     }
   },
   "formats": [
@@ -696,6 +722,26 @@
     637,
     638,
     639,
-    640
+    640,
+    641,
+    642,
+    643,
+    644,
+    645,
+    646,
+    647,
+    648,
+    649,
+    650,
+    651,
+    652,
+    653,
+    654,
+    655,
+    656,
+    657,
+    658,
+    659,
+    660
   ]
 }

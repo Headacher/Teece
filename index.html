@@ -123,6 +123,9 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="zombie"],.dcard[data-card-deck="zombie"]{--cardbg:#3f4a2a;--artink:#eef7d9;background:var(--cardbg);color:#e6efd2;border-color:#242c17}
 .card[data-card-deck="zombie"] .kwl,.dcard[data-card-deck="zombie"] .dkw{color:#b3c78c}
 .card[data-card-deck="zombie"] .ct,.dcard[data-card-deck="zombie"] .dty{color:#b3c78c}
+.card[data-card-deck="tictactoe"],.dcard[data-card-deck="tictactoe"]{--cardbg:#26303a;--artink:#eaf2f8;background:var(--cardbg);color:#e9f1f7;border-color:#141b22}
+.card[data-card-deck="tictactoe"] .kwl,.dcard[data-card-deck="tictactoe"] .dkw{color:#9fc3dd}
+.card[data-card-deck="tictactoe"] .ct,.dcard[data-card-deck="tictactoe"] .dty{color:#9fc3dd}
 .card[data-card-deck="nature"] .kwl,.dcard[data-card-deck="nature"] .dkw{color:#d5e8a4}
 .card[data-card-deck="nature"] .ct,.dcard[data-card-deck="nature"] .dty{color:#d5e8a4}
 
@@ -139,6 +142,10 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="witch"]::after,.dcard[data-card-deck="witch"]::after{content:'🧙'}
 .card[data-card-deck="nature"]::after,.dcard[data-card-deck="nature"]::after{content:'🌿'}
 .card[data-card-deck="pixie"]::after,.dcard[data-card-deck="pixie"]::after{content:'🧚'}
+.card[data-card-deck="spider"]::after,.dcard[data-card-deck="spider"]::after{content:'🕷'}
+.card[data-card-deck="vampire"]::after,.dcard[data-card-deck="vampire"]::after{content:'🧛'}
+.card[data-card-deck="zombie"]::after,.dcard[data-card-deck="zombie"]::after{content:'🧟'}
+.card[data-card-deck="tictactoe"]::after,.dcard[data-card-deck="tictactoe"]::after{content:'#️⃣'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -148,6 +155,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece[data-card-deck="gadget"]{--cardbg:#8a8a8a;--artink:#f2f7e6;background:var(--cardbg);color:#f5f5f5;border-color:#6a6a6a}
 .teece[data-card-deck="time"]{--cardbg:#6b4a8a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8f8;border-color:#4a2a6a}
 .teece[data-card-deck="witch"]{--cardbg:#1f3a30;--artink:#f2f7e6;background:var(--cardbg);color:#d9f0e2;border-color:#12241d}
+.teece[data-card-deck="tictactoe"]{--cardbg:#26303a;--artink:#eaf2f8;background:var(--cardbg);color:#e9f1f7;border-color:#141b22}
 .teece[data-card-deck="bomb"]{--cardbg:#8a4a1a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e8d8;border-color:#5a2e0a}
 .teece[data-card-deck="nature"]{--cardbg:#6b8f2a;--artink:#f2f7e6;background:var(--cardbg);color:#f6faea;border-color:#48611a}
 .teece[data-card-deck="pixie"]{--cardbg:#b1258e;--artink:#fdeaf7;background:var(--cardbg);color:#f4e9fb;border-color:#7a1861}
@@ -168,6 +176,14 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .cell.target{box-shadow:inset 0 0 0 2px var(--gold);cursor:pointer}
 .cell.target:hover{background:#231b12}
 .cell.locked{box-shadow:inset 0 0 0 2px rgba(239,230,208,.55)}
+/* What a panel counts as in noughts and crosses. Above the Teece rather than
+   under it, because the letter a body is putting down is the whole point of it
+   being there, and a bare Toerrain has to read the same way. */
+.markMark{position:absolute;top:2px;left:4px;font-size:13px;font-weight:800;line-height:1;
+  letter-spacing:-1px;z-index:6;pointer-events:none;text-shadow:0 0 3px rgba(0,0,0,.75)}
+.markMark.bare{opacity:.75;font-size:22px;top:50%;left:50%;transform:translate(-50%,-50%);letter-spacing:0}
+.markMark.m0{color:var(--p0)} .markMark.m1{color:var(--p1)} .markMark.m2{color:var(--p2)}
+.cell.markline{box-shadow:inset 0 0 0 2px var(--gold)}
 .mineMark{position:absolute;bottom:3px;right:5px;font-size:12px;z-index:1}
 .mineMark.m0{color:var(--p0)} .mineMark.m1{color:var(--p1)} .mineMark.m2{color:var(--p2)}
 .curseMark{position:absolute;bottom:3px;left:5px;font-size:13px;z-index:1}
@@ -190,8 +206,17 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
   border:2px solid var(--p0);cursor:pointer}
 .teece.o1{border-color:var(--p1)}
 .teece.o2{border-color:var(--p2)}
+/* The side numbers sit on the same centre line as the name, so the name has to
+   be held clear of them. 13px of padding only ever cleared a single digit: any
+   Teece into double figures -- a Boss, anything buffed, an Oliminitator reading
+   the field -- ran its name under the numbers, and nowrap meant a name of two
+   words was cut off rather than simply wrapping. The clearance is now the width
+   of a two-digit number, the name wraps, and a long one steps down a size. */
 .teece .nm{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;
-  font-family:var(--disp);font-size:12px;line-height:1;padding:0 13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  font-family:var(--disp);font-size:12px;line-height:1.05;padding:0 26px;overflow:hidden;
+  overflow-wrap:break-word}
+.teece .nm.long{font-size:10px}
+.teece .nm.longer{font-size:8.5px;letter-spacing:-.2px}
 .teece .tok{font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#7a6a4d;
   position:absolute;left:0;right:0;bottom:2px;text-align:center}
 .teece .s{position:absolute;font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
@@ -569,7 +594,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:32,date:'2026-09-11'};
+const VERSION={build:33,date:'2026-09-12'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -609,7 +634,7 @@ function rebuildWebCards(){
 }
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
-  zombie:'\u{1F9DF}'};
+  zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -636,6 +661,28 @@ const CARD_ART={
   560:["   *  .  *   ", "  .  .-.  .  ", "  *  ( )  *  ", "  .  \\_/  .  ", "   *  .  *   "],
   "TMP":["   .-----.   ","  ( x   x )  ","   \\ --- /   ","  --|   |--  ","    / \\ /    "],
   "TBAT":["  \\\\  ^  //  "," \\_\\(o.o)/_/ ","   ~/   \\~   ","    v   v    "],
+  /* ---- Tic Tac Toe: chalk marks and the grid they go on ---- */
+  641:["   .-----.   ","  ( \\ O / )  ","   [=====]   ","   /|   |\\   ","  ^^^   ^^^  "],
+  642:["   .-----.   ","  ( \\ X / )  ","   [=====]   ","   /|   |\\   ","  ^^^   ^^^  "],
+  643:["   _______   ","  / O   O \\  ","  |  RIP  |  ","  |_______|  ","  ~~~ ~ ~~~  "],
+  644:["   _______   ","  / X   X \\  ","  |  RIP  |  ","  |_______|  ","  ~~~ ~ ~~~  "],
+  645:["  O   O   O  "," \\    |    / "," O-( >o< )-O "," /    |    \\ ","  O   O   O  "],
+  646:["  X   X   X  "," \\    |    / "," X-( >o< )-X "," /    |    \\ ","  X   X   X  "],
+  647:["      O      ","    (o o)    ","   __/_\\__   ","  \\_______/  ","   \\_____/   "],
+  648:["   _______   ","  /  X X  \\  ","  | .---. |  ","  |/     \\|  ","  '-------'  "],
+  649:["    \\ O /    ","   --( + )-- ","    / | \\    ","   O  |  O   ","  >>>-+-<<<  "],
+  650:["    \\ X /    ","   --( + )-- ","    / | \\    ","   X  |  X   ","  >>>-+-<<<  "],
+  651:["   _______   ","  /X     O/| ","  |-------|X ","  |O     X|/ ","  '-------'  "],
+  652:["  \\ X | O /  "," --+--+--+-- "," X | XOD | O "," --+--+--+-- ","  / O | X \\  "],
+  653:["      /\\     ","     /  \\    ","    (  X )   ","     \\__/    ","      ||     "],
+  654:["      /\\     ","      ||     ","     (O)     ","      ||     ","     _||_    "],
+  655:["  X | O | X  ","  --+---+--  ","  O | X | O  ","  --+---+--  ","  >>> ! <<<  "],
+  656:["    . . .    ","   . -->. .  ","  ( o ) . .  ","   ' ' . .   ","    . . .    "],
+  657:["  X | X | X  ","  --+---+--  ","   NO TEECE  ","  --+---+--  ","  O | O | O  "],
+  658:["   \\  ?  /   ","    X   O    ","   [grave]   ","    \\___/    ","   ^  ^  ^   "],
+  659:["  .........  ","  :   O   :  ","  :  ...  :  ","  :.......:  ","             "],
+  660:["  .........  ","  :   X   :  ","  :  ...  :  ","  :.......:  ","             "],
+  661:["  .........  ","  :  X O  :  ","  :  ...  :  ","  :.......:  ","             "],
   621:["   .---.  >>>","  ( o o ) >> ","   \\ ~~ /  > ","  _/|  |\\_   "," >> run  run "],
   622:["    .---.    ","   ( o o )   ","    \\ ~~ /   ","   _/|  |\\_  ","   /      \\  "],
   623:["   .-----.   ","  ( o   o )  ","   | ~~~~ |  ","  _/|    |\\_ ","  RIP  x2    "],
@@ -1017,6 +1064,11 @@ function allDraftable(){
 let DECK_OF={};
 function getCardDeck(cardId){
   if(DECK_OF[cardId]!==undefined)return DECK_OF[cardId];
+  /* A card that names its own deck settles it: that is how a card belongs to a
+     deck without being drawable out of it -- the XO Toerrain XOD leaves behind
+     is Tic Tac Toe's, but it is nobody's to draw. */
+  const own=CARDS[cardId]&&CARDS[cardId].deck;
+  if(own)return DECK_OF[cardId]=own;
   let out='teece100';
   for(const [key,deck] of Object.entries(DECKS)){
     if(deck.cards.includes(cardId)){out=key;break;}
@@ -1072,6 +1124,17 @@ function canPlay(p,cardId){
    bounce{}  gust{who}  shatter{}  quake{}  terra{}  kwT{kw}
    mine{}  swap{}  move{range:orth|any|fly}
    onDeath extra: resummon{bonus} killer{n,dur}
+   noughts and crosses:
+     toerrain{bg}   the panel the source died on becomes that battleground
+     shift{}        select any Teece on the board, move it one space
+     ticAtack{n}    an enemy takes n for every X and O the caster's side shows
+     toetal{msg,exclude,count}  a player plays no Teece next turn, or pays two cards
+     callMarks{n}   call X or O; n of that letter come back from the grave next turn
+   card fields the mark layer reads:
+     mark:'X'|'O'|'XO'   what a Teece counts as    gMark: the same, for a ground
+     modPerMark{letter,n}   scales with that letter's count across the whole field
+     modIfMark{letter,n}    an equip that only pays a Teece carrying that letter
+     aura{...,markOnly}     an aura that only reaches Teece carrying that letter
 */
 const CARDS = {
  /* ---- classic twenty ---- */
@@ -2053,6 +2116,64 @@ const CARDS = {
  640:{name:'Bone Fields',type:'ground',gBone:true,
     gact:[{name:'Sacrifice: destroy this battleground',once:'turn',steps:[{fx:'sacAlly'},{fx:'breakGround'}]}],
     text:'A bone counter is placed here whenever a Teece is destroyed on this panel or summoned from a graveyard onto it. A Teece on this panel gets +1 for each bone counter. While one of your Teece stands on it, once per your turn: sacrifice an allied Teece and destroy this battleground.'},
+ /* ---- Tic Tac Toe ----
+    Every Teece here is printed with a mark, and three of one letter in a
+    straight line takes the game at the end of that turn. The deck plays two
+    boards at once: the usual fight over numbers, and a game of noughts and
+    crosses laid over it, where a body standing on a panel is the letter on
+    that panel and covers whatever the ground underneath was saying. */
+ 641:{name:'sOldier',type:'teece',sides:[4,4,4,4],mark:'O',
+    text:'Counts as an O.'},
+ 642:{name:'X-tremist',type:'teece',sides:[4,4,4,4],mark:'X',
+    text:'Counts as an X.'},
+ 643:{name:'cOrpse',type:'teece',sides:[2,2,2,2],mark:'O',
+    onDeath:[{fx:'toerrain',bg:659}],
+    text:'Counts as an O. When destroyed: the panel it stood on becomes an O Toerrain.'},
+ 644:{name:'X-tinct',type:'teece',sides:[2,2,2,2],mark:'X',
+    onDeath:[{fx:'toerrain',bg:660}],
+    text:'Counts as an X. When destroyed: the panel it stood on becomes an X Toerrain.'},
+ 645:{name:'Oliminitator',type:'teece',sides:[5,3,6,5],mark:'O',modPerMark:{letter:'O',n:2},
+    text:'Counts as an O. +2 for every O on the field, either side, itself included, and bare O Toerrains count.'},
+ 646:{name:'Xecutioner',type:'teece',sides:[5,3,6,5],mark:'X',modPerMark:{letter:'X',n:2},
+    text:'Counts as an X. +2 for every X on the field, either side, itself included, and bare X Toerrains count.'},
+ 647:{name:'hOle digger',type:'teece',sides:[2,3,3,4],def:3,mark:'O',
+    text:'Counts as an O. Defence 3.'},
+ 648:{name:'roX hider',type:'teece',sides:[4,3,3,2],def:3,mark:'X',
+    text:'Counts as an X. Defence 3.'},
+ 649:{name:'suppOrt',type:'teece',sides:[1,8,8,8],mark:'O',
+    aura:{who:'any',where:'global',n:2,markOnly:'O',kw:['ranged','flying']},
+    text:'Counts as an O. Every other O on the field, whoever controls it, gets +2 and is Ranged and Flying.'},
+ 650:{name:'mediX',type:'teece',sides:[8,8,8,1],mark:'X',
+    aura:{who:'any',where:'global',n:2,markOnly:'X',kw:['ranged','flying']},
+    text:'Counts as an X. Every other X on the field, whoever controls it, gets +2 and is Ranged and Flying.'},
+ 651:{name:'bOX',type:'teece',sides:[8,8,8,8],sac:1,mark:'XO',
+    text:'Sacrifice one fielded Teece to play. Counts as an X and an O at once.'},
+ 652:{name:'XOD',type:'teece',sides:[10,10,10,10],sac:2,mark:'XO',
+    onDeath:[{fx:'toerrain',bg:661}],
+    text:'Sacrifice two fielded Teece to play. Counts as an X and an O at once. When destroyed: the panel it stood on becomes an XO Toerrain, which counts as both.'},
+ 653:{name:'aXe',type:'equip',mod:0,modIfMark:{letter:'X',n:4},
+    text:'The equipped Teece gets +4 if it counts as an X. Nothing otherwise.'},
+ 654:{name:'swOrd',type:'equip',mod:0,modIfMark:{letter:'O',n:4},
+    text:'The equipped Teece gets +4 if it counts as an O. Nothing otherwise.'},
+ 655:{name:'Tic aTack',type:'equip',mod:0,
+    grants:{act:[{name:'Tic aTack',once:'turn',steps:[{fx:'ticAtack',n:-2}]}]},
+    text:'Once per your turn: select an enemy Teece. It gets -2 until the end of the turn for every X and every O your side is showing, counting a Teece that is both as two.'},
+ 656:{name:"Incredibly Weak Magic Card That's Really Good In This Deck",type:'magic',
+    text:'Select a Teece anywhere on the board; move it one space.',
+    cast:[{fx:'shift'}]},
+ 657:{name:'Toetal TacTic',type:'magic',
+    text:'Select a player: they may play no Teece on their next turn. They may discard two cards as it is played to negate it.',
+    cast:[{fx:'toetal',msg:'Which player plays no Teece next turn?',exclude:'self'}]},
+ 658:{name:'NOughts and CrOsses',type:'magic',
+    text:'Call Xs or Os. At the start of your next turn, return two cards of that letter from your graveyard to your hand.',
+    cast:[{fx:'callMarks',n:2}]},
+ 659:{name:'O Toerrain',type:'ground',gMark:'O',
+    text:'This panel counts as an O for whoever laid it, unless a Teece is standing on it.'},
+ 660:{name:'X Toerrain',type:'ground',gMark:'X',
+    text:'This panel counts as an X for whoever laid it, unless a Teece is standing on it.'},
+ /* Not in the deck: XOD leaves this behind when it is destroyed. */
+ 661:{name:'XO Toerrain',type:'ground',deck:'tictactoe',gMark:'XO',
+    text:'This panel counts as both an X and an O for whoever laid it, unless a Teece is standing on it.'},
  /* Not in any deck: Cannonball is handed out by a roguelike perk. */
  590:{name:'Cannonball',type:'magic',perkOnly:true,
     text:'Select a Teece and one of its sides; that side gets -4.',
@@ -2158,9 +2279,13 @@ function undyUsedBy(p,cardId){
   return (pl&&pl.undying&&pl.undying[cardId])||0;
 }
 /* How many more times this card may get up. Tokens and copies never do: there
-   is no card behind them to keep a tally for. */
+   is no card behind them to keep a tally for, and neither does a body that has
+   been silenced -- getting back up is the card doing something, so a Silencer
+   or an Unmake takes it away along with the abilities and the aura. Every
+   reader of "can this get up" comes through here: the return itself, the
+   computer's reading of a trade, and the two places the count is shown. */
 function undyLeft(t){
-  if(!t||t.isToken||t.isCopy)return 0;
+  if(!t||t.isToken||t.isCopy||t.silenced)return 0;
   const u=undyOf(t.cardId);
   if(!u)return 0;
   return Math.max(0,(u.x||1)-(t.undyUsed||0));
@@ -2451,6 +2576,7 @@ let G=null, UID=1;
 let BW=3;                 /* board width in panels  */
 let BN=9;                 /* total panels = BW*BW   */
 let ADJ=[],DIAG=[],CN=[];
+let LINES=[];             /* every run of three panels in a straight line */
 const ALL=()=>{const a=[];for(let i=0;i<BN;i++)a.push(i);return a;};
 const row=i=>Math.floor(i/BW), col=i=>i%BW;
 const sameRow=(a,b)=>row(a)===row(b), sameCol=(a,b)=>col(a)===col(b);
@@ -2487,7 +2613,7 @@ function fileName(k,n){
 }
 function buildGeometry(w){
   BW=w; BN=w*w;
-  ADJ=[];DIAG=[];CN=[];
+  ADJ=[];DIAG=[];CN=[];LINES=[];
   for(let i=0;i<BN;i++){
     const r=Math.floor(i/w),c=i%w,a=[],d=[];
     for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
@@ -2502,6 +2628,17 @@ function buildGeometry(w){
     ADJ.push(a);DIAG.push(d);
     if(w===3&&r===1&&c===1)CN.push('center');
     else CN.push((bandName(r,w)+'-'+fileName(c,w)).replace(/^-|-$/g,''));
+  }
+  /* Every run of three panels in a straight line: the eight lines of noughts
+     and crosses on the usual board, and the same shape slid along a wider one
+     so the rule does not quietly stop working if the board ever grows. Built
+     here rather than written down, because it has to follow the geometry. */
+  for(let r=0;r<w;r++)for(let c=0;c<w;c++){
+    for(const[dr,dc]of[[0,1],[1,0],[1,1],[1,-1]]){
+      const rr=r+2*dr,cc=c+2*dc;
+      if(rr<0||rr>=w||cc<0||cc>=w)continue;
+      LINES.push([r*w+c,(r+dr)*w+(c+dc),rr*w+cc]);
+    }
   }
 }
 buildGeometry(3);
@@ -2548,7 +2685,7 @@ function newState(mode,vsAI,decks,extra){
   buildGeometry(extra.width||3);
   const mk=p=>({deck:shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice()),hand:[],plate:[],grave:[],onceUsed:{},pendingDraw:0,undying:{},riding:{},
     nextDefBonus:0,nextMod:0,nextSides:null,noDeckOut:false,coffined:{},teecePlayedLastTurn:false,teecePlayedThisTurn:0,turnsTaken:0,
-    hexes:[],forget:0,confuse:null});
+    hexes:[],forget:0,confuse:null,recall:null});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
     width:BW,
@@ -2766,6 +2903,105 @@ function summonToken(b,i,tok,owner,live){
   if(isSpiderling(tk))bumpSpiderWatchers(b,'hatch',live);
   return tk;
 }
+/* ============ noughts and crosses ============
+   Every Teece the Tic Tac Toe deck fields is printed with a mark -- an O, an X,
+   or, on the two that cost a sacrifice, both at once. Its two Toerrains mark a
+   panel on their own while nothing is standing there. Three of one letter in a
+   straight line takes the game at the end of that turn, alongside every other
+   way of winning: the deck adds a win condition rather than replacing one.
+
+   A mark belongs to the team that put it there -- the controller of the Teece
+   standing on the panel, or the owner of a bare Toerrain. An enemy body on your
+   O Toerrain covers the O rather than inheriting it, which is what makes
+   standing in the way worth doing. Any card may carry `mark`, so a Teece from
+   any deck can be given a letter without the engine learning its name. */
+const markOfCard=d=>(d&&(d.mark||d.gMark))||'';
+const markOfId=cid=>markOfCard(CARDS[cid]);
+/* What panel i counts as right now and for whom, or null for nothing. `m` is
+   'X', 'O', or 'XO' for a panel that is both letters at once. */
+function panelMark(b,i){
+  const c=b[i];if(!c)return null;
+  const t=c.teece;
+  if(t){
+    const m=markOfCard(DEF(t));
+    return m?{m,team:teamOf(t.owner)}:null;
+  }
+  const g=c.ground;
+  if(g){
+    const gm=(g.gMark!=null?g.gMark:markOfCard(CARDS[g.cardId]))||'';
+    if(gm)return {m:gm,team:teamOf(g.owner)};
+  }
+  return null;
+}
+/* Does this panel read as the letter at all, whoever owns it? Oliminitator and
+   Xecutioner count the whole field rather than their own side of it. */
+function hasMark(b,i,letter){
+  const pm=panelMark(b,i);
+  return !!(pm&&pm.m.indexOf(letter)>=0);
+}
+function countMark(b,letter){
+  let n=0;
+  for(let i=0;i<BN;i++)if(hasMark(b,i,letter))n++;
+  return n;
+}
+/* Marks one team is showing, counted a letter at a time: a Teece that is both
+   an X and an O is two of them. Tic aTack is priced off this. */
+function markCountFor(b,tm){
+  let n=0;
+  for(let i=0;i<BN;i++){
+    const pm=panelMark(b,i);
+    if(pm&&pm.team===tm)n+=pm.m.length;
+  }
+  return n;
+}
+/* How far along a line this team is, and the completed one if there is one.
+   `best` is the longest run it holds with the rest of the line still open to
+   it, which is what the computer plays toward and the warning bar reads. */
+function markLines(b,tm){
+  let done=null,best=0,threat=null;
+  for(const ln of LINES){
+    for(const letter of 'XO'){
+      let have=0,open=0;
+      for(const i of ln){
+        const pm=panelMark(b,i);
+        if(pm&&pm.team===tm&&pm.m.indexOf(letter)>=0)have++;
+        else if(!pm)open++;
+      }
+      if(have===3){if(!done)done={cells:ln,letter};continue;}
+      if(have+open<3)continue;
+      if(have>best){best=have;threat={cells:ln,letter,have};}
+    }
+  }
+  return {done,best,threat};
+}
+const markLine=(b,tm)=>markLines(b,tm).done;
+/* Three in a row takes the game at the end of the turn, and it keeps taking it
+   for as long as it stands: an opponent gets their own whole turn to break the
+   line before it is looked at again. A Curse of Freezing holds it back the same
+   way it holds back a win on Teece count. */
+function checkTicTacToe(){
+  if(G.over)return;
+  const seen=[];
+  for(const tm of teamsInPlay()){
+    const ln=markLine(G.board,tm);
+    if(ln)seen.push({tm,ln});
+  }
+  if(!seen.length)return;
+  /* Two lines standing at once go to whoever's turn is ending. */
+  const mine=seen.find(s=>s.tm===teamOf(G.turn));
+  const win=mine||seen[0];
+  if(seatsOnTeam(win.tm).some(s=>hexOn(s,'nowin'))){
+    log('Three '+win.ln.letter+'s in a row, and the Curse of Freezing holds the win back for now.');
+    return;
+  }
+  const who=teamName(win.tm);
+  endGame(win.tm,who+(who==='You'?' end':' ends')+' the turn with three '+win.ln.letter+
+    's in a row \u2014 the '+win.ln.cells.map(i=>CN[i]).join(', ')+'.');
+}
+/* Whether an aura reaches a given Teece at all. effSides spells the same test
+   out inline; this is the copy the keyword and Defence passes share. */
+const auraWho=(a,ally)=>a.who==='ally'?ally:(a.who==='enemy'?!ally:true);
+
 function effSides(b,i,parts){
   const t=b[i].teece; if(!t)return[0,0,0,0];
   const s=[0,0,0,0];
@@ -2804,12 +3040,22 @@ function effSides(b,i,parts){
     if(perkN('equipPlus')&&sameTeam(t.owner,0))addMod(s,perkN('equipPlus'),ed.name+', honed over the run');
     if(ed.modPerDef)addMod(s,ed.modPerDef*defOf(b,i),ed.name+', per point of Defence');
     if(ed.modPerAge)addMod(s,ed.modPerAge*(t.age||0),ed.name+', per turn stood');
+    /* aXe and swOrd are dead weight on the wrong letter. */
+    if(ed.modIfMark&&markOfCard(DEF(t)).indexOf(ed.modIfMark.letter)>=0)
+      addMod(s,ed.modIfMark.n,ed.name+', in the hands of '+(ed.modIfMark.letter==='X'?'an X':'an O'));
   }
   /* A Teece that reads the crowd. Not an aura -- it is the card's own printed
      line scaling with the field, so silence does not touch it. */
   if(DEF(t).modPerAlly){
     const mates=allyCount(b,i,false);
     if(mates)addMod(s,DEF(t).modPerAlly*mates,DEF(t).name+', for each of the '+mates+' other allies standing');
+  }
+  /* Oliminitator and Xecutioner read the whole board -- both sides, bare
+     Toerrains, and themselves among the count. Printed on the card rather than
+     radiated at it, so silencing the card never touches it. */
+  if(DEF(t).modPerMark){
+    const mk=DEF(t).modPerMark,cnt=countMark(b,mk.letter);
+    if(cnt)addMod(s,mk.n*cnt,DEF(t).name+', for each of the '+cnt+' '+mk.letter+(cnt===1?'':'s')+' on the field');
   }
   if(perkN('deckMix')){
     const mix=mixBonus(b,i);
@@ -2839,6 +3085,7 @@ function effSides(b,i,parts){
       if(a.where==='col'&&!sameCol(i,j))continue;
       if(a.tokenOnly&&!t.isToken)continue;
       if(a.pixieOnly&&!DEF(t).pixie)continue;
+      if(a.markOnly&&markOfCard(DEF(t)).indexOf(a.markOnly)<0)continue;
       const amt0=a.byDef?defOf(b,i):a.n;
       const amt=(selfDbl&&amt0>0)?amt0*2:amt0;
       for(let k=0;k<4;k++)s[k]+=amt;
@@ -2923,7 +3170,8 @@ function kwOf(b,i,noGround){
     if(j===i)continue;
     const o=b[j].teece;if(!o||o.silenced)continue;
     const a=DEF(o).aura;
-    if(a&&a.kw&&((a.who==='ally')===sameTeam(o.owner,t.owner))&&a.where==='global')ks.push(...a.kw);
+    if(a&&a.kw&&a.where==='global'&&auraWho(a,sameTeam(o.owner,t.owner))&&
+       (!a.markOnly||markOfCard(d).indexOf(a.markOnly)>=0))ks.push(...a.kw);
     /* an enemy spider holds everything caught in the Web still */
     if(DEF(o).webLock&&!sameTeam(o.owner,t.owner)){
       if(onWeb===null)onWeb=isWebbed(b,i);
@@ -3231,13 +3479,26 @@ function markTargetDeath(v){
    picking one resolves to 'h<index>' instead of a cell number. The computer
    never takes that branch -- aiPickCell only ever looks at the board -- so an
    AI turn behaves exactly as it did before hand targets existed. */
+/* A question about the board is useless with the board off the screen. On a
+   phone the hand sits well below it, so tapping a card there leaves the panels
+   it is asking about scrolled off the top -- the control worked, the question
+   opened, and there was nothing to answer it with. Only moves the page when
+   the board is not already in view, so it never yanks a screen that was fine. */
+function showBoard(){
+  if(!HAS_DOM)return;
+  const row=document.querySelector('.boardrow');
+  if(!row)return;
+  const r=row.getBoundingClientRect();
+  if(r.top>=0&&r.bottom<=window.innerHeight)return;
+  row.scrollIntoView({block:'center',behavior:'smooth'});
+}
 function chooseCell(p,cells,msg,opt){
   opt=opt||{};
   if(isAIP(p)||!HAS_DOM){
     return Promise.resolve(aiPickCell(cells,opt,p)).then(markTargetDeath);
   }
   return new Promise(res=>{G.pending={kind:'cell',p,cells,hands:opt.hands||null,msg,opt,
-    res:v=>res(markTargetDeath(v))};render();});
+    res:v=>res(markTargetDeath(v))};render();showBoard();});
 }
 function chooseOption(p,opts,msg,cancel){
   if(isAIP(p)||!HAS_DOM){
@@ -5257,7 +5518,8 @@ async function FXRUN(st,ctx){
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     b[c].teece.silenced=true;
-    log(nm(b[c].teece)+' is silenced: its abilities are negated for the rest of the game.');
+    log(nm(b[c].teece)+' is silenced: its abilities are negated for the rest of the game, '+
+      'and it no longer gets back up.');
     await anim([c],'zap');
     return;}
   case 'familiar':{
@@ -5284,6 +5546,122 @@ async function FXRUN(st,ctx){
     moveT(b,i,c,true);
     log(nm(t)+' slips to the '+CN[c]+'.');
     await fireMove(i,c,p);
+    return;}
+  /* A body that leaves its letter behind. The panel it fell on becomes a
+     Toerrain owned by whoever controlled it, and reads as that letter for as
+     long as nothing is standing there. Whatever ground was already on the
+     panel is cleared the same way laying one from hand clears it. */
+  case 'toerrain':{
+    const c=ctx.deadCell!=null?ctx.deadCell:ctx.cell;
+    if(c==null||!b[c])return none('There is no panel left to mark.');
+    const own=ctx.deadOwner!=null?ctx.deadOwner:p;
+    if(b[c].razed)return none('The '+CN[c]+' is razed, and nothing takes hold there.');
+    if(b[c].ground)await clearGroundAt(c,own);
+    b[c].ground={cardId:st.bg,owner:own,gid:G.groundSeq++};
+    log(CARDS[st.bg].name+' spreads across the '+CN[c]+'.');
+    if(HAS_DOM)render();
+    return;}
+  /* Pick anything on the board and nudge it one space. Weak on its own, and
+     the difference between two in a row and three. */
+  case 'shift':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      if(!b[i].teece||!canTarget(b,i,p))continue;
+      if(hasKw(b,i,'immovable'))continue;
+      if(!ADJ[i].some(j=>openAt(b,j)))continue;
+      cands.push(i);
+    }
+    if(!cands.length)return none('Nothing on the board has a space to move into.');
+    /* Which Teece to pick is only worth anything for where it can then go, so
+       the preview the computer judges this prompt by is the best single space
+       that Teece could take. Only the computer ever reads a mut. */
+    const c=await pickCell(cands,'Choose a Teece to move one space.',(bb,i)=>{
+      if(!bb[i].teece)return;
+      const outs=ADJ[i].filter(j=>openAt(bb,j));
+      if(!outs.length)return;
+      let bj=outs[0],bv=-1e9;
+      for(const j of outs){
+        const cb=cloneBoard(bb);
+        if(!cb[i].teece)continue;
+        moveT(cb,i,j,false);
+        const v=boardValue(cb,p);
+        if(v>bv){bv=v;bj=j;}
+      }
+      moveT(bb,i,bj,false);
+    });
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const mt=b[c].teece;
+    const dests=ADJ[c].filter(j=>openAt(b,j));
+    if(!dests.length)return none('Nowhere to move.');
+    const dst=await chooseCell(p,dests,'Move '+nm(mt)+' where?',
+      {mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);}});
+    if(dst==null||dst==='CANCEL')return;
+    if(b[c].teece!==mt||b[dst].teece)return;
+    moveT(b,c,dst,true);
+    log(nm(mt)+' is nudged to the '+CN[dst]+'.');
+    await fireMove(c,dst,p);
+    return;}
+  /* Priced off the board rather than off the card: every X and every O your
+     side is showing, a Teece that is both counting as two. */
+  case 'ticAtack':{
+    const marks=markCountFor(b,teamOf(p));
+    if(!marks)return none('You have no X and no O showing, so there is nothing to throw.');
+    const cands=[];
+    for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&!sameTeam(o.owner,p)&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length)return none('No enemy to hit.');
+    const amt=(st.n||-2)*marks;
+    const c=await pickCell(cands,'Choose an enemy: '+amt+' until end of turn, for each of your '+marks+' mark'+
+      (marks===1?'':'s')+'.',(bb,i)=>{applyModT(bb[i].teece,amt,'temp');});
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    applyModT(b[c].teece,amt,'temp');
+    log(nm(b[c].teece)+' is crossed out: '+amt+' until end of turn.');
+    noteTargeted(p);noteEnemyLoss(p,c,-amt,false);
+    await anim([c],'zap');
+    return;}
+  /* No Teece next turn, unless they would rather pay two cards for the right.
+     The choice belongs to the player being cursed, so it is put to them, and
+     they pick which two go. */
+  case 'toetal':{
+    const who=await pickPlayer(p,st.msg||'Which player plays no Teece next turn?',st.exclude);
+    if(who==null)return;
+    for(const q of hexTargets(p,who)){
+      const pl=G.players[q];
+      if(pl.hand.length>=2){
+        const pick=await chooseOption(q,[{v:'pay',lbl:'Discard two cards and shrug it off'},
+                                         {v:'take',lbl:'Take the curse'}],
+          'Toetal TacTic: no Teece on your next turn unless you discard two cards.');
+        if(pick==='pay'){
+          const dumped=[];
+          for(let k=0;k<2&&pl.hand.length;k++){
+            const opts=pl.hand.map((cid,x)=>({v:String(x),lbl:CARDS[cid].name,cid}));
+            const hp=await chooseOption(q,opts,'Discard which card? ('+(k+1)+' of 2)');
+            const idx=hp==null?Math.floor(Math.random()*pl.hand.length):parseInt(hp,10);
+            const gone=handTake(q,idx);
+            if(!gone)break;
+            dumpPlate(gone.plate,'with the card it was bolted to');
+            dumped.push(gone.id);
+          }
+          for(const cid of dumped)await discardCard(q,cid);
+          log(pname(q)+' '+vb(q,'discards','discard')+' '+dumped.length+' and shrugs off Toetal TacTic.');
+          continue;
+        }
+      }
+      addHex(q,'freeze',p,st.count||2);
+      log('Toetal TacTic settles on '+pname(q)+': '+HEX_TXT.freeze+
+        ', until the end of '+pposs(p)+' next turn.');
+    }
+    return;}
+  /* Called now, paid at the top of your next turn. One call stands at a time:
+     calling again overwrites whatever was still waiting. */
+  case 'callMarks':{
+    const pick=await chooseOption(p,[{v:'X',lbl:'Call Xs'},{v:'O',lbl:'Call Os'}],'Call Xs or Os.',!!ctx.first);
+    if(pick==='CANCEL')return 'ABORT';
+    if(pick==null)return;
+    G.players[p].recall={letter:pick,n:st.n||2};
+    log(pname(p)+' '+vb(p,'calls','call')+' '+pick+'s: two come back out of the graveyard at the start of '+
+      pposs(p)+' next turn.');
     return;}
   case 'move':{
     const i=ctx.cell;
@@ -6644,7 +7022,8 @@ async function endTurn(){
   }
   await resolveCombat();
   if(stale(ep))return;
-  checkDomination();
+  checkTicTacToe();
+  if(!G.over)checkDomination();
   if(!G.over)checkStalemate();
   if(G.over)return;
   G.players[p].teecePlayedLastTurn=G.players[p].teecePlayedThisTurn>0;
@@ -6716,6 +7095,40 @@ function checkStalemate(){
     endGame(who,'Three turns passed by every player with nothing played, nothing moved and nothing destroyed. Field: '+scoreLine()+'.');
   }
 }
+/* What NOughts and CrOsses called for, paid at the top of the caller's next
+   turn. Cards "of that type" are the ones printed with that letter, a Toerrain
+   as much as a Teece, and a card that is both an X and an O answers either
+   call. Fewer in the grave than were called for simply brings back fewer. */
+async function payRecall(p){
+  const pl=G.players[p];
+  if(!pl||!pl.recall)return;
+  const {letter,n}=pl.recall;
+  pl.recall=null;
+  const pick=()=>{
+    const out=[];
+    for(const cid of pl.grave)if(markOfId(cid).indexOf(letter)>=0&&out.indexOf(cid)<0)out.push(cid);
+    return out;
+  };
+  let got=0;
+  for(let k=0;k<n;k++){
+    const ids=pick();
+    if(!ids.length)break;
+    let cid=ids[0];
+    if(ids.length>1){
+      const o=await chooseOption(p,ids.map((c,x)=>({v:String(x),lbl:CARDS[c].name,cid:c})),
+        'The call goes out for '+letter+'s. Which one comes back? ('+(k+1)+' of '+n+')');
+      if(o==null)break;
+      cid=ids[parseInt(o,10)];
+    }
+    const gi=pl.grave.lastIndexOf(cid);
+    if(gi<0)break;
+    pl.grave.splice(gi,1);
+    handPush(p,cid);
+    log(CARDS[cid].name+' answers the call and returns to '+pposs(p)+' hand.');
+    got++;
+  }
+  if(!got)log('The call for '+letter+'s goes out, and nothing in the graveyard answers it.');
+}
 async function growSeeds(p){
   for(let i=0;i<BN;i++){
     const sd=G.board[i].seed;
@@ -6766,6 +7179,8 @@ async function startTurn(){
   await ageTurn(p);
   if(stale(ep)||G.over)return;
   await growSeeds(p);
+  if(stale(ep)||G.over)return;
+  await payRecall(p);
   if(stale(ep)||G.over)return;
   if(pl.pendingDraw){const n=pl.pendingDraw;pl.pendingDraw=0;drawCards(p,n);}
   if(G.turnNum>1){
@@ -6898,8 +7313,27 @@ function simCombat(b){
    the pressure this Teece puts on its neighbours, and anything under a Grunt's
    seven is a way in for theirs. A body on a panel is never worth less than
    nothing, however soft -- it still holds the panel. */
-function boardValue(b,p){
+/* What the noughts-and-crosses board is worth to p. Two of a letter with the
+   third panel still open is one move off taking the game outright, so it beats
+   any single body on the field, and an enemy two counts for slightly more
+   again: when both sides are one move away, blocking has to beat racing.
+   Boards with no marks anywhere -- every other deck in the game -- get out
+   before any of the counting, since this runs inside every placement sim. */
+function markValue(b,p){
+  let any=false;
+  for(let i=0;i<BN;i++)if(panelMark(b,i)){any=true;break;}
+  if(!any)return 0;
   let v=0;
+  const mine=teamOf(p);
+  for(const tm of teamsInPlay()){
+    const ml=markLines(b,tm);
+    const w=ml.done?400:(ml.best===2?26:(ml.best===1?3:0));
+    v+=tm===mine?w:-w*1.15;
+  }
+  return v;
+}
+function boardValue(b,p){
+  let v=markValue(b,p);
   for(let i=0;i<BN;i++){
     const t=b[i].teece;if(!t)continue;
     const s=effSides(b,i);
@@ -7173,6 +7607,31 @@ function aiPlanFor(id){
   /* Two cards open their cast by feeding the swarm, and they are worth very
      different things. Both plans eat the price in the simulation so the AI is
      weighing the trade rather than the payoff alone. */
+  /* The nudge is only ever worth anything for the line it opens or closes, and
+     boardValue already knows how to price that, so every legal nudge is simmed
+     and the threshold keeps the AI from spending the card on nothing. */
+  if(st.fx==='shift'){
+    const moves=[];
+    for(let i=0;i<BN;i++){
+      if(!b[i].teece||!canTarget(b,i,p)||hasKw(b,i,'immovable'))continue;
+      for(const j of ADJ[i])if(openAt(b,j))moves.push([i,j]);
+    }
+    if(!moves.length)return null;
+    return {thr:2.0,cands:moves.map((_,x)=>x),
+      mut:(bb,x)=>{const[i,j]=moves[x];if(bb[i].teece&&!bb[j].teece)moveT(bb,i,j,false);}};
+  }
+  /* Neither of these shows up on the board at all, so there is nothing to sim:
+     a flat price, paid when there is someone to point it at or something in the
+     graveyard worth calling back. */
+  if(st.fx==='toetal'){
+    if(!enemySeats(p).length)return null;
+    return {thr:0.5,pseudo:1.0,cands:[0],mut:null};
+  }
+  if(st.fx==='callMarks'){
+    const grave=G.players[p].grave;
+    if(!grave.some(cid=>markOfId(cid)))return null;
+    return {thr:0.5,pseudo:0.9,cands:[0],mut:null};
+  }
   if(st.fx==='sacSpiderling'){
     const fed=[];
     for(let i=0;i<BN;i++)if(b[i].teece&&sameTeam(b[i].teece.owner,p)&&canEatSpiderling(b,i))fed.push(i);
@@ -7602,6 +8061,16 @@ function paintFoot(foot,i){
 function renderBoard(){
   const b=document.getElementById('board');
   b.innerHTML='';
+  /* Any line standing at two with its last panel open, whoever holds it. Drawn
+     on the board because that is where the decision about it gets made. */
+  const lit={};
+  if(LINES.some(ln=>ln.some(j=>panelMark(G.board,j)))){
+    for(const tm of teamsInPlay()){
+      const ml=markLines(G.board,tm);
+      if(ml.done){for(const j of ml.done.cells)lit[j]=true;continue;}
+      if(ml.threat&&ml.threat.have===2)for(const j of ml.threat.cells)lit[j]=true;
+    }
+  }
   for(let i=0;i<BN;i++){
     const cell=document.createElement('div');
     cell.className='cell';
@@ -7614,6 +8083,7 @@ function renderBoard(){
       }
     }
     if(G.detailLock===i)cell.classList.add('locked');
+    if(lit[i])cell.classList.add('markline');
     const an=G.anim&&G.anim.cells.indexOf(i)>=0?G.anim.cls:null;
     if(an==='zap')cell.classList.add('zap');
     cell.innerHTML='';
@@ -7643,8 +8113,11 @@ function renderBoard(){
       const bart=CARD_ART[t.cardId];
       tp.className='teece o'+t.owner+(bart?' arted':'')+((an==='dying'||an==='placed')?' '+an:'');
       tp.setAttribute('data-card-deck',getCardDeck(t.cardId));
+      /* Long names step down a size rather than being cut off: the panel is the
+         only place the name appears once a Teece is on the board. */
+      const tnm=DEF(t).name, nmCls=tnm.length>15?'nm longer':(tnm.length>10?'nm long':'nm');
       tp.innerHTML=(bart?'<pre class="ascii" aria-hidden="true">'+bart.map(escHtml).join('\n')+'</pre>':'')+
-        '<div class="nm">'+DEF(t).name+'</div>'+
+        '<div class="'+nmCls+'">'+tnm+'</div>'+
         '<div class="s s0 '+(s[0]>7?'up':'')+(s[0]<3?'down':'')+'">'+s[0]+'</div>'+
         '<div class="s s1 '+(s[1]>7?'up':'')+(s[1]<3?'down':'')+'">'+s[1]+'</div>'+
         '<div class="s s2 '+(s[2]>7?'up':'')+(s[2]<3?'down':'')+'">'+s[2]+'</div>'+
@@ -7676,6 +8149,19 @@ function renderBoard(){
       tp.addEventListener('mouseenter',()=>{if(G.detailLock==null){G.panelTap=null;G.detailHover=i;showDetail(i);}});
       tp.addEventListener('mouseleave',()=>{if(G.detailLock==null&&G.detailHover===i){G.detailHover=null;showDetail(null);}});
       cell.appendChild(tp);
+    }
+    /* Appended last and given its own layer so it reads over a Teece as
+       clearly as it does on a bare Toerrain -- the letter on the panel is the
+       whole second game, and hunting for it on the card face is no good on a
+       phone. A bare panel gets the big centred version. */
+    const pm=panelMark(G.board,i);
+    if(pm){
+      const mk=document.createElement('div');
+      mk.className='markMark m'+pm.team+(t?'':' bare');
+      mk.title=(pm.m==='XO'?'This panel counts as an X and an O':'This panel counts as '+
+        (pm.m==='X'?'an X':'an O'))+' for '+teamName(pm.team)+'.';
+      mk.textContent=pm.m;
+      cell.appendChild(mk);
     }
     cell.addEventListener('click',async()=>{
       if(G.pending&&G.pending.kind==='cell'&&G.pending.cells.indexOf(i)>=0){
@@ -7736,6 +8222,10 @@ function panelHtml(i){
   if(c.seed)h+='<div class="dt">'+pname(c.seed.owner)+' has a seed planted here, '+c.seed.turns+' turn'+(c.seed.turns===1?'':'s')+
     ' from growing. If the panel is empty then, a Teece is raised from the graveyard with '+sgn(c.seed.n||1)+'.</div>';
   if(c.enchant)h+='<div class="dt" style="color:var(--gold)">'+enchantText(c.enchant)+'</div>';
+  const pm=panelMark(G.board,i);
+  if(pm&&!c.teece)h+='<div class="dt" style="color:var(--gold)">Counts as '+
+    (pm.m==='XO'?'an X and an O':(pm.m==='X'?'an X':'an O'))+' for '+teamName(pm.team)+
+    ', until something stands here.</div>';
   if(isWebbed(G.board,i))h+='<div class="dt" style="color:var(--gold)">Web. Spiders and Spiderlings standing here can Skitter one space once per your turn, and a Spiderling has +'+WEB_DEF+' Defence.</div>';
   return h;
 }
@@ -7753,6 +8243,9 @@ function showDetail(i){
   const locked=G.detailLock===i;
   let html=(locked?'<div class="dlock">Selected</div>':'')+
     '<div class="dn">'+nm(t)+'</div><div class="dt">'+cd.text+'</div>';
+  const pmk=panelMark(G.board,i);
+  if(pmk)html+='<div class="dt" style="color:var(--gold)">Counts as '+
+    (pmk.m==='XO'?'an X and an O':(pmk.m==='X'?'an X':'an O'))+' for '+teamName(pmk.team)+'.</div>';
   const kws=kwOf(G.board,i);
   if(kws.length)html+='<div class="dt" style="color:var(--gold)">'+kws.join(', ')+'</div>';
   const dfv=defOf(G.board,i);
@@ -8032,7 +8525,8 @@ function statusesFor(p){
     if(!t||!t.silenced)continue;
     const ally=sameTeam(t.owner,p);
     push('silenced'+t.uid,ally?'bad':'good','Silenced: '+nm(t),
-      nm(t)+' is silenced: its abilities and its aura do nothing while the curse holds.');
+      nm(t)+' is silenced: its abilities and its aura do nothing, and it no longer gets back up '+
+      'if it was Undying.');
   }
 
   /* --- modalities. Read the same sources as modalCtl, but never consume
@@ -8146,6 +8640,36 @@ function statusesFor(p){
     if(held.length){
       const lines=held.map(k=>PERK_BY_KEY[k].name+' \u2014 '+PERK_BY_KEY[k].text);
       push('perks','good','Perks: '+held.length,lines.join(' '));
+    }
+  }
+
+  /* --- noughts and crosses. A line completes at the end of a turn, which
+         leaves exactly one turn to do something about a second mark going
+         down. Nothing else on screen would tell you it happened. --- */
+  if(LINES.some(ln=>ln.some(i=>panelMark(b,i)))){
+    const mine=markLines(b,teamOf(p));
+    if(mine.done)
+      push('lineDone','good','Three in a row','Three '+mine.done.letter+
+        's of yours stand in a line \u2014 the '+mine.done.cells.map(i=>CN[i]).join(', ')+
+        '. You take the game at the end of the turn, if it is still standing then.');
+    else if(mine.threat&&mine.best===2)
+      push('line','good','One from the line','Two '+mine.threat.letter+
+        's of yours stand in a line with the last panel still open: the '+
+        mine.threat.cells.map(i=>CN[i]).join(', ')+'. Fill it and you take the game at the end of that turn.');
+    for(const tm of teamsInPlay()){
+      if(tm===teamOf(p))continue;
+      const th=markLines(b,tm);
+      if(th.done){
+        push('foeDone'+tm,'bad',teamName(tm)+' has three in a row',
+          teamName(tm)+' has three '+th.done.letter+'s in a line \u2014 the '+
+          th.done.cells.map(i=>CN[i]).join(', ')+'. Break it before the turn ends or the game is theirs: '+
+          'stand something of yours on one of those panels, or take one of the three off the board.');
+        continue;
+      }
+      if(!th.threat||th.best!==2)continue;
+      push('foeline'+tm,'bad',teamName(tm)+' one from the line',
+        teamName(tm)+' has two '+th.threat.letter+'s in a line with the last panel still open: the '+
+        th.threat.cells.map(i=>CN[i]).join(', ')+'. Stand something on it, or take one of the two off the board.');
     }
   }
 
@@ -8555,7 +9079,9 @@ if(typeof module!=='undefined'){
     PERKS,perkN,winLeadFor,leadState,WIN_LEAD,teeceCap,mixBonus,getCardDeck,ROGUE_LEVELS,
     setForm,formOf,applyDrain,drainMult,sacsNeeded,
     undyOf,undyLeft,undyUsedBy,undyReset,undyingReturn,allyCount,canSacrifice,
-    noteGraveReturn,attachRiders,equipCameOff,addBone,clearGroundAt,processDeath,defOf,kwOf,actsOf};
+    noteGraveReturn,attachRiders,equipCameOff,addBone,clearGroundAt,processDeath,defOf,kwOf,actsOf,
+    panelMark,hasMark,countMark,markCountFor,markLines,markLine,checkTicTacToe,markOfCard,markOfId,markValue,
+    payRecall,getLines:()=>LINES};
 }
 </script>
 </body>
