@@ -212,11 +212,23 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
    the field -- ran its name under the numbers, and nowrap meant a name of two
    words was cut off rather than simply wrapping. The clearance is now the width
    of a two-digit number, the name wraps, and a long one steps down a size. */
-.teece .nm{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;
-  font-family:var(--disp);font-size:12px;line-height:1.05;padding:0 26px;overflow:hidden;
-  overflow-wrap:break-word}
+/* Name and badges ride together in one centred stack, so the badges follow the
+   name down when it takes a second or third line rather than being pinned at a
+   fixed offset underneath it. The stack carries the clearance from the side
+   numbers; neither child positions itself. */
+.teece .mid{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:1px;padding:0 26px;z-index:1;
+  /* Held inside the band between the top and bottom numbers, so a name that
+     takes three lines shrinks rather than growing into them. */
+  max-height:calc(100% - 40px);justify-content:center}
+.teece .nm{text-align:center;font-family:var(--disp);font-size:12px;line-height:1.05;
+  max-width:100%;overflow:hidden;overflow-wrap:break-word}
 .teece .nm.long{font-size:10px}
 .teece .nm.longer{font-size:8.5px;letter-spacing:-.2px}
+/* A name sharing the card with badges gives up a size before the badges do. */
+.teece .mid:has(.rgd) .nm{font-size:10px}
+.teece .mid:has(.rgd) .nm.long{font-size:8.5px}
+.teece .mid:has(.rgd) .nm.longer{font-size:7.5px;letter-spacing:-.2px}
 .teece .tok{font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#7a6a4d;
   position:absolute;left:0;right:0;bottom:2px;text-align:center}
 .teece .s{position:absolute;font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
@@ -226,17 +238,21 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece .s3{left:4px;top:50%;transform:translateY(-50%)}
 .teece .up{color:var(--up)} .teece .down{color:var(--down)}
 .teece .eq{position:absolute;top:2px;right:4px;font-size:8px;color:#7a6a4d;letter-spacing:.05em}
-.teece .rgd{position:absolute;left:0;right:0;top:calc(50% + 10px);display:flex;line-height:1;
-  align-items:center;justify-content:center;gap:7px;font-size:11px}
+/* Tight enough that a bow, a shield and a turning arrow together still sit in
+   the gap the side numbers leave. */
+.teece .rgd{display:flex;line-height:1;align-items:center;justify-content:center;
+  gap:3px;font-size:10px;flex:0 0 auto}
 .teece .rgd .dfn{display:inline-flex;align-items:center;gap:2px;font-weight:700;
   font-variant-numeric:tabular-nums}
+/* \u21BB is a text glyph rather than an emoji, so it needs a size of its own to
+   sit level with the bow and the shield beside it. */
+.teece .rgd .undy{font-size:13px;line-height:1;gap:1px}
 .teece .ascii{position:absolute;top:12px;right:5px;bottom:12px;left:5px;margin:0;z-index:0;
   pointer-events:none;overflow:hidden;background:transparent;color:var(--artink);opacity:.46;
   display:flex;align-items:center;justify-content:center;
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Courier New',monospace;
   font-size:7px;line-height:1.02;white-space:pre}
-.teece.arted .nm,.teece.arted .s{text-shadow:0 0 3px var(--cardbg),0 0 3px var(--cardbg),0 0 2px var(--cardbg)}
-.teece.arted .nm{z-index:1}
+.teece.arted .mid,.teece.arted .s{text-shadow:0 0 3px var(--cardbg),0 0 3px var(--cardbg),0 0 2px var(--cardbg)}
 .teece.arted .s{z-index:1}
 .teece .actdot{position:absolute;top:2px;left:4px;width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px var(--gold)}
 
@@ -594,7 +610,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:33,date:'2026-09-12'};
+const VERSION={build:34,date:'2026-09-12'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1088,7 +1104,7 @@ function canPlay(p,cardId){
     let room=false;
     for(let i=0;i<BN;i++)if(openAt(G.board,i)){room=true;break;}
     if(!room)return false;
-    const need=cd.sac||0;
+    const need=sacsNeeded(cardId,p);
     if(need){
       let sacables=0;
       for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p&&!t.isToken&&canSacrifice(G.board,i))sacables++;}
@@ -1874,10 +1890,10 @@ const CARDS = {
     onPlay:[{fx:'token',tok:'T6',where:'any',count:2,linked:true}],
     onMove:[{fx:'token',tok:'T6',where:'any',count:1,linked:true}]},
  549:{name:'Trickspinner',type:'teece',sides:[2,2,2,2],pixie:true,kw:['flying'],
-    text:'Flying. Once per your turn: conjure two random Pixie magic cards into your hand.',
+    text:'Flying. Once per your turn: conjure two random magic cards into your hand.',
     act:[{name:'Spin a trick',once:'turn',steps:[{fx:'conjure',n:2}]}]},
  550:{name:'Wisp of Nothing',type:'teece',sides:[0,0,0,0],pixie:true,kw:['flying'],
-    text:'Flying. When played: conjure a random Pixie magic card. When this moves: conjure two.',
+    text:'Flying. When played: conjure a random magic card. When this moves: conjure two.',
     onPlay:[{fx:'conjure',n:1}],onMove:[{fx:'conjure',n:2}]},
  551:{name:'Spellbound Pixie',type:'teece',sides:[3,1,4,1],sac:1,pixie:true,kw:['flying'],
     text:'Flying. Sacrifice one fielded Teece to play. Whenever you play a magic card: this gets +5 until the end of the turn, +2 permanently, and may move one space.',
@@ -1907,7 +1923,7 @@ const CARDS = {
     text:'Select one of your pixies; it cannot be destroyed until the end of your next turn.',
     cast:[{fx:'invis'}]},
  560:{name:'Enchantment',type:'magic',pixie:true,
-    text:'Conjure two random Pixie magic cards into your hand.',
+    text:'Conjure two random magic cards into your hand.',
     cast:[{fx:'conjure',n:2}]},
  /* ---- Spider: a cannibal swarm that lives on the Web ----
     The Web is board state rather than a card. A deck that carries it lays it
@@ -2026,7 +2042,7 @@ const CARDS = {
     text:'Select an ally; for three of your turns it cannot be destroyed, and it cannot destroy anything.',
     cast:[{fx:'mist',turns:3}]},
  615:{name:'Coffin',type:'magic',vampire:true,
-    text:'Return a Vampire from your graveyard to your hand. It comes back 0/0/0/0, and costs no sacrifices to play.',
+    text:'Return a Teece from your graveyard to your hand. It comes back 0/0/0/0, and costs no sacrifices to play.',
     cast:[{fx:'coffin'}]},
  616:{name:'Transfusion Catalyst',type:'equip',mod:0,anyOwner:true,
     grants:{doublePos:true,doubleNeg:true},
@@ -2073,8 +2089,8 @@ const CARDS = {
     modPerAlly:2,onGraveReturn:{def:5},
     text:'Undying -2. +2 for every other allied Teece on the board. When an allied Teece returns from a graveyard, including itself: +5 Defence until the end of your next turn. Stacks.'},
  626:{name:'Bloated Zombie',type:'teece',sides:[3,3,3,3],zombie:true,undying:{x:1,y:-1},
-    onDeath:[{fx:'allMod',n:-2,dur:'perm'}],
-    text:'Undying -1. When destroyed: every Teece on the board gets -2 permanently.'},
+    onDeath:[{fx:'aoe',n:-3,dur:'perm'}],
+    text:'Undying -1. When destroyed: every adjacent Teece gets -3 permanently.'},
  627:{name:'Plague Winds',type:'teece',sides:[2,3,3,1],zombie:true,
     defPerAlly:1,endAura:{ally:1,enemy:-1,includeSelf:true},
     text:'+1 Defence for every allied Teece on the board, itself included. At the end of every turn: every allied Teece including this one gets +1 permanently, and every enemy Teece gets -1 permanently.'},
@@ -2517,12 +2533,21 @@ function noteSelfTarget(p){
     log(nm(w)+' drinks its own hex: '+sgn(wd.onSelfTarget.n)+'.');
   }
 }
-/* Triggered after a magic card finishes resolving. */
+/* Triggered after a magic card finishes resolving.
+
+   Every one of these walks a list of BODIES taken before anything fires, not
+   the panels in order. A trigger can move the Teece it belongs to -- Spellbound
+   Pixie's ends by stepping one space -- and a loop counting panels upward meets
+   that same body again further along and pays it a second and a third time. One
+   magic card, one trigger each, wherever it ends up standing. A body that died
+   or left in an earlier trigger is no longer on the board and is skipped. */
 async function fireMagic(caster){
   const b=G.board;
-  for(let i=0;i<BN;i++){
-    const t=b[i].teece;
-    if(!t||t.silenced)continue;
+  const present=[];
+  for(let i=0;i<BN;i++)if(b[i].teece)present.push(b[i].teece);
+  const cellOf=t=>{for(let i=0;i<BN;i++)if(b[i].teece===t)return i;return -1;};
+  for(const t of present){
+    if(t.silenced||cellOf(t)<0)continue;
     const d=DEF(t);
     if(d.onAnyMagic){
       applyModT(t,d.onAnyMagic.n,d.onAnyMagic.dur||'temp');
@@ -2533,9 +2558,9 @@ async function fireMagic(caster){
       log(nm(t)+' gets '+sgn(d.onOwnerMagic.n)+durTxt(d.onOwnerMagic.dur||'temp')+'.');
     }
   }
-  for(let i=0;i<BN;i++){
-    const t=b[i].teece;
-    if(!t||t.owner!==caster||t.silenced)continue;
+  for(const t of present){
+    const i=cellOf(t);
+    if(i<0||t.owner!==caster||t.silenced)continue;
     const d=DEF(t);
     if(!d.onMagic)continue;
     /* Unlimited unless the card's own text says otherwise (only Familiar
@@ -2644,16 +2669,26 @@ function buildGeometry(w){
 buildGeometry(3);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-function makeTeece(cardId,owner){
+function makeTeece(cardId,owner,opts){
   const d=CARDS[cardId];
   const base=d.sides.slice();
   if(bonusApplies(owner))for(let k=0;k<4;k++)base[k]=Math.max(0,base[k]+G.enemyBonus);
   const boon=perkBoon(d,owner);
   if(boon)for(let k=0;k<4;k++)base[k]=Math.max(0,base[k]+boon);
-  /* Coffin brings a Vampire back drained to nothing and free to play. */
+  /* Coffin brings a Teece back drained to nothing and free to play.
+
+     Reading the flag must not SPEND it. Every placement the computer weighs and
+     every panel a player hovers builds a Teece through here, on a simulated
+     board -- but the player object the flag lives on is the real one. Spending
+     it here meant merely considering where to put a coffined Teece stripped the
+     coffin off it, and the one that actually landed arrived at full strength and
+     full price. Only playTeece, which places the real body, clears it. */
   const pl0=G&&G.players&&G.players[owner];
   const coffined=!!(pl0&&pl0.coffined&&pl0.coffined[cardId]);
-  if(coffined){for(let k=0;k<4;k++)base[k]=0;delete pl0.coffined[cardId];}
+  if(coffined){
+    for(let k=0;k<4;k++)base[k]=0;
+    if(opts&&opts.real)delete pl0.coffined[cardId];
+  }
   return {uid:UID++,cardId,owner,baseOwner:owner,base,perm:[0,0,0,0],temp:[0,0,0,0],
     equips:[],isToken:!!d.token,isCopy:false,resummoned:false,kwTemp:[],kwPerm:[],links:[],controls:[],
     defPerm:0,dodged:false,age:0,standCell:null,transformed:false,tickTotal:0,immortalOwner:null,
@@ -3826,12 +3861,16 @@ async function FXRUN(st,ctx){
     log(nm(t)+' thins into mist: it cannot be destroyed, and it cannot destroy, for '+(st.turns||3)+' of your turns.');
     await anim([c],'zap');
     return;}
-  /* Coffin: a Vampire comes back with nothing left of it, and costs nothing. */
+  /* Coffin: any Teece in your graveyard comes back, with nothing left of it and
+     costing nothing. The 0/0/0/0 is the price, which is what lets it reach a
+     Boss without the card having to name one. */
   case 'coffin':{
     const pl=G.players[p];
-    const ids=pl.grave.filter(id=>CARDS[id]&&CARDS[id].vampire);
-    if(!ids.length)return none('No Vampire lies in your grave.');
-    const pick=await chooseOption(p,ids.map((id,x)=>({v:String(x),lbl:CARDS[id].name})),'Raise which Vampire?',!!ctx.first);
+    const ids=[];
+    for(const id of pl.grave)if(CARDS[id]&&CARDS[id].type==='teece'&&!CARDS[id].token&&ids.indexOf(id)<0)ids.push(id);
+    if(!ids.length)return none('No Teece lies in your grave.');
+    const pick=await chooseOption(p,ids.map((id,x)=>({v:String(x),lbl:CARDS[id].name+' ('+sidesLine(CARDS[id].sides)+')'})),
+      'Raise which Teece?',!!ctx.first);
     if(pick==='CANCEL')return 'ABORT';
     if(pick==null)return;
     const cid=ids[parseInt(pick,10)];
@@ -6523,7 +6562,7 @@ async function playTeece(p,handIdx){
     spot=(alt==null||alt==='CANCEL')?open2[0]:alt;
   }
   const worn=handTake(p,handIdx).plate;
-  const t=makeTeece(id,p);
+  const t=makeTeece(id,p,{real:true});
   /* anything plated onto it in hand is already bolted on when it lands, so the
      board sees the equipped stats from the first moment */
   for(const e of worn)t.equips.push(e);
@@ -7036,9 +7075,15 @@ async function endTurn(){
    It stays put only when it is pinned or hemmed in. */
 async function forcedMoves(){
   const b=G.board;
-  for(let i=0;i<BN;i++){
-    const t=b[i].teece;
-    if(!t)continue;
+  /* Walked as a list of bodies taken before any of them moves, for the same
+     reason fireMagic is: dragging a Teece to a higher-numbered panel and then
+     carrying on up the panels meets it again and drags it a second and a third
+     time. One space at the end of a turn means one space. */
+  const present=[];
+  for(let i=0;i<BN;i++)if(b[i].teece)present.push(b[i].teece);
+  for(const t of present){
+    const i=b.findIndex(c=>c.teece===t);
+    if(i<0)continue;
     if(!t.equips.some(e=>{const g=CARDS[e.cardId].grants;return g&&g.mustMove;}))continue;
     if(hasKw(b,i,'immovable')){log(nm(t)+' cannot move, so the restlessness goes nowhere.');continue;}
     const dests=ADJ[i].filter(j=>openAt(b,j));
@@ -7702,7 +7747,7 @@ async function aiPlayTeece(){
   for(let h=0;h<pl.hand.length;h++){
     const id=pl.hand[h],d=CARDS[id];
     if(d.type!=='teece')continue;
-    const need=d.sac||0;
+    const need=sacsNeeded(id,p);
     const sacables=[];for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken&&canSacrifice(b,i))sacables.push(i);}
     if(sacables.length<need)continue;
     if(need>0&&realCount(p)-need<1&&totalTeece(p)-need<2)continue;
@@ -8113,11 +8158,25 @@ function renderBoard(){
       const bart=CARD_ART[t.cardId];
       tp.className='teece o'+t.owner+(bart?' arted':'')+((an==='dying'||an==='placed')?' '+an:'');
       tp.setAttribute('data-card-deck',getCardDeck(t.cardId));
+      /* One badge row under the name: a bow for Ranged, a shield and its number
+         for Defence, a turning arrow and its number for how many more times an
+         Undying Teece gets back up. The keyword initials that used to sit in the
+         corner were unpositioned and landed on top of the card. */
+      const badges=[];
+      if(kws.indexOf('ranged')>=0)badges.push('<span title="Ranged">\u{1F3F9}</span>');
+      const dv=defOf(G.board,i);
+      if(dv>0)badges.push('<span class="dfn" title="Defence '+dv+'">\u{1F6E1}\uFE0F'+dv+'</span>');
+      const un=undyLeft(t);
+      if(un>0)badges.push('<span class="dfn undy" title="Undying: gets back up '+un+
+        ' more time'+(un===1?'':'s')+'">\u21BB'+un+'</span>');
       /* Long names step down a size rather than being cut off: the panel is the
-         only place the name appears once a Teece is on the board. */
+         only place the name appears once a Teece is on the board. Name and
+         badges are stacked and centred together, so a name that takes three
+         lines pushes the badges down instead of being sat on by them. */
       const tnm=DEF(t).name, nmCls=tnm.length>15?'nm longer':(tnm.length>10?'nm long':'nm');
       tp.innerHTML=(bart?'<pre class="ascii" aria-hidden="true">'+bart.map(escHtml).join('\n')+'</pre>':'')+
-        '<div class="'+nmCls+'">'+tnm+'</div>'+
+        '<div class="mid"><div class="'+nmCls+'">'+tnm+'</div>'+
+        (badges.length?'<div class="rgd">'+badges.join('')+'</div>':'')+'</div>'+
         '<div class="s s0 '+(s[0]>7?'up':'')+(s[0]<3?'down':'')+'">'+s[0]+'</div>'+
         '<div class="s s1 '+(s[1]>7?'up':'')+(s[1]<3?'down':'')+'">'+s[1]+'</div>'+
         '<div class="s s2 '+(s[2]>7?'up':'')+(s[2]<3?'down':'')+'">'+s[2]+'</div>'+
@@ -8125,14 +8184,6 @@ function renderBoard(){
       if(t.equips.length)tp.innerHTML+='<div class="eq">E'+t.equips.length+'</div>';
       const hasActs=t.owner===G.turn&&aul.some(e=>actAvailable(t,e));
       if(hasActs)tp.innerHTML+='<div class="actdot"></div>';
-      /* One badge row under the name: a bow for Ranged, a shield and its number
-         for Defence. The keyword initials that used to sit in the corner were
-         unpositioned and landed on top of the card. */
-      const badges=[];
-      if(kws.indexOf('ranged')>=0)badges.push('<span title="Ranged">\u{1F3F9}</span>');
-      const dv=defOf(G.board,i);
-      if(dv>0)badges.push('<span class="dfn" title="Defence '+dv+'">\u{1F6E1}\uFE0F'+dv+'</span>');
-      if(badges.length)tp.innerHTML+='<div class="rgd">'+badges.join('')+'</div>';
       const tmr=DEF(t).timer;
       const left=tmr&&!t.transformed?Math.max(0,tmr.turns-(t.age||0)):0;
       if(left>0)tp.innerHTML+='<div class="shield">'+left+' to go</div>';
@@ -8243,6 +8294,15 @@ function showDetail(i){
   const locked=G.detailLock===i;
   let html=(locked?'<div class="dlock">Selected</div>':'')+
     '<div class="dn">'+nm(t)+'</div><div class="dt">'+cd.text+'</div>';
+  const un=undyLeft(t);
+  if(un>0){
+    const u=undyOf(t.cardId),next=(u.y||0)*((t.undyUsed||0)+1);
+    html+='<div class="dt" style="color:var(--gold)">Undying \u00d7'+un+
+      ': it gets back up '+un+' more time'+(un===1?'':'s')+', on any free panel its controller '+
+      'chooses and with no protection once it does. The next return comes back as '+
+      sidesLine(t.base.map(v=>Math.max(0,v)+next))+(next?' ('+sgn(next)+')':'')+
+      ((u.y&&un>1)?', and each one after that is '+sgn(u.y)+' more.':'.')+'</div>';
+  }
   const pmk=panelMark(G.board,i);
   if(pmk)html+='<div class="dt" style="color:var(--gold)">Counts as '+
     (pmk.m==='XO'?'an X and an O':(pmk.m==='X'?'an X':'an O'))+' for '+teamName(pmk.team)+'.</div>';
@@ -8549,28 +8609,9 @@ function statusesFor(p){
             :'The next modality you trigger fires its chosen mode twice.');
   }
 
-  /* --- how many times the dead still get up, and what is counting them ---
-         None of this is on the card face once the game is running: the card
-         says how many lives it started with, and only this says how many are
-         left. --- */
-  for(let i=0;i<BN;i++){
-    const t=b[i].teece;
-    const lives=undyLeft(t);
-    if(!lives)continue;
-    const u=undyOf(t.cardId);
-    const ally=sameTeam(t.owner,p);
-    const next=(u.y||0)*((t.undyUsed||0)+1);
-    /* The numbers it will actually stand up as, not just the modifier: a
-       Rotting Brute reading "-6" tells you nothing until you work out that it
-       comes back at 0 on every side. Same arithmetic undyingReturn uses. */
-    const nextLine=sidesLine(t.base.map(v=>Math.max(0,v)+next));
-    push('undy'+t.uid,ally?'good':'warn',
-      (ally?'Undying: ':'Undying enemy: ')+nm(t)+' \u00d7'+lives,
-      nm(t)+' returns '+lives+' more time'+(lives===1?'':'s')+
-      ', on any free panel its controller chooses, with no protection once it returns. '+
-      'The next return comes back as '+nextLine+(next?' ('+sgn(next)+')':'')+
-      ((u.y&&lives>1)?', and each return after that is '+sgn(u.y)+' more.':'.'));
-  }
+  /* Undying is worn on the card itself -- the badge under the name, and the
+     numbers it comes back as in the panel readout -- rather than announced from
+     over here, so there is nothing to say about it in the status list. */
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
     if(!t||!t.infect)continue;
@@ -9080,6 +9121,7 @@ if(typeof module!=='undefined'){
     setForm,formOf,applyDrain,drainMult,sacsNeeded,
     undyOf,undyLeft,undyUsedBy,undyReset,undyingReturn,allyCount,canSacrifice,
     noteGraveReturn,attachRiders,equipCameOff,addBone,clearGroundAt,processDeath,defOf,kwOf,actsOf,
+    aiPlayTeece,aiSupport,fireMagic,
     panelMark,hasMark,countMark,markCountFor,markLines,markLine,checkTicTacToe,markOfCard,markOfId,markValue,
     payRecall,getLines:()=>LINES};
 }
