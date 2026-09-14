@@ -454,6 +454,18 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   padding:13px 15px;margin:16px 0 18px;font-size:12.5px;line-height:1.5;color:var(--muted)}
 .rules .rk{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);
   white-space:nowrap;padding-top:3px}
+/* The "i" in the corner of a deck tile. Sized for a thumb rather than a
+   cursor, and it must never be mistaken for picking the deck. */
+.dinfo{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;
+  border:1px solid var(--gold);background:#241f18;color:#f2dc9c;font-weight:700;
+  font-family:var(--disp);font-size:16px;line-height:1;cursor:pointer;padding:0;
+  display:flex;align-items:center;justify-content:center;z-index:2}
+.dinfo:hover{background:var(--gold);color:#241f18;border-color:var(--gold)}
+#infoOverlay{z-index:30}
+#infoBox .isym{font-size:40px;line-height:1}
+#infoBox .icount{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+#infoBox ul{margin:6px 0 0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.6}
+#infoBox li{margin:4px 0}
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .mode{display:flex;flex-direction:column;background:var(--panel2);
   border:1px solid var(--line);border-radius:10px;padding:13px 15px}
@@ -566,26 +578,6 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
     <h2>Teece <span class="ver" id="verTag"></span></h2>
     <p class="sub" id="startSub"></p>
 
-    <div class="rules">
-      <span class="rk">Combat</span>
-      <span>Adjacent enemies compare the edge numbers that touch; the smaller one dies and ties do nothing.
-            Any Teece whose attributes fall below zero dies on the spot, and every change anywhere re-checks the whole board.</span>
-      <span class="rk">Each turn</span>
-      <span>One Teece. Equips, magic and battlegrounds are unlimited.</span>
-      <span class="rk">Reviving</span>
-      <span>A Teece brought back from a graveyard is played: its when-played effect triggers, controlled by
-            whoever revived it.</span>
-      <span class="rk">Undying</span>
-      <span>A Zombie printed <i>X Undying Y</i> returns X times a game, on any free panel its controller
-            chooses, each return worth Y more than the last. It has no protection once it returns.
-            Where no X is printed, X is one.</span>
-      <span class="rk">Day and Night</span>
-      <span>The sun or moon at the top right corner of the board is the whole game's clock. It opens on Day
-            and turns over at the start of every round, so each of your own turns runs the other way from
-            the last. Solar cards read it, and a few of them reach up and turn it.</span>
-      <span class="rk">Winning</span>
-      <span>Wipe out every enemy Teece, end a turn four Teece ahead (Tokens never count),
-            or hold the bigger field when a player must draw from an empty deck.</span>
     </div>
 
     <div class="modes">
@@ -619,6 +611,10 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   </div>
 </div>
 
+<div class="overlay hidden" id="infoOverlay">
+  <div class="box" id="infoBox"></div>
+</div>
+
 <div class="overlay hidden" id="draftOverlay">
   <div class="box">
     <h2 id="draftTitle">Draft</h2>
@@ -643,7 +639,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:39,date:'2026-09-14'};
+const VERSION={build:41,date:'2026-09-14'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -680,6 +676,42 @@ function rebuildWebCards(){
   WEB_CARDS={};
   for(const key of Object.keys(DECKS||{}))
     if(DECKS[key].web)for(const id of DECKS[key].cards)WEB_CARDS[id]=true;
+}
+/* The keywords a card can print, in the words the engine actually enforces.
+   Read off the code rather than the card text: Flying is DIAG (all eight
+   neighbours), Skitter is ADJ (the four orthogonals), Ranged only reaches past
+   the next panel, and Steadfast refuses every penalty, not just a shove. */
+const KEYWORDS={
+  flying:'Once per your turn, move one space — diagonals included.',
+  skitter:'Once per your turn, move one space up, down or sideways. Spiders and Spiderlings have it while they stand on the Web.',
+  teleport:'Once per your turn, move to any empty panel on the board.',
+  ranged:'Strikes the first enemy beyond the next panel, straight up, down or sideways. Nothing strikes back.',
+  ward:'Your opponents cannot target it with anything.',
+  steadfast:'Nothing can take attributes off it, and nothing can shove it.',
+  needsflinger:'It destroys nothing unless an allied Flinger is standing on the board.',
+  immovable:'It cannot move, and nothing can move it.'
+};
+/* Gathered from the cards rather than written down, so a deck that gains or
+   loses a keyword cannot leave this page saying the old thing. */
+function deckKeywords(key){
+  const dk=DECKS[key]; if(!dk)return [];
+  const found=[];
+  const add=ks=>{for(const k of ks||[])if(KEYWORDS[k]&&found.indexOf(k)<0)found.push(k);};
+  for(const id of dk.cards){
+    const c=CARDS[id]; if(!c)continue;
+    add(c.kw); add(c.gkw);
+    if(c.aura)add(c.aura.kw);
+    for(const a of c.auras||[])add(a.kw);
+    for(const f of c.forms||[])add(f.kw);
+    const gr=c.grants;
+    if(gr){
+      add(gr.kw);
+      for(const half in (gr.kwWhen||{}))add(gr.kwWhen[half]);
+      if(gr.formSet)add(gr.formSet.kw);
+      if(gr.aura)add(gr.aura.kw);
+    }
+  }
+  return found.sort();
 }
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
@@ -3839,12 +3871,26 @@ const dirTxt=d=>d==='cw'?'clockwise':'counter-clockwise';
    hand is still spent even when it fizzles. */
 async function runSteps(steps,ctx){
   const list=steps||[];
-  let did=list.length===0;
+  let did=list.length===0,offPhase=0,ran=0;
   for(const st of list){
+    /* A clause that belongs to the other half of the day/night cycle. Skipped
+       quietly, because a card printed with a day clause AND a night clause is
+       working exactly as written when only one of them fires. */
+    if(!phaseIs(st.when)){offPhase++;continue;}
+    ran++;
     const r=await FXRUN(st,ctx);
     if(r==='ABORT')return false;
     if(r!=='NONE')did=true;
     ctx.first=false;
+  }
+  /* But a card whose EVERY clause was out of season did nothing at all, and
+     saying nothing about it reads as a broken card rather than a card played
+     in the wrong half of the cycle. This is the one place that can tell the
+     difference, because it is the only one holding the whole list. */
+  if(offPhase&&!ran){
+    const who=ctx.t?nm(ctx.t):(ctx.cardId&&CARDS[ctx.cardId]?CARDS[ctx.cardId].name:null);
+    const m=(who?who+' does nothing':'Nothing happens')+': it is '+phaseName()+'.';
+    log(m);ctx.noneMsg=m;toast(m);
   }
   return did||'NONE';
 }
@@ -3856,10 +3902,6 @@ async function FXRUN(st,ctx){
   };
   /* nothing to work with: say so and let the caller know none of it landed */
   const none=msg=>{log(msg);ctx.noneMsg=msg;return 'NONE';};
-  /* A step that belongs to one half of the day/night cycle. Silent: a card
-     printed with a day clause and a night clause carries both as steps, and
-     the one that is not in season simply is not there. */
-  if(!phaseIs(st.when))return 'NONE';
   switch(st.fx){
   case 'mod':{
     if(st.who==='self'){if(ctx.t)applyModT(ctx.t,st.n,st.dur);return;}
@@ -6310,7 +6352,7 @@ async function processDeath(d){
   log(nm(t)+' is destroyed.');
   for(let i=0;i<BN;i++){
     const w=b[i].teece;
-    if(!w||w.uid===t.uid||!sameTeam(w.owner,t.owner))continue;
+    if(!w||w.uid===t.uid||w.silenced||!sameTeam(w.owner,t.owner))continue;
     const wd=DEF(w);
     if(wd.onAllyDeath){
       if(wd.onAllyDeath.n)applyModT(w,wd.onAllyDeath.n,wd.onAllyDeath.dur);
@@ -6330,7 +6372,11 @@ async function processDeath(d){
     if(!k&&G._deathWave)k=G._deathWave[kuid]||null;
     if(!k)continue;
     const oks=[];
-    const kd=DEF(k); if(kd.onKill)oks.push(kd.onKill);
+    /* Silence takes the card's own on-kill reward with it. What an EQUIP pays
+       is the equip's, not the card's, so a silenced Teece still collects it --
+       the same line effSides already draws, where a silenced Teece keeps the
+       auras its equips radiate and loses the one printed on it. */
+    const kd=DEF(k); if(kd.onKill&&!k.silenced)oks.push(kd.onKill);
     for(const e of k.equips){const g=CARDS[e.cardId].grants;if(g&&g.onKill)oks.push(g.onKill);}
     /* An echoed killer collects every reward once more. Snapshotted first, or
        a second echo would square the list instead of doubling it. */
@@ -6355,7 +6401,7 @@ async function processDeath(d){
     }
   }
   /* victim's death effects, then equip-granted ones */
-  let deathFx=(DEF(t).onDeath||[]).slice();
+  let deathFx=(t.silenced?[]:(DEF(t).onDeath||[])).slice();
   if(cell!=null&&G.board[cell]&&G.board[cell].ground&&groundFlag(G.board[cell].ground,'gDeathModal')){
     deathFx.push({fx:'choose',modal:true,msg:'The Platform gives out:',opts:[
       {lbl:'Every Teece gets +2',steps:[{fx:'allMod',n:2,dur:'perm'}]},
@@ -7328,7 +7374,7 @@ async function endTurn(){
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
     if(!t)continue;
-    const em=DEF(t).endMod;
+    const em=t.silenced?null:DEF(t).endMod;
     if(em){applyModT(t,em.n,'perm');log(nm(t)+' puts on another ring: '+sgn(em.n)+'.');}
   }
   /* endAura pays out at the end of every turn, either side's, the way endMod
@@ -7342,7 +7388,7 @@ async function endTurn(){
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
     if(!t)continue;
-    const ea=DEF(t).endAura;
+    const ea=t.silenced?null:DEF(t).endAura;
     if(!ea)continue;
     const pair=(ea.ally!=null||ea.enemy!=null);
     const amountFor=ally=>{
@@ -7686,12 +7732,12 @@ function simDeath(b,d){
     for(let i=0;i<BN;i++){
       const k=b[i].teece;
       if(!k||k.uid!==kuid)continue;
-      const oks=[];const kd=DEF(k);if(kd.onKill)oks.push(kd.onKill);
+      const oks=[];const kd=DEF(k);if(kd.onKill&&!k.silenced)oks.push(kd.onKill);
       for(const e of k.equips){const g=CARDS[e.cardId].grants;if(g&&g.onKill)oks.push(g.onKill);}
       for(const ok of oks)if(!ok.draw&&!ok.burnOut&&phaseIs(ok.when))applyModT(k,ok.n,ok.dur);
     }
   }
-  const fx=(DEF(t).onDeath||[]).slice().filter(x=>phaseIs(x.when));
+  const fx=(t.silenced?[]:(DEF(t).onDeath||[])).slice().filter(x=>phaseIs(x.when));
   for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.onDeath)fx.push(...g.onDeath);}
   for(const st of fx){
     if(st.fx==='killer'){
@@ -8398,6 +8444,46 @@ function hideHcapRow(){
   const hr=document.getElementById('hcapRow');
   if(hr){hr.classList.add('hidden');hr.innerHTML='';}
 }
+/* One page per deck, opened from the "i" in the corner of its tile and closed
+   without picking anything. It carries what the start screen used to spell out
+   in a wall of text: the deck's own gimmick, the keywords its cards actually
+   print, and the handful of rules that are true of every game -- which have to
+   live somewhere now that the menu no longer says them, and are never more than
+   one tap from the moment you are choosing. */
+function showDeckInfo(key){
+  const dk=DECKS[key]; if(!dk)return;
+  const box=document.getElementById('infoBox'),ov=document.getElementById('infoOverlay');
+  if(!box||!ov)return;
+  const kws=deckKeywords(key);
+  let h='<div style="display:flex;gap:14px;align-items:center">'+
+    '<div class="isym">'+(DECK_SYM[key]||'\u2753')+'</div>'+
+    '<div><h2 style="margin:0">'+escHtml(dk.name)+'</h2>'+
+    '<div class="icount">'+dk.cards.length+' cards</div></div></div>'+
+    '<p>'+escHtml(dk.blurb||'')+'</p>';
+  if((dk.how||[]).length){
+    h+='<h3>How it works</h3><ul>'+dk.how.map(l=>'<li>'+escHtml(l)+'</li>').join('')+'</ul>';
+  }
+  if(kws.length){
+    h+='<h3>Keywords on these cards</h3><div class="rules">';
+    for(const k of kws)h+='<span class="rk">'+escHtml(k)+'</span><span>'+escHtml(KEYWORDS[k])+'</span>';
+    h+='</div>';
+  }
+  h+='<h3>True of every game</h3><div class="rules">'+
+    '<span class="rk">Combat</span><span>Adjacent enemies compare the edge numbers that touch; the smaller one dies and ties do nothing. '+
+      'Any Teece whose attributes fall below zero dies on the spot, and every change anywhere re-checks the whole board.</span>'+
+    '<span class="rk">Defence</span><span>Defence soaks the difference: a Teece with Defence 2 only dies to an attack that beats it by three or more.</span>'+
+    '<span class="rk">Each turn</span><span>One Teece. Equips, magic and battlegrounds are unlimited.</span>'+
+    '<span class="rk">Reviving</span><span>A Teece brought back from a graveyard is played: its when-played effect triggers, controlled by whoever revived it.</span>'+
+    '<span class="rk">Winning</span><span>Wipe out every enemy Teece, end a turn four Teece ahead (Tokens never count), '+
+      'or hold the bigger field when a player must draw from an empty deck.</span>'+
+    '</div>'+
+    '<div class="row"><button class="btn primary" id="infoClose">Back to the decks</button></div>';
+  box.innerHTML=h;
+  ov.classList.remove('hidden');
+  const close=()=>ov.classList.add('hidden');
+  document.getElementById('infoClose').addEventListener('click',close);
+  ov.onclick=e=>{if(e.target===ov)close();};
+}
 function pickDeck(who,opts){
   opts=opts||{};
   return new Promise(res=>{
@@ -8415,6 +8501,16 @@ function pickDeck(who,opts){
       el.title=dk.name+' — '+dk.cards.length+' cards\n'+dk.blurb;
       el.innerHTML='<div class="dsymbol">'+(DECK_SYM[key]||'❓')+'</div><div class="dnm">'+dk.name+'</div>';
       el.addEventListener('click',()=>{overlay.classList.add('hidden');res(key);});
+      /* The "i" reads the deck without choosing it, so the tap must stop here
+         rather than carrying on into the tile underneath. */
+      const info=document.createElement('button');
+      info.type='button';
+      info.className='dinfo';
+      info.textContent='i';
+      info.title='What this deck does';
+      info.setAttribute('aria-label',dk.name+': what this deck does');
+      info.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();showDeckInfo(key);});
+      el.appendChild(info);
       box.appendChild(el);
     }
     document.getElementById('draftDeck').textContent='';
@@ -9559,7 +9655,7 @@ if(typeof module!=='undefined'){
     riseFromGrave,forcedMoves,fireMagic,flushDiscards,toGrave,isBossCard,playMagic,
     mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
     groundCells,playGround,areaShapeCells,
-    statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,
+    statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,
     plateHand,plateOf,platedSides,handPush,handTake,playEquip,queueFx,resolvePending,VERSION,
     getDecks:()=>DECKS,getPool:()=>POOL,allDraftable,bounceToHand,cloneBoard,fireMove,isBossCard,
     setDeckData:d=>{DECKS=d.decks;FORMATS=d.formats;CLASSIC=d.classic;POOL=d.pool;rebuildWebCards();},
