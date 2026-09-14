@@ -643,7 +643,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:37,date:'2026-09-14'};
+const VERSION={build:38,date:'2026-09-14'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1119,13 +1119,22 @@ const CARD_ART={
   "TR":["    .---.    ", "  ,'#####',  ", " /#########\\ ", " \\#########/ ", "  `-------'  "],
   "TS":["    \\ | /    ", "     \\|/     ", "   .--+--.   ", "      |      ", " ~~~~~~~~~~~ "]};
 /* Roguelike drafts from the whole card list, not the curated POOL: every
-   card in the game that is not a Token or Spider can turn up. */
+   card in the game that is not a Token or Spider can turn up.
+
+   A deck marked noRogue in decks.json stays out of a run altogether, both from
+   your own draft and from the deck the computer is built out of. Tic Tac Toe is
+   one: its cards only mean anything as a whole deck. Three marks in a line
+   takes the game, so a handful of stray Xs in a drafted pile is either dead
+   text on a body or a win nobody was playing for. */
 function allDraftable(){
   const out=[];
   for(const k of Object.keys(CARDS)){
     if(CARDS[k].token||CARDS[k].perkOnly||CARDS[k].spider)continue;
     const id=Number(k);
-    if(Number.isFinite(id))out.push(id);
+    if(!Number.isFinite(id))continue;
+    const dk=DECKS[getCardDeck(id)];
+    if(dk&&dk.noRogue)continue;
+    out.push(id);
   }
   return out;
 }

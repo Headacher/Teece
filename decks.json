@@ -354,7 +354,8 @@
         659,
         660
       ],
-      "blurb": "A second board laid over the first. Every Teece here is an X, an O, or both, and the two Toerrains mark a bare panel on their own. Three of one letter in a straight line takes the game at the end of that turn, however far behind you are on bodies."
+      "blurb": "A second board laid over the first. Every Teece here is an X, an O, or both, and the two Toerrains mark a bare panel on their own. Three of one letter in a straight line takes the game at the end of that turn, however far behind you are on bodies.",
+      "noRogue": true
     },
     "solar": {
       "name": "Solar",
