@@ -355,6 +355,32 @@
         660
       ],
       "blurb": "A second board laid over the first. Every Teece here is an X, an O, or both, and the two Toerrains mark a bare panel on their own. Three of one letter in a straight line takes the game at the end of that turn, however far behind you are on bodies."
+    },
+    "solar": {
+      "name": "Solar",
+      "cards": [
+        681,
+        682,
+        683,
+        684,
+        685,
+        686,
+        687,
+        688,
+        689,
+        690,
+        691,
+        692,
+        693,
+        694,
+        695,
+        696,
+        697,
+        698,
+        699,
+        700
+      ],
+      "blurb": "The sun at the corner of the board turns to a moon at the start of every round, so each of your own turns runs the other way from the last. Half of what this deck prints is worth having in one half of the cycle and worth nothing in the other — so play the sky, not just the card."
     }
   },
   "formats": [
@@ -742,6 +768,26 @@
     657,
     658,
     659,
-    660
+    660,
+    681,
+    682,
+    683,
+    684,
+    685,
+    686,
+    687,
+    688,
+    689,
+    690,
+    691,
+    692,
+    693,
+    694,
+    695,
+    696,
+    697,
+    698,
+    699,
+    700
   ]
 }

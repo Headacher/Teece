@@ -126,6 +126,9 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="tictactoe"],.dcard[data-card-deck="tictactoe"]{--cardbg:#26303a;--artink:#eaf2f8;background:var(--cardbg);color:#e9f1f7;border-color:#141b22}
 .card[data-card-deck="tictactoe"] .kwl,.dcard[data-card-deck="tictactoe"] .dkw{color:#9fc3dd}
 .card[data-card-deck="tictactoe"] .ct,.dcard[data-card-deck="tictactoe"] .dty{color:#9fc3dd}
+.card[data-card-deck="solar"],.dcard[data-card-deck="solar"]{--cardbg:#7d4a12;--artink:#ffeccc;background:var(--cardbg);color:#fdeed6;border-color:#4d2b06}
+.card[data-card-deck="solar"] .kwl,.dcard[data-card-deck="solar"] .dkw{color:#f0c076}
+.card[data-card-deck="solar"] .ct,.dcard[data-card-deck="solar"] .dty{color:#f0c076}
 .card[data-card-deck="nature"] .kwl,.dcard[data-card-deck="nature"] .dkw{color:#d5e8a4}
 .card[data-card-deck="nature"] .ct,.dcard[data-card-deck="nature"] .dty{color:#d5e8a4}
 
@@ -146,6 +149,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="vampire"]::after,.dcard[data-card-deck="vampire"]::after{content:'🧛'}
 .card[data-card-deck="zombie"]::after,.dcard[data-card-deck="zombie"]::after{content:'🧟'}
 .card[data-card-deck="tictactoe"]::after,.dcard[data-card-deck="tictactoe"]::after{content:'#️⃣'}
+.card[data-card-deck="solar"]::after,.dcard[data-card-deck="solar"]::after{content:'☀️'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -162,6 +166,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece[data-card-deck="spider"]{--cardbg:#3b3350;--artink:#efe9ff;background:var(--cardbg);color:#e6e0f5;border-color:#241e33}
 .teece[data-card-deck="vampire"]{--cardbg:#5c1420;--artink:#ffe9ec;background:var(--cardbg);color:#f6dfe3;border-color:#360a12}
 .teece[data-card-deck="zombie"]{--cardbg:#3f4a2a;--artink:#eef7d9;background:var(--cardbg);color:#e6efd2;border-color:#242c17}
+.teece[data-card-deck="solar"]{--cardbg:#7d4a12;--artink:#ffeccc;background:var(--cardbg);color:#fdeed6;border-color:#4d2b06}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -342,6 +347,20 @@ button,.teece,.cell,.card{touch-action:manipulation}
        colour, yours filling from the bottom. The chip above counts the leader
        toward the lead that ends the game. ---- */
 .boardrow{display:flex;align-items:stretch;justify-content:center;gap:12px}
+.sidecol{display:flex;flex-direction:column;align-items:center;gap:6px}
+.sidecol>.dombar{flex:1;min-height:0}
+/* The sky, kept where the fight is: flush with the top right corner of the
+   board, in the same column as the domination meter so it is part of the
+   layout rather than pinned over it. */
+.sundial{flex:none;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);
+  background:#191410;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1}
+.sundial.day{box-shadow:0 0 9px rgba(240,190,80,.55);border-color:#8a6a22}
+.sundial.night{box-shadow:0 0 9px rgba(150,170,225,.45);border-color:#46527a}
+.sundial.pinned{border-color:var(--gold);border-style:dashed}
+.turnline{display:flex;align-items:center;gap:6px}
+.phase{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.03em;white-space:nowrap}
+.phase.day{color:#e9b84c}
+.phase.night{color:#a8b6e4}
 .dombar{width:26px;display:flex;flex-direction:column;gap:5px}
 .dommeter{flex:1;display:flex;flex-direction:column-reverse;gap:3px;padding:3px;
   border:1px solid var(--line);border-radius:7px;background:#191410}
@@ -511,7 +530,10 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
     <div id="promptBar"><span class="msg">&nbsp;</span></div>
     <div class="boardrow">
       <div id="board"></div>
-      <div class="dombar" id="domBar"></div>
+      <div class="sidecol">
+        <div class="sundial" id="sunDial" aria-live="polite"></div>
+        <div class="dombar" id="domBar"></div>
+      </div>
     </div>
     <div id="actionBar" class="hidden"></div>
     <div id="statusBar" class="hidden"></div>
@@ -550,6 +572,10 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
       <span>A Zombie printed <i>X Undying Y</i> returns X times a game, on any free panel its controller
             chooses, each return worth Y more than the last. It has no protection once it returns.
             Where no X is printed, X is one.</span>
+      <span class="rk">Day and Night</span>
+      <span>The sun or moon at the top right corner of the board is the whole game's clock. It opens on Day
+            and turns over at the start of every round, so each of your own turns runs the other way from
+            the last. Solar cards read it, and a few of them reach up and turn it.</span>
       <span class="rk">Winning</span>
       <span>Wipe out every enemy Teece, end a turn four Teece ahead (Tokens never count),
             or hold the bigger field when a player must draw from an empty deck.</span>
@@ -610,7 +636,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:34,date:'2026-09-12'};
+const VERSION={build:35,date:'2026-09-14'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -650,7 +676,7 @@ function rebuildWebCards(){
 }
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
-  zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3'};
+  zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -677,6 +703,28 @@ const CARD_ART={
   560:["   *  .  *   ", "  .  .-.  .  ", "  *  ( )  *  ", "  .  \\_/  .  ", "   *  .  *   "],
   "TMP":["   .-----.   ","  ( x   x )  ","   \\ --- /   ","  --|   |--  ","    / \\ /    "],
   "TBAT":["  \\\\  ^  //  "," \\_\\(o.o)/_/ ","   ~/   \\~   ","    v   v    "],
+  /* ---- Solar: the sun on one side of the sky and the moon on the other ---- */
+  681:["   \\  |  /   ","  --( o )--  ","   /  |  \\   ","   .-----.   ","  DAY / NIGHT"],
+  682:["   \\ .-. /   ","  --( o )--  ","   [=====]   ","   /|   |\\   ","  ^^^   ^^^  "],
+  683:["    .-.-.    ","  ( o o o )  ","   \\ \\|/ /   ","  (o) | (o)  ","   *  *  *   "],
+  684:["   ,-----.   ","  ( (  o  )  ","   \\  vv  /  ","    \\ __ /   ","  ) dusk (   "],
+  685:["   \\ \\|/ /   ","  --( ^ )--  ","   / /|\\ \\   ","  .-------.  ","  ) dawn (   "],
+  686:["   (  )  )   ","  ( (o o) )  ","   \\ >-< /   ","   _/| |\\_   ","  ecl  ipse  "],
+  687:["   .-----.   ","  ( x   x )  ","   |  --  |  ","  _/|    |\\_ ","   s h h h   "],
+  688:["  .-.   .-.  "," ( o ) ( o ) ","  \\|/   \\|/  ","  / \\   / \\  ","  echo  echo "],
+  689:["      8      ","    \\   /    ","   > ( ) <   ","    /   \\    ","      8      "],
+  690:["   .-----.   ","  / 12  1 \\  "," | 9  +  3 | ","  \\  6 5  /  ","   '--||--'  "],
+  691:["   \\  .  /   ","  \\( >< )/   ","  ==[ ]==    ","  // | | \\\\  ","  ) night (  "],
+  692:["  \\\\ \\|/ //  ","  \\( 0 0 )/  "," ==[  ww  ]==","  //|    |\\\\ "," ( ) ( ) ( ) "],
+  693:["      _      ","     / )     ","    ( (      ","     \\ \\__   ","      \\___)  "],
+  694:["   .------.  ","  [ (o)===>  ","   '------'  ","      ||     ","     _||_    "],
+  695:["   ~~~~~~~   ","  ~ .---. ~  ","  ~( ... )~  ","   ~\\   /~   ","    ~~ ~~    "],
+  696:["   \\  |  /   ","  --( O )--  ","   /  |  \\   ","  ( DAY|NGT )","   \\_____/   "],
+  697:["   .-----.   ","  ( -- -- )  ","   \\  ~  /   ","    | | |    ","   no  kill  "],
+  698:["   .-----.   ","  ( o   o )  ","   \\ === /   ","    | | |    ","   . . . .   "],
+  699:["  ___________","  | $ | $ | $","  |---|---|--","  | @ | @ | @","  '----------"],
+  700:["  .........  ","  : \\ | / :  ","  : -(o)- :  ","  : / | \\ :  ","  :.......:  "],
+  "TSOL":["    \\ | /    ","  -- ( o ) --","    / | \\    ","    _/ \\_    ","   .  .  .   "],
   /* ---- Tic Tac Toe: chalk marks and the grid they go on ---- */
   641:["   .-----.   ","  ( \\ O / )  ","   [=====]   ","   /|   |\\   ","  ^^^   ^^^  "],
   642:["   .-----.   ","  ( \\ X / )  ","   [=====]   ","   /|   |\\   ","  ^^^   ^^^  "],
@@ -1099,6 +1147,9 @@ function getCardDeck(cardId){
 function canPlay(p,cardId){
   if(!G||p!==G.turn||G.over)return false;
   const cd=CARDS[cardId];
+  /* Blind is a day card and Mute a night one. Held back rather than cast into
+     nothing, so the card is never spent on the wrong half of the cycle. */
+  if(cd.needPhase&&!phaseIs(cd.needPhase))return false;
   if(cd.type==='teece'){
     if(G.teecePlayed||hexOn(p,'freeze'))return false;
     let room=false;
@@ -1151,6 +1202,21 @@ function canPlay(p,cardId){
      modPerMark{letter,n}   scales with that letter's count across the whole field
      modIfMark{letter,n}    an equip that only pays a Teece carrying that letter
      aura{...,markOnly}     an aura that only reaches Teece carrying that letter
+   day and night:
+     flipTime{}     turn Day to Night or Night to Day
+     setTime{to}    set it to one of them outright
+     solstice{}     call a half of the cycle, take it, and be paid for it
+     blind{}        a Teece that can no longer destroy anything
+     echoFx{}       a Teece gains a second copy of each of its effects
+     bazaarTrade{} bazaarDump{}   the two halves of the Bazaar
+   card fields the sky layer reads:
+     when:'day'|'night'  on a step, an aura, an ability or an on-kill reward
+     needPhase           a card that may only be played in that half
+     phaseMod[{when,n,needAdjAlly}]   printed, silence-proof, conditional numbers
+     modWhen{day,night}              an equip that only pays in one half
+     grants.defWhen / grants.kwWhen  the same, for Defence and keywords
+     gPhaseMod[{when,who,n}]         a battleground that reads the sky
+     timeStop            while it stands, nothing turns the sky
 */
 const CARDS = {
  /* ---- classic twenty ---- */
@@ -1209,6 +1275,8 @@ const CARDS = {
     text:'Bat Token. Twice per your turn: fly one space. Once per your turn: Drain 2. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  TSP:{name:'Spiderling',type:'teece',token:true,sides:[4,4,4,4],spider:true,
     text:'Spiderling Token. On the Web it has +1 Defence and Skitter \u2014 once per your turn, move one space. Bigger than most Tokens, and the currency the whole Spider deck spends. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ TSOL:{name:'Solar Token',type:'teece',token:true,sides:[3,3,3,3],solar:true,
+    text:'Solar Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  TS:{name:'Sprout',type:'teece',token:true,sides:[3,3,3,3],
     text:'Sprout Token. When destroyed: every other allied Teece gets +1. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.',
     onDeath:[{fx:'mass',who:'ally',n:1,dur:'perm'}]},
@@ -2190,6 +2258,76 @@ const CARDS = {
  /* Not in the deck: XOD leaves this behind when it is destroyed. */
  661:{name:'XO Toerrain',type:'ground',deck:'tictactoe',gMark:'XO',
     text:'This panel counts as both an X and an O for whoever laid it, unless a Teece is standing on it.'},
+ /* ---- Solar ----
+    One counter for the whole board: it is Day when the game opens, and the sky
+    turns over at the start of every full round, so each player's own turns run
+    Day, Night, Day. Half of what this deck prints is worth having in one half
+    of the cycle and worth nothing in the other, which is what the cards that
+    reach up and turn the sky by hand are for -- and what the Stopped Sundial
+    is for, which pins it where it stands and answers nothing after that. ---- */
+ 681:{name:'Solar Herald',type:'teece',sides:[4,4,4,4],solar:true,
+    onPlay:[{fx:'mod',who:'any',where:'any',n:2,dur:'perm',when:'day'},
+            {fx:'mod',who:'any',where:'any',n:-2,dur:'perm',when:'night'}],
+    text:'When played: select a Teece. By day it gets +2 permanently; by night it gets -2 permanently.'},
+ 682:{name:'Dawn Warden',type:'teece',sides:[5,5,5,5],solar:true,
+    auras:[{who:'ally',where:'adj',n:2,when:'day'},{who:'enemy',where:'adj',n:-2,when:'night'}],
+    text:'By day: every adjacent ally gets +2. By night: every adjacent enemy gets -2.'},
+ 683:{name:'Sun Caller',type:'teece',sides:[3,3,3,3],solar:true,
+    onPlay:[{fx:'token',tok:'TSOL',count:3,when:'day'},
+            {fx:'token',tok:'TSOL',count:1,when:'night'}],
+    text:'When played: summon a 3/3/3/3 Solar Token — and two more of them if it is Day.'},
+ 684:{name:'Duskfall',type:'teece',sides:[2,7,7,7],solar:true,
+    onDeath:[{fx:'killer',n:-4,dur:'perm',when:'night'}],
+    handDiscard:[{fx:'setTime',to:'night'}],
+    text:'When destroyed by night: whatever destroyed it gets -4 permanently. Discard this from your hand: it becomes Night.'},
+ 685:{name:'Daybreak',type:'teece',sides:[7,7,7,2],solar:true,
+    onDeath:[{fx:'mod',who:'ally',where:'any',n:4,dur:'perm',when:'day'}],
+    handDiscard:[{fx:'setTime',to:'day'}],
+    text:'When destroyed by day: select an ally; it gets +4 permanently. Discard this from your hand: it becomes Day.'},
+ 686:{name:'Eclipse Hunter',type:'teece',sides:[6,6,6,6],solar:true,
+    onKill:{n:2,dur:'perm',when:'night'},
+    phaseMod:[{when:'day',n:2,needAdjAlly:true}],
+    text:'By night, whenever it destroys a Teece: +2 permanently. By day, while it stands next to an ally: +2.'},
+ 687:{name:'Nightfall Mute',type:'teece',sides:[4,9,9,4],solar:true,
+    onPlay:[{fx:'unmake',when:'night'}],
+    text:'When played by night: select a Teece. It is stripped back to the bare card — every bonus and penalty on it gone — and everything it does is negated.'},
+ 688:{name:'Noon Echo',type:'teece',sides:[9,4,4,9],solar:true,
+    onPlay:[{fx:'echoFx',when:'day'}],
+    text:'When played by day: select a Teece. It gains a second copy of each of its effects — its aura counts twice, each of its abilities may be used once more a turn, and its on-kill and when-destroyed effects fire twice.'},
+ 689:{name:'Zenith Walker',type:'teece',sides:[1,9,1,9],solar:true,kw:['teleport'],
+    phaseMod:[{when:'day',n:[8,0,0,0]},{when:'night',n:[0,0,8,0]}],
+    text:'Teleport: once per your turn, move to any empty panel. By day: +8 to its top. By night: +8 to its bottom.'},
+ 690:{name:'Stopped Sundial',type:'teece',sides:[7,7,7,7],solar:true,timeStop:true,
+    text:'While this stands, time no longer changes: the round does not turn the sky, and no card may turn it either.'},
+ 691:{name:'Night Assassin',type:'teece',sides:[8,8,8,8],sac:1,solar:true,
+    onPlay:[{fx:'destroy',when:'night'}],
+    text:'Sacrifice one fielded Teece to play. When played by night: select a Teece and destroy it.'},
+ 692:{name:'Solar Tyrant',type:'teece',sides:[13,13,10,10],sac:2,solar:true,
+    act:[{name:'Turn the sky',once:'turn',steps:[{fx:'flipTime'}]}],
+    text:'Sacrifice two fielded Teece to play. Once per your turn: turn Day to Night, or Night to Day.'},
+ 693:{name:'Moon Scythe',type:'equip',mod:0,modWhen:{night:4},
+    text:'By night the equipped Teece gets +4. By day, nothing.'},
+ 694:{name:'Sun Gun',type:'equip',mod:0,modWhen:{day:3},grants:{kw:['ranged']},
+    text:'The equipped Teece is Ranged. By day it also gets +3.'},
+ 695:{name:'Twilight Cloak',type:'equip',mod:0,modWhen:{day:7},
+    grants:{defWhen:{night:3},kwWhen:{day:['flying']},onKill:{when:'day',burnOut:true}},
+    text:'By night the equipped Teece gets +3 Defence. By day it gets +7 and Flying, and is destroyed at the end of any turn in which it destroyed an enemy.'},
+ 696:{name:'Solstice',type:'magic',solar:true,
+    text:'Call Day or Night. Day: it becomes Day and every Teece of yours gets +2. Night: it becomes Night and every enemy Teece gets -2.',
+    cast:[{fx:'solstice'}]},
+ 697:{name:'Blind',type:'magic',needPhase:'day',
+    text:'Playable by day only. Select a Teece: it can no longer destroy another Teece.',
+    cast:[{fx:'blind'}]},
+ 698:{name:'Mute',type:'magic',needPhase:'night',
+    text:'Playable by night only. Select a Teece: it is stripped back to the bare card — every bonus and penalty on it gone — and everything it does is negated.',
+    cast:[{fx:'unmake'}]},
+ 699:{name:'Bazaar',type:'ground',
+    gact:[{name:'Bustling Marketplace',once:'turn',times:3,when:'day',steps:[{fx:'bazaarTrade'}]},
+          {name:'Underground Dealings',once:'turn',when:'night',steps:[{fx:'bazaarDump'}]}],
+    text:'Bustling Marketplace — by day, up to three times a turn: the controller of a Teece standing here discards a card and takes a card back out of their graveyard. Underground Dealings — by night, once a turn: they destroy the five oldest cards in their graveyard and draw a card.'},
+ 700:{name:'Solar Terrace',type:'ground',
+    gPhaseMod:[{when:'day',who:'ally',n:3},{when:'night',who:'enemy',n:-3}],
+    text:'By day an allied Teece standing here gets +3. By night an enemy Teece standing here gets -3.'},
  /* Not in any deck: Cannonball is handed out by a roguelike perk. */
  590:{name:'Cannonball',type:'magic',perkOnly:true,
     text:'Select a Teece and one of its sides; that side gets -4.',
@@ -2727,6 +2865,7 @@ function newState(mode,vsAI,decks,extra){
     web:Array.from({length:BN},(_,i)=>_spun&&!isCornerCell(i)),
     board:Array.from({length:BN},()=>({teece:null,ground:null,mine:null,defMark:null,razed:false,curseP:null,seed:null,enchant:null})),
     turn:Math.floor(Math.random()*nP),turnNum:1,teecePlayed:false,over:false,winner:null,pending:null,
+    phase:'day',
     detailLock:null,detailHover:null,panelTap:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],graveLastTurn:[],
     epoch:++EPOCH,
     enemyBonus:extra.enemyBonus||0,level:extra.level||0,quiet:0,eventFlag:false,
@@ -2851,6 +2990,41 @@ const seatsOnTeam=tm=>{const o=[];for(let i=0;i<PLAYERS();i++)if(teamOf(i)===tm)
 const teamsInPlay=()=>{const o=[];for(let i=0;i<PLAYERS();i++)if(o.indexOf(teamOf(i))<0)o.push(teamOf(i));return o;};
 /* the difficulty rating hits anyone not on the human's team (seat 0) */
 const bonusApplies=o=>!!(G&&G.enemyBonus&&!sameTeam(o,0));
+/* ---- Day and Night ----
+   One counter for the whole board, drawn as a sun or a moon at the top right
+   corner of it. The game opens on Day and the sky turns over once every full
+   round, which is what makes each player's own turns alternate Day, Night,
+   Day -- with three seats a per-turn flip would hand one of them a phase it
+   never leaves, and half the Solar deck would be dead in its hand.
+
+   A Teece printed timeStop pins the sky where it stands: the round no longer
+   turns it, and neither does any card that would. Everything a card does
+   conditionally reads phaseIs, so a step, an aura, an ability or an equip can
+   name the half of the cycle it belongs to and nothing else has to know. */
+const isDay=()=>!G||G.phase!=='night';
+const isNight=()=>!isDay();
+const phaseName=()=>isDay()?'Day':'Night';
+const phaseIs=w=>!w||w==='any'||(w==='day'?isDay():(w==='night'?isNight():true));
+/* {day:x,night:y} read off whichever half it is now. */
+const phasePick=o=>o==null?null:(isDay()?o.day:o.night);
+function timePinned(){
+  if(!G||!G.board)return false;
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(t&&!t.silenced&&DEF(t).timeStop)return true;
+  }
+  return false;
+}
+function setPhase(ph,live){
+  if(!G||(ph!=='day'&&ph!=='night'))return false;
+  if(G.phase===ph)return false;
+  if(timePinned()){if(live)log('Time no longer changes: it stays '+phaseName()+'.');return false;}
+  G.phase=ph;
+  if(live)log('It is '+phaseName()+'.');
+  if(HAS_DOM)render();
+  return true;
+}
+const flipPhase=live=>setPhase(isDay()?'night':'day',live);
 const isAIP=p=>G.vsAI&&(G.aiSeats?G.aiSeats.indexOf(p)>=0:p===1);
 function pname(p){
   if(G&&G.seatNames&&G.seatNames[p])return G.seatNames[p];
@@ -3072,6 +3246,8 @@ function effSides(b,i,parts){
   for(const e of t.equips){
     const ed=CARDS[e.cardId];
     addMod(s,ed.mod,ed.name);
+    /* Moon Scythe by night, Sun Gun and Twilight Cloak by day. */
+    if(ed.modWhen){const mw=phasePick(ed.modWhen);if(mw)addMod(s,mw,ed.name+(isDay()?', by day':', by night'));}
     if(perkN('equipPlus')&&sameTeam(t.owner,0))addMod(s,perkN('equipPlus'),ed.name+', honed over the run');
     if(ed.modPerDef)addMod(s,ed.modPerDef*defOf(b,i),ed.name+', per point of Defence');
     if(ed.modPerAge)addMod(s,ed.modPerAge*(t.age||0),ed.name+', per turn stood');
@@ -3092,6 +3268,14 @@ function effSides(b,i,parts){
     const mk=DEF(t).modPerMark,cnt=countMark(b,mk.letter);
     if(cnt)addMod(s,mk.n*cnt,DEF(t).name+', for each of the '+cnt+' '+mk.letter+(cnt===1?'':'s')+' on the field');
   }
+  /* Solar Teece read the sky. Printed on the card the way modPerAlly is, so
+     silence never touches it, and worked out fresh every scan because the sky
+     turns over underneath it. */
+  for(const pm of (DEF(t).phaseMod||[])){
+    if(!phaseIs(pm.when))continue;
+    if(pm.needAdjAlly&&!ADJ[i].some(j=>b[j].teece&&b[j].teece.uid!==t.uid&&sameTeam(b[j].teece.owner,t.owner)))continue;
+    addMod(s,pm.n,DEF(t).name+(pm.when==='night'?', by night':', by day'));
+  }
   if(perkN('deckMix')){
     const mix=mixBonus(b,i);
     if(mix)addMod(s,mix,'Motley Band, one for each other deck standing with it');
@@ -3102,17 +3286,33 @@ function effSides(b,i,parts){
     if(gd.gStand&&t.standCell===i)addMod(s,gd.gStand,gd.name+', for standing still');
     if(b[i].ground.gmod!=null)addMod(s,b[i].ground.gmod,gd.name+', the ground here');
     if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addMod(s,gd.gRangedPlus,gd.name+', for being Ranged');
+    /* A battleground that pays one side by day and charges the other by
+       night. Ally and enemy are read against whoever laid it. */
+    for(const pm of (gd.gPhaseMod||[])){
+      if(!phaseIs(pm.when))continue;
+      const gally=sameTeam(t.owner,b[i].ground.owner);
+      if(pm.who==='ally'&&!gally)continue;
+      if(pm.who==='enemy'&&gally)continue;
+      addMod(s,pm.n,gd.name+(pm.when==='night'?', by night':', by day'));
+    }
   }
   for(let j=0;j<BN;j++){
     if(j===i)continue;
     const o=b[j].teece; if(!o)continue;
     const auras=[]; const od=DEF(o);
-    if(od.aura&&!o.silenced)auras.push(od.aura);
+    /* auras (plural) is one card radiating more than one thing -- a Solar
+       Teece that feeds its own side by day and bleeds the other by night. An
+       echoed Teece radiates the whole set once more. */
+    if(!o.silenced){
+      const own=(od.aura?[od.aura]:[]).concat(od.auras||[]);
+      for(let e=0;e<=(o.echo||0);e++)auras.push(...own);
+    }
     /* Everything a Mindless Hunger has eaten radiates from its wearer too. */
     if(!o.silenced)for(const gid of (o.grafts||[])){const ga=CARDS[gid]&&CARDS[gid].aura;if(ga)auras.push(ga);}
     for(const e of o.equips){const g=CARDS[e.cardId].grants;if(g&&g.aura)auras.push(g.aura);}
     for(const a of auras){
       const ally=sameTeam(o.owner,t.owner);
+      if(!phaseIs(a.when))continue;
       if(a.who==='ally'&&!ally)continue;
       if(a.who==='enemy'&&ally)continue;
       if(a.where==='adj'&&ADJ[j].indexOf(i)<0)continue;
@@ -3147,7 +3347,11 @@ function defOf(b,i){
   const t=b[i].teece; if(!t)return 0;
   let d=(DEF(t).def||0)+(t.defPerm||0)+(t.defTemp2||0);
   if(DEF(t).defPerAlly)d+=DEF(t).defPerAlly*allyCount(b,i,true);
-  for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.def)d+=g.def;}
+  for(const e of t.equips){
+    const g=CARDS[e.cardId].grants;
+    if(g&&g.def)d+=g.def;
+    if(g&&g.defWhen){const dw=phasePick(g.defWhen);if(dw)d+=dw;}
+  }
   if(b[i].ground){const gd=CARDS[b[i].ground.cardId];if(gd.gdef)d+=gd.gdef;}
   if(b[i].defMark&&b.some(c=>c.teece&&c.teece.uid===b[i].defMark.uid))d+=b[i].defMark.n;
   if(sameTeam(t.owner,0))d+=perkN('armour');
@@ -3198,7 +3402,11 @@ function kwOf(b,i,noGround){
   for(const gid of (t.grafts||[])){const gk=CARDS[gid]&&CARDS[gid].kw;if(gk)ks.push(...gk);}
   ks.push(...t.kwTemp);
   if(t.kwPerm)ks.push(...t.kwPerm);
-  for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.kw)ks.push(...g.kw);}
+  for(const e of t.equips){
+    const g=CARDS[e.cardId].grants;
+    if(g&&g.kw)ks.push(...g.kw);
+    if(g&&g.kwWhen){const kw=phasePick(g.kwWhen);if(kw)ks.push(...kw);}
+  }
   if(b[i].ground&&!noGround){const gd=CARDS[b[i].ground.cardId];if(gd.gkw)ks.push(...gd.gkw);}
   let onWeb=null;
   for(let j=0;j<BN;j++){
@@ -3221,7 +3429,16 @@ const openAt=(b,i)=>!b[i].teece&&!b[i].razed;
 function actsOf(b,i){
   const t=b[i].teece; if(!t)return[];
   const out=[]; const d=DEF(t);
-  if(!t.silenced)(d.act||[]).forEach((a,x)=>{if(a.needWeb&&!isWebbed(b,i))return;out.push({key:'c'+x,act:a});});
+  if(!t.silenced)(d.act||[]).forEach((a,x)=>{
+    if(a.needWeb&&!isWebbed(b,i))return;
+    /* An ability that belongs to one half of the cycle is not offered in the
+       other half at all, rather than offered and refusing to fire. */
+    if(!phaseIs(a.when))return;
+    out.push({key:'c'+x,act:a});
+    /* An echoed Teece holds a second copy of each of its own abilities, keyed
+       apart so the two never share a use counter. */
+    for(let e=1;e<=(t.echo||0);e++)out.push({key:'c'+x+'#'+e,act:a});
+  });
   const fa=formOf(t);
   if(fa&&fa.act&&!t.silenced)fa.act.forEach((a,x)=>out.push({key:'f'+(t.form||0)+'_'+x,act:a}));
   /* Abilities eaten off the things it has killed, each keyed by the card it
@@ -3232,14 +3449,15 @@ function actsOf(b,i){
   }
   for(const e of t.equips){
     const g=CARDS[e.cardId].grants;
-    if(g&&g.act)g.act.forEach((a,x)=>out.push({key:'e'+e.cardId+'_'+x,act:a}));
+    if(g&&g.act)g.act.forEach((a,x)=>{if(phaseIs(a.when))out.push({key:'e'+e.cardId+'_'+x,act:a});});
   }
   if(hasKw(b,i,'flying'))out.push({key:'kfly',act:FLY_ACT});
   if(hasKw(b,i,'skitter'))out.push({key:'kskit',act:SKITTER_ACT});
   /* the step a drain-watcher is owed, offered only while it is owed */
   if(t.drainMove)out.push({key:'kdrainstep',act:DRAIN_STEP_ACT});
   if(hasKw(b,i,'teleport'))out.push({key:'ktele',act:TELE_ACT});
-  if(b[i].ground){const gd=CARDS[b[i].ground.cardId];if(gd.gact)gd.gact.forEach((a,x)=>out.push({key:'g'+b[i].ground.cardId+'_'+x,act:a}));}
+  if(b[i].ground){const gd=CARDS[b[i].ground.cardId];
+    if(gd.gact)gd.gact.forEach((a,x)=>{if(phaseIs(a.when))out.push({key:'g'+b[i].ground.cardId+'_'+x,act:a});});}
   return out;
 }
 /* A Teece silenced by Silencer keeps none of its own acts in actsOf, so the
@@ -3445,7 +3663,7 @@ function scanDeaths(b){
   const dead={};
   const canKill=ki=>{
     const k=b[ki].teece;
-    if(k&&k.harmless)return false;
+    if(k&&(k.harmless||k.blinded))return false;
     if(kws[ki].indexOf('needsflinger')<0)return true;
     return b.some(c=>c.teece&&sameTeam(c.teece.owner,k.owner)&&DEF(c.teece).flinger);
   };
@@ -3616,6 +3834,10 @@ async function FXRUN(st,ctx){
   };
   /* nothing to work with: say so and let the caller know none of it landed */
   const none=msg=>{log(msg);ctx.noneMsg=msg;return 'NONE';};
+  /* A step that belongs to one half of the day/night cycle. Silent: a card
+     printed with a day clause and a night clause carries both as steps, and
+     the one that is not in season simply is not there. */
+  if(!phaseIs(st.when))return 'NONE';
   switch(st.fx){
   case 'mod':{
     if(st.who==='self'){if(ctx.t)applyModT(ctx.t,st.n,st.dur);return;}
@@ -5702,6 +5924,111 @@ async function FXRUN(st,ctx){
     log(pname(p)+' '+vb(p,'calls','call')+' '+pick+'s: two come back out of the graveyard at the start of '+
       pposs(p)+' next turn.');
     return;}
+  /* ---- Solar: the sky, and the cards that reach up and turn it ---- */
+  case 'flipTime':{
+    const was=phaseName();
+    if(!flipPhase(true))return none('Time no longer changes.');
+    log(was+' gives way to '+phaseName()+'.');
+    return;}
+  /* Aborts rather than fizzling: this is the whole price of a card off the
+     hand, so a sky that is already there, or pinned, must not eat it. */
+  case 'setTime':{
+    if(!setPhase(st.to,true)){
+      toast(timePinned()?'Time no longer changes.':'It is already '+phaseName()+'.');
+      return 'ABORT';
+    }
+    return;}
+  /* Call the sky and take the half you called: Day pays your own side, Night
+     charges everybody else's. A pinned sky holds where it is and the payout
+     still lands -- what the card buys is the numbers, not the weather. */
+  case 'solstice':{
+    const pick=await chooseOption(p,[
+      {v:'day',lbl:'Day — it becomes Day, and every Teece of yours gets +2'},
+      {v:'night',lbl:'Night — it becomes Night, and every enemy Teece gets -2'}],
+      'Call the sky.',!!ctx.first);
+    if(pick==='CANCEL'||pick==null)return 'ABORT';
+    setPhase(pick,true);
+    const day=pick==='day',n=day?2:-2,hit=[];
+    for(let i=0;i<BN;i++){
+      const o=b[i].teece;if(!o)continue;
+      const ally=sameTeam(o.owner,p);
+      if(day!==ally)continue;
+      if(!day&&!canTarget(b,i,p))continue;
+      applyModT(o,n,'perm');
+      hit.push(i);
+      if(!day)noteEnemyLoss(p,i,2,false);
+    }
+    if(!day&&hit.length)noteTargeted(p);
+    log(hit.length
+      ?(day?'Every allied Teece gets +2.':'Every enemy Teece gets -2.')
+      :'There was nobody standing to feel it.');
+    await anim(hit,'zap');
+    return;}
+  /* Blind. Not silence and not a penalty: the Teece stays exactly as big as it
+     was and simply stops killing, which is the same flag Mist Form hangs a
+     harmless body on. Kept apart from it so a mist lifting later does not take
+     the blindness with it. */
+  case 'blind':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&!b[i].teece.blinded&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return none('There is nothing left to blind.');
+    const c=await pickCell(cands,'Blind which Teece? It can no longer destroy anything.',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)){await anim([c],'zap');return;}
+    b[c].teece.blinded=true;
+    log(nm(b[c].teece)+' is blinded: it can no longer destroy another Teece.');
+    await anim([c],'zap');
+    return;}
+  /* An extra copy of everything a card does. One counter on the body, read
+     wherever a card's effects are gathered: effSides pushes its aura again,
+     actsOf hands it a second charge of each ability, and processDeath runs its
+     on-kill and when-destroyed lists through twice. */
+  case 'echoFx':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return none('No valid target.');
+    const c=await pickCell(cands,'Which Teece gets a second copy of each of its effects?',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)){await anim([c],'zap');return;}
+    const et=b[c].teece;
+    et.echo=(et.echo||0)+1;
+    log(nm(et)+' doubles: its aura, its abilities and its on-kill and when-destroyed effects all count twice.');
+    await anim([c],'zap');
+    return;}
+  /* The Bazaar, by day: a card off your hand for a card out of your grave. */
+  case 'bazaarTrade':{
+    const pl=G.players[p];
+    if(!pl.hand.length)return none('Nothing in hand to trade away.');
+    if(!pl.grave.length)return none('Your graveyard is empty, so there is nothing to buy.');
+    const pick=await chooseOption(p,pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name,cid:id})),
+      'Trade away which card?',true);
+    if(pick==='CANCEL'||pick==null)return 'ABORT';
+    const gone=handTake(p,parseInt(pick,10));
+    if(!gone)return 'ABORT';
+    dumpPlate(gone.plate,'with the card it was bolted to');
+    log(pname(p)+' trades away '+CARDS[gone.id].name+'.');
+    await discardCard(p,gone.id);
+    if(!G||G.over)return;
+    if(!pl.grave.length)return;
+    const back=await chooseOption(p,pl.grave.map((id,x)=>({v:String(x),lbl:CARDS[id].name,cid:id})),
+      'And take which card back?');
+    const cid=pl.grave.splice(back==null?0:parseInt(back,10),1)[0];
+    if(cid==null)return;
+    handPush(p,cid);
+    log(pname(p)+' buys back '+CARDS[cid].name+'.');
+    return;}
+  /* And by night: five bodies off the bottom of the grave for one card. The
+     five oldest, so nothing has to be picked over one prompt at a time and
+     what you lost most recently is what you keep. */
+  case 'bazaarDump':{
+    const pl=G.players[p];
+    if(pl.grave.length<5)return none('Five cards have to be lying in your graveyard to deal them away.');
+    const burnt=pl.grave.splice(0,5);
+    log(pname(p)+' deals away '+burnt.map(cid=>CARDS[cid].name).join(', ')+'.');
+    drawCards(p,1);
+    return;}
   case 'move':{
     const i=ctx.cell;
     if(hasKw(b,i,'immovable'))return none('It cannot move.');
@@ -5976,7 +6303,13 @@ async function processDeath(d){
     const oks=[];
     const kd=DEF(k); if(kd.onKill)oks.push(kd.onKill);
     for(const e of k.equips){const g=CARDS[e.cardId].grants;if(g&&g.onKill)oks.push(g.onKill);}
+    /* An echoed killer collects every reward once more. Snapshotted first, or
+       a second echo would square the list instead of doubling it. */
+    if(k.echo){const base=oks.slice();for(let e=0;e<k.echo;e++)oks.push(...base);}
     for(const ok of oks){
+      if(!phaseIs(ok.when))continue;
+      /* Twilight Cloak by day: enormous, airborne, and spent. */
+      if(ok.burnOut){k.dieEOT=true;log(nm(k)+' will not outlast the turn it killed in.');continue;}
       if(ok.draw)drawCards(k.owner,ok.draw);
       else{applyModT(k,ok.n,ok.dur);log(nm(k)+' gets '+sgn(ok.n)+durTxt(ok.dur)+' for the kill.');}
     }
@@ -6001,10 +6334,17 @@ async function processDeath(d){
   }
   for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.onDeath)deathFx.push(...g.onDeath);}
   const dblG=G.board[cell].ground&&CARDS[G.board[cell].ground.cardId].gDouble;
-  if(dblG)deathFx=deathFx.concat(deathFx.filter(x=>x.fx!=='resummon'&&x.once!=='game'));
+  const twice=x=>x.fx!=='resummon'&&x.once!=='game';
+  if(dblG)deathFx=deathFx.concat(deathFx.filter(twice));
+  /* And again for every echo laid on the body, from a snapshot so two echoes
+     are three runs rather than four. */
+  if(t.echo){const base=deathFx.filter(twice);for(let e=0;e<t.echo;e++)deathFx=deathFx.concat(base);}
   let resFx=null;
   for(const st of deathFx){
     if(st.fx==='resummon'){resFx=st;continue;}
+    /* "When destroyed, if it is Night" -- checked here so the inline killer
+       branch below is covered along with everything runSteps handles. */
+    if(!phaseIs(st.when))continue;
     if(st.once==='game'){
       const key='od'+t.cardId;
       if(G.players[t.baseOwner].onceUsed[key])continue;
@@ -6985,7 +7325,7 @@ async function endTurn(){
     const t=G.board[i].teece;
     /* dieEOT is the same rule worn by one body rather than printed on a card:
        what Brief Return hauls up is only borrowed for the turn. */
-    if(t&&t.owner===p&&(DEF(t).dieAtEndOfTurn||t.dieEOT)){
+    if(t&&(t.dieEOT||(t.owner===p&&DEF(t).dieAtEndOfTurn))){
       log(nm(t)+' burns itself out.');
       forceDeath(t);
     }
@@ -7207,6 +7547,9 @@ async function startTurn(){
   G._endingTurn=false;
   const ep=G.epoch;
   const p=G.turn,pl=G.players[p];
+  /* Once every full rotation, so every seat shares the same sky and every
+     seat's own turns alternate. */
+  if(G.turnNum>1&&(G.turnNum-1)%PLAYERS()===0)flipPhase(true);
   pl.teecePlayedThisTurn=0;
   pl.failedThisTurn=[];
   pl.toldMustPlay=false;
@@ -7261,7 +7604,8 @@ function cloneBoard(b){
       kwPerm:(c.teece.kwPerm||[]).slice(),defPerm:c.teece.defPerm||0,dodged:c.teece.dodged,
       age:c.teece.age||0,transformed:c.teece.transformed,standCell:c.teece.standCell,tickTotal:c.teece.tickTotal||0,
       form:c.teece.form||0,ctr:c.teece.ctr||0,drainsThisTurn:c.teece.drainsThisTurn||0,
-      harmless:!!c.teece.harmless,drainMove:!!c.teece.drainMove,boon:c.teece.boon||0,
+      harmless:!!c.teece.harmless,blinded:!!c.teece.blinded,echo:c.teece.echo||0,
+      drainMove:!!c.teece.drainMove,boon:c.teece.boon||0,
       immortalOwner:c.teece.immortalOwner,
       silenced:!!c.teece.silenced,magicUsedTurn:c.teece.magicUsedTurn||0,
       links:c.teece.links.slice(),controls:c.teece.controls.slice(),
@@ -7296,10 +7640,10 @@ function simDeath(b,d){
       if(!k||k.uid!==kuid)continue;
       const oks=[];const kd=DEF(k);if(kd.onKill)oks.push(kd.onKill);
       for(const e of k.equips){const g=CARDS[e.cardId].grants;if(g&&g.onKill)oks.push(g.onKill);}
-      for(const ok of oks)if(!ok.draw)applyModT(k,ok.n,ok.dur);
+      for(const ok of oks)if(!ok.draw&&!ok.burnOut&&phaseIs(ok.when))applyModT(k,ok.n,ok.dur);
     }
   }
-  const fx=(DEF(t).onDeath||[]).slice();
+  const fx=(DEF(t).onDeath||[]).slice().filter(x=>phaseIs(x.when));
   for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.onDeath)fx.push(...g.onDeath);}
   for(const st of fx){
     if(st.fx==='killer'){
@@ -8508,6 +8852,19 @@ function statusesFor(p){
       ' cannot be activated again for the rest of the game, though the card still describes it.');
   }
 
+  /* --- and the two things a Solar deck leaves on a body --- */
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(!t)continue;
+    const mine=sameTeam(t.owner,p);
+    if(t.blinded)push('blind'+t.uid,mine?'bad':'good','Blinded: '+nm(t),
+      nm(t)+' is blinded. It keeps every number it has and can still be destroyed, but it destroys nothing itself.');
+    if(t.echo)push('echo'+t.uid,mine?'good':'bad','Doubled: '+nm(t),
+      nm(t)+' carries '+(t.echo===1?'a second copy':t.echo+1+' copies')+' of each of its effects: its aura counts '+
+      (t.echo===1?'twice':(t.echo+1)+' times')+', each of its abilities may be used '+t.echo+
+      ' more time'+(t.echo===1?'':'s')+' a turn, and its on-kill and when-destroyed effects fire the same number of times.');
+  }
+
   /* --- what is waiting for the next Teece you play --- */
   if(G.trap){
     if(!sameTeam(p,G.trap.by))
@@ -8794,6 +9151,18 @@ function domTitle(rows,st){
   return who+' lead'+pl+' by '+st.gap+' — '+parts+'.'+rule+
     (st.blocked?' The Curse of Freezing is holding that win back.':'');
 }
+/* The sky, drawn at the top right corner of the board. The word for it goes on
+   the turn line too: an emoji alone is no good to anyone reading the panel. */
+function renderSun(){
+  const el=document.getElementById('sunDial');
+  if(!el||!G)return;
+  const day=isDay(),pin=timePinned();
+  el.className='sundial '+(day?'day':'night')+(pin?' pinned':'');
+  el.textContent=day?'\u2600\uFE0F':'\u{1F319}';
+  el.title=(day?'Day':'Night')+(pin
+    ?' \u2014 time no longer changes.'
+    :' \u2014 the sky turns over at the start of the next round.');
+}
 function renderDom(){
   const el=document.getElementById('domBar');
   if(!el||!G)return;
@@ -8911,7 +9280,7 @@ function render(){
   syncHandSlots();
   renderBoard();
   for(let p=0;p<PLAYERS();p++)renderHand(p);
-  renderCounts();renderDom();renderWarn();renderLog();renderPrompt();renderActionBar();renderStatus();
+  renderCounts();renderSun();renderDom();renderWarn();renderLog();renderPrompt();renderActionBar();renderStatus();
   const bd=document.getElementById('board');
   bd.style.setProperty('--bw',BW);
   bd.style.setProperty('--cs',(BW>=4?'86px':'110px'));
@@ -8925,7 +9294,9 @@ function render(){
     'three by three');
   if(!G.over){
     const t=G.turn,d=document.getElementById('turnInfo');
-    d.innerHTML='<span class="dot d'+t+'"></span><strong>'+pname(t)+"'s turn</strong>";
+    d.innerHTML='<span class="dot d'+t+'"></span><strong>'+pname(t)+"'s turn</strong>"+
+      '<span class="phase '+(isDay()?'day':'night')+'">'+
+      (isDay()?'\u2600\uFE0F Day':'\u{1F319} Night')+(timePinned()?' \u00b7 held':'')+'</span>';
     document.getElementById('endTurn').disabled=false;
   }else{
     document.getElementById('endTurn').disabled=true;
