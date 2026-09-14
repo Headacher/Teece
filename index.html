@@ -179,6 +179,13 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .cell.splash{background:rgba(201,162,39,.20);box-shadow:inset 0 0 0 2px rgba(201,162,39,.5)}
 .cell.splash .teece{box-shadow:0 0 0 2px var(--gold)}
 .cell.target{box-shadow:inset 0 0 0 2px var(--gold);cursor:pointer}
+/* The placement ghost: the Teece you are about to play, shown on each panel it
+   could go to, with the numbers that panel would actually give it. Never takes
+   a click -- the panel underneath is what you are choosing. */
+.ghost{opacity:.62;pointer-events:none;border-style:dashed!important}
+.ghost .gtag{font-size:9px;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+.ghost.doomed{opacity:.75;border-color:var(--p1)!important;box-shadow:inset 0 0 0 2px var(--p1)}
+.ghost.doomed .gtag{color:#ffd9d4;font-weight:700}
 .cell.target:hover{background:#231b12}
 .cell.locked{box-shadow:inset 0 0 0 2px rgba(239,230,208,.55)}
 /* What a panel counts as in noughts and crosses. Above the Teece rather than
@@ -636,7 +643,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:36,date:'2026-09-14'};
+const VERSION={build:37,date:'2026-09-14'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -2271,9 +2278,9 @@ const CARDS = {
     auras:[{who:'ally',where:'adj',n:2,when:'day'},{who:'enemy',where:'adj',n:-2,when:'night'}],
     text:'By day: every adjacent ally gets +2. By night: every adjacent enemy gets -2.'},
  683:{name:'Sun Caller',type:'teece',sides:[3,3,3,3],solar:true,
-    onPlay:[{fx:'token',tok:'TSOL',count:3,when:'day'},
-            {fx:'token',tok:'TSOL',count:1,when:'night'}],
-    text:'When played: summon a 3/3/3/3 Solar Token — and two more of them if it is Day.'},
+    onPlay:[{fx:'token',tok:'TSOL',count:3,when:'day',safe:true},
+            {fx:'token',tok:'TSOL',count:1,when:'night',safe:true}],
+    text:'When played: summon a 3/3/3/3 Solar Token — and two more of them if it is Day. They cannot be destroyed until the start of your next turn.'},
  684:{name:'Duskfall',type:'teece',sides:[2,7,7,7],solar:true,
     onDeath:[{fx:'killer',n:-4,dur:'perm',when:'night'}],
     handDiscard:[{fx:'setTime',to:'night'}],
@@ -3916,9 +3923,13 @@ async function FXRUN(st,ctx){
     log('A copy of '+DEF(ctx.t).name+' appears at the '+CN[c]+'.');
     return;}
   case 'token':{
+    /* st.safe holds what it summons outside time with no expiry set, which is
+       the game's existing shorthand for "until the start of its controller's
+       next turn": startTurn is what clears an immortality that names no end. */
+    const holdSafe=tk=>{if(st.safe&&tk)tk.immortalOwner=tk.owner;};
     if(st.where==='here'){
       const i=ctx.deadCell;
-      if(i!=null&&openAt(b,i)){summonToken(b,i,st.tok,ctx.deadOwner!=null?ctx.deadOwner:p,true);
+      if(i!=null&&openAt(b,i)){holdSafe(summonToken(b,i,st.tok,ctx.deadOwner!=null?ctx.deadOwner:p,true));
         log('A Token ('+sidesLine(CARDS[st.tok].sides)+') appears at the '+CN[i]+'.');}
       return;}
     for(let n=0;n<(st.count||1);n++){
@@ -3929,6 +3940,7 @@ async function FXRUN(st,ctx){
       if(st.random){
         const c=pool[Math.floor(Math.random()*pool.length)];
         const tk=summonToken(b,c,st.tok,owner,true);
+        holdSafe(tk);
         if(st.linked&&ctx.t){ctx.t.links.push(tk.uid);}
         log('A Token ('+sidesLine(CARDS[st.tok].sides)+') appears at the '+CN[c]+'.');
         continue;
@@ -3945,8 +3957,10 @@ async function FXRUN(st,ctx){
       if(c==='CANCEL')return 'ABORT';
       if(c==null)return;
       const tk=summonToken(b,c,st.tok,owner,true);
+      holdSafe(tk);
       if(st.linked&&ctx.t){ctx.t.links.push(tk.uid);}
-      log('A Token ('+sidesLine(CARDS[st.tok].sides)+') appears at the '+CN[c]+'.');
+      log('A Token ('+sidesLine(CARDS[st.tok].sides)+') appears at the '+CN[c]+
+        (st.safe?', held outside time until '+pposs(owner)+' next turn':'')+'.');
       ctx.first=false;
       render();
     }
@@ -6869,7 +6883,26 @@ async function playTeece(p,handIdx){
   const spots=empt.slice();
   for(const c of sacP)if(!b[c].razed&&spots.indexOf(c)<0)spots.push(c);
   spots.sort((x,y)=>x-y);
-  let spot=plan?plan.c:await chooseCell(p,spots,'Choose a space for '+d.name+'.',{cancel:true,mut:null});
+  /* What the Teece would actually arrive as, panel by panel. Every other prompt
+     in the game previews its own consequence and this one previewed nothing, so
+     a battleground that takes 3 off an enemy standing on it -- and you cannot
+     see whose battleground it is -- was invisible until after you had committed
+     the turn's only Teece to it.
+
+     Built the way the real placement builds it: the equips plated on in hand
+     already bolted on, the bodies paid for the sacrifice already off the board,
+     and putTeece run for real on the clone so the panel's own mine, prime,
+     enchantment and curse all fire into the numbers you are shown. makeTeece
+     without {real:true}, so weighing a panel never spends the coffin. */
+  const previewPlace=(bb,c)=>{
+    for(const q of sacP)if(bb[q].teece)bb[q].teece=null;
+    if(!openAt(bb,c))return;
+    const gt=makeTeece(id,p);
+    for(const e of plateOf(p,handIdx))gt.equips.push(e);
+    putTeece(bb,c,gt,false);
+  };
+  let spot=plan?plan.c:await chooseCell(p,spots,'Choose a space for '+d.name+'.',
+    {cancel:true,mut:previewPlace,preview:true});
   if(spot==null||spot==='CANCEL')return false;
   const sacked=[];
   for(const c of sacP){
@@ -8437,6 +8470,22 @@ function clearFoot(){
   if(!bd)return;
   for(const el of bd.children)el.classList.remove('splash');
 }
+/* The arriving Teece, drawn on a panel it has not been played to yet: the same
+   mut the computer scores a panel with, run on a clone and read back. Every
+   candidate is drawn at once rather than on hover, because a thumb has no
+   hover and the whole point is comparing the panels against each other. */
+function previewAt(i){
+  const pd=G&&G.pending;
+  if(!pd||pd.kind!=='cell'||!pd.opt||!pd.opt.preview||!pd.opt.mut)return null;
+  if(pd.cells.indexOf(i)<0||G.board[i].teece)return null;
+  let bb;
+  try{bb=cloneBoard(G.board);pd.opt.mut(bb,i);}catch(e){return null;}
+  const gt=bb[i].teece;
+  if(!gt)return null;
+  let doomed=false;
+  try{doomed=scanDeaths(bb).some(d=>d.cell===i);}catch(e){}
+  return {t:gt,sides:effSides(bb,i),def:defOf(bb,i),doomed};
+}
 function paintFoot(foot,i){
   clearFoot();
   const bd=document.getElementById('board');
@@ -8493,6 +8542,18 @@ function renderBoard(){
     if(ench)cell.innerHTML+='<div class="enchMark m'+ench.owner+'" title="'+escHtml(enchantText(ench))+
       '">✧ '+sgn(ENCHANT_N)+'</div>';
     if(G.board[i].razed)cell.classList.add('razed');
+    const pv=previewAt(i);
+    if(pv){
+      const gh=document.createElement('div');
+      gh.className='teece ghost o'+pv.t.owner+(pv.doomed?' doomed':'');
+      gh.setAttribute('data-card-deck',getCardDeck(pv.t.cardId));
+      gh.innerHTML='<div class="mid"><div class="gtag">'+
+        (pv.doomed?'dies here':'lands here')+'</div>'+
+        (pv.def>0?'<div class="rgd"><span class="dfn">\u{1F6E1}\uFE0F'+pv.def+'</span></div>':'')+'</div>'+
+        [0,1,2,3].map(k=>'<div class="s s'+k+' '+(pv.sides[k]>7?'up':'')+
+          (pv.sides[k]<3?'down':'')+'">'+pv.sides[k]+'</div>').join('');
+      cell.appendChild(gh);
+    }
     const t=G.board[i].teece;
     if(t){
       const s=effSides(G.board,i),kws=kwOf(G.board,i),aul=actsOf(G.board,i);
