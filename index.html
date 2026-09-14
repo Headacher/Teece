@@ -643,7 +643,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:38,date:'2026-09-14'};
+const VERSION={build:39,date:'2026-09-14'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1118,18 +1118,26 @@ const CARD_ART={
   "TD":["  \\   _   /  ", "   \\ (o) /   ", "  ==[###]==  ", "   / | | \\   ", "   '  '  '   "],
   "TR":["    .---.    ", "  ,'#####',  ", " /#########\\ ", " \\#########/ ", "  `-------'  "],
   "TS":["    \\ | /    ", "     \\|/     ", "   .--+--.   ", "      |      ", " ~~~~~~~~~~~ "]};
-/* Roguelike drafts from the whole card list, not the curated POOL: every
-   card in the game that is not a Token or Spider can turn up.
+/* Roguelike drafts from the whole card list rather than the curated POOL: any
+   card in the game that is not a Token can turn up.
 
-   A deck marked noRogue in decks.json stays out of a run altogether, both from
-   your own draft and from the deck the computer is built out of. Tic Tac Toe is
-   one: its cards only mean anything as a whole deck. Three marks in a line
-   takes the game, so a handful of stray Xs in a drafted pile is either dead
-   text on a body or a win nobody was playing for. */
+   Except a deck marked noRogue in decks.json, which stays out of a run
+   altogether -- out of your draft offers and out of the deck the computer is
+   built from, since both come through here. Two decks carry it, for the same
+   reason: their cards only mean anything as a whole deck. Three Tic Tac Toe
+   marks in a line takes the game, so stray Xs in a drafted pile are either
+   dead text on a body or a win nobody was playing for; and every Spider card
+   is written for the Web, which only exists because the Spider deck brings it.
+
+   Spider used to be held out by the per-card spider:true flag instead, and
+   that never worked: the flag marks a Spider TEECE, so the deck's three equips
+   and two grounds do not carry it and were always draftable. The flag is still
+   what the Web rules read -- it just has no business deciding a draft, so the
+   test moved to the deck and the flag stayed where it belongs. */
 function allDraftable(){
   const out=[];
   for(const k of Object.keys(CARDS)){
-    if(CARDS[k].token||CARDS[k].perkOnly||CARDS[k].spider)continue;
+    if(CARDS[k].token||CARDS[k].perkOnly)continue;
     const id=Number(k);
     if(!Number.isFinite(id))continue;
     const dk=DECKS[getCardDeck(id)];
