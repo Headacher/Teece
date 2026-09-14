@@ -636,7 +636,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:35,date:'2026-09-14'};
+const VERSION={build:36,date:'2026-09-14'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -720,10 +720,9 @@ const CARD_ART={
   694:["   .------.  ","  [ (o)===>  ","   '------'  ","      ||     ","     _||_    "],
   695:["   ~~~~~~~   ","  ~ .---. ~  ","  ~( ... )~  ","   ~\\   /~   ","    ~~ ~~    "],
   696:["   \\  |  /   ","  --( O )--  ","   /  |  \\   ","  ( DAY|NGT )","   \\_____/   "],
-  697:["   .-----.   ","  ( -- -- )  ","   \\  ~  /   ","    | | |    ","   no  kill  "],
-  698:["   .-----.   ","  ( o   o )  ","   \\ === /   ","    | | |    ","   . . . .   "],
-  699:["  ___________","  | $ | $ | $","  |---|---|--","  | @ | @ | @","  '----------"],
-  700:["  .........  ","  : \\ | / :  ","  : -(o)- :  ","  : / | \\ :  ","  :.......:  "],
+  697:[" .-.     .-. ","( -- ) ( == )"," \\ ~ /   \\|/ "," blind  mute "," day      ngt"],
+  698:["  ___________","  | $ | $ | $","  |---|---|--","  | @ | @ | @","  '----------"],
+  699:["  .........  ","  : \\ | / :  ","  : -(o)- :  ","  : / | \\ :  ","  :.......:  "],
   "TSOL":["    \\ | /    ","  -- ( o ) --","    / | \\    ","    _/ \\_    ","   .  .  .   "],
   /* ---- Tic Tac Toe: chalk marks and the grid they go on ---- */
   641:["   .-----.   ","  ( \\ O / )  ","   [=====]   ","   /|   |\\   ","  ^^^   ^^^  "],
@@ -1147,9 +1146,6 @@ function getCardDeck(cardId){
 function canPlay(p,cardId){
   if(!G||p!==G.turn||G.over)return false;
   const cd=CARDS[cardId];
-  /* Blind is a day card and Mute a night one. Held back rather than cast into
-     nothing, so the card is never spent on the wrong half of the cycle. */
-  if(cd.needPhase&&!phaseIs(cd.needPhase))return false;
   if(cd.type==='teece'){
     if(G.teecePlayed||hexOn(p,'freeze'))return false;
     let room=false;
@@ -1211,7 +1207,6 @@ function canPlay(p,cardId){
      bazaarTrade{} bazaarDump{}   the two halves of the Bazaar
    card fields the sky layer reads:
      when:'day'|'night'  on a step, an aura, an ability or an on-kill reward
-     needPhase           a card that may only be played in that half
      phaseMod[{when,n,needAdjAlly}]   printed, silence-proof, conditional numbers
      modWhen{day,night}              an equip that only pays in one half
      grants.defWhen / grants.kwWhen  the same, for Defence and keywords
@@ -2264,7 +2259,10 @@ const CARDS = {
     Day, Night, Day. Half of what this deck prints is worth having in one half
     of the cycle and worth nothing in the other, which is what the cards that
     reach up and turn the sky by hand are for -- and what the Stopped Sundial
-    is for, which pins it where it stands and answers nothing after that. ---- */
+    is for, which pins it where it stands and answers nothing after that.
+
+    Nineteen cards rather than twenty: Blind / Mute is one card carrying both
+    halves of the cycle, not two cards each dead in one of them. ---- */
  681:{name:'Solar Herald',type:'teece',sides:[4,4,4,4],solar:true,
     onPlay:[{fx:'mod',who:'any',where:'any',n:2,dur:'perm',when:'day'},
             {fx:'mod',who:'any',where:'any',n:-2,dur:'perm',when:'night'}],
@@ -2288,7 +2286,7 @@ const CARDS = {
     onKill:{n:2,dur:'perm',when:'night'},
     phaseMod:[{when:'day',n:2,needAdjAlly:true}],
     text:'By night, whenever it destroys a Teece: +2 permanently. By day, while it stands next to an ally: +2.'},
- 687:{name:'Nightfall Mute',type:'teece',sides:[4,9,9,4],solar:true,
+ 687:{name:'Nightfall Hush',type:'teece',sides:[4,9,9,4],solar:true,
     onPlay:[{fx:'unmake',when:'night'}],
     text:'When played by night: select a Teece. It is stripped back to the bare card — every bonus and penalty on it gone — and everything it does is negated.'},
  688:{name:'Noon Echo',type:'teece',sides:[9,4,4,9],solar:true,
@@ -2315,17 +2313,17 @@ const CARDS = {
  696:{name:'Solstice',type:'magic',solar:true,
     text:'Call Day or Night. Day: it becomes Day and every Teece of yours gets +2. Night: it becomes Night and every enemy Teece gets -2.',
     cast:[{fx:'solstice'}]},
- 697:{name:'Blind',type:'magic',needPhase:'day',
-    text:'Playable by day only. Select a Teece: it can no longer destroy another Teece.',
-    cast:[{fx:'blind'}]},
- 698:{name:'Mute',type:'magic',needPhase:'night',
-    text:'Playable by night only. Select a Teece: it is stripped back to the bare card — every bonus and penalty on it gone — and everything it does is negated.',
-    cast:[{fx:'unmake'}]},
- 699:{name:'Bazaar',type:'ground',
+ /* One card that reads the sky and does a different thing under each half of
+    it. Always castable, because whichever clause is out of season is simply
+    not there: the card is never dead in hand, and never spent on nothing. */
+ 697:{name:'Blind / Mute',type:'magic',solar:true,
+    text:'Blind — by day: select a Teece; it can no longer destroy another Teece. Mute — by night: select a Teece; it is stripped back to the bare card, every bonus and penalty on it gone, and everything it does is negated.',
+    cast:[{fx:'blind',when:'day'},{fx:'unmake',when:'night'}]},
+ 698:{name:'Bazaar',type:'ground',
     gact:[{name:'Bustling Marketplace',once:'turn',times:3,when:'day',steps:[{fx:'bazaarTrade'}]},
           {name:'Underground Dealings',once:'turn',when:'night',steps:[{fx:'bazaarDump'}]}],
     text:'Bustling Marketplace — by day, up to three times a turn: the controller of a Teece standing here discards a card and takes a card back out of their graveyard. Underground Dealings — by night, once a turn: they destroy the five oldest cards in their graveyard and draw a card.'},
- 700:{name:'Solar Terrace',type:'ground',
+ 699:{name:'Solar Terrace',type:'ground',
     gPhaseMod:[{when:'day',who:'ally',n:3},{when:'night',who:'enemy',n:-3}],
     text:'By day an allied Teece standing here gets +3. By night an enemy Teece standing here gets -3.'},
  /* Not in any deck: Cannonball is handed out by a roguelike perk. */
