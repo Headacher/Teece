@@ -16,7 +16,12 @@
         311,
         312
       ],
-      "blurb": "Twelve cards, every one of them overpowered. Win before you run dry: your own empty deck never loses you the game, only your opponent's does."
+      "blurb": "Twelve cards, every one of them overpowered. Win before you run dry: your own empty deck never loses you the game, only your opponent's does.",
+      "how": [
+        "Titan is 16 on every side and Skullsplitter is 15 on one — check which edge is facing you before you trade with either.",
+        "Warcamp sends your dying cards back to your hand instead of the graveyard, and charges an opponent two cards to break it.",
+        "Undying Axe comes back once a game: to your deck, or straight onto any panel you like."
+      ]
     },
     "rock": {
       "name": "Rock",
@@ -42,7 +47,12 @@
         339,
         340
       ],
-      "blurb": "Defence soaks up the difference. A Teece with Defence 2 only dies to an attack that beats it by three or more."
+      "blurb": "Defence soaks up the difference. A Teece with Defence 2 only dies to an attack that beats it by three or more.",
+      "how": [
+        "Colossus is 10 on every side and destroys nothing at all unless your Master Rock Flinger is standing.",
+        "Rock Sergeant pays every other ally its own Defence, and Stoneheart pays its wearer +1 for each point it has — the deck stacks Defence, then spends it as attack.",
+        "Muckraider and Bedrock cannot lose attributes at all, and cannot be selected by enemy effects."
+      ]
     },
     "ogre": {
       "name": "Ogre",
@@ -68,7 +78,12 @@
         369,
         370
       ],
-      "blurb": "Shove everything. Ogres move enemies around and the penalties they hand out are permanent, so a shoved Teece never recovers. Negative attributes are lethal."
+      "blurb": "Shove everything. Ogres move enemies around and the penalties they hand out are permanent, so a shoved Teece never recovers. Negative attributes are lethal.",
+      "how": [
+        "Almost every Ogre moves something as it lands, and the -2 it hands out sticks for the rest of the game.",
+        "Ogre Trapper punishes movement however it happened, so your own shoves feed it too.",
+        "Sinkhole destroys whatever moves onto it. Springshelf pays +5 to whatever moves on — and nothing to a Teece played straight there."
+      ]
     },
     "robot": {
       "name": "Robot",
@@ -94,7 +109,12 @@
         429,
         430
       ],
-      "blurb": "Every Robot Flies, and Drones roll off the line all game. Drones are 3/3/3/3 Tokens that also Fly — they block, they kill, and several Robots pay you for keeping them moving."
+      "blurb": "Every Robot Flies, and Drones roll off the line all game. Drones are 3/3/3/3 Tokens that also Fly — they block, they kill, and several Robots pay you for keeping them moving.",
+      "how": [
+        "Drones are 3/3/3/3 flying Tokens, and Tokens never count toward winning: they are board, not lead.",
+        "Swarm Node, Hangar Guard and Drone Tether all pay the Drones; Overclocker and Signal Relay pay for movement instead.",
+        "War Machine is 11 on every side and brings three more Drones down with it."
+      ]
     },
     "gadget": {
       "name": "Gadget",
@@ -120,7 +140,12 @@
         459,
         460
       ],
-      "blurb": "Almost every card asks you to choose a mode. The deck is built to cheat that choice — fire every mode at once, fire the chosen one twice, or switch modes off for both players entirely."
+      "blurb": "Almost every card asks you to choose a mode. The deck is built to cheat that choice — fire every mode at once, fire the chosen one twice, or switch modes off for both players entirely.",
+      "how": [
+        "Null Module, Preset, Coupling Rig and Grand Apparatus all bend the next choice: every mode at once, or the chosen mode twice.",
+        "Safety Interlock switches your OWN modalities off — while it stands, your cards that offer a choice simply do nothing.",
+        "Modular Platform sells the same trick as ground, and the size you give it decides which trick you get."
+      ]
     },
     "time": {
       "name": "Time",
@@ -146,7 +171,12 @@
         399,
         400
       ],
-      "blurb": "Cards that grow or rot on a clock. Every Teece ages at the start of your turn; some come of age into something far bigger, others decay every turn you keep them."
+      "blurb": "Cards that grow or rot on a clock. Every Teece ages at the start of your turn; some come of age into something far bigger, others decay every turn you keep them.",
+      "how": [
+        "Acorn and Long Game are nearly worthless for two turns and then 10 and 12 on every side.",
+        "Fast Forward, Timekeeper, Whetted Blade and Last Breath all push clocks forward — that is how you collect early.",
+        "Chronoplate stops a clock dead, which is what saves a Fading Titan. Sundial doubles it, which is only ever good on something growing."
+      ]
     },
     "witch": {
       "name": "Witch",
@@ -171,7 +201,12 @@
         508,
         509
       ],
-      "blurb": "Eight Curses instead of equipment or ground. Witches are physically fragile, but a Curse can silence a player, freeze their Teece in hand, turn one against them, or raze a panel off the board for good."
+      "blurb": "Eight Curses instead of equipment or ground. Witches are physically fragile, but a Curse can silence a player, freeze their Teece in hand, turn one against them, or raze a panel off the board for good.",
+      "how": [
+        "Curse of Freezing is the trump: they cannot play a Teece at all, and you cannot win the game until it lifts — it buys time, not the win.",
+        "Most Witches trigger on you playing magic at all, so a cheap Curse is also a growth spurt.",
+        "Coven Matriarch turns every Curse of yours that picks one player into one that hits everybody — you included."
+      ]
     },
     "bomb": {
       "name": "Bomb",
@@ -197,7 +232,12 @@
         489,
         490
       ],
-      "blurb": "Crazy area-of-effect damage that risks blowing itself up too. Lay Mines to control the board, then turn the damage into a boost with Blast Ward."
+      "blurb": "Crazy area-of-effect damage that risks blowing itself up too. Lay Mines to control the board, then turn the damage into a boost with Blast Ward.",
+      "how": [
+        "Blast Ward inverts the whole deck: the Teece wearing it gains whatever it would have lost.",
+        "Mines sit on empty panels for -2 as anything arrives, and Chain Charge, Minefield and Overcharged Warhead all make them bigger.",
+        "Unstable Warhead destroys itself the moment anything targets it or takes a single point off it."
+      ]
     },
     "nature": {
       "name": "Nature",
@@ -223,7 +263,12 @@
         539,
         540
       ],
-      "blurb": "Plants that feed each other. Almost every card hands out a permanent bonus, and the bonuses stack all game — but every plant is soft at the bottom, so watch the edge it is standing on."
+      "blurb": "Plants that feed each other. Almost every card hands out a permanent bonus, and the bonuses stack all game — but every plant is soft at the bottom, so watch the edge it is standing on.",
+      "how": [
+        "Nearly every plant is thin on its bottom edge — Sapling 1, Elder Willow 1, Mother Tree 1 — so the panel above it is where it dies.",
+        "Hothouse Orchid and Sunlit Loam double every positive effect, and the bonuses here are permanent, so they compound all game.",
+        "Plant Pot is +20 on the bottom side alone, which is exactly the edge the deck keeps leaving open."
+      ]
     },
     "pixie": {
       "name": "Pixie",
@@ -249,7 +294,12 @@
         559,
         560
       ],
-      "blurb": "Tiny flying creatures with almost no numbers and an enormous amount of magic. Every pixie flies, and the deck keeps pulling magic back out of graveyards, decks and thin air — then bends what is on the field with it: minds taken, Teece stretched or shrunk, wings bought by the turn."
+      "blurb": "Tiny flying creatures with almost no numbers and an enormous amount of magic. Every pixie flies, and the deck keeps pulling magic back out of graveyards, decks and thin air — then bends what is on the field with it: minds taken, Teece stretched or shrunk, wings bought by the turn.",
+      "how": [
+        "Pixies are 0s, 1s and 2s. They are not meant to fight — they are meant to keep casting.",
+        "Trickspinner, Wisp of Nothing and Enchantment conjure magic out of nothing; Thieving Sprite, Grave Pixie and Echo Pixie pull it back out of graveyards and decks.",
+        "Pixie Queen gives every other pixie of yours +10, and is the one card that turns the swarm into a board."
+      ]
     },
     "spider": {
       "name": "Spider",
@@ -276,7 +326,13 @@
         580
       ],
       "web": true,
-      "blurb": "A cannibal swarm. The Web is on the field from the first turn, covering every panel but the corners. Every Spider Teece and Spiderling standing on it can Skitter one space each turn, and a Spiderling has +1 Defence there. Spiders pour out 4/4/4/4 Spiderlings and then eat them to pay for everything else."
+      "blurb": "A cannibal swarm. The Web is on the field from the first turn, covering every panel but the corners. Every Spider Teece and Spiderling standing on it can Skitter one space each turn, and a Spiderling has +1 Defence there. Spiders pour out 4/4/4/4 Spiderlings and then eat them to pay for everything else.",
+      "noRogue": true,
+      "how": [
+        "Spiderlings are Tokens, and Tokens never count toward winning: they are fuel and board, never a lead.",
+        "The corners are never Web, which makes them the one place a Spiderling gets neither Skitter nor its extra Defence.",
+        "Brood Mother reprints every Spiderling on the Web at 12/12/12/12 — either side's — and stops them being sacrificed at all."
+      ]
     },
     "vampire": {
       "name": "Vampire",
@@ -302,7 +358,105 @@
         619,
         620
       ],
-      "blurb": "They grow by taking. Drain X pulls X off a Teece and hands the drinker exactly what it managed to take — which is not always X, because Steadfast gives up nothing and the deck's own castle, catalyst and fangs all bend the number on the way."
+      "blurb": "They grow by taking. Drain X pulls X off a Teece and hands the drinker exactly what it managed to take — which is not always X, because Steadfast gives up nothing and the deck's own castle, catalyst and fangs all bend the number on the way.",
+      "how": [
+        "Parasite has to bite twice on each of your turns, from your own side, or it withers and dies.",
+        "Enhanced Fangs doubles what you take. Vampire Castle and Transfusion Catalyst double everything either way, up and down alike.",
+        "Blood Bank stores every drain anything else makes, and spends the lot as one bite once a turn."
+      ]
+    },
+    "zombie": {
+      "name": "Zombie",
+      "cards": [
+        621,
+        622,
+        623,
+        624,
+        625,
+        626,
+        627,
+        628,
+        629,
+        630,
+        631,
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638,
+        639,
+        640
+      ],
+      "blurb": "They come back when you kill them. X Undying Y means X returns a game, each worth Y more than the last, on any free panel you choose. A returned Teece has no protection, so placement is what keeps it alive. The rest of the deck works both graveyards: summoning out of them, stealing from the enemy's, and taking cards back to hand.",
+      "how": [
+        "The return count belongs to the card, not the body, so bouncing a zombie back to hand does not launder it. Back Again and Death's Avatar are the two that wind it back.",
+        "Silence stops it getting up. A silenced zombie stays down.",
+        "Plague Winds hands every ally +1 and every enemy -1 at the end of every turn — both sides' turns, not just yours."
+      ]
+    },
+    "tictactoe": {
+      "name": "Tic Tac Toe",
+      "cards": [
+        641,
+        642,
+        643,
+        644,
+        645,
+        646,
+        647,
+        648,
+        649,
+        650,
+        651,
+        652,
+        653,
+        654,
+        655,
+        656,
+        657,
+        658,
+        659,
+        660
+      ],
+      "blurb": "A second board laid over the first. Every Teece here is an X, an O, or both, and the two Toerrains mark a bare panel on their own. Three of one letter in a straight line takes the game at the end of that turn, however far behind you are on bodies.",
+      "noRogue": true,
+      "how": [
+        "A body covers the ground it stands on, so standing on their Toerrain blocks that line instead of joining it.",
+        "The board lights up any line standing at two with its last panel still open, whoever holds it.",
+        "bOX and XOD count as an X and an O at once, which is two lines from one body."
+      ]
+    },
+    "solar": {
+      "name": "Solar",
+      "cards": [
+        681,
+        682,
+        683,
+        684,
+        685,
+        686,
+        687,
+        688,
+        689,
+        690,
+        691,
+        692,
+        693,
+        694,
+        695,
+        696,
+        697,
+        698,
+        699
+      ],
+      "blurb": "The sun at the corner of the board turns to a moon at the start of every round, so each of your own turns runs the other way from the last. Half of what this deck prints is worth having in one half of the cycle and worth nothing in the other — so play the sky, not just the card.",
+      "how": [
+        "A card that only works in one half of the cycle tells you so when you play it in the other.",
+        "Equips read the sky too: Twilight Cloak is +3 Defence by night, and +7 with Flying by day.",
+        "Stopped Sundial pins the sky where it stands — the round stops turning it, and no card can turn it either."
+      ]
     },
     "army": {
       "name": "Army",
@@ -328,7 +482,12 @@
         719,
         720
       ],
-      "blurb": "A deck that is paid for its shape. Almost nothing here is worth much standing alone — Teece gain attributes, Ranged, March and cover for standing beside an ally, and the equips pay for lines, triangles and a lone point. Field Marshal Marshall ends the geometry altogether: while he stands, every Teece on the field counts as adjacent to all of its allies, wherever they are."
+      "blurb": "A deck that is paid for its shape. Almost nothing here is worth much standing alone — Teece gain attributes, Ranged, March and cover for standing beside an ally, and the equips pay for lines, triangles and a lone point. Field Marshal Marshall ends the geometry altogether: while he stands, every Teece on the field counts as adjacent to all of its allies, wherever they are.",
+      "how": [
+        "Beside means the four panels a side touches, never a diagonal. Line Formation is the only card here that counts diagonals, and it counts them as lines rather than as neighbours.",
+        "Brigadeer Ryan and Brigadeer Bryan call each other up: play one and the other may go down the same turn without spending your Teece play. Side by side they are +10 each.",
+        "Scout Stout is paid for having its back to the board — two sides on a corner, one side and Ranged on an edge, all four in the middle — so it wants the panel nobody else does."
+      ]
     }
   },
   "formats": [
@@ -677,6 +836,65 @@
     618,
     619,
     620,
+    621,
+    622,
+    623,
+    624,
+    625,
+    626,
+    627,
+    628,
+    629,
+    630,
+    631,
+    632,
+    633,
+    634,
+    635,
+    636,
+    637,
+    638,
+    639,
+    640,
+    641,
+    642,
+    643,
+    644,
+    645,
+    646,
+    647,
+    648,
+    649,
+    650,
+    651,
+    652,
+    653,
+    654,
+    655,
+    656,
+    657,
+    658,
+    659,
+    660,
+    681,
+    682,
+    683,
+    684,
+    685,
+    686,
+    687,
+    688,
+    689,
+    690,
+    691,
+    692,
+    693,
+    694,
+    695,
+    696,
+    697,
+    698,
+    699,
     701,
     702,
     703,
