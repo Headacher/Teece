@@ -184,13 +184,26 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .cell.splash{background:rgba(201,162,39,.20);box-shadow:inset 0 0 0 2px rgba(201,162,39,.5)}
 .cell.splash .teece{box-shadow:0 0 0 2px var(--gold)}
 .cell.target{box-shadow:inset 0 0 0 2px var(--gold);cursor:pointer}
-/* The placement ghost: the Teece you are about to play, shown on each panel it
-   could go to, with the numbers that panel would actually give it. Never takes
-   a click -- the panel underneath is what you are choosing. */
-.ghost{opacity:.62;pointer-events:none;border-style:dashed!important}
+/* The placement preview: the Teece you are about to play, with the numbers the
+   panel you are pointing at would actually give it. ONE of it, in the bar that
+   asked the question -- drawn on every candidate at once it answered the
+   question by covering up the board it was asked about, nine copies of the same
+   card laid over the nine panels you were choosing between. */
+.ghost{border-style:dashed!important}
 .ghost .gtag{font-size:9px;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
-.ghost.doomed{opacity:.75;border-color:var(--p1)!important;box-shadow:inset 0 0 0 2px var(--p1)}
+.ghost.doomed{border-color:var(--p1)!important;box-shadow:inset 0 0 0 2px var(--p1)}
 .ghost.doomed .gtag{color:#ffd9d4;font-weight:700}
+/* .teece is positioned against the panel it stands on, so away from the board
+   it needs a frame of its own to sit in. */
+.pvwrap{position:relative;width:76px;height:76px;flex:none}
+.pvwrap .teece{inset:0;cursor:default;opacity:1}
+.pvwrap .teece .s{font-size:13px}
+.pvwrap .teece .mid{padding:0 20px;gap:0}
+.pvwrap .gtag{font-size:8px;line-height:1.15}
+.pvwrap .rgd{font-size:9px}
+/* The panel the numbers belong to, so the tile is never orphaned from it. */
+.cell.previewing{box-shadow:inset 0 0 0 3px var(--gold),0 0 12px rgba(201,162,39,.45)}
+.cell.previewing.doomed{box-shadow:inset 0 0 0 3px var(--p1),0 0 12px rgba(200,70,60,.5)}
 .cell.target:hover{background:#231b12}
 .cell.locked{box-shadow:inset 0 0 0 2px rgba(239,230,208,.55)}
 /* What a panel counts as in noughts and crosses. Above the Teece rather than
@@ -313,6 +326,11 @@ button,.teece,.cell,.card{touch-action:manipulation}
 #promptBar{min-height:38px;width:100%;max-width:560px;display:flex;align-items:center;justify-content:center;
   gap:10px;padding:8px 12px;border:1px dashed var(--line);border-radius:8px;text-align:center;flex-wrap:wrap}
 #promptBar.hot{border-color:var(--gold);border-style:solid;background:rgba(201,162,39,.07)}
+/* With a preview tile in it the bar has three things to fit, and wrapping the
+   button onto its own line costs a phone another 40px of the screen it is
+   pinned over. The question takes the slack instead. */
+#promptBar.haspv{justify-content:flex-start;text-align:left;gap:8px}
+#promptBar.haspv .msg{flex:1 1 0;min-width:0}
 /* On a narrow screen the prompt bar sits far above the board, so once you have
    scrolled down to play, a question asked of you is off the top of the screen
    and the board just looks dead -- every tap refused because something is
@@ -652,7 +670,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:43,date:'2026-09-15'};
+const VERSION={build:44,date:'2026-09-15'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -2465,8 +2483,8 @@ const CARDS = {
     onDeath:[{fx:'shieldNext'}],
     text:'When played: she cannot be destroyed until the start of your next turn. When destroyed: the next Teece you play cannot be destroyed until the start of your next turn.'},
  710:{name:'Grenadier Greg',type:'teece',sides:[6,5,4,5],def:1,army:true,
-    act:[{name:'Lob a grenade',once:'turn',steps:[{fx:'moveAllAdj',pick:true,n:-2,dur:'perm'}]}],
-    text:'Defence 1. Once per your turn: select a panel; every Teece standing beside it is moved one space and gets -2 permanently.'},
+    act:[{name:'Lob a grenade',once:'turn',steps:[{fx:'moveAllAdj',pick:true,away:true,n:-2,dur:'perm'}]}],
+    text:'Defence 1. Once per your turn: select a panel; every Teece standing beside it is knocked one space straight away from it and gets -2 permanently. Anything with nowhere to be blown stays where it is, and still takes the -2.'},
  711:{name:'Colonel Cornell',type:'teece',sides:[8,8,8,8],sac:1,army:true,
     bonus:{when:'adjAlly',n:2,each:true},
     aura:{who:'ally',where:'adj',n:2},
@@ -3062,6 +3080,7 @@ function newState(mode,vsAI,decks,extra){
     epoch:++EPOCH,
     enemyBonus:extra.enemyBonus||0,level:extra.level||0,quiet:0,eventFlag:false,
     perks:pk,robbed:false,mourned:false,teeceThisTurn:0,extraTeece:0,freePlay:null,
+    previewCell:null,previewTouch:false,
     modalNext:null,trap:null,pendingFx:[],tempControls:[],castingMagic:false,magicConsumed:false,
     seatNames:extra.seatNames||null};
   /* Well Supplied and Cannonball both land in the opening hand. Only seat 0
@@ -4128,7 +4147,8 @@ function chooseCell(p,cells,msg,opt){
   if(isAIP(p)||!HAS_DOM){
     return Promise.resolve(aiPickCell(cells,opt,p)).then(markTargetDeath);
   }
-  return new Promise(res=>{G.pending={kind:'cell',p,cells,hands:opt.hands||null,msg,opt,
+  return new Promise(res=>{G.previewCell=null;G.previewTouch=false;
+    G.pending={kind:'cell',p,cells,hands:opt.hands||null,msg,opt,
     res:v=>res(markTargetDeath(v))};render();showBoard();});
 }
 function chooseOption(p,opts,msg,cancel){
@@ -4139,7 +4159,8 @@ function chooseOption(p,opts,msg,cancel){
 }
 function resolvePending(val){
   const pd=G.pending; if(!pd)return;
-  G.pending=null; pd.res(val); render();
+  G.pending=null; G.previewCell=null; G.previewTouch=false;
+  pd.res(val); render();
 }
 
 /* ============ fx executor ============ */
@@ -5458,7 +5479,8 @@ async function FXRUN(st,ctx){
       const cands=[];
       for(let i=0;i<BN;i++)if(ADJ[i].some(j=>b[j].teece))cands.push(i);
       if(!cands.length)return none('Nothing is standing beside any panel.');
-      const c=await pickCell(cands,'Choose the panel it lands on: everything beside it is moved one space and gets '+
+      const c=await pickCell(cands,'Choose the panel it lands on: everything beside it is '+
+        (st.away?'knocked one space straight away from it':'moved one space')+' and gets '+
         sgn(st.n)+durTxt(st.dur)+'.',
         (bb,i)=>{for(const j of ADJ[i])if(bb[j].teece)applyModT(bb[j].teece,st.n,st.dur);},
         false,i=>[i].concat(ADJ[i]));
@@ -5469,7 +5491,25 @@ async function FXRUN(st,ctx){
     }
     for(const j of ADJ[src].slice()){
       const t=b[j].teece;
-      if(!t||hasKw(b,j,'immovable'))continue;
+      if(!t)continue;
+      /* A blast throws things; it does not steer them. Everything beside the
+         panel goes one space straight out from it, and where that is is the
+         geometry's business rather than anybody's choice -- which is what
+         makes WHICH panel you pick the whole of the decision. */
+      if(st.away){
+        const dst=hasKw(b,j,'immovable')?-1:oppositeCell(src,j);
+        if(dst>=0&&openAt(b,dst)){
+          moveT(b,j,dst,true);
+          applyModT(b[dst].teece,st.n,st.dur);
+          log(nm(t)+' is blown back to the '+CN[dst]+' and gets '+sgn(st.n)+durTxt(st.dur)+'.');
+          await fireMove(j,dst,p);
+          continue;
+        }
+        applyModT(t,st.n,st.dur);
+        log(nm(t)+' has nowhere to be blown, and gets '+sgn(st.n)+durTxt(st.dur)+'.');
+        continue;
+      }
+      if(hasKw(b,j,'immovable'))continue;
       const opts=ADJ[j].filter(k=>!b[k].teece);
       if(opts.length){
         const r=await chooseCell(p,opts,'Move '+nm(t)+' one space, or skip.',
@@ -7400,7 +7440,7 @@ async function playTeece(p,handIdx){
     putTeece(bb,c,gt,false);
   };
   let spot=plan?plan.c:await chooseCell(p,spots,'Choose a space for '+d.name+'.',
-    {cancel:true,mut:previewPlace,preview:true});
+    {cancel:true,mut:previewPlace,preview:{cardId:id,plate:plateOf(p,handIdx)}});
   if(spot==null||spot==='CANCEL')return false;
   const sacked=[];
   for(const c of sacP){
@@ -8824,11 +8864,21 @@ function aiActMuts(cell,ent){
       });
     }
   }else if(st.fx==='moveAllAdj'&&st.pick){
-    /* where the grenade goes is worth weighing even though where each Teece is
-       shoved afterwards is not: the penalty lands either way */
+    /* the shove is the geometry's, not a choice, so the simulation can throw
+       the blast exactly as the ability will throw it */
     for(let j=0;j<BN;j++){
       if(!ADJ[j].some(k=>b[k].teece))continue;
-      muts.push(bb=>{for(const k of ADJ[j])if(bb[k].teece)applyModT(bb[k].teece,st.n,st.dur);});
+      muts.push(bb=>{
+        for(const k of ADJ[j].slice()){
+          const t=bb[k].teece;
+          if(!t)continue;
+          if(st.away&&!hasKw(bb,k,'immovable')){
+            const dst=oppositeCell(j,k);
+            if(dst>=0&&openAt(bb,dst)){moveT(bb,k,dst,false);applyModT(bb[dst].teece,st.n,st.dur);continue;}
+          }
+          applyModT(t,st.n,st.dur);
+        }
+      });
     }
   }
   return muts;
@@ -9093,6 +9143,55 @@ function previewAt(i){
   try{doomed=scanDeaths(bb).some(d=>d.cell===i);}catch(e){}
   return {t:gt,sides:effSides(bb,i),def:defOf(bb,i),doomed};
 }
+/* The face of the preview: the same tile a Teece is drawn as on the board, so
+   the numbers you are shown before you commit are read the same way as the
+   numbers you get afterwards. `i` is the panel being pointed at, or null for
+   none yet -- and then it shows the card as it stands in hand, plating and all,
+   since that is all that is true before a panel is chosen. */
+function previewTileHtml(i){
+  const pd=G&&G.pending, pv=(i==null)?null:previewAt(i);
+  const spec=pd&&pd.opt&&pd.opt.preview;
+  let cardId,sides,def=0,owner=pd?pd.p:0,doomed=false,tag;
+  if(pv){
+    cardId=pv.t.cardId;sides=pv.sides;def=pv.def;owner=pv.t.owner;doomed=pv.doomed;
+    tag=pv.doomed?'dies here':'lands here';
+  }else{
+    if(!spec||!spec.cardId)return '';
+    cardId=spec.cardId;
+    sides=platedSides(cardId,spec.plate||[]);
+    tag='in hand';
+  }
+  const num=k=>'<div class="s s'+k+' '+(sides[k]>7?'up':'')+(sides[k]<3?'down':'')+'">'+sides[k]+'</div>';
+  return '<div class="pvwrap" aria-live="polite"><div class="teece ghost o'+owner+(doomed?' doomed':'')+
+    '" data-card-deck="'+getCardDeck(cardId)+'">'+
+    '<div class="mid"><div class="gtag">'+tag+'</div>'+
+    (def>0?'<div class="rgd"><span class="dfn">\u{1F6E1}\uFE0F'+def+'</span></div>':'')+'</div>'+
+    [0,1,2,3].map(num).join('')+'</div></div>';
+}
+/* Repainted on its own rather than through render(): crossing the board would
+   otherwise rebuild every panel nine times over, and nothing on the board has
+   changed -- only which panel is being asked about. */
+function renderPreview(){
+  const pd=G&&G.pending;
+  const live=!!(pd&&pd.kind==='cell'&&pd.opt&&pd.opt.preview);
+  const bd=document.getElementById('board');
+  if(bd)for(let i=0;i<BN;i++){
+    const el=bd.children[i];
+    if(!el)continue;
+    const on=live&&G.previewCell===i;
+    el.classList.toggle('previewing',on);
+    el.classList.toggle('doomed',on&&!!(previewAt(i)||{}).doomed);
+  }
+  const host=document.getElementById('pvHost');
+  if(host)host.innerHTML=live?previewTileHtml(G.previewCell):'';
+}
+function setPreview(i,byTouch){
+  if(!G||!G.pending)return;
+  if(byTouch)G.previewTouch=true;
+  if(G.previewCell===i)return;
+  G.previewCell=i;
+  renderPreview();
+}
 function paintFoot(foot,i){
   clearFoot();
   const bd=document.getElementById('board');
@@ -9104,6 +9203,23 @@ function paintFoot(foot,i){
 function renderBoard(){
   const b=document.getElementById('board');
   b.innerHTML='';
+  /* A finger that slides across the board reads the panel it is over, not the
+     one it started on. Bound once on the board itself -- the panels are rebuilt
+     every render, and the finger leaves the panel it came down on anyway. */
+  if(!b._pvMove){
+    b._pvMove=true;
+    b.addEventListener('touchmove',ev=>{
+      const pd=G&&G.pending;
+      if(!pd||pd.kind!=='cell'||!pd.opt||!pd.opt.preview)return;
+      const tp=ev.touches&&ev.touches[0];
+      if(!tp)return;
+      const el=document.elementFromPoint(tp.clientX,tp.clientY);
+      const cell=el&&el.closest?el.closest('.cell'):null;
+      if(!cell||cell.parentNode!==b)return;
+      const i=Array.prototype.indexOf.call(b.children,cell);
+      if(i>=0&&pd.cells.indexOf(i)>=0)setPreview(i,true);
+    },{passive:true});
+  }
   /* Any line standing at two with its last panel open, whoever holds it. Drawn
      on the board because that is where the decision about it gets made. */
   const lit={};
@@ -9123,6 +9239,17 @@ function renderBoard(){
       if(foot){
         cell.addEventListener('mouseenter',()=>paintFoot(foot,i));
         cell.addEventListener('mouseleave',clearFoot);
+      }
+      /* Pointing at a panel is what fills the preview tile. A thumb has no
+         hover, so a finger down on a panel points at it too -- and since a tap
+         is a finger down and up on the same panel, a plain tap still previews
+         and places in one go. Dragging across the board browses instead: the
+         click guard below refuses to place anywhere but the panel the finger
+         actually came to rest on. */
+      if(G.pending.opt&&G.pending.opt.preview){
+        cell.addEventListener('mouseenter',()=>setPreview(i,false));
+        cell.addEventListener('mouseleave',()=>{if(!G.previewTouch&&G.previewCell===i)setPreview(null,false);});
+        cell.addEventListener('touchstart',()=>setPreview(i,true),{passive:true});
       }
     }
     if(G.detailLock===i)cell.classList.add('locked');
@@ -9149,18 +9276,6 @@ function renderBoard(){
     if(ench)cell.innerHTML+='<div class="enchMark m'+ench.owner+'" title="'+escHtml(enchantText(ench))+
       '">✧ '+sgn(ENCHANT_N)+'</div>';
     if(G.board[i].razed)cell.classList.add('razed');
-    const pv=previewAt(i);
-    if(pv){
-      const gh=document.createElement('div');
-      gh.className='teece ghost o'+pv.t.owner+(pv.doomed?' doomed':'');
-      gh.setAttribute('data-card-deck',getCardDeck(pv.t.cardId));
-      gh.innerHTML='<div class="mid"><div class="gtag">'+
-        (pv.doomed?'dies here':'lands here')+'</div>'+
-        (pv.def>0?'<div class="rgd"><span class="dfn">\u{1F6E1}\uFE0F'+pv.def+'</span></div>':'')+'</div>'+
-        [0,1,2,3].map(k=>'<div class="s s'+k+' '+(pv.sides[k]>7?'up':'')+
-          (pv.sides[k]<3?'down':'')+'">'+pv.sides[k]+'</div>').join('');
-      cell.appendChild(gh);
-    }
     const t=G.board[i].teece;
     if(t){
       const s=effSides(G.board,i),kws=kwOf(G.board,i),aul=actsOf(G.board,i);
@@ -9226,6 +9341,12 @@ function renderBoard(){
     }
     cell.addEventListener('click',async()=>{
       if(G.pending&&G.pending.kind==='cell'&&G.pending.cells.indexOf(i)>=0){
+        /* A finger dragged across the board fires its click on the panel it
+           started from, not the one it ended on -- which would place the Teece
+           somewhere other than the panel whose numbers you were reading. When
+           the two disagree, the tap moves the preview and places nothing. */
+        if(G.previewTouch&&G.pending.opt&&G.pending.opt.preview&&
+           G.previewCell!=null&&G.previewCell!==i)return;
         resolvePending(i);
         return;
       }
@@ -9869,9 +9990,11 @@ function renderLog(){
 function renderPrompt(){
   const pb=document.getElementById('promptBar'),pd=G.pending;
   pb.classList.toggle('hot',!!pd);
-  if(!pd){pb.innerHTML='<span class="msg">&nbsp;</span>';return;}
-  pb.innerHTML='<span class="msg"></span>';
-  pb.firstChild.textContent=pd.msg;
+  if(!pd){pb.classList.remove('haspv');pb.innerHTML='<span class="msg">&nbsp;</span>';return;}
+  const haspv=!!(pd.kind==='cell'&&pd.opt&&pd.opt.preview);
+  pb.classList.toggle('haspv',haspv);
+  pb.innerHTML=(haspv?'<span id="pvHost"></span>':'')+'<span class="msg"></span>';
+  pb.querySelector('.msg').textContent=pd.msg;
   const add=(lbl,val,cid,key)=>{
     const b=document.createElement('button');
     b.className='btn';b.textContent=lbl;
@@ -9957,7 +10080,7 @@ function render(){
   syncHandSlots();
   renderBoard();
   for(let p=0;p<PLAYERS();p++)renderHand(p);
-  renderCounts();renderSun();renderDom();renderWarn();renderLog();renderPrompt();renderActionBar();renderStatus();
+  renderCounts();renderSun();renderDom();renderWarn();renderLog();renderPrompt();renderPreview();renderActionBar();renderStatus();
   const bd=document.getElementById('board');
   bd.style.setProperty('--bw',BW);
   bd.style.setProperty('--cs',(BW>=4?'86px':'110px'));
