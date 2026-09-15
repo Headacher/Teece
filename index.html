@@ -652,7 +652,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:42,date:'2026-09-15'};
+const VERSION={build:43,date:'2026-09-15'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3217,6 +3217,59 @@ function setPhase(ph,live){
   return true;
 }
 const flipPhase=live=>setPhase(isDay()?'night':'day',live);
+/* ---- Is there a sky to show? ----
+   Day and Night are a Solar mechanic, and in a game with no card able to read
+   them the dial, the turn-line badge and the round's "It is Night" are all
+   noise about a number nothing is using. So they are drawn only when a card
+   that reads the sky is somewhere in the game -- on the board, in a hand, in a
+   deck, in a graveyard, or bolted onto a Teece. A deck counts as well as the
+   board: a Solar card must be able to tell you which half of the cycle it is
+   before you decide whether to play it, and a run that drafted one needs the
+   same. The counter itself turns underneath either way, so a Solar card that
+   arrives late -- drawn, drafted, or conjured out of another deck -- finds the
+   sky where it should be rather than at whatever it was when it left.
+
+   Which cards those are is read off the cards rather than listed here, the way
+   the keyword pages are, so a new one cannot leave this saying the old thing:
+   anything naming a half of the cycle, keyed on one, or pinning it. */
+const SKY_CARD={};
+function readsSky(cardId){
+  if(SKY_CARD[cardId]!==undefined)return SKY_CARD[cardId];
+  const seen=[];
+  const walk=v=>{
+    if(v==null)return false;
+    if(typeof v==='string')return v==='day'||v==='night';
+    if(typeof v!=='object')return false;
+    if(seen.indexOf(v)>=0)return false;
+    seen.push(v);
+    if(Array.isArray(v))return v.some(walk);
+    if('day' in v||'night' in v)return true;
+    for(const k in v){
+      if((k==='solar'||k==='timeStop'||k==='phaseMod'||k==='gPhaseMod')&&v[k])return true;
+      if(walk(v[k]))return true;
+    }
+    return false;
+  };
+  return SKY_CARD[cardId]=!!(CARDS[cardId]&&walk(CARDS[cardId]));
+}
+function skyShowing(){
+  if(!G||!G.board)return false;
+  for(let i=0;i<BN;i++){
+    const c=G.board[i];
+    if(c.ground&&readsSky(c.ground.cardId))return true;
+    const t=c.teece;
+    if(!t)continue;
+    if(readsSky(t.cardId))return true;
+    for(const e of t.equips)if(readsSky(e.cardId))return true;
+  }
+  for(const pl of (G.players||[])){
+    for(const list of [pl.hand,pl.deck,pl.grave])
+      for(const cid of (list||[]))if(readsSky(cid))return true;
+    for(const worn of (pl.plate||[]))
+      for(const e of (worn||[]))if(readsSky(e.cardId))return true;
+  }
+  return false;
+}
 const isAIP=p=>G.vsAI&&(G.aiSeats?G.aiSeats.indexOf(p)>=0:p===1);
 function pname(p){
   if(G&&G.seatNames&&G.seatNames[p])return G.seatNames[p];
@@ -8034,7 +8087,7 @@ async function startTurn(){
   const p=G.turn,pl=G.players[p];
   /* Once every full rotation, so every seat shares the same sky and every
      seat's own turns alternate. */
-  if(G.turnNum>1&&(G.turnNum-1)%PLAYERS()===0)flipPhase(true);
+  if(G.turnNum>1&&(G.turnNum-1)%PLAYERS()===0)flipPhase(skyShowing());
   pl.teecePlayedThisTurn=0;
   pl.failedThisTurn=[];
   pl.toldMustPlay=false;
@@ -9778,6 +9831,8 @@ function domTitle(rows,st){
 function renderSun(){
   const el=document.getElementById('sunDial');
   if(!el||!G)return;
+  /* nothing in this game reads the sky, so there is no sky */
+  if(!skyShowing()){el.className='sundial hidden';el.textContent='';el.title='';return;}
   const day=isDay(),pin=timePinned();
   el.className='sundial '+(day?'day':'night')+(pin?' pinned':'');
   el.textContent=day?'\u2600\uFE0F':'\u{1F319}';
@@ -9917,8 +9972,8 @@ function render(){
   if(!G.over){
     const t=G.turn,d=document.getElementById('turnInfo');
     d.innerHTML='<span class="dot d'+t+'"></span><strong>'+pname(t)+"'s turn</strong>"+
-      '<span class="phase '+(isDay()?'day':'night')+'">'+
-      (isDay()?'\u2600\uFE0F Day':'\u{1F319} Night')+(timePinned()?' \u00b7 held':'')+'</span>';
+      (skyShowing()?'<span class="phase '+(isDay()?'day':'night')+'">'+
+      (isDay()?'\u2600\uFE0F Day':'\u{1F319} Night')+(timePinned()?' \u00b7 held':'')+'</span>':'');
     document.getElementById('endTurn').disabled=false;
   }else{
     document.getElementById('endTurn').disabled=true;
@@ -10106,6 +10161,7 @@ if(typeof module!=='undefined'){
     mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
     groundCells,playGround,areaShapeCells,
     statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,
+    readsSky,skyShowing,isDay,flipPhase,
     plateHand,plateOf,platedSides,handPush,handTake,playEquip,queueFx,resolvePending,VERSION,
     getDecks:()=>DECKS,getPool:()=>POOL,allDraftable,bounceToHand,cloneBoard,fireMove,isBossCard,
     setDeckData:d=>{DECKS=d.decks;FORMATS=d.formats;CLASSIC=d.classic;POOL=d.pool;rebuildWebCards();},
