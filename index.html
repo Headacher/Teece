@@ -122,6 +122,9 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="vampire"] .ct,.dcard[data-card-deck="vampire"] .dty{color:#e3a0ab}
 .card[data-card-deck="nature"] .kwl,.dcard[data-card-deck="nature"] .dkw{color:#d5e8a4}
 .card[data-card-deck="nature"] .ct,.dcard[data-card-deck="nature"] .dty{color:#d5e8a4}
+.card[data-card-deck="army"],.dcard[data-card-deck="army"]{--cardbg:#4c5a33;--artink:#f1f5e2;background:var(--cardbg);color:#eef2e2;border-color:#2e3a1c}
+.card[data-card-deck="army"] .kwl,.dcard[data-card-deck="army"] .dkw{color:#c3d09b}
+.card[data-card-deck="army"] .ct,.dcard[data-card-deck="army"] .dty{color:#c3d09b}
 
 .card[data-card-deck]::after,.dcard[data-card-deck]::after{position:absolute;top:2px;right:3px;font-size:11px;line-height:1;opacity:.85;z-index:1}
 .card[data-card-deck="classic"]::after,.dcard[data-card-deck="classic"]::after{content:'🂡'}
@@ -136,6 +139,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="witch"]::after,.dcard[data-card-deck="witch"]::after{content:'🧙'}
 .card[data-card-deck="nature"]::after,.dcard[data-card-deck="nature"]::after{content:'🌿'}
 .card[data-card-deck="pixie"]::after,.dcard[data-card-deck="pixie"]::after{content:'🧚'}
+.card[data-card-deck="army"]::after,.dcard[data-card-deck="army"]::after{content:'🪖'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -150,6 +154,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece[data-card-deck="pixie"]{--cardbg:#b1258e;--artink:#fdeaf7;background:var(--cardbg);color:#f4e9fb;border-color:#7a1861}
 .teece[data-card-deck="spider"]{--cardbg:#3b3350;--artink:#efe9ff;background:var(--cardbg);color:#e6e0f5;border-color:#241e33}
 .teece[data-card-deck="vampire"]{--cardbg:#5c1420;--artink:#ffe9ec;background:var(--cardbg);color:#f6dfe3;border-color:#360a12}
+.teece[data-card-deck="army"]{--cardbg:#4c5a33;--artink:#f1f5e2;background:var(--cardbg);color:#eef2e2;border-color:#2e3a1c}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -345,9 +350,14 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 #log div{padding:1px 0;border-bottom:1px solid rgba(255,255,255,.04)}
 #log div:first-child{color:var(--cream)}
 
-.overlay{position:fixed;inset:0;background:rgba(10,8,6,.94);display:flex;align-items:center;
+/* align-items:center on a scrolling flex box clips the top of anything taller
+   than the screen and no amount of scrolling brings it back -- on a phone that
+   ate the picker's title and, with a thirteenth deck, the deck itself. Auto
+   margins centre a box that fits and leave both ends reachable on one that
+   does not. */
+.overlay{position:fixed;inset:0;background:rgba(10,8,6,.94);display:flex;align-items:flex-start;
   justify-content:center;padding:20px;z-index:20;overflow:auto}
-.overlay .box{max-width:640px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px}
+.overlay .box{margin:auto;max-width:640px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px}
 .overlay h2{font-family:var(--disp);font-weight:400;font-size:30px;margin:0 0 8px}
 .sdia{display:inline-grid;grid-template-columns:repeat(3,1.35em);grid-template-rows:repeat(3,1.15em);
   vertical-align:middle;text-align:center;font-style:normal;font-variant-numeric:tabular-nums;line-height:1.15em}
@@ -421,6 +431,14 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .dcard.dsym{width:110px;min-height:110px;align-items:center;justify-content:center;gap:6px}
 .dcard.dsym .dsymbol{font-size:44px;line-height:1}
 .dcard.dsym .dnm{margin-top:0;font-size:15px}
+/* Thirteen decks at 110px go two to a row on a phone and run off the bottom.
+   Three to a row puts the whole picker back on one screen. */
+@media(max-width:480px){
+  #draftCards{gap:9px}
+  .dcard.dsym{width:90px;min-height:90px;gap:4px}
+  .dcard.dsym .dsymbol{font-size:34px}
+  .dcard.dsym .dnm{font-size:13px}
+}
 #draftDeck{font-size:11.5px;color:var(--muted);line-height:1.5;max-height:110px;overflow:auto;margin-top:8px}
 
 #hcapRow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:18px 0 6px}
@@ -549,7 +567,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:27,date:'2026-09-10'};
+const VERSION={build:28,date:'2026-09-15'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -588,7 +606,8 @@ function rebuildWebCards(){
     if(DECKS[key].web)for(const id of DECKS[key].cards)WEB_CARDS[id]=true;
 }
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
-  gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}'};
+  gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
+  army:'\u{1FA96}'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -635,6 +654,27 @@ const CARD_ART={
   618:["  \\\\  ^  //  ","  \\(o . o)/  ","   ~/   \\~   ","    v   v    "],
   619:["  /~~~~~~~\\  "," /  ^   ^  \\ ","|  (o) (o)  |"," \\   ~~~   / ","  '-------'  "],
   620:["    /\\ /\\    ","   |##|##|   ","  /|######|\\ "," |##########|"," |###|__|###|"],
+  "TSUP":["   .-----.   ","  /|     |\\  ","  |_+_+_+_|  ","  [#######]  ","   '-----'   "],
+  621:["  .-------.  ","  [=*****=]  ","   ( o o )   ","  _/ | | \\_  ","   RYAN >>>  "],
+  622:["  .-------.  ","  [=*****=]  ","   ( o o )   ","  _/ | | \\_  ","  <<< BRYAN  "],
+  623:["   .-----.   ","  ( o   o )  ","   \\ --- /   ","  /|     |\\  ","  o-+-+-+-o  "],
+  624:["  +  .-.  +  ","    ( o )    ","  +  /|\\  +  ","    _/ \\_    ","  +   ...   +"],
+  625:["   .-.       ","  ( o-)=====>","   \\|/       ","   / \\       ","  ^^   ^^    "],
+  626:["  .-.   .-.  "," ( o ) ( o ) ","  /|\\   /|\\  ","  / \\   / \\  ","  >>>>>>>>>  "],
+  627:["+ - - - - - +","  . .-. . .  ","   ( o )     ","  . /|\\ . .  ","+ - - - - - +"],
+  628:["    .---.    ","   ( + + )   ","  [ +---+ ]  ","   | +++ |   ","   '-----'   "],
+  629:["   .-----.   ","  / .---. \\  "," | ( o.o ) | ","  \\ \\___/ /  ","   '--#--'   "],
+  630:["    (@)      ","   / | \\     ","  .-------.  "," ( * BOOM * )","  '-------'  "],
+  631:["  * .---. *  ","   ( o o )   ","  =[ --- ]=  ","  /| | | |\\  ","  * ..... *  "],
+  632:["*************","  \\ .---. /  ","  =( O O )=  ","  /[=====]\\  ","*************"],
+  633:["  o          ","    \\        ","      o      ","        \\    ","          o  "],
+  634:["      o      ","     / \\     ","    /   \\    ","   /     \\   ","  o-------o  "],
+  635:["      ^      ","     / \\     ","    < o >    ","     \\ /     ","      v      "],
+  636:["   .-----.   ","  /       \\  ","  \\_______/  ","   \\ | | /   ","    ( o )    "],
+  637:["   .-----.   ","  /  \\ /  \\  ","  \\___X___/  ","  [#######]  ","  [##+++##]  "],
+  638:["    __|__    ","  <--(o)-->  ","     / \\     ","  + +   - -  ","  + +   - -  "],
+  639:["    ______   ","   |  __  |==","  _|_(__)_|_ "," (o)(o)(o)(o)","  ~~~~~~~~~  "],
+  640:["  _________  "," /#########\\ ","|##[===]####|","|###########|","'-----------'"],
   "TSP":["   .     .   ","    \\(o.o)/  ","    /  |  \\  ","   '   |   ' "],
   561:["  \\   |   /  "," ==\\(o o)/== ","   #[===]#   ","  / #| |# \\  ","  ==========="],
   562:["  .---------.","  | .-----. |","  | (o . o) |","  '--/ | \\--'","    _/   \\_  "],
@@ -991,7 +1031,7 @@ function canPlay(p,cardId){
   if(!G||p!==G.turn||G.over)return false;
   const cd=CARDS[cardId];
   if(cd.type==='teece'){
-    if(G.teecePlayed||hexOn(p,'freeze'))return false;
+    if((G.teecePlayed&&!freePlayFor(p,cardId))||hexOn(p,'freeze'))return false;
     let room=false;
     for(let i=0;i<BN;i++)if(openAt(G.board,i)){room=true;break;}
     if(!room)return false;
@@ -1081,6 +1121,11 @@ const CARDS = {
     text:'Bat Token. Twice per your turn: fly one space. Once per your turn: Drain 2. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  TSP:{name:'Spiderling',type:'teece',token:true,sides:[4,4,4,4],spider:true,
     text:'Spiderling Token. On the Web it has +1 Defence and Skitter \u2014 once per your turn, move one space. Bigger than most Tokens, and the currency the whole Spider deck spends. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ TSUP:{name:'Supply Drop',type:'teece',token:true,sides:[2,2,2,2],
+    text:'Supply Drop Token. When destroyed: select an adjacent Teece and give it +1 or -1. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.',
+    onDeath:[{fx:'choose',msg:'The crate splits open:',opts:[
+      {lbl:'Give an adjacent Teece +1',steps:[{fx:'mod',who:'any',where:'adj',n:1,dur:'perm'}]},
+      {lbl:'Give an adjacent Teece -1',steps:[{fx:'mod',who:'any',where:'adj',n:-1,dur:'perm'}]}]}]},
  TS:{name:'Sprout',type:'teece',token:true,sides:[3,3,3,3],
     text:'Sprout Token. When destroyed: every other allied Teece gets +1. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.',
     onDeath:[{fx:'mass',who:'ally',n:1,dur:'perm'}]},
@@ -1931,6 +1976,76 @@ const CARDS = {
     text:'At the end of your turn, if nothing stands on it, a 3/3/3/3 Bat hatches here.'},
  620:{name:'Vampire Castle',type:'ground',gDoublePos:true,gDoubleNeg:true,
     text:'Every attribute effect on a Teece standing here counts double, up and down alike.'},
+ /* ---- Army 621-640 ----
+    Numbers the deck does not carry on the card: it earns them by where it
+    stands and who it stands with. `bonus` is what a Teece is paid for holding
+    a shape, `aura` what it pays out for the same, and both read adjacency
+    through adjAlly -- which is the one thing Field Marshal Marshall changes. */
+ 621:{name:'Brigadeer Ryan',type:'teece',sides:[0,10,0,0],army:true,
+    bonus:{when:'adjCard',card:622,n:10},
+    onPlay:[{fx:'playPartner',card:622}],
+    text:'When played: if Brigadeer Bryan is in your hand, he may be played this turn as well, free of the turn’s Teece play. While standing beside Brigadeer Bryan: +10.'},
+ 622:{name:'Brigadeer Bryan',type:'teece',sides:[0,0,0,10],army:true,
+    bonus:{when:'adjCard',card:621,n:10},
+    onPlay:[{fx:'playPartner',card:621}],
+    text:'When played: if Brigadeer Ryan is in your hand, he may be played this turn as well, free of the turn’s Teece play. While standing beside Brigadeer Ryan: +10.'},
+ 623:{name:'Marine Irene',type:'teece',sides:[5,5,6,6],army:true,
+    bonus:{when:'adjAlly',n:2},
+    text:'While an ally stands beside her: +2.'},
+ 624:{name:'Corporal Laurel',type:'teece',sides:[5,5,5,5],army:true,
+    aura:{who:'ally',where:'adj',n:2},
+    text:'Adjacent allies get +2.'},
+ 625:{name:'Sniper Piper',type:'teece',sides:[9,1,1,9],army:true,kw:['ranged'],
+    aura:{who:'ally',where:'adj',n:0,kw:['ranged']},
+    text:'Ranged. Adjacent allies are Ranged as well.'},
+ 626:{name:'Trooper Cooper',type:'teece',sides:[6,6,6,6],army:true,kw:['march'],
+    aura:{who:'ally',where:'adj',n:0,kw:['march']},
+    text:'March, once per your turn: move one space, then move every Teece that ends up beside him one space. Adjacent allies have March too.'},
+ 627:{name:'Scout Stout',type:'teece',sides:[3,3,3,3],army:true,
+    posture:{corner:5,edge:6,middle:6,edgeKw:['ranged']},
+    text:'On a corner panel: +5 to each of the two sides facing the board rather than the corner. On an edge panel: +6 to the one side facing away from the edge, and Ranged. On the middle panel: +6 to every side.'},
+ 628:{name:'Medic Cedric',type:'teece',sides:[0,7,9,7],army:true,
+    kwWhen:[{when:'adjAlly',kw:['ward']}],
+    onDeath:[{fx:'kwT',kw:'ward',kwTxt:'cover — it cannot be targeted',perm:true,where:'adj',
+              msg:'Choose an ally standing beside him: it cannot be targeted again, and gets +2.'},
+             {fx:'mod',who:'last',n:2,dur:'perm'}],
+    text:'While an ally stands beside him, he cannot be targeted. When destroyed: select an adjacent ally; it cannot be targeted for the rest of the game, and gets +2.'},
+ 629:{name:'Cadet Annette',type:'teece',sides:[4,3,5,2],army:true,
+    onPlay:[{fx:'shieldSelf'}],
+    onDeath:[{fx:'shieldNext'}],
+    text:'When played: she cannot be destroyed until the start of your next turn. When destroyed: the next Teece you play cannot be destroyed until the start of your next turn.'},
+ 630:{name:'Grenadier Greg',type:'teece',sides:[6,5,4,5],def:1,army:true,
+    act:[{name:'Lob a grenade',once:'turn',steps:[{fx:'moveAllAdj',pick:true,n:-2,dur:'perm'}]}],
+    text:'Defence 1. Once per your turn: select a panel; every Teece standing beside it is moved one space and gets -2 permanently.'},
+ 631:{name:'Colonel Cornell',type:'teece',sides:[8,8,8,8],sac:1,army:true,
+    bonus:{when:'adjAlly',n:2,each:true},
+    aura:{who:'ally',where:'adj',n:2},
+    text:'Sacrifice one fielded Teece to play. +2 for every ally standing beside him, and each of those allies gets +2. It stacks.'},
+ 632:{name:'Field Marshal Marshall',type:'teece',sides:[10,10,10,10],sac:2,army:true,adjAllyAll:true,
+    text:'Sacrifice two fielded Teece to play. While he stands, every Teece on the field counts as adjacent to all of its allies, wherever they are standing — the enemy’s formations as well as yours.'},
+ 633:{name:'Line Formation',type:'equip',mod:0,army:true,
+    grants:{bonus:{when:'line',n:3},aura:{who:'ally',where:'line',n:3}},
+    text:'While the equipped Teece shares a row, a column or a diagonal with an ally, it gets +3 — and so does every ally it shares one with.'},
+ 634:{name:'Triangle Formation',type:'equip',mod:0,army:true,
+    grants:{bonus:{when:'corners',n:6,need:3},aura:{who:'ally',where:'corner',n:6,need:3}},
+    text:'While the equipped Teece and at least two other allies all stand on corner panels, every one of them gets +6.'},
+ 635:{name:'Point Formation',type:'equip',mod:0,army:true,
+    grants:{bonus:{when:'soloMid',n:10}},
+    text:'While the equipped Teece stands on the middle panel with no other ally anywhere on the field: +10.'},
+ 636:{name:'Paratroop',type:'magic',army:true,
+    cast:[{fx:'extraPlay'},{fx:'noWinSelf'}],
+    text:'Play an extra Teece this turn. You cannot win by board domination until your next turn.'},
+ 637:{name:'Supply Drop',type:'magic',army:true,
+    cast:[{fx:'token',tok:'TSUP',where:'any',count:3}],
+    text:'Summon three 2/2/2/2 Supply Drop Tokens. When one is destroyed: select an adjacent Teece and give it +1 or -1.'},
+ 638:{name:'Aerial Support',type:'magic',army:true,
+    cast:[{fx:'formationBlast',n:3,shape:'2x2',dur:'perm'}],
+    text:'Select a 2x2 area of the board. Every enemy in it that stands beside another enemy gets -3; every ally in it that stands beside another ally gets +3.'},
+ 639:{name:'Tank',type:'ground',gmod:2,gdef:2,gkw:['ranged'],
+    gact:[{name:'Drive',once:'turn',steps:[{fx:'driveGround'}]}],
+    text:'A Teece standing here gets +2, 2 Defence and Ranged. Once per your turn it may drive: move to a panel holding neither a Teece nor a battleground, and the Tank goes with it.'},
+ 640:{name:'Bunker',type:'ground',gdef:3,gdefAdjAlly:3,
+    text:'A Teece standing here gets 3 Defence, and 3 more while one of its allies stands adjacent.'},
  /* Not in any deck: Cannonball is handed out by a roguelike perk. */
  590:{name:'Cannonball',type:'magic',perkOnly:true,
     text:'Select a Teece and one of its sides; that side gets -4.',
@@ -2040,6 +2155,9 @@ const TELE_ACT={name:'Teleport',once:'turn',steps:[{fx:'move',range:'tele'}]};
    a flier crosses corners, a spider runs the strands. Spiders and Spiderlings
    have it while they stand on the Web, and the Skitter equip carries it off. */
 const SKITTER_ACT={name:'Skitter',once:'turn',steps:[{fx:'move',range:'orth'}]};
+/* March is the Ogre Overlord's step, printed as a keyword so the Army can hand
+   it round: one space, and everything that ends up beside you is moved on too. */
+const MARCH_ACT={name:'March',once:'turn',steps:[{fx:'march'}]};
 const DRAIN_STEP_ACT={name:'Step',once:'turn',times:9,steps:[{fx:'move',range:'orth'},{fx:'spendDrainStep'}]};
 
 /* ============ modalities ============
@@ -2258,13 +2376,19 @@ let ADJ=[],DIAG=[],CN=[];
 const ALL=()=>{const a=[];for(let i=0;i<BN;i++)a.push(i);return a;};
 const row=i=>Math.floor(i/BW), col=i=>i%BW;
 const sameRow=(a,b)=>row(a)===row(b), sameCol=(a,b)=>col(a)===col(b);
-/* Muster gives two Teece on your opening turn of a level and one thereafter.
-   G.teecePlayed keeps its old meaning -- no more Teece this turn -- and is only
-   raised once the allowance is spent, so every reader of it stays correct. */
+/* How many Teece this seat may put down this turn. Muster gives two on your
+   opening turn of a level and one thereafter; Paratroop buys another for the
+   turn it is cast on, and extraTeece is cleared with the turn. G.teecePlayed
+   keeps its old meaning -- no more Teece this turn -- and is only raised once
+   the allowance is spent, so every reader of it stays correct. */
 function teeceCap(p){
-  if(!G||!perkN('doublePlay')||!sameTeam(p,0))return 1;
-  return ((G.players[p]&&G.players[p].turnsTaken)||0)<=1?2:1;
+  const extra=(G&&G.extraTeece)||0;
+  if(!G||!perkN('doublePlay')||!sameTeam(p,0))return 1+extra;
+  return (((G.players[p]&&G.players[p].turnsTaken)||0)<=1?2:1)+extra;
 }
+/* The Brigadeers' free play: one named card that may go down this turn without
+   spending the turn's Teece play, whether or not one has been spent already. */
+const freePlayFor=(p,cardId)=>!!(G&&G.freePlay&&G.freePlay.p===p&&G.freePlay.card===cardId);
 /* The panel that side k touches (0 top, 1 right, 2 bottom, 3 left), or -1 when
    that side is pressed against the rim of the board and can never be fought. */
 function sideNbr(i,k){
@@ -2275,6 +2399,21 @@ function sideNbr(i,k){
   return c>0?i-1:-1;
 }
 const isCornerCell=i=>{const r=row(i),c=col(i);return (r===0||r===BW-1)&&(c===0||c===BW-1);};
+/* The sides of a panel that have no panel across them, so nothing can ever be
+   fought there. Two of them make a corner, one an edge, none the middle -- one
+   reading of the board that the Army deck's postures and formations all share. */
+function rimSides(i){
+  const out=[];
+  for(let k=0;k<4;k++)if(sideNbr(i,k)<0)out.push(k);
+  return out;
+}
+const isMiddleCell=i=>rimSides(i).length===0;
+/* A row, a column or a diagonal -- what Line Formation means by "in line". */
+const inStraightLine=(a,c)=>{
+  if(a===c)return false;
+  const dr=row(a)-row(c),dc=col(a)-col(c);
+  return dr===0||dc===0||Math.abs(dr)===Math.abs(dc);
+};
 function bandName(k,n){
   if(n<=1)return '';
   if(k===0)return 'top';
@@ -2344,7 +2483,7 @@ function newState(mode,vsAI,decks,extra){
   const teams=extra.teams||Array.from({length:nP},(_,i)=>i);
   buildGeometry(extra.width||3);
   const mk=p=>({deck:shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice()),hand:[],plate:[],grave:[],onceUsed:{},pendingDraw:0,
-    nextDefBonus:0,nextMod:0,nextSides:null,noDeckOut:false,coffined:{},teecePlayedLastTurn:false,teecePlayedThisTurn:0,turnsTaken:0,
+    nextDefBonus:0,nextMod:0,nextSides:null,nextShield:false,noDeckOut:false,coffined:{},teecePlayedLastTurn:false,teecePlayedThisTurn:0,turnsTaken:0,
     hexes:[],forget:0,confuse:null});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
@@ -2355,7 +2494,7 @@ function newState(mode,vsAI,decks,extra){
     detailLock:null,detailHover:null,panelTap:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],graveLastTurn:[],
     epoch:++EPOCH,
     enemyBonus:extra.enemyBonus||0,level:extra.level||0,quiet:0,eventFlag:false,
-    perks:pk,robbed:false,mourned:false,teeceThisTurn:0,
+    perks:pk,robbed:false,mourned:false,teeceThisTurn:0,extraTeece:0,freePlay:null,
     modalNext:null,trap:null,pendingFx:[],tempControls:[],castingMagic:false,magicConsumed:false,
     seatNames:extra.seatNames||null};
   /* Well Supplied and Cannonball both land in the opening hand. Only seat 0
@@ -2505,6 +2644,111 @@ function summonToken(b,i,tok,owner,live){
   if(isSpiderling(tk))bumpSpiderWatchers(b,'hatch',live);
   return tk;
 }
+
+/* ============ formations ============
+   The Army deck pays a Teece for where it stands and who stands beside it, so
+   "adjacent to an ally" has to mean one thing everywhere: to an aura, to a
+   keyword, to a card's own bonus, to a battleground's Defence. Everything
+   below is that one answer, and adjAlly is the only place allowed to decide
+   it -- which is what lets Field Marshal Marshall change it in a single spot. */
+
+/* While a Field Marshal stands, every Teece counts as adjacent to all of its
+   allies wherever they are. It is not a Teece of its own side only: the card
+   stands the whole field shoulder to shoulder, the enemy's formations
+   included. */
+function fieldWide(b){
+  for(let j=0;j<BN;j++){const o=b[j].teece;if(o&&!o.silenced&&DEF(o).adjAllyAll)return true;}
+  return false;
+}
+function adjAlly(b,i,j){
+  if(ADJ[i].indexOf(j)>=0)return true;
+  const a=b[i].teece,c=b[j].teece;
+  return !!(a&&c&&sameTeam(a.owner,c.owner)&&fieldWide(b));
+}
+function hasAllyAdj(b,i){
+  const t=b[i].teece; if(!t)return false;
+  for(let j=0;j<BN;j++){
+    const o=b[j].teece;
+    if(j!==i&&o&&sameTeam(o.owner,t.owner)&&adjAlly(b,i,j))return true;
+  }
+  return false;
+}
+/* Triangle Formation: the Teece wearing it has to hold a corner itself, with
+   enough allies holding the others to close the shape. */
+function cornerPact(b,j,need){
+  const o=b[j].teece;
+  if(!o||!isCornerCell(j))return false;
+  let n=1;
+  for(let k=0;k<BN;k++){
+    if(k===j)continue;
+    const w=b[k].teece;
+    if(w&&sameTeam(w.owner,o.owner)&&isCornerCell(k))n++;
+  }
+  return n>=need;
+}
+/* How many times a formation bonus pays out for the Teece at i: 0 when the
+   shape is not there, 1 when it is, and once per ally when it stacks. */
+function formationCount(b,i,bo){
+  const t=b[i].teece; if(!t)return 0;
+  const mate=j=>{const o=b[j].teece;return j!==i&&!!o&&sameTeam(o.owner,t.owner);};
+  if(bo.when==='adjAlly'){
+    let n=0;
+    for(let j=0;j<BN;j++)if(mate(j)&&adjAlly(b,i,j))n++;
+    return bo.each?n:(n?1:0);
+  }
+  if(bo.when==='adjCard'){
+    for(let j=0;j<BN;j++)if(mate(j)&&b[j].teece.cardId===bo.card&&adjAlly(b,i,j))return 1;
+    return 0;
+  }
+  if(bo.when==='line'){
+    for(let j=0;j<BN;j++)if(mate(j)&&inStraightLine(i,j))return 1;
+    return 0;
+  }
+  if(bo.when==='corners'){
+    if(!isCornerCell(i))return 0;
+    let n=1;
+    for(let j=0;j<BN;j++)if(mate(j)&&isCornerCell(j))n++;
+    return n>=(bo.need||3)?1:0;
+  }
+  if(bo.when==='soloMid'){
+    if(!isMiddleCell(i))return 0;
+    for(let j=0;j<BN;j++)if(mate(j))return 0;
+    return 1;
+  }
+  return 0;
+}
+function formationLabel(bo){
+  if(bo.when==='adjCard')return 'Standing beside '+CARDS[bo.card].name;
+  if(bo.when==='adjAlly')return bo.each?'One for every ally beside it':'Standing beside an ally';
+  if(bo.when==='line')return 'In line with an ally';
+  if(bo.when==='corners')return 'Holding the corners together';
+  if(bo.when==='soloMid')return 'Alone on the middle panel';
+  return 'Formation';
+}
+/* The formation bonuses on the Teece at i: its own, and any an equip lends it.
+   A silenced Teece keeps what is bolted to it and loses what it printed. */
+function bonusesOn(b,i){
+  const t=b[i].teece,out=[];
+  if(!t)return out;
+  if(!t.silenced&&DEF(t).bonus)out.push(...[].concat(DEF(t).bonus));
+  for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.bonus)out.push(...[].concat(g.bonus));}
+  return out;
+}
+/* Does the aura on the Teece at j reach the panel at i? effSides and kwOf both
+   ask here, so an aura that hands out a number and one that hands out a
+   keyword can never disagree about what "adjacent" or "in line" means. */
+function auraReaches(b,j,i,a){
+  if(!a.where||a.where==='global')return true;
+  if(a.where==='adj'){
+    const o=b[j].teece,t=b[i].teece;
+    return (a.who==='ally'&&o&&t&&sameTeam(o.owner,t.owner))?adjAlly(b,j,i):ADJ[j].indexOf(i)>=0;
+  }
+  if(a.where==='row')return sameRow(i,j);
+  if(a.where==='col')return sameCol(i,j);
+  if(a.where==='line')return inStraightLine(i,j);
+  if(a.where==='corner')return isCornerCell(i)&&cornerPact(b,j,a.need||3);
+  return false;
+}
 function effSides(b,i,parts){
   const t=b[i].teece; if(!t)return[0,0,0,0];
   const s=[0,0,0,0];
@@ -2537,6 +2781,21 @@ function effSides(b,i,parts){
     for(let k=0;k<4;k++)sum[k]+=d[k];
     put(label,d);
   };
+  /* Scout Stout reads the rim. Every side with no panel across it is a side
+     backed against the board, and the bonus lands on the side facing away from
+     each of them -- two on a corner, one on an edge, and in the middle, where
+     nothing is at its back, on all four. */
+  const po=(!t.silenced)&&DEF(t).posture;
+  if(po){
+    const rim=rimSides(i),d=[0,0,0,0];
+    if(!rim.length){for(let k=0;k<4;k++)d[k]=po.middle||0;}
+    else{const n=(rim.length>1?po.corner:po.edge)||0;for(const k of rim)d[(k+2)%4]+=n;}
+    addMod(s,d,rim.length>1?'Dug into the corner':rim.length?'Backed onto the edge':'Out in the middle');
+  }
+  for(const bo of bonusesOn(b,i)){
+    const n=formationCount(b,i,bo);
+    if(n)addMod(s,bo.n*n,formationLabel(bo));
+  }
   for(const e of t.equips){
     const ed=CARDS[e.cardId];
     addMod(s,ed.mod,ed.name);
@@ -2565,9 +2824,7 @@ function effSides(b,i,parts){
       const ally=sameTeam(o.owner,t.owner);
       if(a.who==='ally'&&!ally)continue;
       if(a.who==='enemy'&&ally)continue;
-      if(a.where==='adj'&&ADJ[j].indexOf(i)<0)continue;
-      if(a.where==='row'&&!sameRow(i,j))continue;
-      if(a.where==='col'&&!sameCol(i,j))continue;
+      if(!auraReaches(b,j,i,a))continue;
       if(a.tokenOnly&&!t.isToken)continue;
       if(a.pixieOnly&&!DEF(t).pixie)continue;
       const amt0=a.byDef?defOf(b,i):a.n;
@@ -2596,7 +2853,12 @@ function defOf(b,i){
   const t=b[i].teece; if(!t)return 0;
   let d=(DEF(t).def||0)+(t.defPerm||0)+(t.defTemp2||0);
   for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.def)d+=g.def;}
-  if(b[i].ground){const gd=CARDS[b[i].ground.cardId];if(gd.gdef)d+=gd.gdef;}
+  if(b[i].ground){
+    const gd=CARDS[b[i].ground.cardId];
+    if(gd.gdef)d+=gd.gdef;
+    /* the Bunker is worth holding with somebody: a second wall for a neighbour */
+    if(gd.gdefAdjAlly&&hasAllyAdj(b,i))d+=gd.gdefAdjAlly;
+  }
   if(b[i].defMark&&b.some(c=>c.teece&&c.teece.uid===b[i].defMark.uid))d+=b[i].defMark.n;
   if(sameTeam(t.owner,0))d+=perkN('armour');
   const fdf=formOf(t);
@@ -2647,12 +2909,21 @@ function kwOf(b,i,noGround){
   if(t.kwPerm)ks.push(...t.kwPerm);
   for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.kw)ks.push(...g.kw);}
   if(b[i].ground&&!noGround){const gd=CARDS[b[i].ground.cardId];if(gd.gkw)ks.push(...gd.gkw);}
+  /* a keyword held only while the formation holds: Medic Cedric cannot be
+     targeted for exactly as long as somebody is standing with it */
+  if(!t.silenced&&d.kwWhen)
+    for(const w of [].concat(d.kwWhen))if(formationCount(b,i,w))ks.push(...w.kw);
+  /* Scout Stout shoots from the edge, where its back is to the board */
+  if(!t.silenced&&d.posture&&d.posture.edgeKw&&rimSides(i).length===1)ks.push(...d.posture.edgeKw);
   let onWeb=null;
   for(let j=0;j<BN;j++){
     if(j===i)continue;
     const o=b[j].teece;if(!o||o.silenced)continue;
-    const a=DEF(o).aura;
-    if(a&&a.kw&&((a.who==='ally')===sameTeam(o.owner,t.owner))&&a.where==='global')ks.push(...a.kw);
+    const kauras=[];
+    if(DEF(o).aura)kauras.push(DEF(o).aura);
+    for(const e of o.equips){const g=CARDS[e.cardId].grants;if(g&&g.aura)kauras.push(g.aura);}
+    for(const a of kauras)
+      if(a.kw&&((a.who==='ally')===sameTeam(o.owner,t.owner))&&auraReaches(b,j,i,a))ks.push(...a.kw);
     /* an enemy spider holds everything caught in the Web still */
     if(DEF(o).webLock&&!sameTeam(o.owner,t.owner)){
       if(onWeb===null)onWeb=isWebbed(b,i);
@@ -2676,6 +2947,7 @@ function actsOf(b,i){
   }
   if(hasKw(b,i,'flying'))out.push({key:'kfly',act:FLY_ACT});
   if(hasKw(b,i,'skitter'))out.push({key:'kskit',act:SKITTER_ACT});
+  if(hasKw(b,i,'march'))out.push({key:'kmarch',act:MARCH_ACT});
   /* the step a drain-watcher is owed, offered only while it is owed */
   if(t.drainMove)out.push({key:'kdrainstep',act:DRAIN_STEP_ACT});
   if(hasKw(b,i,'teleport'))out.push({key:'ktele',act:TELE_ACT});
@@ -3567,16 +3839,21 @@ async function FXRUN(st,ctx){
     return;}
   case 'kwT':{
     const cands=[];
-    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p)cands.push(i);}
-    if(!cands.length)return none('No ally to target.');
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(!t||t.owner!==p)continue;
+      if(st.where==='adj'&&ctx.cell!=null&&ADJ[ctx.cell].indexOf(i)<0)continue;
+      cands.push(i);
+    }
+    if(!cands.length)return none(st.where==='adj'?'No ally is standing beside it.':'No ally to target.');
     const kdur=st.perm?' permanently.':' until end of turn.';
-    const c=await pickCell(cands,'Choose an ally: it gains '+st.kw+kdur,
+    const c=await pickCell(cands,st.msg||('Choose an ally: it gains '+st.kw+kdur),
       (bb,i)=>{(st.perm?bb[i].teece.kwPerm:bb[i].teece.kwTemp).push(st.kw);},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     (st.perm?b[c].teece.kwPerm:b[c].teece.kwTemp).push(st.kw);
     ctx.last=c;
-    log(nm(b[c].teece)+' gains '+st.kw+kdur);
+    log(nm(b[c].teece)+' gains '+(st.kwTxt||st.kw)+kdur);
     await anim([c],'zap');
     return;}
   case 'mine':{
@@ -3919,6 +4196,92 @@ async function FXRUN(st,ctx){
       await fireMove(j,r,p);
     }
     return;}
+  /* ---- Army: formations, free plays, and a battleground that drives ---- */
+  /* A Brigadeer on the field opens the door for the other one. It does not put
+     it down for you -- it makes that one card free to play for the rest of the
+     turn, so you still choose the panel, and the shape you choose is the whole
+     point of the pair. */
+  case 'playPartner':{
+    const pd=CARDS[st.card];
+    if(G.players[p].hand.indexOf(st.card)<0)return none(pd.name+' is not in hand.');
+    G.freePlay={p,card:st.card};
+    log(pname(p)+' may play '+pd.name+' as well this turn, free of the turn’s Teece play.');
+    return;}
+  case 'extraPlay':{
+    const n=st.n||1;
+    G.extraTeece=(G.extraTeece||0)+n;
+    if((G.teeceThisTurn||0)<teeceCap(p))G.teecePlayed=false;
+    log(pname(p)+' may play '+(n===1?'one more Teece':n+' more Teece')+' this turn.');
+    return;}
+  /* The drop is not a landing yet: whoever came down this way cannot take the
+     game on board domination before their next turn comes round. */
+  case 'noWinSelf':{
+    addHex(p,'nowin',p,st.count||1);
+    log(pname(p)+' cannot win by board domination until '+pposs(p)+' next turn.');
+    return;}
+  case 'shieldSelf':{
+    if(!ctx.t)return;
+    ctx.t.immortalOwner=p;ctx.t.immortalUntil=0;
+    log(nm(ctx.t)+' digs in: it cannot be destroyed until the start of '+pposs(p)+' next turn.');
+    return;}
+  case 'shieldNext':{
+    const who=ctx.deadOwner!=null?ctx.deadOwner:p;
+    G.players[who].nextShield=true;
+    log('The next Teece '+pname(who)+' plays cannot be destroyed until the start of their next turn.');
+    return;}
+  /* Aerial Support reads formations rather than sides: inside the area it
+     picks out, anything standing with its own is either reinforced or strafed.
+     Standing alone in there is what saves an enemy from it. */
+  case 'formationBlast':{
+    const shape=st.shape||'2x2',cands=[];
+    for(let i=0;i<BN;i++)if(areaShapeCells(i,shape))cands.push(i);
+    if(!cands.length)return none('No room for the flight path.');
+    const hitsIn=(bb,cells)=>{
+      const out=[];
+      for(const j of cells){
+        const o=bb[j].teece;
+        if(!o||!hasAllyAdj(bb,j))continue;
+        out.push({j,n:sameTeam(o.owner,p)?st.n:-st.n});
+      }
+      return out;
+    };
+    const c=await pickCell(cands,'Choose the area the flight crosses: '+sgn(st.n)+
+      ' to allies standing together in it, '+sgn(-st.n)+' to enemies standing together in it.',
+      (bb,i)=>{for(const h of hitsIn(bb,areaShapeCells(i,shape)))applyModT(bb[h.j].teece,h.n,st.dur||'perm');},
+      false,i=>areaShapeCells(i,shape));
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const hits=hitsIn(b,areaShapeCells(c,shape));
+    for(const h of hits){
+      applyModT(b[h.j].teece,h.n,st.dur||'perm');
+      log(nm(b[h.j].teece)+' gets '+sgn(h.n)+durTxt(st.dur||'perm')+'.');
+    }
+    if(!hits.length)log('Nothing in the area was standing with its own.');
+    await anim(hits.map(h=>h.j),'zap');
+    return;}
+  /* The Tank is the panel, so the panel goes too. It can only park where there
+     is no other battleground to drive over. */
+  case 'driveGround':{
+    const i=ctx.cell,g=b[i].ground;
+    if(!g)return none('There is nothing here to drive.');
+    if(hasKw(b,i,'immovable'))return none('It cannot move.');
+    /* only a battleground standing on one panel can be carried off it */
+    let span=0;
+    for(let j=0;j<BN;j++)if(b[j].ground&&(g.gid?b[j].ground.gid===g.gid:j===i))span++;
+    if(span>1)return none(CARDS[g.cardId].name+' is laid across too many panels to drive.');
+    const dests=[];
+    for(let j=0;j<BN;j++)if(j!==i&&openAt(b,j)&&!b[j].ground)dests.push(j);
+    if(!dests.length)return none('Nowhere to drive: every open panel is somebody’s ground.');
+    const t=b[i].teece,gn=CARDS[g.cardId].name;
+    const c=await pickCell(dests,'Drive '+gn+' to a panel holding neither a Teece nor a battleground.',
+      (bb,j)=>{if(!bb[i].teece)return;bb[j].ground=bb[i].ground;bb[i].ground=null;moveT(bb,i,j,false);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    b[c].ground=g;b[i].ground=null;
+    moveT(b,i,c,true);
+    log(nm(t)+' drives '+gn+' to the '+CN[c]+'.');
+    await fireMove(i,c,p);
+    return;}
   case 'sacEquip':{
     const et=ctx.t, key=ctx.ent&&ctx.ent.key;
     if(!et||!key||key.charAt(0)!=='e')return;
@@ -3931,7 +4294,22 @@ async function FXRUN(st,ctx){
     log(CARDS[eq.cardId].name+' snaps off '+nm(et)+' and is destroyed.');
     return;}
   case 'moveAllAdj':{
-    const src=ctx.cell;
+    let src=ctx.cell;
+    /* Grenadier Greg throws it: the blast is centred on a panel of his
+       choosing rather than on the panel he is standing on. */
+    if(st.pick){
+      const cands=[];
+      for(let i=0;i<BN;i++)if(ADJ[i].some(j=>b[j].teece))cands.push(i);
+      if(!cands.length)return none('Nothing is standing beside any panel.');
+      const c=await pickCell(cands,'Choose the panel it lands on: everything beside it is moved one space and gets '+
+        sgn(st.n)+durTxt(st.dur)+'.',
+        (bb,i)=>{for(const j of ADJ[i])if(bb[j].teece)applyModT(bb[j].teece,st.n,st.dur);},
+        false,i=>[i].concat(ADJ[i]));
+      if(c==='CANCEL')return 'ABORT';
+      if(c==null)return;
+      src=c;
+      await anim([src].concat(ADJ[src]),'zap');
+    }
     for(const j of ADJ[src].slice()){
       const t=b[j].teece;
       if(!t||hasKw(b,j,'immovable'))continue;
@@ -5409,7 +5787,12 @@ function spendTeecePlay(p){
 }
 async function playTeece(p,handIdx){
   const pl=G.players[p],id=pl.hand[handIdx],d=CARDS[id],b=G.board;
-  if(G.teecePlayed&&!G.viaReveal){toast(teeceCap(p)>1?'Both Teece already played.':'Only one Teece per turn.');return false;}
+  /* Two ways a Teece can go down without costing the turn's play: revealed off
+     the top of the deck, or called up by a Brigadeer already on the field. */
+  const called=freePlayFor(p,id);
+  const free=G.viaReveal||called;
+  const spend=()=>{if(called)G.freePlay=null;if(!free)spendTeecePlay(p);};
+  if(G.teecePlayed&&!free){toast(teeceCap(p)>1?'Every Teece for this turn is already played.':'Only one Teece per turn.');return false;}
   if(hexOn(p,'freeze')){toast('Frozen: you cannot play Teece.');return false;}
   const need=sacsNeeded(id,p);
   const sacables=[];for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken)sacables.push(i);}
@@ -5449,7 +5832,7 @@ async function playTeece(p,handIdx){
       toGrave(p,id);
       if(gone)dumpPlate(gone.plate,'with the card it was bolted to');
       log(d.name+' has nowhere left to land, and is discarded.');
-      if(!G.viaReveal)spendTeecePlay(p);
+      spend();
       await resolveCombat();render();
       return true;
     }
@@ -5476,8 +5859,10 @@ async function playTeece(p,handIdx){
     const gd0=CARDS[b[spot].ground.cardId];
     if(gd0.gPlayMod){applyModT(t,gd0.gPlayMod,'perm');log(nm(t)+' is played onto '+gd0.name+': '+sgn(gd0.gPlayMod)+'.');}
   }
-  if(!G.viaReveal)spendTeecePlay(p);
-  log(pname(p)+' plays '+d.name+' at the '+CN[spot]+(G.viaReveal?' — revealed, so it doesn’t use this turn’s Teece play.':'.'));
+  spend();
+  log(pname(p)+' plays '+d.name+' at the '+CN[spot]+
+    (G.viaReveal?' — revealed, so it doesn’t use this turn’s Teece play.'
+     :called?' — called up alongside its counterpart, so it doesn’t use this turn’s Teece play.':'.'));
   await anim([spot],'placed',140);
   if(worn.length){
     log(nm(t)+' arrives already plated with '+worn.map(e=>CARDS[e.cardId].name).join(', ')+'.');
@@ -5493,6 +5878,13 @@ async function playTeece(p,handIdx){
   }
   if(pl.nextDefBonus){applyDef(t,pl.nextDefBonus);log(nm(t)+' arrives with +'+pl.nextDefBonus+' Defence.');pl.nextDefBonus=0;}
   if(pl.nextMod){const nmd=pl.nextMod;pl.nextMod=0;applyModT(t,nmd,'perm');log(nm(t)+' arrives with '+sgn(nmd)+'.');}
+  /* Cadet Annette hands the cover it was under to whoever comes next. An
+     immortality with no turn set on it lifts at the start of its owner's turn. */
+  if(pl.nextShield){
+    pl.nextShield=false;
+    t.immortalOwner=p;t.immortalUntil=0;
+    log(nm(t)+' arrives under cover: it cannot be destroyed until the start of '+pposs(p)+' next turn.');
+  }
   if(pl.nextSides){
     const ns=pl.nextSides;pl.nextSides=null;
     for(let k=0;k<4;k++)t.perm[k]+=ns[k];
@@ -5882,7 +6274,7 @@ async function endTurn(){
   if(G.over)return;
   G.players[p].teecePlayedLastTurn=G.players[p].teecePlayedThisTurn>0;
   tickHexes(p);
-  G.turn=nextLiveSeat(p);G.turnNum++;G.teecePlayed=false;G.teeceThisTurn=0;
+  G.turn=nextLiveSeat(p);G.turnNum++;G.teecePlayed=false;G.teeceThisTurn=0;G.extraTeece=0;G.freePlay=null;
   await startTurn();
 }
 /* Curse of Akathisia: the host is dragged one space at the end of EVERY turn,
@@ -6411,6 +6803,32 @@ function aiPlanFor(id){
       eat(bb,price);
     }};
   }
+  /* Aerial Support prices itself: lay the area down in the simulation exactly
+     as the card resolves it, and the board score says which 2x2 is worth it. */
+  if(st.fx==='formationBlast'){
+    const shape=st.shape||'2x2',cands=[];
+    for(let i=0;i<BN;i++)if(areaShapeCells(i,shape))cands.push(i);
+    if(!cands.length)return null;
+    return {thr:1.5,cands,mut:(bb,i)=>{
+      for(const j of areaShapeCells(i,shape)){
+        const o=bb[j].teece;
+        if(!o||!hasAllyAdj(bb,j))continue;
+        applyModT(o,sameTeam(o.owner,p)?st.n:-st.n,st.dur||'perm');
+      }
+    }};
+  }
+  /* Paratroop buys a second Teece, which no board score can see until it is
+     spent -- so it is priced flat, and only when there is a Teece in hand to
+     spend it on, room to put one down, and no win being given up for it. */
+  if(st.fx==='extraPlay'){
+    if(G.teecePlayed&&!G.extraTeece)return null;
+    if(!G.players[p].hand.some(cid=>CARDS[cid].type==='teece'&&cid!==id))return null;
+    let room=0;for(let i=0;i<BN;i++)if(openAt(b,i))room++;
+    if(room<1)return null;
+    const ls=leadState();
+    if(ls&&sameTeam(ls.lead.tm,p)&&ls.gap>=ls.need-1)return null;
+    return {thr:0.5,pseudo:0.9,cands:[0],mut:null};
+  }
   return null;
 }
 async function aiSupport(){
@@ -6444,7 +6862,7 @@ async function aiSupport(){
 }
 async function aiPlayTeece(){
   const p=G.turn,pl=G.players[p],b=G.board;
-  if(G.teecePlayed)return false;
+  if(G.teecePlayed&&!(G.freePlay&&G.freePlay.p===p))return false;
   const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
   const anySac=b.some(c=>c.teece&&c.teece.owner===p&&!c.teece.isToken);
   if(!empt.length&&!anySac)return false;
@@ -6453,6 +6871,8 @@ async function aiPlayTeece(){
   for(let h=0;h<pl.hand.length;h++){
     const id=pl.hand[h],d=CARDS[id];
     if(d.type!=='teece')continue;
+    /* once the turn's play is spent, only a card called up free is still on */
+    if(G.teecePlayed&&!freePlayFor(p,id))continue;
     const need=d.sac||0;
     const sacables=[];for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken)sacables.push(i);}
     if(sacables.length<need)continue;
@@ -6610,6 +7030,22 @@ function aiActMuts(cell,ent){
       if(b[j].teece)continue;
       muts.push(bb=>{if(!bb[j].teece)putTeece(bb,j,makeTeece(st.tok,p),false);});
     }
+  }else if(st.fx==='driveGround'){
+    for(let j=0;j<BN;j++){
+      if(j===cell||!openAt(b,j)||b[j].ground)continue;
+      muts.push(bb=>{
+        if(!bb[cell].teece||!bb[cell].ground)return;
+        bb[j].ground=bb[cell].ground;bb[cell].ground=null;
+        moveT(bb,cell,j,false);
+      });
+    }
+  }else if(st.fx==='moveAllAdj'&&st.pick){
+    /* where the grenade goes is worth weighing even though where each Teece is
+       shoved afterwards is not: the penalty lands either way */
+    for(let j=0;j<BN;j++){
+      if(!ADJ[j].some(k=>b[k].teece))continue;
+      muts.push(bb=>{for(const k of ADJ[j])if(bb[k].teece)applyModT(bb[k].teece,st.n,st.dur);});
+    }
   }
   return muts;
 }
@@ -6619,6 +7055,12 @@ async function aiTurn(){
   for(let k=0;k<3;k++){if(!await aiSupport())break;if(stale(ep)||G.over)return;}
   await aiPlayTeece();
   if(stale(ep)||G.over)return;
+  /* a second Teece is on the table when something bought one: a Brigadeer
+     calling up its counterpart, or a Paratroop */
+  if(!G.teecePlayed||(G.freePlay&&G.freePlay.p===p)){
+    await aiPlayTeece();
+    if(stale(ep)||G.over)return;
+  }
   for(let k=0;k<2;k++){if(!await aiSupport())break;if(stale(ep)||G.over)return;}
   await aiActs();
   if(stale(ep)||G.over)return;
@@ -7047,7 +7489,9 @@ function renderHand(p){
     const card=document.createElement('div');
     card.className='card playable t-'+cd.type+(isTarget?' target':'');
     card.setAttribute('data-card-deck',getCardDeck(id));
-    if(!isTarget&&(p!==G.turn||G.teecePlayed&&cd.type==='teece'||G.over))card.classList.add('dim');
+    /* A card a Brigadeer called up is still playable with the turn's Teece
+       spent, so it must not be greyed out with the rest of them. */
+    if(!isTarget&&(p!==G.turn||(G.teecePlayed&&cd.type==='teece'&&!freePlayFor(p,id))||G.over))card.classList.add('dim');
     const art=CARD_ART[id];
     if(art)card.classList.add('arted');
     if(cd.type==='teece'){
@@ -7118,8 +7562,8 @@ function teecePlayBlock(p){
   const held=pl.hand.filter(id=>CARDS[id].type==='teece');
   if(!held.length)return 'You hold no Teece, so there is nothing to put on the field this turn.';
   if(hexOn(p,'freeze'))return 'A Curse of Freezing holds you: no Teece may be played at all.';
-  if(G.teecePlayed)return teeceCap(p)>1
-    ?'You have played both Teece you get on your opening turn.'
+  if(G.teecePlayed&&!held.some(id=>freePlayFor(p,id)))return teeceCap(p)>1
+    ?'You have played every Teece you get this turn.'
     :'You have already played a Teece this turn, and only one Teece may be played per turn.';
   let room=0;for(let i=0;i<BN;i++)if(openAt(G.board,i))room++;
   let own=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p&&!t.isToken)own++;}
@@ -7193,6 +7637,13 @@ function statusesFor(p){
     'The next Teece you play arrives with '+sidesLine(pl.nextSides)+', half of what was sacrificed to the Curse of Sacrifice.');
   if(pl.nextMod)push('nextmod',pl.nextMod<0?'bad':'good','Next Teece '+sgn(pl.nextMod),
     'The next Teece you play arrives with '+sgn(pl.nextMod)+'.');
+  if(pl.nextShield)push('nextshield','good','Next Teece cannot be destroyed',
+    'The next Teece you play cannot be destroyed until the start of your next turn.');
+  if(G.turn===p&&G.freePlay&&G.freePlay.p===p)push('freeplay','good',CARDS[G.freePlay.card].name+' is free to play',
+    CARDS[G.freePlay.card].name+' may be played this turn without spending your Teece play, whether or not you have already played one.');
+  if(G.turn===p&&G.extraTeece)push('extraplay','good',
+    G.extraTeece===1?'One extra Teece play':G.extraTeece+' extra Teece plays',
+    'You may play '+G.extraTeece+' more Teece than usual this turn. It lapses at the end of the turn.');
   if(pl.calib)push('calib','good','Dial set to '+pl.calib.x,
     'The Calibration Dial is set to '+pl.calib.x+'. The next Teece you play whose four sides are all '+
     pl.calib.x+' arrives with '+sgn(pl.calib.n)+'.');

@@ -303,6 +303,32 @@
         620
       ],
       "blurb": "They grow by taking. Drain X pulls X off a Teece and hands the drinker exactly what it managed to take — which is not always X, because Steadfast gives up nothing and the deck's own castle, catalyst and fangs all bend the number on the way."
+    },
+    "army": {
+      "name": "Army",
+      "cards": [
+        621,
+        622,
+        623,
+        624,
+        625,
+        626,
+        627,
+        628,
+        629,
+        630,
+        631,
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638,
+        639,
+        640
+      ],
+      "blurb": "A deck that is paid for its shape. Almost nothing here is worth much standing alone — Teece gain attributes, Ranged, March and cover for standing beside an ally, and the equips pay for lines, triangles and a lone point. Field Marshal Marshall ends the geometry altogether: while he stands, every Teece on the field counts as adjacent to all of its allies, wherever they are."
     }
   },
   "formats": [
@@ -650,6 +676,26 @@
     617,
     618,
     619,
-    620
+    620,
+    621,
+    622,
+    623,
+    624,
+    625,
+    626,
+    627,
+    628,
+    629,
+    630,
+    631,
+    632,
+    633,
+    634,
+    635,
+    636,
+    637,
+    638,
+    639,
+    640
   ]
 }
