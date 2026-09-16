@@ -488,6 +488,65 @@
         "Brigadeer Ryan and Brigadeer Bryan call each other up: play one and the other may go down the same turn without spending your Teece play. Side by side they are +10 each.",
         "Scout Stout is paid for having its back to the board — two sides on a corner, one side and Ranged on an edge, all four in the middle — so it wants the panel nobody else does."
       ]
+    },
+    "garbage": {
+      "name": "Garbage",
+      "cards": [
+        721,
+        722,
+        723,
+        724,
+        725,
+        726,
+        727,
+        728,
+        729,
+        730,
+        731,
+        732,
+        733,
+        734,
+        735,
+        736,
+        737,
+        738,
+        739,
+        740,
+        741,
+        742,
+        743,
+        744,
+        745,
+        746,
+        747,
+        748,
+        749,
+        750,
+        751,
+        752,
+        753,
+        754,
+        755,
+        756,
+        757,
+        758,
+        759,
+        760,
+        761,
+        762,
+        763,
+        764
+      ],
+      "perTurn": {
+        "play": 2,
+        "draw": 2
+      },
+      "blurb": "Twice the deck and twice the turn: forty-odd cards, two Teece plays and two draws every turn. Nothing here is worth much on its own, and most of it pays for itself by being thrown away — the graveyard is the stockpile, and Living Dump, Trash King and the Dumpster all read the size of the heap behind you.",
+      "how": [
+        "Two Teece a turn and two cards a turn are the deck's own rule, not a card's: they hold for as long as you are playing Garbage. Garbage Soul adds a third of each while it stands.",
+        "The graveyard is a resource. Living Dump grows with it, Trash King eats it for attributes, Garbage Man and Racoon fish cards back out of it, and Banana Peel and the Dumpster spend it.",
+        "Fire sits on a panel rather than on a Teece. Anything standing in one has -4 while it burns, and it burns until the start of the turn of whoever lit it."
+      ]
     }
   },
   "formats": [

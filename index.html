@@ -134,6 +134,9 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="army"],.dcard[data-card-deck="army"]{--cardbg:#4c5a33;--artink:#f1f5e2;background:var(--cardbg);color:#eef2e2;border-color:#2e3a1c}
 .card[data-card-deck="army"] .kwl,.dcard[data-card-deck="army"] .dkw{color:#c3d09b}
 .card[data-card-deck="army"] .ct,.dcard[data-card-deck="army"] .dty{color:#c3d09b}
+.card[data-card-deck="garbage"],.dcard[data-card-deck="garbage"]{--cardbg:#5a4634;--artink:#f6ecdd;background:var(--cardbg);color:#f2e7d8;border-color:#36281c}
+.card[data-card-deck="garbage"] .kwl,.dcard[data-card-deck="garbage"] .dkw{color:#d3b992}
+.card[data-card-deck="garbage"] .ct,.dcard[data-card-deck="garbage"] .dty{color:#d3b992}
 
 .card[data-card-deck]::after,.dcard[data-card-deck]::after{position:absolute;top:2px;right:3px;font-size:11px;line-height:1;opacity:.85;z-index:1}
 .card[data-card-deck="classic"]::after,.dcard[data-card-deck="classic"]::after{content:'🂡'}
@@ -154,6 +157,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="tictactoe"]::after,.dcard[data-card-deck="tictactoe"]::after{content:'#️⃣'}
 .card[data-card-deck="solar"]::after,.dcard[data-card-deck="solar"]::after{content:'☀️'}
 .card[data-card-deck="army"]::after,.dcard[data-card-deck="army"]::after{content:'🪖'}
+.card[data-card-deck="garbage"]::after,.dcard[data-card-deck="garbage"]::after{content:'🗑️'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -172,6 +176,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece[data-card-deck="zombie"]{--cardbg:#3f4a2a;--artink:#eef7d9;background:var(--cardbg);color:#e6efd2;border-color:#242c17}
 .teece[data-card-deck="solar"]{--cardbg:#7d4a12;--artink:#ffeccc;background:var(--cardbg);color:#fdeed6;border-color:#4d2b06}
 .teece[data-card-deck="army"]{--cardbg:#4c5a33;--artink:#f1f5e2;background:var(--cardbg);color:#eef2e2;border-color:#2e3a1c}
+.teece[data-card-deck="garbage"]{--cardbg:#5a4634;--artink:#f6ecdd;background:var(--cardbg);color:#f2e7d8;border-color:#36281c}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -226,6 +231,8 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .enchMark{position:absolute;top:2px;left:50%;transform:translateX(-50%);font-size:10px;
   line-height:1;font-weight:700;letter-spacing:.02em;white-space:nowrap;z-index:1}
 .enchMark.m0{color:var(--p0)} .enchMark.m1{color:var(--p1)} .enchMark.m2{color:var(--p2)}
+.fireMark{position:absolute;bottom:3px;left:5px;font-size:11px;line-height:1;z-index:1;color:#ffb055}
+.cell.afire{box-shadow:inset 0 0 14px rgba(255,120,40,.55)}
 .cell.razed{background-image:repeating-linear-gradient(45deg,rgba(0,0,0,.42) 0 6px,transparent 6px 12px)}
 .bglayer{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;
   font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding-bottom:2px}
@@ -670,7 +677,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:44,date:'2026-09-15'};
+const VERSION={build:45,date:'2026-09-16'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -751,7 +758,8 @@ function deckKeywords(key){
 }
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
-  zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}'};
+  zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
+  garbage:'\u{1F5D1}\uFE0F'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -882,6 +890,51 @@ const CARD_ART={
   718:["    __|__    ","  <--(o)-->  ","     / \\     ","  + +   - -  ","  + +   - -  "],
   719:["    ______   ","   |  __  |==","  _|_(__)_|_ "," (o)(o)(o)(o)","  ~~~~~~~~~  "],
   720:["  _________  "," /#########\\ ","|##[===]####|","|###########|","'-----------'"],
+  721:["  ~ ~ ~ ~ ~  ","  ~ ( o ) ~  ","  ~ ~ ~ ~ ~  ","  ~~~~~~~~~  ","  - . - . -  "],
+  722:["    .---.    ","   (o)=[#]   ","    /| |\\    ","    _/ \\_    ","   *  *  *   "],
+  723:["     ,-.     ","    ( x )    ","    /|=|\\    ","    _/ \\_    ","   ~  ~  ~   "],
+  724:["     .-.     ","    / | \\    ","    | | |    ","    \\_|_/    ","    *  *     "],
+  725:["    [===]    ","    |:::|    ","    |___|    ","    ~~~~~    ","    . . .    "],
+  726:["    .---.    ","   [o]-+-    ","    | |      ","    _/ \\_    ","    =====    "],
+  727:["    .~~~.    ","   ( ~ ~ )   ","    '~~~'    ","    ~ ~ ~    ","    . . .    "],
+  728:["     .-.     ","    ( o )    ","    /|_|\\    ","    _/ \\_    ","    [][]     "],
+  729:["    .---.    ","   (  o  )   ","    \\vvv/    ","    / | \\    ","    ^ ^ ^    "],
+  730:["   _______   ","   |     |   ","   |_____|   ","    \\___/    ","    . . .    "],
+  731:["    .---.    ","   ( o o )   ","    \\ - /    ","    /| |\\    ","    ^   ^    "],
+  732:["    |\\_/|    ","    |###|    ","    |___|    ","    (o) (o)  ","    '   '    "],
+  733:["   .-----.   ","   |#####|   ","   |#o o#|   ","   |#####|   ","   '-----'   "],
+  734:["    \\   /    ","    (o>      ","    /|\\      ","     ^^      ","    . . .    "],
+  735:["    [+-+]    ","    |###|    ","    +-+-+    ","    |###|    ","    [+-+]    "],
+  736:["    .---.    ","   | OIL |   ","   |     |   ","   '-----'   ","    * * *    "],
+  737:["     .-.     ","    (o o)    ","    ( - )    ","    /   \\    ","    ~~~~~    "],
+  738:["    .---.    ","   (o) (o)   ","    \\ - /    ","    /| |\\    ","   ~~~~~~~   "],
+  739:["    [===]    ","    |   |    ","    [#-#]    ","    >===<    ","    ^   ^    "],
+  740:["    (===)    ","   ((===))   ","    (===)    ","   ((===))   ","    (===)    "],
+  741:["     .-.     ","    ( o )    ","    /|=|\\    ","    | | |    ","    [###]    "],
+  742:["   ~~~~~~~   ","  ~ . . . ~  ","   ~ ~ ~ ~   ","  ~ . . . ~  ","   ~~~~~~~   "],
+  743:["     .-.     ","    ( x )    ","    -/|\\-    ","     / \\     ","    .   .    "],
+  744:["    .---.    ","   /#####\\   ","  /#######\\  ","  |#######|  ","  '-------'  "],
+  745:["    \\.-./    ","   (o)-(o)   ","    \\ - /    ","    /| |\\    ","   ~~~~~~~   "],
+  746:["    .---.    ","   ( ### )   ","    \\###/    ","    ~~|~~    ","    .   .    "],
+  747:["    \\###/    ","    (o o)    ","    ( - )    ","    /| |\\    ","   [#####]   "],
+  748:["    \\ | /    ","   --[#]--   ","    (o o)    ","    /###\\    ","   /|   |\\   "],
+  749:["   [=====]   ","   |#####|   ","   [=====]   ","    |   |    ","    '   '    "],
+  750:["    .---.    ","   (     )   ","   |     |   ","   |_____|   ","    \\___/    "],
+  751:["    \\ | /    ","    - + -    ","    / | \\    ","    [###]    ","    .   .    "],
+  752:["    .-.      ","   (o)==>    ","    | |      ","    |_|      ","    x   x    "],
+  753:["     .-.     ","    ( , )    ","    \\ | /    ","     ~~~     ","    ~   ~    "],
+  754:["   +-----+   ","   |~~~~~|   ","   |~~~~~|   ","   +-----+   ","    ~ ~ ~    "],
+  755:["    . , .    ","   , . , .   ","    . , .    ","   , . , .   ","    . , .    "],
+  756:["    ~ ~ ~    ","   ~ (x) ~   ","    ~ ~ ~    ","    . . .    ","    .   .    "],
+  757:["    .---.    ","   | ??? |   ","    '---'    ","    .   .    ","             "],
+  758:["     ,-.     ","    ( x )    ","    >-|-<    ","     / \\     ","    .   .    "],
+  759:["    [#][#]   ","    [#][#]   ","    >>>>>    ","    [#][#]   ","    .   .    "],
+  760:["    .---.    ","   (  o  )   ","    \\|=|/    ","   |#####|   ","   '-----'   "],
+  761:["    .-^-.    ","   /#####\\   ","  /#######\\  ","  ~~~~~~~~~  ","    . . .    "],
+  762:["   [R][R]    ","   |#||#|    ","   |#||#|    ","   '--''--   ","    . . .    "],
+  763:["   ._____.   ","   |#####|   ","   |#####|   ","   |_____|   ","    ^   ^    "],
+  764:["  ~~~~~~~~~  ","  ~#~#~#~#~  ","  ~~~~~~~~~  ","  ~#~#~#~#~  ","  ~~~~~~~~~  "],
+  "TRAT":["     .-.     ","    (o o)    ","    ( - )    ","    /   \\    ","     ~~~     "],
   "TSP":["   .     .   ","    \\(o.o)/  ","    /  |  \\  ","   '   |   ' "],
   561:["  \\   |   /  "," ==\\(o o)/== ","   #[===]#   ","  / #| |# \\  ","  ==========="],
   562:["  .---------.","  | .-----. |","  | (o . o) |","  '--/ | \\--'","    _/   \\_  "],
@@ -1385,6 +1438,8 @@ const CARDS = {
     text:'Spiderling Token. On the Web it has +1 Defence and Skitter \u2014 once per your turn, move one space. Bigger than most Tokens, and the currency the whole Spider deck spends. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  TSOL:{name:'Solar Token',type:'teece',token:true,sides:[3,3,3,3],solar:true,
     text:'Solar Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ TRAT:{name:'Rat',type:'teece',token:true,sides:[1,1,1,1],garbage:true,
+    text:'Rat Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  TSUP:{name:'Supply Drop',type:'teece',token:true,sides:[2,2,2,2],
     text:'Supply Drop Token. When destroyed: select an adjacent Teece and give it +1 or -1. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.',
     onDeath:[{fx:'choose',msg:'The crate splits open:',opts:[
@@ -2514,6 +2569,142 @@ const CARDS = {
     text:'A Teece standing here gets +2, 2 Defence and Ranged. Once per your turn it may drive: move to a panel holding neither a Teece nor a battleground, and the Tank goes with it.'},
  720:{name:'Bunker',type:'ground',gdef:3,gdefAdjAlly:3,
     text:'A Teece standing here gets 3 Defence, and 3 more while one of its allies stands adjacent.'},
+ /* ---- Garbage ----
+    Forty-odd cards instead of twenty, two Teece plays and two draws a turn, and
+    a graveyard that is not a loss but a stockpile: Living Dump, Trash King and
+    the Dumpster all read the pile of rubbish behind you and turn it into
+    numbers. Nearly everything here spends something -- a card off the hand, a
+    body off the field, the grave itself -- so the deck is written around
+    feeding its own heap. */
+ 721:{name:'Rancid Mist',type:'teece',sides:[3,4,2,4],garbage:true,blockGain:true,
+    text:'While Rancid Mist stands, enemy Teece cannot gain attributes: every bonus aimed at one is soaked up by the stink.'},
+ 722:{name:'Scrap Welder',type:'teece',sides:[5,4,3,2],garbage:true,
+    onPlay:[{fx:'mod',n:2,dur:'perm'}],
+    text:'When played: select a Teece; it gets +2.'},
+ 723:{name:'Sour Whiff',type:'teece',sides:[2,3,4,5],garbage:true,
+    onPlay:[{fx:'mod',n:-2,dur:'perm'}],
+    text:'When played: select a Teece; it gets -2.'},
+ 724:{name:'Broken Bottle',type:'teece',sides:[3,3,3,3],garbage:true,
+    onDeath:[{fx:'nextMod',n:2}],
+    text:'When destroyed: the next Teece you play arrives with +2.'},
+ 725:{name:'Spilled Bleach',type:'teece',sides:[3,3,3,3],garbage:true,
+    onDeath:[{fx:'nextMod',who:'enemy',n:-2}],
+    text:'When destroyed: the next Teece your opponent plays arrives with -2.'},
+ 726:{name:'Rusted Crank',type:'teece',sides:[8,0,0,0],garbage:true,
+    act:[{name:'Crank it round',once:'game',steps:[{fx:'haul'}]}],
+    text:'Once a game: select a Teece, turn it a quarter turn whichever way you like, and then you may move it one space.'},
+ 727:{name:'Rotting Meat',type:'teece',sides:[2,6,1,5],garbage:true,
+    onDeath:[{fx:'killer',n:-2,dur:'perm'}],
+    text:'When destroyed: whatever destroyed it gets -2.'},
+ 728:{name:'Gutter Scrapper',type:'teece',sides:[2,3,2,3],garbage:true,
+    onPlay:[{fx:'choose',msg:'Feed the Scrapper?',opts:[
+      {lbl:'Sacrifice an ally: +3',steps:[{fx:'sacAlly'},{fx:'mod',who:'self',n:3,dur:'perm'}]},
+      {lbl:'Leave everybody standing',steps:[]}]}],
+    text:'When played: you may sacrifice an allied Teece; if you do, this gets +3.'},
+ 729:{name:'Cockroach',type:'teece',sides:[1,6,1,1],garbage:true,
+    onDeath:[{fx:'selfToHand',once:'game'}],
+    text:'The first time it is destroyed each game, it scuttles back to your hand instead of the grave.'},
+ 730:{name:'Landfill Tarp',type:'teece',sides:[1,2,1,2],garbage:true,
+    onPlay:[{fx:'shieldNext',long:true}],
+    text:'When played: the next Teece you play cannot be destroyed until the end of your next turn.'},
+ 731:{name:'Junkyard Dog',type:'teece',sides:[5,4,2,2],garbage:true,modPerAlly:1,
+    text:'+1 for every other allied Teece on the field.'},
+ 732:{name:'Rusted Shopping Cart',type:'teece',sides:[3,2,3,2],garbage:true,cart:true,
+    act:[{name:'Trundle',once:'turn',steps:[{fx:'trundle'}]},
+         {name:'Take an ally aboard',times:8,steps:[{fx:'loadAlly'}]}],
+    text:'Once per your turn: move up to two spaces. An ally standing beside it may climb aboard and ride as an equip. When the Cart is destroyed, everything aboard is summoned onto the panels around it.'},
+ 733:{name:'Crusted-Over Filthling',type:'teece',sides:[7,7,1,1],garbage:true,kw:['immovable'],
+    text:'Immovable: it cannot move, and nothing can move it.'},
+ 734:{name:'Pigeon',type:'teece',sides:[2,2,2,1],garbage:true,kw:['flying'],
+    onAllyDeath:{n:2,dur:'perm'},
+    text:'Flying. Whenever another allied Teece is destroyed: +2.'},
+ 735:{name:'Living Scrap',type:'teece',sides:[4,3,4,4],garbage:true,
+    text:'A heap of rubbish that got up. Nothing else.'},
+ 736:{name:'Exploding Oil Barrel',type:'teece',sides:[2,2,2,2],garbage:true,
+    onDeath:[{fx:'aoe',n:-3,dur:'perm'}],
+    text:'When destroyed: every Teece standing beside it gets -3.'},
+ 737:{name:'Alley Rat',type:'teece',sides:[1,1,1,1],garbage:true,
+    onPlay:[{fx:'token',tok:'TRAT',where:'any',count:2}],
+    text:'When played: summon two 1/1/1/1 Rat Tokens.'},
+ 738:{name:'Racoon',type:'teece',sides:[2,3,1,2],garbage:true,
+    act:[{name:'Rummage',once:'turn',steps:[{fx:'rummage'}]}],
+    text:'Once per your turn: take a card at random out of either graveyard and into your hand. If it came out of an opponent’s, discard two cards.'},
+ 739:{name:'Compactor Arm',type:'teece',sides:[2,4,2,1],garbage:true,
+    act:[{name:'Compact an ally',once:'turn',times:2,steps:[{fx:'scrapAlly'},{fx:'mod',who:'self',n:3,dur:'perm'}]}],
+    text:'Twice per your turn: destroy an allied Teece standing beside it; this gets +3 permanently.'},
+ 740:{name:'Pile of Tires',type:'teece',sides:[2,2,2,2],garbage:true,
+    onDeath:[{fx:'ignite',where:'here'}],
+    text:'When destroyed: the panel it stood on catches fire until the start of your next turn. A Teece standing in a fire gets -4 while it burns.'},
+ 741:{name:'Garbage Man',type:'teece',sides:[3,1,3,4],garbage:true,
+    onPlay:[{fx:'dumpDiscard',max:2,n:2}],
+    act:[{name:'Pick through the pile',once:'turn',steps:[{fx:'graveBurn',n:2},{fx:'graveGrab'}]}],
+    text:'When played: discard up to two cards; +2 for each one discarded. Once per your turn: destroy two cards in your graveyard, then take a card at random out of it and into your hand.'},
+ 742:{name:'Living Smog',type:'teece',sides:[1,2,0,1],garbage:true,
+    auras:[{who:'enemy',where:'global',n:-2},{who:'ally',where:'global',n:2}],
+    text:'Every enemy Teece has -2. Every other allied Teece has +2.'},
+ 743:{name:'Broken Doll',type:'teece',sides:[0,0,1,0],garbage:true,
+    onPlay:[{fx:'silenceCard'}],
+    onDeath:[{fx:'scrapGear'}],
+    text:'When played: select a Teece and silence it. When destroyed: select an equip or a battleground; it is destroyed.'},
+ /* ---- Garbage minibosses ---- */
+ 744:{name:'Living Dump',type:'teece',sides:[0,0,0,0],sac:1,garbage:true,modPerGrave:{n:1,per:2},
+    text:'Sacrifice one fielded Teece to play. +1 for every two cards in your graveyard.'},
+ 745:{name:'Rat King',type:'teece',sides:[6,6,6,6],sac:1,garbage:true,
+    onPlay:[{fx:'choose',msg:'The Rat King holds court:',opts:[
+      {lbl:'Give a Teece +2',steps:[{fx:'mod',n:2,dur:'perm'}]},
+      {lbl:'Give a Teece -2',steps:[{fx:'mod',n:-2,dur:'perm'}]}]}],
+    text:'Sacrifice one fielded Teece to play. When played: select a Teece; give it +2 or -2.'},
+ /* ---- Garbage bosses ---- */
+ 746:{name:'Garbage Soul',type:'teece',sides:[5,5,5,5],sac:2,def:7,garbage:true,grantPlay:1,grantDraw:1,
+    text:'Sacrifice two fielded Teece to play. Defence 7. While it stands, you draw one extra card and may play one extra Teece every turn.'},
+ 747:{name:'Trash King',type:'teece',sides:[0,0,0,0],sac:2,garbage:true,
+    onPlay:[{fx:'consumeGrave',n:1}],
+    text:'Sacrifice two fielded Teece to play. When played: destroy any number of cards in your graveyard; +1 for each one destroyed.'},
+ /* ---- Garbage megaboss ---- */
+ 748:{name:'God of the Forgotten',type:'teece',sides:[12,12,12,12],sac:3,garbage:true,
+    text:'Sacrifice three fielded Teece to play. Everything thrown away, standing up at once.'},
+ /* ---- Garbage equips ---- */
+ 749:{name:'Duct Tape',type:'equip',mod:0,garbage:true,grants:{def:1,tape:true},
+    text:'Equipped Teece gets 1 Defence. When an effect would pick the equipped Teece out as a target, Duct Tape is destroyed instead and the effect is turned aside.'},
+ 750:{name:'Trash Bag',type:'equip',mod:0,garbage:true,grants:{def:2,reequip:true,reequipOnce:true},
+    text:'Stealth — equipped Teece gets 2 Defence. Blow In The Wind — once a game, when the equipped Teece is destroyed, you may blow this onto another ally instead of losing it.'},
+ 751:{name:'Blessing of the Dump',type:'equip',mod:0,garbage:true,grants:{blessGuard:true},
+    text:'While the equipped Teece stands beside an ally and you hold more Teece on the field than your opponent, it cannot be destroyed.'},
+ 752:{name:'Broken Gun',type:'equip',mod:0,garbage:true,grants:{kw:['ranged']},
+    text:'Equipped Teece is Ranged, and… that’s it.'},
+ 753:{name:'Banana Peel',type:'equip',mod:0,garbage:true,grants:{dodge:{grave:2,killer:-1}},
+    text:'When the equipped Teece would be destroyed in combat: you may destroy two cards in your graveyard to slip one space clear. If you do, whatever was about to destroy it gets -1.'},
+ 754:{name:'Wet Cardboard',type:'equip',mod:4,garbage:true,grants:{startMod:-1},
+    text:'Equipped Teece gets +4, and loses 1 at the start of every player’s turn as the cardboard sags.'},
+ /* ---- Garbage magic ---- */
+ 755:{name:'Litter',type:'magic',garbage:true,
+    cast:[{fx:'extraPlay'},{fx:'noWinSelf'}],
+    text:'Play an extra Teece this turn. You cannot win by board domination until the end of your next turn.'},
+ 756:{name:'Pollute',type:'magic',garbage:true,
+    cast:[{fx:'mod',who:'enemy',n:-1,dur:'temp',may:true},{fx:'draw',n:1}],
+    text:'Select up to one enemy Teece; it gets -1 until the end of the turn. Draw a card.'},
+ 757:{name:'The True Power of Trash',type:'magic',garbage:true,
+    cast:[{fx:'nothing',msg:'The True Power of Trash is revealed. Nothing happens.'}],
+    text:'Trump card. Does literally nothing.'},
+ 758:{name:'Choke',type:'magic',garbage:true,
+    cast:[{fx:'choke',n:4}],
+    text:'Sacrifice four allied Teece to select an enemy Teece and destroy it. A Boss counts for as many Teece as were sacrificed to summon it.'},
+ 759:{name:'Garbage Day',type:'magic',garbage:true,
+    cast:[{fx:'garbageDay',max:3}],
+    text:'Discard up to three cards, then draw that many.'},
+ 760:{name:'Dumpster Diving',type:'magic',garbage:true,
+    cast:[{fx:'dumpsterDive'}],
+    text:'Discard a card; take a card at random out of an opponent’s graveyard and into your hand. Then a second card at random out of that graveyard goes into yours.'},
+ /* ---- Garbage battlegrounds ---- */
+ 761:{name:'Trash Heap',type:'ground',gGraveSteal:true,garbage:true,
+    text:'Any card that would be sent to a graveyard from this panel goes to your graveyard instead, whoever owned it.'},
+ 762:{name:'Recycling Bins',type:'ground',gRecycle:true,garbage:true,
+    text:'A Teece destroyed on this panel goes back to its controller’s hand if its controller discards a card.'},
+ 763:{name:'Dumpster',type:'ground',gDump:true,gLoad:10,gHeldPer:{n:1,per:2},garbage:true,
+    gact:[{name:'Dumpster Fire',once:'turn',steps:[{fx:'dumpsterFire'}]}],
+    text:'When played: up to ten cards chosen at random from your graveyard are packed into the Dumpster. A Teece standing here gets +1 for every two cards packed in, and a Teece destroyed here is packed in as well. Dumpster Fire — once per your turn, while one of your Teece stands here: destroy it, and set this panel and every panel beside it on fire until the start of your next turn.'},
+ 764:{name:'The Great Garbage Patch',type:'ground',gRow:true,gGarbageFull:3,garbage:true,
+    text:'Laid across a whole row. While every panel of it holds a Garbage Teece, all of them get +3.'},
  /* Not in any deck: Cannonball is handed out by a roguelike perk. */
  590:{name:'Cannonball',type:'magic',perkOnly:true,
     text:'Select a Teece and one of its sides; that side gets -4.',
@@ -2680,6 +2871,73 @@ function canSacrifice(b,i){
 /* What an enchanted panel pays the first ally to arrive. Named once: the card
    text, the log line, the corner marker and the panel readout all read it. */
 const ENCHANT_N=5;
+/* ============ fire ============
+   A fire sits on the PANEL, not on the Teece standing in it, which is what
+   makes it worth walking out of: the penalty is read fresh by effSides every
+   scan and lands on whoever is standing there at the time. It burns until the
+   start of the next turn of whoever lit it, so the side that lit it is the side
+   that has to live beside it for a full round. Named once here, because the
+   card text, the log line, the panel marker and the readout all quote it. */
+const FIRE_N=4;
+function setFire(i,owner,live){
+  if(i==null||!G.board[i])return;
+  G.board[i].fire={owner,lit:G.turnNum};
+  if(live)log('The '+CN[i]+' catches fire: anything standing in it has -'+FIRE_N+' while it burns.');
+}
+/* Rancid Mist soaks up bonuses aimed at the other side. Read off the live board
+   the way isSteadfast is, since applyModT is handed a Teece and not a panel. */
+function gainBlocked(t){
+  if(!t||!G||!G.board)return false;
+  for(let i=0;i<BN;i++){
+    const w=G.board[i].teece;
+    if(!w||w.silenced||!DEF(w).blockGain)continue;
+    if(!sameTeam(w.owner,t.owner))return true;
+  }
+  return false;
+}
+/* Blessing of the Dump: cover bought by standing with your own and by holding
+   the field. Board-aware, because scanDeaths asks it of simulated boards too. */
+function blessedOn(b,i){
+  const t=b[i]&&b[i].teece;
+  if(!t||!t.equips.some(e=>{const g=CARDS[e.cardId].grants;return g&&g.blessGuard;}))return false;
+  if(!hasAllyAdj(b,i))return false;
+  let mine=0;const foes={};
+  for(let j=0;j<BN;j++){
+    const o=b[j].teece;if(!o)continue;
+    if(sameTeam(o.owner,t.owner))mine++;
+    else foes[teamOf(o.owner)]=(foes[teamOf(o.owner)]||0)+1;
+  }
+  return Object.keys(foes).every(k=>mine>foes[k]);
+}
+/* Garbage Soul hands its controller another play and another card while it
+   stands. Counted off the board so it is gone the moment the Soul is. */
+function grantedBy(p,key){
+  let n=0;
+  if(!G||!G.board)return 0;
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(t&&t.owner===p&&!t.silenced&&DEF(t)[key])n+=DEF(t)[key];
+  }
+  return n;
+}
+/* How many cards this seat draws at the top of its turn: one, or whatever its
+   deck prints, plus anything standing on the field that pays out another. */
+function drawPerTurn(p){
+  const pl=G&&G.players[p];
+  return ((pl&&pl.perTurn&&pl.perTurn.draw)||1)+grantedBy(p,'grantDraw');
+}
+/* The Great Garbage Patch pays only while every panel it covers is held by a
+   Garbage Teece -- either side's, since the row is the thing being filled. */
+function patchFull(b,i){
+  const g=b[i].ground;
+  if(!g)return false;
+  for(let j=0;j<BN;j++){
+    if(!b[j].ground||(g.gid?b[j].ground.gid!==g.gid:j!==i))continue;
+    const t=b[j].teece;
+    if(!t||!DEF(t).garbage)return false;
+  }
+  return true;
+}
 /* Where a move of a given range may land. Flying is one space with diagonals
    allowed -- which is what every flier's card text says, and what the Flying
    section comment has always said -- so it is NOT the whole board. Teleport is
@@ -2844,6 +3102,20 @@ function wardMagic(b,i,p){
   log(nm(t)+' turns the magic aside and gets +4.');
   return true;
 }
+/* Duct Tape. The effect picked this Teece out, so the tape comes away instead
+   of it -- wired into the effects that single a Teece out, the way wardMagic is
+   wired into the ones that can be turned aside. */
+function tapeSave(b,i,by){
+  const t=b[i]&&b[i].teece;
+  if(!t||by==null||sameTeam(t.owner,by))return false;
+  const ix=t.equips.findIndex(e=>{const g=CARDS[e.cardId].grants;return g&&g.tape;});
+  if(ix<0)return false;
+  const e=t.equips.splice(ix,1)[0];
+  toGrave(e.owner,e.cardId);
+  log(CARDS[e.cardId].name+' tears off '+nm(t)+', and the effect comes away with it.');
+  equipCameOff(t,e,true);
+  return true;
+}
 /* Self-Hexer pays out the first time you aim magic at your own side. */
 function noteSelfTarget(p){
   if(!G.castingMagic)return;
@@ -2939,8 +3211,13 @@ const sameRow=(a,b)=>row(a)===row(b), sameCol=(a,b)=>col(a)===col(b);
    the allowance is spent, so every reader of it stays correct. */
 function teeceCap(p){
   const extra=(G&&G.extraTeece)||0;
-  if(!G||!perkN('doublePlay')||!sameTeam(p,0))return 1+extra;
-  return (((G.players[p]&&G.players[p].turnsTaken)||0)<=1?2:1)+extra;
+  if(!G)return 1+extra;
+  const pl=G.players[p];
+  /* Garbage plays two a turn as a rule of the deck rather than of any card, and
+     Garbage Soul adds another while it stands. */
+  let base=(pl&&pl.perTurn&&pl.perTurn.play)||1;
+  if(perkN('doublePlay')&&sameTeam(p,0))base=Math.max(base,((pl&&pl.turnsTaken)||0)<=1?2:1);
+  return base+grantedBy(p,'grantPlay')+extra;
 }
 /* The Brigadeers' free play: one named card that may go down this turn without
    spending the turn's Teece play, whether or not one has been spent already. */
@@ -3073,7 +3350,7 @@ function newState(mode,vsAI,decks,extra){
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
     width:BW,
     web:Array.from({length:BN},(_,i)=>_spun&&!isCornerCell(i)),
-    board:Array.from({length:BN},()=>({teece:null,ground:null,mine:null,defMark:null,razed:false,curseP:null,seed:null,enchant:null})),
+    board:Array.from({length:BN},()=>({teece:null,ground:null,mine:null,defMark:null,razed:false,curseP:null,seed:null,enchant:null,fire:null})),
     turn:Math.floor(Math.random()*nP),turnNum:1,teecePlayed:false,over:false,winner:null,pending:null,
     phase:'day',
     detailLock:null,detailHover:null,panelTap:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],graveLastTurn:[],
@@ -3645,6 +3922,14 @@ function effSides(b,i,parts){
     const mates=allyCount(b,i,false);
     if(mates)addMod(s,DEF(t).modPerAlly*mates,DEF(t).name+', for each of the '+mates+' other allies standing');
   }
+  /* Living Dump is the heap behind its controller made flesh. Printed on the
+     card, so silence never touches it, and read fresh every scan because the
+     graveyard fills up underneath it. */
+  if(DEF(t).modPerGrave){
+    const mg=DEF(t).modPerGrave,pile=(G.players[t.owner]&&G.players[t.owner].grave.length)||0;
+    const n=Math.floor(pile/(mg.per||1))*mg.n;
+    if(n)addMod(s,n,DEF(t).name+', for the '+pile+' cards in the graveyard');
+  }
   /* Oliminitator and Xecutioner read the whole board -- both sides, bare
      Toerrains, and themselves among the count. Printed on the card rather than
      radiated at it, so silencing the card never touches it. */
@@ -3670,6 +3955,12 @@ function effSides(b,i,parts){
     if(gd.gStand&&t.standCell===i)addMod(s,gd.gStand,gd.name+', for standing still');
     if(b[i].ground.gmod!=null)addMod(s,b[i].ground.gmod,gd.name+', the ground here');
     if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addMod(s,gd.gRangedPlus,gd.name+', for being Ranged');
+    /* The Dumpster pays for what is packed into it, and the Patch for a row
+       held end to end. */
+    if(gd.gHeldPer&&b[i].ground.held&&b[i].ground.held.length)
+      addMod(s,Math.floor(b[i].ground.held.length/(gd.gHeldPer.per||1))*gd.gHeldPer.n,
+        gd.name+', for the '+b[i].ground.held.length+' cards packed into it');
+    if(gd.gGarbageFull&&patchFull(b,i))addMod(s,gd.gGarbageFull,gd.name+', filled end to end');
     /* A battleground that pays one side by day and charges the other by
        night. Ally and enemy are read against whoever laid it. */
     for(const pm of (gd.gPhaseMod||[])){
@@ -3680,6 +3971,10 @@ function effSides(b,i,parts){
       addMod(s,pm.n,gd.name+(pm.when==='night'?', by night':', by day'));
     }
   }
+  /* The panel itself is burning. Not a penalty applied to the Teece -- it is
+     the ground it is standing on, so Steadfast does not save it and walking out
+     of the fire is what does. */
+  if(b[i].fire)addMod(s,-FIRE_N,'The panel is on fire');
   for(let j=0;j<BN;j++){
     if(j===i)continue;
     const o=b[j].teece; if(!o)continue;
@@ -4066,7 +4361,7 @@ function scanDeaths(b){
   };
   const mark=(vi,ki)=>{const v=b[vi].teece;if(!dead[vi])dead[vi]={cell:vi,t:v,killers:[]};
     if(ki!=null&&dead[vi].killers.indexOf(b[ki].teece.uid)<0)dead[vi].killers.push(b[ki].teece.uid);};
-  const immune=i=>b[i].teece&&b[i].teece.immortalOwner!=null;
+  const immune=i=>b[i].teece&&(b[i].teece.immortalOwner!=null||blessedOn(b,i));
   /* Carapace: its wearer swings two harder at anything standing on the Web. The
      bonus is on the pairing, not on the Teece, so it never shows in effSides. */
   const webEdge=(ai,di)=>{
@@ -4173,6 +4468,9 @@ function applyModT(t,n,dur){
     if(isSteadfast(t))return;
     if(hasInvertLoss(t))n=-n;
   }
+  /* Rancid Mist stands between an enemy and every bonus aimed at it. Checked
+     after the inversion above, so a loss turned into a gain is soaked up too. */
+  if(n>0&&gainBlocked(t))return;
   /* Doubling is a state, not a stacking multiplier: two sources saying
      "positive effects count double" still only double it once. */
   let dblPos=!!DEF(t).selfDoublePos,dblNeg=false;
@@ -4270,6 +4568,7 @@ async function FXRUN(st,ctx){
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     if(wardMagic(b,c,p)){ctx.last=c;await anim([c],'zap');return;}
+    if(tapeSave(b,c,p)){ctx.last=c;await anim([c],'zap');return;}
     applyModT(b[c].teece,st.n,st.dur);
     ctx.last=c;
     log(nm(b[c].teece)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');
@@ -4933,6 +5232,7 @@ async function FXRUN(st,ctx){
     const c=await pickCell(cands,'Choose a Teece to destroy.',(bb,i)=>{bb[i].teece=null;},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
+    if(tapeSave(b,c,p)){await anim([c],'zap');return;}
     const vt=b[c].teece;
     log(nm(vt)+' is destroyed outright.');
     await anim([c],'dying',190);
@@ -5220,6 +5520,7 @@ async function FXRUN(st,ctx){
     const c=await pickCell(cands,'Choose a Teece: '+sgn(st.n)+' Defence.',(bb,i)=>{applyDef(bb[i].teece,st.n);},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
+    if(tapeSave(b,c,p))return;
     applyDef(b[c].teece,st.n);
     log(nm(b[c].teece)+' gets '+sgn(st.n)+' Defence.');
     return;}
@@ -5403,8 +5704,9 @@ async function FXRUN(st,ctx){
     return;}
   case 'shieldNext':{
     const who=ctx.deadOwner!=null?ctx.deadOwner:p;
-    G.players[who].nextShield=true;
-    log('The next Teece '+pname(who)+' plays cannot be destroyed until the start of their next turn.');
+    G.players[who].nextShield=st.long?'long':true;
+    log('The next Teece '+pname(who)+' plays cannot be destroyed until the '+
+      (st.long?'end':'start')+' of their next turn.');
     return;}
   /* Aerial Support reads formations rather than sides: inside the area it
      picks out, anything standing with its own is either reinforced or strafed.
@@ -5716,6 +6018,7 @@ async function FXRUN(st,ctx){
     const c=await pickCell(cands,'Rotate which Teece '+(st.dir==='cw'?'clockwise':'counter-clockwise')+'?',spin,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
+    if(tapeSave(b,c,p)){await anim([c],'zap');return;}
     spin(b,c);
     log(nm(b[c].teece)+' turns '+dirTxt(st.dir)+'.');
     await anim([c],'zap');
@@ -6319,6 +6622,7 @@ async function FXRUN(st,ctx){
     const c=await pickCell(cands,'Silence a Teece — its abilities are negated for good — or skip.',null,true);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
+    if(tapeSave(b,c,p)){await anim([c],'zap');return;}
     b[c].teece.silenced=true;
     log(nm(b[c].teece)+' is silenced: its abilities are negated for the rest of the game, '+
       'and it no longer gets back up.');
@@ -6570,6 +6874,324 @@ async function FXRUN(st,ctx){
     log(pname(p)+' deals away '+burnt.map(cid=>CARDS[cid].name).join(', ')+'.');
     drawCards(p,1);
     return;}
+  /* ---- Garbage ---- */
+  /* The Rusted Crank: a quarter turn given to anybody, and then a shove to go
+     with it. Turning a Teece is not always a kindness -- the numbers go round
+     with it, so an 8 pointed at a neighbour can be cranked to face the wall. */
+  case 'haul':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return none('No valid target.');
+    const c=await pickCell(cands,'Crank which Teece round?',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(tapeSave(b,c,p)){await anim([c],'zap');return;}
+    const dir=await chooseOption(p,[{v:'cw',lbl:'Turn it clockwise'},{v:'ccw',lbl:'Turn it counter-clockwise'}],
+      'Which way does '+nm(b[c].teece)+' turn?');
+    spinT(b[c].teece,dir==='ccw'?'ccw':'cw');
+    log(nm(b[c].teece)+' turns '+dirTxt(dir==='ccw'?'ccw':'cw')+'.');
+    await anim([c],'zap');
+    if(hasKw(b,c,'immovable'))return;
+    const d=ADJ[c].filter(j=>openAt(b,j));
+    if(!d.length)return;
+    const t=b[c].teece;
+    const dst=await chooseCell(p,d,'Move it one space, or skip.',
+      {skip:true,mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);}});
+    if(dst==null||dst==='CANCEL')return;
+    moveT(b,c,dst,true);
+    log(nm(t)+' is shoved to the '+CN[dst]+'.');
+    await fireMove(c,dst,p);
+    return;}
+  /* Two orthogonal steps and nothing on the way: the Cart rolls, it does not
+     run anything down. Routes are worked out the way the Zombie sprint works
+     them out, so a destination two panels off is reachable only if there is an
+     empty panel in between to roll through. */
+  case 'trundle':{
+    const i=ctx.cell;
+    if(hasKw(b,i,'immovable'))return none('It cannot move.');
+    const t=b[i].teece;
+    const dests={};
+    for(const j of ADJ[i]){
+      if(!openAt(b,j))continue;
+      dests[j]=true;
+      for(const k of ADJ[j])if(k!==i&&openAt(b,k))dests[k]=true;
+    }
+    const list=Object.keys(dests).map(Number);
+    if(!list.length)return none('Nowhere to roll.');
+    const c=await pickCell(list,'Trundle up to two spaces.',
+      (bb,j)=>{if(bb[i].teece)moveT(bb,i,j,false);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    moveT(b,i,c,true);
+    log(nm(t)+' trundles to the '+CN[c]+'.');
+    await fireMove(i,c,p);
+    return;}
+  /* An ally climbs into the Cart. It comes off the board and rides as an equip
+     -- which is exactly what the card says -- so it stops fighting, stops being
+     fought, and is tipped back out when the Cart goes over. */
+  case 'loadAlly':{
+    const i=ctx.cell,cart=ctx.t;
+    if(!cart)return;
+    const cands=ADJ[i].filter(j=>{
+      const o=b[j].teece;
+      return o&&sameTeam(o.owner,p)&&!o.isToken&&!o.isCopy&&canSacrifice(b,j)&&!hasKw(b,j,'immovable');
+    });
+    if(!cands.length)return none('No ally is standing beside the Cart.');
+    const c=await pickCell(cands,'Which ally climbs into the Cart?',(bb,j)=>{bb[j].teece=null;},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const rider=b[c].teece;
+    b[c].teece=null;
+    for(const e of rider.equips)toGrave(e.owner,e.cardId);
+    cart.equips.push({cardId:rider.cardId,owner:rider.baseOwner,rider:true});
+    log(nm(rider)+' climbs into '+nm(cart)+' and rides there.');
+    return;}
+  /* The Racoon works either heap. Somebody else's is worth more and costs two
+     cards off your hand, which is the whole of the decision. */
+  case 'rummage':{
+    const piles=[];
+    for(let q=0;q<PLAYERS();q++)if(G.players[q].grave.length)piles.push(q);
+    if(!piles.length)return none('Every graveyard is empty.');
+    const opts=piles.map(q=>({v:String(q),lbl:(sameTeam(q,p)?'Your own graveyard':pname(q)+"'s graveyard")+
+      ' ('+G.players[q].grave.length+')'}));
+    const pick=await chooseOption(p,opts,'Rummage in which graveyard?',!!ctx.first);
+    if(pick==='CANCEL')return 'ABORT';
+    if(pick==null)return;
+    const q=parseInt(pick,10),pile=G.players[q].grave;
+    const cid=pile.splice(Math.floor(Math.random()*pile.length),1)[0];
+    handPush(p,cid);
+    log(pname(p)+' drags '+CARDS[cid].name+' out of '+(sameTeam(q,p)?'their own graveyard':pname(q)+"'s graveyard")+'.');
+    if(!sameTeam(q,p)){
+      log('It came out of an enemy heap, so '+pname(p)+' '+vb(p,'discards','discard')+' two cards.');
+      await runSteps([{fx:'discard',n:2}],{p,first:false});
+    }
+    return;}
+  /* The Compactor Arm eats its own side. A price, not a destruction, so what it
+     takes cannot be held safe from it. */
+  case 'scrapAlly':{
+    const cands=ADJ[ctx.cell].filter(j=>{
+      const o=b[j].teece;
+      return o&&sameTeam(o.owner,p)&&canSacrifice(b,j);
+    });
+    if(!cands.length)return none('No ally is standing beside it.');
+    const c=await pickCell(cands,'Feed which ally into the Compactor?',(bb,j)=>{bb[j].teece=null;},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return 'ABORT';
+    const victim=b[c].teece;
+    log(nm(victim)+' goes into the Compactor.');
+    await processDeath({cell:c,t:victim,killers:[],cost:true});
+    return;}
+  case 'ignite':{
+    const own=ctx.deadOwner!=null?ctx.deadOwner:p;
+    if(st.where==='here'){
+      const i=ctx.deadCell!=null?ctx.deadCell:ctx.cell;
+      if(i==null)return none('No panel to set alight.');
+      setFire(i,own,true);
+      return;}
+    const centre=ctx.cell;
+    if(centre==null)return none('No panel to set alight.');
+    const cells=[centre].concat(ADJ[centre]);
+    for(const j of cells)setFire(j,own,false);
+    log('The '+CN[centre]+' and every panel beside it go up: anything standing in the fire has -'+FIRE_N+' while it burns.');
+    await anim(cells,'zap');
+    return;}
+  /* The Garbage Man is paid for throwing things away. Up to st.max cards, one
+     at a time, so the second is offered only after the first is gone. */
+  case 'dumpDiscard':{
+    const pl=G.players[p];
+    let n=0;
+    for(let k=0;k<(st.max||1);k++){
+      if(!pl.hand.length)break;
+      const opts=pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name,cid:id}));
+      opts.push({v:'no',lbl:'Throw nothing away'});
+      const pick=await chooseOption(p,opts,'Discard a card for '+sgn(st.n)+'? ('+(k+1)+' of '+(st.max||1)+')');
+      if(pick==null||pick==='no'||pick==='CANCEL')break;
+      const gone=handTake(p,parseInt(pick,10));
+      if(!gone)break;
+      dumpPlate(gone.plate,'with the card it was bolted to');
+      log(pname(p)+' throws '+CARDS[gone.id].name+' away.');
+      await discardCard(p,gone.id);
+      n++;
+      if(ctx.t)applyModT(ctx.t,st.n,'perm');
+    }
+    if(!n)return none('Nothing is thrown away.');
+    if(ctx.t)log(nm(ctx.t)+' gets '+sgn(st.n*n)+' for the '+n+' card'+(n===1?'':'s')+' thrown away.');
+    return;}
+  /* Cards destroyed in a graveyard are gone for good: out of the pile, and out
+     of reach of everything that reads the pile. */
+  case 'graveBurn':{
+    const pl=G.players[p];
+    if(!pl.grave.length)return none('The graveyard is empty.');
+    let n=0;
+    for(let k=0;k<(st.n||1)&&pl.grave.length;k++){
+      const cid=pl.grave.splice(Math.floor(Math.random()*pl.grave.length),1)[0];
+      log(CARDS[cid].name+' is destroyed in the graveyard.');
+      n++;
+    }
+    if(!n)return none('The graveyard is empty.');
+    return;}
+  case 'graveGrab':{
+    const pl=G.players[p];
+    if(!pl.grave.length)return none('The graveyard is empty.');
+    const cid=pl.grave.splice(Math.floor(Math.random()*pl.grave.length),1)[0];
+    handPush(p,cid);
+    log(pname(p)+' fishes '+CARDS[cid].name+' back out of the graveyard.');
+    return;}
+  /* The Broken Doll takes a fitting with it: an equip off anybody, or a whole
+     battleground. */
+  case 'scrapGear':{
+    const own=ctx.deadOwner!=null?ctx.deadOwner:p;
+    const opts=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(t)for(let x=0;x<t.equips.length;x++)
+        opts.push({v:'e'+i+'_'+x,lbl:CARDS[t.equips[x].cardId].name+' on '+nm(t)});
+    }
+    const seen=[];
+    for(let i=0;i<BN;i++){
+      const g=b[i].ground;if(!g)continue;
+      const key=g.gid?'g'+g.gid:'c'+i;
+      if(seen.indexOf(key)>=0)continue;
+      seen.push(key);
+      opts.push({v:'b'+i,lbl:CARDS[g.cardId].name+' at the '+CN[i]});
+    }
+    if(!opts.length)return none('There is no equip or battleground on the field.');
+    const pick=await chooseOption(own,opts,'Destroy which equip or battleground?');
+    if(pick==null||pick==='CANCEL')return;
+    if(pick.charAt(0)==='b'){
+      const i=parseInt(pick.slice(1),10);
+      log(CARDS[b[i].ground.cardId].name+' is torn up.');
+      await clearGroundAt(i,own);
+      return;}
+    const parts=pick.slice(1).split('_'),ci=parseInt(parts[0],10),ex=parseInt(parts[1],10);
+    const host=b[ci].teece;
+    if(!host||!host.equips[ex])return;
+    const e=host.equips.splice(ex,1)[0];
+    toGrave(e.owner,e.cardId);
+    log(CARDS[e.cardId].name+' is torn off '+nm(host)+' and destroyed.');
+    equipCameOff(host,e,true);
+    return;}
+  /* The Trash King eats the heap. How much of it is the player's to say, and
+     the cards are gone once they are eaten. */
+  case 'consumeGrave':{
+    const pl=G.players[p];
+    if(!pl.grave.length)return none('The graveyard is empty.');
+    const opts=[];
+    for(let k=pl.grave.length;k>0;k--)opts.push({v:String(k),lbl:'Destroy '+k+' card'+(k===1?'':'s')+': '+sgn(st.n*k)});
+    opts.push({v:'0',lbl:'Destroy nothing'});
+    const pick=await chooseOption(p,opts,'How much of the graveyard goes into the Trash King?');
+    const k=pick==null||pick==='CANCEL'?0:parseInt(pick,10);
+    if(!k)return none('Nothing is destroyed.');
+    for(let x=0;x<k&&pl.grave.length;x++)pl.grave.splice(Math.floor(Math.random()*pl.grave.length),1);
+    if(ctx.t){
+      applyModT(ctx.t,st.n*k,'perm');
+      log(nm(ctx.t)+' swallows '+k+' card'+(k===1?'':'s')+' out of the graveyard: '+sgn(st.n*k)+'.');
+    }
+    return;}
+  case 'nothing':{
+    log(st.msg||'Nothing happens.');
+    return;}
+  /* Choke is paid for in bodies, and a Boss is worth what it cost to raise:
+     the two or three Teece that went under it count again here. */
+  case 'choke':{
+    const need=st.n||4;
+    const worth=j=>Math.max(1,CARDS[b[j].teece.cardId].sac||0);
+    const pool=()=>{
+      const o=[];
+      for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&sameTeam(t.owner,p)&&canSacrifice(b,i))o.push(i);}
+      return o;
+    };
+    let credit=0;
+    for(const j of pool())credit+=worth(j);
+    if(credit<need)return none('Not enough allied Teece to choke it out: '+need+' are needed.');
+    const foes=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p)&&!isHeldSafe(t))foes.push(i);}
+    if(!foes.length)return none('There is no enemy to choke.');
+    let paid=0;
+    while(paid<need){
+      const avail=pool();
+      if(!avail.length)break;
+      const c=await pickCell(avail,'Sacrifice an allied Teece to Choke ('+paid+' of '+need+' paid).',null,false);
+      if(c==='CANCEL')return 'ABORT';
+      if(c==null)return 'ABORT';
+      const v=b[c].teece,w=worth(c);
+      log(nm(v)+' is choked out, and counts for '+w+'.');
+      await processDeath({cell:c,t:v,killers:[],cost:true});
+      paid+=w;
+      render();
+    }
+    if(paid<need)return none('The price could not be paid in full.');
+    const live=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p)&&!isHeldSafe(t))live.push(i);}
+    if(!live.length)return none('There is nothing left to choke.');
+    const c=await pickCell(live,'Choose an enemy Teece to destroy.',(bb,i)=>{bb[i].teece=null;},false);
+    if(c==='CANCEL'||c==null)return;
+    if(tapeSave(b,c,p)){await anim([c],'zap');return;}
+    const vt=b[c].teece;
+    log(nm(vt)+' is choked out.');
+    await anim([c],'dying',190);
+    await processDeath({cell:c,t:vt,killers:[]});
+    return;}
+  case 'garbageDay':{
+    const pl=G.players[p];
+    if(!pl.hand.length)return none('There is nothing in hand to throw out.');
+    let n=0;
+    for(let k=0;k<(st.max||1);k++){
+      if(!pl.hand.length)break;
+      const opts=pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name,cid:id}));
+      opts.push({v:'no',lbl:n?'That is enough':'Throw nothing out'});
+      const pick=await chooseOption(p,opts,'Throw out a card, and draw one for it. ('+(k+1)+' of '+(st.max||1)+')');
+      if(pick==null||pick==='no'||pick==='CANCEL')break;
+      const gone=handTake(p,parseInt(pick,10));
+      if(!gone)break;
+      dumpPlate(gone.plate,'with the card it was bolted to');
+      log(pname(p)+' throws '+CARDS[gone.id].name+' out.');
+      await discardCard(p,gone.id);
+      n++;
+    }
+    if(!n)return none('Nothing is thrown out.');
+    drawCards(p,n);
+    return;}
+  /* Diving in somebody else's dumpster: one card comes up in your hand, and the
+     next one you touch goes straight onto your own heap. */
+  case 'dumpsterDive':{
+    const pl=G.players[p];
+    if(!pl.hand.length)return none('There is nothing in hand to pay with.');
+    const foes=[];
+    for(let q=0;q<PLAYERS();q++)if(!sameTeam(q,p)&&G.players[q].grave.length)foes.push(q);
+    if(!foes.length)return none('No opponent has anything in their graveyard.');
+    let q=foes[0];
+    if(foes.length>1){
+      const pick=await chooseOption(p,foes.map(x=>({v:String(x),lbl:pname(x)+"'s graveyard ("+G.players[x].grave.length+')'})),
+        'Dive into which graveyard?',!!ctx.first);
+      if(pick==='CANCEL')return 'ABORT';
+      if(pick==null)return;
+      q=parseInt(pick,10);
+    }
+    const ok=await runSteps([{fx:'discard',n:1}],{p,first:false});
+    if(!ok)return 'ABORT';
+    const pile=G.players[q].grave;
+    const got=pile.splice(Math.floor(Math.random()*pile.length),1)[0];
+    handPush(p,got);
+    log(pname(p)+' comes up out of '+pname(q)+"'s graveyard holding "+CARDS[got].name+'.');
+    if(pile.length){
+      const moved=pile.splice(Math.floor(Math.random()*pile.length),1)[0];
+      toGrave(p,moved);
+      log(CARDS[moved].name+' is dragged over onto '+pname(p)+"'s own heap.");
+    }
+    return;}
+  /* Dumpster Fire: the body that lit it is the fuel. */
+  case 'dumpsterFire':{
+    const i=ctx.cell,t=ctx.t;
+    if(i==null||!t)return none('Nothing is standing on the Dumpster.');
+    log(nm(t)+' goes up with the Dumpster.');
+    await anim([i],'dying',190);
+    await processDeath({cell:i,t,killers:[],cost:true});
+    const cells=[i].concat(ADJ[i]);
+    for(const j of cells)setFire(j,p,false);
+    log('The Dumpster and every panel beside it burn until the start of '+pposs(p)+' next turn: -'+FIRE_N+' to anything standing in the fire.');
+    await anim(cells,'zap');
+    return;}
   case 'move':{
     const i=ctx.cell;
     if(hasKw(b,i,'immovable'))return none('It cannot move.');
@@ -6798,7 +7420,17 @@ async function undyingReturn(t,cell){
 /* Held outside time. Pause, a Stasis Field and a zombie that has just hauled
    itself up all hang on the same flag, and "cannot be destroyed" has to mean it
    everywhere rather than only in a fight. */
-const isHeldSafe=t=>!!t&&t.immortalOwner!=null;
+const isHeldSafe=t=>{
+  if(!t)return false;
+  if(t.immortalOwner!=null)return true;
+  /* Blessing of the Dump is cover held by a formation rather than by a clock,
+     so it has to be worked out from where the Teece is standing right now. */
+  if(G&&G.board){
+    const i=G.board.findIndex(c=>c.teece===t);
+    if(i>=0)return blessedOn(G.board,i);
+  }
+  return false;
+};
 async function processDeath(d){
   const b=G.board,t=d.t,cell=d.cell;
   if(b[cell].teece!==t)return;
@@ -6917,6 +7549,32 @@ async function processDeath(d){
       }
     }
   }
+  /* Anything riding in the Rusted Shopping Cart is tipped out onto the panels
+     around it. A rider is an equip only in how it is carried -- it is a real
+     card, so it comes back as a Teece, and falls into the grave only when there
+     is nowhere left to stand. */
+  const riders=t.equips.filter(e=>e.rider);
+  if(riders.length){
+    t.equips=t.equips.filter(e=>!e.rider);
+    for(const e of riders){
+      /* The panels BESIDE the Cart, which is what the card says: the panel the
+         Cart itself was standing on is not one of them, so a Cart that goes
+         over hemmed in on all four sides scraps what it was carrying. */
+      const spots=ADJ[cell].filter(j=>openAt(b,j));
+      if(!spots.length){
+        toGrave(e.owner,e.cardId);
+        log(CARDS[e.cardId].name+' is tipped out with nowhere to stand, and is scrapped.');
+        continue;
+      }
+      const c=await chooseCell(e.owner,spots,'Where does '+CARDS[e.cardId].name+' land as the Cart goes over?',
+        {mut:(bb,j)=>{putTeece(bb,j,makeTeece(e.cardId,e.owner),false);}});
+      const dst=(c==null||c==='CANCEL')?spots[0]:c;
+      if(!openAt(b,dst)){toGrave(e.owner,e.cardId);continue;}
+      putTeece(b,dst,makeTeece(e.cardId,e.owner),true);
+      attachRiders(e.owner,e.cardId,b[dst].teece,true);
+      log(CARDS[e.cardId].name+' is thrown clear of the Cart onto the '+CN[dst]+'.');
+    }
+  }
   for(const uid of t.controls)revertControl(b,uid,true);
   /* resummon */
   let gone=!!ctx.consumed;
@@ -6966,9 +7624,29 @@ async function processDeath(d){
     }
     const gr=G.board[cell].ground,grd=gr?CARDS[gr.cardId]:null;
     const salvage=grd&&grd.gSalvage&&gr.owner===t.baseOwner;
+    /* Trash Heap: whatever is thrown away on this panel is yours, whoever it
+       belonged to. Every burial from here goes through bury() so the body and
+       the equips buckled to it all land in the same graveyard. */
+    const heapTo=(grd&&grd.gGraveSteal)?gr.owner:null;
+    const bury=(owner,cardId)=>{
+      toGrave(heapTo!=null?heapTo:owner,cardId);
+      if(heapTo!=null&&heapTo!==owner)log(CARDS[cardId].name+' is thrown onto '+pname(heapTo)+"'s Trash Heap.");
+    };
+    /* Recycling Bins: a card off the hand buys the body back. */
+    if(!handed&&!t.isToken&&!t.isCopy&&grd&&grd.gRecycle&&G.players[t.baseOwner].hand.length){
+      const yes=await chooseOption(t.baseOwner,[{v:'y',lbl:'Discard a card to take it back'},{v:'n',lbl:'Let it go to the grave'}],
+        nm(t)+' fell in the Recycling Bins. Discard a card to take it back to hand?');
+      if(yes==='y'){
+        await runSteps([{fx:'discard',n:1}],{p:t.baseOwner,first:false});
+        handPush(t.baseOwner,t.cardId);
+        handed=true;
+        log(nm(t)+' is sorted out of the Recycling Bins and back into '+pname(t.baseOwner)+"'s hand.");
+      }
+    }
     for(const e of t.equips){
       const eg=CARDS[e.cardId].grants;
-      if(eg&&eg.reequip){
+      if(eg&&eg.reequip&&!(eg.reequipOnce&&G.players[e.owner].onceUsed['req'+e.cardId])){
+        if(eg.reequipOnce)G.players[e.owner].onceUsed['req'+e.cardId]=true;
         const hosts=[];
         for(let i2=0;i2<9;i2++)if(G.board[i2].teece&&G.board[i2].teece.owner===e.owner)hosts.push(i2);
         if(hosts.length){
@@ -6991,19 +7669,20 @@ async function processDeath(d){
         continue;
       }
       if(salvage&&e.owner===gr.owner)handPush(e.owner,e.cardId);
-      else toGrave(e.owner,e.cardId);
+      else bury(e.owner,e.cardId);
     }
     if(!handed&&!t.isToken&&!t.isCopy){
       if(salvage){handPush(t.baseOwner,t.cardId);log(nm(t)+' is salvaged back to hand.');}
       /* A Graveyard keeps what dies on it. The card is buckled onto the
          battleground rather than buried, and comes back to its owner's hand
          when the Graveyard itself is broken up. */
-      else if(gr&&grd.gInter){
+      else if(gr&&(grd.gInter||grd.gDump)){
         gr.held=gr.held||[];
         gr.held.push({cardId:t.cardId,owner:t.baseOwner});
-        log(nm(t)+' is equipped to the Graveyard instead of going to a graveyard. '+gr.held.length+' held.');
+        log(nm(t)+(grd.gDump?' is packed into the Dumpster instead of going to a graveyard. '
+          :' is equipped to the Graveyard instead of going to a graveyard. ')+gr.held.length+' held.');
       }
-      else toGrave(t.baseOwner,t.cardId);
+      else bury(t.baseOwner,t.cardId);
     }
   }
   /* A Bone Field counts every body that falls on it, whether or not the body
@@ -7065,6 +7744,38 @@ async function resolveCombat(){
           if(c!=null&&c!=='CANCEL'){moveT(G.board,d.cell,c,true);await fireMove(d.cell,c,d.t.owner);}
         }
         dodged=true;
+      }
+      /* Banana Peel: a slip bought with two cards off your own graveyard.
+         Offered rather than automatic, because the stockpile is worth
+         something to half the deck and the player is the one spending it. */
+      const peel=d.t.equips.map(e=>({e,g:CARDS[e.cardId].grants})).find(x=>x.g&&x.g.dodge);
+      if(peel&&!d.t.dodged&&G.board[d.cell].teece===d.t&&!hasKw(G.board,d.cell,'immovable')){
+        const own=G.players[d.t.owner];
+        const empt=ADJ[d.cell].filter(j=>openAt(G.board,j));
+        const cost=peel.g.dodge.grave||0;
+        if(empt.length&&own.grave.length>=cost){
+          const yes=await chooseOption(d.t.owner,
+            [{v:'y',lbl:'Destroy '+cost+' cards in your grave and slip clear'},{v:'n',lbl:'Stand and take it'}],
+            nm(d.t)+' is standing on a Banana Peel. Slip one space clear?');
+          if(yes==='y'){
+            for(let k=0;k<cost&&own.grave.length;k++)own.grave.splice(Math.floor(Math.random()*own.grave.length),1);
+            log(pname(d.t.owner)+' destroys '+cost+' cards in the graveyard, and '+nm(d.t)+' slips.');
+            d.t.dodged=true;
+            const c=await chooseCell(d.t.owner,empt,'Slip '+nm(d.t)+' one space clear.',
+              {mut:(bb,j)=>{if(bb[d.cell].teece)moveT(bb,d.cell,j,false);}});
+            const dst=(c==null||c==='CANCEL')?empt[0]:c;
+            moveT(G.board,d.cell,dst,true);
+            log(nm(d.t)+' slides to the '+CN[dst]+'.');
+            await fireMove(d.cell,dst,d.t.owner);
+            const km=peel.g.dodge.killer||0;
+            if(km)for(const kuid of (d.killers||[]))for(let i2=0;i2<BN;i2++){
+              const k=G.board[i2].teece;
+              if(k&&k.uid===kuid){applyModT(k,km,'perm');log(nm(k)+' skids on the peel: '+sgn(km)+'.');}
+            }
+            dodged=true;
+            continue;
+          }
+        }
       }
     }
     if(dodged){deaths=scanDeaths(G.board);if(!deaths.length)break;}
@@ -7513,9 +8224,13 @@ async function playTeece(p,handIdx){
   /* Cadet Annette hands the cover it was under to whoever comes next. An
      immortality with no turn set on it lifts at the start of its owner's turn. */
   if(pl.nextShield){
+    /* A cover with no end set on it lifts at the start of its owner's next
+       turn; a Landfill Tarp holds one turn longer, to the end of that turn. */
+    const long=pl.nextShield==='long';
     pl.nextShield=false;
-    t.immortalOwner=p;t.immortalUntil=0;
-    log(nm(t)+' arrives under cover: it cannot be destroyed until the start of '+pposs(p)+' next turn.');
+    t.immortalOwner=p;t.immortalUntil=long?nextTurnExpiry():0;
+    log(nm(t)+' arrives under cover: it cannot be destroyed until the '+
+      (long?'end':'start')+' of '+pposs(p)+' next turn.');
   }
   if(pl.nextSides){
     const ns=pl.nextSides;pl.nextSides=null;
@@ -7655,6 +8370,13 @@ function areaShapeCells(anchor,shape){
 }
 function groundCells(anchor,shape){
   if(shape==='1x1')return [anchor];
+  /* The Great Garbage Patch takes a whole row, however wide the board is: three
+     panels in a two-player game, four in a three-player one. */
+  if(shape==='row'){
+    if(col(anchor)!==0)return null;
+    const cells=[];for(let c=0;c<BW;c++)cells.push(anchor+c);
+    return cells;
+  }
   const rows=Math.floor(BN/BW);
   if(shape==='2x1'){
     if(col(anchor)>BW-2)return null;
@@ -7674,8 +8396,15 @@ async function clearGroundAt(i,breaker){
      Graveyard came apart -- its own act, an enemy laying a battleground over
      it, or a Quake. */
   for(const held of (g.held||[])){
-    handPush(held.owner,held.cardId);
-    log(CARDS[held.cardId].name+' returns from the Graveyard to '+pname(held.owner)+"'s hand.");
+    /* A Graveyard hands back what it interred; a Dumpster is not a loan, and
+       everything packed into it is tipped into its owner's graveyard. */
+    if(gd.gDump){
+      toGrave(g.owner,held.cardId);
+      log(CARDS[held.cardId].name+' is tipped out of the Dumpster and into '+pname(g.owner)+"'s graveyard.");
+    }else{
+      handPush(held.owner,held.cardId);
+      log(CARDS[held.cardId].name+' returns from the Graveyard to '+pname(held.owner)+"'s hand.");
+    }
   }
   G.players[g.owner].grave.push(g.cardId);
   if(gd.gDiscardOnBreak&&breaker!=null&&breaker!==g.owner){
@@ -7700,6 +8429,7 @@ async function playGround(p,handIdx){
     }
     if(!ctl.off)fireModal(p);
   }
+  if(d.gRow)shape='row';
   if(d.gShape){
     const pick=await chooseOption(p,[{v:'1x1',lbl:'One panel'},{v:'2x1',lbl:'Two panels'},{v:'2x2',lbl:'Four panels'}],
       'How large is '+d.name+'?');
@@ -7736,6 +8466,20 @@ async function playGround(p,handIdx){
         'The wide Platform arms everything on it with a parting shot.');
   }
   log(pname(p)+' lays '+d.name+(cells.length>1?' across '+cells.length+' panels.':' on the '+CN[c]+'.'));
+  /* The Dumpster does not arrive empty: it comes up loaded with whatever is
+     already lying in your graveyard, up to what it will hold. */
+  if(d.gLoad){
+    const g0=b[cells[0]].ground,pile=G.players[p].grave;
+    g0.held=g0.held||[];
+    let n=0;
+    while(n<d.gLoad&&pile.length){
+      const cid=pile.splice(Math.floor(Math.random()*pile.length),1)[0];
+      g0.held.push({cardId:cid,owner:p});
+      n++;
+    }
+    log(n?n+' card'+(n===1?'':'s')+' out of the graveyard '+(n===1?'is':'are')+' packed into the Dumpster.'
+         :'The Dumpster comes up empty: there is nothing in the graveyard yet.');
+  }
   await resolveCombat();
   render();
   return true;
@@ -8137,6 +8881,20 @@ async function startTurn(){
     if(t&&t.owner===p){t.actUsedTurn={};t.dodged=false;t.magicUsedTurn=0;t.drainsThisTurn=0;t.drainMove=false;}
     if(t&&t.immortalOwner===p&&!t.immortalUntil)t.immortalOwner=null;
   }
+  /* Wet Cardboard sags at the start of EVERY turn, whoever is taking it, so
+     this runs over the whole board rather than over one seat's Teece. */
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;if(!t)continue;
+    let sag=0;
+    for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.startMod)sag+=g.startMod;}
+    if(sag){applyModT(t,sag,'perm');log(nm(t)+' sags under wet cardboard: '+sgn(sag)+'.');}
+  }
+  /* A fire burns until the start of the next turn of whoever lit it, so it is
+     out by the time its own side comes round again. */
+  for(let i=0;i<BN;i++){
+    const f=G.board[i].fire;
+    if(f&&f.owner===p&&G.turnNum>f.lit){G.board[i].fire=null;log('The fire at the '+CN[i]+' burns itself out.');}
+  }
   G.movedThisTurn=[];
   G.graveLastTurn=G.graveThisTurn;
   G.graveThisTurn=[];
@@ -8151,7 +8909,7 @@ async function startTurn(){
   if(pl.pendingDraw){const n=pl.pendingDraw;pl.pendingDraw=0;drawCards(p,n);}
   if(G.turnNum>1){
     if(!pl.deck.length&&G.mode!=='rogue'&&!pl.noDeckOut){deckOut(p);return;}
-    if(pl.deck.length){drawCards(p,1);await flushDiscards();await offerReveal(p);}
+    if(pl.deck.length){drawCards(p,drawPerTurn(p));await flushDiscards();await offerReveal(p);}
   }
   warnLastCard(p);
   log('--- Turn '+G.turnNum+': '+pname(p)+' ---');
@@ -8198,6 +8956,7 @@ function cloneBoard(b){
     ground:c.ground?Object.assign({},c.ground,c.ground.held?{held:c.ground.held.slice()}:{}):null,
     mine:c.mine?Object.assign({},c.mine):null,
     enchant:c.enchant?Object.assign({},c.enchant):null,
+    fire:c.fire?Object.assign({},c.fire):null,
     razed:!!c.razed,
     curseP:c.curseP?Object.assign({},c.curseP):null,
     prime:c.prime?Object.assign({},c.prime):null,
@@ -9016,7 +9775,14 @@ function showDeckInfo(key){
     '<span class="rk">Combat</span><span>Adjacent enemies compare the edge numbers that touch; the smaller one dies and ties do nothing. '+
       'Any Teece whose attributes fall below zero dies on the spot, and every change anywhere re-checks the whole board.</span>'+
     '<span class="rk">Defence</span><span>Defence soaks the difference: a Teece with Defence 2 only dies to an attack that beats it by three or more.</span>'+
-    '<span class="rk">Each turn</span><span>One Teece. Equips, magic and battlegrounds are unlimited.</span>'+
+    /* "One Teece" is the rule for every deck but one, and a deck that prints
+       its own turn has to say so here or its own page contradicts it. */
+    '<span class="rk">Each turn</span><span>'+
+      (dk.perTurn
+        ? (dk.perTurn.play||1)+' Teece, and '+(dk.perTurn.draw||1)+
+          ' cards drawn at the top of it: this deck plays a bigger turn than the others. '
+        : 'One Teece. ')+
+      'Equips, magic and battlegrounds are unlimited.</span>'+
     '<span class="rk">Reviving</span><span>A Teece brought back from a graveyard is played: its when-played effect triggers, controlled by whoever revived it.</span>'+
     '<span class="rk">Winning</span><span>Wipe out every enemy Teece, end a turn four Teece ahead (Tokens never count), '+
       'or hold the bigger field when a player must draw from an empty deck.</span>'+
@@ -9069,7 +9835,8 @@ function pickFormat(){
     overlay.classList.remove('hidden');
     hideHcapRow();
     document.getElementById('draftTitle').textContent='Three players: choose the sides';
-    document.getElementById('draftInfo').textContent='Four by four board, three seats, one Teece per turn each.';
+    document.getElementById('draftInfo').textContent=
+      'Four by four board, three seats, and one Teece per turn each \u2014 unless somebody brings a deck that prints its own turn.';
     const box=document.getElementById('draftCards');
     box.innerHTML='';
     document.getElementById('draftDeck').textContent='';
@@ -9275,6 +10042,10 @@ function renderBoard(){
     const ench=G.board[i].enchant;
     if(ench)cell.innerHTML+='<div class="enchMark m'+ench.owner+'" title="'+escHtml(enchantText(ench))+
       '">✧ '+sgn(ENCHANT_N)+'</div>';
+    if(G.board[i].fire){
+      cell.classList.add('afire');
+      cell.innerHTML+='<div class="fireMark" title="'+escHtml(fireText(G.board[i].fire))+'">\u{1F525}-'+FIRE_N+'</div>';
+    }
     if(G.board[i].razed)cell.classList.add('razed');
     const t=G.board[i].teece;
     if(t){
@@ -9385,6 +10156,10 @@ function renderBoard(){
    Curse, a razing, a priming, a seed. Hovering a panel should show the lot. */
 /* Said the same way in the corner marker's tooltip and in the panel readout, so
    the two can never drift. */
+function fireText(f){
+  return 'This panel is on fire. Anything standing in it has -'+FIRE_N+
+    ', until the start of '+pposs(f.owner)+' next turn.';
+}
 function enchantText(e){
   /* Phrased around the owner rather than starting with them, because pname(0)
      is "You" and "You has enchanted" is not a sentence. */
@@ -9404,6 +10179,7 @@ function panelHtml(i){
   if(c.seed)h+='<div class="dt">'+pname(c.seed.owner)+' has a seed planted here, '+c.seed.turns+' turn'+(c.seed.turns===1?'':'s')+
     ' from growing. If the panel is empty then, a Teece is raised from the graveyard with '+sgn(c.seed.n||1)+'.</div>';
   if(c.enchant)h+='<div class="dt" style="color:var(--gold)">'+enchantText(c.enchant)+'</div>';
+  if(c.fire)h+='<div class="dt" style="color:var(--gold)">'+fireText(c.fire)+'</div>';
   const pm=panelMark(G.board,i);
   if(pm&&!c.teece)h+='<div class="dt" style="color:var(--gold)">Counts as '+
     (pm.m==='XO'?'an X and an O':(pm.m==='X'?'an X':'an O'))+' for '+teamName(pm.team)+
@@ -10178,7 +10954,10 @@ async function startInner(mode,vsAI){
     G=newState('three',vsAI,keys.map(k=>DECKS[k].cards.slice()),
       {seats:3,width:4,teams:fmt.teams,enemyBonus:hcap,aiSeats:vsAI?[1,2]:[]});
     G.deckNames=keys.map(k=>DECKS[k].name);
-    for(let i=0;i<3;i++)G.players[i].noDeckOut=(keys[i]==='berserker');
+    for(let i=0;i<3;i++){
+      G.players[i].noDeckOut=(keys[i]==='berserker');
+      G.players[i].perTurn=DECKS[keys[i]].perTurn||null;
+    }
     G.formatName=fmt.name;
     log(fmt.name+': '+keys.map((k,i)=>pname(i)+' brings '+DECKS[k].name).join(', ')+
       (hcap?'. Every Teece against you carries '+hcapLabel(hcap)+'.':'.'));
@@ -10198,6 +10977,10 @@ async function startInner(mode,vsAI){
     G.deckNames=[DECKS[mine].name,DECKS[theirs].name];
     G.players[0].noDeckOut=(mine==='berserker');
     G.players[1].noDeckOut=(theirs==='berserker');
+    /* A deck may print its own turn: Garbage plays two Teece and draws two
+       cards every turn, for as long as it is the deck being played. */
+    G.players[0].perTurn=DECKS[mine].perTurn||null;
+    G.players[1].perTurn=DECKS[theirs].perTurn||null;
     log(DECKS[mine].name+' faces '+DECKS[theirs].name+
       (hcap?', and every enemy Teece carries '+hcapLabel(hcap)+' on all four sides.':'.'));
     render();
@@ -10290,6 +11073,7 @@ if(typeof module!=='undefined'){
     setDeckData:d=>{DECKS=d.decks;FORMATS=d.formats;CLASSIC=d.classic;POOL=d.pool;rebuildWebCards();},
     isWebbed,isSpiderling,webBrood,canEatSpiderling,summonToken,isCornerCell,sideNbr,
     PERKS,perkN,winLeadFor,leadState,WIN_LEAD,teeceCap,mixBonus,getCardDeck,ROGUE_LEVELS,
+    drawPerTurn,grantedBy,gainBlocked,blessedOn,patchFull,setFire,tapeSave,FIRE_N,
     setForm,formOf,applyDrain,drainMult,sacsNeeded,
     undyOf,undyLeft,undyUsedBy,undyReset,undyingReturn,allyCount,canSacrifice,
     noteGraveReturn,attachRiders,equipCameOff,addBone,clearGroundAt,processDeath,defOf,kwOf,actsOf,
