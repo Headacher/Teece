@@ -677,7 +677,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:45,date:'2026-09-16'};
+const VERSION={build:46,date:'2026-09-16'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -2598,7 +2598,7 @@ const CARDS = {
     text:'When destroyed: whatever destroyed it gets -2.'},
  728:{name:'Gutter Scrapper',type:'teece',sides:[2,3,2,3],garbage:true,
     onPlay:[{fx:'choose',msg:'Feed the Scrapper?',opts:[
-      {lbl:'Sacrifice an ally: +3',steps:[{fx:'sacAlly'},{fx:'mod',who:'self',n:3,dur:'perm'}]},
+      {lbl:'Sacrifice an ally: +3',steps:[{fx:'sacAlly',cost:true},{fx:'mod',who:'self',n:3,dur:'perm'}]},
       {lbl:'Leave everybody standing',steps:[]}]}],
     text:'When played: you may sacrifice an allied Teece; if you do, this gets +3.'},
  729:{name:'Cockroach',type:'teece',sides:[1,6,1,1],garbage:true,
@@ -2630,14 +2630,16 @@ const CARDS = {
     act:[{name:'Rummage',once:'turn',steps:[{fx:'rummage'}]}],
     text:'Once per your turn: take a card at random out of either graveyard and into your hand. If it came out of an opponent’s, discard two cards.'},
  739:{name:'Compactor Arm',type:'teece',sides:[2,4,2,1],garbage:true,
-    act:[{name:'Compact an ally',once:'turn',times:2,steps:[{fx:'scrapAlly'},{fx:'mod',who:'self',n:3,dur:'perm'}]}],
+    act:[{name:'Compact an ally',once:'turn',times:2,
+          steps:[{fx:'scrapAlly',cost:true},{fx:'mod',who:'self',n:3,dur:'perm'}]}],
     text:'Twice per your turn: destroy an allied Teece standing beside it; this gets +3 permanently.'},
  740:{name:'Pile of Tires',type:'teece',sides:[2,2,2,2],garbage:true,
     onDeath:[{fx:'ignite',where:'here'}],
     text:'When destroyed: the panel it stood on catches fire until the start of your next turn. A Teece standing in a fire gets -4 while it burns.'},
  741:{name:'Garbage Man',type:'teece',sides:[3,1,3,4],garbage:true,
     onPlay:[{fx:'dumpDiscard',max:2,n:2}],
-    act:[{name:'Pick through the pile',once:'turn',steps:[{fx:'graveBurn',n:2},{fx:'graveGrab'}]}],
+    act:[{name:'Pick through the pile',once:'turn',
+          steps:[{fx:'graveBurn',n:2,all:true,cost:true},{fx:'graveGrab'}]}],
     text:'When played: discard up to two cards; +2 for each one discarded. Once per your turn: destroy two cards in your graveyard, then take a card at random out of it and into your hand.'},
  742:{name:'Living Smog',type:'teece',sides:[1,2,0,1],garbage:true,
     auras:[{who:'enemy',where:'global',n:-2},{who:'ally',where:'global',n:2}],
@@ -4452,6 +4454,29 @@ function chooseOption(p,opts,msg,cancel){
   }
   return new Promise(res=>{G.pending={kind:'opt',p,opts,msg,cancel:!!cancel,res};render();});
 }
+/* ---- the card a spell is being cast off ----
+   A magic card is still sitting in its owner's hand while its own effect
+   resolves -- handTake does not run until the cast comes back -- so every
+   effect that asks the hand a question was offering the card asking it. Pick
+   it and the game came apart: the card paid for itself, and the handTake
+   afterwards, still holding the index the card used to be at, took a
+   bystander out of the hand and buried the spell twice over.
+
+   playEquip has always drawn this line for plating (`if(h===handIdx)continue`).
+   This is the same line, drawn once, where every hand prompt can read it: the
+   card resolving is not a card in hand. Kept on G rather than passed down a
+   ctx, because an effect may run a nested runSteps of its own and the answer
+   has to hold all the way down. */
+function handOpts(p){
+  const pl=G.players[p],skip=(G.castingFrom&&G.castingFrom.p===p)?G.castingFrom.handIdx:-1;
+  const out=[];
+  for(let x=0;x<pl.hand.length;x++){
+    if(x===skip)continue;
+    out.push({v:String(x),lbl:CARDS[pl.hand[x]].name,cid:pl.hand[x]});
+  }
+  return out;
+}
+const handCount=p=>handOpts(p).length;
 function resolvePending(val){
   const pd=G.pending; if(!pd)return;
   G.pending=null; G.previewCell=null; G.previewTouch=false;
@@ -4523,6 +4548,12 @@ async function runSteps(steps,ctx){
     ran++;
     const r=await FXRUN(st,ctx);
     if(r==='ABORT')return false;
+    /* A step marked as the price of the ones after it. If it found nothing to
+       take, what follows was never paid for, so the list stops here rather
+       than handing out the reward for free -- the Compactor Arm with nobody
+       beside it to compact was taking its +3 anyway. Reported as NONE when
+       nothing has landed yet, so the ability keeps its charge and says why. */
+    if(r==='NONE'&&st.cost)return did||'NONE';
     if(r!=='NONE')did=true;
     ctx.first=false;
   }
@@ -5892,10 +5923,12 @@ async function FXRUN(st,ctx){
     return;}
   case 'discard':{
     const pl=G.players[p];
-    if(pl.hand.length<st.n){log('Not enough cards to discard.');return 'ABORT';}
+    if(handCount(p)<st.n){log('Not enough cards to discard.');return 'ABORT';}
     for(let k=0;k<st.n;k++){
-      const pick=await chooseOption(p,pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name,cid:id})),'Discard a card.');
-      const idx=pick==null?0:parseInt(pick,10);
+      const opts=handOpts(p);
+      if(!opts.length)break;
+      const pick=await chooseOption(p,opts,'Discard a card.');
+      const idx=pick==null?parseInt(opts[0].v,10):parseInt(pick,10);
       const gone=handTake(p,idx);const cid=gone.id;
       dumpPlate(gone.plate,'with the card it was bolted to');
       log(pname(p)+' discards '+CARDS[cid].name+'.');
@@ -5945,8 +5978,9 @@ async function FXRUN(st,ctx){
     return;}
   case 'handToDeck':{
     const pl=G.players[p];
-    if(!pl.hand.length)return none('No card to stack back.');
-    const pick=await chooseOption(p,pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name,cid:id})),'Put which card on top of your deck?');
+    const hopts=handOpts(p);
+    if(!hopts.length)return none('No card to stack back.');
+    const pick=await chooseOption(p,hopts,'Put which card on top of your deck?');
     if(pick==null)return;
     const gone=handTake(p,parseInt(pick,10));const cid=gone.id;
     dumpPlate(gone.plate,'off a card stacked back onto the deck');
@@ -7001,8 +7035,8 @@ async function FXRUN(st,ctx){
     const pl=G.players[p];
     let n=0;
     for(let k=0;k<(st.max||1);k++){
-      if(!pl.hand.length)break;
-      const opts=pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name,cid:id}));
+      const opts=handOpts(p);
+      if(!opts.length)break;
       opts.push({v:'no',lbl:'Throw nothing away'});
       const pick=await chooseOption(p,opts,'Discard a card for '+sgn(st.n)+'? ('+(k+1)+' of '+(st.max||1)+')');
       if(pick==null||pick==='no'||pick==='CANCEL')break;
@@ -7022,6 +7056,11 @@ async function FXRUN(st,ctx){
   case 'graveBurn':{
     const pl=G.players[p];
     if(!pl.grave.length)return none('The graveyard is empty.');
+    /* Two cards destroyed is the price, so one card is not a cheaper version
+       of it: the whole price is there or the ability does not fire. */
+    if(st.all&&pl.grave.length<(st.n||1))
+      return none('There '+(pl.grave.length===1?'is only one card':'are only '+pl.grave.length+' cards')+
+        ' in the graveyard, and '+(st.n||1)+' must be destroyed.');
     let n=0;
     for(let k=0;k<(st.n||1)&&pl.grave.length;k++){
       const cid=pl.grave.splice(Math.floor(Math.random()*pl.grave.length),1)[0];
@@ -7134,11 +7173,11 @@ async function FXRUN(st,ctx){
     return;}
   case 'garbageDay':{
     const pl=G.players[p];
-    if(!pl.hand.length)return none('There is nothing in hand to throw out.');
+    if(!handCount(p))return none('There is nothing in hand to throw out.');
     let n=0;
     for(let k=0;k<(st.max||1);k++){
-      if(!pl.hand.length)break;
-      const opts=pl.hand.map((id,x)=>({v:String(x),lbl:CARDS[id].name,cid:id}));
+      const opts=handOpts(p);
+      if(!opts.length)break;
       opts.push({v:'no',lbl:n?'That is enough':'Throw nothing out'});
       const pick=await chooseOption(p,opts,'Throw out a card, and draw one for it. ('+(k+1)+' of '+(st.max||1)+')');
       if(pick==null||pick==='no'||pick==='CANCEL')break;
@@ -7156,7 +7195,7 @@ async function FXRUN(st,ctx){
      next one you touch goes straight onto your own heap. */
   case 'dumpsterDive':{
     const pl=G.players[p];
-    if(!pl.hand.length)return none('There is nothing in hand to pay with.');
+    if(!handCount(p))return none('There is nothing in hand to pay with.');
     const foes=[];
     for(let q=0;q<PLAYERS();q++)if(!sameTeam(q,p)&&G.players[q].grave.length)foes.push(q);
     if(!foes.length)return none('No opponent has anything in their graveyard.');
@@ -8509,19 +8548,24 @@ async function castCard(p,cid,opts){
 async function playMagic(p,handIdx){
   const pl=G.players[p],id=pl.hand[handIdx],d=CARDS[id];
   if(hexOn(p,'silence')){toast('Silenced: you cannot cast magic.');return false;}
-  const wasCasting=G.castingMagic,wasConsumed=G.magicConsumed;
-  G.castingMagic=true;G.magicConsumed=false;
+  const wasCasting=G.castingMagic,wasConsumed=G.magicConsumed,wasFrom=G.castingFrom;
+  G.castingMagic=true;G.magicConsumed=false;G.castingFrom={p,handIdx,cardId:id};
   let ok,consumed;
   try{ ok=await runSteps(d.cast,{p,cell:null,t:null,first:true,cardId:id,handIdx}); }
-  finally{ consumed=G.magicConsumed;G.castingMagic=wasCasting;G.magicConsumed=wasConsumed; }
+  finally{ consumed=G.magicConsumed;G.castingMagic=wasCasting;G.magicConsumed=wasConsumed;
+           G.castingFrom=wasFrom; }
   if(!ok)return false;
-  handTake(p,handIdx);
+  /* The hand can have shifted under the cast -- a card drawn, a card thrown
+     away, a Teece called out of it -- so the spell is found again by what it
+     is rather than by where it was. Taking the old index took a bystander. */
+  const at=pl.hand[handIdx]===id?handIdx:pl.hand.indexOf(id);
+  if(at>=0)handTake(p,at);
   log(pname(p)+' casts '+d.name+'.');
   if(d.rebound&&!pl.onceUsed['rb'+id]){
     pl.onceUsed['rb'+id]=true;
     handPush(p,id);
     log(d.name+' returns to '+pname(p)+"'s hand.");
-  }else if(!consumed)toGrave(p,id);
+  }else if(!consumed&&at>=0)toGrave(p,id);
   await fireMagic(p);
   await resolveCombat();
   render();
