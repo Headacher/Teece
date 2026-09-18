@@ -573,6 +573,32 @@
         784
       ],
       "blurb": "The end arrives on schedule. The four Horsemen are lifted back out of the shuffle and stacked on top of your deck, so they are your opening hand, and each one played drags a second out of it silenced. Everything after them is paid for in cards: the graveyard is this deck's second resource, and two of its three ways to clear the field are bought with discards."
+    },
+    "psychedelic": {
+      "name": "Psychedelic",
+      "cards": [
+        785,
+        786,
+        787,
+        788,
+        789,
+        790,
+        791,
+        792,
+        793,
+        794,
+        795,
+        796,
+        797,
+        798,
+        799,
+        800,
+        801,
+        802,
+        803,
+        804
+      ],
+      "blurb": "Played out of the graveyard rather than into it. Almost every card does its work on the way OUT of your hand, and four of them let you throw themselves away whenever you like, so a discard is a move rather than a loss. Two cards catch discards before they land: a Pocket Dimension that hands them all back at the end of the turn, and a Library that shelves them as a wall."
     }
   },
   "formats": [
@@ -1019,6 +1045,26 @@
     781,
     782,
     783,
-    784
+    784,
+    785,
+    786,
+    787,
+    788,
+    789,
+    790,
+    791,
+    792,
+    793,
+    794,
+    795,
+    796,
+    797,
+    798,
+    799,
+    800,
+    801,
+    802,
+    803,
+    804
   ]
 }
