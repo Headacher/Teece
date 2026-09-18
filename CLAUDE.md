@@ -72,10 +72,27 @@ Two things about the harness:
 - `HAS_DOM` is false, so `anim()` returns at once and `toast()` does nothing.
 
 For rendering, input or overlays, drive the real page with Playwright — but serve
-it over HTTP first (`npx http-server -p 8137 -s .`), because `fetch('decks.json')`
+it over HTTP first (`npx http-server -p 8137 -s -c-1 .`), because `fetch('decks.json')`
 needs a real origin and fails on `file://`. Chromium is preinstalled at
 `/opt/pw-browsers`; never run `playwright install`. Top-level `let` bindings like
 `G` and `DECKS` are reachable from `page.evaluate` as bare identifiers.
+
+`-c-1` is not optional. Without it http-server sends `max-age=3600`, so a server
+started before an edit keeps serving the old file and the failures it produces
+look like real bugs in whatever you just wrote.
+
+Two more things a page test gets wrong before it gets right:
+
+- `G.turn` flips to the next seat inside `endTurn`, **before** `startTurn` has
+  drawn, scanned or rendered. Waiting on the seat alone hands you control while
+  all of that is still to come, and it stomps whatever board the test seeded.
+  The turn banner (`--- Turn N: ---`) is the last line `startTurn` logs, so
+  `G.turn===0 && !G.pending && /^--- Turn/.test(G.log[0])` is the honest signal.
+- `boundingBox()` is viewport-relative, and a click past the fold lands on
+  nothing at all — silently. That is the same bug as the phone one below, and it
+  bites on a 1280x900 desktop too, because the hand sits at the bottom of a page
+  taller than the window. Scroll it into the window and re-measure before
+  clicking, on every viewport.
 
 ### "It doesn't work on mobile" usually means "I can't reach it"
 

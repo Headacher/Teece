@@ -140,9 +140,9 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="apocalypse"],.dcard[data-card-deck="apocalypse"]{--cardbg:#2b2a2e;--artink:#f4eee8;background:var(--cardbg);color:#ece6df;border-color:#161519}
 .card[data-card-deck="apocalypse"] .kwl,.dcard[data-card-deck="apocalypse"] .dkw{color:#d8a07a}
 .card[data-card-deck="apocalypse"] .ct,.dcard[data-card-deck="apocalypse"] .dty{color:#d8a07a}
-.card[data-card-deck="psychedelic"],.dcard[data-card-deck="psychedelic"]{--cardbg:#4a1d6b;--artink:#fdeaff;background:var(--cardbg);color:#f3e4fb;border-color:#2b0f40}
-.card[data-card-deck="psychedelic"] .kwl,.dcard[data-card-deck="psychedelic"] .dkw{color:#8ff0d0}
-.card[data-card-deck="psychedelic"] .ct,.dcard[data-card-deck="psychedelic"] .dty{color:#8ff0d0}
+.card[data-card-deck="madness"],.dcard[data-card-deck="madness"]{--cardbg:#4a1d6b;--artink:#fdeaff;background:var(--cardbg);color:#f3e4fb;border-color:#2b0f40}
+.card[data-card-deck="madness"] .kwl,.dcard[data-card-deck="madness"] .dkw{color:#8ff0d0}
+.card[data-card-deck="madness"] .ct,.dcard[data-card-deck="madness"] .dty{color:#8ff0d0}
 
 .card[data-card-deck]::after,.dcard[data-card-deck]::after{position:absolute;top:2px;right:3px;font-size:11px;line-height:1;opacity:.85;z-index:1}
 .card[data-card-deck="classic"]::after,.dcard[data-card-deck="classic"]::after{content:'🂡'}
@@ -165,7 +165,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="army"]::after,.dcard[data-card-deck="army"]::after{content:'🪖'}
 .card[data-card-deck="garbage"]::after,.dcard[data-card-deck="garbage"]::after{content:'🗑️'}
 .card[data-card-deck="apocalypse"]::after,.dcard[data-card-deck="apocalypse"]::after{content:'☄️'}
-.card[data-card-deck="psychedelic"]::after,.dcard[data-card-deck="psychedelic"]::after{content:'🌀'}
+.card[data-card-deck="madness"]::after,.dcard[data-card-deck="madness"]::after{content:'🌀'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -186,7 +186,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece[data-card-deck="army"]{--cardbg:#4c5a33;--artink:#f1f5e2;background:var(--cardbg);color:#eef2e2;border-color:#2e3a1c}
 .teece[data-card-deck="garbage"]{--cardbg:#5a4634;--artink:#f6ecdd;background:var(--cardbg);color:#f2e7d8;border-color:#36281c}
 .teece[data-card-deck="apocalypse"]{--cardbg:#2b2a2e;--artink:#f4eee8;background:var(--cardbg);color:#ece6df;border-color:#161519}
-.teece[data-card-deck="psychedelic"]{--cardbg:#4a1d6b;--artink:#fdeaff;background:var(--cardbg);color:#f3e4fb;border-color:#2b0f40}
+.teece[data-card-deck="madness"]{--cardbg:#4a1d6b;--artink:#fdeaff;background:var(--cardbg);color:#f3e4fb;border-color:#2b0f40}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -687,7 +687,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:49,date:'2026-09-18'};
+const VERSION={build:50,date:'2026-09-18'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -769,7 +769,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',psychedelic:'\u{1F300}'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -1931,7 +1931,7 @@ const CARDS = {
  388:{name:'Acorn',type:'teece',sides:[3,3,3,3],timer:{turns:2,sides:[10,10,10,10]},
     text:'After two of your turns, it becomes 10 on every side.'},
  389:{name:'Rewind',type:'magic',
-    text:'Take a card that reached any graveyard last turn, yours or an enemy\u2019s, into your hand.',
+    text:'Take a card that reached any graveyard this turn or last, yours or an enemy\u2019s, into your hand.',
     cast:[{fx:'rewind'}]},
  390:{name:'Long Game',type:'teece',sides:[2,2,2,2],timer:{turns:2,sides:[12,12,12,12]},
     text:'After two of your turns, it becomes 12 on every side.'},
@@ -1950,7 +1950,7 @@ const CARDS = {
     onDeath:[{fx:'ageAll',who:'ally',n:2}]},
  396:{name:'Chronoplate',type:'equip',mod:3,grants:{ageStop:true},
     text:'Equipped Teece gets +3 and its clock stops: it never ages again.'},
- 397:{name:'Pause',type:'magic',text:'A Teece cannot be destroyed until the start of your next turn.',
+ 397:{name:'Pause',type:'magic',text:'A Teece cannot be destroyed until the end of your next turn.',
     cast:[{fx:'pause'}]},
  398:{name:'Sundial',type:'equip',mod:2,text:'Equipped Teece gets +2 and ages twice as fast.',
     grants:{ageRate:2}},
@@ -2864,7 +2864,7 @@ const CARDS = {
     text:'A Teece destroyed on this panel is equipped to this battleground instead of going to a graveyard. While one of your Teece stands on it, once per your turn: tear two of the cards equipped to it into the graveyards and destroy this battleground — and every card on the field with it.'},
  784:{name:'Wastes',type:'ground',gmod:-3,gNoEntry:true,
     text:'No Teece may be played or moved onto this panel. A Teece already standing here gets -3.'},
- /* ---- Psychedelic: the deck is played out of the graveyard. ----
+ /* ---- Madness: the deck is played out of the graveyard. ----
     Almost every card here does its work on the way OUT of your hand rather
     than on the way in, so throwing one away is a move rather than a loss --
     and "On your turn: you can discard this" puts that move in your hands
@@ -2874,23 +2874,23 @@ const CARDS = {
     them outside the game for a turn, and the Eldritch Library shelves them as
     a wall. A card caught either way never reaches a graveyard, so the grave
     watchers stay quiet while the discard watchers still fire. ---- */
- 785:{name:'Resurger',type:'teece',sides:[7,8,3,3],psych:true,
+ 785:{name:'Resurger',type:'teece',sides:[7,8,3,3],madness:true,
     onDeath:[{fx:'resummon',bonus:0,discard:1}],
     text:'When destroyed: you may discard a card to stand it straight back up on an empty panel. One body gets up once.'},
- 786:{name:'Architect of the Indescribable',type:'teece',sides:[6,6,6,6],psych:true,
+ 786:{name:'Architect of the Indescribable',type:'teece',sides:[6,6,6,6],madness:true,
     onPlay:[{fx:'rotTarget'}],onDiscard:[{fx:'rotTarget'}],handDiscard:[],
     text:'When played, and again when discarded: select a Teece and turn it whichever way you like. On your turn you may discard this from your hand instead of playing it.'},
- 787:{name:'Frenetic Researcher',type:'teece',sides:[4,8,8,4],psych:true,
+ 787:{name:'Frenetic Researcher',type:'teece',sides:[4,8,8,4],madness:true,
     onPlay:[{fx:'shield'}],onDiscard:[{fx:'shield'}],handDiscard:[],
     text:'When played, and again when discarded: select a Teece, either side’s; it cannot be destroyed until the end of your next turn. On your turn you may discard this from your hand instead of playing it.'},
- 788:{name:'Manic Raver',type:'teece',sides:[0,7,8,7],psych:true,
+ 788:{name:'Manic Raver',type:'teece',sides:[0,7,8,7],madness:true,
     onAnyDiscard:{sides:[8,0,0,0],dur:'temp'},
     act:[{name:'Wicked Dance Moves',once:'turn',times:2,steps:[{fx:'move',range:'orth'}]}],
     text:'Whenever a card is discarded, either side’s: +8 to its top until the end of the turn. Wicked Dance Moves — once per your turn it may move up to two spaces.'},
- 789:{name:'Psychopathic Killer',type:'teece',sides:[7,3,7,3],psych:true,
+ 789:{name:'Psychopathic Killer',type:'teece',sides:[7,3,7,3],madness:true,
     onGrave:{sides:[0,2,0,2],sidesDur:'perm',step:1},
     text:'Whenever a card is sent to a graveyard from anywhere, either side’s: +2 to its left and right permanently, and it may step one space.'},
- 790:{name:'Cultist of Babble',type:'teece',sides:[5,5,5,5],psych:true,sacWorth:2,
+ 790:{name:'Cultist of Babble',type:'teece',sides:[5,5,5,5],madness:true,sacWorth:2,
     onDeath:[{fx:'choose',msg:'Willing Sacrifice:',opts:[
       {lbl:'Draw a card, then throw one away',steps:[{fx:'price',deck:1},{fx:'draw',n:1},{fx:'discard',n:1}]},
       {lbl:'Go quietly',steps:[]}]}],
@@ -2898,48 +2898,48 @@ const CARDS = {
       {lbl:'Draw a card, then throw one away',steps:[{fx:'price',deck:1},{fx:'draw',n:1},{fx:'discard',n:1}]},
       {lbl:'Go quietly',steps:[]}]}],
     text:'Willing Sacrifice — when destroyed or discarded: you may draw a card, and if you do, discard one. Worthy — it counts as two of the sacrifices a Boss asks for.'},
- 791:{name:'Tattered Reader',type:'teece',sides:[3,3,3,9],psych:true,
+ 791:{name:'Tattered Reader',type:'teece',sides:[3,3,3,9],madness:true,
     onPlay:[{fx:'kingInYellow'}],onDiscard:[{fx:'kingInYellow'}],
     text:'The King in Yellow — when played, and again when discarded: select an enemy; it is silenced, every equip on it is destroyed, and its attributes go back to what the card was printed with.'},
- 792:{name:'Lunatic',type:'teece',sides:[7,2,7,7],psych:true,
+ 792:{name:'Lunatic',type:'teece',sides:[7,2,7,7],madness:true,
     onPlay:[{fx:'markPanel',n:2}],onDiscard:[{fx:'markPanel',n:2}],
     onAnyDiscard:{steps:[{fx:'markPanel',n:2}]},
     text:'When played, whenever a card is discarded, and when this is discarded: mark an empty panel. The next ally played there gets +2.'},
- 793:{name:'Paranoid Schizophrenic',type:'teece',sides:[1,2,3,4],psych:true,handDiscard:[],
+ 793:{name:'Paranoid Schizophrenic',type:'teece',sides:[1,2,3,4],madness:true,handDiscard:[],
     onDiscard:[{fx:'mod',who:'ally',where:'any',n:-2,dur:'perm'},{fx:'recallSelf'}],
     text:'When discarded: select one of your own Teece and give it -2 permanently — then this claws its way back into your hand at the end of that turn. On your turn you may discard this from your hand instead of playing it.'},
- 794:{name:'Mindbroken Mindbreaker',type:'teece',sides:[9,9,9,9],psych:true,
+ 794:{name:'Mindbroken Mindbreaker',type:'teece',sides:[9,9,9,9],madness:true,
     onPlay:[{fx:'discard',n:1}],
     onDeath:[{fx:'choose',msg:'Mindbroken Mindbreaker falls:',opts:[
       {lbl:'Throw a card away',steps:[{fx:'discard',n:1}]},
       {lbl:'Hold onto them',steps:[]}]}],
     onDiscard:[{fx:'mod',who:'enemy',where:'any',n:-2,dur:'perm'}],
     text:'When played: discard a card. When destroyed: you may discard a card. When discarded: select an enemy and give it -2 permanently.'},
- 795:{name:'That Which Should Not',type:'teece',sides:[9,9,9,9],sac:1,psych:true,handDiscard:[],
+ 795:{name:'That Which Should Not',type:'teece',sides:[9,9,9,9],sac:1,madness:true,handDiscard:[],
     onDiscard:[{fx:'choose',msg:'That Which Should Not stirs:',opts:[
       {lbl:'Discard two and let it up',steps:[{fx:'price',hand:2},{fx:'discard',n:2,cost:true},{fx:'graveSelfPlay'}]},
       {lbl:'Leave it buried',steps:[]}]}],
     text:'Sacrifice one fielded Teece to play. When discarded: you may discard two cards to put it straight onto the field out of the graveyard, paying no sacrifice for it. On your turn you may discard this from your hand instead of playing it.'},
- 796:{name:'Echo of Gol’god’oth',type:'teece',sides:[0,15,3,9],sac:2,psych:true,
+ 796:{name:'Echo of Gol’god’oth',type:'teece',sides:[0,15,3,9],sac:2,madness:true,
     onPlay:[{fx:'discardHands'}],
     onDiscard:[{fx:'discard',n:1}],
     text:'Sacrifice two fielded Teece to play. When played: every player throws away their whole hand. When discarded: discard a card.'},
- 797:{name:'Pocket Dimension',type:'magic',psych:true,
+ 797:{name:'Pocket Dimension',type:'magic',madness:true,
     cast:[{fx:'pocket'}],
     text:'Every card discarded for the rest of this turn, either side’s, falls into a pocket dimension instead of a graveyard — and at the end of the turn every one of them lands in your hand.'},
- 798:{name:'Ravings',type:'magic',psych:true,
+ 798:{name:'Ravings',type:'magic',madness:true,
     cast:[{fx:'price',hand:1,grave:1},{fx:'discard',n:1,cost:true},{fx:'graveToHand'}],
     text:'Discard a card, then take a card out of your graveyard and into your hand.'},
- 799:{name:'Whispers',type:'magic',psych:true,
+ 799:{name:'Whispers',type:'magic',madness:true,
     cast:[{fx:'price',hand:1},{fx:'discard',n:1},{fx:'discard',n:1,foe:true}],
     text:'Both players discard a card.'},
- 800:{name:'Necronomicon',type:'equip',mod:0,psych:true,
-    grants:{act:[{name:'Read from the Necronomicon',once:'turn',steps:[{fx:'armFreeDiscard'}]}]},
-    text:'Once per your turn: the next effect the equipped Teece would pay a discard for costs nothing.'},
- 801:{name:'Goggles of Truth',type:'equip',mod:2,psych:true,
+ 800:{name:'Necronomicon',type:'equip',mod:0,madness:true,
+    grants:{act:[{name:'Read from the Necronomicon',once:'turn',steps:[{fx:'freeActivate'}]}]},
+    text:'Once per your turn: activate one of the equipped Teece\u2019s abilities that has a cost, and do not pay the cost. The ability keeps its own charge \u2014 this is the book\u2019s activation, not its.'},
+ 801:{name:'Goggles of Truth',type:'equip',mod:2,madness:true,
     onDiscard:[{fx:'equipFromGrave'}],
     text:'The equipped Teece gets +2. When this card is discarded: bolt it onto one of your Teece instead of leaving it lying there.'},
- 802:{name:'Astral Mindwyrm',type:'equip',mod:0,psych:true,
+ 802:{name:'Astral Mindwyrm',type:'equip',mod:0,madness:true,
     grants:{undyingRide:true,
       act:[{name:'Slip away together',once:'game',steps:[{fx:'bounceSelfPair'}]}]},
     text:'This goes to the graveyard wrapped around the equipped Teece rather than on its own, and comes back with it — including when it was bolted on while both were still in hand. Once a game: return this and the Teece wearing it to your hand.'},
@@ -3587,7 +3587,7 @@ function makeTeece(cardId,owner,opts){
        as it is made, which is also what lets a cloned board work out how many
        times a Teece can still get up without touching the real game. */
     undyUsed:(pl0&&pl0.undying&&pl0.undying[cardId])||0,
-    grafts:[],noSac:false,infect:null,dieEOT:false,graveMarks:0,stepOwed:0,freeDiscard:0,
+    grafts:[],noSac:false,infect:null,dieEOT:false,graveMarks:0,stepOwed:0,
     boon:(bonusApplies(owner)?G.enemyBonus:0)+boon,
     silenced:false,magicUsedTurn:0,
     temp2:[0,0,0,0],temp2Until:0,defTemp2:0,defTemp2Until:0,baseTemp:null,flyExtra:0,immortalUntil:0,
@@ -6264,14 +6264,6 @@ async function FXRUN(st,ctx){
     /* st.foe turns the cost around: every opponent pays it instead. An opponent
        who cannot pay simply does not, where a cost you cannot pay yourself
        calls the whole effect off. */
-    /* A Necronomicon open on the Teece doing the paying: the cost is waived
-       once and the charge is spent. Only a cost is waived -- a discard that is
-       the EFFECT of a card rather than its price still happens. */
-    if(st.cost&&!st.foe&&ctx.t&&ctx.t.freeDiscard>0){
-      ctx.t.freeDiscard--;
-      log(nm(ctx.t)+' pays nothing: the Necronomicon reads the price away.');
-      return;
-    }
     const seats=st.foe?enemySeats(p):[p];
     if(!seats.length)return none('There is no opponent to make discard.');
     for(const q of seats){
@@ -6650,18 +6642,39 @@ async function FXRUN(st,ctx){
     const cands=[];
     for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
     if(!cands.length){log('No Teece to pause.');return 'ABORT';}
-    const c=await pickCell(cands,'Choose a Teece: it cannot be destroyed until the start of your next turn.',null,false);
+    const c=await pickCell(cands,'Choose a Teece: it cannot be destroyed until the end of your next turn.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
+    /* Held to the END of the next turn rather than its start. The mechanism was
+       never broken -- a paused Teece survives combat, Destroy, a wipe and the
+       trap alike -- but cover that lifts at the START of a turn lifts inside
+       startTurn, which resolves combat before the player is handed control. So
+       a doomed Teece rode out the enemy turn and was destroyed before its owner
+       could move it, buff it or trade with it: a card paid for a stay of
+       execution that could never be spent. One turn later and the reprieve is
+       a turn you can actually use. */
     b[c].teece.immortalOwner=p;
-    log(nm(b[c].teece)+' is held outside time until your next turn.');
+    b[c].teece.immortalUntil=nextTurnExpiry();
+    log(nm(b[c].teece)+' is held outside time until the end of '+pposs(p)+' next turn.');
     await anim([c],'zap');
     return;}
   case 'rewind':{
-    /* Everything that hit a graveyard during the turn just past, whoever
-       owned it. The card comes back to the caster's hand, not its owner's. */
-    const pool=(G.graveLastTurn||[]).filter(g=>G.players[g.owner].grave.indexOf(g.cardId)>=0);
-    if(!pool.length){log('Nothing reached a graveyard last turn.');return 'ABORT';}
+    /* Everything that hit a graveyard this turn or the turn just past, whoever
+       owned it. The card comes back to the caster's hand, not its owner's.
+
+       This turn counts because the turn just past is a single seat's turn: a
+       body that fell on YOUR turn was already out of reach by the time the
+       card came round to you again, so the window the card advertised almost
+       never held what you had just watched die. */
+    const seen=[];
+    const pool=(G.graveThisTurn||[]).concat(G.graveLastTurn||[])
+      .filter(g=>{
+        if(G.players[g.owner].grave.indexOf(g.cardId)<0)return false;
+        const key=g.owner+':'+g.cardId;
+        if(seen.indexOf(key)>=0)return false;
+        seen.push(key);return true;
+      });
+    if(!pool.length){log('Nothing has reached a graveyard this turn or last.');return 'ABORT';}
     const pick=await chooseOption(p,pool.map((g,x)=>({v:String(x),
       lbl:CARDS[g.cardId].name+(g.owner===p?'':' \u00b7 '+pname(g.owner)),cid:g.cardId})),'Rewind which card?');
     if(pick==null)return;
@@ -6670,8 +6683,11 @@ async function FXRUN(st,ctx){
     if(gi<0){log('It is no longer there.');return;}
     G.players[entry.owner].grave.splice(gi,1);
     handPush(p,entry.cardId);
-    const gx=G.graveLastTurn.indexOf(entry);
-    if(gx>=0)G.graveLastTurn.splice(gx,1);
+    for(const list of [G.graveThisTurn,G.graveLastTurn]){
+      if(!list)continue;
+      const gx=list.indexOf(entry);
+      if(gx>=0)list.splice(gx,1);
+    }
     log(CARDS[entry.cardId].name+' is pulled back out of '+
       (entry.owner===p?'the grave':pname(entry.owner)+"'s grave")+' and into '+pname(p)+"'s hand.");
     return;}
@@ -7752,13 +7768,33 @@ async function FXRUN(st,ctx){
     log(nm(t)+' and the Mindwyrm around it slip off the field together.');
     await anim([i],'zap');
     return;}
-  /* The Necronomicon opens. The next thing the wearer pays a discard for, it
-     does not pay. */
-  case 'armFreeDiscard':{
-    const t=ctx.t;
-    if(!t)return;
-    t.freeDiscard=(t.freeDiscard||0)+1;
-    log(nm(t)+' reads from the Necronomicon: its next discard costs nothing.');
+  /* The Necronomicon. An ability on a card reads as X : Y ; Z -- what turns it
+     on, what it costs, and what it does. The book fires Z and never pays Y.
+
+     Y is already marked in this engine: build 46 gave a step cost:true so that
+     a list stops when the price cannot be met. So the ability runs here with
+     exactly those steps dropped, and nothing else about it changes -- the
+     ability keeps its own once-a-turn charge, because this activation is the
+     book's, not the ability's. */
+  case 'freeActivate':{
+    const t=ctx.t,cell=ctx.cell;
+    if(!t)return none('There is nothing wearing it.');
+    const list=[];
+    const paid=act=>(act.steps||[]).some(st2=>st2.cost);
+    if(!t.silenced)for(const act of (DEF(t).act||[]))if(paid(act))list.push(act);
+    const f=formOf(t);
+    if(f&&f.act&&!t.silenced)for(const act of f.act)if(paid(act))list.push(act);
+    if(!list.length)
+      return none(nm(t)+' has no ability with a cost for the book to read away.');
+    const pick=list.length===1?'0'
+      :await chooseOption(p,list.map((act,x)=>({v:String(x),lbl:act.name})),
+        'Read which of '+nm(t)+'\u2019s abilities out of the Necronomicon?');
+    if(pick==null)return;
+    const act=list[parseInt(pick,10)];
+    const free=(act.steps||[]).filter(st2=>!st2.cost);
+    if(!free.length)return none(act.name+' is all price and no effect.');
+    log(nm(t)+' reads '+act.name+' out of the Necronomicon, and pays nothing for it.');
+    await runSteps(free,{p,cell,t,first:false,noModal:true});
     return;}
   /* ---- Apocalypse: the end, and the four who bring it ---- */
   /* The whole price, checked before any of it is paid.
@@ -9941,7 +9977,7 @@ function cloneBoard(b){
       kwPerm:(c.teece.kwPerm||[]).slice(),defPerm:c.teece.defPerm||0,dodged:c.teece.dodged,
       age:c.teece.age||0,transformed:c.teece.transformed,standCell:c.teece.standCell,tickTotal:c.teece.tickTotal||0,
       form:c.teece.form||0,ctr:c.teece.ctr||0,drainsThisTurn:c.teece.drainsThisTurn||0,
-      graveMarks:c.teece.graveMarks||0,stepOwed:c.teece.stepOwed||0,freeDiscard:c.teece.freeDiscard||0,
+      graveMarks:c.teece.graveMarks||0,stepOwed:c.teece.stepOwed||0,
       harmless:!!c.teece.harmless,blinded:!!c.teece.blinded,echo:c.teece.echo||0,
       drainMove:!!c.teece.drainMove,boon:c.teece.boon||0,
       immortalOwner:c.teece.immortalOwner,
