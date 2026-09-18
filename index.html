@@ -137,6 +137,9 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="garbage"],.dcard[data-card-deck="garbage"]{--cardbg:#5a4634;--artink:#f6ecdd;background:var(--cardbg);color:#f2e7d8;border-color:#36281c}
 .card[data-card-deck="garbage"] .kwl,.dcard[data-card-deck="garbage"] .dkw{color:#d3b992}
 .card[data-card-deck="garbage"] .ct,.dcard[data-card-deck="garbage"] .dty{color:#d3b992}
+.card[data-card-deck="apocalypse"],.dcard[data-card-deck="apocalypse"]{--cardbg:#2b2a2e;--artink:#f4eee8;background:var(--cardbg);color:#ece6df;border-color:#161519}
+.card[data-card-deck="apocalypse"] .kwl,.dcard[data-card-deck="apocalypse"] .dkw{color:#d8a07a}
+.card[data-card-deck="apocalypse"] .ct,.dcard[data-card-deck="apocalypse"] .dty{color:#d8a07a}
 
 .card[data-card-deck]::after,.dcard[data-card-deck]::after{position:absolute;top:2px;right:3px;font-size:11px;line-height:1;opacity:.85;z-index:1}
 .card[data-card-deck="classic"]::after,.dcard[data-card-deck="classic"]::after{content:'🂡'}
@@ -158,6 +161,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="solar"]::after,.dcard[data-card-deck="solar"]::after{content:'☀️'}
 .card[data-card-deck="army"]::after,.dcard[data-card-deck="army"]::after{content:'🪖'}
 .card[data-card-deck="garbage"]::after,.dcard[data-card-deck="garbage"]::after{content:'🗑️'}
+.card[data-card-deck="apocalypse"]::after,.dcard[data-card-deck="apocalypse"]::after{content:'☄️'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -177,6 +181,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece[data-card-deck="solar"]{--cardbg:#7d4a12;--artink:#ffeccc;background:var(--cardbg);color:#fdeed6;border-color:#4d2b06}
 .teece[data-card-deck="army"]{--cardbg:#4c5a33;--artink:#f1f5e2;background:var(--cardbg);color:#eef2e2;border-color:#2e3a1c}
 .teece[data-card-deck="garbage"]{--cardbg:#5a4634;--artink:#f6ecdd;background:var(--cardbg);color:#f2e7d8;border-color:#36281c}
+.teece[data-card-deck="apocalypse"]{--cardbg:#2b2a2e;--artink:#f4eee8;background:var(--cardbg);color:#ece6df;border-color:#161519}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -677,7 +682,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:46,date:'2026-09-16'};
+const VERSION={build:47,date:'2026-09-18'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -759,7 +764,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -935,6 +940,30 @@ const CARD_ART={
   763:["   ._____.   ","   |#####|   ","   |#####|   ","   |_____|   ","    ^   ^    "],
   764:["  ~~~~~~~~~  ","  ~#~#~#~#~  ","  ~~~~~~~~~  ","  ~#~#~#~#~  ","  ~~~~~~~~~  "],
   "TRAT":["     .-.     ","    (o o)    ","    ( - )    ","    /   \\    ","     ~~~     "],
+  765:["    .---.    ","   ( o o )   ","  --| ~ |--  ","   _/   \\_   ","   o--+--o   "],
+  766:["    .---.    ","   ( x x )   ","  --| ^ |--  ","   _/ | \\_   ","   /=====\\   "],
+  767:["  . .---. .  ","   ( o o )   ","  --| x |--  ","   _/ : \\_   ","  : . : . :  "],
+  768:["    .---.    ","   ( X X )   ","  --| = |--  ","   _/ | \\_   ","   '--|--'   "],
+  769:["   \\  |  /   ","    \\ | /    ","   --[o]--   ","    / | \\    ","   /  |  \\   "],
+  770:["   .-----.   ","  ( x   x )  ","   \\  V  /   ","    \\___/    ","   : : : :   "],
+  771:["    _____    ","   \\     /   ","    \\   /    ","     \\_/     ","   .  .  .   "],
+  772:["   .-----.   ","   |  .  |   ","   | .-. |   ","   | '-' |   ","   '-----'   "],
+  773:["   *  *  *   ","   \\-----/   ","    \\   /    ","     | |     ","   .-------. "],
+  774:["     .-.     ","    ( o )    ","   --|+|--   ","    _/ \\_    ","  ... . ...  "],
+  775:["       .---. ","  o=====|   |","       '---' ","   ) ) )     "],
+  776:["   .-----.   ","  / VII   \\  "," |  .---.  | ","  \\ '---' /  ","   '-----'   "],
+  777:["   \\ | | /   ","    v v v    ","   _______   ","  /_______\\  ","   R I P     "],
+  778:["   ^  ^  ^   ","  ( )( )( )  ","   \\  |  /   ","  #########  ","   .  .  .   "],
+  779:["      |      ","   o--+--o   ","  / |   | \\  ","  ---   ---  ","   V     V   "],
+  780:["   .--+--.   ","  ( x | ^ )  ","   '--+--'   ","   : :|: :   "],
+  781:["   .--+--.   ","  ( ~ | X )  ","   '--+--'   ","   .  |  .   "],
+  782:["  oXoXoXoXo  ","  XoXoXoXoX  ","  oXoXoXoXo  ","  XoXoXoXoX  ","   \\_____/   "],
+  783:["  ~~~~~~~~~  "," ~ . ~ . ~ . ","  ~~~~~~~~~  "," . ~ . ~ . ~ ","  ~~~~~~~~~  "],
+  784:["             ","  .    ,   . ","    ,  .     "," .    ,    , ","  ,  .   ,   "],
+  "TAF":["    .---.    ","   ( - - )   ","    \\ _ /    ","   .  .  .   "],
+  "TAW":["   \\  |  /   ","  --[XXX]--  ","   /  |  \\   ","  /   |   \\  "],
+  "TAD":["    .---.    ","   ( X X )   ","    \\ = /    ","   '-----'   "],
+  "TAP":["  : .---. :  ","   ( o o )   ","    \\ x /    ","  : . : . :  "],
   "TSP":["   .     .   ","    \\(o.o)/  ","    /  |  \\  ","   '   |   ' "],
   561:["  \\   |   /  "," ==\\(o o)/== ","   #[===]#   ","  / #| |# \\  ","  ==========="],
   562:["  .---------.","  | .-----. |","  | (o . o) |","  '--/ | \\--'","    _/   \\_  "],
@@ -1448,6 +1477,19 @@ const CARDS = {
  TS:{name:'Sprout',type:'teece',token:true,sides:[3,3,3,3],
     text:'Sprout Token. When destroyed: every other allied Teece gets +1. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.',
     onDeath:[{fx:'mass',who:'ally',n:1,dur:'perm'}]},
+ /* The four the Apocalypse deck fields. apoc names which of the four a card is,
+    the way mark names a Tic Tac Toe letter, so the two Marks can pay out on the
+    one they are tied to without checking ids. */
+ TAF:{name:'Famine',type:'teece',token:true,sides:[0,0,7,7],apoc:'famine',onFoeDraw:true,
+    text:'Famine Token. Whenever an enemy draws a card, they must put a card from their hand on the bottom of their deck. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ TAW:{name:'War',type:'teece',token:true,sides:[5,10,10,5],apoc:'war',
+    text:'War Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ TAD:{name:'Death',type:'teece',token:true,sides:[2,2,1,1],apoc:'death',
+    onPlay:[{fx:'destroy'}],
+    text:'Death Token. When it arrives: select a Teece; destroy it. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ TAP:{name:'Plague',type:'teece',token:true,sides:[7,2,2,7],apoc:'plague',
+    aura:{who:'enemy',where:'global',n:-2},
+    text:'Plague Token. Every enemy Teece has -2. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  /* ---- Teece 100 pool: the twenty-two you specified ---- */
  101:{name:'Enforcer',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice one fielded Teece to play.'},
  102:{name:'Grudge',type:'teece',sides:[8,8,8,8],text:'When destroyed: all adjacent enemies get +1.',
@@ -2707,6 +2749,90 @@ const CARDS = {
     text:'When played: up to ten cards chosen at random from your graveyard are packed into the Dumpster. A Teece standing here gets +1 for every two cards packed in, and a Teece destroyed here is packed in as well. Dumpster Fire — once per your turn, while one of your Teece stands here: destroy it, and set this panel and every panel beside it on fire until the start of your next turn.'},
  764:{name:'The Great Garbage Patch',type:'ground',gRow:true,gGarbageFull:3,garbage:true,
     text:'Laid across a whole row. While every panel of it holds a Garbage Teece, all of them get +3.'},
+ /* ---- Apocalypse: the end arrives on schedule. ----
+    The four Horsemen are lifted back out of the shuffle and stacked on top of
+    the deck, so they are the opening hand rather than something to draw
+    towards, and each one played drags a second out of your hand -- silenced,
+    which is what stops the chain at two a turn. Everything after them is paid
+    for in cards: the graveyard is this deck's second resource, and two of its
+    three ways to clear the field are bought with discards. ---- */
+ 765:{name:'Horseman of Famine',type:'teece',sides:[1,1,8,8],horseman:true,topDeck:true,apoc:'famine',
+    onPlay:[{fx:'horseman'}],
+    text:'Starts on top of your deck. When played: you may bring another Horseman out of your hand, silenced.'},
+ 766:{name:'Horseman of War',type:'teece',sides:[1,8,8,1],horseman:true,topDeck:true,apoc:'war',
+    onPlay:[{fx:'horseman'}],
+    text:'Starts on top of your deck. When played: you may bring another Horseman out of your hand, silenced.'},
+ 767:{name:'Horseman of Plague',type:'teece',sides:[8,1,1,8],horseman:true,topDeck:true,apoc:'plague',
+    onPlay:[{fx:'horseman'}],
+    text:'Starts on top of your deck. When played: you may bring another Horseman out of your hand, silenced.'},
+ 768:{name:'Horseman of Death',type:'teece',sides:[8,8,1,1],horseman:true,topDeck:true,apoc:'death',
+    onPlay:[{fx:'horseman'}],
+    text:'Starts on top of your deck. When played: you may bring another Horseman out of your hand, silenced.'},
+ 769:{name:'Harbinger of War',type:'teece',sides:[2,4,4,2],apoc:'war',civilWar:true,
+    text:'While it stands, nobody has allies: every Teece on the board fights the Teece beside it, its own side included.'},
+ 770:{name:'Harbinger of Plague',type:'teece',sides:[4,2,2,4],apoc:'plague',
+    aura:{who:'enemy',where:'global',n:-2},onEnemyPlay:{n:-2,dur:'perm'},
+    text:'Every enemy Teece has -2. When an enemy Teece is played: it gets another -2 permanently.'},
+ 771:{name:'Harbinger of Famine',type:'teece',sides:[2,2,4,4],apoc:'famine',
+    onPlay:[{fx:'discard',n:1,foe:true}],
+    text:'When played: your opponent discards a card.'},
+ 772:{name:'Harbinger of Death',type:'teece',sides:[4,4,2,2],apoc:'death',
+    onDeath:[{fx:'choose',msg:'Harbinger of Death falls:',opts:[
+      {lbl:'Discard a card; drag its killer down',steps:[{fx:'discard',n:1,cost:true},{fx:'killerDies'}]},
+      {lbl:'Let it lie',steps:[]}]}],
+    text:'When destroyed: you may discard a card to destroy the Teece that destroyed it.'},
+ 773:{name:'Whore of Babylon',type:'teece',sides:[3,3,3,3],kw:['flying'],onGrave:{perm:1,temp:1},
+    text:'Flying: once per your turn, move one space. Whenever a card is sent to a graveyard from anywhere, either side’s: +1 permanently and +1 more until the end of the turn.'},
+ 774:{name:'Last Man Standing',type:'teece',sides:[4,4,4,4],loneMod:6,onDiscardSummon:true,onDiscardBonus:4,
+    text:'While it is the only Teece you control, it gets +6. When it is discarded from hand or buried off the top of your deck: it climbs out of the grave onto an empty panel with +4.'},
+ 775:{name:'Apocalypse Trumpet',type:'teece',sides:[1,1,1,1],sac:1,
+    onPlay:[{fx:'choose',msg:'The Trumpet sounds:',opts:[
+      {lbl:'War (5/10/10/5)',steps:[{fx:'token',tok:'TAW'}]},
+      {lbl:'Famine (0/0/7/7)',steps:[{fx:'token',tok:'TAF'}]},
+      {lbl:'Plague (7/2/2/7)',steps:[{fx:'token',tok:'TAP'}]},
+      {lbl:'Death (2/2/1/1)',steps:[{fx:'token',tok:'TAD'}]}]}],
+    text:'Sacrifice one fielded Teece to play. When played: summon War, Famine, Plague or Death.'},
+ 776:{name:'Seal of Armageddon',type:'teece',sides:[0,0,0,0],def:5,sac:2,
+    onDeath:[{fx:'token',tok:'TAF'},{fx:'token',tok:'TAP'},{fx:'token',tok:'TAW'},{fx:'token',tok:'TAD'}],
+    text:'Sacrifice two fielded Teece to play. Defence 5. When destroyed: summon Famine, Plague, Death and War.'},
+ 777:{name:'The End Draws Near',type:'magic',
+    cast:[{fx:'mill',n:2}],
+    text:'Every player buries the top two cards of their deck.'},
+ 778:{name:'Raze',type:'magic',
+    cast:[{fx:'raze'}],
+    text:'Select a panel with no Teece on it; destroy it. No Teece may be played or moved onto it again.'},
+ 779:{name:'Final Judgement',type:'magic',
+    cast:[{fx:'choose',msg:'Final Judgement:',opts:[
+      {lbl:'Discard a card; destroy a Teece',steps:[{fx:'discard',n:1,cost:true},{fx:'destroy'}]},
+      {lbl:'Discard 3 and sacrifice a Teece; destroy everything',
+       steps:[{fx:'discard',n:3,cost:true},{fx:'sacAlly',cost:true},{fx:'wipe'}]}]}],
+    text:'Discard a card to select a Teece and destroy it — or discard three cards and sacrifice one of your Teece to destroy every card on the field.'},
+ 780:{name:'Mark of Plague and War',type:'equip',mod:0,
+    modIfApoc:{of:['plague','war'],n:2},
+    eModes:{plague:{aura:{who:'any',where:'adj',n:-3}},war:{onKill:{n:2,dur:'perm'}}},
+    grants:{onEquip:[{fx:'choose',msg:'Mark of Plague and War:',opts:[
+      {lbl:'Plague — every adjacent Teece gets -3',steps:[{fx:'eqMode',mode:'plague'}]},
+      {lbl:'War — +2 for every Teece it destroys',steps:[{fx:'eqMode',mode:'war'}]}]}]},
+    text:'Choose a mode as it goes on. Plague: the equipped Teece gives every adjacent Teece -3, either side’s. War: the equipped Teece gets +2 permanently whenever it destroys a Teece. Either way, if it is a Plague or a War: +2.'},
+ 781:{name:'Mark of Famine and Death',type:'equip',mod:0,
+    modIfApoc:{of:['famine','death'],n:2},
+    eModes:{famine:{onDeath:[{fx:'foeToll'}]},
+            death:{onDeath:[{fx:'strip'}],onKill:{steps:[{fx:'strip'}],foeOnly:true}}},
+    grants:{onEquip:[{fx:'choose',msg:'Mark of Famine and Death:',opts:[
+      {lbl:'Famine — its death costs your opponent a card or a Teece',steps:[{fx:'eqMode',mode:'famine'}]},
+      {lbl:'Death — it strips an equip, Token or battleground',steps:[{fx:'eqMode',mode:'death'}]}]}]},
+    text:'Choose a mode as it goes on. Famine: when the equipped Teece is destroyed, your opponent either discards a card or sacrifices a Teece that is not a Token. Death: when the equipped Teece destroys an enemy, or is destroyed, select an equip, a Token or a battleground and destroy it. Either way, if it is a Famine or a Death: +2.'},
+ 782:{name:'Chainmail of the End Times',type:'equip',mod:0,
+    grants:{graveMark:true,markDef:1,
+      act:[{name:'Spend a mark',once:'turn',times:9,steps:[{fx:'spendMark',n:-2}]},
+           {name:'Trade discards',once:'turn',steps:[{fx:'discard',n:2,cost:true},{fx:'discard',n:1,foe:true}]}]},
+    text:'Whenever a card is sent to a graveyard from anywhere, the equipped Teece takes a mark. It has +1 Defence for every mark on it. Spend a mark to select an enemy and give it -2 permanently. Once per your turn: discard two cards and your opponent discards one.'},
+ 783:{name:'River of Blood',type:'ground',gPin:true,
+    gact:[{name:'Break the river',once:'turn',
+           steps:[{fx:'riverToll',n:2,cost:true},{fx:'breakGround'},{fx:'wipe'}]}],
+    text:'A Teece destroyed on this panel is equipped to this battleground instead of going to a graveyard. While one of your Teece stands on it, once per your turn: tear two of the cards equipped to it into the graveyards and destroy this battleground — and every card on the field with it.'},
+ 784:{name:'Wastes',type:'ground',gmod:-3,gNoEntry:true,
+    text:'No Teece may be played or moved onto this panel. A Teece already standing here gets -3.'},
  /* Not in any deck: Cannonball is handed out by a roguelike perk. */
  590:{name:'Cannonball',type:'magic',perkOnly:true,
     text:'Select a Teece and one of its sides; that side gets -4.',
@@ -2715,6 +2841,22 @@ const CARDS = {
     text:'This panel counts as Web. At the end of your turn, if nothing stands on it, a 4/4/4/4 Spiderling hatches here.'},
 };
 const DEF=t=>CARDS[t.cardId];
+/* What an equip actually grants, once the modality it was bolted on with is
+   counted. An equip with modes carries the chosen one on the worn instance and
+   the mode's grants are laid over the card's own, so everything that reads an
+   equip -- effSides, defOf, kwOf, actsOf, processDeath -- sees one shape
+   whether or not the card has modes at all. */
+function eqG(e){
+  const d=CARDS[e.cardId];
+  if(!e.mode||!d.eModes||!d.eModes[e.mode])return d.grants;
+  return Object.assign({},d.grants,d.eModes[e.mode]);
+}
+/* An equip named with the mode it was laid down in, so a Mark on the field
+   says which half of itself is awake. */
+function eqLabel(e){
+  const n=CARDS[e.cardId].name;
+  return e.mode?n+' \u2014 '+e.mode.charAt(0).toUpperCase()+e.mode.slice(1):n;
+}
 const isBossCard=id=>(CARDS[id].sac||0)>=2;
 /* "Until the end of your next turn" outlives temp, which endTurn empties every
    turn. These carry the turn number they die at: your next turn is PLAYERS()
@@ -2734,7 +2876,7 @@ const turnsAhead=n=>G.turnNum+PLAYERS()*n;
    that reads a Teece's numbers, Defence, keywords or abilities asks here. */
 function formOf(t){
   if(!t)return null;
-  for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.formSet)return g.formSet;}
+  for(const e of t.equips){const g=eqG(e);if(g&&g.formSet)return g.formSet;}
   const fs=DEF(t).forms;
   return fs?fs[t.form||0]:null;
 }
@@ -2747,7 +2889,7 @@ function setForm(t,ix,live){
 }
 function drainMult(t){
   if(!t)return 1;
-  for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.drainDouble)return 2;}
+  for(const e of t.equips){const g=eqG(e);if(g&&g.drainDouble)return 2;}
   return 1;
 }
 /* A Teece has fed. What is counted is the drinking, not the biting: Suck picks
@@ -2901,7 +3043,7 @@ function gainBlocked(t){
    the field. Board-aware, because scanDeaths asks it of simulated boards too. */
 function blessedOn(b,i){
   const t=b[i]&&b[i].teece;
-  if(!t||!t.equips.some(e=>{const g=CARDS[e.cardId].grants;return g&&g.blessGuard;}))return false;
+  if(!t||!t.equips.some(e=>{const g=eqG(e);return g&&g.blessGuard;}))return false;
   if(!hasAllyAdj(b,i))return false;
   let mine=0;const foes={};
   for(let j=0;j<BN;j++){
@@ -3110,7 +3252,7 @@ function wardMagic(b,i,p){
 function tapeSave(b,i,by){
   const t=b[i]&&b[i].teece;
   if(!t||by==null||sameTeam(t.owner,by))return false;
-  const ix=t.equips.findIndex(e=>{const g=CARDS[e.cardId].grants;return g&&g.tape;});
+  const ix=t.equips.findIndex(e=>{const g=eqG(e);return g&&g.tape;});
   if(ix<0)return false;
   const e=t.equips.splice(ix,1)[0];
   toGrave(e.owner,e.cardId);
@@ -3326,7 +3468,7 @@ function makeTeece(cardId,owner,opts){
        as it is made, which is also what lets a cloned board work out how many
        times a Teece can still get up without touching the real game. */
     undyUsed:(pl0&&pl0.undying&&pl0.undying[cardId])||0,
-    grafts:[],noSac:false,infect:null,dieEOT:false,
+    grafts:[],noSac:false,infect:null,dieEOT:false,graveMarks:0,
     boon:(bonusApplies(owner)?G.enemyBonus:0)+boon,
     silenced:false,magicUsedTurn:0,
     temp2:[0,0,0,0],temp2Until:0,defTemp2:0,defTemp2Until:0,baseTemp:null,flyExtra:0,immortalUntil:0,
@@ -3345,7 +3487,16 @@ function newState(mode,vsAI,decks,extra){
   const nP=extra.seats||2;
   const teams=extra.teams||Array.from({length:nP},(_,i)=>i);
   buildGeometry(extra.width||3);
-  const mk=p=>({deck:shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice()),hand:[],plate:[],grave:[],onceUsed:{},pendingDraw:0,undying:{},riding:{},
+  /* A card that starts on top of the deck is lifted back out of the shuffle
+     afterwards and stacked on the end of the array, which is the end drawCards
+     pops from. Several of them keep whatever order the shuffle gave them, so
+     the four Horsemen are the opening hand rather than a draw to hope for. */
+  const stack=list=>{
+    const top=[],rest=[];
+    for(const id of list)((CARDS[id]&&CARDS[id].topDeck)?top:rest).push(id);
+    return top.length?rest.concat(top):list;
+  };
+  const mk=p=>({deck:stack(shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice())),hand:[],plate:[],grave:[],onceUsed:{},pendingDraw:0,undying:{},riding:{},
     nextDefBonus:0,nextMod:0,nextSides:null,nextShield:false,noDeckOut:false,coffined:{},teecePlayedLastTurn:false,teecePlayedThisTurn:0,turnsTaken:0,
     hexes:[],forget:0,confuse:null,recall:null});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
@@ -3392,6 +3543,14 @@ function handTake(p,idx){
   if(idx<0||idx>=pl.hand.length)return null;
   const id=pl.hand.splice(idx,1)[0];
   const plate=pl.plate.splice(idx,1)[0]||[];
+  /* The card a spell is being cast off is remembered by POSITION, and a cast
+     that empties the hand under it slides it down: Final Judgement's three
+     discards moved it two places, after which the prompt was hiding a
+     bystander and offering the spell itself as the third card to throw away.
+     handTake is the only place a card leaves a hand, so it is the one place
+     that can keep the marker in step. */
+  const cf=G.castingFrom;
+  if(cf&&cf.p===p&&cf.handIdx>idx)cf.handIdx--;
   return {id,plate};
 }
 /* Bringing a card back out of a graveyard is a PLAY: its when-played effect
@@ -3421,7 +3580,7 @@ function attachRiders(p,cardId,nt,live){
   for(const e of rid){
     nt.equips.push(e);
     if(live)log(CARDS[e.cardId].name+' returns equipped to '+CARDS[cardId].name+'.');
-    const g=CARDS[e.cardId].grants;
+    const g=eqG(e);
     if(g&&g.riseMod){
       applyModT(nt,g.riseMod,'temp');
       if(live)log(nm(nt)+' gets '+sgn(g.riseMod)+' until the end of the turn.');
@@ -3433,7 +3592,7 @@ function attachRiders(p,cardId,nt,live){
    pulls an equip off a standing Teece passes it through here. */
 function equipCameOff(t,e,live){
   if(!t||!e)return;
-  const g=CARDS[e.cardId].grants;
+  const g=eqG(e);
   if(!g||!g.holdsUp)return;
   if(live)log(CARDS[e.cardId].name+' is removed, so '+nm(t)+' is destroyed.');
   forceDeath(t);
@@ -3841,7 +4000,7 @@ function bonusesOn(b,i){
   const t=b[i].teece,out=[];
   if(!t)return out;
   if(!t.silenced&&DEF(t).bonus)out.push(...[].concat(DEF(t).bonus));
-  for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.bonus)out.push(...[].concat(g.bonus));}
+  for(const e of t.equips){const g=eqG(e);if(g&&g.bonus)out.push(...[].concat(g.bonus));}
   return out;
 }
 /* Does the aura on the Teece at j reach the panel at i? effSides and kwOf both
@@ -3906,9 +4065,25 @@ function effSides(b,i,parts){
     const n=formationCount(b,i,bo);
     if(n)addMod(s,bo.n*n,formationLabel(bo));
   }
+  /* Last Man Standing: nothing of yours left beside it and it swells. Read off
+     the owner rather than the team, because an ally's Teece is not yours. */
+  const lone=(!t.silenced)&&DEF(t).loneMod;
+  if(lone){
+    let alone=true;
+    for(let j=0;j<BN;j++){
+      if(j===i)continue;
+      const o=b[j].teece;
+      if(o&&o.owner===t.owner){alone=false;break;}
+    }
+    if(alone)addMod(s,lone,DEF(t).name+', the last one standing');
+  }
   for(const e of t.equips){
     const ed=CARDS[e.cardId];
     addMod(s,ed.mod,ed.name);
+    /* The two Marks pay out extra on the Horseman they are named for, the way
+       aXe and swOrd pay out on their letter. */
+    if(ed.modIfApoc&&ed.modIfApoc.of.indexOf(DEF(t).apoc)>=0)
+      addMod(s,ed.modIfApoc.n,ed.name+', worn by a '+DEF(t).apoc.charAt(0).toUpperCase()+DEF(t).apoc.slice(1));
     /* Moon Scythe by night, Sun Gun and Twilight Cloak by day. */
     if(ed.modWhen){const mw=phasePick(ed.modWhen);if(mw)addMod(s,mw,ed.name+(isDay()?', by day':', by night'));}
     if(perkN('equipPlus')&&sameTeam(t.owner,0))addMod(s,perkN('equipPlus'),ed.name+', honed over the run');
@@ -3990,7 +4165,7 @@ function effSides(b,i,parts){
     }
     /* Everything a Mindless Hunger has eaten radiates from its wearer too. */
     if(!o.silenced)for(const gid of (o.grafts||[])){const ga=CARDS[gid]&&CARDS[gid].aura;if(ga)auras.push(ga);}
-    for(const e of o.equips){const g=CARDS[e.cardId].grants;if(g&&g.aura)auras.push(g.aura);}
+    for(const e of o.equips){const g=eqG(e);if(g&&g.aura)auras.push(g.aura);}
     for(const a of auras){
       const ally=sameTeam(o.owner,t.owner);
       if(!phaseIs(a.when))continue;
@@ -4027,8 +4202,11 @@ function defOf(b,i){
   let d=(DEF(t).def||0)+(t.defPerm||0)+(t.defTemp2||0);
   if(DEF(t).defPerAlly)d+=DEF(t).defPerAlly*allyCount(b,i,true);
   for(const e of t.equips){
-    const g=CARDS[e.cardId].grants;
+    const g=eqG(e);
     if(g&&g.def)d+=g.def;
+    /* Chainmail of the End Times: a point of Defence for every card it has
+       watched go into the ground. */
+    if(g&&g.markDef)d+=g.markDef*(t.graveMarks||0);
     if(g&&g.defWhen){const dw=phasePick(g.defWhen);if(dw)d+=dw;}
   }
   if(b[i].ground){
@@ -4087,7 +4265,7 @@ function kwOf(b,i,noGround){
   ks.push(...t.kwTemp);
   if(t.kwPerm)ks.push(...t.kwPerm);
   for(const e of t.equips){
-    const g=CARDS[e.cardId].grants;
+    const g=eqG(e);
     if(g&&g.kw)ks.push(...g.kw);
     if(g&&g.kwWhen){const kw=phasePick(g.kwWhen);if(kw)ks.push(...kw);}
   }
@@ -4104,7 +4282,7 @@ function kwOf(b,i,noGround){
     const o=b[j].teece;if(!o||o.silenced)continue;
     const kauras=[];
     if(DEF(o).aura)kauras.push(DEF(o).aura);
-    for(const e of o.equips){const g=CARDS[e.cardId].grants;if(g&&g.aura)kauras.push(g.aura);}
+    for(const e of o.equips){const g=eqG(e);if(g&&g.aura)kauras.push(g.aura);}
     for(const a of kauras)
       if(a.kw&&auraWho(a,sameTeam(o.owner,t.owner))&&auraReaches(b,j,i,a)&&
          (!a.markOnly||markOfCard(d).indexOf(a.markOnly)>=0))ks.push(...a.kw);
@@ -4118,7 +4296,11 @@ function kwOf(b,i,noGround){
 }
 const hasKw=(b,i,k)=>kwOf(b,i).indexOf(k)>=0;
 /* A panel a Teece may be played onto or moved onto: empty and not razed. */
-const openAt=(b,i)=>!b[i].teece&&!b[i].razed;
+/* A panel a Teece may be played onto or moved onto: empty, not razed, and not
+   a battleground that refuses arrivals. A Teece already standing on one when it
+   was laid stays put; what is shut is the way in. */
+const blockedGround=(b,i)=>!!(b[i].ground&&CARDS[b[i].ground.cardId].gNoEntry);
+const openAt=(b,i)=>!b[i].teece&&!b[i].razed&&!blockedGround(b,i);
 function actsOf(b,i){
   const t=b[i].teece; if(!t)return[];
   const out=[]; const d=DEF(t);
@@ -4141,7 +4323,7 @@ function actsOf(b,i){
     if(ga)ga.forEach((a,x)=>{if(!a.needWeb||isWebbed(b,i))out.push({key:'x'+gid+'_'+x,act:a});});
   }
   for(const e of t.equips){
-    const g=CARDS[e.cardId].grants;
+    const g=eqG(e);
     if(g&&g.act)g.act.forEach((a,x)=>{if(phaseIs(a.when))out.push({key:'e'+e.cardId+'_'+x,act:a});});
   }
   if(hasKw(b,i,'flying'))out.push({key:'kfly',act:FLY_ACT});
@@ -4235,7 +4417,7 @@ function ageRateAt(b,i){
   let rate=1;
   if(gd&&gd.gAgeRate)rate*=gd.gAgeRate;
   for(const e of t.equips){
-    const g=CARDS[e.cardId].grants;
+    const g=eqG(e);
     if(g&&g.ageStop)return 0;
     if(g&&g.ageRate)rate*=g.ageRate;
   }
@@ -4317,7 +4499,7 @@ async function fireMove(from,to,cause){
   }
   const d=DEF(t);
   const selfHooks=(d.onMove||[]).slice();
-  for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.onMove)selfHooks.push(...g.onMove);}
+  for(const e of t.equips){const g=eqG(e);if(g&&g.onMove)selfHooks.push(...g.onMove);}
   for(const h of selfHooks)await runSteps([h],{p:t.owner,cell:to,fromCell:from,t,first:false});
   for(let i=0;i<BN;i++){
     const w=b[i].teece;
@@ -4326,7 +4508,7 @@ async function fireMove(from,to,cause){
     const wd=DEF(w),hooks=[];
     if(ally){
       if(wd.onAllyMove)hooks.push(...wd.onAllyMove);
-      for(const e of w.equips){const g=CARDS[e.cardId].grants;if(g&&g.onAllyMove)hooks.push(...g.onAllyMove);}
+      for(const e of w.equips){const g=eqG(e);if(g&&g.onAllyMove)hooks.push(...g.onAllyMove);}
       for(const h of hooks){
         if(h.fx==='modMoved'){applyModT(t,h.n,h.dur);log(nm(t)+' gets '+sgn(h.n)+durTxt(h.dur)+'.');}
         else if(h.fx==='modSelf'){applyModT(w,h.n,h.dur);log(nm(w)+' gets '+sgn(h.n)+durTxt(h.dur)+'.');}
@@ -4336,7 +4518,7 @@ async function fireMove(from,to,cause){
     }
     const own=[]; 
     if(wd.onEnemyMove)own.push(...wd.onEnemyMove);
-    for(const e of w.equips){const g=CARDS[e.cardId].grants;if(g&&g.onEnemyMove)own.push(...g.onEnemyMove);}
+    for(const e of w.equips){const g=eqG(e);if(g&&g.onEnemyMove)own.push(...g.onEnemyMove);}
     for(const h of own){
       if(h.anyCause||cause==null||cause===w.owner)hooks.push(h);
     }
@@ -4364,13 +4546,18 @@ function scanDeaths(b){
   const mark=(vi,ki)=>{const v=b[vi].teece;if(!dead[vi])dead[vi]={cell:vi,t:v,killers:[]};
     if(ki!=null&&dead[vi].killers.indexOf(b[ki].teece.uid)<0)dead[vi].killers.push(b[ki].teece.uid);};
   const immune=i=>b[i].teece&&(b[i].teece.immortalOwner!=null||blessedOn(b,i));
+  /* Harbinger of War: while it stands, nobody has allies. Every pairing on the
+     board is a fight, its own side included -- and it is standing in the middle
+     of that board itself. */
+  const anarchy=b.some(c=>c.teece&&!c.teece.silenced&&DEF(c.teece).civilWar);
+  const foes=(x,y)=>anarchy||!sameTeam(x,y);
   /* Carapace: its wearer swings two harder at anything standing on the Web. The
      bonus is on the pairing, not on the Teece, so it never shows in effSides. */
   const webEdge=(ai,di)=>{
     const t=b[ai].teece;
     if(!t||!t.equips.length||!isWebbed(b,di))return 0;
     let n=0;
-    for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.webCombat)n+=g.webCombat;}
+    for(const e of t.equips){const g=eqG(e);if(g&&g.webCombat)n+=g.webCombat;}
     return n;
   };
   for(let i=0;i<BN;i++){
@@ -4381,7 +4568,7 @@ function scanDeaths(b){
     const t=b[i].teece; if(!t)continue;
     for(const j of ADJ[i]){
       if(j<i)continue;
-      const o=b[j].teece; if(!o||sameTeam(o.owner,t.owner))continue;
+      const o=b[j].teece; if(!o||!foes(o.owner,t.owner))continue;
       let mi,oj;
       if(j===i+1){mi=1;oj=3;} else if(j===i-1){mi=3;oj=1;}
       else if(j===i+BW){mi=2;oj=0;} else {mi=0;oj=2;}
@@ -4402,7 +4589,7 @@ function scanDeaths(b){
       let j=i+st,d=1;
       while(inLine(i,j,st)){
         if(b[j].teece){
-          if(d>1&&!sameTeam(b[j].teece.owner,t.owner)){
+          if(d>1&&foes(b[j].teece.owner,t.owner)){
             const os=(ms+2)%4;
             if(eff[i][ms]+webEdge(i,j)-eff[j][os]>dfn[j]&&canKill(i)&&!immune(j))mark(j,i);
           }
@@ -4485,7 +4672,7 @@ function resolvePending(val){
 
 /* ============ fx executor ============ */
 function hasInvertLoss(t){
-  return t.equips.some(e=>{const g=CARDS[e.cardId].grants;return g&&g.invertLoss;});
+  return t.equips.some(e=>{const g=eqG(e);return g&&g.invertLoss;});
 }
 function forceDeath(t){ if(t)for(let k=0;k<4;k++)t.perm[k]=-999; }
 function applyModT(t,n,dur){
@@ -4501,7 +4688,7 @@ function applyModT(t,n,dur){
   let dblPos=!!DEF(t).selfDoublePos,dblNeg=false;
   /* Transfusion Catalyst doubles both ways from the Teece's own back. */
   for(const e of t.equips){
-    const g=CARDS[e.cardId].grants;
+    const g=eqG(e);
     if(!g)continue;
     if(g.doublePos)dblPos=true;
     if(g.doubleNeg)dblNeg=true;
@@ -4661,10 +4848,22 @@ async function FXRUN(st,ctx){
        the game's existing shorthand for "until the start of its controller's
        next turn": startTurn is what clears an immortality that names no end. */
     const holdSafe=tk=>{if(st.safe&&tk)tk.immortalOwner=tk.owner;};
+    /* A few Tokens do something the moment they land. Their arrival runs here,
+       where the summon is already awaited, rather than inside the synchronous
+       summonToken every other caller shares. */
+    const tokArrive=async(tk,cell)=>{
+      const td=CARDS[tk.cardId];
+      if(td.onPlay)await runSteps(td.onPlay,{p:tk.owner,cell,t:tk,first:false,noModal:true});
+    };
+    const tokName=CARDS[st.tok].name+' ('+sidesLine(CARDS[st.tok].sides)+')';
     if(st.where==='here'){
       const i=ctx.deadCell;
-      if(i!=null&&openAt(b,i)){holdSafe(summonToken(b,i,st.tok,ctx.deadOwner!=null?ctx.deadOwner:p,true));
-        log('A Token ('+sidesLine(CARDS[st.tok].sides)+') appears at the '+CN[i]+'.');}
+      if(i!=null&&openAt(b,i)){
+        const tk0=summonToken(b,i,st.tok,ctx.deadOwner!=null?ctx.deadOwner:p,true);
+        holdSafe(tk0);
+        log('A '+tokName+' appears at the '+CN[i]+'.');
+        await tokArrive(tk0,i);
+      }
       return;}
     for(let n=0;n<(st.count||1);n++){
       const pool=(st.where==='adj'?ADJ[ctx.cell]:ALL()).filter(j=>openAt(b,j));
@@ -4676,7 +4875,8 @@ async function FXRUN(st,ctx){
         const tk=summonToken(b,c,st.tok,owner,true);
         holdSafe(tk);
         if(st.linked&&ctx.t){ctx.t.links.push(tk.uid);}
-        log('A Token ('+sidesLine(CARDS[st.tok].sides)+') appears at the '+CN[c]+'.');
+        log('A '+tokName+' appears at the '+CN[c]+'.');
+        await tokArrive(tk,c);
         continue;
       }
       /* A Token handed to the enemy is a cost, not an offer, so there is no
@@ -4686,15 +4886,16 @@ async function FXRUN(st,ctx){
       const c=st.foe
         ? await pickCell(pool,'Place a Meat Puppet your opponent will control ('+(n+1)+' of '+(st.count||1)+').',
             (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,owner),false);},false)
-        : await pickCell(pool,'Choose a space for a Token ('+sidesLine(CARDS[st.tok].sides)+') ('+(n+1)+' of '+(st.count||1)+'), or skip.',
+        : await pickCell(pool,'Choose a space for a '+tokName+((st.count||1)>1?' ('+(n+1)+' of '+(st.count||1)+')':'')+', or skip.',
             (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,p),false);},true);
       if(c==='CANCEL')return 'ABORT';
       if(c==null)return;
       const tk=summonToken(b,c,st.tok,owner,true);
       holdSafe(tk);
       if(st.linked&&ctx.t){ctx.t.links.push(tk.uid);}
-      log('A Token ('+sidesLine(CARDS[st.tok].sides)+') appears at the '+CN[c]+
+      log('A '+tokName+' appears at the '+CN[c]+
         (st.safe?', held outside time until '+pposs(owner)+' next turn':'')+'.');
+      await tokArrive(tk,c);
       ctx.first=false;
       render();
     }
@@ -5922,17 +6123,29 @@ async function FXRUN(st,ctx){
     }
     return;}
   case 'discard':{
-    const pl=G.players[p];
-    if(handCount(p)<st.n){log('Not enough cards to discard.');return 'ABORT';}
-    for(let k=0;k<st.n;k++){
-      const opts=handOpts(p);
-      if(!opts.length)break;
-      const pick=await chooseOption(p,opts,'Discard a card.');
-      const idx=pick==null?parseInt(opts[0].v,10):parseInt(pick,10);
-      const gone=handTake(p,idx);const cid=gone.id;
-      dumpPlate(gone.plate,'with the card it was bolted to');
-      log(pname(p)+' discards '+CARDS[cid].name+'.');
-      await discardCard(p,cid);
+    /* st.foe turns the cost around: every opponent pays it instead. An opponent
+       who cannot pay simply does not, where a cost you cannot pay yourself
+       calls the whole effect off. */
+    const seats=st.foe?enemySeats(p):[p];
+    if(!seats.length)return none('There is no opponent to make discard.');
+    for(const q of seats){
+      if(handCount(q)<st.n){
+        if(!st.foe){log('Not enough cards to discard.');return 'ABORT';}
+        log(pname(q)+' has nothing to discard.');
+        continue;
+      }
+      for(let k=0;k<st.n;k++){
+        const opts=handOpts(q);
+        if(!opts.length)break;
+        const pick=await chooseOption(q,opts,'Discard a card.');
+        const idx=pick==null?parseInt(opts[0].v,10):parseInt(pick,10);
+        const gone=handTake(q,idx);
+        if(!gone)break;
+        dumpPlate(gone.plate,'with the card it was bolted to');
+        log(pname(q)+' discards '+CARDS[gone.id].name+'.');
+        await discardCard(q,gone.id);
+        if(G.over)return;
+      }
     }
     return;}
   case 'modalNext':{
@@ -7231,6 +7444,177 @@ async function FXRUN(st,ctx){
     log('The Dumpster and every panel beside it burn until the start of '+pposs(p)+' next turn: -'+FIRE_N+' to anything standing in the fire.');
     await anim(cells,'zap');
     return;}
+  /* ---- Apocalypse: the end, and the four who bring it ---- */
+  /* A Horseman played drags a second out of your hand. It arrives silenced,
+     which is the whole brake on the chain: a silenced Horseman has no "when
+     played" left to call a third one in with. */
+  case 'horseman':{
+    const pl=G.players[p];
+    const ids=pl.hand.map((cid,x)=>({cid,x})).filter(o=>CARDS[o.cid].horseman);
+    if(!ids.length)return none('No other Horseman in hand.');
+    const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
+    if(!empt.length)return none('No room for another Horseman.');
+    const opts=ids.map((o,y)=>({v:String(y),lbl:CARDS[o.cid].name+' ('+sidesLine(CARDS[o.cid].sides)+')',cid:o.cid}));
+    opts.push({v:'no',lbl:'Ride alone'});
+    const pick=await chooseOption(p,opts,'Bring another Horseman in, silenced?');
+    if(pick==null||pick==='no')return;
+    const sel=ids[parseInt(pick,10)];
+    const c=await chooseCell(p,empt,'Choose a space for '+CARDS[sel.cid].name+', or skip.',
+      {skip:true,preview:{cardId:sel.cid,plate:plateOf(p,sel.x)},
+       mut:(bb,i)=>{const pv=makeTeece(sel.cid,p);pv.silenced=true;putTeece(bb,i,pv,false);}});
+    if(c==null||c==='CANCEL')return;
+    const gone=handTake(p,sel.x);
+    if(!gone)return;
+    const nt=makeTeece(sel.cid,p,{real:true});
+    nt.silenced=true;
+    for(const e of gone.plate)nt.equips.push(e);
+    putTeece(b,c,nt,true);
+    attachRiders(p,sel.cid,nt,true);
+    log(CARDS[sel.cid].name+' rides in at the '+CN[c]+', silenced.');
+    await anim([c],'placed',140);
+    for(const e of gone.plate){
+      const eg=eqG(e);
+      if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:c,t:nt,first:false,equip:e});
+    }
+    return;}
+  /* The modality an equip was bolted on with, recorded on the worn copy. */
+  case 'eqMode':{
+    if(!ctx.equip)return;
+    ctx.equip.mode=st.mode;
+    log(CARDS[ctx.equip.cardId].name+' is set to '+st.mode.charAt(0).toUpperCase()+st.mode.slice(1)+'.');
+    return;}
+  /* Cards off the top of every deck and straight into the ground. Buried, not
+     destroyed, so anything that answers a discard answers this too. */
+  case 'mill':{
+    const n=st.n||1;
+    for(let q=0;q<PLAYERS();q++){
+      const pl=G.players[q];
+      const got=[];
+      for(let k=0;k<n&&pl.deck.length;k++)got.push(pl.deck.pop());
+      if(!got.length){log(pname(q)+' has nothing left to bury.');continue;}
+      log(pname(q)+' buries '+got.map(c=>CARDS[c].name).join(' and ')+'.');
+      for(const cid of got){
+        await discardCard(q,cid);
+        if(G.over)return;
+      }
+    }
+    return;}
+  /* Everything goes. Teece first, with their deaths paid out as any other
+     death is, then the ground they were standing on. */
+  case 'wipe':{
+    const cells=[];
+    for(let i=0;i<BN;i++)if(b[i].teece)cells.push(i);
+    if(cells.length)await anim(cells,'dying',190);
+    for(const i of cells){
+      const vt=b[i].teece;
+      if(!vt)continue;
+      await processDeath({cell:i,t:vt,killers:[]});
+      if(G.over)return;
+    }
+    for(let i=0;i<BN;i++)if(b[i].ground)await clearGroundAt(i,p);
+    log('Everything on the field is destroyed.');
+    return;}
+  /* The price of breaking the river: cards torn off it and into the graveyards
+     they were kept out of. Marked cost:true on the ability, so a river holding
+     fewer than two is not a cheaper way to clear the board. */
+  case 'riverToll':{
+    const i=ctx.cell;
+    const g=(i!=null&&b[i])?b[i].ground:null;
+    if(!g||!CARDS[g.cardId].gPin)return none('There is no river here to break.');
+    const held=g.held||[];
+    const n=st.n||1;
+    if(held.length<n)return none('The river holds only '+held.length+' card'+(held.length===1?'':'s')+
+      ', and breaking it takes '+n+'.');
+    const torn=held.splice(0,n);
+    for(const sc of torn)toGrave(sc.owner,sc.cardId);
+    log(nm(ctx.t)+' tears '+torn.map(sc=>CARDS[sc.cardId].name).join(' and ')+' off '+CARDS[g.cardId].name+'.');
+    return;}
+  /* A mark burned off the chainmail, spent on an enemy. */
+  case 'spendMark':{
+    const t=ctx.t;
+    if(!t||!(t.graveMarks>0))return none('There is no mark left to spend.');
+    const cands=[];
+    for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&!sameTeam(o.owner,p)&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length)return none('No enemy to spend a mark on.');
+    const n=st.n||-2;
+    const c=await pickCell(cands,'Spend a mark: which enemy gets '+sgn(n)+' permanently?',
+      (bb,i)=>{applyModT(bb[i].teece,n,'perm');},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    t.graveMarks--;
+    applyModT(b[c].teece,n,'perm');
+    log(nm(b[c].teece)+' gets '+sgn(n)+' as a mark burns off '+nm(t)+' — '+t.graveMarks+' left.');
+    await anim([c],'zap');
+    return;}
+  /* Famine's due. The opponent chooses which way to pay it. */
+  case 'foeToll':{
+    const foes=enemySeats(p);
+    if(!foes.length)return none('There is no opponent to pay the toll.');
+    for(const q of foes){
+      const sacs=[];
+      for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&o.owner===q&&!o.isToken&&canSacrifice(b,i))sacs.push(i);}
+      const opts=[];
+      if(handCount(q))opts.push({v:'d',lbl:'Discard a card'});
+      if(sacs.length)opts.push({v:'s',lbl:'Sacrifice a Teece'});
+      if(!opts.length){log(pname(q)+' has nothing left to give up.');continue;}
+      const pick=opts.length===1?opts[0].v
+        :await chooseOption(q,opts,'Famine comes due: discard a card, or sacrifice a Teece.');
+      if(pick==='d'){await runSteps([{fx:'discard',n:1}],{p:q,first:false});}
+      else{
+        const c=await chooseCell(q,sacs,'Choose one of your Teece to give up to Famine.',{mut:null});
+        if(c==null||c==='CANCEL')continue;
+        const vt=b[c].teece;
+        if(!vt)continue;
+        log(nm(vt)+' is given up to Famine.');
+        await processDeath({cell:c,t:vt,killers:[],cost:true});
+      }
+      if(G.over)return;
+    }
+    return;}
+  /* Death takes the furniture: one equip, Token or battleground off the board.
+     Listed rather than pointed at, because three different kinds of thing can
+     share one panel and a tap could not tell them apart. */
+  case 'strip':{
+    const opts=[],seen={};
+    for(let i=0;i<BN;i++){
+      const o=b[i].teece;
+      if(o&&canTarget(b,i,p)){
+        if(o.isToken)opts.push({v:'t'+i,lbl:nm(o)+' — the Token at the '+CN[i],cid:o.cardId});
+        o.equips.forEach((e,x)=>opts.push({v:'e'+i+'_'+x,lbl:eqLabel(e)+' — worn by '+nm(o)+' at the '+CN[i],cid:e.cardId}));
+      }
+      const g=b[i].ground;
+      if(g){
+        const key=g.gid?'gid'+g.gid:'c'+i;
+        if(!seen[key]){seen[key]=true;opts.push({v:'g'+i,lbl:CARDS[g.cardId].name+' — the ground at the '+CN[i],cid:g.cardId});}
+      }
+    }
+    if(!opts.length)return none('There is no equip, Token or battleground to destroy.');
+    const pick=await chooseOption(p,opts,'Destroy which equip, Token or battleground?');
+    if(pick==null)return;
+    if(pick[0]==='g'){
+      const i=parseInt(pick.slice(1),10);
+      if(!b[i].ground)return;
+      log(CARDS[b[i].ground.cardId].name+' is destroyed.');
+      await clearGroundAt(i,p);
+      return;}
+    if(pick[0]==='t'){
+      const i=parseInt(pick.slice(1),10);
+      const vt=b[i].teece;
+      if(!vt)return;
+      log(nm(vt)+' is destroyed outright.');
+      await anim([i],'dying',190);
+      await processDeath({cell:i,t:vt,killers:[]});
+      return;}
+    const bits=pick.slice(1).split('_');
+    const i=parseInt(bits[0],10),x=parseInt(bits[1],10);
+    const host=b[i].teece;
+    if(!host||!host.equips[x])return;
+    const e=host.equips.splice(x,1)[0];
+    equipCameOff(host,e,true);
+    toGrave(e.owner,e.cardId);
+    log(CARDS[e.cardId].name+' is torn off '+nm(host)+' and destroyed.');
+    await anim([i],'zap');
+    return;}
   case 'move':{
     const i=ctx.cell;
     if(hasKw(b,i,'immovable'))return none('It cannot move.');
@@ -7285,6 +7669,36 @@ function bounceToHand(t,keepEquips){
 function toGrave(owner,cardId){
   G.players[owner].grave.push(cardId);
   G.graveThisTurn.push({owner,cardId});
+  noteBuried(cardId);
+}
+/* Every card that reaches a graveyard comes through toGrave, whichever way it
+   got there -- a body off the field, a discard, a milled card, a broken equip,
+   a battleground somebody built over. That single funnel is what lets a card
+   answer "a card is sent to the grave, from anywhere" without caring where
+   from. Kept synchronous, because toGrave is called from places that cannot
+   wait, and it only ever changes numbers. */
+function noteBuried(cardId){
+  if(!G||!G.board)return;
+  const what=CARDS[cardId]?CARDS[cardId].name:'a card';
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(!t)continue;
+    const og=DEF(t).onGrave;
+    if(og&&!t.silenced){
+      if(og.perm)applyModT(t,og.perm,'perm');
+      if(og.temp)applyModT(t,og.temp,'temp');
+      log(nm(t)+' feeds on '+what+' going into the ground: '+
+        (og.perm?sgn(og.perm)+' permanently':'')+(og.perm&&og.temp?' and ':'')+
+        (og.temp?sgn(og.temp)+' until the end of the turn':'')+'.');
+    }
+    for(const e of t.equips){
+      const g=eqG(e);
+      if(g&&g.graveMark){
+        t.graveMarks=(t.graveMarks||0)+1;
+        log(nm(t)+' takes a mark from '+CARDS[e.cardId].name+' \u2014 '+t.graveMarks+' now.');
+      }
+    }
+  }
 }
 /* Discarding is not dying. Only cards discarded from hand or milled off the
    deck answer onDiscardSummon, so a Witch Queen destroyed on the field stays
@@ -7301,23 +7715,58 @@ async function riseFromGrave(owner,cardId){
   if(gi<0)return;
   const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
   if(!empt.length){log(d.name+' is discarded, but there is no room for it to rise.');return;}
-  const c=await chooseCell(owner,empt,d.name+' claws its way out of the grave. Choose a space, or skip.',
-    {skip:true,mut:(bb,i)=>{putTeece(bb,i,makeTeece(cardId,owner),false);}});
+  const boon=d.onDiscardBonus||0;
+  const raise=real=>{const nt=makeTeece(cardId,owner,real?{real:true}:undefined);
+    if(boon)for(let k=0;k<4;k++)nt.perm[k]+=boon;return nt;};
+  const c=await chooseCell(owner,empt,d.name+' claws its way out of the grave'+(boon?' with '+sgn(boon):'')+
+    '. Choose a space, or skip.',
+    {skip:true,mut:(bb,i)=>{putTeece(bb,i,raise(false),false);}});
   if(c==null||c==='CANCEL')return;
   const gj=pl.grave.lastIndexOf(cardId);
   if(gj>=0)pl.grave.splice(gj,1);
-  putTeece(b,c,makeTeece(cardId,owner),true);
+  putTeece(b,c,raise(true),true);
   attachRiders(owner,cardId,b[c].teece,true);
-  log(d.name+' rises from the grave at the '+CN[c]+'.');
+  log(d.name+' rises from the grave at the '+CN[c]+(boon?' with '+sgn(boon)+'.':'.'));
   if(d.onPlay)await runSteps(d.onPlay,{p:owner,cell:c,t:b[c].teece,first:false});
 }
-/* Cards milled by Curse of Forgetting are queued here: drawCards is sync, and
-   the hooks that answer a discard are not. */
+/* Cards milled by Curse of Forgetting are queued here, and so is the toll a
+   Famine Token takes off an enemy draw: drawCards is sync, and the hooks that
+   answer it are not. */
 async function flushDiscards(){
   while(G&&G.discardQueue&&G.discardQueue.length){
     const q=G.discardQueue.shift();
+    if(q.bottom){await bottomOne(q.owner);continue;}
     await riseFromGrave(q.owner,q.cardId);
   }
+}
+/* A card off the hand and back under the deck. Not a discard: it never reaches
+   a graveyard, so nothing watching the graveyard sees it. */
+async function bottomOne(owner){
+  const opts=handOpts(owner);
+  if(!opts.length){log(pname(owner)+' has nothing in hand to push back under the deck.');return;}
+  const pick=await chooseOption(owner,opts,
+    'Famine takes its toll: put a card from your hand on the bottom of your deck.');
+  const gone=handTake(owner,parseInt(pick==null?opts[0].v:pick,10));
+  if(!gone)return;
+  dumpPlate(gone.plate,'off a card pushed under the deck');
+  G.players[owner].deck.unshift(gone.id);
+  log(pname(owner)+' puts a card on the bottom of the deck.');
+}
+/* Famine stands over the draw: whatever an enemy pulls up, something else goes
+   back under their deck. One toll per card drawn, per Famine watching. */
+function noteFoeDraw(p,n){
+  if(!G||!G.board||!n)return;
+  let watchers=0;
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(!t||t.silenced||sameTeam(t.owner,p))continue;
+    if(DEF(t).onFoeDraw)watchers++;
+  }
+  if(!watchers)return;
+  G.discardQueue=G.discardQueue||[];
+  for(let k=0;k<n*watchers;k++)G.discardQueue.push({owner:p,bottom:true});
+  log('Famine watches '+pposs(p)+' draw: '+(n*watchers===1?'a card goes':n*watchers+' cards go')+
+    ' back under the deck.');
 }
 function drawCards(p,n){
   const pl=G.players[p];
@@ -7337,6 +7786,7 @@ function drawCards(p,n){
   }
   if(got)log(pname(p)+' draws '+(got===1?'a card':got+' cards')+'.');
   else if(!burned)log(pname(p)+' has nothing left to draw.');
+  noteFoeDraw(p,got);
 }
 function revertControl(b,uid,liveLog){
   for(let i=0;i<BN;i++){
@@ -7433,7 +7883,7 @@ async function undyingReturn(t,cell){
   }
   const riders=[];
   for(const e of t.equips){
-    const g=CARDS[e.cardId].grants;
+    const g=eqG(e);
     if(g&&g.undyingRide)riders.push(e);
     else toGrave(e.owner,e.cardId);
   }
@@ -7444,7 +7894,7 @@ async function undyingReturn(t,cell){
     (bonus?' ('+sgn(bonus)+')':'')+
     '. '+(left?left+' return'+(left===1?'':'s')+' left.':'No returns left.'));
   for(const e of riders){
-    const g=CARDS[e.cardId].grants;
+    const g=eqG(e);
     log(CARDS[e.cardId].name+' returns equipped to it.');
     if(g.riseMod){
       applyModT(nt,g.riseMod,'temp');
@@ -7518,7 +7968,7 @@ async function processDeath(d){
        the same line effSides already draws, where a silenced Teece keeps the
        auras its equips radiate and loses the one printed on it. */
     const kd=DEF(k); if(kd.onKill&&!k.silenced)oks.push(kd.onKill);
-    for(const e of k.equips){const g=CARDS[e.cardId].grants;if(g&&g.onKill)oks.push(g.onKill);}
+    for(const e of k.equips){const g=eqG(e);if(g&&g.onKill)oks.push(g.onKill);}
     /* An echoed killer collects every reward once more. Snapshotted first, or
        a second echo would square the list instead of doubling it. */
     if(k.echo){const base=oks.slice();for(let e=0;e<k.echo;e++)oks.push(...base);}
@@ -7527,13 +7977,21 @@ async function processDeath(d){
       /* Twilight Cloak by day: enormous, airborne, and spent. */
       if(ok.burnOut){k.dieEOT=true;log(nm(k)+' will not outlast the turn it killed in.');continue;}
       if(ok.draw)drawCards(k.owner,ok.draw);
+      /* A reward that is a whole effect rather than a number. foeOnly holds it
+         back when the kill was of its own side, which a Harbinger of War can
+         arrange. */
+      else if(ok.steps){
+        if(ok.foeOnly&&sameTeam(k.owner,t.owner))continue;
+        const kc=b.findIndex(c=>c.teece===k);
+        await runSteps(ok.steps,{p:k.owner,cell:kc>=0?kc:null,t:k,first:false,noModal:true});
+      }
       else{applyModT(k,ok.n,ok.dur);log(nm(k)+' gets '+sgn(ok.n)+durTxt(ok.dur)+' for the kill.');}
     }
     /* Mindless Hunger: what the wearer kills, it keeps. Grafting a card id on
        is enough -- kwOf, actsOf and effSides all read the grafts alongside the
        Teece's own card, so it inherits the keywords, the abilities and the aura
        of everything it has eaten. */
-    if(k.equips.some(e=>{const g=CARDS[e.cardId].grants;return g&&g.graft;})){
+    if(k.equips.some(e=>{const g=eqG(e);return g&&g.graft;})){
       k.grafts=k.grafts||[];
       if(k.grafts.indexOf(t.cardId)<0&&(DEF(t).kw||DEF(t).act||DEF(t).aura)){
         k.grafts.push(t.cardId);
@@ -7548,7 +8006,7 @@ async function processDeath(d){
       {lbl:'Every Teece gets +2',steps:[{fx:'allMod',n:2,dur:'perm'}]},
       {lbl:'Every Teece gets -2',steps:[{fx:'allMod',n:-2,dur:'perm'}]}]});
   }
-  for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.onDeath)deathFx.push(...g.onDeath);}
+  for(const e of t.equips){const g=eqG(e);if(g&&g.onDeath)deathFx.push(...g.onDeath);}
   const dblG=G.board[cell].ground&&CARDS[G.board[cell].ground.cardId].gDouble;
   const twice=x=>x.fx!=='resummon'&&x.once!=='game';
   if(dblG)deathFx=deathFx.concat(deathFx.filter(twice));
@@ -7654,7 +8112,7 @@ async function processDeath(d){
       log(nm(t)+' is dragged off the field and into '+pname(0)+"'s hand.");
     }
     for(const e of t.equips){
-      const g=CARDS[e.cardId].grants;
+      const g=eqG(e);
       if(g&&g.teeceReturn&&!handed&&!t.isToken&&!t.isCopy){
         handPush(t.baseOwner,t.cardId);
         log(nm(t)+' returns to '+pname(t.baseOwner)+"'s hand.");
@@ -7683,7 +8141,7 @@ async function processDeath(d){
       }
     }
     for(const e of t.equips){
-      const eg=CARDS[e.cardId].grants;
+      const eg=eqG(e);
       if(eg&&eg.reequip&&!(eg.reequipOnce&&G.players[e.owner].onceUsed['req'+e.cardId])){
         if(eg.reequipOnce)G.players[e.owner].onceUsed['req'+e.cardId]=true;
         const hosts=[];
@@ -7715,10 +8173,11 @@ async function processDeath(d){
       /* A Graveyard keeps what dies on it. The card is buckled onto the
          battleground rather than buried, and comes back to its owner's hand
          when the Graveyard itself is broken up. */
-      else if(gr&&(grd.gInter||grd.gDump)){
+      else if(gr&&(grd.gInter||grd.gDump||grd.gPin)){
         gr.held=gr.held||[];
         gr.held.push({cardId:t.cardId,owner:t.baseOwner});
-        log(nm(t)+(grd.gDump?' is packed into the Dumpster instead of going to a graveyard. '
+        log(nm(t)+(grd.gPin?' sinks into the River of Blood instead of going to a graveyard. '
+          :grd.gDump?' is packed into the Dumpster instead of going to a graveyard. '
           :' is equipped to the Graveyard instead of going to a graveyard. ')+gr.held.length+' held.');
       }
       else bury(t.baseOwner,t.cardId);
@@ -7787,7 +8246,7 @@ async function resolveCombat(){
       /* Banana Peel: a slip bought with two cards off your own graveyard.
          Offered rather than automatic, because the stockpile is worth
          something to half the deck and the player is the one spending it. */
-      const peel=d.t.equips.map(e=>({e,g:CARDS[e.cardId].grants})).find(x=>x.g&&x.g.dodge);
+      const peel=d.t.equips.map(e=>({e,g:eqG(e)})).find(x=>x.g&&x.g.dodge);
       if(peel&&!d.t.dodged&&G.board[d.cell].teece===d.t&&!hasKw(G.board,d.cell,'immovable')){
         const own=G.players[d.t.owner];
         const empt=ADJ[d.cell].filter(j=>openAt(G.board,j));
@@ -8169,7 +8628,7 @@ async function playTeece(p,handIdx){
     sacP.push(c);
   }
   const spots=empt.slice();
-  for(const c of sacP)if(!b[c].razed&&spots.indexOf(c)<0)spots.push(c);
+  for(const c of sacP)if(!b[c].razed&&!blockedGround(b,c)&&spots.indexOf(c)<0)spots.push(c);
   spots.sort((x,y)=>x-y);
   /* What the Teece would actually arrive as, panel by panel. Every other prompt
      in the game previews its own consequence and this one previewed nothing, so
@@ -8192,6 +8651,15 @@ async function playTeece(p,handIdx){
   let spot=plan?plan.c:await chooseCell(p,spots,'Choose a space for '+d.name+'.',
     {cancel:true,mut:previewPlace,preview:{cardId:id,plate:plateOf(p,handIdx)}});
   if(spot==null||spot==='CANCEL')return false;
+  /* Committed. The card comes out of the hand HERE, before the sacrifices are
+     paid, because a death can reach into that same hand -- a Harbinger of Death
+     discards as it falls -- and every rule in the game indexes the hand by
+     position, so anything that shifts it under a saved index takes the wrong
+     card out. Past this point the play cannot be called off, so nothing needs
+     putting back. */
+  const taken=handTake(p,handIdx);
+  if(!taken)return false;
+  const worn=taken.plate;
   const sacked=[];
   for(const c of sacP){
     const t=b[c].teece;
@@ -8209,9 +8677,8 @@ async function playTeece(p,handIdx){
   if(!openAt(b,spot)){
     const open2=[];for(let i=0;i<BN;i++)if(openAt(b,i))open2.push(i);
     if(!open2.length){
-      const gone=handTake(p,handIdx);
       toGrave(p,id);
-      if(gone)dumpPlate(gone.plate,'with the card it was bolted to');
+      dumpPlate(worn,'with the card it was bolted to');
       log(d.name+' has nowhere left to land, and is discarded.');
       spend();
       await resolveCombat();render();
@@ -8220,7 +8687,6 @@ async function playTeece(p,handIdx){
     const alt=await chooseCell(p,open2,'The '+CN[spot]+' filled up. Choose another space for '+d.name+'.',{mut:null});
     spot=(alt==null||alt==='CANCEL')?open2[0]:alt;
   }
-  const worn=handTake(p,handIdx).plate;
   const t=makeTeece(id,p,{real:true});
   /* anything plated onto it in hand is already bolted on when it lands, so the
      board sees the equipped stats from the first moment */
@@ -8249,8 +8715,8 @@ async function playTeece(p,handIdx){
   if(worn.length){
     log(nm(t)+' arrives already plated with '+worn.map(e=>CARDS[e.cardId].name).join(', ')+'.');
     for(const e of worn){
-      const eg=CARDS[e.cardId].grants;
-      if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:spot,t,first:false});
+      const eg=eqG(e);
+      if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:spot,t,first:false,equip:e});
     }
   }
   if(pl.confuse){
@@ -8381,10 +8847,11 @@ async function playEquip(p,handIdx){
     return true;
   }
   handTake(p,handIdx);
-  b[c].teece.equips.push({cardId:id,owner:p});
+  const worn={cardId:id,owner:p};
+  b[c].teece.equips.push(worn);
   log(pname(p)+' equips '+CARDS[id].name+' to '+nm(b[c].teece)+'.');
   const eg=CARDS[id].grants;
-  if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:c,t:b[c].teece,first:false});
+  if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:c,t:b[c].teece,first:false,equip:worn});
   await resolveCombat();
   render();
   return true;
@@ -8437,7 +8904,10 @@ async function clearGroundAt(i,breaker){
   for(const held of (g.held||[])){
     /* A Graveyard hands back what it interred; a Dumpster is not a loan, and
        everything packed into it is tipped into its owner's graveyard. */
-    if(gd.gDump){
+    if(gd.gPin){
+      toGrave(held.owner,held.cardId);
+      log(CARDS[held.cardId].name+' comes loose from the river and sinks into '+pposs(held.owner)+' graveyard.');
+    }else if(gd.gDump){
       toGrave(g.owner,held.cardId);
       log(CARDS[held.cardId].name+' is tipped out of the Dumpster and into '+pname(g.owner)+"'s graveyard.");
     }else{
@@ -8445,7 +8915,7 @@ async function clearGroundAt(i,breaker){
       log(CARDS[held.cardId].name+' returns from the Graveyard to '+pname(held.owner)+"'s hand.");
     }
   }
-  G.players[g.owner].grave.push(g.cardId);
+  toGrave(g.owner,g.cardId);
   if(gd.gDiscardOnBreak&&breaker!=null&&breaker!==g.owner){
     log(pname(breaker)+' broke '+gd.name+' and must discard '+gd.gDiscardOnBreak+'.');
     await runSteps([{fx:'discard',n:gd.gDiscardOnBreak}],{p:breaker,first:false});
@@ -8790,7 +9260,7 @@ async function forcedMoves(){
   for(const t of present){
     const i=b.findIndex(c=>c.teece===t);
     if(i<0)continue;
-    if(!t.equips.some(e=>{const g=CARDS[e.cardId].grants;return g&&g.mustMove;}))continue;
+    if(!t.equips.some(e=>{const g=eqG(e);return g&&g.mustMove;}))continue;
     if(hasKw(b,i,'immovable')){log(nm(t)+' cannot move, so the restlessness goes nowhere.');continue;}
     const dests=ADJ[i].filter(j=>openAt(b,j));
     if(!dests.length){log(nm(t)+' has nowhere to go and rides out the restlessness.');continue;}
@@ -8930,7 +9400,7 @@ async function startTurn(){
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;if(!t)continue;
     let sag=0;
-    for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.startMod)sag+=g.startMod;}
+    for(const e of t.equips){const g=eqG(e);if(g&&g.startMod)sag+=g.startMod;}
     if(sag){applyModT(t,sag,'perm');log(nm(t)+' sags under wet cardboard: '+sgn(sag)+'.');}
   }
   /* A fire burns until the start of the next turn of whoever lit it, so it is
@@ -8984,6 +9454,7 @@ function cloneBoard(b){
       kwPerm:(c.teece.kwPerm||[]).slice(),defPerm:c.teece.defPerm||0,dodged:c.teece.dodged,
       age:c.teece.age||0,transformed:c.teece.transformed,standCell:c.teece.standCell,tickTotal:c.teece.tickTotal||0,
       form:c.teece.form||0,ctr:c.teece.ctr||0,drainsThisTurn:c.teece.drainsThisTurn||0,
+      graveMarks:c.teece.graveMarks||0,
       harmless:!!c.teece.harmless,blinded:!!c.teece.blinded,echo:c.teece.echo||0,
       drainMove:!!c.teece.drainMove,boon:c.teece.boon||0,
       immortalOwner:c.teece.immortalOwner,
@@ -9020,12 +9491,12 @@ function simDeath(b,d){
       const k=b[i].teece;
       if(!k||k.uid!==kuid)continue;
       const oks=[];const kd=DEF(k);if(kd.onKill&&!k.silenced)oks.push(kd.onKill);
-      for(const e of k.equips){const g=CARDS[e.cardId].grants;if(g&&g.onKill)oks.push(g.onKill);}
-      for(const ok of oks)if(!ok.draw&&!ok.burnOut&&phaseIs(ok.when))applyModT(k,ok.n,ok.dur);
+      for(const e of k.equips){const g=eqG(e);if(g&&g.onKill)oks.push(g.onKill);}
+      for(const ok of oks)if(!ok.draw&&!ok.steps&&!ok.burnOut&&phaseIs(ok.when))applyModT(k,ok.n,ok.dur);
     }
   }
   const fx=(t.silenced?[]:(DEF(t).onDeath||[])).slice().filter(x=>phaseIs(x.when));
-  for(const e of t.equips){const g=CARDS[e.cardId].grants;if(g&&g.onDeath)fx.push(...g.onDeath);}
+  for(const e of t.equips){const g=eqG(e);if(g&&g.onDeath)fx.push(...g.onDeath);}
   for(const st of fx){
     if(st.fx==='killer'){
       for(const kuid of d.killers)for(let i=0;i<BN;i++){
@@ -10215,6 +10686,9 @@ function panelHtml(i){
   if(!c)return '';
   let h='';
   if(c.ground)h+='<div class="dn">'+CARDS[c.ground.cardId].name+'</div><div class="dt">'+CARDS[c.ground.cardId].text+'</div>';
+  if(c.ground&&c.ground.held&&c.ground.held.length)
+    h+='<div class="dt" style="color:var(--gold)">'+c.ground.held.length+' card'+(c.ground.held.length===1?'':'s')+
+      ' held: '+c.ground.held.map(hc=>CARDS[hc.cardId].name).join(', ')+'.</div>';
   if(c.mine)h+='<div class="dt">'+((c.mine.n||1)>1?c.mine.n+' Mines are buried here. The next Teece to enter gets -'+(2*c.mine.n)+'.':
     'A Mine is buried here. The next Teece to enter gets -2.')+'</div>';
   if(c.curseP)h+='<div class="dt">This panel is cursed. The next enemy of '+pposs(c.curseP.owner)+' to arrive here gets '+sgn(c.curseP.n)+'.</div>';
@@ -10266,9 +10740,10 @@ function showDetail(i){
     'Becomes '+sidesLine(tm.sides)+' in '+Math.max(0,tm.turns-(t.age||0))+' more of your turns.')+'</div>';
   if(DEF(t).tick)html+='<div class="dt" style="color:var(--gold)">Ticks '+sgn(DEF(t).tick.n)+' each of your turns.</div>';
 
+  if(t.graveMarks)html+='<div class="dt" style="color:var(--gold)">'+t.graveMarks+' mark'+(t.graveMarks===1?'':'s')+'</div>';
   if(t.equips.length){
     html+='<div class="dstats" style="color:var(--gold)">Equips:</div>';
-    for(const e of t.equips)html+='<div class="dstats" style="font-size:11px">'+CARDS[e.cardId].name+
+    for(const e of t.equips)html+='<div class="dstats" style="font-size:11px">'+eqLabel(e)+
       ' &mdash; '+CARDS[e.cardId].text+'</div>';
   }
   /* How it came to be showing the numbers it is showing: every buff and debuff
@@ -10538,6 +11013,11 @@ function statusesFor(p){
     push('cursep'+i,mine?'good':'bad',(mine?'Cursed panel: ':'Cursed against you: ')+CN[i],
       'The '+CN[i]+' is cursed. The next enemy of '+pname(cp.owner)+' to arrive there gets '+sgn(cp.n)+'.');
   }
+  const shut=[];for(let i=0;i<BN;i++)if(!b[i].razed&&blockedGround(b,i))shut.push(CN[i]);
+  if(shut.length)push('noentry','warn','Closed: '+shut.join(', '),
+    (shut.length===1?'The '+shut[0]+' is a battleground':'These panels are battlegrounds')+
+    ' no Teece may be played or moved onto'+(shut.length===1?'':': '+shut.join(', '))+
+    '. Anything already standing there stays, and pays whatever the ground charges.');
   const razed=[];for(let i=0;i<BN;i++)if(b[i].razed)razed.push(CN[i]);
   if(razed.length)push('razed','warn','Razed: '+razed.join(', '),
     (razed.length===1?'The '+razed[0]+' is':'These panels are')+' razed for the rest of the game. No Teece may be played or moved onto '+
@@ -10607,10 +11087,13 @@ function statusesFor(p){
     if(!g||seenG[g.gid||('c'+i)])continue;
     seenG[g.gid||('c'+i)]=true;
     const mine=sameTeam(g.owner,p);
-    if(g.held&&g.held.length)
-      push('inter'+i,'good','Graveyard holds '+g.held.length,
-        'The Graveyard at the '+CN[i]+' holds '+g.held.map(h=>CARDS[h.cardId].name).join(', ')+
-        '. Break it open and every one of them goes back to its owner\u2019s hand.');
+    if(g.held&&g.held.length){
+      const ggd=CARDS[g.cardId];
+      push('inter'+i,'good',ggd.name+' holds '+g.held.length,
+        'The '+ggd.name+' at the '+CN[i]+' holds '+g.held.map(h=>CARDS[h.cardId].name).join(', ')+
+        '. Break it open and '+(ggd.gInter?'every one of them goes back to its owner\u2019s hand.'
+          :'every one of them goes into a graveyard.'));
+    }
     if(g.bones)
       push('bones'+i,mine?'good':'warn','Bone Fields: '+g.bones+' counter'+(g.bones===1?'':'s'),
         'The Bone Fields at the '+CN[i]+' have '+g.bones+' bone counter'+(g.bones===1?'':'s')+

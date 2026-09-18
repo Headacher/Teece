@@ -547,6 +547,32 @@
         "The graveyard is a resource. Living Dump grows with it, Trash King eats it for attributes, Garbage Man and Racoon fish cards back out of it, and Banana Peel and the Dumpster spend it.",
         "Fire sits on a panel rather than on a Teece. Anything standing in one has -4 while it burns, and it burns until the start of the turn of whoever lit it."
       ]
+    },
+    "apocalypse": {
+      "name": "Apocalypse",
+      "cards": [
+        765,
+        766,
+        767,
+        768,
+        769,
+        770,
+        771,
+        772,
+        773,
+        774,
+        775,
+        776,
+        777,
+        778,
+        779,
+        780,
+        781,
+        782,
+        783,
+        784
+      ],
+      "blurb": "The end arrives on schedule. The four Horsemen are lifted back out of the shuffle and stacked on top of your deck, so they are your opening hand, and each one played drags a second out of it silenced. Everything after them is paid for in cards: the graveyard is this deck's second resource, and two of its three ways to clear the field are bought with discards."
     }
   },
   "formats": [
@@ -973,6 +999,26 @@
     717,
     718,
     719,
-    720
+    720,
+    765,
+    766,
+    767,
+    768,
+    769,
+    770,
+    771,
+    772,
+    773,
+    774,
+    775,
+    776,
+    777,
+    778,
+    779,
+    780,
+    781,
+    782,
+    783,
+    784
   ]
 }
