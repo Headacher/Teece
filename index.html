@@ -380,6 +380,10 @@ button,.teece,.cell,.card{touch-action:manipulation}
 .stchip.s-warn .stbang{background:var(--gold);color:var(--ink)}
 .stchip.s-good{border-color:var(--up);background:rgba(47,143,91,.15)}
 .stchip.s-good .stbang{background:var(--up);color:#fff}
+/* an actionable status: the chip is the button, so it reads as one */
+.stchip.s-act{border-color:var(--p0);background:rgba(63,160,138,.18);cursor:pointer;font-weight:600}
+.stchip.s-act:hover{background:rgba(63,160,138,.32);border-color:var(--p0)}
+.stchip.s-act .stbang{background:var(--p0);color:#0d1815;font-size:8px}
 @keyframes bangPulse{0%,100%{box-shadow:0 0 0 0 rgba(184,65,47,.55)}50%{box-shadow:0 0 0 4px rgba(184,65,47,0)}}
 @media(prefers-reduced-motion:reduce){.stchip.s-bad .stbang{animation:none}}
 .btn{background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:6px;
@@ -575,8 +579,14 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .hcap.easy .hn{color:var(--up)}
 .hcap.hard .hn{color:var(--down)}
 
+/* A faded-out toast is still in the page, pinned to the bottom of the window at
+   z-index 40, and until this line it still swallowed every tap that landed on
+   it -- an invisible pill over the middle of the bottom of a phone screen,
+   eating presses on whatever was underneath. A toast is never something you
+   press, so it takes no presses. */
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000;border:1px solid var(--line);
-  color:var(--cream);padding:8px 14px;border-radius:20px;font-size:12px;z-index:40;opacity:0;transition:opacity .18s}
+  color:var(--cream);padding:8px 14px;border-radius:20px;font-size:12px;z-index:40;opacity:0;transition:opacity .18s;
+  pointer-events:none}
 #toast.show{opacity:1}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}
   .card.playable:hover,.dcard:hover,.hcap:hover{transform:none}}
@@ -687,7 +697,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:50,date:'2026-09-18'};
+const VERSION={build:51,date:'2026-09-18'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -2941,8 +2951,9 @@ const CARDS = {
     text:'The equipped Teece gets +2. When this card is discarded: bolt it onto one of your Teece instead of leaving it lying there.'},
  802:{name:'Astral Mindwyrm',type:'equip',mod:0,madness:true,
     grants:{undyingRide:true,
-      act:[{name:'Slip away together',once:'game',steps:[{fx:'bounceSelfPair'}]}]},
-    text:'This goes to the graveyard wrapped around the equipped Teece rather than on its own, and comes back with it — including when it was bolted on while both were still in hand. Once a game: return this and the Teece wearing it to your hand.'},
+      act:[{name:'Slip away together',onceGame:'mindwyrm',steps:[{fx:'bounceSelfPair'}]}],
+      graveAct:[{name:'Slip out together',onceGame:'mindwyrm',steps:[{fx:'riseSelfPair'}]}]},
+    text:'This goes to the graveyard wrapped around the equipped Teece rather than on its own, and comes back with it — including when it was bolted on while both were still in hand. Once in the whole game, from the field or from the graveyard: return this and the Teece wearing it to your hand.'},
  803:{name:'Mountains of Madness',type:'ground',gOnDiscard:{n:3,kw:['flying']},
     text:'Whenever a card is discarded, either side’s: the Teece standing here gets +3 and flies until the end of the turn.'},
  804:{name:'Eldritch Library',type:'ground',gLib:true,gHeldDef:1,
@@ -3749,7 +3760,12 @@ function dumpPlate(plate,why,cardId){
       const pl=G.players[e.owner];
       pl.riding=pl.riding||{};
       (pl.riding[cardId]=pl.riding[cardId]||[]).push(e);
-      toGrave(e.owner,e.cardId);
+      /* Not also buried on its own: a card wrapped around another card is in
+         the ground once, not twice. It used to be pushed onto the grave pile
+         as well, and attachRiders takes it out of riding without touching the
+         pile, so the card came back on the Teece AND stayed in the graveyard
+         -- one card in two places. The death path (processDeath) has always
+         put it in riding alone, and this is now the same. */
       log(CARDS[e.cardId].name+' goes into the graveyard still wrapped around '+CARDS[cardId].name+'.');
       continue;
     }
@@ -4493,7 +4509,19 @@ function negatedActs(b,i){
   if(!t||!t.silenced)return [];
   return (DEF(t).act||[]).map((a,x)=>({key:'c'+x,act:a}));
 }
+/* Two different "once a game". once:'game' is once per BODY: it is kept on the
+   Teece, and a Teece that dies and comes back is a new body with a clean sheet,
+   which is what the Teece that carry it want. onceGame is once per PLAYER for
+   the whole game, kept on the seat under a name the card picks, so two
+   abilities can share one charge and no amount of dying, bouncing or moving to
+   another host gives it back. The Astral Mindwyrm spends one charge whether it
+   is fired off the field or out of the graveyard. */
+const onceGameKey=k=>'ag:'+k;
+function onceGameSpent(p,act){
+  return !!(act.onceGame&&G.players[p]&&G.players[p].onceUsed[onceGameKey(act.onceGame)]);
+}
 function actAvailable(t,ent){
+  if(onceGameSpent(t.owner,ent.act))return false;
   if(ent.act.once==='game'&&t.actUsedGame[ent.key])return false;
   /* Magic Wings buys flights for the turn, so Fly is not always once */
   if(ent.key==='kfly'&&t.flyExtra)
@@ -7768,6 +7796,39 @@ async function FXRUN(st,ctx){
     log(nm(t)+' and the Mindwyrm around it slip off the field together.');
     await anim([i],'zap');
     return;}
+  /* The same thing, called up out of the ground rather than off the field. The
+     Mindwyrm is not lying loose in the pile -- it went down wrapped around the
+     card it was bolted to and waits in riding under that card's name -- so the
+     pair comes back the way it went down, the card in hand with the Mindwyrm
+     still plated onto it. ctx.graveCard and ctx.graveHost are set by
+     runGraveAct; there is no cell and no body to read anything off. */
+  case 'riseSelfPair':{
+    const cid=ctx.graveCard,pl=G.players[p];
+    if(cid==null)return none('There is nothing in the ground to answer.');
+    const rid=pl.riding||{},host=ctx.graveHost;
+    let ride=null;
+    if(host!=null&&rid[host]){
+      const x=rid[host].findIndex(e=>e.cardId===cid);
+      if(x>=0){ride=rid[host][x];rid[host].splice(x,1);if(!rid[host].length)delete rid[host];}
+    }
+    if(!ride){
+      const gi=pl.grave.lastIndexOf(cid);
+      if(gi<0)return none(CARDS[cid].name+' is no longer in your graveyard.');
+      pl.grave.splice(gi,1);
+    }
+    let up=null;
+    if(host!=null){
+      const hg=pl.grave.lastIndexOf(host);
+      if(hg>=0){pl.grave.splice(hg,1);up=host;}
+    }
+    if(up!=null){
+      handPush(p,up,[ride||{cardId:cid,owner:p}]);
+      log(CARDS[up].name+' is pulled back out of the graveyard with '+CARDS[cid].name+' still wrapped around it.');
+    }else{
+      handPush(p,cid);
+      log(CARDS[cid].name+' unwinds itself out of the graveyard and back into '+pposs(p)+' hand.');
+    }
+    return;}
   /* The Necronomicon. An ability on a card reads as X : Y ; Z -- what turns it
      on, what it costs, and what it does. The book fires Z and never pays Y.
 
@@ -9554,8 +9615,62 @@ async function runAct(p,cell,ent){
   if(!ok){render();return false;}
   /* the ability found nothing to do, so it keeps its charge for this turn */
   if(ok==='NONE'){toast(ctx.noneMsg||'Nothing for that ability to do.');render();return false;}
+  if(ent.act.onceGame)G.players[p].onceUsed[onceGameKey(ent.act.onceGame)]=true;
   if(ent.act.once==='game')t.actUsedGame[ent.key]=true;
   t.actUsedTurn[ent.key]=(t.actUsedTurn[ent.key]||0)+1;
+  G.detailLock=null;
+  await resolveCombat();
+  render();
+  return true;
+}
+/* ---- abilities that answer from a graveyard ----
+   actsOf reads a Teece off the board, so an ability on a card that is in the
+   ground has nowhere to be tapped: it is rendered nowhere, and the card reads
+   as a promise the game does not keep. These are the abilities a card offers
+   from inside a graveyard. An equip with undyingRide is not lying loose in the
+   pile -- it went down wrapped around the card it was bolted to and waits in
+   pl.riding under that card's name -- so both places are read, and a card that
+   turns up in both is offered once.
+
+   A rider whose host is no longer in the ground is not offered: the host was
+   salvaged, shelved on a battleground or already called back up, and the pair
+   is not in a graveyard to be pulled out of. */
+function graveActsFor(p){
+  const pl=G&&G.players&&G.players[p];
+  if(!pl)return [];
+  const out=[],seen=[];
+  const take=(id,host)=>{
+    if(seen.indexOf(id)>=0)return;
+    const gr=CARDS[id]&&CARDS[id].grants;
+    if(!gr||!gr.graveAct)return;
+    seen.push(id);
+    gr.graveAct.forEach((a,x)=>out.push({key:'v'+id+'_'+x,act:a,cardId:id,host}));
+  };
+  const rid=pl.riding||{};
+  for(const k in rid){
+    const hid=parseInt(k,10);
+    if(pl.grave.indexOf(hid)<0)continue;
+    for(const e of rid[k])if(e.owner===p)take(e.cardId,hid);
+  }
+  for(const id of pl.grave)take(id,null);
+  return out;
+}
+function graveActAvailable(p,ent){
+  if(!G||G.over||G.pending)return false;
+  if(G.turn!==p)return false;
+  if(hexOn(p,'silence'))return false;
+  if(onceGameSpent(p,ent.act))return false;
+  if(ent.act.once==='game'&&G.players[p].onceUsed['gv:'+ent.key])return false;
+  return true;
+}
+async function runGraveAct(p,ent){
+  if(!graveActAvailable(p,ent))return false;
+  const ctx={p,cell:null,t:null,first:true,ent,graveCard:ent.cardId,graveHost:ent.host};
+  const ok=await runSteps(ent.act.steps,ctx);
+  if(!ok){render();return false;}
+  if(ok==='NONE'){toast(ctx.noneMsg||'Nothing for that ability to do.');render();return false;}
+  if(ent.act.onceGame)G.players[p].onceUsed[onceGameKey(ent.act.onceGame)]=true;
+  if(ent.act.once==='game')G.players[p].onceUsed['gv:'+ent.key]=true;
   G.detailLock=null;
   await resolveCombat();
   render();
@@ -11432,12 +11547,31 @@ function statusesFor(p){
   if(!G||G.over)return out;
   const b=G.board,pl=G.players[p];
   if(!pl)return out;
-  const push=(k,sev,label,text)=>out.push({k,sev,label,text});
+  /* A status is a note unless it is handed a run: then the chip IS the button.
+     That is the only place an ability with nowhere on the board to be tapped
+     can be reached -- see graveActsFor. */
+  const push=(k,sev,label,text,run)=>out.push({k,sev,label,text,run});
 
   /* --- can a Teece go down at all? --- */
   if(G.turn===p){
     const why=teecePlayBlock(p);
     if(why)push('noteece','warn','No Teece play',why);
+  }
+
+  /* --- and what is calling from the graveyard ---
+     The board has no panel to tap for a card that is in the ground, so the
+     chip carries the ability itself. */
+  for(const ent of graveActsFor(p)){
+    if(!graveActAvailable(p,ent))continue;
+    const cd=CARDS[ent.cardId];
+    const hostTxt=ent.host!=null
+      ?' It went down wrapped around '+CARDS[ent.host].name+', and the pair comes back together, still bolted.'
+      :'';
+    push('gact'+ent.key,'act',cd.name+': '+ent.act.name,
+      cd.name+' is in your graveyard and answers from there. Tap this to use it.'+hostTxt+
+      (ent.act.onceGame?' It may be used once in the whole game, whether it is fired from the field or out of the ground.':'')+
+      ' ('+cd.text+')',
+      ()=>runGraveAct(p,ent));
   }
 
   /* --- Curses sitting on the seat --- */
@@ -11728,11 +11862,15 @@ function renderStatus(){
       const chip=document.createElement('button');
       chip.type='button';
       chip.className='stchip s-'+st.sev;
-      chip.innerHTML='<span class="stbang">!</span><span>'+escHtml(st.label)+'</span>';
+      chip.innerHTML='<span class="stbang">'+(st.run?'▶':'!')+'</span><span>'+escHtml(st.label)+'</span>';
       chip.title=st.text;
       const show=()=>{if(G.detailLock==null){G.detailHover=key;showStatusDetail(st);}};
       chip.addEventListener('mouseenter',show);
-      chip.addEventListener('click',e=>{e.stopPropagation();show();});
+      /* An actionable chip fires on the tap rather than only explaining itself:
+         it is the whole control, and there is no second button behind it. */
+      chip.addEventListener('click',st.run
+        ?e=>{e.stopPropagation();if(G.pending)return;showStatusDetail(st);st.run();}
+        :e=>{e.stopPropagation();show();});
       chip.addEventListener('mouseleave',()=>{
         if(G.detailLock==null&&G.detailHover===key){G.detailHover=null;showDetail(null);}
       });
@@ -12117,6 +12255,7 @@ if(typeof module!=='undefined'){
     mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
     groundCells,playGround,areaShapeCells,
     statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,
+    graveActsFor,graveActAvailable,runGraveAct,dumpPlate,
     readsSky,skyShowing,isDay,flipPhase,
     plateHand,plateOf,platedSides,handPush,handTake,playEquip,queueFx,resolvePending,VERSION,
     getDecks:()=>DECKS,getPool:()=>POOL,allDraftable,bounceToHand,cloneBoard,fireMove,isBossCard,
