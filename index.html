@@ -682,7 +682,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:47,date:'2026-09-18'};
+const VERSION={build:48,date:'2026-09-18'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -2803,9 +2803,10 @@ const CARDS = {
     text:'Select a panel with no Teece on it; destroy it. No Teece may be played or moved onto it again.'},
  779:{name:'Final Judgement',type:'magic',
     cast:[{fx:'choose',msg:'Final Judgement:',opts:[
-      {lbl:'Discard a card; destroy a Teece',steps:[{fx:'discard',n:1,cost:true},{fx:'destroy'}]},
+      {lbl:'Discard a card; destroy a Teece',
+       steps:[{fx:'price',hand:1,teece:1},{fx:'discard',n:1,cost:true},{fx:'destroy'}]},
       {lbl:'Discard 3 and sacrifice a Teece; destroy everything',
-       steps:[{fx:'discard',n:3,cost:true},{fx:'sacAlly',cost:true},{fx:'wipe'}]}]}],
+       steps:[{fx:'price',hand:3,ally:1},{fx:'discard',n:3,cost:true},{fx:'sacAlly',cost:true},{fx:'wipe'}]}]}],
     text:'Discard a card to select a Teece and destroy it — or discard three cards and sacrifice one of your Teece to destroy every card on the field.'},
  780:{name:'Mark of Plague and War',type:'equip',mod:0,
     modIfApoc:{of:['plague','war'],n:2},
@@ -7445,6 +7446,33 @@ async function FXRUN(st,ctx){
     await anim(cells,'zap');
     return;}
   /* ---- Apocalypse: the end, and the four who bring it ---- */
+  /* The whole price, checked before any of it is paid.
+
+     cost:true stops a list when THAT step finds nothing, which is enough for a
+     price of one thing. Final Judgement asks for two -- three cards off the
+     hand and a Teece off the board -- and the discards went first, so a player
+     with nothing to sacrifice paid three cards and the spell and got no wipe
+     for them. Nothing can refund a step already run, so the question has to be
+     asked before the first one does. Reported as ABORT rather than NONE: the
+     card was never committed, so it goes back to the hand it was cast from. */
+  case 'price':{
+    const short=[];
+    if(st.hand&&handCount(p)<st.hand)
+      short.push(st.hand+' card'+(st.hand===1?'':'s')+' in hand');
+    if(st.ally){
+      let n=0;
+      for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&sameTeam(o.owner,p)&&canSacrifice(b,i))n++;}
+      if(n<st.ally)short.push(st.ally+' allied Teece to sacrifice');
+    }
+    if(st.teece){
+      let n=0;
+      for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))n++;
+      if(n<st.teece)short.push(st.teece+' Teece on the field to destroy');
+    }
+    if(!short.length)return;
+    const m='That costs '+short.join(' and ')+'.';
+    log(m);toast(m);
+    return 'ABORT';}
   /* A Horseman played drags a second out of your hand. It arrives silenced,
      which is the whole brake on the chain: a silenced Horseman has no "when
      played" left to call a third one in with. */
