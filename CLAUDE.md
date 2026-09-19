@@ -64,12 +64,19 @@ Then `newState` / `setG` / `getG` to build a position, and `playFromHand`,
 `runAct`, `endTurn`, `resolveCombat` to drive it. Set `G.aiSeats=[]` to drive
 both sides by hand so no AI turn races an assertion.
 
-Two things about the harness:
+Three things about the harness:
 
 - With no DOM, every prompt auto-resolves through `aiPickCell`/`aiPickOpt`, which
   pick **randomly**. A test depending on where a Teece lands must constrain the
   board to one legal choice or retry until it gets the placement it needs.
 - `HAS_DOM` is false, so `anim()` returns at once and `toast()` does nothing.
+- A prompt offered with `skip:true` is **declined** whenever the placement does
+  not move `boardValue` by 0.05 — `aiPickCell` weighs the board and takes the
+  skip. Anything whose worth is later rather than now scores zero, so it never
+  fires in a test and never fires for the AI: the Eldritch Library laying
+  itself down read as a dead effect for exactly this reason. Before believing
+  an effect is broken, check whether it offered a skip at all. If the card says
+  "play this" rather than "you may", do not pass `skip`.
 
 For rendering, input or overlays, drive the real page with Playwright — but serve
 it over HTTP first (`npx http-server -p 8137 -s -c-1 .`), because `fetch('decks.json')`
