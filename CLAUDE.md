@@ -133,6 +133,16 @@ the page, or it buries the content underneath. On a phone `aside` stacks below
 
 - Cards are data in `CARDS`, keyed by id. Prefer adding a field the engine reads
   over special-casing a card by id.
+- A rule that belongs to a DECK rather than a card goes in `decks.json` and is
+  copied onto the seat at setup — `perTurn` and `freeDiscard` both work this
+  way. There are two setup paths that do the copying (the two-seat one and the
+  three-seat one) and `newState` is not one of them, so a headless test or a
+  soak built straight on `newState` never sees the rule and will report the
+  feature dead. Set the seat flag by hand in the harness.
+- `opt.hands` lets a cell prompt accept a card in hand as the answer, but
+  `aiPickCell` only ever looks at the board, so the computer and every headless
+  prompt will ignore those targets entirely. Anything the AI has to be able to
+  choose needs its own branch, the way `chooseSacrifice` does.
 - `effSides` is the single source of truth for a Teece's current numbers; auras,
   equips, grounds and doubling all compose there.
 - Effects that must land before combat go on the effect stack via `queueFx`;
