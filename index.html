@@ -714,7 +714,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:54,date:'2026-09-20'};
+const VERSION={build:55,date:'2026-09-20'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1986,9 +1986,10 @@ const CARDS = {
     text:'Sacrifice one fielded Teece to play. It becomes 12 on every side at the start of your next turn.'},
  393:{name:'Fading Titan',type:'teece',sides:[15,15,15,15],sac:2,tick:{n:-1},
     text:'Sacrifice two fielded Teece to play. At the start of each of your turns, it gets -1.'},
- 394:{name:'Timekeeper',type:'teece',sides:[4,4,4,4],
-    text:'When played: advance every other allied Teece by one turn.',
-    onPlay:[{fx:'ageAll',who:'ally',n:1,notSelf:true}]},
+ 394:{name:'Timekeeper',type:'teece',sides:[4,4,4,4],timer:{turns:3,sides:[7,7,7,7]},handDiscard:true,
+    text:'Discard this: Select a Teece; advance its clock by one. When played: advance every other allied Teece by one turn.',
+    onPlay:[{fx:'ageAll',who:'ally',n:1,notSelf:true}],
+    onDiscard:[{fx:'ageTarget',who:'any'}]},
  395:{name:'Last Breath',type:'teece',sides:[5,5,5,5],
     text:'When destroyed: advance every allied Teece by two turns.',
     onDeath:[{fx:'ageAll',who:'ally',n:2}]},
@@ -6739,6 +6740,16 @@ async function FXRUN(st,ctx){
   case 'ageSelf':{
     const i=ctx.cell;
     if(b[i].teece){ageOne(b,i,st.n);log(nm(b[i].teece)+' hurries its own clock.');}
+    return;}
+  case 'ageTarget':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t)cands.push(i);}
+    if(!cands.length){log('No Teece on board.');return 'ABORT';}
+    const c=await pickCell(cands,'Select a Teece; advance its clock by one:',
+      (bb,i)=>{ageOne(bb,i,1);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    log(nm(b[c].teece)+' ages forward.');
     return;}
   case 'resetAge':{
     const cands=[];
