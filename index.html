@@ -1986,7 +1986,7 @@ const CARDS = {
     text:'Sacrifice one fielded Teece to play. It becomes 12 on every side at the start of your next turn.'},
  393:{name:'Fading Titan',type:'teece',sides:[15,15,15,15],sac:2,tick:{n:-1},
     text:'Sacrifice two fielded Teece to play. At the start of each of your turns, it gets -1.'},
- 394:{name:'Timekeeper',type:'teece',sides:[4,4,4,4],timer:{turns:3,sides:[7,7,7,7]},handDiscard:true,
+ 394:{name:'Timekeeper',type:'teece',sides:[4,4,4,4],timer:{turns:1,sides:[7,7,7,7]},handDiscard:true,
     text:'Discard this: Select a Teece; advance its clock by one. When played: advance every other allied Teece by one turn.',
     onPlay:[{fx:'ageAll',who:'ally',n:1,notSelf:true}],
     onDiscard:[{fx:'ageTarget',who:'any'}]},
