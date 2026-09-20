@@ -6515,7 +6515,7 @@ async function FXRUN(st,ctx){
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const t=b[c].teece;
-    const defVal=effSides(t,b,c).def||0;
+    const defVal=defOf(b,c);
     applyModT(t,defVal,'perm');
     ctx.last=c;
     log(nm(t)+' gets +'+defVal+'.');
@@ -9660,7 +9660,7 @@ async function playTeece(p,handIdx){
       const eg=eqG(e);
       if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:spot,t,first:false,equip:e});
       if(eg&&eg.stoneConvert){
-        const defVal=effSides(t,b,spot).def||0;
+        const defVal=defOf(b,spot);
         if(defVal>0){applyModT(t,defVal,'perm');applyDef(t,-defVal);log(nm(t)+' converts '+defVal+' Defence into attack.');}
       }
     }
