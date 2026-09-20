@@ -598,7 +598,13 @@
         803,
         804
       ],
-      "blurb": "Played out of the graveyard rather than into it. Almost every card does its work on the way OUT of your hand, and four of them let you throw themselves away whenever you like, so a discard is a move rather than a loss. Two cards catch discards before they land: a Pocket Dimension that hands them all back at the end of the turn, and a Library that shelves them as a wall."
+      "freeDiscard": true,
+      "blurb": "Played out of the graveyard rather than into it. Throwing a card away is a move here, not a loss: on your turn you may discard any card in your hand, as often as you like, and almost every card in the deck does its work on the way OUT. An empty hand is a win condition of its own — the Goggles, the Mindwyrm and two of the Teece all pay for holding nothing.",
+      "how": [
+        "Discarding is free and unlimited on your turn. It is a rule of the deck, not of any card, so no card has to print it.",
+        "An empty hand pays: Astral Mindwyrm is +10, Paranoid Schizophrenic is 11/12/13/14, and the Goggles of Truth add another +5 the moment anybody runs dry.",
+        "The Eldritch Library shelves discards as a wall of Defence instead of burying them, and the Pocket Dimension takes back everything you threw away this turn."
+      ]
     }
   },
   "formats": [

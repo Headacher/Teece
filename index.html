@@ -81,6 +81,23 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card .plated{position:absolute;top:2px;left:4px;font-size:8px;letter-spacing:.05em;z-index:2;
   color:#5d4a22;background:rgba(201,168,90,.55);border-radius:3px;padding:0 3px}
 
+/* Square hand. A magic, equip or ground card prints its whole first line of
+   rules into .cs, so at 88px wide it grows into a tall block of text and the
+   hand stops being scannable. Square view drops that line, pins every card to
+   one size whatever it prints, and lets the drawing and the name carry it --
+   the rules are still a hover away in the Detail panel. Teece cards barely
+   move; it is the other three types this is for. */
+.sqhand .card,.sqhand .card.t-teece{height:88px;min-height:0}
+.sqhand .card .cs{display:none}
+.sqhand .card .ct{position:absolute;top:4px;left:0;right:0;text-align:center}
+.sqhand .card .cn{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+  text-align:center;padding:0 6px;font-size:12.5px;line-height:1.05}
+.sqhand .card.arted .cn,.sqhand .card.arted .ct{z-index:1}
+.handview{margin-left:8px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:5px;
+  padding:1px 6px;cursor:pointer;vertical-align:middle}
+.handview:hover{border-color:var(--gold)}
+
 /* Deck-specific card colors */
 .card[data-card-deck="classic"],.dcard[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 .card[data-card-deck="berserker"],.dcard[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -697,10 +714,26 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:51,date:'2026-09-18'};
+const VERSION={build:54,date:'2026-09-20'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
+
+/* Square hand view, remembered per browser. A private window or blocked site
+   data throws on the read as well as the write -- and in Node there is no
+   localStorage at all -- so both are wrapped and the text default stands. */
+let SQHAND=false;
+try{SQHAND=(localStorage.getItem('teece.handview')==='square');}catch(e){}
+function applyHandView(){
+  if(!HAS_DOM||!document.body)return;
+  document.body.classList.toggle('sqhand',SQHAND);
+}
+function setHandView(sq){
+  SQHAND=!!sq;
+  try{localStorage.setItem('teece.handview',SQHAND?'square':'text');}catch(e){}
+  applyHandView();
+  if(HAS_DOM&&G)render();
+}
 
 let DECKS={}, FORMATS=[], CLASSIC=[], POOL=[];
 async function loadDeckData(){
@@ -1382,16 +1415,10 @@ function canPlay(p,cardId){
     for(let i=0;i<BN;i++)if(openAt(G.board,i)){room=true;break;}
     if(!room)return false;
     const need=sacsNeeded(cardId,p);
-    if(need){
-      /* Measured in what the bodies are WORTH, not how many there are: a
-         Cultist of Babble is two of the sacrifices a Boss asks for. Read the
-         same way playTeece reads it, or the forced-play rule and playTeece
-         would disagree about whether a Boss can be afforded. */
-      let worth=0;
-      for(let i=0;i<BN;i++){const t=G.board[i].teece;
-        if(t&&t.owner===p&&!t.isToken&&canSacrifice(G.board,i))worth+=DEF(t).sacWorth||1;}
-      if(worth<need)return false;
-    }
+    /* Read through the one pool playTeece reads, or the forced-play rule and
+       playTeece would disagree about whether a Boss can be afforded. The card
+       being weighed is itself in hand, and cannot pay for its own play. */
+    if(need&&sacPool(p,G.players[p].hand.indexOf(cardId)).worth<need)return false;
     return true;
   }
   if(cd.type==='magic')return !hexOn(p,'silence');
@@ -1514,6 +1541,13 @@ const CARDS = {
     onDeath:[{fx:'choose',msg:'The crate splits open:',opts:[
       {lbl:'Give an adjacent Teece +1',steps:[{fx:'mod',who:'any',where:'adj',n:1,dur:'perm'}]},
       {lbl:'Give an adjacent Teece -1',steps:[{fx:'mod',who:'any',where:'adj',n:-1,dur:'perm'}]}]}]},
+ /* The one Token that is dealt into a hand rather than onto the board, so it
+    is the one that can be thrown away -- which is the only thing it is for. */
+ TEA:{name:'Eager Acolyte',type:'teece',token:true,sides:[1,1,1,1],madness:true,deck:'madness',
+    onDiscard:[{fx:'choose',msg:'The Acolyte is thrown away:',opts:[
+      {lbl:'Give a Teece +1',steps:[{fx:'mod',who:'any',where:'any',n:1,dur:'perm'}]},
+      {lbl:'Give a Teece -1',steps:[{fx:'mod',who:'any',where:'any',n:-1,dur:'perm'}]}]}],
+    text:'Eager Acolyte Token. When discarded: Select a Teece; give it +1 or -1. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  TS:{name:'Sprout',type:'teece',token:true,sides:[3,3,3,3],
     text:'Sprout Token. When destroyed: every other allied Teece gets +1. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.',
     onDeath:[{fx:'mass',who:'ally',n:1,dur:'perm'}]},
@@ -1926,20 +1960,20 @@ const CARDS = {
  /* ---- Time: cards that grow, decay and hurry ---- */
  381:{name:'Baby Dragon',type:'teece',sides:[4,4,4,4],tick:{n:2,cap:6},
     text:'At the start of each of your turns it gets +2, up to +6 in all.'},
- 382:{name:'Chrysalis',type:'teece',sides:[4,4,8,8],timer:{turns:2,sides:[10,10,8,8]},
-    text:'After two of your turns, it becomes ↑10 →10 ↓8 ←8.'},
- 383:{name:'Green Shoot',type:'teece',sides:[8,9,1,1],timer:{turns:3,sides:[8,9,11,11]},
-    text:'After three of your turns, it becomes ↑8 →9 ↓11 ←11.'},
+ 382:{name:'Chrysalis',type:'teece',sides:[3,3,8,8],kw:['teleport'],timer:{turns:2,sides:[10,10,8,8]},
+    text:'Teleport. After two of your turns, it becomes ↑10 →10 ↓8 ←8.'},
+ 383:{name:'Green Shoot',type:'teece',sides:[8,9,1,1],timer:{turns:3,sides:[8,9,12,12],kw:['teleport']},
+    text:'After three of your turns, it becomes ↑8 →9 ↓12 ←12 and gains Teleport.'},
  384:{name:'Cut Flower',type:'teece',sides:[9,9,9,9],timer:{turns:2,sides:[5,5,5,5]},
     text:'After two of your turns, it wilts to 5 on every side.'},
  385:{name:'Hourglass Knight',type:'teece',sides:[9,9,9,9],tick:{n:-1},kw:['flying'],
     text:'Flying. At the start of each of your turns, it gets -1.'},
  386:{name:'Fast Forward',type:'magic',text:"Advance a Teece's clock by two turns.",
     cast:[{fx:'fastForward',n:2}]},
- 387:{name:'Time Warp',type:'ground',gAgeRate:2,gDouble:true,
-    text:'A Teece on this panel ages twice as fast, and its when-played and when-destroyed effects happen twice.'},
- 388:{name:'Acorn',type:'teece',sides:[3,3,3,3],timer:{turns:2,sides:[10,10,10,10]},
-    text:'After two of your turns, it becomes 10 on every side.'},
+ 387:{name:'Time Warp',type:'ground',gAgeRate:2,gmod:2,gDoubleEffects:true,
+    text:'A Teece on this panel gets +2 Defence, ages twice as fast, and gains a second copy of each of its when-played and when-destroyed effects.'},
+ 388:{name:'Acorn',type:'teece',sides:[3,3,3,3],def:6,timer:{turns:2,sides:[10,10,10,10],defLoss:6,defGain:6},
+    text:'Defence 6. After two of your turns, it becomes 10 on every side, loses the Defence, and gets +6.'},
  389:{name:'Rewind',type:'magic',
     text:'Take a card that reached any graveyard this turn or last, yours or an enemy\u2019s, into your hand.',
     cast:[{fx:'rewind'}]},
@@ -1949,7 +1983,7 @@ const CARDS = {
     text:"When played: advance an ally's clock by one turn. After two of your turns, it becomes ↑9 →9 ↓7 ←7.",
     onPlay:[{fx:'fastForward',n:1,who:'ally'}]},
  392:{name:'Heir Apparent',type:'teece',sides:[8,8,8,8],sac:1,timer:{turns:1,sides:[12,12,12,12]},
-    text:'Sacrifice one fielded Teece to play. It becomes 12 on every side at the start of your next turn, or the moment its clock is moved forward at all.'},
+    text:'Sacrifice one fielded Teece to play. It becomes 12 on every side at the start of your next turn.'},
  393:{name:'Fading Titan',type:'teece',sides:[15,15,15,15],sac:2,tick:{n:-1},
     text:'Sacrifice two fielded Teece to play. At the start of each of your turns, it gets -1.'},
  394:{name:'Timekeeper',type:'teece',sides:[4,4,4,4],
@@ -2216,9 +2250,9 @@ const CARDS = {
  551:{name:'Spellbound Pixie',type:'teece',sides:[3,1,4,1],sac:1,pixie:true,kw:['flying'],
     text:'Flying. Sacrifice one fielded Teece to play. Whenever you play a magic card: this gets +5 until the end of the turn, +2 permanently, and may move one space.',
     onMagic:[{fx:'mod',who:'self',n:5,dur:'temp'},{fx:'mod',who:'self',n:2,dur:'perm'},{fx:'move',range:'orth',may:true}]},
- 552:{name:'Pixie Queen',type:'teece',sides:[4,4,4,4],sac:2,pixie:true,kw:['flying'],
-    text:'Boss. Flying. Sacrifice two fielded Teece to play. Every other pixie of yours gets +10.',
-    aura:{who:'ally',where:'global',n:10,pixieOnly:true}},
+ 552:{name:'Pixie Queen',type:'teece',sides:[2,2,2,2],sac:2,pixie:true,kw:['flying'],
+    act:[{name:'Conjure Enlarge',once:'turn',steps:[{fx:'enlargeExtended'}]}],
+    text:'Boss. Flying. Sacrifice two fielded Teece to play. Once per your turn: add an Enlarge to your hand (Enlarge lasts one extra turn).'},
  553:{name:'Mind Control',type:'magic',pixie:true,
     text:'Take control of a non-Boss enemy Teece until the end of the turn.',
     cast:[{fx:'controlTemp'}]},
@@ -2232,8 +2266,8 @@ const CARDS = {
     text:'Select a Teece; it is 3 on every side until the end of the turn. Anything stacked on top of it still counts.',
     cast:[{fx:'shrink',n:3}]},
  557:{name:'Magic Wings',type:'magic',pixie:true,
-    text:'Select a flying Teece; it may fly twice more this turn.',
-    cast:[{fx:'flyBoost',n:2}]},
+    text:'Select a flying Teece; it may fly twice more this turn. Then destroy this in the grave.',
+    cast:[{fx:'flyBoost',n:2},{fx:'graveDestroy'}]},
  558:{name:'Silence',type:'magic',pixie:true,
     text:'Select a Teece; strip every bonus and penalty off it and negate its effects for the rest of the game. The next Teece your opponent plays arrives with -2.',
     cast:[{fx:'unmake'},{fx:'nextMod',n:-2,who:'enemy'}]},
@@ -2884,81 +2918,104 @@ const CARDS = {
     them outside the game for a turn, and the Eldritch Library shelves them as
     a wall. A card caught either way never reaches a graveyard, so the grave
     watchers stay quiet while the discard watchers still fire. ---- */
+ /* resummon is lifted out of the onDeath list by processDeath rather than run
+    as a step, so the discarded half cannot reuse it: out of the hand the card
+    is already in the graveyard, which is exactly what graveSelfPlay reads. */
  785:{name:'Resurger',type:'teece',sides:[7,8,3,3],madness:true,
     onDeath:[{fx:'resummon',bonus:0,discard:1}],
-    text:'When destroyed: you may discard a card to stand it straight back up on an empty panel. One body gets up once.'},
+    onDiscard:[{fx:'choose',msg:'Resurger stirs:',opts:[
+      {lbl:'Discard a card and let it up',steps:[{fx:'price',hand:1},{fx:'discard',n:1,cost:true},{fx:'graveSelfPlay'}]},
+      {lbl:'Leave it buried',steps:[]}]}],
+    text:'When destroyed or discarded: You may discard a card; summon Resurger from the grave.'},
  786:{name:'Architect of the Indescribable',type:'teece',sides:[6,6,6,6],madness:true,
-    onPlay:[{fx:'rotTarget'}],onDiscard:[{fx:'rotTarget'}],handDiscard:[],
-    text:'When played, and again when discarded: select a Teece and turn it whichever way you like. On your turn you may discard this from your hand instead of playing it.'},
- 787:{name:'Frenetic Researcher',type:'teece',sides:[4,8,8,4],madness:true,
-    onPlay:[{fx:'shield'}],onDiscard:[{fx:'shield'}],handDiscard:[],
-    text:'When played, and again when discarded: select a Teece, either side’s; it cannot be destroyed until the end of your next turn. On your turn you may discard this from your hand instead of playing it.'},
+    onPlay:[{fx:'rotTarget'}],onDiscard:[{fx:'rotTarget'}],
+    text:'When played and when discarded: select a Teece; rotate it.'},
+ 787:{name:'Frenetic Researcher',type:'teece',sides:[1,8,8,0],madness:true,
+    onPlay:[{fx:'shield'}],onDiscard:[{fx:'shield'}],
+    text:'When played and when discarded: Select a Teece; it cannot be destroyed until the end of your next turn.'},
  788:{name:'Manic Raver',type:'teece',sides:[0,7,8,7],madness:true,
     onAnyDiscard:{sides:[8,0,0,0],dur:'temp'},
     act:[{name:'Wicked Dance Moves',once:'turn',times:2,steps:[{fx:'move',range:'orth'}]}],
-    text:'Whenever a card is discarded, either side’s: +8 to its top until the end of the turn. Wicked Dance Moves — once per your turn it may move up to two spaces.'},
+    onDiscard:[{fx:'modSides',sides:[8,0,0,0],dur:'temp',may:true,
+      msg:'Which Teece gets +8 to its top until the end of the turn?'}],
+    text:'Whenever a card is discarded, either side’s: +8 to its top until the end of the turn. Wicked Dance Moves — once per your turn it may move up to two spaces at once. When discarded: You can select a Teece; give it +8 to its top attribute until the end of the turn.'},
  789:{name:'Psychopathic Killer',type:'teece',sides:[7,3,7,3],madness:true,
     onGrave:{sides:[0,2,0,2],sidesDur:'perm',step:1},
-    text:'Whenever a card is sent to a graveyard from anywhere, either side’s: +2 to its left and right permanently, and it may step one space.'},
- 790:{name:'Cultist of Babble',type:'teece',sides:[5,5,5,5],madness:true,sacWorth:2,
+    onDiscard:[{fx:'modSides',sides:[0,2,0,2],dur:'perm',may:true,
+      msg:'Which Teece gets +2 to its left and right?'}],
+    text:'Whenever a card is sent to a graveyard from anywhere, either side’s: +2 to its left and right permanently, and it may step one space. When discarded: You can select a Teece; give it +2 to its left and right.'},
+ 790:{name:'Cultist of Babble',type:'teece',sides:[5,5,5,5],madness:true,sacHand:true,
     onDeath:[{fx:'choose',msg:'Willing Sacrifice:',opts:[
       {lbl:'Draw a card, then throw one away',steps:[{fx:'price',deck:1},{fx:'draw',n:1},{fx:'discard',n:1}]},
       {lbl:'Go quietly',steps:[]}]}],
     onDiscard:[{fx:'choose',msg:'Willing Sacrifice:',opts:[
       {lbl:'Draw a card, then throw one away',steps:[{fx:'price',deck:1},{fx:'draw',n:1},{fx:'discard',n:1}]},
       {lbl:'Go quietly',steps:[]}]}],
-    text:'Willing Sacrifice — when destroyed or discarded: you may draw a card, and if you do, discard one. Worthy — it counts as two of the sacrifices a Boss asks for.'},
+    text:'Willing Sacrifice — When destroyed or discarded: you may draw a card, and if you do, discard one. Worthy — This card can be counted as a sacrifice by discarding it from your hand.'},
  791:{name:'Tattered Reader',type:'teece',sides:[3,3,3,9],madness:true,
     onPlay:[{fx:'kingInYellow'}],onDiscard:[{fx:'kingInYellow'}],
-    text:'The King in Yellow — when played, and again when discarded: select an enemy; it is silenced, every equip on it is destroyed, and its attributes go back to what the card was printed with.'},
+    text:'The King in Yellow — when played, and when discarded: select an enemy; it is silenced, a random equip card on it is destroyed, and its attributes go back to what the card was printed with.'},
  792:{name:'Lunatic',type:'teece',sides:[7,2,7,7],madness:true,
     onPlay:[{fx:'markPanel',n:2}],onDiscard:[{fx:'markPanel',n:2}],
     onAnyDiscard:{steps:[{fx:'markPanel',n:2}]},
-    text:'When played, whenever a card is discarded, and when this is discarded: mark an empty panel. The next ally played there gets +2.'},
- 793:{name:'Paranoid Schizophrenic',type:'teece',sides:[1,2,3,4],madness:true,handDiscard:[],
-    onDiscard:[{fx:'mod',who:'ally',where:'any',n:-2,dur:'perm'},{fx:'recallSelf'}],
-    text:'When discarded: select one of your own Teece and give it -2 permanently — then this claws its way back into your hand at the end of that turn. On your turn you may discard this from your hand instead of playing it.'},
+    text:'When played, whenever a card is discarded, and when this is discarded: mark an empty panel. The next ally played there gets +2. This stacks.'},
+ /* The -2 is marked cost:true so a seat with nothing of its own to hurt does
+    not get the card back for free: no target, no return. */
+ 793:{name:'Paranoid Schizophrenic',type:'teece',sides:[1,2,3,4],madness:true,emptyHand:10,
+    onDiscard:[{fx:'mod',who:'ally',where:'any',n:-2,dur:'perm',cost:true},{fx:'recallSelf'}],
+    text:'When discarded: select one of your own Teece and give it -2 permanently. If you do, add this back to your hand at the end of the turn. When your hand is empty: +10.'},
  794:{name:'Mindbroken Mindbreaker',type:'teece',sides:[9,9,9,9],madness:true,
     onPlay:[{fx:'discard',n:1}],
     onDeath:[{fx:'choose',msg:'Mindbroken Mindbreaker falls:',opts:[
-      {lbl:'Throw a card away',steps:[{fx:'discard',n:1}]},
-      {lbl:'Hold onto them',steps:[]}]}],
-    onDiscard:[{fx:'mod',who:'enemy',where:'any',n:-2,dur:'perm'}],
-    text:'When played: discard a card. When destroyed: you may discard a card. When discarded: select an enemy and give it -2 permanently.'},
- 795:{name:'That Which Should Not',type:'teece',sides:[9,9,9,9],sac:1,madness:true,handDiscard:[],
+      {lbl:'Skip your next draw',steps:[{fx:'skipDraw'}]},
+      {lbl:'Draw as usual',steps:[]}]}],
+    onDiscard:[{fx:'choose',msg:'Mindbroken Mindbreaker is thrown away:',opts:[
+      {lbl:'Skip your next draw',steps:[{fx:'skipDraw'}]},
+      {lbl:'Draw as usual',steps:[]}]}],
+    text:'When played: Discard a card. When destroyed, or when discarded: You may skip your next draw.'},
+ 795:{name:'That Which Should Not',type:'teece',sides:[9,9,9,9],sac:1,madness:true,
     onDiscard:[{fx:'choose',msg:'That Which Should Not stirs:',opts:[
       {lbl:'Discard two and let it up',steps:[{fx:'price',hand:2},{fx:'discard',n:2,cost:true},{fx:'graveSelfPlay'}]},
       {lbl:'Leave it buried',steps:[]}]}],
-    text:'Sacrifice one fielded Teece to play. When discarded: you may discard two cards to put it straight onto the field out of the graveyard, paying no sacrifice for it. On your turn you may discard this from your hand instead of playing it.'},
+    text:'Sacrifice one fielded Teece to play. When discarded: you may discard two cards to put it straight onto the field out of the graveyard, paying no sacrifice for it.'},
  796:{name:'Echo of Gol’god’oth',type:'teece',sides:[0,15,3,9],sac:2,madness:true,
     onPlay:[{fx:'discardHands'}],
-    onDiscard:[{fx:'discard',n:1}],
-    text:'Sacrifice two fielded Teece to play. When played: every player throws away their whole hand. When discarded: discard a card.'},
+    onDiscard:[{fx:'choose',msg:'Echo of Gol’god’oth is thrown away:',opts:[
+      {lbl:'Throw your whole hand away',steps:[{fx:'discardOwnHand'}]},
+      {lbl:'Hold onto them',steps:[]}]}],
+    text:'Sacrifice two fielded Teece to play. When played: every player throws away their whole hand. When discarded: You may discard your hand.'},
  797:{name:'Pocket Dimension',type:'magic',madness:true,
-    cast:[{fx:'pocket'}],
-    text:'Every card discarded for the rest of this turn, either side’s, falls into a pocket dimension instead of a graveyard — and at the end of the turn every one of them lands in your hand.'},
+    cast:[{fx:'price',turnDiscard:1},{fx:'pocketReturn'}],
+    onDiscard:[{fx:'pocketPlay'}],
+    text:'Return all cards you discarded this turn to your hand. When discarded: Play any Teece you discarded this turn with its effects silenced.'},
  798:{name:'Ravings',type:'magic',madness:true,
     cast:[{fx:'price',hand:1,grave:1},{fx:'discard',n:1,cost:true},{fx:'graveToHand'}],
-    text:'Discard a card, then take a card out of your graveyard and into your hand.'},
+    onDiscard:[{fx:'graveToHandRandom'}],
+    text:'Discard a card; add a card from your grave to your hand. When discarded: Add a random card from your grave to your hand.'},
  799:{name:'Whispers',type:'magic',madness:true,
     cast:[{fx:'price',hand:1},{fx:'discard',n:1},{fx:'discard',n:1,foe:true}],
-    text:'Both players discard a card.'},
+    onDiscard:[{fx:'tokenToHand',tok:'TEA',count:3}],
+    text:'Both players discard a card. When this is discarded: Add three 1/1/1/1 Eager Acolyte tokens to your hand. Each of them, when discarded: Select a Teece; give it +1 or -1.'},
  800:{name:'Necronomicon',type:'equip',mod:0,madness:true,
     grants:{act:[{name:'Read from the Necronomicon',once:'turn',steps:[{fx:'freeActivate'}]}]},
-    text:'Once per your turn: activate one of the equipped Teece\u2019s abilities that has a cost, and do not pay the cost. The ability keeps its own charge \u2014 this is the book\u2019s activation, not its.'},
- 801:{name:'Goggles of Truth',type:'equip',mod:2,madness:true,
+    text:'Once per your turn: activate one of the equipped Teece\u2019s "When discarded:" abilities, ignoring condition and cost.'},
+ 801:{name:'Goggles of Truth',type:'equip',mod:6,madness:true,
+    modPerFoeCard:-1,modIfAnyEmptyHand:5,
     onDiscard:[{fx:'equipFromGrave'}],
-    text:'The equipped Teece gets +2. When this card is discarded: bolt it onto one of your Teece instead of leaving it lying there.'},
- 802:{name:'Astral Mindwyrm',type:'equip',mod:0,madness:true,
+    text:'The equipped Teece gets +6, and -1 for every card in your opponent’s hand. If any player has no cards in hand: an additional +5. When discarded: You may equip this to an ally.'},
+ 802:{name:'Astral Mindwyrm',type:'equip',mod:0,madness:true,modIfEmptyHand:10,
     grants:{undyingRide:true,
       act:[{name:'Slip away together',onceGame:'mindwyrm',steps:[{fx:'bounceSelfPair'}]}],
       graveAct:[{name:'Slip out together',onceGame:'mindwyrm',steps:[{fx:'riseSelfPair'}]}]},
-    text:'This goes to the graveyard wrapped around the equipped Teece rather than on its own, and comes back with it — including when it was bolted on while both were still in hand. Once in the whole game, from the field or from the graveyard: return this and the Teece wearing it to your hand.'},
+    text:'Astral Mindwyrm goes to the grave with the Teece it’s equipped to, and gives it +10 while you hold no cards. Once per game, from the field or from the graveyard: return this and the Teece wearing it to your hand.'},
  803:{name:'Mountains of Madness',type:'ground',gOnDiscard:{n:3,kw:['flying']},
-    text:'Whenever a card is discarded, either side’s: the Teece standing here gets +3 and flies until the end of the turn.'},
+    onDiscard:[{fx:'modSides',n:3,kw:['flying'],dur:'temp',may:true,
+      msg:'Which Teece gets +3 and flies until the end of the turn?'}],
+    text:'Whenever a card is discarded, either side’s: the Teece standing here gets +3 and flies until the end of the turn. When discarded: You may select a Teece; give it +3 and flying until the end of the turn.'},
  804:{name:'Eldritch Library',type:'ground',gLib:true,gHeldDef:1,
     gact:[{name:'Tear down the Library',once:'turn',steps:[{fx:'breakGround'}]}],
-    text:'Whenever a card would be discarded into a graveyard you may shelve it here instead. A Teece standing here has +1 Defence for every card shelved. While one of your Teece stands on it, once per your turn: tear it down, and every card shelved goes back to its owner’s hand.'},
+    onDiscard:[{fx:'groundSelfPlay'}],
+    text:'Whenever a card would be discarded into a graveyard you may shelve it here instead. A Teece standing here has +1 Defence for every card shelved. While one of your Teece stands on it, once per your turn: tear it down, and every card shelved goes back to its owner’s hand. When discarded: Play this.'},
  /* Not in any deck: Cannonball is handed out by a roguelike perk. */
  590:{name:'Cannonball',type:'magic',perkOnly:true,
     text:'Select a Teece and one of its sides; that side gets -4.',
@@ -4209,6 +4266,12 @@ function effSides(b,i,parts){
     else{const n=(rim.length>1?po.corner:po.edge)||0;for(const k of rim)d[(k+2)%4]+=n;}
     addMod(s,d,rim.length>1?'Dug into the corner':rim.length?'Backed onto the edge':'Out in the middle');
   }
+  /* Paid for holding nothing at all. Read off the hand of whoever controls the
+     body right now, not whoever it was printed for, so a stolen Teece is paid
+     by its thief's empty hand. */
+  const eh=(!t.silenced)&&DEF(t).emptyHand;
+  if(eh&&G&&G.players&&G.players[t.owner]&&handCount(t.owner)===0)
+    addMod(s,eh,'Holding no cards');
   for(const bo of bonusesOn(b,i)){
     const n=formationCount(b,i,bo);
     if(n)addMod(s,bo.n*n,formationLabel(bo));
@@ -4240,6 +4303,22 @@ function effSides(b,i,parts){
     /* aXe and swOrd are dead weight on the wrong letter. */
     if(ed.modIfMark&&markOfCard(DEF(t)).indexOf(ed.modIfMark.letter)>=0)
       addMod(s,ed.modIfMark.n,ed.name+', in the hands of '+(ed.modIfMark.letter==='X'?'an X':'an O'));
+    /* The Goggles read the hand across the table, and both they and the
+       Mindwyrm pay out the moment a hand runs dry. Counted off the LARGEST
+       enemy hand rather than every enemy hand added together, so the number
+       the card was written against still means something at three seats. */
+    if(ed.modPerFoeCard&&G&&G.players){
+      let most=0;
+      for(let q=0;q<PLAYERS();q++)if(!sameTeam(q,t.owner))most=Math.max(most,handCount(q));
+      if(most)addMod(s,ed.modPerFoeCard*most,ed.name+', per card held against it');
+    }
+    if(ed.modIfAnyEmptyHand&&G&&G.players){
+      let dry=false;
+      for(let q=0;q<PLAYERS();q++)if(handCount(q)===0){dry=true;break;}
+      if(dry)addMod(s,ed.modIfAnyEmptyHand,ed.name+', with a hand run dry');
+    }
+    if(ed.modIfEmptyHand&&G&&G.players&&G.players[t.owner]&&handCount(t.owner)===0)
+      addMod(s,ed.modIfEmptyHand,ed.name+', holding no cards');
   }
   /* A Teece that reads the crowd. Not an aura -- it is the card's own printed
      line scaling with the field, so silence does not touch it. */
@@ -4593,6 +4672,9 @@ function checkTimer(b,i){
   t.transformed=true;
   t.base=d.timer.sides.slice();
   if(bonusApplies(t.owner))for(let k=0;k<4;k++)t.base[k]=Math.max(0,t.base[k]+G.enemyBonus);
+  if(d.timer.defLoss)t.defPerm=Math.max(0,(t.defPerm||0)-d.timer.defLoss);
+  if(d.timer.defGain)applyModT(t,d.timer.defGain,'perm');
+  if(d.timer.kw)t.kwPerm.push(...d.timer.kw);
   log(nm(t)+' comes of age: '+sidesLine(d.timer.sides)+'.');
   return true;
 }
@@ -4891,6 +4973,10 @@ async function runSteps(steps,ctx){
   const list=steps||[];
   let did=list.length===0,offPhase=0,ran=0;
   for(const st of list){
+    /* Read out of the Necronomicon, which pays nothing: the price gate and
+       every step marked as part of the price are skipped outright. ctx rides
+       into a choose's options, so the price inside a mode goes unpaid too. */
+    if(ctx.free&&(st.cost||st.fx==='price'))continue;
     /* A clause that belongs to the other half of the day/night cycle. Skipped
        quietly, because a card printed with a day clause AND a night clause is
        working exactly as written when only one of them fires. */
@@ -4928,9 +5014,11 @@ async function FXRUN(st,ctx){
   const none=msg=>{log(msg);ctx.noneMsg=msg;return 'NONE';};
   switch(st.fx){
   case 'mod':{
-    if(st.who==='self'){if(ctx.t)applyModT(ctx.t,st.n,st.dur);return;}
-    if(st.who==='last'){if(ctx.last!=null&&b[ctx.last].teece){applyModT(b[ctx.last].teece,st.n,st.dur);
-      log(nm(b[ctx.last].teece)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');}return;}
+    let dur=st.dur;
+    if(ctx.cardId===555&&G.players[p].enlargeExtended){dur='temp2';G.players[p].enlargeExtended=false;}
+    if(st.who==='self'){if(ctx.t)applyModT(ctx.t,st.n,dur);return;}
+    if(st.who==='last'){if(ctx.last!=null&&b[ctx.last].teece){applyModT(b[ctx.last].teece,st.n,dur);
+      log(nm(b[ctx.last].teece)+' gets '+sgn(st.n)+durTxt(dur)+'.');}return;}
     const cands=[];
     for(let i=0;i<BN;i++){
       const t=b[i].teece;if(!t)continue;
@@ -4944,15 +5032,15 @@ async function FXRUN(st,ctx){
       cands.push(i);
     }
     if(!cands.length)return none(st.where==='web'?'Nothing is standing on the Web.':'No valid target.');
-    const c=await pickCell(cands,'Choose a Teece'+(st.where==='web'?' on the Web':'')+': '+sgn(st.n)+durTxt(st.dur)+'.',
-      (bb,i)=>{applyModT(bb[i].teece,st.n,st.dur);},!!st.may);
+    const c=await pickCell(cands,'Choose a Teece'+(st.where==='web'?' on the Web':'')+': '+sgn(st.n)+durTxt(dur)+'.',
+      (bb,i)=>{applyModT(bb[i].teece,st.n,dur);},!!st.may);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     if(wardMagic(b,c,p)){ctx.last=c;await anim([c],'zap');return;}
     if(tapeSave(b,c,p)){ctx.last=c;await anim([c],'zap');return;}
-    applyModT(b[c].teece,st.n,st.dur);
+    applyModT(b[c].teece,st.n,dur);
     ctx.last=c;
-    log(nm(b[c].teece)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');
+    log(nm(b[c].teece)+' gets '+sgn(st.n)+durTxt(dur)+'.');
     if(b[c].teece&&!sameTeam(b[c].teece.owner,p)){noteTargeted(p);if(st.n<0)noteEnemyLoss(p,c,-st.n,false);}
     else noteSelfTarget(p);
     await anim([c],'zap');
@@ -6912,6 +7000,11 @@ async function FXRUN(st,ctx){
     }
     log(pname(p)+' conjures '+got.join(' and ')+' out of the air.');
     return;}
+  case 'enlargeExtended':{
+    handPush(p,555);
+    G.players[p].enlargeExtended=true;
+    log(pname(p)+' conjures Enlarge (extended duration) into hand.');
+    return;}
   case 'copyMagic':{
     /* A copy: the original stays where it lies. */
     const opts=[];
@@ -7064,6 +7157,10 @@ async function FXRUN(st,ctx){
     const sel=ids[parseInt(pick,10)];
     handTake(p,sel.x);
     await castCard(p,sel.cid,{keep:!!st.keep});
+    return;}
+  case 'graveDestroy':{
+    G.magicConsumed=true;
+    log(CARDS[ctx.cardId].name+' destroys itself rather than settling.');
     return;}
   case 'silenceCard':{
     const cands=[];
@@ -7663,6 +7760,82 @@ async function FXRUN(st,ctx){
     log(nm(tt)+' is held out of reach until the end of '+pposs(p)+' next turn.');
     await anim([c],'zap');
     return;}
+  /* A bonus aimed at named edges rather than all four, on a Teece of your
+     choosing. sides is the four-slot line to add; n and kw are the flat
+     version, for a card that lifts the whole body at once. */
+  case 'modSides':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;if(!t)continue;
+      if(st.who==='ally'&&!sameTeam(t.owner,p))continue;
+      if(st.who==='enemy'&&sameTeam(t.owner,p))continue;
+      if(!canTarget(b,i,p))continue;
+      cands.push(i);
+    }
+    if(!cands.length)return none('No Teece to lift.');
+    const c=await pickCell(cands,st.msg||'Choose a Teece.',null,!!st.may);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)){await anim([c],'zap');return;}
+    const tt=b[c].teece;
+    if(st.sides)applySides(tt,st.sides,st.dur||'temp');
+    if(st.n)applyModT(tt,st.n,st.dur||'temp');
+    for(const k of (st.kw||[]))if(tt.kwTemp.indexOf(k)<0)tt.kwTemp.push(k);
+    log(nm(tt)+' takes '+(st.sides?sidesLine(st.sides):sgn(st.n||0))+
+      ((st.kw||[]).length?' and '+(st.kw||[]).join(', '):'')+durTxt(st.dur||'temp')+'.');
+    await anim([c],'zap');
+    return;}
+  /* One hand emptied rather than every hand. Snapshotted first, for the same
+     reason discardHands is: each card thrown away fires its own discard, and
+     some of those reach back into the hand being emptied. */
+  case 'discardOwnHand':{
+    const hand=G.players[p].hand.slice();
+    if(!hand.length)return none('You have nothing left to throw away.');
+    log(pname(p)+' throws away '+(hand.length===1?'their last card':'all '+hand.length+' cards')+'.');
+    for(const cid of hand){
+      const at=G.players[p].hand.indexOf(cid);
+      if(at<0)continue;
+      const gone=handTake(p,at);
+      if(!gone)continue;
+      dumpPlate(gone.plate,'with the card it was bolted to',gone.id);
+      await discardCard(p,gone.id);
+      if(G.over)return;
+    }
+    return;}
+  /* A battleground that lays itself down as it is thrown away, the way the
+     Goggles bolt themselves on. Only the plain one-panel kind gets here, so
+     there is no shape or mode left to ask about. */
+  case 'groundSelfPlay':{
+    const cid=ctx.cardId;
+    if(cid==null)return none('There is nothing to lay down.');
+    const cands=[];for(let i=0;i<BN;i++)if(groundCells(i,'1x1'))cands.push(i);
+    if(!cands.length)return none('There is no room for it.');
+    /* No skip offered: the card reads "play this", not "you may". It would be
+       declined every time if it were -- aiPickCell drops any placement worth
+       less than 0.05, and a Library is worth nothing until cards are shelved
+       on it, so the one ground whose whole point is later value scores zero. */
+    const c=await chooseCell(p,cands,'Lay '+CARDS[cid].name+' on which panel?',
+      {mut:(bb,i)=>{bb[i].ground={cardId:cid,owner:p};}});
+    if(c==null||c==='CANCEL')return;
+    /* Out of wherever it landed: a graveyard, or a Library's shelf. */
+    const pl=G.players[p];
+    const gi=pl.grave.lastIndexOf(cid);
+    if(gi>=0)pl.grave.splice(gi,1);
+    else{
+      let found=false;
+      for(let i=0;i<BN&&!found;i++){
+        const g=b[i].ground;
+        if(!g||!g.held)continue;
+        const x=g.held.findIndex(h=>h.cardId===cid&&h.owner===p);
+        if(x>=0){g.held.splice(x,1);found=true;}
+      }
+    }
+    if(b[c].ground)await clearGroundAt(c,p);
+    b[c].ground={cardId:cid,owner:p,gid:G.groundSeq++};
+    log(CARDS[cid].name+' lays itself down on the '+CN[c]+' out of the graveyard.');
+    await anim([c],'placed',140);
+    await resolveCombat();
+    return;}
   /* A panel marked for whatever of yours lands on it next. */
   case 'markPanel':{
     const cands=[];for(let i=0;i<BN;i++)if(openAt(b,i))cands.push(i);
@@ -7670,8 +7843,12 @@ async function FXRUN(st,ctx){
     const c=await pickCell(cands,'Mark which empty panel? The next ally played there gets '+sgn(st.n||2)+'.',null,true);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
-    b[c].prime={n:st.n||2,owner:p,allyOnly:true};
-    log('The '+CN[c]+' is marked: the next ally of '+pname(p)+' to arrive there gets '+sgn(st.n||2)+'.');
+    /* Marks stack: a panel marked twice pays the arrival both times. Only your
+       own marks pool -- an opposing Lunatic's mark is a separate promise. */
+    const pr=b[c].prime;
+    if(pr&&pr.owner===p&&pr.allyOnly)pr.n+=(st.n||2);
+    else b[c].prime={n:st.n||2,owner:p,allyOnly:true};
+    log('The '+CN[c]+' is marked: the next ally of '+pname(p)+' to arrive there gets '+sgn(b[c].prime.n)+'.');
     return;}
   /* The King in Yellow: read it and you are nobody afterwards. Silenced,
      stripped of everything bolted on, and handed back its printed line. */
@@ -7684,12 +7861,14 @@ async function FXRUN(st,ctx){
     if(c==null)return;
     if(wardMagic(b,c,p)){await anim([c],'zap');return;}
     const tt=b[c].teece;
-    for(const e of tt.equips.slice()){
+    /* One equip, not the lot: the reader loses a card off its back, not its
+       whole kit. Chosen blind, so plating a second equip is real cover. */
+    if(tt.equips.length){
+      const e=tt.equips.splice(Math.floor(Math.random()*tt.equips.length),1)[0];
       equipCameOff(tt,e,true);
       toGrave(e.owner,e.cardId);
       log(CARDS[e.cardId].name+' falls off '+nm(tt)+'.');
     }
-    tt.equips=[];
     tt.perm=[0,0,0,0];tt.temp=[0,0,0,0];tt.temp2=[0,0,0,0];tt.temp2Until=0;
     tt.defPerm=0;tt.defTemp2=0;tt.defTemp2Until=0;tt.baseTemp=null;
     tt.kwTemp=[];tt.kwPerm=[];tt.silenced=true;
@@ -7748,10 +7927,84 @@ async function FXRUN(st,ctx){
     return;}
   /* The Pocket Dimension opens. Everything discarded from here to the end of
      the turn falls into it rather than into a graveyard. */
-  case 'pocket':{
-    if(G.pocket)return none('The Pocket Dimension is already open.');
-    G.pocket={owner:p,cards:[]};
-    log(pname(p)+' opens a Pocket Dimension: every card thrown away this turn falls into it.');
+  /* Everything this seat threw away this turn, taken back out of the
+     graveyard. Only what is still lying there: a card the Goggles bolted back
+     on, a Resurger that stood itself up or a card already fished out has moved
+     on, and the Pocket has no claim on it. */
+  case 'pocketReturn':{
+    const pl=G.players[p],got=[];
+    for(const c of (G.turnDiscards||[])){
+      if(c.owner!==p)continue;
+      const gi=pl.grave.lastIndexOf(c.cardId);
+      if(gi<0)continue;
+      pl.grave.splice(gi,1);
+      handPush(p,c.cardId);
+      got.push(c.cardId);
+    }
+    if(!got.length)return none('You have thrown nothing away this turn.');
+    log('The Pocket Dimension opens: '+got.map(id=>CARDS[id].name).join(', ')+
+      ' fall'+(got.length===1?'s':'')+' back into '+pposs(p)+' hand.');
+    return;}
+  /* The other half: a body thrown away this turn stands up out of the
+     graveyard with nothing printed on it working. Silenced before it lands,
+     and its when-played clause is never run -- that is what silenced means
+     for a card arriving rather than standing. */
+  case 'pocketPlay':{
+    const pl=G.players[p],cands=[];
+    for(const c of (G.turnDiscards||[])){
+      if(c.owner!==p||cands.indexOf(c.cardId)>=0)continue;
+      if(!CARDS[c.cardId]||CARDS[c.cardId].type!=='teece')continue;
+      if(pl.grave.lastIndexOf(c.cardId)<0)continue;
+      cands.push(c.cardId);
+    }
+    if(!cands.length)return none('You have thrown no Teece away this turn.');
+    const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
+    if(!empt.length)return none('There is no room for it.');
+    const pick=cands.length===1?'0'
+      :await chooseOption(p,cands.map((cid,x)=>({v:String(x),lbl:CARDS[cid].name,cid})),
+        'Which Teece comes up out of the Pocket Dimension?');
+    if(pick==null)return;
+    const cid=cands[parseInt(pick,10)];
+    const c=await chooseCell(p,empt,CARDS[cid].name+' comes up silenced. Choose a space, or skip.',
+      {skip:true,preview:{cardId:cid},
+       mut:(bb,i)=>{const nt=makeTeece(cid,p);nt.silenced=true;putTeece(bb,i,nt,false);}});
+    if(c==null||c==='CANCEL')return;
+    const gi=pl.grave.lastIndexOf(cid);
+    if(gi<0)return;
+    pl.grave.splice(gi,1);
+    const nt=makeTeece(cid,p,{real:true});
+    nt.silenced=true;
+    putTeece(b,c,nt,true);
+    attachRiders(p,cid,nt,true);
+    log(CARDS[cid].name+' comes up out of the Pocket Dimension at the '+CN[c]+', silenced.');
+    await anim([c],'placed',140);
+    return;}
+  /* Blind out of the graveyard. The card that asked never counts itself: it
+     landed in the pile a moment ago, and pulling itself straight back is a
+     loop that costs nothing and does nothing. */
+  case 'graveToHandRandom':{
+    const pl=G.players[p];
+    const pick=[];
+    for(let x=0;x<pl.grave.length;x++)if(pl.grave[x]!==ctx.cardId)pick.push(x);
+    if(!pick.length)return none('There is nothing else in the graveyard.');
+    const at=pick[Math.floor(Math.random()*pick.length)];
+    const cid=pl.grave.splice(at,1)[0];
+    handPush(p,cid);
+    log(pname(p)+' pulls '+CARDS[cid].name+' blindly out of the graveyard.');
+    return;}
+  /* Tokens dealt into a hand rather than onto the board. */
+  case 'tokenToHand':{
+    const n=st.count||1;
+    for(let x=0;x<n;x++)handPush(p,st.tok);
+    log(pname(p)+' takes '+(n===1?'an '+CARDS[st.tok].name:n+' '+CARDS[st.tok].name+'s')+' into hand.');
+    return;}
+  /* A draw given up. Kept as a count rather than a flag, because two of these
+     in one turn should cost two cards, and startTurn spends them one at a
+     time against whatever the deck draws. */
+  case 'skipDraw':{
+    const pl=G.players[p];
+    pl.skipDraw=(pl.skipDraw||0)+1;
+    log(pposs(p)+' next draw is given up.');
     return;}
   /* An equip that deploys itself out of the graveyard as it is discarded. */
   case 'equipFromGrave':{
@@ -7774,10 +8027,6 @@ async function FXRUN(st,ctx){
         if(!g||!g.held)continue;
         const x=g.held.findIndex(h=>h.cardId===cid&&h.owner===p);
         if(x>=0){g.held.splice(x,1);found=true;}
-      }
-      if(!found&&G.pocket){
-        const x=G.pocket.cards.findIndex(h=>h.cardId===cid&&h.owner===p);
-        if(x>=0)G.pocket.cards.splice(x,1);
       }
     }
     const worn={cardId:cid,owner:p};
@@ -7837,25 +8086,19 @@ async function FXRUN(st,ctx){
      exactly those steps dropped, and nothing else about it changes -- the
      ability keeps its own once-a-turn charge, because this activation is the
      book's, not the ability's. */
+  /* The book force-activates Z and never pays Y. What it reads is the "When
+     discarded:" clause of the card wearing it -- the condition being that the
+     card would have to be in a graveyard for it, which the book ignores along
+     with the price. The card itself stays exactly where it is. */
   case 'freeActivate':{
     const t=ctx.t,cell=ctx.cell;
     if(!t)return none('There is nothing wearing it.');
-    const list=[];
-    const paid=act=>(act.steps||[]).some(st2=>st2.cost);
-    if(!t.silenced)for(const act of (DEF(t).act||[]))if(paid(act))list.push(act);
-    const f=formOf(t);
-    if(f&&f.act&&!t.silenced)for(const act of f.act)if(paid(act))list.push(act);
-    if(!list.length)
-      return none(nm(t)+' has no ability with a cost for the book to read away.');
-    const pick=list.length===1?'0'
-      :await chooseOption(p,list.map((act,x)=>({v:String(x),lbl:act.name})),
-        'Read which of '+nm(t)+'\u2019s abilities out of the Necronomicon?');
-    if(pick==null)return;
-    const act=list[parseInt(pick,10)];
-    const free=(act.steps||[]).filter(st2=>!st2.cost);
-    if(!free.length)return none(act.name+' is all price and no effect.');
-    log(nm(t)+' reads '+act.name+' out of the Necronomicon, and pays nothing for it.');
-    await runSteps(free,{p,cell,t,first:false,noModal:true});
+    if(t.silenced)return none(nm(t)+' is silenced, and the book reads nothing off it.');
+    const od=DEF(t).onDiscard;
+    if(!od||!od.length)
+      return none(nm(t)+' has no "When discarded" clause for the book to read.');
+    log(nm(t)+' reads its own discard out of the Necronomicon, and pays nothing for it.');
+    await runSteps(od,{p,cell,t,first:false,noModal:true,free:true,cardId:t.cardId});
     return;}
   /* ---- Apocalypse: the end, and the four who bring it ---- */
   /* The whole price, checked before any of it is paid.
@@ -7885,6 +8128,16 @@ async function FXRUN(st,ctx){
       short.push(st.grave+' card'+(st.grave===1?'':'s')+' in your graveyard');
     if(st.deck&&G.players[p].deck.length<st.deck)
       short.push(st.deck+' card'+(st.deck===1?'':'s')+' left in your deck');
+    /* What the Pocket Dimension reaches for: cards this seat threw away this
+       turn that are still lying in its graveyard to be taken back. */
+    if(st.turnDiscard){
+      const pl=G.players[p];
+      let n=0;
+      for(const c of (G.turnDiscards||[]))
+        if(c.owner===p&&pl.grave.lastIndexOf(c.cardId)>=0)n++;
+      if(n<st.turnDiscard)
+        short.push(st.turnDiscard+' card'+(st.turnDiscard===1?'':'s')+' thrown away this turn');
+    }
     if(!short.length)return;
     const m='That costs '+short.join(' and ')+'.';
     log(m);toast(m);
@@ -8170,6 +8423,11 @@ async function discardCard(owner,cardId){
    out because a card milled by Curse of Forgetting reaches its graveyard inside
    the synchronous drawCards and only gets here when the queue is flushed. */
 async function afterDiscard(owner,cardId){
+  /* Everything thrown away this turn, whosever it was. The Pocket Dimension
+     reads this at the end of the turn rather than intercepting the discard, so
+     a card still reaches a graveyard on the way and everything that watches a
+     graveyard still fires. Emptied by endTurn. */
+  (G.turnDiscards=G.turnDiscards||[]).push({owner,cardId});
   await riseFromGrave(owner,cardId);
   if(G.over)return;
   const d=CARDS[cardId];
@@ -8181,13 +8439,6 @@ async function afterDiscard(owner,cardId){
    when the card was taken, in which case it is not buried. */
 async function catchDiscard(owner,cardId){
   if(!G)return false;
-  /* The Pocket Dimension swallows every discard made this turn, either side's,
-     and hands them all to whoever opened it when the turn ends. */
-  if(G.pocket){
-    G.pocket.cards.push({owner,cardId});
-    log(CARDS[cardId].name+' falls into the Pocket Dimension instead of a graveyard.');
-    return true;
-  }
   /* The Eldritch Library offers to shelve it. Its controller decides, whosever
      card it is -- the shelf is theirs. */
   for(let i=0;i<BN;i++){
@@ -8545,9 +8796,12 @@ async function processDeath(d){
       {lbl:'Every Teece gets -2',steps:[{fx:'allMod',n:-2,dur:'perm'}]}]});
   }
   for(const e of t.equips){const g=eqG(e);if(g&&g.onDeath)deathFx.push(...g.onDeath);}
-  const dblG=G.board[cell].ground&&CARDS[G.board[cell].ground.cardId].gDouble;
+  const groundCard=G.board[cell].ground&&CARDS[G.board[cell].ground.cardId];
+  const dblG=groundCard&&groundCard.gDouble;
+  const dblFx=groundCard&&groundCard.gDoubleEffects;
   const twice=x=>x.fx!=='resummon'&&x.once!=='game';
   if(dblG)deathFx=deathFx.concat(deathFx.filter(twice));
+  if(dblFx)deathFx=deathFx.concat(deathFx.filter(twice));
   /* And again for every echo laid on the body, from a snapshot so two echoes
      are three runs rather than four. */
   if(t.echo){const base=deathFx.filter(twice);for(let e=0;e<t.echo;e++)deathFx=deathFx.concat(base);}
@@ -9114,12 +9368,58 @@ function sacsNeeded(id,p){
   if(pl&&pl.coffined&&pl.coffined[id])return 0;
   return CARDS[id].sac||0;
 }
+/* Everything a seat can pay a sacrifice with, read in one place so canPlay and
+   playTeece can never disagree about whether a Boss is affordable. Bodies on
+   the field, and cards in hand that may be thrown away to count as one -- the
+   Cultist of Babble's Worthy. skipHand is the card being played: it is still
+   sitting in the hand while its own price is counted, and it cannot pay for
+   itself. */
+function sacPool(p,skipHand){
+  const b=G.board,cells=[],hands=[];
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(t&&t.owner===p&&!t.isToken&&canSacrifice(b,i))cells.push(i);
+  }
+  const pl=G.players[p];
+  for(let x=0;x<pl.hand.length;x++){
+    if(x===skipHand)continue;
+    const cd=CARDS[pl.hand[x]];
+    if(cd&&cd.sacHand)hands.push(x);
+  }
+  const worth=cells.reduce((a,i)=>a+((DEF(b[i].teece).sacWorth)||1),0)+hands.length;
+  return {cells,hands,worth};
+}
+/* One sacrifice, paid off the board or out of the hand. aiPickCell only ever
+   looks at the board, so the computer would never see a hand card offered
+   through opt.hands; it is answered here instead, and spends the card before
+   the body because a body on the field is worth more than one in hand. */
+async function chooseSacrifice(p,cells,hands,msg){
+  if(!hands.length)return await chooseCell(p,cells,msg,{cancel:true,mut:null});
+  if(isAIP(p)||!HAS_DOM)return 'h'+hands[0];
+  return await chooseCell(p,cells,msg,{cancel:true,mut:null,hands});
+}
+/* Whether this card can be thrown away from hand for its own sake. A card may
+   carry its own handDiscard list -- Spare Parts, the two Solar cards -- and a
+   deck may hand the whole seat the right, which is how Madness works: the
+   deck prints "discard freely" once instead of every card printing it. */
+function canHandDiscard(p,id){
+  if(id==null||!CARDS[id])return false;
+  if(CARDS[id].handDiscard)return true;
+  const pl=G&&G.players[p];
+  if(pl&&pl.freeDiscard)return true;
+  /* A Madness card drafted into a mixed deck brings the rule with it. Without
+     this the cards whose whole design is being thrown away would be unplayable
+     outside their own deck, which is where they used to print it themselves. */
+  return !!CARDS[id].madness;
+}
 async function playHandDiscard(p,handIdx){
   if(G.over||G.pending)return false;
   if(p!==G.turn)return false;
   const pl=G.players[p],id=pl.hand[handIdx],d=CARDS[id];
-  if(!d||!d.handDiscard)return false;
-  const ok=await runSteps(d.handDiscard,{p,cell:null,t:null,first:true});
+  if(!canHandDiscard(p,id))return false;
+  /* A card with no list of its own is thrown away for nothing but its own
+     "when discarded" clause, which afterDiscard fires either way. */
+  const ok=d.handDiscard?await runSteps(d.handDiscard,{p,cell:null,t:null,first:true}):true;
   if(!ok)return false;
   const idx=pl.hand.indexOf(id);
   const gone=idx>=0?handTake(p,idx):null;
@@ -9167,28 +9467,37 @@ async function playTeece(p,handIdx){
   if(G.teecePlayed&&!free){toast(teeceCap(p)>1?'Every Teece for this turn is already played.':'Only one Teece per turn.');return false;}
   if(hexOn(p,'freeze')){toast('Frozen: you cannot play Teece.');return false;}
   const need=sacsNeeded(id,p);
-  const sacables=[];for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken&&canSacrifice(b,i))sacables.push(i);}
-  /* Most bodies are worth one sacrifice. A Cultist of Babble is worth two, so
-     the pool is measured in what it is WORTH rather than how many bodies are
-     in it, and the asking stops as soon as the price is met. */
+  const pool=sacPool(p,handIdx);
+  const sacables=pool.cells;
+  /* The pool is measured in what it is WORTH rather than how many bodies are
+     in it, and the asking stops as soon as the price is met. A Cultist of
+     Babble in hand is one of those payments without ever reaching the field. */
   const worthAt=i=>{const t=b[i].teece;return (t&&DEF(t).sacWorth)||1;};
-  if(sacables.reduce((a,i)=>a+worthAt(i),0)<need){toast('Not enough Teece to sacrifice.');return false;}
+  if(pool.worth<need){
+    toast(pool.hands.length?'Not enough to sacrifice.':'Not enough Teece to sacrifice.');
+    return false;
+  }
   const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
   /* A sacrifice empties the panel it was standing on, and that panel is a place
      the new Teece may land. So a full board is only a wall when the card pays
      for nothing. */
   if(!empt.length&&!need){toast('No empty space.');return false;}
   const plan=(isAIP(p)&&AI_TEECE_PLAN)?AI_TEECE_PLAN:null;
-  const sacP=[];
+  const sacP=[],sacH=[];
   for(let paidW=0,s=0;paidW<need;s++){
     const left=need-paidW;
-    const c=plan?plan.sacP[s]:await chooseCell(p,sacables.filter(i=>sacP.indexOf(i)<0),
-      'Choose a Teece to sacrifice ('+left+' more to pay).',{cancel:true,mut:null});
+    const c=plan?plan.sacP[s]:await chooseSacrifice(p,
+      sacables.filter(i=>sacP.indexOf(i)<0),
+      pool.hands.filter(x=>sacH.indexOf(x)<0),
+      'Choose a sacrifice ('+left+' more to pay).');
     if(c==null||c==='CANCEL')return false;
-    sacP.push(c);
-    paidW+=worthAt(c);
+    if(typeof c==='string'&&c.charAt(0)==='h'){sacH.push(parseInt(c.slice(1),10));paidW+=1;}
+    else{sacP.push(c);paidW+=worthAt(c);}
     if(plan&&s+1>=plan.sacP.length)break;
   }
+  /* Resolved to card ids while the indices still mean something: handTake for
+     the card being played is about to shift everything after it. */
+  const sacHIds=sacH.map(x=>pl.hand[x]);
   const spots=empt.slice();
   for(const c of sacP)if(!b[c].razed&&!blockedGround(b,c)&&spots.indexOf(c)<0)spots.push(c);
   spots.sort((x,y)=>x-y);
@@ -9223,6 +9532,19 @@ async function playTeece(p,handIdx){
   if(!taken)return false;
   const worn=taken.plate;
   const sacked=[];
+  /* Paid out of the hand first: nothing on the board has moved yet, so a
+     Willing Sacrifice that draws and discards cannot disturb a panel already
+     marked for the next payment. */
+  for(const cid of sacHIds){
+    const at=pl.hand.indexOf(cid);
+    if(at<0)continue;
+    const gone=handTake(p,at);
+    if(!gone)continue;
+    dumpPlate(gone.plate,'with the card it was bolted to',gone.id);
+    log(CARDS[gone.id].name+' is discarded from hand as a sacrifice.');
+    await discardCard(p,gone.id);
+    if(G.over)return true;
+  }
   for(const c of sacP){
     const t=b[c].teece;
     /* One of the chosen may already have fallen with another: a Necromancer
@@ -9309,8 +9631,10 @@ async function playTeece(p,handIdx){
     for(let k=0;k<4;k++)t.perm[k]+=cn;
     log(nm(t)+' matches the dial: '+sgn(cn)+'.');
   }
-  const dbl=b[spot].ground&&CARDS[b[spot].ground.cardId].gDouble?2:1;
-  if(d.onPlay)for(let k=0;k<dbl;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked});
+  const groundCard=b[spot].ground&&CARDS[b[spot].ground.cardId];
+  const dbl=(groundCard&&groundCard.gDouble)?2:1;
+  const dblFx=(groundCard&&groundCard.gDoubleEffects)?2:1;
+  if(d.onPlay)for(let k=0;k<dblFx;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked});
   for(let i=0;i<BN;i++){
     const w=b[i].teece;
     if(!w||w.uid===t.uid)continue;
@@ -9851,16 +10175,7 @@ async function endTurn(){
       log(nm(G.board[pick].teece)+' catches a second wind: '+sgn(n)+'.');
     }
   }
-  /* The Pocket Dimension closes. Everything thrown away while it was open --
-     either side's -- lands in the hand of whoever opened it. */
-  if(G.pocket){
-    const pk=G.pocket;G.pocket=null;
-    if(pk.cards.length){
-      for(const c of pk.cards)handPush(pk.owner,c.cardId);
-      log('The Pocket Dimension closes: '+pk.cards.map(c=>CARDS[c.cardId].name).join(', ')+
-        ' fall'+(pk.cards.length===1?'s':'')+' into '+pposs(pk.owner)+' hand.');
-    }else log('The Pocket Dimension closes on nothing.');
-  }
+  G.turnDiscards=[];
   /* Cards that go back to a hand at the end of the turn they were discarded. */
   if(G.handBack&&G.handBack.length){
     const back=G.handBack;G.handBack=[];
@@ -10061,7 +10376,18 @@ async function startTurn(){
   if(pl.pendingDraw){const n=pl.pendingDraw;pl.pendingDraw=0;drawCards(p,n);}
   if(G.turnNum>1){
     if(!pl.deck.length&&G.mode!=='rogue'&&!pl.noDeckOut){deckOut(p);return;}
-    if(pl.deck.length){drawCards(p,drawPerTurn(p));await flushDiscards();await offerReveal(p);}
+    if(pl.deck.length){
+      /* Draws given up to a Mindbroken Mindbreaker are spent here, one card at
+         a time against whatever the deck draws, so a seat that draws two gives
+         up one of them rather than the turn. */
+      let n=drawPerTurn(p);
+      if(pl.skipDraw>0){
+        const give=Math.min(pl.skipDraw,n);
+        pl.skipDraw-=give;n-=give;
+        log(pname(p)+' gives up '+(give===1?'a draw':give+' draws')+' this turn.');
+      }
+      if(n>0){drawCards(p,n);await flushDiscards();await offerReveal(p);}
+    }
   }
   warnLastCard(p);
   log('--- Turn '+G.turnNum+': '+pname(p)+' ---');
@@ -10936,6 +11262,10 @@ function showDeckInfo(key){
           ' cards drawn at the top of it: this deck plays a bigger turn than the others. '
         : 'One Teece. ')+
       'Equips, magic and battlegrounds are unlimited.</span>'+
+    (dk.freeDiscard
+      ? '<span class="rk">Discarding</span><span>On your turn you may throw away any card in your hand, as often as you like. '+
+        'A rule of this deck rather than of any card in it, which is why none of them print it.</span>'
+      : '')+
     '<span class="rk">Reviving</span><span>A Teece brought back from a graveyard is played: its when-played effect triggers, controlled by whoever revived it.</span>'+
     '<span class="rk">Winning</span><span>Wipe out every enemy Teece, end a turn four Teece ahead (Tokens never count), '+
       'or hold the bigger field when a player must draw from an empty deck.</span>'+
@@ -11446,7 +11776,23 @@ function syncHandSlots(){
 function renderHand(p){
   const pl=G.players[p],h=handSlot(p);
   if(!h)return;
-  h.innerHTML='<div class="handlbl">'+pname(p)+' hand</div>';
+  h.innerHTML='';
+  const lbl=document.createElement('div');
+  lbl.className='handlbl';
+  lbl.textContent=pname(p)+' hand';
+  h.appendChild(lbl);
+  /* The switch lives on your own hand only: the other seats' rows follow it. */
+  if(p===0){
+    applyHandView();
+    const vb=document.createElement('button');
+    vb.className='handview';
+    vb.type='button';
+    vb.textContent=SQHAND?'Text cards':'Square cards';
+    vb.title=SQHAND?'Show the full card, rules line and all.'
+                   :'Show every card as a square: the drawing and the name, no rules line.';
+    vb.addEventListener('click',e=>{e.stopPropagation();setHandView(!SQHAND);});
+    lbl.appendChild(vb);
+  }
   const pd=G.pending;
   const targeting=!!(pd&&pd.kind==='cell'&&pd.hands&&pd.p===p);
   for(let i=0;i<pl.hand.length;i++){
@@ -11470,19 +11816,24 @@ function renderHand(p){
         '<div class="'+sc(2)+'">'+ps[2]+'</div>'+
         '<div class="'+sc(3)+'">'+ps[3]+'</div>'+
         '<div class="hcn cn">'+cd.name+'</div>';
-      if(cd.handDiscard){
-        const db=document.createElement('button');
-        db.className='discardBtn';
-        db.type='button';
-        db.textContent='Discard';
-        db.title='Discard '+cd.name+' from hand for its effect, instead of playing it.';
-        db.disabled=(p!==G.turn||G.over||!!G.pending);
-        db.addEventListener('click',(e)=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)playHandDiscard(p,i);});
-        card.appendChild(db);
-      }
     }else{
       card.innerHTML=(art?'<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>':'')+
         '<div class="ct">'+cd.type+'</div><div class="cn">'+cd.name+'</div><div class="cs">'+cd.text.split('\n')[0]+'</div>';
+    }
+    /* Outside the type branch: a deck that lets you discard freely lets you
+       discard a magic card, an equip and a battleground too, and the button
+       used to be built only for Teece. */
+    if(canHandDiscard(p,id)){
+      const db=document.createElement('button');
+      db.className='discardBtn';
+      db.type='button';
+      db.textContent='Discard';
+      db.title=cd.handDiscard
+        ?'Discard '+cd.name+' from hand for its effect, instead of playing it.'
+        :'Throw '+cd.name+' away. This deck lets you discard freely, as often as you like on your turn.';
+      db.disabled=(p!==G.turn||G.over||!!G.pending);
+      db.addEventListener('click',(e)=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)playHandDiscard(p,i);});
+      card.appendChild(db);
     }
     if(worn.length){
       const pb=document.createElement('div');
@@ -12145,6 +12496,7 @@ async function startInner(mode,vsAI){
     for(let i=0;i<3;i++){
       G.players[i].noDeckOut=(keys[i]==='berserker');
       G.players[i].perTurn=DECKS[keys[i]].perTurn||null;
+      G.players[i].freeDiscard=!!DECKS[keys[i]].freeDiscard;
     }
     G.formatName=fmt.name;
     log(fmt.name+': '+keys.map((k,i)=>pname(i)+' brings '+DECKS[k].name).join(', ')+
@@ -12169,6 +12521,11 @@ async function startInner(mode,vsAI){
        cards every turn, for as long as it is the deck being played. */
     G.players[0].perTurn=DECKS[mine].perTurn||null;
     G.players[1].perTurn=DECKS[theirs].perTurn||null;
+    /* Madness lets a seat throw any card away on its own turn, as often as it
+       likes. A rule of the deck rather than of any card, so nothing in the
+       deck has to print it. */
+    G.players[0].freeDiscard=!!DECKS[mine].freeDiscard;
+    G.players[1].freeDiscard=!!DECKS[theirs].freeDiscard;
     log(DECKS[mine].name+' faces '+DECKS[theirs].name+
       (hcap?', and every enemy Teece carries '+hcapLabel(hcap)+' on all four sides.':'.'));
     render();
@@ -12256,6 +12613,8 @@ if(typeof module!=='undefined'){
     groundCells,playGround,areaShapeCells,
     statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,
     graveActsFor,graveActAvailable,runGraveAct,dumpPlate,
+    setHandView,applyHandView,getHandView:()=>SQHAND,applySides,handCount,afterDiscard,
+    canHandDiscard,sacPool,chooseSacrifice,drawPerTurn,
     readsSky,skyShowing,isDay,flipPhase,
     plateHand,plateOf,platedSides,handPush,handTake,playEquip,queueFx,resolvePending,VERSION,
     getDecks:()=>DECKS,getPool:()=>POOL,allDraftable,bounceToHand,cloneBoard,fireMove,isBossCard,

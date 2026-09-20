@@ -64,12 +64,19 @@ Then `newState` / `setG` / `getG` to build a position, and `playFromHand`,
 `runAct`, `endTurn`, `resolveCombat` to drive it. Set `G.aiSeats=[]` to drive
 both sides by hand so no AI turn races an assertion.
 
-Two things about the harness:
+Three things about the harness:
 
 - With no DOM, every prompt auto-resolves through `aiPickCell`/`aiPickOpt`, which
   pick **randomly**. A test depending on where a Teece lands must constrain the
   board to one legal choice or retry until it gets the placement it needs.
 - `HAS_DOM` is false, so `anim()` returns at once and `toast()` does nothing.
+- A prompt offered with `skip:true` is **declined** whenever the placement does
+  not move `boardValue` by 0.05 — `aiPickCell` weighs the board and takes the
+  skip. Anything whose worth is later rather than now scores zero, so it never
+  fires in a test and never fires for the AI: the Eldritch Library laying
+  itself down read as a dead effect for exactly this reason. Before believing
+  an effect is broken, check whether it offered a skip at all. If the card says
+  "play this" rather than "you may", do not pass `skip`.
 
 For rendering, input or overlays, drive the real page with Playwright — but serve
 it over HTTP first (`npx http-server -p 8137 -s -c-1 .`), because `fetch('decks.json')`
@@ -126,6 +133,16 @@ the page, or it buries the content underneath. On a phone `aside` stacks below
 
 - Cards are data in `CARDS`, keyed by id. Prefer adding a field the engine reads
   over special-casing a card by id.
+- A rule that belongs to a DECK rather than a card goes in `decks.json` and is
+  copied onto the seat at setup — `perTurn` and `freeDiscard` both work this
+  way. There are two setup paths that do the copying (the two-seat one and the
+  three-seat one) and `newState` is not one of them, so a headless test or a
+  soak built straight on `newState` never sees the rule and will report the
+  feature dead. Set the seat flag by hand in the harness.
+- `opt.hands` lets a cell prompt accept a card in hand as the answer, but
+  `aiPickCell` only ever looks at the board, so the computer and every headless
+  prompt will ignore those targets entirely. Anything the AI has to be able to
+  choose needs its own branch, the way `chooseSacrifice` does.
 - `effSides` is the single source of truth for a Teece's current numbers; auras,
   equips, grounds and doubling all compose there.
 - Effects that must land before combat go on the effect stack via `queueFx`;
