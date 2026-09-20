@@ -1960,20 +1960,20 @@ const CARDS = {
  /* ---- Time: cards that grow, decay and hurry ---- */
  381:{name:'Baby Dragon',type:'teece',sides:[4,4,4,4],tick:{n:2,cap:6},
     text:'At the start of each of your turns it gets +2, up to +6 in all.'},
- 382:{name:'Chrysalis',type:'teece',sides:[4,4,8,8],timer:{turns:2,sides:[10,10,8,8]},
-    text:'After two of your turns, it becomes ↑10 →10 ↓8 ←8.'},
- 383:{name:'Green Shoot',type:'teece',sides:[8,9,1,1],timer:{turns:3,sides:[8,9,11,11]},
-    text:'After three of your turns, it becomes ↑8 →9 ↓11 ←11.'},
+ 382:{name:'Chrysalis',type:'teece',sides:[3,3,8,8],kw:['teleport'],timer:{turns:2,sides:[10,10,8,8]},
+    text:'Teleport. After two of your turns, it becomes ↑10 →10 ↓8 ←8.'},
+ 383:{name:'Green Shoot',type:'teece',sides:[8,9,1,1],timer:{turns:3,sides:[8,9,12,12],kw:['teleport']},
+    text:'After three of your turns, it becomes ↑8 →9 ↓12 ←12 and gains Teleport.'},
  384:{name:'Cut Flower',type:'teece',sides:[9,9,9,9],timer:{turns:2,sides:[5,5,5,5]},
     text:'After two of your turns, it wilts to 5 on every side.'},
  385:{name:'Hourglass Knight',type:'teece',sides:[9,9,9,9],tick:{n:-1},kw:['flying'],
     text:'Flying. At the start of each of your turns, it gets -1.'},
  386:{name:'Fast Forward',type:'magic',text:"Advance a Teece's clock by two turns.",
     cast:[{fx:'fastForward',n:2}]},
- 387:{name:'Time Warp',type:'ground',gAgeRate:2,gDouble:true,
-    text:'A Teece on this panel ages twice as fast, and its when-played and when-destroyed effects happen twice.'},
- 388:{name:'Acorn',type:'teece',sides:[3,3,3,3],timer:{turns:2,sides:[10,10,10,10]},
-    text:'After two of your turns, it becomes 10 on every side.'},
+ 387:{name:'Time Warp',type:'ground',gAgeRate:2,gmod:2,gDoubleEffects:true,
+    text:'A Teece on this panel gets +2 Defence, ages twice as fast, and gains a second copy of each of its when-played and when-destroyed effects.'},
+ 388:{name:'Acorn',type:'teece',sides:[3,3,3,3],def:6,timer:{turns:2,sides:[10,10,10,10],defLoss:6,defGain:6},
+    text:'Defence 6. After two of your turns, it becomes 10 on every side, loses the Defence, and gets +6.'},
  389:{name:'Rewind',type:'magic',
     text:'Take a card that reached any graveyard this turn or last, yours or an enemy\u2019s, into your hand.',
     cast:[{fx:'rewind'}]},
@@ -1983,7 +1983,7 @@ const CARDS = {
     text:"When played: advance an ally's clock by one turn. After two of your turns, it becomes ↑9 →9 ↓7 ←7.",
     onPlay:[{fx:'fastForward',n:1,who:'ally'}]},
  392:{name:'Heir Apparent',type:'teece',sides:[8,8,8,8],sac:1,timer:{turns:1,sides:[12,12,12,12]},
-    text:'Sacrifice one fielded Teece to play. It becomes 12 on every side at the start of your next turn, or the moment its clock is moved forward at all.'},
+    text:'Sacrifice one fielded Teece to play. It becomes 12 on every side at the start of your next turn.'},
  393:{name:'Fading Titan',type:'teece',sides:[15,15,15,15],sac:2,tick:{n:-1},
     text:'Sacrifice two fielded Teece to play. At the start of each of your turns, it gets -1.'},
  394:{name:'Timekeeper',type:'teece',sides:[4,4,4,4],
@@ -2250,9 +2250,9 @@ const CARDS = {
  551:{name:'Spellbound Pixie',type:'teece',sides:[3,1,4,1],sac:1,pixie:true,kw:['flying'],
     text:'Flying. Sacrifice one fielded Teece to play. Whenever you play a magic card: this gets +5 until the end of the turn, +2 permanently, and may move one space.',
     onMagic:[{fx:'mod',who:'self',n:5,dur:'temp'},{fx:'mod',who:'self',n:2,dur:'perm'},{fx:'move',range:'orth',may:true}]},
- 552:{name:'Pixie Queen',type:'teece',sides:[4,4,4,4],sac:2,pixie:true,kw:['flying'],
-    text:'Boss. Flying. Sacrifice two fielded Teece to play. Every other pixie of yours gets +10.',
-    aura:{who:'ally',where:'global',n:10,pixieOnly:true}},
+ 552:{name:'Pixie Queen',type:'teece',sides:[2,2,2,2],sac:2,pixie:true,kw:['flying'],
+    act:[{name:'Conjure Enlarge',once:'turn',steps:[{fx:'enlargeExtended'}]}],
+    text:'Boss. Flying. Sacrifice two fielded Teece to play. Once per your turn: add an Enlarge to your hand (Enlarge lasts one extra turn).'},
  553:{name:'Mind Control',type:'magic',pixie:true,
     text:'Take control of a non-Boss enemy Teece until the end of the turn.',
     cast:[{fx:'controlTemp'}]},
@@ -2266,8 +2266,8 @@ const CARDS = {
     text:'Select a Teece; it is 3 on every side until the end of the turn. Anything stacked on top of it still counts.',
     cast:[{fx:'shrink',n:3}]},
  557:{name:'Magic Wings',type:'magic',pixie:true,
-    text:'Select a flying Teece; it may fly twice more this turn.',
-    cast:[{fx:'flyBoost',n:2}]},
+    text:'Select a flying Teece; it may fly twice more this turn. Then destroy this in the grave.',
+    cast:[{fx:'flyBoost',n:2},{fx:'graveDestroy'}]},
  558:{name:'Silence',type:'magic',pixie:true,
     text:'Select a Teece; strip every bonus and penalty off it and negate its effects for the rest of the game. The next Teece your opponent plays arrives with -2.',
     cast:[{fx:'unmake'},{fx:'nextMod',n:-2,who:'enemy'}]},
@@ -4672,6 +4672,9 @@ function checkTimer(b,i){
   t.transformed=true;
   t.base=d.timer.sides.slice();
   if(bonusApplies(t.owner))for(let k=0;k<4;k++)t.base[k]=Math.max(0,t.base[k]+G.enemyBonus);
+  if(d.timer.defLoss)t.defPerm=Math.max(0,(t.defPerm||0)-d.timer.defLoss);
+  if(d.timer.defGain)applyModT(t,d.timer.defGain,'perm');
+  if(d.timer.kw)t.kwPerm.push(...d.timer.kw);
   log(nm(t)+' comes of age: '+sidesLine(d.timer.sides)+'.');
   return true;
 }
@@ -5011,9 +5014,11 @@ async function FXRUN(st,ctx){
   const none=msg=>{log(msg);ctx.noneMsg=msg;return 'NONE';};
   switch(st.fx){
   case 'mod':{
-    if(st.who==='self'){if(ctx.t)applyModT(ctx.t,st.n,st.dur);return;}
-    if(st.who==='last'){if(ctx.last!=null&&b[ctx.last].teece){applyModT(b[ctx.last].teece,st.n,st.dur);
-      log(nm(b[ctx.last].teece)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');}return;}
+    let dur=st.dur;
+    if(ctx.cardId===555&&G.players[p].enlargeExtended){dur='temp2';G.players[p].enlargeExtended=false;}
+    if(st.who==='self'){if(ctx.t)applyModT(ctx.t,st.n,dur);return;}
+    if(st.who==='last'){if(ctx.last!=null&&b[ctx.last].teece){applyModT(b[ctx.last].teece,st.n,dur);
+      log(nm(b[ctx.last].teece)+' gets '+sgn(st.n)+durTxt(dur)+'.');}return;}
     const cands=[];
     for(let i=0;i<BN;i++){
       const t=b[i].teece;if(!t)continue;
@@ -5027,15 +5032,15 @@ async function FXRUN(st,ctx){
       cands.push(i);
     }
     if(!cands.length)return none(st.where==='web'?'Nothing is standing on the Web.':'No valid target.');
-    const c=await pickCell(cands,'Choose a Teece'+(st.where==='web'?' on the Web':'')+': '+sgn(st.n)+durTxt(st.dur)+'.',
-      (bb,i)=>{applyModT(bb[i].teece,st.n,st.dur);},!!st.may);
+    const c=await pickCell(cands,'Choose a Teece'+(st.where==='web'?' on the Web':'')+': '+sgn(st.n)+durTxt(dur)+'.',
+      (bb,i)=>{applyModT(bb[i].teece,st.n,dur);},!!st.may);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     if(wardMagic(b,c,p)){ctx.last=c;await anim([c],'zap');return;}
     if(tapeSave(b,c,p)){ctx.last=c;await anim([c],'zap');return;}
-    applyModT(b[c].teece,st.n,st.dur);
+    applyModT(b[c].teece,st.n,dur);
     ctx.last=c;
-    log(nm(b[c].teece)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');
+    log(nm(b[c].teece)+' gets '+sgn(st.n)+durTxt(dur)+'.');
     if(b[c].teece&&!sameTeam(b[c].teece.owner,p)){noteTargeted(p);if(st.n<0)noteEnemyLoss(p,c,-st.n,false);}
     else noteSelfTarget(p);
     await anim([c],'zap');
@@ -6995,6 +7000,11 @@ async function FXRUN(st,ctx){
     }
     log(pname(p)+' conjures '+got.join(' and ')+' out of the air.');
     return;}
+  case 'enlargeExtended':{
+    handPush(p,555);
+    G.players[p].enlargeExtended=true;
+    log(pname(p)+' conjures Enlarge (extended duration) into hand.');
+    return;}
   case 'copyMagic':{
     /* A copy: the original stays where it lies. */
     const opts=[];
@@ -7147,6 +7157,10 @@ async function FXRUN(st,ctx){
     const sel=ids[parseInt(pick,10)];
     handTake(p,sel.x);
     await castCard(p,sel.cid,{keep:!!st.keep});
+    return;}
+  case 'graveDestroy':{
+    G.magicConsumed=true;
+    log(CARDS[ctx.cardId].name+' destroys itself rather than settling.');
     return;}
   case 'silenceCard':{
     const cands=[];
@@ -8782,9 +8796,12 @@ async function processDeath(d){
       {lbl:'Every Teece gets -2',steps:[{fx:'allMod',n:-2,dur:'perm'}]}]});
   }
   for(const e of t.equips){const g=eqG(e);if(g&&g.onDeath)deathFx.push(...g.onDeath);}
-  const dblG=G.board[cell].ground&&CARDS[G.board[cell].ground.cardId].gDouble;
+  const groundCard=G.board[cell].ground&&CARDS[G.board[cell].ground.cardId];
+  const dblG=groundCard&&groundCard.gDouble;
+  const dblFx=groundCard&&groundCard.gDoubleEffects;
   const twice=x=>x.fx!=='resummon'&&x.once!=='game';
   if(dblG)deathFx=deathFx.concat(deathFx.filter(twice));
+  if(dblFx)deathFx=deathFx.concat(deathFx.filter(twice));
   /* And again for every echo laid on the body, from a snapshot so two echoes
      are three runs rather than four. */
   if(t.echo){const base=deathFx.filter(twice);for(let e=0;e<t.echo;e++)deathFx=deathFx.concat(base);}
@@ -9614,8 +9631,10 @@ async function playTeece(p,handIdx){
     for(let k=0;k<4;k++)t.perm[k]+=cn;
     log(nm(t)+' matches the dial: '+sgn(cn)+'.');
   }
-  const dbl=b[spot].ground&&CARDS[b[spot].ground.cardId].gDouble?2:1;
-  if(d.onPlay)for(let k=0;k<dbl;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked});
+  const groundCard=b[spot].ground&&CARDS[b[spot].ground.cardId];
+  const dbl=(groundCard&&groundCard.gDouble)?2:1;
+  const dblFx=(groundCard&&groundCard.gDoubleEffects)?2:1;
+  if(d.onPlay)for(let k=0;k<dblFx;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked});
   for(let i=0;i<BN;i++){
     const w=b[i].teece;
     if(!w||w.uid===t.uid)continue;
