@@ -714,7 +714,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:55,date:'2026-09-20'};
+const VERSION={build:57,date:'2026-09-20'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1777,36 +1777,37 @@ const CARDS = {
     text:'When played: choose a panel. Teece on it get +2 Defence while Barricade Builder stands.',
     onPlay:[{fx:'defMark',n:2}]},
  327:{name:'Rolling Stone',type:'teece',sides:[3,3,3,3],dodge:{n:-3},
-    text:'When it would be destroyed: it gets -3 and rolls one space instead, once per turn. When it moves: summon a Rock Token with 0 on every side with Defence 6 beside it.',
-    onMove:[{fx:'token',tok:'TR',where:'adj',count:1}]},
+    text:'Roll — move up two spaces at once, once per turn. When it would be destroyed: it gets -3 and rolls one space instead, once per turn. When it moves: summon a Rock Token with 0 on every side with Defence 6 beside it.',
+    act:[{name:'Roll',once:'turn',steps:[{fx:'moveTarget',where:'any',range:2}]}],onMove:[{fx:'token',tok:'TR',where:'adj',count:1}]},
  328:{name:'Rock Sergeant',type:'teece',sides:[7,7,7,7],def:1,sac:1,
-    text:'Sacrifice one fielded Teece to play. Defence 1. Every other ally gets +X, where X is its own Defence.',
-    aura:{who:'ally',where:'global',byDef:true,n:0}},
- 329:{name:'Master Rock Flinger',type:'teece',sides:[9,9,9,9],sac:2,flinger:true,
-    text:'Sacrifice two fielded Teece to play. All other allies get +3 and Flying.',
-    aura:{who:'ally',where:'global',n:3,kw:['flying']}},
+    text:'Sacrifice one fielded Teece to play. Defence 1. When played: select an ally; give it +X, where X is its Defence.',
+    onPlay:[{fx:'modByDef',who:'ally',notSelf:true}]},
+ 329:{name:'Master Rock Flinger',type:'teece',sides:[8,8,8,8],def:2,sac:2,
+    text:'Sacrifice two fielded Teece to play. Defence 2. Allies get +X where X is their Defence, and Flying.',
+    aura:{who:'ally',where:'global',byDef:true,n:0,kw:['flying']}},
  330:{name:'Quarry Foreman',type:'teece',sides:[4,4,4,4],def:1,
-    text:'Defence 1. Every other allied Teece gets +1 Defence.',aura:{who:'ally',where:'global',n:0,def:1}},
+    text:'Defence 1. Every other allied Teece gets +2 Defence.',aura:{who:'ally',where:'global',n:0,def:2}},
  331:{name:'Rubble',type:'teece',sides:[2,2,2,2],
-    text:'When destroyed: the next Teece you play gets +2 Defence.',onDeath:[{fx:'nextDef',n:2}]},
+    text:'When destroyed: the next Teece you play gets +3 Defence.',onDeath:[{fx:'nextDef',n:3}]},
  332:{name:'Gravel Golem',type:'teece',sides:[3,3,3,3],def:5,text:'Defence 5. Adjacent enemies get -1.',
     aura:{who:'enemy',where:'adj',n:-1}},
  333:{name:'Avalanche',type:'magic',
-    text:'Sacrifice one of your Teece. Everything below it in that column gets -6 until end of turn, and an Avalanche battleground settles where it stood.',
-    cast:[{fx:'avalanche',n:-6,bg:340}]},
+    text:'Sacrifice one of your Teece. Select all Teece below it in its column; destroy all selected Teece.',
+    cast:[{fx:'avalancheDestroy'}]},
  334:{name:'Ground Pound',type:'magic',
     text:'Choose one of your Teece: lay an Avalanche battleground on its panel and shove every adjacent Teece one space.',
     cast:[{fx:'groundPound',bg:340}]},
  335:{name:'Roll',type:'magic',
     text:'Choose one of your Teece: roll it anywhere along its row or column, then every enemy beside it gets -2.',
     cast:[{fx:'rowColMove',n:-2,dur:'perm'}]},
- 336:{name:'Studded Plate',type:'equip',mod:1,def:2,text:'Equipped Teece gets +1 and +2 Defence.',grants:{def:2}},
- 337:{name:'Stoneheart',type:'equip',mod:0,modPerDef:1,text:'Equipped Teece gets +1 for each point of Defence it has.'},
+ 336:{name:'Studded Plate',type:'equip',mod:1,def:3,text:'Equipped Teece gets +1 and +3 Defence.',grants:{def:3}},
+ 337:{name:'Stoneheart',type:'equip',mod:0,text:'Equipped Teece converts any Defence it has into offence, losing all its Defence and gaining that many stats permanently.',
+    grants:{stoneConvert:true}},
  338:{name:'Clinging Moss',type:'equip',mod:0,text:'Equipped Teece gets +1 Defence. When it is destroyed, you may move this to another Teece.',
     grants:{def:1,reequip:true}},
  339:{name:'Bedrock',type:'ground',gkw:['steadfast','ward'],
     text:'A Teece on this panel cannot lose attributes and cannot be selected by enemy effects.'},
- 340:{name:'Avalanche Field',type:'ground',gdef:2,text:'A Teece on this panel gets +2 Defence.'},
+ 340:{name:'Avalanche Field',type:'ground',gdef:3,text:'A Teece on this panel gets +3 Defence. While adjacent to one of its allies, it has an additional +3 Defence.'},
  /* ---- Ogre: shoving things around ---- */
  351:{name:'Ogre Bruiser',type:'teece',sides:[6,6,6,6],
     text:'When played: you may move an adjacent Teece one space. If you do, it gets -2 permanently.',
@@ -6357,6 +6358,24 @@ async function FXRUN(st,ctx){
     }
     if(!b[c].ground){b[c].ground={cardId:st.bg,owner:p,gid:G.groundSeq++};log('An Avalanche settles on the '+CN[c]+'.');}
     return;}
+  case 'avalancheDestroy':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p)cands.push(i);}
+    if(!cands.length)return none('No Teece to sacrifice.');
+    const c=await pickCell(cands,'Sacrifice one of your Teece.',null,false,
+      i=>{const o=[i];for(let j=i+BW;j<BN;j+=BW)o.push(j);return o;});
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const vt=b[c].teece;
+    await processDeath({cell:c,t:vt,killers:[],cost:true});
+    log(nm(vt)+' is sacrificed.');
+    const hit=[];
+    for(let j=c+BW;j<BN;j+=BW){
+      const o=b[j].teece;
+      if(o){hit.push(j);await processDeath({cell:j,t:o,killers:[],cost:false});log(nm(o)+' is crushed.');}
+    }
+    if(hit.length)await anim(hit,'zap');
+    return;}
   case 'groundPound':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p)cands.push(i);}
@@ -6479,6 +6498,29 @@ async function FXRUN(st,ctx){
     if(n>0&&dblPos)n*=2;if(n<0&&dblNeg)n*=2;
     t.perm[k]+=n;
     log(nm(t)+' takes '+sgn(n)+' on its '+SIDE_NAMES[k]+' side.');
+    await anim([c],'zap');
+    return;}
+  case 'modByDef':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;if(!t)continue;
+      if(st.notSelf&&ctx.t&&t.uid===ctx.t.uid)continue;
+      if(st.who==='ally'&&!sameTeam(t.owner,p))continue;
+      if(st.who==='enemy'&&sameTeam(t.owner,p))continue;
+      if(!canTarget(b,i,p))continue;
+      cands.push(i);
+    }
+    if(!cands.length)return none('No valid target.');
+    const c=await pickCell(cands,'Choose a Teece: it gets +X, where X is its Defence.',null,!!st.may);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece;
+    const defVal=effSides(t,b,c).def||0;
+    applyModT(t,defVal,'perm');
+    ctx.last=c;
+    log(nm(t)+' gets +'+defVal+'.');
+    if(t&&!sameTeam(t.owner,p)){noteTargeted(p);noteEnemyLoss(p,c,-defVal,false);}
+    else noteSelfTarget(p);
     await anim([c],'zap');
     return;}
   case 'setSide':{
@@ -9617,6 +9659,10 @@ async function playTeece(p,handIdx){
     for(const e of worn){
       const eg=eqG(e);
       if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:spot,t,first:false,equip:e});
+      if(eg&&eg.stoneConvert){
+        const defVal=effSides(t,b,spot).def||0;
+        if(defVal>0){applyModT(t,defVal,'perm');applyDef(t,-defVal);log(nm(t)+' converts '+defVal+' Defence into attack.');}
+      }
     }
   }
   if(pl.confuse){
