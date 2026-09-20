@@ -4931,7 +4931,7 @@ function applyModT(t,n,dur){
   if(n>0&&gainBlocked(t))return;
   /* Doubling is a state, not a stacking multiplier: two sources saying
      "positive effects count double" still only double it once. */
-  let dblPos=!!DEF(t).selfDoublePos,dblNeg=false;
+  let dblPos=!!DEF(t).selfDoublePos,dblNeg=!!DEF(t).selfDoubleNeg;
   /* Transfusion Catalyst doubles both ways from the Teece's own back. */
   for(const e of t.equips){
     const g=eqG(e);
@@ -6472,8 +6472,13 @@ async function FXRUN(st,ctx){
     const k=await pickSide(p,'Which side of '+nm(t)+'?');
     if(k==null)return;
     if(st.n<0&&isSteadfast(t)){log(nm(t)+' will not give ground.');return;}
-    t.perm[k]+=st.n;
-    log(nm(t)+' takes '+sgn(st.n)+' on its '+SIDE_NAMES[k]+' side.');
+    let n=st.n;
+    let dblPos=!!DEF(t).selfDoublePos,dblNeg=!!DEF(t).selfDoubleNeg;
+    for(const e of t.equips){const g=eqG(e);if(!g)continue;if(g.doublePos)dblPos=true;if(g.doubleNeg)dblNeg=true;}
+    if(G&&G.board){const ci=G.board.findIndex(c=>c.teece===t);if(ci>=0&&G.board[ci].ground){const g=G.board[ci].ground;if(groundFlag(g,'gDoublePos')||groundFlag(g,'gDoublePosAll'))dblPos=true;if(groundFlag(g,'gDoubleNeg'))dblNeg=true;}}
+    if(n>0&&dblPos)n*=2;if(n<0&&dblNeg)n*=2;
+    t.perm[k]+=n;
+    log(nm(t)+' takes '+sgn(n)+' on its '+SIDE_NAMES[k]+' side.');
     await anim([c],'zap');
     return;}
   case 'setSide':{
