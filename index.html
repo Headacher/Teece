@@ -268,6 +268,13 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .cell.razed{background-image:repeating-linear-gradient(45deg,rgba(0,0,0,.42) 0 6px,transparent 6px 12px)}
 .bglayer{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;
   font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding-bottom:2px}
+/* What the empty panel is offering, big enough to read across the board at a
+   glance, because the decision it informs is made by looking at the board. */
+.bggive{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:22px;font-weight:700;line-height:1;letter-spacing:0;
+  color:var(--gold);text-shadow:0 1px 4px rgba(0,0,0,.75);pointer-events:none;z-index:1}
+.bggive.neg{color:#c7a8e8}
+.bggive.small{font-size:12px;letter-spacing:.02em;white-space:nowrap}
 .bgplus{background:linear-gradient(180deg,rgba(201,162,39,.05),rgba(201,162,39,.28));color:var(--gold)}
 .bgminus{background:linear-gradient(180deg,rgba(125,91,166,.05),rgba(125,91,166,.30));color:#b79ad6}
 .bgutil{background:linear-gradient(180deg,rgba(63,160,138,.05),rgba(63,160,138,.22));color:#7fc4b2}
@@ -731,7 +738,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:62,date:'2026-09-21'};
+const VERSION={build:63,date:'2026-09-21'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4687,6 +4694,64 @@ function countGrounds(b){
     if(seen.indexOf(key)<0)seen.push(key);
   }
   return seen.length;
+}
+/* What a Teece arriving on this panel would get from the terrain alone, as
+   four numbers. Drawn on an EMPTY panel so it can be read before committing to
+   it, which is the whole point: the ground's gift is otherwise invisible until
+   something is already standing in it.
+
+   Only the flat, unconditional part -- what is true the moment anything lands,
+   whoever it is. Not gStand (it has to stay still for that), not gRangedPlus
+   (it has to be Ranged), not a gPhaseMod that picks a side (nobody owns the
+   panel yet), because a number that turned out to need a keyword or an owner
+   would be a lie at the moment it is read. Reach and the neighbours' bite ARE
+   in, because those are terrain too and they land with everything else.
+
+   Shaped like the ground block of effSides on purpose: the two have to agree,
+   so they are written to be read against each other. */
+function groundGives(b,i){
+  const out=[0,0,0,0];
+  const add=m=>{
+    if(m==null)return;
+    if(Array.isArray(m)){for(let k=0;k<4;k++)out[k]+=m[k];}
+    else for(let k=0;k<4;k++)out[k]+=m;
+  };
+  const gpans=[];
+  if(b[i].ground&&!b[i].ground.gsil)gpans.push(i);
+  for(const j of ADJ[i]){
+    const og=b[j].ground;
+    if(!og||og.gsil||!groundFlag(og,'gReach'))continue;
+    if(gpans.some(x=>b[x].ground&&(og.gid?b[x].ground.gid===og.gid:x===j)))continue;
+    gpans.push(j);
+  }
+  for(const gi of gpans){
+    const gg=b[gi].ground;
+    if(gg.gmod!=null)add(gg.gmod);
+    for(const gd of gcards(gg)){
+      add(gd.gmod);
+      if(gd.gPerGround)add(gd.gPerGround*countGrounds(b));
+      for(const pm of (gd.gPhaseMod||[]))if(!pm.who&&phaseIs(pm.when))add(pm.n);
+    }
+  }
+  const seen=[];
+  for(const j of ADJ[i]){
+    const og=b[j].ground;
+    if(!og)continue;
+    const key=og.gid!=null?'g'+og.gid:'c'+j;
+    if(seen.indexOf(key)>=0)continue;
+    seen.push(key);
+    add(groundAdjMod(b,j));
+  }
+  return out;
+}
+const GIVE_ARROW=['▲','▶','▼','◀'];
+/* One number when every side gets the same, and the sides themselves when they
+   do not -- a Pedestal pays the top seven and the rest nothing, and averaging
+   that into one figure would be worse than saying nothing. */
+function groundGiveLabel(d){
+  if(!d.some(v=>v))return '';
+  if(d[0]===d[1]&&d[1]===d[2]&&d[2]===d[3])return sgn(d[0]);
+  return d.map((v,k)=>v?GIVE_ARROW[k]+sgn(v):null).filter(Boolean).join(' ');
 }
 /* What the battleground at panel j charges whatever is standing NEXT to it:
    its own printed reach, plus anything a Teece standing on it is lending. */
@@ -12424,8 +12489,21 @@ function renderBoard(){
     const bg=G.board[i].ground;
     if(bg){
       const gd=CARDS[bg.cardId];
-      const cls=gd.gmod>0?'bgplus':(gd.gmod<0?'bgminus':'bgutil');
+      /* Coloured by what the panel actually gives rather than by what the card
+         prints, so a stack, a modal instance or a Nascent Dimension counting
+         the field is the colour it has earned. */
+      const gives=groundGives(G.board,i);
+      const tot=gives.reduce((a,c)=>a+c,0);
+      const cls=tot>0?'bgplus':(tot<0?'bgminus':'bgutil');
       cell.innerHTML+='<div class="bglayer '+cls+'">'+gd.name+'</div>';
+      /* Shown only while nothing is standing there: once a Teece lands, its
+         own four numbers already say it, and two sets of figures on one panel
+         is worse than one. */
+      if(!G.board[i].teece){
+        const lbl=groundGiveLabel(gives);
+        if(lbl)cell.innerHTML+='<div class="bggive'+(tot<0?' neg':'')+
+          (lbl.length>4?' small':'')+'">'+lbl+'</div>';
+      }
     }
     const mine=G.board[i].mine;
     if(mine)cell.innerHTML+='<div class="mineMark m'+mine.owner+'">⚠'+((mine.n||1)>1?'&#215;'+mine.n:'')+'</div>';
@@ -13554,6 +13632,7 @@ if(typeof module!=='undefined'){
     riseFromGrave,forcedMoves,fireMagic,flushDiscards,toGrave,isBossCard,playMagic,
     mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
     groundCells,playGround,areaShapeCells,makeTeece,gcards,countGrounds,groundAnchored,
+    groundGives,groundGiveLabel,
     isPlane,planeOn,PLANE,planeSpots,hangPlane,syncPlane,getGrid:()=>GRID,
     statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,
     graveActsFor,graveActAvailable,runGraveAct,dumpPlate,
