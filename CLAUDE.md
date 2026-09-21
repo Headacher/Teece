@@ -21,9 +21,25 @@ differently-numbered codebase that `main` used to carry — and every push
 succeeded while none of it reached the game. The pushes are never the problem.
 The branch is.
 
-`main` now carries this same tree, so a session that starts there is at least
-working on the right code; it still has to move to the shipping branch before
-pushing, because Pages does not build `main`.
+`main` carries the same tree but **not the same commits**, and it drifts. A
+session that starts there is at least working on the right codebase, but it is
+working on an older one: the shipping branch has repeatedly been several builds
+and a dozen commits ahead. Never assume the two agree — diff them.
+
+So a task branch is where you work, and the shipping branch is where you land.
+Finishing means merging into `claude/overclocker-fly-gadget-bugs-rvlhsg`, not
+pushing somewhere and stopping. **This holds for a new deck by default.** A deck
+that exists only on `main` is a deck nobody can play, and "add a deck" is never
+complete until it is on the branch Pages builds. If you are told to push
+somewhere else, push there too — but say plainly that the change is not live
+until it reaches the shipping branch, and offer to take it there.
+
+The merge is usually small — your one commit onto whatever landed meanwhile —
+but it conflicts on `VERSION` every time, and on `CARDS` whenever both sides
+added cards next to each other. Keep the shipping branch's number and bump it
+past theirs; keep both sides' cards. Then re-run the tests on the MERGED tree:
+the shipping branch has its own engine work that your changes have never been
+tested against.
 
 Before believing anything is live, check the deployment rather than the push. The
 Pages build shows up as a `pages build and deployment` workflow run, and its
@@ -45,6 +61,34 @@ const VERSION={build:3,date:'2026-09-05'};
 
 Every push carries a bump, in the same commit as the change: `build` up by one
 (once per push, not per commit), `date` set to the day of the push.
+
+## Adding a deck
+
+A deck is registered in seven places, and missing one of them fails quietly —
+the cards exist and simply never reach a player. Take the next free block of
+twenty ids (Dimension is 805–824), then:
+
+- `CARDS` in `index.html` — the twenty cards, plus any token cards they make.
+  A token carries `token:true` and `deck:'<key>'`, which keeps it out of drafts
+  while still colouring it as yours.
+- `decks.json` — a `decks.<key>` entry with `name`, `cards`, `blurb` and `how`,
+  and the twenty ids appended to `pool`. Edit it with a script rather than by
+  hand; it is long enough that a stray comma is hard to see.
+- `CARD_ART` — one 13-column drawing per card, tokens included. Anything not 13
+  wide skews the face it sits behind.
+- `DECK_SYM` — the deck's emoji.
+- Three CSS blocks keyed on `data-card-deck="<key>"`: the `.card`/`.dcard`
+  palette with its `.kwl`/`.ct` accent, the `::after` symbol, and `.teece` for
+  the board. The rules name `.card` and `.dcard` together so a card in hand and
+  the same card in a draft never diverge.
+
+Then check it the way a player would: the deck appears in the picker, its cards
+carry the palette in hand, and every one of the twenty actually fires in a real
+game — drive some AI games and grep the log for each card's name, because a
+card the AI never plays is a card you never tested.
+
+And land it on the shipping branch. See the top of this file: a deck that stops
+at `main` is a deck nobody can play.
 
 ## Testing
 
