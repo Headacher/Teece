@@ -731,7 +731,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:61,date:'2026-09-21'};
+const VERSION={build:62,date:'2026-09-21'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3114,7 +3114,7 @@ const CARDS = {
     text:'Flying: once per your turn, move one space. Whenever any battleground is replaced or destroyed: +4 until the end of the turn. Unmake the ground — once per your turn: destroy a battleground, and this gets +2 permanently.'},
  822:{name:'Terrain Animator',type:'teece',sides:[1,1,1,1],
     act:[{name:'Animate the terrain',once:'game',steps:[{fx:'animate'}]}],
-    text:'Animate the terrain — once a game: select a battleground with nothing on it; it stands up as a 9/9/9/9 Teece that flies, and lies back down when Terrain Animator leaves the field.'},
+    text:'Animate the terrain — once a game: select a battleground with nothing standing on it. It comes up off its panel and stands as a 9/9/9/9 Teece that flies, so the battleground itself is what moves. When Terrain Animator leaves the field it lies back down — on whatever panel it has reached by then.'},
  823:{name:'Worldshaper',type:'teece',sides:[8,8,8,8],sac:1,
     onPlay:[{fx:'seedPlanes'}],
     text:'Sacrifice one fielded Teece to play. When played: every panel without a battleground gets one that gives a Teece standing on it +1 for every battleground on the field.'},
@@ -4160,7 +4160,10 @@ function teamName(tm){
   if(seats.length===1)return pname(seats[0]);
   return seats.map(pname).join(' and ');
 }
-function nm(t){const d=DEF(t);return d.name+(t.isCopy?' (copy)':'');}
+/* A woken battleground answers to its own name while it is on its feet. It is
+   that card walking around, not a token standing in for it, and a player has to
+   be able to see which battleground is loose on the board. */
+function nm(t){const d=DEF(t);return (t.animGround?CARDS[t.animGround.cardId].name:d.name)+(t.isCopy?' (copy)':'');}
 /* pname() returns "You" for the human seat, so any verb after it has to agree. */
 const vb=(p,third,second)=>(G&&G.vsAI&&p===0)?second:third;
 function log(m){G.log.unshift(m);if(G.log.length>140)G.log.pop();if(HAS_DOM)renderLog();}
@@ -5954,19 +5957,35 @@ async function FXRUN(st,ctx){
   /* The panel gets up. It is a Token, so it never wins anybody the game, and
      it is tied to the Animator by uid -- syncGrounds puts it back down the
      moment that body is no longer on the field. */
+  /* The battleground does not get a Teece standing on it -- it GETS UP. The
+     ground comes off the panel entirely and is carried by the body, so the
+     panel it used to be is bare ground while it walks, and since it flies, the
+     battleground is what is moving around the board. It lies back down wherever
+     it happens to be standing when the Animator leaves the field. */
   case 'animate':{
     const cands=[];
-    for(let i=0;i<BN;i++)if(b[i].ground&&!b[i].teece&&!b[i].razed)cands.push(i);
-    if(!cands.length)return none('There is no battleground standing empty to wake.');
+    for(let i=0;i<BN;i++){
+      const g=b[i].ground;
+      if(!g||b[i].teece||b[i].razed)continue;
+      if(isPlane(i)||groundAnchored(b,i))continue;
+      /* Only a battleground standing on one panel can get up off it. */
+      let span=0;
+      for(let j=0;j<BN;j++)if(b[j].ground&&(g.gid?b[j].ground.gid===g.gid:j===i))span++;
+      if(span>1)continue;
+      cands.push(i);
+    }
+    if(!cands.length)return none('There is no battleground standing empty that could get up.');
     const c=await pickCell(cands,'Wake which battleground?',
-      (bb,i)=>{putTeece(bb,i,makeTeece('TANIM',p),false);},false);
+      (bb,i)=>{bb[i].ground=null;putTeece(bb,i,makeTeece('TANIM',p),false);},false);
     if(c==='CANCEL')return 'ABORT';
-    if(c==null)return;
-    const gnm=b[c].ground?CARDS[b[c].ground.cardId].name:'The ground';
+    if(c==null||!b[c].ground)return;
+    const g=b[c].ground,gnm=CARDS[g.cardId].name;
+    b[c].ground=null;
     const tk=makeTeece('TANIM',p);
     tk.animBy=ctx.t?ctx.t.uid:null;
+    tk.animGround=g;
     putTeece(b,c,tk,true);
-    log(gnm+' at the '+CN[c]+' pulls itself up and stands: 9 on every side, and it flies.');
+    log(gnm+' tears itself off the '+CN[c]+' and stands up: 9 on every side, and it flies.');
     return;}
   case 'seedPlanes':{
     let n=0;
@@ -9489,6 +9508,15 @@ async function processDeath(d){
       if(salvage&&e.owner===gr.owner)handPush(e.owner,e.cardId);
       else bury(e.owner,e.cardId);
     }
+    /* A woken battleground destroyed on its feet does not lie back down: the
+       card it is goes into a graveyard, because what died was the ground. */
+    if(t.animGround){
+      const ag=t.animGround;
+      t.animGround=null;
+      for(const held of (ag.held||[]))handPush(held.owner,held.cardId);
+      if(!CARDS[ag.cardId].token)toGrave(ag.owner,ag.cardId);
+      log(CARDS[ag.cardId].name+' is destroyed on its feet and never lies back down.');
+    }
     if(!handed&&!t.isToken&&!t.isCopy){
       if(salvage){handPush(t.baseOwner,t.cardId);log(nm(t)+' is salvaged back to hand.');}
       /* A Graveyard keeps what dies on it. The card is buckled onto the
@@ -9517,7 +9545,7 @@ async function processDeath(d){
    every one of them can be brought about by something that never touched the
    card responsible -- a battleground laid underneath, an equip destroyed, a
    Teece shoved one space by somebody else's card. */
-function syncGrounds(){
+async function syncGrounds(){
   if(!G||!G.board)return;
   /* The Plane's adjacency lives in the global ADJ rather than in the state, so
      re-assert it from the state on every sweep. Idempotent and cheap, and it
@@ -9547,17 +9575,31 @@ function syncGrounds(){
       t.silenced=true;
       log(nm(t)+' sinks into the Goo and is silenced.');
     }
-    if(t.animBy!=null&&!b.some(c=>c.teece&&c.teece.uid===t.animBy)){
-      b[i].teece=null;
-      log(nm(t)+' lies back down: the Animator that woke it is gone.');
-    }
+    if(t.animBy==null)continue;
+    /* "When Terrain Animator leaves the field: this effect ends" is an
+       activated clause, so silencing the Animator takes it away -- and a
+       battleground woken by an Animator that was then silenced never lies back
+       down at all. Noted while the Animator is still standing, because once it
+       is gone there is nothing left to ask. */
+    const an=b.find(c=>c.teece&&c.teece.uid===t.animBy);
+    if(an){if(an.teece.silenced)t.animFree=true;continue;}
+    if(t.animFree)continue;
+    b[i].teece=null;
+    if(t.animGround){
+      /* It lies down wherever it has got to, not where it got up -- which is
+         the whole point of giving it wings. */
+      if(b[i].ground)await clearGroundAt(i,t.owner);
+      b[i].ground=t.animGround;
+      log(CARDS[t.animGround.cardId].name+' lies back down at the '+CN[i]+
+        ': the Animator that woke it is gone.');
+    }else log(nm(t)+' lies back down: the Animator that woke it is gone.');
   }
 }
 async function resolveCombat(){
   if(!G)return;
   await flushDiscards();
   if(!G)return;
-  syncGrounds();
+  await syncGrounds();
   const ep=G.epoch;
   let guard=0;
   while(G&&!G.over){
@@ -11262,6 +11304,7 @@ function cloneBoard(b){
       defTemp2:c.teece.defTemp2||0,defTemp2Until:c.teece.defTemp2Until||0,
       baseTemp:c.teece.baseTemp?c.teece.baseTemp.slice():null,flyExtra:c.teece.flyExtra||0,
       immortalUntil:c.teece.immortalUntil||0,
+      animGround:c.teece.animGround?Object.assign({},c.teece.animGround):null,
       actUsedTurn:Object.assign({},c.teece.actUsedTurn),actUsedGame:Object.assign({},c.teece.actUsedGame)}):null,
     /* the Graveyard's roll of interred cards is an array: copy it, or a
        simulated board and the real one share one list */
@@ -12422,7 +12465,8 @@ function renderBoard(){
          only place the name appears once a Teece is on the board. Name and
          badges are stacked and centred together, so a name that takes three
          lines pushes the badges down instead of being sat on by them. */
-      const tnm=DEF(t).name, nmCls=tnm.length>15?'nm longer':(tnm.length>10?'nm long':'nm');
+      const tnm=t.animGround?CARDS[t.animGround.cardId].name:DEF(t).name;
+      const nmCls=tnm.length>15?'nm longer':(tnm.length>10?'nm long':'nm');
       tp.innerHTML=(bart?'<pre class="ascii" aria-hidden="true">'+bart.map(escHtml).join('\n')+'</pre>':'')+
         '<div class="mid"><div class="'+nmCls+'">'+tnm+'</div>'+
         (badges.length?'<div class="rgd">'+badges.join('')+'</div>':'')+'</div>'+
