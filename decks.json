@@ -599,6 +599,37 @@
         804
       ],
       "blurb": "Played out of the graveyard rather than into it. Almost every card does its work on the way OUT of your hand, and four of them let you throw themselves away whenever you like, so a discard is a move rather than a loss. Two cards catch discards before they land: a Pocket Dimension that hands them all back at the end of the turn, and a Library that shelves them as a wall."
+    },
+    "dimension": {
+      "name": "Dimension",
+      "cards": [
+        805,
+        806,
+        807,
+        808,
+        809,
+        810,
+        811,
+        812,
+        813,
+        814,
+        815,
+        816,
+        817,
+        818,
+        819,
+        820,
+        821,
+        822,
+        823,
+        824
+      ],
+      "blurb": "Eight of its twenty cards are battlegrounds, and the other twelve only mean anything standing on one. Two of them stack onto a battleground rather than replacing it, so the panel ends up saying several things at once — and a Dimension of Dimensions or a Warden makes ground nobody can take back off the board.",
+      "how": [
+        "Almost every body here reads the panel rather than itself: Native of Nowhere and Dimensional Anchor pay only on a battleground, and Riftwalker starts walking the moment anybody lays one.",
+        "Dimension of Dimensions is played ON another battleground: the two fold into one panel that cannot be replaced or destroyed, and it reaches one panel further out.",
+        "Black Hole Dimension eats every equip and every non-Boss Teece beside it and hands the lot back when it goes — and it goes on its own, at the start of your turn, once it holds three."
+      ]
     }
   },
   "formats": [
@@ -1065,6 +1096,26 @@
     801,
     802,
     803,
-    804
+    804,
+    805,
+    806,
+    807,
+    808,
+    809,
+    810,
+    811,
+    812,
+    813,
+    814,
+    815,
+    816,
+    817,
+    818,
+    819,
+    820,
+    821,
+    822,
+    823,
+    824
   ]
 }

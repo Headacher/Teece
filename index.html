@@ -143,6 +143,9 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="madness"],.dcard[data-card-deck="madness"]{--cardbg:#4a1d6b;--artink:#fdeaff;background:var(--cardbg);color:#f3e4fb;border-color:#2b0f40}
 .card[data-card-deck="madness"] .kwl,.dcard[data-card-deck="madness"] .dkw{color:#8ff0d0}
 .card[data-card-deck="madness"] .ct,.dcard[data-card-deck="madness"] .dty{color:#8ff0d0}
+.card[data-card-deck="dimension"],.dcard[data-card-deck="dimension"]{--cardbg:#252a78;--artink:#e6ecff;background:var(--cardbg);color:#e4e8fb;border-color:#141746}
+.card[data-card-deck="dimension"] .kwl,.dcard[data-card-deck="dimension"] .dkw{color:#8fe6f0}
+.card[data-card-deck="dimension"] .ct,.dcard[data-card-deck="dimension"] .dty{color:#8fe6f0}
 
 .card[data-card-deck]::after,.dcard[data-card-deck]::after{position:absolute;top:2px;right:3px;font-size:11px;line-height:1;opacity:.85;z-index:1}
 .card[data-card-deck="classic"]::after,.dcard[data-card-deck="classic"]::after{content:'🂡'}
@@ -166,6 +169,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="garbage"]::after,.dcard[data-card-deck="garbage"]::after{content:'🗑️'}
 .card[data-card-deck="apocalypse"]::after,.dcard[data-card-deck="apocalypse"]::after{content:'☄️'}
 .card[data-card-deck="madness"]::after,.dcard[data-card-deck="madness"]::after{content:'🌀'}
+.card[data-card-deck="dimension"]::after,.dcard[data-card-deck="dimension"]::after{content:'🌌'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -187,6 +191,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece[data-card-deck="garbage"]{--cardbg:#5a4634;--artink:#f6ecdd;background:var(--cardbg);color:#f2e7d8;border-color:#36281c}
 .teece[data-card-deck="apocalypse"]{--cardbg:#2b2a2e;--artink:#f4eee8;background:var(--cardbg);color:#ece6df;border-color:#161519}
 .teece[data-card-deck="madness"]{--cardbg:#4a1d6b;--artink:#fdeaff;background:var(--cardbg);color:#f3e4fb;border-color:#2b0f40}
+.teece[data-card-deck="dimension"]{--cardbg:#252a78;--artink:#e6ecff;background:var(--cardbg);color:#e4e8fb;border-color:#141746}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -697,7 +702,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:51,date:'2026-09-18'};
+const VERSION={build:52,date:'2026-09-21'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -779,7 +784,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -975,6 +980,33 @@ const CARD_ART={
   802:["   _~-~_     ","  ( o    ~-_ ","   \\  ~-_   )","    ~-_   _~ ","       ~-~   "],
   803:["      /\\     ","     /  \\    ","    /\\  /\\   ","   /  \\/  \\  ","  /________\\ "],
   804:["  |=|=|=|=|  ","  |=|=|=|=|  ","  ---------  ","  |=|=|=|=|  ","  |=|=|=|=|  "],
+  /* ---- Dimension: the battlegrounds are plans of a panel seen from above,
+         and the bodies are shapes that do not quite close ---- */
+  805:["  +--+ +--+  ","  |  \\/   |  ","  |  /\\   |  ","  +--+ +--+  ","   <-  ->    "],
+  806:["  \\  |  /    ","   \\ | /     ","  ---+---    ","   / | \\     ","  /  |  \\    "],
+  807:["   ~~~~~~~   ","  ( ~~~~~ )  ","  ((  o  ))  ","  ( ~~~~~ )  ","   ~~~~~~~   "],
+  808:["   /\\/\\/\\/   ","  < ~~~~~ >  ","   \\ *** /   ","  < ~~~~~ >  ","   /\\/\\/\\/   "],
+  809:["  +-------+  ","  | +---+ |  ","  | | + | |  ","  | +---+ |  ","  +-------+  "],
+  810:["    ......   ","  ,'+----+   ","  | |    |   ","  | +----+,  ","   ......    "],
+  811:["  +-+ +-+    ","  | | | | +-+","  +-+ +-+ | |","  +-+ +-+ +-+","  | | | |    "],
+  812:["   . ' | ' . ","  '  \\ | /  '","  -- ( @ ) --","  .  / | \\  .","   ' , | , ' "],
+  813:["   /|  .-.   ","  / | ( o )  ","  | | (/|\\)  ","  \\ |  / \\   ","   \\|   ' '  "],
+  814:["   .-. ' .   ","  ( x )  '   ","   (/|\\) .   ","   _/ \\_ '   ","  . ' . ' .  "],
+  815:["  [=] .-. [=]","   \\ ( $ ) / ","    ((/|\\))  ","    _/   \\_  ","  [=]     [=]"],
+  816:["   .-.       ","  ( o )      ","  (/|\\)      ","   /|\\       ","  =====#====="],
+  817:["  ||  .-.  ||","  || ( o ) ||","  || (/|\\) ||","  ||  / \\  ||","  ||       ||"],
+  818:["   .-.  +-+  ","  ( o ) | | >","  (/|\\) +-+  ","  _/ \\_  +-+ ","        >| | "],
+  819:["   .-.   _   ","  ( o )  /|  ","  (/|\\) [_]  ","  _/ \\_  |   ","  ~~~~~~~~~  "],
+  820:["  +---------+","  | .-.     |","  |( o )    |","  |(/|\\)    |","  +---------+"],
+  821:["  \\  .-.  /  ","   \\( o )/   ","    (/|\\)    ","   _/   \\_   ","  ###   ###  "],
+  822:["  +---+ .-.  ","  |o o| ( ' )","  | ^ | (/|\\)","  |___|  / \\ ","  /   \\      "],
+  823:["  + + + + +  ","   .-.       ","  ( O )      ","  (/|\\)      ","  + + + + +  "],
+  824:["  \\ | .-. | /","   \\|( @ )|/ ","  --((/|\\))--","   /| _ _ |\\ ","  / | | | | \\"],
+  "GRIFT":["   . ' . '   ","  '   ,   .  ","   . ( ) '   ","  '   `   .  ","   . ' . '   "],
+  "GLENT":["  +-------+  ","  |  + +  |  ","  |   +   |  ","  |  + +  |  ","  +-------+  "],
+  "GNASC":["   . - . -   ","  - +---+ .  ","  . |   | -  ","  - +---+ .  ","   . - . -   "],
+  "GFUSE":["  +=+=+=+=+  ","  |#|#|#|#|  ","  +=+=+=+=+  ","  |#|#|#|#|  ","  +=+=+=+=+  "],
+  "TANIM":["  +---------+","  | o     o |","  |    ^    |","  |  -----  |","  +--/   \\--+"],
   765:["    .---.    ","   ( o o )   ","  --| ~ |--  ","   _/   \\_   ","   o--+--o   "],
   766:["    .---.    ","   ( x x )   ","  --| ^ |--  ","   _/ | \\_   ","   /=====\\   "],
   767:["  . .---. .  ","   ( o o )   ","  --| x |--  ","   _/ : \\_   ","  : . : . :  "],
@@ -2959,6 +2991,78 @@ const CARDS = {
  804:{name:'Eldritch Library',type:'ground',gLib:true,gHeldDef:1,
     gact:[{name:'Tear down the Library',once:'turn',steps:[{fx:'breakGround'}]}],
     text:'Whenever a card would be discarded into a graveyard you may shelve it here instead. A Teece standing here has +1 Defence for every card shelved. While one of your Teece stands on it, once per your turn: tear it down, and every card shelved goes back to its owner’s hand.'},
+ /* ---- Dimension: eight battlegrounds and twelve bodies that only mean
+    anything standing on one. Everything here reads the panel rather than the
+    Teece, so the deck's whole game is deciding what the ground underneath is
+    saying — and a battleground laid by Dimension is rarely the last word on
+    its panel, because two of these stack onto one rather than replacing it. ---- */
+ 805:{name:'Dimension of Change',type:'ground',gFlipSides:true,
+    text:'A Teece on this battleground has every side swapped with the one opposite it: top with bottom, left with right.'},
+ 806:{name:'Dimension of Pain',type:'ground',gmod:-2,gStartMod:-2,
+    text:'A Teece on this battleground gets -2. When a Teece begins its turn on this battleground, it gets another -2 permanently.'},
+ 807:{name:'Dimension of Goo',type:'ground',gdef:3,gkw:['immovable'],gGoo:true,
+    text:'A Teece on this battleground cannot move or be moved, has +3 Defence, and is silenced the moment it arrives.'},
+ 808:{name:'Dimension of Energy',type:'ground',gSpellJar:true,
+    text:'A magic card played by either player is equipped to this instead of being cast. When this battleground goes, every spell on it is cast in the order it arrived, at targets nobody chooses.'},
+ 809:{name:'Dimension of Dimensions',type:'ground',gOnGround:true,gAnchor:true,gReach:true,gmod:2,
+    text:'Lay this on a panel that already has a battleground and it is equipped to that battleground rather than replacing it. Neither can then be replaced or destroyed. A Teece on it or beside it counts as standing on it, and gets +2.'},
+ 810:{name:'Extradimensional Plane of Matter',type:'ground',gAnchor:true,
+    gact:[{name:'Drift the Plane',once:'turn',steps:[{fx:'driftPlane'}]}],
+    text:'A slab of somewhere else. It cannot be replaced or destroyed. While one of your Teece stands on it, once per your turn: drift it to any other panel, carrying whatever stands on it.'},
+ 811:{name:'Dimension of Multiplicities',type:'ground',gDoubleBase:true,gFreeAct:{
+      name:'Collapse the Multiplicity',steps:[{fx:'price',hand:2},{fx:'discard',n:2,cost:true},{fx:'breakGround'}]},
+    text:'A Teece on this battleground has the numbers printed on its card doubled. Either player, on their turn: discard two cards and destroy this battleground.'},
+ 812:{name:'Black Hole Dimension',type:'ground',gBlackHole:true,
+    text:'When laid, and again at the start of your turn: every equip, and every Teece that is not a Boss, on this panel or beside it is equipped to this battleground — and if it then holds three or more, it is destroyed. When destroyed, all of them return to their owners’ hands.'},
+ 813:{name:'Riftwalker',type:'teece',sides:[3,7,9,7],
+    onGroundPlay:{kw:'teleport'},
+    text:'When a battleground is played, either side’s: this gains Teleport — once per your turn, move to any empty panel on the board.'},
+ 814:{name:'Collapsing Anomaly',type:'teece',sides:[0,9,0,0],
+    onDeath:[{fx:'toerrain',bg:'GRIFT'}],
+    text:'When destroyed: the panel it died on becomes a battleground that gives the next Teece played or moved onto it +9 until the end of the turn, and then falls apart.'},
+ 815:{name:'Plane Broker',type:'teece',sides:[6,6,6,6],
+    onPlay:[{fx:'brokerBG'}],
+    text:'When played: both players take a battleground into hand that gives a Teece standing on it +2.'},
+ 816:{name:'Dimensional Anchor',type:'teece',sides:[4,2,6,7],defOnGround:2,groundSilencer:true,
+    onPlay:[{fx:'anchorSilence',may:true}],
+    text:'While it stands on a battleground it has +2 Defence. When played onto a battleground: you may silence that battleground, and it stays silenced for as long as this Teece stands on it.'},
+ 817:{name:'Warden of the Threshold',type:'teece',sides:[9,1,1,9],
+    grantsOnGround:{gAnchor:true,gAdjMod:-2},
+    text:'While it stands on a battleground, that battleground cannot be replaced or destroyed, and every Teece on a panel beside it gets -2.'},
+ 818:{name:'Shifting Architect',type:'teece',sides:[6,6,6,6],
+    act:[{name:'Shift the plane',once:'turn',steps:[{fx:'terra'}]}],
+    text:'Shift the plane — once per your turn: select a battleground and move it to another panel.'},
+ 819:{name:'Plane Scavenger',type:'teece',sides:[2,2,9,4],
+    onPlay:[{fx:'bgFromGrave'}],
+    text:'When played: take a battleground out of either graveyard and into your hand.'},
+ 820:{name:'Native of Nowhere',type:'teece',sides:[5,5,5,5],onGroundMod:3,
+    text:'While it stands on a battleground it gets +3.'},
+ 821:{name:'Eldritch Terraformer',type:'teece',sides:[4,4,4,4],kw:['flying'],
+    onGroundBreak:{n:4,dur:'temp'},
+    act:[{name:'Unmake the ground',once:'turn',steps:[{fx:'breakAnyGround'},{fx:'mod',who:'self',n:2,dur:'perm'}]}],
+    text:'Flying: once per your turn, move one space. Whenever any battleground is replaced or destroyed: +4 until the end of the turn. Unmake the ground — once per your turn: destroy a battleground, and this gets +2 permanently.'},
+ 822:{name:'Terrain Animator',type:'teece',sides:[1,1,1,1],
+    act:[{name:'Animate the terrain',once:'game',steps:[{fx:'animate'}]}],
+    text:'Animate the terrain — once a game: select a battleground with nothing on it; it stands up as a 9/9/9/9 Teece that flies, and lies back down when Terrain Animator leaves the field.'},
+ 823:{name:'Worldshaper',type:'teece',sides:[8,8,8,8],sac:1,
+    onPlay:[{fx:'seedPlanes'}],
+    text:'Sacrifice one fielded Teece to play. When played: every panel without a battleground gets one that gives a Teece standing on it +1 for every battleground on the field.'},
+ 824:{name:'That Which Unfolds',type:'teece',sides:[9,11,10,9],sac:2,
+    onPlay:[{fx:'fuseGrounds'}],
+    text:'Sacrifice two fielded Teece to play. When played: every battleground on the field folds into one carrying all of their effects at once, laid under this Teece.'},
+ /* Dimension's four made things: none of them is drafted, and none of them is
+    drawn. Three are battlegrounds another card lays or hands over, and the
+    fourth is a panel that stood up. */
+ 'GRIFT':{name:'Fading Rift',type:'ground',token:true,deck:'dimension',gArrive:9,
+    text:'The next Teece played or moved onto this panel gets +9 until the end of the turn, and then this falls apart.'},
+ 'GLENT':{name:'Borrowed Dimension',type:'ground',token:true,deck:'dimension',gmod:2,
+    text:'A Teece on this battleground gets +2.'},
+ 'GNASC':{name:'Nascent Dimension',type:'ground',token:true,deck:'dimension',gPerGround:1,
+    text:'A Teece on this battleground gets +1 for every battleground on the field.'},
+ 'GFUSE':{name:'The Folded Dimension',type:'ground',token:true,deck:'dimension',
+    text:'Every battleground folded into this one still speaks from underneath it.'},
+ 'TANIM':{name:'Animated Terrain',type:'teece',token:true,deck:'dimension',sides:[9,9,9,9],kw:['flying'],
+    text:'A battleground that stood up. Flying: once per your turn, move one space. It lies back down when the Terrain Animator that woke it leaves the field.'},
  /* Not in any deck: Cannonball is handed out by a roguelike perk. */
  590:{name:'Cannonball',type:'magic',perkOnly:true,
     text:'Select a Teece and one of its sides; that side gets -4.',
@@ -3254,11 +3358,42 @@ const sidesLine=s=>
 const sidesBlock=s=>'<span class="sdia"><i class="t">'+s[0]+'</i><i class="l">'+s[3]+
   '</i><i class="r">'+s[1]+'</i><i class="b">'+s[2]+'</i></span>';
 const SIDE_NAMES=['top','right','bottom','left'];
+/* Every card speaking for one battleground. Normally that is the one card it
+   was laid from, but a Dimension of Dimensions equipped onto a battleground and
+   a whole field folded into one by That Which Unfolds both stack their ids in
+   `fuse`, and from then on the panel says everything all of them say. Reading
+   the stack in one place is what keeps effSides, groundFlag, kwOf and defOf
+   from each having to know that a battleground can be more than one card. */
+function gcards(g){
+  if(!g)return [];
+  const out=[];
+  const own=CARDS[g.cardId];
+  if(own)out.push(own);
+  for(const id of (g.fuse||[])){const c=CARDS[id];if(c)out.push(c);}
+  return out;
+}
 function groundFlag(g,key){
   if(!g)return false;
+  /* A Dimensional Anchor standing on it has shut it up: it says nothing at all
+     until that Teece walks off or dies. */
+  if(g.gsil)return false;
   if(g[key])return true;
-  const gd=CARDS[g.cardId];
-  return !!(gd&&gd[key]);
+  return gcards(g).some(gd=>gd[key]);
+}
+/* Anchored ground cannot be replaced or destroyed. The flag rides the stack,
+   so a Dimension of Dimensions equipped onto a Swamp anchors the Swamp; the
+   Warden of the Threshold lends the same thing while it stands. */
+function groundAnchored(b,i){
+  const g=b[i].ground;
+  if(!g)return false;
+  if(groundFlag(g,'gAnchor'))return true;
+  for(let j=0;j<BN;j++){
+    const t=b[j].teece;
+    if(!t||t.silenced)continue;
+    const go=DEF(t).grantsOnGround;
+    if(go&&go.gAnchor&&b[j].ground&&(g.gid?b[j].ground.gid===g.gid:j===i))return true;
+  }
+  return false;
 }
 function modalCtl(p,cell){
   let all=false,times=1,off=false;
@@ -4178,9 +4313,14 @@ function effSides(b,i,parts){
      whatever handicap the Token was made with. Shrink still wins: a replaced
      base is the printed line for the turn, and the swell has nothing to lift. */
   const swell=(t.cardId==='TSP'&&!t.baseTemp&&webBrood(b)&&isWebbed(b,i))?8:0;
-  for(let k=0;k<4;k++)s[k]=Math.max(0,bs[k]+swell)+t.perm[k]+t.temp[k]+((t.temp2&&t.temp2[k])||0);
+  /* The Dimension of Multiplicities doubles what the card was PRINTED with.
+     Everything stacked on top of that is added afterwards at face value, so
+     the ground pays a Boss far more than it pays a Grunt with three equips. */
+  const dblBase=groundFlag(b[i].ground,'gDoubleBase')?2:1;
+  for(let k=0;k<4;k++)s[k]=Math.max(0,bs[k]*dblBase+swell)+t.perm[k]+t.temp[k]+((t.temp2&&t.temp2[k])||0);
   if(parts){
-    parts.push({label:t.baseTemp?'Printed, replaced for the turn':'Printed',amt:bs.slice(),base:true});
+    parts.push({label:t.baseTemp?'Printed, replaced for the turn':dblBase>1?'Printed, doubled by the ground':'Printed',
+      amt:bs.map(v=>v*dblBase),base:true});
     put('Permanent',t.perm);
     put('Until the end of this turn',t.temp);
     if(t.temp2)put('Until the end of your next turn',t.temp2);
@@ -4274,27 +4414,63 @@ function effSides(b,i,parts){
     const mix=mixBonus(b,i);
     if(mix)addMod(s,mix,'Motley Band, one for each other deck standing with it');
   }
-  if(b[i].ground){
-    const gd=CARDS[b[i].ground.cardId];
-    addMod(s,gd.gmod,gd.name+', the ground here');
-    if(gd.gStand&&t.standCell===i)addMod(s,gd.gStand,gd.name+', for standing still');
-    if(b[i].ground.gmod!=null)addMod(s,b[i].ground.gmod,gd.name+', the ground here');
-    if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addMod(s,gd.gRangedPlus,gd.name+', for being Ranged');
-    /* The Dumpster pays for what is packed into it, and the Patch for a row
-       held end to end. */
-    if(gd.gHeldPer&&b[i].ground.held&&b[i].ground.held.length)
-      addMod(s,Math.floor(b[i].ground.held.length/(gd.gHeldPer.per||1))*gd.gHeldPer.n,
-        gd.name+', for the '+b[i].ground.held.length+' cards packed into it');
-    if(gd.gGarbageFull&&patchFull(b,i))addMod(s,gd.gGarbageFull,gd.name+', filled end to end');
-    /* A battleground that pays one side by day and charges the other by
-       night. Ally and enemy are read against whoever laid it. */
-    for(const pm of (gd.gPhaseMod||[])){
-      if(!phaseIs(pm.when))continue;
-      const gally=sameTeam(t.owner,b[i].ground.owner);
-      if(pm.who==='ally'&&!gally)continue;
-      if(pm.who==='enemy'&&gally)continue;
-      addMod(s,pm.n,gd.name+(pm.when==='night'?', by night':', by day'));
+  /* Which battlegrounds this Teece is standing on, as far as numbers go.
+     Usually only its own panel's -- but a Dimension of Dimensions beside it
+     counts it as standing there too, so it takes the whole of that stack. */
+  const gpans=[];
+  if(b[i].ground&&!b[i].ground.gsil)gpans.push(i);
+  for(const j of ADJ[i]){
+    const og=b[j].ground;
+    if(!og||og.gsil||!groundFlag(og,'gReach'))continue;
+    if(gpans.some(x=>b[x].ground&&(og.gid?b[x].ground.gid===og.gid:x===j)))continue;
+    gpans.push(j);
+  }
+  for(const gi of gpans){
+    const gg=b[gi].ground;
+    const where=gi===i?', the ground here':', reaching over from the '+CN[gi];
+    if(gg.gmod!=null)addMod(s,gg.gmod,CARDS[gg.cardId].name+where);
+    for(const gd of gcards(gg)){
+      addMod(s,gd.gmod,gd.name+where);
+      if(gd.gStand&&t.standCell===gi)addMod(s,gd.gStand,gd.name+', for standing still');
+      if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addMod(s,gd.gRangedPlus,gd.name+', for being Ranged');
+      /* The Dumpster pays for what is packed into it, and the Patch for a row
+         held end to end. */
+      if(gd.gHeldPer&&gg.held&&gg.held.length)
+        addMod(s,Math.floor(gg.held.length/(gd.gHeldPer.per||1))*gd.gHeldPer.n,
+          gd.name+', for the '+gg.held.length+' cards packed into it');
+      if(gd.gGarbageFull&&patchFull(b,gi))addMod(s,gd.gGarbageFull,gd.name+', filled end to end');
+      if(gd.gPerGround){
+        const n=countGrounds(b);
+        if(n)addMod(s,gd.gPerGround*n,gd.name+', one for each of the '+n+' battleground'+(n===1?'':'s')+' on the field');
+      }
+      /* A battleground that pays one side by day and charges the other by
+         night. Ally and enemy are read against whoever laid it. */
+      for(const pm of (gd.gPhaseMod||[])){
+        if(!phaseIs(pm.when))continue;
+        const gally=sameTeam(t.owner,gg.owner);
+        if(pm.who==='ally'&&!gally)continue;
+        if(pm.who==='enemy'&&gally)continue;
+        addMod(s,pm.n,gd.name+(pm.when==='night'?', by night':', by day'));
+      }
     }
+  }
+  /* Read off the panel rather than off the gpans list: what pays a Native of
+     Nowhere is standing on a battleground at all, so a battleground held shut
+     by an Anchor still counts as one to stand on. */
+  if(b[i].ground&&DEF(t).onGroundMod&&!t.silenced)
+    addMod(s,DEF(t).onGroundMod,DEF(t).name+', at home on a battleground');
+  /* A battleground that reaches out at whatever is standing beside it, rather
+     than at what stands on it. Counted once per battleground, not once per
+     panel, so a wide one does not charge the same Teece twice. */
+  const seenAdjG=[];
+  for(const j of ADJ[i]){
+    const og=b[j].ground;
+    if(!og)continue;
+    const key=og.gid!=null?'g'+og.gid:'c'+j;
+    if(seenAdjG.indexOf(key)>=0)continue;
+    seenAdjG.push(key);
+    const n=groundAdjMod(b,j);
+    if(n)addMod(s,n,CARDS[og.cardId].name+' at the '+CN[j]+', reaching out at what stands beside it');
   }
   /* The panel itself is burning. Not a penalty applied to the Teece -- it is
      the ground it is standing on, so Steadfast does not save it and walking out
@@ -4333,7 +4509,43 @@ function effSides(b,i,parts){
   if(parts&&selfDbl)parts.push({label:DEF(t).selfDoublePos
     ?'Every positive effect on it counts double'
     :'The ground here doubles every positive effect',note:true});
+  /* Last of all, because the Dimension of Change turns the finished numbers
+     round rather than the printed ones: whatever the Teece ended up with on
+     its top is what ends up on its bottom. */
+  if(groundFlag(b[i].ground,'gFlipSides')){
+    const f=[s[2],s[3],s[0],s[1]];
+    for(let k=0;k<4;k++)s[k]=f[k];
+    if(parts)parts.push({label:'The Dimension of Change swaps every side with the one opposite it',note:true});
+  }
   return s;
+}
+/* How many battlegrounds are on the field -- battlegrounds, not panels, so one
+   laid across four panels is one. */
+function countGrounds(b){
+  const seen=[];
+  for(let i=0;i<BN;i++){
+    const g=b[i].ground;if(!g)continue;
+    const key=g.gid!=null?'g'+g.gid:'c'+i;
+    if(seen.indexOf(key)<0)seen.push(key);
+  }
+  return seen.length;
+}
+/* What the battleground at panel j charges whatever is standing NEXT to it:
+   its own printed reach, plus anything a Teece standing on it is lending. */
+function groundAdjMod(b,j){
+  const g=b[j].ground;
+  if(!g||g.gsil)return 0;
+  let n=0;
+  for(const gd of gcards(g))if(gd.gAdjMod)n+=gd.gAdjMod;
+  for(let k=0;k<BN;k++){
+    const t=b[k].teece;
+    if(!t||t.silenced)continue;
+    const go=DEF(t).grantsOnGround;
+    if(!go||!go.gAdjMod)continue;
+    const og=b[k].ground;
+    if(og&&(g.gid?og.gid===g.gid:k===j))n+=go.gAdjMod;
+  }
+  return n;
 }
 /* The panel readout's account of how a Teece reached the numbers it is showing:
    every contribution effSides applied, in the order it applied them. */
@@ -4357,14 +4569,19 @@ function defOf(b,i){
     if(g&&g.markDef)d+=g.markDef*(t.graveMarks||0);
     if(g&&g.defWhen){const dw=phasePick(g.defWhen);if(dw)d+=dw;}
   }
-  if(b[i].ground){
-    const gd=CARDS[b[i].ground.cardId];
-    if(gd.gdef)d+=gd.gdef;
-    /* The Eldritch Library is a wall made of what you threw away. */
-    if(gd.gHeldDef&&b[i].ground.held)d+=gd.gHeldDef*b[i].ground.held.length;
-    /* the Bunker is worth holding with somebody: a second wall for a neighbour */
-    if(gd.gdefAdjAlly&&hasAllyAdj(b,i))d+=gd.gdefAdjAlly;
+  if(b[i].ground&&!b[i].ground.gsil){
+    for(const gd of gcards(b[i].ground)){
+      if(gd.gdef)d+=gd.gdef;
+      /* The Eldritch Library is a wall made of what you threw away. */
+      if(gd.gHeldDef&&b[i].ground.held)d+=gd.gHeldDef*b[i].ground.held.length;
+      /* the Bunker is worth holding with somebody: a second wall for a neighbour */
+      if(gd.gdefAdjAlly&&hasAllyAdj(b,i))d+=gd.gdefAdjAlly;
+    }
   }
+  /* Standing on a battleground at all, whatever that battleground is saying.
+     The Dimensional Anchor earns this off the ground it is holding shut, so it
+     is read outside the silence test rather than inside it. */
+  if(b[i].ground&&DEF(t).defOnGround&&!t.silenced)d+=DEF(t).defOnGround;
   if(b[i].defMark&&b.some(c=>c.teece&&c.teece.uid===b[i].defMark.uid))d+=b[i].defMark.n;
   if(sameTeam(t.owner,0))d+=perkN('armour');
   const fdf=formOf(t);
@@ -4419,7 +4636,8 @@ function kwOf(b,i,noGround){
     if(g&&g.kw)ks.push(...g.kw);
     if(g&&g.kwWhen){const kw=phasePick(g.kwWhen);if(kw)ks.push(...kw);}
   }
-  if(b[i].ground&&!noGround){const gd=CARDS[b[i].ground.cardId];if(gd.gkw)ks.push(...gd.gkw);}
+  if(b[i].ground&&!noGround&&!b[i].ground.gsil)
+    for(const gd of gcards(b[i].ground))if(gd.gkw)ks.push(...gd.gkw);
   /* a keyword held only while the formation holds: Medic Cedric cannot be
      targeted for exactly as long as somebody is standing with it */
   if(!t.silenced&&d.kwWhen)
@@ -4449,7 +4667,7 @@ const hasKw=(b,i,k)=>kwOf(b,i).indexOf(k)>=0;
 /* A panel a Teece may be played onto or moved onto: empty, not razed, and not
    a battleground that refuses arrivals. A Teece already standing on one when it
    was laid stays put; what is shut is the way in. */
-const blockedGround=(b,i)=>!!(b[i].ground&&CARDS[b[i].ground.cardId].gNoEntry);
+const blockedGround=(b,i)=>groundFlag(b[i].ground,'gNoEntry');
 const openAt=(b,i)=>!b[i].teece&&!b[i].razed&&!blockedGround(b,i);
 function actsOf(b,i){
   const t=b[i].teece; if(!t)return[];
@@ -4483,8 +4701,9 @@ function actsOf(b,i){
   if(t.drainMove)out.push({key:'kdrainstep',act:DRAIN_STEP_ACT});
   if(t.stepOwed>0)out.push({key:'kowedstep',act:OWED_STEP_ACT});
   if(hasKw(b,i,'teleport'))out.push({key:'ktele',act:TELE_ACT});
-  if(b[i].ground){const gd=CARDS[b[i].ground.cardId];
-    if(gd.gact)gd.gact.forEach((a,x)=>{if(phaseIs(a.when))out.push({key:'g'+b[i].ground.cardId+'_'+x,act:a});});}
+  if(b[i].ground&&!b[i].ground.gsil)
+    for(const gd of gcards(b[i].ground))
+      if(gd.gact)gd.gact.forEach((a,x)=>{if(phaseIs(a.when))out.push({key:'g'+gd.name+'_'+x,act:a});});
   return out;
 }
 /* A Teece silenced by Silencer keeps none of its own acts in actsOf, so the
@@ -4533,6 +4752,14 @@ function actAvailable(t,ent){
 /* ============ board entry (mines) ============ */
 function putTeece(b,i,t,live){
   b[i].teece=t;
+  /* A Fading Rift pays the first thing to arrive on it and then is gone. It is
+     a made card, so nothing buries it -- it simply stops being there. */
+  if(groundFlag(b[i].ground,'gArrive')){
+    const g=b[i].ground,n=CARDS[g.cardId].gArrive;
+    b[i].ground=null;
+    for(let k=0;k<4;k++)t.temp[k]+=n;
+    if(live)log(nm(t)+' arrives through the Fading Rift: '+sgn(n)+' until the end of the turn, and the rift closes behind it.');
+  }
   /* The enchantment is spent by the first ally to arrive, however it arrives:
      played onto it or moved onto it. A straight bonus -- it does not silence
      what walks into it, so the Teece keeps everything it came with. */
@@ -4789,8 +5016,14 @@ function showBoard(){
   if(r.top>=0&&r.bottom<=window.innerHeight)return;
   row.scrollIntoView({block:'center',behavior:'smooth'});
 }
+/* A spell nobody is aiming. The Dimension of Energy lets go of everything it
+   swallowed at once, and the card says the targets are random -- so for the
+   length of that cast every question the spells ask answers itself out of a
+   hat, for a human seat exactly as for a computer one. */
 function chooseCell(p,cells,msg,opt){
   opt=opt||{};
+  if(G&&G.blindCast&&cells&&cells.length)
+    return Promise.resolve(markTargetDeath(cells[Math.floor(Math.random()*cells.length)]));
   if(isAIP(p)||!HAS_DOM){
     return Promise.resolve(aiPickCell(cells,opt,p)).then(markTargetDeath);
   }
@@ -4799,6 +5032,8 @@ function chooseCell(p,cells,msg,opt){
     res:v=>res(markTargetDeath(v))};render();showBoard();});
 }
 function chooseOption(p,opts,msg,cancel){
+  if(G&&G.blindCast&&opts&&opts.length)
+    return Promise.resolve(opts[Math.floor(Math.random()*opts.length)].v);
   if(isAIP(p)||!HAS_DOM){
     return Promise.resolve(aiPickOpt(opts));
   }
@@ -5448,8 +5683,8 @@ async function FXRUN(st,ctx){
     return;}
   case 'quake':{
     const cands=[];
-    for(let i=0;i<BN;i++)if(b[i].ground)cands.push(i);
-    if(!cands.length)return none('No battleground in play.');
+    for(let i=0;i<BN;i++)if(b[i].ground&&!groundAnchored(b,i))cands.push(i);
+    if(!cands.length)return none('No battleground in play that can be destroyed.');
     const c=await pickCell(cands,'Choose a battleground to destroy.',
       (bb,i)=>{bb[i].ground=null;},false);
     if(c==='CANCEL')return 'ABORT';
@@ -5470,14 +5705,140 @@ async function FXRUN(st,ctx){
     const c=await pickCell(cands,'Choose a battleground to move.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
-    const dests=[];for(let i=0;i<BN;i++)if(i!==c)dests.push(i);
+    const dests=[];for(let i=0;i<BN;i++)if(i!==c&&!(b[i].ground&&groundAnchored(b,i)))dests.push(i);
+    if(!dests.length)return none('Nowhere to move it to.');
     const dst=await chooseCell(p,dests,'Choose its new panel.',{skip:true,mut:(bb,j)=>{
       if(bb[j].ground)bb[j].ground=null; bb[j].ground=bb[c].ground; bb[c].ground=null;}});
     if(dst==null||dst==='CANCEL')return;
-    if(G.board[dst].ground){const old=G.board[dst].ground;G.players[old.owner].grave.push(old.cardId);
+    if(G.board[dst].ground){const old=G.board[dst].ground;
+      if(!CARDS[old.cardId].token)G.players[old.owner].grave.push(old.cardId);
       log(CARDS[old.cardId].name+' is buried.');}
     G.board[dst].ground=G.board[c].ground;G.board[c].ground=null;
     log(CARDS[G.board[dst].ground.cardId].name+' shifts to the '+CN[dst]+'.');
+    return;}
+  /* ---- Dimension: eight ways of arguing with the panel underneath ---- */
+  /* The Plane of Matter is not really part of the field, so it goes where it
+     likes -- and takes whoever is standing on it along. */
+  case 'driftPlane':{
+    const i=ctx.cell,g=i!=null?b[i].ground:null;
+    if(!g)return none('There is no plane here to drift.');
+    let span=0;
+    for(let j=0;j<BN;j++)if(b[j].ground&&(g.gid?b[j].ground.gid===g.gid:j===i))span++;
+    if(span>1)return none(CARDS[g.cardId].name+' lies across too many panels to drift.');
+    const rider=b[i].teece;
+    const dests=[];
+    for(let j=0;j<BN;j++){
+      if(j===i||b[j].razed)continue;
+      if(b[j].ground&&groundAnchored(b,j))continue;
+      if(rider&&b[j].teece)continue;
+      dests.push(j);
+    }
+    if(!dests.length)return none('Nowhere for the plane to drift to.');
+    const dst=await pickCell(dests,'Drift '+CARDS[g.cardId].name+' to another panel.',
+      (bb,j)=>{if(bb[j].ground)bb[j].ground=null;bb[j].ground=bb[i].ground;bb[i].ground=null;
+               if(bb[i].teece)moveT(bb,i,j,false);},false);
+    if(dst==='CANCEL')return 'ABORT';
+    if(dst==null)return;
+    if(b[dst].ground)await clearGroundAt(dst,p);
+    b[dst].ground=g;b[i].ground=null;
+    if(rider&&!b[dst].teece)moveT(b,i,dst,true);
+    log(CARDS[g.cardId].name+' drifts to the '+CN[dst]+(rider?', carrying '+nm(rider)+' with it.':'.'));
+    if(rider)await fireMove(i,dst,p);
+    return;}
+  /* A dimension sold to both sides at once. */
+  case 'brokerBG':{
+    for(let q=0;q<PLAYERS();q++)handPush(q,'GLENT');
+    log(pname(p)+' brokers a dimension: every player takes a Borrowed Dimension into hand.');
+    return;}
+  case 'anchorSilence':{
+    const i=ctx.cell,t=ctx.t;
+    if(i==null||!b[i].ground||!t)return none('It did not land on a battleground.');
+    const gnm=CARDS[b[i].ground.cardId].name;
+    if(st.may){
+      const pick=await chooseOption(p,[
+        {v:'y',lbl:'Hold '+gnm+' shut while the Anchor stands'},
+        {v:'n',lbl:'Leave the ground saying what it says'}],'Dimensional Anchor:');
+      if(pick!=='y')return;
+    }
+    t.silencingGround=true;
+    log(nm(t)+' drives into '+gnm+' and holds it shut.');
+    return;}
+  case 'bgFromGrave':{
+    const opts=[];
+    for(let q=0;q<PLAYERS();q++)
+      G.players[q].grave.forEach((cid,x)=>{
+        if(CARDS[cid]&&CARDS[cid].type==='ground')
+          opts.push({v:q+':'+x,lbl:CARDS[cid].name+' — out of '+pposs(q)+' graveyard',cid});
+      });
+    if(!opts.length)return none('There is no battleground in any graveyard.');
+    const pick=await chooseOption(p,opts,'Take which battleground into hand?');
+    if(pick==null)return;
+    const q=parseInt(pick.split(':')[0],10),x=parseInt(pick.split(':')[1],10);
+    const cid=G.players[q].grave.splice(x,1)[0];
+    handPush(p,cid);
+    log(pname(p)+' digs '+CARDS[cid].name+' out of '+pposs(q)+' graveyard.');
+    return;}
+  case 'breakAnyGround':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].ground&&!groundAnchored(b,i))cands.push(i);
+    if(!cands.length)return none('There is no battleground that can be destroyed.');
+    const c=await pickCell(cands,'Choose a battleground to destroy.',(bb,i)=>{bb[i].ground=null;},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null||!b[c].ground)return;
+    log(CARDS[b[c].ground.cardId].name+' is unmade.');
+    await clearGroundAt(c,p);
+    return;}
+  /* The panel gets up. It is a Token, so it never wins anybody the game, and
+     it is tied to the Animator by uid -- syncGrounds puts it back down the
+     moment that body is no longer on the field. */
+  case 'animate':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].ground&&!b[i].teece&&!b[i].razed)cands.push(i);
+    if(!cands.length)return none('There is no battleground standing empty to wake.');
+    const c=await pickCell(cands,'Wake which battleground?',
+      (bb,i)=>{putTeece(bb,i,makeTeece('TANIM',p),false);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const gnm=b[c].ground?CARDS[b[c].ground.cardId].name:'The ground';
+    const tk=makeTeece('TANIM',p);
+    tk.animBy=ctx.t?ctx.t.uid:null;
+    putTeece(b,c,tk,true);
+    log(gnm+' at the '+CN[c]+' pulls itself up and stands: 9 on every side, and it flies.');
+    return;}
+  case 'seedPlanes':{
+    let n=0;
+    for(let i=0;i<BN;i++){
+      if(b[i].ground||b[i].razed)continue;
+      b[i].ground={cardId:'GNASC',owner:p,gid:G.groundSeq++};
+      n++;
+    }
+    if(!n)return none('Every panel already has a battleground.');
+    log(pname(p)+' seeds '+n+' bare panel'+(n===1?'':'s')+' with a Nascent Dimension.');
+    return;}
+  /* Not destroyed and not replaced: folded. Nothing is buried, nothing the
+     folded grounds were holding is spilled, and the one panel left speaks with
+     all of their voices at once. */
+  case 'fuseGrounds':{
+    const i=ctx.cell;
+    if(i==null||!b[i])return none('There is nowhere to lay the folded dimension.');
+    const ids=[],seen=[],held=[],spells=[];
+    for(let j=0;j<BN;j++){
+      const g=b[j].ground;if(!g)continue;
+      const key=g.gid!=null?'g'+g.gid:'c'+j;
+      if(seen.indexOf(key)>=0)continue;
+      seen.push(key);
+      for(const cid of [g.cardId].concat(g.fuse||[]))if(ids.indexOf(cid)<0)ids.push(cid);
+      held.push(...(g.held||[]));
+      spells.push(...(g.spells||[]));
+    }
+    if(!ids.length)return none('There is no battleground on the field to fold.');
+    for(let j=0;j<BN;j++)b[j].ground=null;
+    const fold={cardId:'GFUSE',owner:p,gid:G.groundSeq++,fuse:ids};
+    if(held.length)fold.held=held;
+    if(spells.length)fold.spells=spells;
+    b[i].ground=fold;
+    log('Every battleground on the field folds into one at the '+CN[i]+': '+
+      ids.map(c=>CARDS[c].name).join(', ')+'.');
     return;}
   case 'kwT':{
     const cands=[];
@@ -8743,10 +9104,51 @@ async function processDeath(d){
   const bg=G.board[cell]&&G.board[cell].ground;
   if(bg&&groundFlag(bg,'gBone')&&!t.isToken)addBone(bg,true,nm(t)+' was destroyed on it');
 }
+/* Three standing arrangements that have to be true again after ANY change to
+   the board, and that nothing can be relied on to announce: a Teece that has
+   found its way onto the Goo, a battleground that is or is no longer shut up by
+   the Dimensional Anchor standing on it, and terrain still standing because the
+   Animator that woke it is still there. Swept rather than hooked, because
+   every one of them can be brought about by something that never touched the
+   card responsible -- a battleground laid underneath, an equip destroyed, a
+   Teece shoved one space by somebody else's card. */
+function syncGrounds(){
+  if(!G||!G.board)return;
+  const b=G.board;
+  for(let i=0;i<BN;i++){
+    const g=b[i].ground;
+    if(!g)continue;
+    let sil=false;
+    for(let j=0;j<BN;j++){
+      const t=b[j].teece;
+      if(!t||!t.silencingGround||t.silenced)continue;
+      if(b[j].ground&&(g.gid?b[j].ground.gid===g.gid:j===i)){sil=true;break;}
+    }
+    if(sil&&!g.gsil)log(CARDS[g.cardId].name+' at the '+CN[i]+' falls silent under the Anchor.');
+    else if(!sil&&g.gsil)log(CARDS[g.cardId].name+' at the '+CN[i]+' speaks again.');
+    g.gsil=sil||undefined;
+  }
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(!t)continue;
+    /* The Goo takes a Teece's voice on arrival and never gives it back, the
+       way every other silence in the game works. Walking out of it later does
+       not undo it. */
+    if(!t.silenced&&groundFlag(b[i].ground,'gGoo')){
+      t.silenced=true;
+      log(nm(t)+' sinks into the Goo and is silenced.');
+    }
+    if(t.animBy!=null&&!b.some(c=>c.teece&&c.teece.uid===t.animBy)){
+      b[i].teece=null;
+      log(nm(t)+' lies back down: the Animator that woke it is gone.');
+    }
+  }
+}
 async function resolveCombat(){
   if(!G)return;
   await flushDiscards();
   if(!G)return;
+  syncGrounds();
   const ep=G.epoch;
   let guard=0;
   while(G&&!G.over){
@@ -9456,6 +9858,13 @@ function groundCells(anchor,shape){
 async function clearGroundAt(i,breaker){
   const b=G.board,g=b[i].ground;
   if(!g)return;
+  /* Anchored ground does not come up, however it is being pulled at. Said here
+     rather than at each of the dozen places that break ground, so nothing gets
+     to be the exception. */
+  if(groundAnchored(b,i)){
+    log(CARDS[g.cardId].name+' at the '+CN[i]+' holds: it cannot be replaced or destroyed.');
+    return;
+  }
   const gd=CARDS[g.cardId];
   const cells=[];
   for(let j=0;j<BN;j++)if(b[j].ground&&(g.gid?b[j].ground.gid===g.gid:j===i))cells.push(j);
@@ -9477,7 +9886,30 @@ async function clearGroundAt(i,breaker){
       log(CARDS[held.cardId].name+' returns from '+gd.name+' to '+pname(held.owner)+"'s hand.");
     }
   }
-  toGrave(g.owner,g.cardId);
+  /* A made battleground is not a card anybody owns, so nothing buries it. The
+     stack goes down with the panel: a Dimension of Dimensions equipped onto
+     another battleground is buried alongside it. */
+  if(!gd.token)toGrave(g.owner,g.cardId);
+  for(const fid of (g.fuse||[]))if(!CARDS[fid].token)toGrave(g.owner,fid);
+  /* Somebody is fed by the unmaking itself, wherever on the board it happened
+     and whoever did it. */
+  for(let j=0;j<BN;j++){
+    const w=b[j].teece;
+    if(!w||w.silenced)continue;
+    const ob=DEF(w).onGroundBreak;
+    if(!ob)continue;
+    applyModT(w,ob.n,ob.dur||'temp');
+    log(nm(w)+' drinks the unmaking of '+gd.name+': '+sgn(ob.n)+durTxt(ob.dur||'temp')+'.');
+  }
+  /* Everything the Dimension of Energy swallowed goes off at once, in the
+     order it came in, with nobody aiming any of it. */
+  if(gd.gSpellJar&&(g.spells||[]).length){
+    log('The Dimension of Energy lets go: '+g.spells.length+' spell'+(g.spells.length===1?'':'s')+' discharge at random.');
+    const was=G.blindCast;
+    G.blindCast=true;
+    try{ for(const sp of g.spells)await castCard(sp.owner,sp.cardId); }
+    finally{ G.blindCast=was; }
+  }
   if(gd.gDiscardOnBreak&&breaker!=null&&breaker!==g.owner){
     log(pname(breaker)+' broke '+gd.name+' and must discard '+gd.gDiscardOnBreak+'.');
     await runSteps([{fx:'discard',n:gd.gDiscardOnBreak}],{p:breaker,first:false});
@@ -9508,13 +9940,36 @@ async function playGround(p,handIdx){
     shape=pick;
   }
   const cands=[];
-  for(let i=0;i<BN;i++)if(groundCells(i,shape))cands.push(i);
+  for(let i=0;i<BN;i++){
+    const cs=groundCells(i,shape);
+    if(!cs)continue;
+    /* Ground that cannot be replaced is nowhere to lay another battleground --
+       unless this is the one written to go on top of one rather than over it. */
+    if(!d.gOnGround&&cs.some(j=>b[j].ground&&groundAnchored(b,j)))continue;
+    cands.push(i);
+  }
   if(!cands.length){toast('No room for it.');return false;}
   const c=await chooseCell(p,cands,'Choose where '+d.name+' goes.',
     {cancel:true,mut:(bb,i)=>{for(const j of groundCells(i,shape))bb[j].ground=Object.assign({cardId:id,owner:p},gmode||{});},
      foot:i=>groundCells(i,shape)});
   if(c==null||c==='CANCEL')return false;
   handTake(p,handIdx);
+  /* A Dimension of Dimensions laid over a battleground is equipped to it
+     instead of burying it: from here on the panel says everything both cards
+     say, and nothing can take either of them off it. */
+  if(d.gOnGround&&b[c].ground){
+    const host=b[c].ground,hid=host.gid;
+    for(let j=0;j<BN;j++){
+      const hg=b[j].ground;
+      if(hg&&(hid?hg.gid===hid:j===c))hg.fuse=(hg.fuse||[]).concat([id]);
+    }
+    log(pname(p)+' folds '+d.name+' onto '+CARDS[host.cardId].name+' at the '+CN[c]+
+      ': the two are one panel now, and neither can be replaced or destroyed.');
+    await fireGroundPlay(p,id,c);
+    await resolveCombat();
+    render();
+    return true;
+  }
   const cells=groundCells(c,shape);
   const cleared=[];
   for(const j of cells){
@@ -9551,9 +10006,54 @@ async function playGround(p,handIdx){
     log(n?n+' card'+(n===1?'':'s')+' out of the graveyard '+(n===1?'is':'are')+' packed into the Dumpster.'
          :'The Dumpster comes up empty: there is nothing in the graveyard yet.');
   }
+  await fireGroundPlay(p,id,cells[0]);
   await resolveCombat();
   render();
   return true;
+}
+/* Everything that wants to know a battleground has just gone down -- whoever
+   laid it, and wherever they laid it. */
+async function fireGroundPlay(p,id,cell){
+  const b=G.board;
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(!t||t.silenced)continue;
+    const og=DEF(t).onGroundPlay;
+    if(!og)continue;
+    if(og.kw&&(t.kwPerm||[]).indexOf(og.kw)<0){
+      t.kwPerm.push(og.kw);
+      log(nm(t)+' reads the seam a new dimension opened: it gains '+og.kw+'.');
+    }
+    if(og.n)applyModT(t,og.n,og.dur||'temp');
+  }
+  if(cell!=null&&groundFlag(b[cell].ground,'gBlackHole'))await blackHoleSwallow(cell);
+}
+/* The Black Hole takes the panel and everything beside it: every equip off
+   every body, and every body that is not a Boss. All of it hangs on the
+   battleground, and all of it goes home the moment the battleground does. */
+async function blackHoleSwallow(cell){
+  const b=G.board,g=b[cell].ground;
+  if(!g)return;
+  g.held=g.held||[];
+  let n=0;
+  for(const j of [cell].concat(ADJ[cell])){
+    const t=b[j].teece;
+    if(!t)continue;
+    for(const e of t.equips.slice()){
+      g.held.push({cardId:e.cardId,owner:e.owner});
+      t.equips=t.equips.filter(x=>x!==e);
+      equipCameOff(t,e,true);
+      n++;
+    }
+    if(t.isToken||t.isCopy||isBossCard(t.cardId))continue;
+    b[j].teece=null;
+    g.held.push({cardId:t.cardId,owner:t.baseOwner});
+    log(nm(t)+' falls into the Black Hole.');
+    n++;
+  }
+  log(n?'The Black Hole holds '+g.held.length+' card'+(g.held.length===1?'':'s')+'.'
+      :'The Black Hole finds nothing around it to swallow.');
+  if(n&&HAS_DOM)render();
 }
 /* Cast a magic card that is not being played from hand the normal way — out of
    a grave, or off a Witch Doctor. `keep` sends it to hand afterwards instead of
@@ -9580,6 +10080,20 @@ async function castCard(p,cid,opts){
 async function playMagic(p,handIdx){
   const pl=G.players[p],id=pl.hand[handIdx],d=CARDS[id];
   if(hexOn(p,'silence')){toast('Silenced: you cannot cast magic.');return false;}
+  /* A Dimension of Energy on the field eats the spell before it is cast. It
+     takes everybody's, not only its owner's, and the card is not spent -- it
+     hangs on the battleground until something breaks the battleground open. */
+  for(let i=0;i<BN;i++){
+    const g=G.board[i].ground;
+    if(!g||!groundFlag(g,'gSpellJar'))continue;
+    handTake(p,handIdx);
+    g.spells=(g.spells||[]).concat([{cardId:id,owner:p}]);
+    log(d.name+' is drawn into the Dimension of Energy and hangs there, silent. '+
+      g.spells.length+' spell'+(g.spells.length===1?'':'s')+' waiting.');
+    await resolveCombat();
+    render();
+    return true;
+  }
   const wasCasting=G.castingMagic,wasConsumed=G.magicConsumed,wasFrom=G.castingFrom;
   G.castingMagic=true;G.magicConsumed=false;G.castingFrom={p,handIdx,cardId:id};
   let ok,consumed;
@@ -9671,6 +10185,22 @@ async function runGraveAct(p,ent){
   if(ok==='NONE'){toast(ctx.noneMsg||'Nothing for that ability to do.');render();return false;}
   if(ent.act.onceGame)G.players[p].onceUsed[onceGameKey(ent.act.onceGame)]=true;
   if(ent.act.once==='game')G.players[p].onceUsed['gv:'+ent.key]=true;
+  G.detailLock=null;
+  await resolveCombat();
+  render();
+  return true;
+}
+/* A battleground's own ability, fired by a player rather than by whoever is
+   standing on it. No Teece is the source, so the steps run with no cell and no
+   body -- which is why the Multiplicity's price is paid out of hand. */
+async function runFreeGroundAct(p,cell,act){
+  if(!G||G.over||G.pending||G.turn!==p)return false;
+  const g=G.board[cell]&&G.board[cell].ground;
+  if(!g)return false;
+  const ctx={p,cell,t:null,first:true};
+  const ok=await runSteps(act.steps,ctx);
+  if(!ok){render();return false;}
+  if(ok==='NONE'){toast(ctx.noneMsg||'Nothing for that ability to do.');render();return false;}
   G.detailLock=null;
   await resolveCombat();
   render();
@@ -10047,6 +10577,29 @@ async function startTurn(){
     const f=G.board[i].fire;
     if(f&&f.owner===p&&G.turnNum>f.lit){G.board[i].fire=null;log('The fire at the '+CN[i]+' burns itself out.');}
   }
+  /* The Dimension of Pain charges rent, and only from the seat whose turn it
+     is: a Teece that has stood there a while owes for every turn of it. */
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(!t||t.owner!==p)continue;
+    if(!groundFlag(G.board[i].ground,'gStartMod'))continue;
+    let n=0;
+    for(const gd of gcards(G.board[i].ground))if(gd.gStartMod)n+=gd.gStartMod;
+    if(!n)continue;
+    applyModT(t,n,'perm');
+    log(nm(t)+' wakes in the Dimension of Pain: '+sgn(n)+'.');
+  }
+  /* A Black Hole swallows again every time its own side comes round, and
+     collapses under what it has taken. */
+  for(let i=0;i<BN;i++){
+    const g=G.board[i].ground;
+    if(!g||g.owner!==p||!groundFlag(g,'gBlackHole'))continue;
+    if((g.held||[]).length>=3){
+      log('The Black Hole cannot hold '+g.held.length+' and collapses.');
+      await clearGroundAt(i,p);
+    }else await blackHoleSwallow(i);
+    break;
+  }
   G.movedThisTurn=[];
   G.graveLastTurn=G.graveThisTurn;
   G.graveThisTurn=[];
@@ -10106,7 +10659,8 @@ function cloneBoard(b){
       actUsedTurn:Object.assign({},c.teece.actUsedTurn),actUsedGame:Object.assign({},c.teece.actUsedGame)}):null,
     /* the Graveyard's roll of interred cards is an array: copy it, or a
        simulated board and the real one share one list */
-    ground:c.ground?Object.assign({},c.ground,c.ground.held?{held:c.ground.held.slice()}:{}):null,
+    ground:c.ground?Object.assign({},c.ground,c.ground.held?{held:c.ground.held.slice()}:{},
+      c.ground.fuse?{fuse:c.ground.fuse.slice()}:{},c.ground.spells?{spells:c.ground.spells.slice()}:{}):null,
     mine:c.mine?Object.assign({},c.mine):null,
     enchant:c.enchant?Object.assign({},c.enchant):null,
     fire:c.fire?Object.assign({},c.fire):null,
@@ -10332,9 +10886,18 @@ function aiPlanFor(id){
     return {thr:0.8,cands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
   }
   if(d.type==='ground'){
-    const cands=[];for(let i=0;i<BN;i++)if(!b[i].ground)cands.push(i);
+    /* A battleground written to go ON TOP of one wants the occupied panels,
+       not the bare ones: weighing it only where there is nothing to fold onto
+       is weighing the one thing it does not do. */
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      if(d.gOnGround){if(b[i].ground&&!(b[i].ground.fuse||[]).length)cands.push(i);}
+      else if(!b[i].ground)cands.push(i);
+    }
     if(!cands.length)return null;
-    return {thr:0.8,cands,mut:(bb,i)=>{bb[i].ground={cardId:id,owner:p};}};
+    return {thr:0.8,cands,mut:(bb,i)=>{
+      if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
+      else bb[i].ground={cardId:id,owner:p};}};
   }
   if(d.type!=='magic')return null;
   const st=d.cast[0];
@@ -11323,7 +11886,11 @@ function panelHtml(i){
   const c=G.board[i];
   if(!c)return '';
   let h='';
-  if(c.ground)h+='<div class="dn">'+CARDS[c.ground.cardId].name+'</div><div class="dt">'+CARDS[c.ground.cardId].text+'</div>';
+  if(c.ground)for(const gd of gcards(c.ground))
+    h+='<div class="dn">'+gd.name+(c.ground.gsil?' (silenced)':'')+'</div><div class="dt">'+gd.text+'</div>';
+  if(c.ground&&(c.ground.spells||[]).length)
+    h+='<div class="dt" style="color:var(--gold)">'+c.ground.spells.length+' spell'+(c.ground.spells.length===1?'':'s')+
+      ' hanging here: '+c.ground.spells.map(s=>CARDS[s.cardId].name).join(', ')+'.</div>';
   if(c.ground&&c.ground.held&&c.ground.held.length)
     h+='<div class="dt" style="color:var(--gold)">'+c.ground.held.length+' card'+(c.ground.held.length===1?'':'s')+
       ' held: '+c.ground.held.map(hc=>CARDS[hc.cardId].name).join(', ')+'.</div>';
@@ -11744,6 +12311,28 @@ function statusesFor(p){
     if(!g||seenG[g.gid||('c'+i)])continue;
     seenG[g.gid||('c'+i)]=true;
     const mine=sameTeam(g.owner,p);
+    /* A battleground either player may pull down, with or without a body
+       standing on it. The board has no panel to tap for that -- the panel
+       belongs to whoever is standing there -- so the chip is the button. */
+    const fa=!g.gsil&&gcards(g).map(gd=>gd.gFreeAct).filter(Boolean)[0];
+    if(fa&&G.turn===p&&!G.over)
+      push('gfree'+i,'act',CARDS[g.cardId].name+': '+fa.name,
+        CARDS[g.cardId].name+' at the '+CN[i]+' answers to either player. Tap this to use it. ('+
+        CARDS[g.cardId].text+')',
+        ()=>runFreeGroundAct(p,i,fa));
+    if(g.gsil)
+      push('gsil'+i,mine?'bad':'good','Silenced ground: '+CARDS[g.cardId].name,
+        CARDS[g.cardId].name+' at the '+CN[i]+' is held shut by a Dimensional Anchor standing on it. '+
+        'It gives nothing and charges nothing while that Teece stands there, and speaks again the moment it does not.');
+    if(g.fuse&&g.fuse.length)
+      push('gfuse'+i,mine?'good':'warn','Folded ground: '+(g.fuse.length+1)+' dimensions',
+        'The ground at the '+CN[i]+' carries '+
+        [CARDS[g.cardId].name].concat(g.fuse.map(c=>CARDS[c].name)).join(', ')+
+        ' at once, and everything all of them say is in force there together.');
+    if((g.spells||[]).length)
+      push('gspell'+i,mine?'good':'warn',CARDS[g.cardId].name+' holds '+g.spells.length+' spell'+(g.spells.length===1?'':'s'),
+        'The Dimension of Energy at the '+CN[i]+' has swallowed '+g.spells.map(s=>CARDS[s.cardId].name).join(', ')+
+        '. Break it and all of them go off at once, in that order, at targets nobody chooses.');
     if(g.held&&g.held.length){
       const ggd=CARDS[g.cardId];
       push('inter'+i,'good',ggd.name+' holds '+g.held.length,
@@ -12253,7 +12842,7 @@ if(typeof module!=='undefined'){
     canPlay,hexOn,addHex,tickHexes,hexTargets,drawCards,openAt,discardCard,castCard,
     riseFromGrave,forcedMoves,fireMagic,flushDiscards,toGrave,isBossCard,playMagic,
     mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
-    groundCells,playGround,areaShapeCells,
+    groundCells,playGround,areaShapeCells,makeTeece,gcards,countGrounds,groundAnchored,
     statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,
     graveActsFor,graveActAvailable,runGraveAct,dumpPlate,
     readsSky,skyShowing,isDay,flipPhase,
