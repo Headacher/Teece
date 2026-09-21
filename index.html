@@ -420,6 +420,18 @@ button,.teece,.cell,.card{touch-action:manipulation}
        colour, yours filling from the bottom. The chip above counts the leader
        toward the lead that ends the game. ---- */
 .boardrow{display:flex;align-items:stretch;justify-content:center;gap:12px}
+/* The Extradimensional Plane is not on the board, and is drawn not on it: its
+   own panel in the margin, set apart by the gap and the dashed tether rather
+   than by being a different shape, because it is an ordinary panel in every
+   way that matters to the game. */
+#planeStrip{display:flex;flex-direction:column;align-items:flex-start;flex:0 0 auto}
+#planeStrip:empty{display:none}
+#planeStrip .cell{width:var(--cs,110px);height:var(--cs,110px);border-style:dashed;
+  border-color:#6a6ad0;box-shadow:0 0 12px rgba(80,84,200,.35)}
+/* The board plus a Plane is one panel wider than the board, and on a phone the
+   board already fills the screen. Shrink every panel while it is out rather
+   than let the extra one hang off the edge where no thumb can reach it. */
+@media(max-width:560px){.boardrow.hasplane{--cs:72px;--cs-sm:72px}}
 .sidecol{display:flex;flex-direction:column;align-items:center;gap:6px}
 .sidecol>.dombar{flex:1;min-height:0}
 /* The sky, kept where the fight is: flush with the top right corner of the
@@ -719,7 +731,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:60,date:'2026-09-21'};
+const VERSION={build:61,date:'2026-09-21'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3065,9 +3077,9 @@ const CARDS = {
     text:'A magic card played by either player is equipped to this instead of being cast. When this battleground goes, every spell on it is cast in the order it arrived, at targets nobody chooses.'},
  809:{name:'Dimension of Dimensions',type:'ground',gOnGround:true,gAnchor:true,gReach:true,gmod:2,
     text:'Lay this on a panel that already has a battleground and it is equipped to that battleground rather than replacing it. Neither can then be replaced or destroyed. A Teece on it or beside it counts as standing on it, and gets +2.'},
- 810:{name:'Extradimensional Plane of Matter',type:'ground',gAnchor:true,
+ 810:{name:'Extradimensional Plane of Matter',type:'ground',gAnchor:true,gOffField:true,
     gact:[{name:'Drift the Plane',once:'turn',steps:[{fx:'driftPlane'}]}],
-    text:'A slab of somewhere else. It cannot be replaced or destroyed. While one of your Teece stands on it, once per your turn: drift it to any other panel, carrying whatever stands on it.'},
+    text:'Played outside the field, hanging off the left or right edge of a panel. It is a panel of its own from then on — a Teece may be played onto it, and fights across the edge it hangs on — and it cannot be replaced or destroyed. While one of your Teece stands on it, once per your turn: drift it round to hang off any other edge of the board, carrying whatever stands on it.'},
  811:{name:'Dimension of Multiplicities',type:'ground',gDoubleBase:true,gFreeAct:{
       name:'Collapse the Multiplicity',steps:[{fx:'price',hand:2},{fx:'discard',n:2,cost:true},{fx:'breakGround'}]},
     text:'A Teece on this battleground has the numbers printed on its card doubled. Either player, on their turn: discard two cards and destroy this battleground.'},
@@ -3670,8 +3682,60 @@ let BN=9;                 /* total panels = BW*BW   */
 let ADJ=[],DIAG=[],CN=[];
 let LINES=[];             /* every run of three panels in a straight line */
 const ALL=()=>{const a=[];for(let i=0;i<BN;i++)a.push(i);return a;};
-const row=i=>Math.floor(i/BW), col=i=>i%BW;
-const sameRow=(a,b)=>row(a)===row(b), sameCol=(a,b)=>col(a)===col(b);
+/* ---- the panel that is not on the board ----
+   The Extradimensional Plane of Matter is played OUTSIDE the field, hanging off
+   a rim panel. It is a real panel: a Teece stands on it, fights across it and
+   dies on it, so it has to be a real index in G.board or none of the 287 loops
+   that sweep the board would ever look at it.
+
+   So it is index GRID -- one past the last panel of the square -- and BN grows
+   to cover it while it is in play. Every one of those loops then reaches it for
+   free. What does NOT come free is the three things that are grid arithmetic
+   rather than array indexing: which panel lies across a given side, which
+   panels share a row or a column, and where a cell is drawn. Those are the only
+   places below that have to know the Plane exists.
+
+   G.plane is {host, side}: the rim panel it is pinned to, and which of that
+   panel's open sides it is pinned across. Holding the SIDE, not just the panel,
+   is what lets combat work -- a Teece on the Plane meets the host across a real
+   pair of edges rather than an invented one. */
+let GRID=9;               /* panels in the square itself */
+const PLANE=()=>GRID;     /* the index the Plane occupies when it is in play */
+const planeOn=()=>BN>GRID;
+const isPlane=i=>i===GRID&&planeOn();
+const row=i=>isPlane(i)?-1:Math.floor(i/BW), col=i=>isPlane(i)?-1:i%BW;
+/* A panel off the board shares no row and no column with anything, itself
+   included -- otherwise row -1 would line it up with every other off-board
+   panel and col -1 with the whole left-hand file. */
+const sameRow=(a,b)=>!isPlane(a)&&!isPlane(b)&&row(a)===row(b);
+const sameCol=(a,b)=>!isPlane(a)&&!isPlane(b)&&col(a)===col(b);
+/* Pin the Plane to a panel and a side, or take it off the board again. This is
+   the only thing that changes BN mid-game, and it patches the adjacency both
+   ways: the Plane knows its host and the host knows the Plane, or combat would
+   be one-sided. */
+function setPlane(spec){
+  ADJ.length=GRID;DIAG.length=GRID;CN.length=GRID;
+  for(let i=0;i<GRID;i++){
+    ADJ[i]=ADJ[i].filter(j=>j<GRID);
+    DIAG[i]=DIAG[i].filter(j=>j<GRID);
+  }
+  if(!spec){BN=GRID;return;}
+  BN=GRID+1;
+  ADJ[GRID]=[spec.host];DIAG[GRID]=[spec.host];
+  ADJ[spec.host]=ADJ[spec.host].concat([GRID]);
+  DIAG[spec.host]=DIAG[spec.host].concat([GRID]);
+  CN[GRID]='plane';
+}
+/* Re-assert the geometry from whatever state is loaded. Cheap and idempotent,
+   so it can be called on every sweep rather than trusted to one caller. */
+function syncPlane(){
+  if(!G)return;
+  const want=G.plane||null;
+  const have=planeOn()?{host:ADJ[GRID][0]}:null;
+  if(!want&&!have)return;
+  if(want&&have&&want.host===have.host)return;
+  setPlane(want);
+}
 /* How many Teece this seat may put down this turn. Muster gives two on your
    opening turn of a level and one thereafter; Paratroop buys another for the
    turn it is cast on, and extraTeece is cleared with the turn. G.teecePlayed
@@ -3693,13 +3757,22 @@ const freePlayFor=(p,cardId)=>!!(G&&G.freePlay&&G.freePlay.p===p&&G.freePlay.car
 /* The panel that side k touches (0 top, 1 right, 2 bottom, 3 left), or -1 when
    that side is pressed against the rim of the board and can never be fought. */
 function sideNbr(i,k){
+  /* The Plane meets its host across one pair of edges and has nothing across
+     the other three, so it reads as a panel with three rim sides -- which is
+     what it is. The host gains a neighbour on the side the Plane is pinned to,
+     and that side stops being rim while the Plane hangs there. */
+  if(G&&G.plane){
+    const pl=G.plane;
+    if(isPlane(i))return k===((pl.side+2)%4)?pl.host:-1;
+    if(i===pl.host&&k===pl.side)return PLANE();
+  }
   const r=row(i),c=col(i);
   if(k===0)return r>0?i-BW:-1;
   if(k===1)return c<BW-1?i+1:-1;
   if(k===2)return r<BW-1?i+BW:-1;
   return c>0?i-1:-1;
 }
-const isCornerCell=i=>{const r=row(i),c=col(i);return (r===0||r===BW-1)&&(c===0||c===BW-1);};
+const isCornerCell=i=>{if(isPlane(i))return false;const r=row(i),c=col(i);return (r===0||r===BW-1)&&(c===0||c===BW-1);};
 /* The sides of a panel that have no panel across them, so nothing can ever be
    fought there. Two of them make a corner, one an edge, none the middle -- one
    reading of the board that the Army deck's postures and formations all share. */
@@ -3711,7 +3784,7 @@ function rimSides(i){
 const isMiddleCell=i=>rimSides(i).length===0;
 /* A row, a column or a diagonal -- what Line Formation means by "in line". */
 const inStraightLine=(a,c)=>{
-  if(a===c)return false;
+  if(a===c||isPlane(a)||isPlane(c))return false;
   const dr=row(a)-row(c),dc=col(a)-col(c);
   return dr===0||dc===0||Math.abs(dr)===Math.abs(dc);
 };
@@ -3730,7 +3803,7 @@ function fileName(k,n){
   return 'column '+(k+1);
 }
 function buildGeometry(w){
-  BW=w; BN=w*w;
+  BW=w; GRID=w*w; BN=GRID;
   ADJ=[];DIAG=[];CN=[];LINES=[];
   for(let i=0;i<BN;i++){
     const r=Math.floor(i/w),c=i%w,a=[],d=[];
@@ -3831,6 +3904,7 @@ function newState(mode,vsAI,decks,extra){
     turn:Math.floor(Math.random()*nP),turnNum:1,teecePlayed:false,over:false,winner:null,pending:null,
     phase:'day',
     detailLock:null,detailHover:null,panelTap:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],graveLastTurn:[],
+    plane:null,
     epoch:++EPOCH,
     enemyBonus:extra.enemyBonus||0,level:extra.level||0,quiet:0,eventFlag:false,
     perks:pk,robbed:false,mourned:false,teeceThisTurn:0,extraTeece:0,freePlay:null,
@@ -5044,7 +5118,17 @@ function scanDeaths(b){
       if(j<i)continue;
       const o=b[j].teece; if(!o||!foes(o.owner,t.owner))continue;
       let mi,oj;
-      if(j===i+1){mi=1;oj=3;} else if(j===i-1){mi=3;oj=1;}
+      /* Which edge of each meets the other. Everywhere on the square that is
+         the difference between the two indexes -- but the Plane is not on the
+         square, so for that one pairing the sides are the ones it was pinned
+         across, and reading them off i and j would give a wrong pair of edges
+         rather than no fight at all. */
+      if(isPlane(i)||isPlane(j)){
+        const pl=G.plane;
+        if(isPlane(i)){mi=(pl.side+2)%4;oj=pl.side;}
+        else{mi=pl.side;oj=(pl.side+2)%4;}
+      }
+      else if(j===i+1){mi=1;oj=3;} else if(j===i-1){mi=3;oj=1;}
       else if(j===i+BW){mi=2;oj=0;} else {mi=0;oj=2;}
       const a=eff[i][mi]+webEdge(i,j), c=eff[j][oj]+webEdge(j,i);
       if(a-c>dfn[j]&&canKill(i)&&!immune(j))mark(j,i);
@@ -5790,12 +5874,14 @@ async function FXRUN(st,ctx){
     return;}
   case 'terra':{
     const cands=[];
-    for(let i=0;i<BN;i++)if(b[i].ground)cands.push(i);
+    /* The Plane is not on the field, so nothing that shifts the field's
+       battlegrounds around reaches it. It moves by drifting, or not at all. */
+    for(let i=0;i<BN;i++)if(b[i].ground&&!isPlane(i))cands.push(i);
     if(!cands.length)return none('No battleground to move.');
     const c=await pickCell(cands,'Choose a battleground to move.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
-    const dests=[];for(let i=0;i<BN;i++)if(i!==c&&!(b[i].ground&&groundAnchored(b,i)))dests.push(i);
+    const dests=[];for(let i=0;i<BN;i++)if(i!==c&&!isPlane(i)&&!(b[i].ground&&groundAnchored(b,i)))dests.push(i);
     if(!dests.length)return none('Nowhere to move it to.');
     const dst=await chooseCell(p,dests,'Choose its new panel.',{skip:true,mut:(bb,j)=>{
       if(bb[j].ground)bb[j].ground=null; bb[j].ground=bb[c].ground; bb[c].ground=null;}});
@@ -5809,31 +5895,18 @@ async function FXRUN(st,ctx){
   /* ---- Dimension: eight ways of arguing with the panel underneath ---- */
   /* The Plane of Matter is not really part of the field, so it goes where it
      likes -- and takes whoever is standing on it along. */
+  /* The Plane does not move across the board -- it re-pins to a different edge
+     of it. Whatever is standing on the Plane is standing on the Plane before
+     and after, so it comes along without being moved at all: there is no step
+     here that could leave it behind. */
   case 'driftPlane':{
-    const i=ctx.cell,g=i!=null?b[i].ground:null;
-    if(!g)return none('There is no plane here to drift.');
-    let span=0;
-    for(let j=0;j<BN;j++)if(b[j].ground&&(g.gid?b[j].ground.gid===g.gid:j===i))span++;
-    if(span>1)return none(CARDS[g.cardId].name+' lies across too many panels to drift.');
-    const rider=b[i].teece;
-    const dests=[];
-    for(let j=0;j<BN;j++){
-      if(j===i||b[j].razed)continue;
-      if(b[j].ground&&groundAnchored(b,j))continue;
-      if(rider&&b[j].teece)continue;
-      dests.push(j);
-    }
-    if(!dests.length)return none('Nowhere for the plane to drift to.');
-    const dst=await pickCell(dests,'Drift '+CARDS[g.cardId].name+' to another panel.',
-      (bb,j)=>{if(bb[j].ground)bb[j].ground=null;bb[j].ground=bb[i].ground;bb[i].ground=null;
-               if(bb[i].teece)moveT(bb,i,j,false);},false);
-    if(dst==='CANCEL')return 'ABORT';
-    if(dst==null)return;
-    if(b[dst].ground)await clearGroundAt(dst,p);
-    b[dst].ground=g;b[i].ground=null;
-    if(rider&&!b[dst].teece)moveT(b,i,dst,true);
-    log(CARDS[g.cardId].name+' drifts to the '+CN[dst]+(rider?', carrying '+nm(rider)+' with it.':'.'));
-    if(rider)await fireMove(i,dst,p);
+    if(!G.plane||!isPlane(ctx.cell))return none('There is no plane here to drift.');
+    const spec=await pinPlane(p,'Drift');
+    if(spec==null)return none('Nowhere else for the plane to hang.');
+    const rider=b[GRID].teece;
+    hangPlane(spec,p,null);
+    log('The Extradimensional Plane drifts round to hang '+SIDE_OUT[spec.side]+' the '+CN[spec.host]+
+      (rider?', and '+nm(rider)+' rides it round.':'.'));
     return;}
   /* A dimension sold to both sides at once. */
   case 'brokerBG':{
@@ -9446,6 +9519,10 @@ async function processDeath(d){
    Teece shoved one space by somebody else's card. */
 function syncGrounds(){
   if(!G||!G.board)return;
+  /* The Plane's adjacency lives in the global ADJ rather than in the state, so
+     re-assert it from the state on every sweep. Idempotent and cheap, and it
+     means nothing has to remember to do it. */
+  syncPlane();
   const b=G.board;
   for(let i=0;i<BN;i++){
     const g=b[i].ground;
@@ -10245,6 +10322,9 @@ function areaShapeCells(anchor,shape){
   return null;
 }
 function groundCells(anchor,shape){
+  /* The Plane is one panel off the board and has no row or column, so no
+     battleground with a footprint can be laid across it. */
+  if(isPlane(anchor))return shape==='1x1'?[anchor]:null;
   if(shape==='1x1')return [anchor];
   /* The Great Garbage Patch takes a whole row, however wide the board is: three
      panels in a two-player game, four in a three-player one. */
@@ -10321,8 +10401,70 @@ async function clearGroundAt(i,breaker){
     await runSteps([{fx:'discard',n:gd.gDiscardOnBreak}],{p:breaker,first:false});
   }
 }
+/* Every place the Plane could hang: a panel on the rim, and one of that panel's
+   open sides. A corner offers two, an edge one, the middle none. */
+function planeSpots(){
+  const out=[];
+  for(let i=0;i<GRID;i++){
+    if(G.board[i].razed)continue;
+    /* Only the left and right files, not the top and bottom ranks. The Plane
+       is drawn in a margin beside the board, and a margin is somewhere a
+       column of panels can go -- so restricting it here is what keeps where it
+       is DRAWN and which edge it FIGHTS ACROSS the same fact. A Plane that said
+       it hung above a panel and appeared to its left would be lying about the
+       one thing a player has to read off it. */
+    for(const k of [3,1]){
+      if(G.plane&&G.plane.host===i&&G.plane.side===k)continue;
+      const c=col(i);
+      if(k===1?c===BW-1:c===0)out.push({host:i,side:k});
+    }
+  }
+  return out;
+}
+const SIDE_OUT=['above','to the right of','below','to the left of'];
+/* Ask where the Plane hangs. The panel first, because that is the decision
+   that matters; the side only when the panel offers a choice, and then it
+   matters too -- it settles which edge of whatever stands on the Plane is the
+   one facing the board. */
+async function pinPlane(p,verb){
+  const spots=planeSpots();
+  if(!spots.length)return null;
+  const hosts=[];
+  for(const s of spots)if(hosts.indexOf(s.host)<0)hosts.push(s.host);
+  const c=await chooseCell(p,hosts,verb+' the Extradimensional Plane beside which panel?',{cancel:true});
+  if(c==null||c==='CANCEL')return null;
+  const mine=spots.filter(s=>s.host===c);
+  if(mine.length===1)return mine[0];
+  const pick=await chooseOption(p,mine.map(s=>({v:String(s.side),lbl:'Hang it '+SIDE_OUT[s.side]+' the '+CN[c]})),
+    'Which side of the '+CN[c]+'?');
+  if(pick==null)return mine[0];
+  return mine.find(s=>s.side===parseInt(pick,10))||mine[0];
+}
+/* Hang the Plane, growing the board by the one panel it is. */
+function hangPlane(spec,owner,cardId){
+  const first=!G.plane;
+  G.plane=spec;
+  setPlane(spec);
+  if(first)G.board[GRID]={teece:null,ground:null,mine:null,defMark:null,razed:false,
+    curseP:null,seed:null,enchant:null,fire:null};
+  if(cardId!=null)G.board[GRID].ground={cardId,owner,gid:G.groundSeq++};
+}
 async function playGround(p,handIdx){
   const pl=G.players[p],id=pl.hand[handIdx],b=G.board,d=CARDS[id];
+  /* A battleground that is not laid on the field at all: it is played beside
+     it, and becomes a panel of its own. */
+  if(d.gOffField){
+    const spec=await pinPlane(p,'Play');
+    if(!spec)return false;
+    handTake(p,handIdx);
+    hangPlane(spec,p,id);
+    log(pname(p)+' unfolds '+d.name+' '+SIDE_OUT[spec.side]+' the '+CN[spec.host]+
+      ', outside the field entirely.');
+    await fireGroundPlay(p,id,GRID);
+    await resolveCombat();
+    render();
+    return true;
+  }
   let shape='1x1';
   let gmode=null;
   if(d.gModal){
@@ -12151,9 +12293,36 @@ function paintFoot(foot,i){
   try{cs=foot(i)||[];}catch(e){cs=[];}
   for(const j of cs){const el=bd.children[j];if(el)el.classList.add('splash');}
 }
+/* The strip the Plane is drawn in, made only once there is a Plane to draw and
+   emptied out again when there is not. It sits before the board in the same
+   flex row, so the off-board panel reads as off the board. */
+function planeHost(){
+  const rowEl=document.querySelector('.boardrow');
+  const bd=document.getElementById('board');
+  let el=document.getElementById('planeStrip');
+  if(!el){
+    el=document.createElement('div');
+    el.id='planeStrip';
+  }
+  /* Drawn on the side it is actually pinned to, and pushed down to sit level
+     with the panel it hangs off, so the gap between the two reads as the edge
+     they fight across. */
+  const pl=G&&G.plane;
+  if(pl){
+    if(pl.side===1)rowEl.insertBefore(el,bd.nextSibling);
+    else rowEl.insertBefore(el,bd);
+    el.style.paddingTop='calc((var(--cs,110px) + 8px) * '+row(pl.host)+')';
+  }
+  return el;
+}
 function renderBoard(){
   const b=document.getElementById('board');
   b.innerHTML='';
+  const strip=document.getElementById('planeStrip');
+  if(strip)strip.innerHTML='';
+  const rowEl=document.querySelector('.boardrow');
+  if(rowEl)rowEl.classList.toggle('hasplane',planeOn());
+  if(planeOn())planeHost().innerHTML='';
   /* A finger that slides across the board reads the panel it is over, not the
      one it started on. Bound once on the board itself -- the panels are rebuilt
      every render, and the finger leaves the panel it came down on anyway. */
@@ -12333,7 +12502,10 @@ function renderBoard(){
     cell.addEventListener('mouseleave',()=>{
       if(G.detailLock==null&&G.detailHover===i&&G.panelTap!==i){G.detailHover=null;showDetail(null);}
     });
-    b.appendChild(cell);
+    /* Everything above is closure over i, so the Plane's panel is built exactly
+       like any other and only lands somewhere else: outside the grid, in the
+       strip beside the board, which is the whole point of it. */
+    (isPlane(i)?planeHost():b).appendChild(cell);
   }
 }
 /* Everything on one panel besides the Teece: the battleground, Mines, a
@@ -13338,6 +13510,7 @@ if(typeof module!=='undefined'){
     riseFromGrave,forcedMoves,fireMagic,flushDiscards,toGrave,isBossCard,playMagic,
     mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
     groundCells,playGround,areaShapeCells,makeTeece,gcards,countGrounds,groundAnchored,
+    isPlane,planeOn,PLANE,planeSpots,hangPlane,syncPlane,getGrid:()=>GRID,
     statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,
     graveActsFor,graveActAvailable,runGraveAct,dumpPlate,
     setHandView,applyHandView,getHandView:()=>SQHAND,applySides,handCount,afterDiscard,
