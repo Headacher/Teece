@@ -714,7 +714,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:58,date:'2026-09-20'};
+const VERSION={build:59,date:'2026-09-21'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -2215,8 +2215,8 @@ const CARDS = {
     grants:{kw:['flying'],onEquip:[{fx:'mod',who:'self',n:5,dur:'temp'}]}},
  539:{name:'Sunlit Loam',type:'ground',gDoublePosAll:true,
     text:'Every positive attribute effect on a Teece on this panel counts double. Its own attributes are untouched.'},
- 540:{name:'Rich Bed',type:'ground',gmod:3,
-    text:'A Teece on this panel gets +3.'},
+ 540:{name:'Spreading Vines',type:'ground',gmod:3,expansive:true,
+    text:'A Teece on this panel gets +3. At the start of your turn: this BG expands to contain another adjacent panel unoccupied by another BG. If any part is replaced or destroyed, all of Spreading Vines are replaced with it.'},
  /* ---- Pixie: tiny, weak, and made almost entirely of magic. Every pixie
         flies, and the deck plays off the magic it keeps pulling back. ---- */
  541:{name:'Thieving Sprite',type:'teece',sides:[1,2,1,3],pixie:true,kw:['flying'],
@@ -6383,8 +6383,11 @@ async function FXRUN(st,ctx){
     const c=await pickCell(cands,'Choose one of your Teece.',null,false,i=>[i].concat(ADJ[i]));
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
-    if(b[c].ground)G.players[b[c].ground.owner].grave.push(b[c].ground.cardId);
-    b[c].ground={cardId:st.bg,owner:p,gid:G.groundSeq++};
+    if(b[c].ground){
+      const og=b[c].ground;
+      if(!CARDS[og.cardId]||!CARDS[og.cardId].expansive)G.players[og.owner].grave.push(og.cardId);
+    }
+    placeGround(b,c,st.bg,p);
     log('An Avalanche crashes onto the '+CN[c]+'.');
     for(const j of ADJ[c].slice()){
       const o=b[j].teece;
@@ -7267,8 +7270,11 @@ async function FXRUN(st,ctx){
     if(c==null||!b[c])return none('There is no panel left to mark.');
     const own=ctx.deadOwner!=null?ctx.deadOwner:p;
     if(b[c].razed)return none('The '+CN[c]+' is razed, and nothing takes hold there.');
-    if(b[c].ground)await clearGroundAt(c,own);
-    b[c].ground={cardId:st.bg,owner:own,gid:G.groundSeq++};
+    if(b[c].ground){
+      const og=b[c].ground;
+      if(!CARDS[og.cardId]||!CARDS[og.cardId].expansive)await clearGroundAt(c,own);
+    }
+    placeGround(b,c,st.bg,own);
     log(CARDS[st.bg].name+' spreads across the '+CN[c]+'.');
     if(HAS_DOM)render();
     return;}
@@ -7888,9 +7894,23 @@ async function FXRUN(st,ctx){
         if(x>=0){g.held.splice(x,1);found=true;}
       }
     }
-    if(b[c].ground)await clearGroundAt(c,p);
-    b[c].ground={cardId:cid,owner:p,gid:G.groundSeq++};
-    log(CARDS[cid].name+' lays itself down on the '+CN[c]+' out of the graveyard.');
+    const oldGround=b[c].ground;
+    if(oldGround){
+      const oldCard=CARDS[oldGround.cardId];
+      if(oldCard&&oldCard.expansive&&oldGround.gid){
+        const cells=findExpansiveNetwork(oldGround.gid);
+        const newGid=G.groundSeq++;
+        for(const j of cells)b[j].ground={cardId:cid,owner:p,gid:newGid,expansive:oldCard.expansive};
+        log(CARDS[cid].name+' engulfs the '+oldCard.name+' network at the '+CN[c]+'.');
+      }else{
+        await clearGroundAt(c,p);
+        b[c].ground={cardId:cid,owner:p,gid:G.groundSeq++};
+        log(CARDS[cid].name+' lays itself down on the '+CN[c]+' out of the graveyard.');
+      }
+    }else{
+      b[c].ground={cardId:cid,owner:p,gid:G.groundSeq++};
+      log(CARDS[cid].name+' lays itself down on the '+CN[c]+' out of the graveyard.');
+    }
     await anim([c],'placed',140);
     await resolveCombat();
     return;}
@@ -10393,6 +10413,53 @@ async function growSeeds(p){
     await resolveCombat();
   }
 }
+function findExpansiveNetwork(gid){
+  const cells=[];
+  for(let i=0;i<BN;i++){
+    const g=G.board[i].ground;
+    if(g&&g.gid===gid&&CARDS[g.cardId]&&CARDS[g.cardId].expansive)cells.push(i);
+  }
+  return cells;
+}
+function replaceExpansiveNetwork(gid,newCard,owner){
+  const cells=findExpansiveNetwork(gid);
+  if(!cells.length)return;
+  const card=CARDS[newCard];
+  for(const c of cells){
+    if(card){
+      G.board[c].ground={cardId:newCard,owner,gid:G.groundSeq++};
+      log(CARDS[newCard].name+' replaces '+CARDS[cells[0]].cardId+' at the '+CN[c]+'.');
+    }else{
+      G.board[c].ground=null;
+    }
+  }
+}
+function placeGround(b,cell,cardId,owner){
+  const oldGround=b[cell].ground;
+  if(oldGround){
+    const oldCard=CARDS[oldGround.cardId];
+    if(oldCard&&oldCard.expansive&&oldGround.gid){
+      const cells=findExpansiveNetwork(oldGround.gid);
+      const newGid=G.groundSeq++;
+      const newCard=CARDS[cardId];
+      for(const j of cells)b[j].ground={cardId,owner,gid:newGid,expansive:newCard&&newCard.expansive};
+      return;
+    }
+  }
+  b[cell].ground={cardId,owner,gid:G.groundSeq++};
+}
+async function expandGrounds(p){
+  for(let i=0;i<BN;i++){
+    const g=G.board[i].ground;
+    if(!g||g.owner!==p||!CARDS[g.cardId]||!CARDS[g.cardId].expansive)continue;
+    const empt=ADJ[i].filter(j=>!G.board[j].ground);
+    if(!empt.length)continue;
+    const c=empt[Math.floor(Math.random()*empt.length)];
+    const gid=g.gid;
+    G.board[c].ground={cardId:g.cardId,owner:p,gid,expansive:true};
+    log(CARDS[g.cardId].name+' spreads to the '+CN[c]+'.');
+  }
+}
 async function startTurn(){
   if(!G)return;
   G._endingTurn=false;
@@ -10432,6 +10499,8 @@ async function startTurn(){
   await ageTurn(p);
   if(stale(ep)||G.over)return;
   await growSeeds(p);
+  if(stale(ep)||G.over)return;
+  await expandGrounds(p);
   if(stale(ep)||G.over)return;
   await payRecall(p);
   if(stale(ep)||G.over)return;
