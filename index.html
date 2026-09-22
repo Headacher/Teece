@@ -743,7 +743,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:64,date:'2026-09-22'};
+const VERSION={build:65,date:'2026-09-22'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3734,11 +3734,25 @@ const PLANE=()=>GRID;     /* the index the Plane occupies when it is in play */
 const planeOn=()=>BN>GRID;
 const isPlane=i=>i===GRID&&planeOn();
 const row=i=>isPlane(i)?-1:Math.floor(i/BW), col=i=>isPlane(i)?-1:i%BW;
-/* A panel off the board shares no row and no column with anything, itself
-   included -- otherwise row -1 would line it up with every other off-board
-   panel and col -1 with the whole left-hand file. */
-const sameRow=(a,b)=>!isPlane(a)&&!isPlane(b)&&row(a)===row(b);
-const sameCol=(a,b)=>!isPlane(a)&&!isPlane(b)&&col(a)===col(b);
+/* row() and col() say the Plane is off the grid, and they have to: several
+   things walk the board by adding 1 or BW to an index and use a shared row or
+   column as the guard that stops them wrapping round an edge. Give the Plane
+   real coordinates and those guards start agreeing that panel 8 is next to it.
+
+   But it IS somewhere. It hangs off a panel, so for anything that reaches
+   along a rank or a file it counts as standing on that panel: a Bomb Lob from
+   the Plane reaches its host's row and its host's column, and one aimed at the
+   Plane from either reaches back. Before this it reached nothing at all, in
+   both directions, because an off-board panel shared a line with nothing.
+
+   So the RELATIONSHIP is what knows about the Plane; the COORDINATES stay
+   honest about it not being on the grid. The two stepping sites that turn a
+   shared line back into an index -- dragging a Teece one space toward another
+   -- refuse when either end is the Plane, because there is no one step from
+   off the board to on it. */
+const planeRef=i=>(isPlane(i)&&G&&G.plane)?G.plane.host:i;
+const sameRow=(a,b)=>row(planeRef(a))===row(planeRef(b));
+const sameCol=(a,b)=>col(planeRef(a))===col(planeRef(b));
 /* Pin the Plane to a panel and a side, or take it off the board again. This is
    the only thing that changes BN mid-game, and it patches the adjacency both
    ways: the Plane knows its host and the host knows the Plane, or combat would
@@ -6641,7 +6655,8 @@ async function FXRUN(st,ctx){
     }else if(st.dir==='toward'){
       dst=null;
       const step=(c>src?-1:1);
-      const cand=sameRow(src,c)?c+(src<c?-1:1):(sameCol(src,c)?c+(src<c?-BW:BW):null);
+      const cand=(isPlane(src)||isPlane(c))?null
+        :sameRow(src,c)?c+(src<c?-1:1):(sameCol(src,c)?c+(src<c?-BW:BW):null);
       if(cand!=null&&cand>=0&&cand<BN&&!b[cand].teece)dst=cand;
     }else{
       const opts=ADJ[c].filter(j=>openAt(b,j));
@@ -7287,9 +7302,11 @@ async function FXRUN(st,ctx){
     const toward=allies.length===1?allies[0]:await chooseCell(p,allies,'Drag it toward which of your Teece?',{});
     if(toward==null||toward==='CANCEL')return;
     let dst;
+    /* No one step joins a panel off the board to one on it. */
+    if(isPlane(c)||isPlane(toward)){log('It cannot be dragged any closer.');return;}
     if(sameRow(c,toward))dst=c+(toward>c?1:-1);
-    else dst=c+(toward>c?3:-3);
-    if(dst<0||dst>=BN||b[dst].teece){log('It cannot be dragged any closer.');return;}
+    else dst=c+(toward>c?BW:-BW);
+    if(dst<0||dst>=BN||isPlane(dst)||b[dst].teece){log('It cannot be dragged any closer.');return;}
     const t=b[c].teece;
     moveT(b,c,dst,true);
     log(nm(t)+' is dragged to the '+CN[dst]+'.');
@@ -8958,8 +8975,17 @@ function noteTargeted(byPlayer){
   }
 }
 function oppositeCell(from,through){
+  /* Straight on from `through`, away from `from`. Off the board that cannot be
+     worked out by subtracting indexes -- the Plane's index bears no relation to
+     where it hangs -- so the direction comes from the side it is pinned
+     across, which is the only place that fact is recorded. */
+  if(isPlane(from)){
+    if(!G.plane||through!==G.plane.host)return -1;
+    return sideNbr(through,(G.plane.side+2)%4);
+  }
+  if(isPlane(through))return -1;
   const dst=through+(through-from);
-  if(dst<0||dst>=BN)return -1;
+  if(dst<0||dst>=BN||isPlane(dst))return -1;
   if(row(from)===row(through)&&row(through)!==row(dst))return -1;
   if(col(from)===col(through)&&col(through)!==col(dst))return -1;
   return dst;
@@ -13656,7 +13682,7 @@ if(typeof module!=='undefined'){
     riseFromGrave,forcedMoves,fireMagic,flushDiscards,toGrave,isBossCard,playMagic,
     mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
     groundCells,playGround,areaShapeCells,makeTeece,gcards,countGrounds,groundAnchored,
-    groundGives,groundGiveLabel,invulnText,blessedOn,
+    groundGives,groundGiveLabel,invulnText,blessedOn,sameRow,sameCol,oppositeCell,
     isPlane,planeOn,PLANE,planeSpots,hangPlane,syncPlane,getGrid:()=>GRID,
     statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,
     graveActsFor,graveActAvailable,runGraveAct,dumpPlate,
