@@ -743,7 +743,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:69,date:'2026-09-22'};
+const VERSION={build:70,date:'2026-09-22'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3781,6 +3781,12 @@ const row=i=>isPlane(i)?-1:Math.floor(i/BW), col=i=>isPlane(i)?-1:i%BW;
 const planeRef=i=>(isPlane(i)&&G&&G.plane)?G.plane.host:i;
 const sameRow=(a,b)=>row(planeRef(a))===row(planeRef(b));
 const sameCol=(a,b)=>col(planeRef(a))===col(planeRef(b));
+/* The rest of a panel's column, top to bottom -- what an avalanche falls onto.
+   It stops at GRID rather than BN because a column belongs to the square: the
+   Plane's index sits one past the last panel, so a walk bounded by BN reads it
+   as the panel under the bottom rank and buries whatever is standing off the
+   board. The Plane has no column of its own and nothing below it. */
+const below=i=>{const o=[];if(isPlane(i))return o;for(let j=i+BW;j<GRID;j+=BW)o.push(j);return o;};
 /* Pin the Plane to a panel and a side, or take it off the board again. This is
    the only thing that changes BN mid-game, and it patches the adjacency both
    ways: the Plane knows its host and the host knows the Plane, or combat would
@@ -5336,17 +5342,28 @@ function scanDeaths(b){
       else if(c-a>dfn[i]&&canKill(j)&&!immune(i))mark(i,j);
     }
   }
-  const inLine=(i,j,st)=>{
-    if(j<0||j>=BN)return false;
-    if(st===1||st===-1)return row(i)===row(j);
-    return true;
-  };
+  /* Ranged walks a straight line off one side of a panel until it meets
+     somebody. Stepping the index by 1 or by BW is that walk everywhere on the
+     square -- but the Plane is not on the square. Its index sits one past the
+     last panel, so adding BW to the bottom rank landed on it from whatever
+     column happened to reach index 9 first, and a Teece standing on it fired
+     up the left-hand file however the Plane actually hung. It could neither
+     shoot along the row it hangs in nor be shot along it.
+
+     sideNbr is the one thing that already knows which panel lies across a
+     given side, the Plane's single pinned edge included, so the walk asks it
+     instead of doing the arithmetic. The line then runs out of the row, off
+     the edge onto the Plane, and back out of the Plane along its host's row --
+     and the side each Teece meets the other with falls out of the same
+     answer, because the Plane's one open edge IS the side it was pinned
+     across. Three panels of the Plane are rim, so a shot from it goes one way
+     only, and nothing on the square reaches it except along that line. */
   for(let i=0;i<BN;i++){
     const t=b[i].teece; if(!t)continue;
     if(kws[i].indexOf('ranged')<0)continue;
-    for(const[st,ms]of[[-BW,0],[1,1],[BW,2],[-1,3]]){
-      let j=i+st,d=1;
-      while(inLine(i,j,st)){
+    for(let ms=0;ms<4;ms++){
+      let j=sideNbr(i,ms),d=1;
+      while(j>=0){
         if(b[j].teece){
           if(d>1&&foes(b[j].teece.owner,t.owner)){
             const os=(ms+2)%4;
@@ -5354,7 +5371,7 @@ function scanDeaths(b){
           }
           break;
         }
-        j+=st;d++;
+        j=sideNbr(j,ms);d++;
       }
     }
   }
@@ -6998,13 +7015,13 @@ async function FXRUN(st,ctx){
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p)cands.push(i);}
     if(!cands.length)return none('No Teece to sacrifice.');
     const c=await pickCell(cands,'Sacrifice one of your Teece to start the avalanche.',null,false,
-      i=>{const o=[i];for(let j=i+BW;j<BN;j+=BW)o.push(j);return o;});
+      i=>[i].concat(below(i)));
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const vt=b[c].teece;
     await processDeath({cell:c,t:vt,killers:[],cost:true});
     log(nm(vt)+' is sacrificed.');
-    for(let j=c+BW;j<BN;j+=BW){
+    for(const j of below(c)){
       const o=b[j].teece;
       if(o){applyModT(o,st.n,'temp');log(nm(o)+' is buried: '+st.n+' until end of turn.');}
     }
@@ -7015,14 +7032,14 @@ async function FXRUN(st,ctx){
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p)cands.push(i);}
     if(!cands.length)return none('No Teece to sacrifice.');
     const c=await pickCell(cands,'Sacrifice one of your Teece.',null,false,
-      i=>{const o=[i];for(let j=i+BW;j<BN;j+=BW)o.push(j);return o;});
+      i=>[i].concat(below(i)));
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const vt=b[c].teece;
     await processDeath({cell:c,t:vt,killers:[],cost:true});
     log(nm(vt)+' is sacrificed.');
     const hit=[];
-    for(let j=c+BW;j<BN;j+=BW){
+    for(const j of below(c)){
       const o=b[j].teece;
       if(o){hit.push(j);await processDeath({cell:j,t:o,killers:[],cost:false});log(nm(o)+' is crushed.');}
     }
@@ -10580,7 +10597,14 @@ async function playEquip(p,handIdx){
   return true;
 }
 function areaShapeCells(anchor,shape){
-  const rows=Math.floor(BN/BW);
+  /* Every shape below is grid arithmetic off the anchor, and the Plane has no
+     row and no column to step through -- so a blast with a footprint cannot be
+     anchored on it, exactly as a battleground with one cannot be laid across
+     it. Without this the guards read col() as -1, pass, and hand back a panel
+     one past the end of the board. The square, not the board, is what the
+     footprint has to fit inside. */
+  if(isPlane(anchor))return null;
+  const rows=Math.floor(GRID/BW);
   if(shape==='1x2'){
     if(col(anchor)>BW-2)return null;
     return [anchor,anchor+1];
@@ -10609,7 +10633,7 @@ function groundCells(anchor,shape){
     const cells=[];for(let c=0;c<BW;c++)cells.push(anchor+c);
     return cells;
   }
-  const rows=Math.floor(BN/BW);
+  const rows=Math.floor(GRID/BW);
   if(shape==='2x1'){
     if(col(anchor)>BW-2)return null;
     return [anchor,anchor+1];
