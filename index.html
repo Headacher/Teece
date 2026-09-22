@@ -743,7 +743,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:67,date:'2026-09-22'};
+const VERSION={build:68,date:'2026-09-22'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4546,6 +4546,23 @@ function effSides(b,i,parts){
     for(let k=0;k<4;k++)sum[k]+=d[k];
     put(label,d);
   };
+  /* Steadfast is "nothing can take attributes off it", and the ground is
+     something. applyModT has always refused a negative aimed at a steadfast
+     Teece, but the ground layer composes here instead of going through it, so
+     it was the one place a penalty still landed -- and since a negative side is
+     death, ANY negative ground killed a Muckraider outright: printed 0/0/8/8,
+     it died on a Low Ground, a Swamp, the Wastes or a Dimension of Pain while
+     its card said its attributes cannot decrease.
+
+     The panel being on fire stays the exception it was already written to be:
+     that is a hazard laid on the panel rather than terrain, and walking out of
+     it is the answer. */
+  const fast=isSteadfast(t);
+  const addGround=(sum,m,label)=>{
+    if(m==null)return;
+    if(!fast)return addMod(sum,m,label);
+    addMod(sum,Array.isArray(m)?m.map(v=>Math.max(0,v)):Math.max(0,m),label);
+  };
   /* Scout Stout reads the rim. Every side with no panel across it is a side
      backed against the board, and the bonus lands on the side facing away from
      each of them -- two on a corner, one on an edge, and in the middle, where
@@ -4658,20 +4675,20 @@ function effSides(b,i,parts){
   for(const gi of gpans){
     const gg=b[gi].ground;
     const where=gi===i?', the ground here':', reaching over from the '+CN[gi];
-    if(gg.gmod!=null)addMod(s,gg.gmod,CARDS[gg.cardId].name+where);
+    if(gg.gmod!=null)addGround(s,gg.gmod,CARDS[gg.cardId].name+where);
     for(const gd of gcards(gg)){
-      addMod(s,gd.gmod,gd.name+where);
-      if(gd.gStand&&t.standCell===gi)addMod(s,gd.gStand,gd.name+', for standing still');
-      if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addMod(s,gd.gRangedPlus,gd.name+', for being Ranged');
+      addGround(s,gd.gmod,gd.name+where);
+      if(gd.gStand&&t.standCell===gi)addGround(s,gd.gStand,gd.name+', for standing still');
+      if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addGround(s,gd.gRangedPlus,gd.name+', for being Ranged');
       /* The Dumpster pays for what is packed into it, and the Patch for a row
          held end to end. */
       if(gd.gHeldPer&&gg.held&&gg.held.length)
-        addMod(s,Math.floor(gg.held.length/(gd.gHeldPer.per||1))*gd.gHeldPer.n,
+        addGround(s,Math.floor(gg.held.length/(gd.gHeldPer.per||1))*gd.gHeldPer.n,
           gd.name+', for the '+gg.held.length+' cards packed into it');
-      if(gd.gGarbageFull&&patchFull(b,gi))addMod(s,gd.gGarbageFull,gd.name+', filled end to end');
+      if(gd.gGarbageFull&&patchFull(b,gi))addGround(s,gd.gGarbageFull,gd.name+', filled end to end');
       if(gd.gPerGround){
         const n=countGrounds(b);
-        if(n)addMod(s,gd.gPerGround*n,gd.name+', one for each of the '+n+' battleground'+(n===1?'':'s')+' on the field');
+        if(n)addGround(s,gd.gPerGround*n,gd.name+', one for each of the '+n+' battleground'+(n===1?'':'s')+' on the field');
       }
       /* A battleground that pays one side by day and charges the other by
          night. Ally and enemy are read against whoever laid it. */
@@ -4680,7 +4697,7 @@ function effSides(b,i,parts){
         const gally=sameTeam(t.owner,gg.owner);
         if(pm.who==='ally'&&!gally)continue;
         if(pm.who==='enemy'&&gally)continue;
-        addMod(s,pm.n,gd.name+(pm.when==='night'?', by night':', by day'));
+        addGround(s,pm.n,gd.name+(pm.when==='night'?', by night':', by day'));
       }
     }
   }
@@ -4700,7 +4717,7 @@ function effSides(b,i,parts){
     if(seenAdjG.indexOf(key)>=0)continue;
     seenAdjG.push(key);
     const n=groundAdjMod(b,j);
-    if(n)addMod(s,n,CARDS[og.cardId].name+' at the '+CN[j]+', reaching out at what stands beside it');
+    if(n)addGround(s,n,CARDS[og.cardId].name+' at the '+CN[j]+', reaching out at what stands beside it');
   }
   /* The panel itself is burning. Not a penalty applied to the Teece -- it is
      the ground it is standing on, so Steadfast does not save it and walking out
@@ -4942,9 +4959,9 @@ function isSteadfast(t){
   if((t.kwTemp||[]).indexOf('steadfast')>=0)return true;
   if(G&&G.board){
     const i=G.board.findIndex(c=>c.teece===t);
-    if(i>=0&&G.board[i].ground){
-      const gd=CARDS[G.board[i].ground.cardId];
-      if((gd.gkw||[]).indexOf('steadfast')>=0)return true;
+    if(i>=0&&G.board[i].ground&&!G.board[i].ground.gsil){
+      for(const gd of gcards(G.board[i].ground))
+        if((gd.gkw||[]).indexOf('steadfast')>=0)return true;
     }
   }
   return false;
@@ -13771,7 +13788,7 @@ if(typeof module!=='undefined'){
     mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
     groundCells,playGround,areaShapeCells,makeTeece,gcards,countGrounds,groundAnchored,
     groundGives,givesLabel,invulnText,blessedOn,sameRow,sameCol,oppositeCell,
-    groundNum,groundOf,canHandDiscard,auraGives,panelGives,
+    groundNum,groundOf,canHandDiscard,auraGives,panelGives,isSteadfast,
     isPlane,planeOn,PLANE,planeSpots,hangPlane,syncPlane,getGrid:()=>GRID,
     statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,
     graveActsFor,graveActAvailable,runGraveAct,dumpPlate,
