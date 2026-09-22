@@ -323,6 +323,11 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 /* \u21BB is a text glyph rather than an emoji, so it needs a size of its own to
    sit level with the bow and the shield beside it. */
 .teece .rgd .undy{font-size:13px;line-height:1;gap:1px}
+/* Invulnerable. A text glyph like the Undying arrow, so it needs its own size
+   to sit level; given a light of its own because "cannot be destroyed" is the
+   one badge that changes what an attack is worth. */
+.teece .rgd .inv{font-size:13px;line-height:1;color:#7fd4ff;
+  text-shadow:0 0 5px rgba(127,212,255,.85)}
 .teece .ascii{position:absolute;top:12px;right:5px;bottom:12px;left:5px;margin:0;z-index:0;
   pointer-events:none;overflow:hidden;background:transparent;color:var(--artink);opacity:.46;
   display:flex;align-items:center;justify-content:center;
@@ -738,7 +743,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:63,date:'2026-09-21'};
+const VERSION={build:64,date:'2026-09-22'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3349,6 +3354,24 @@ function gainBlocked(t){
 }
 /* Blessing of the Dump: cover bought by standing with your own and by holding
    the field. Board-aware, because scanDeaths asks it of simulated boards too. */
+/* Why this Teece cannot be destroyed, or '' if it can. Both sources answer
+   here, because scanDeaths treats them as one thing and the badge that reports
+   it has to mean the same thing the combat scan means. */
+function invulnText(b,i){
+  const t=b[i]&&b[i].teece;
+  if(!t)return '';
+  if(t.immortalOwner!=null){
+    const until=t.immortalUntil
+      ? (t.immortalUntil<=G.turnNum?'the end of this turn':'the end of turn '+t.immortalUntil)
+      /* pposs gives "yours", which is right after a noun and wrong before one:
+         the chip this replaced read "the start of You's next turn". */
+      : 'the start of '+(pname(t.immortalOwner)==='You'?'your':pname(t.immortalOwner)+"'s")+' next turn';
+    return 'Cannot be destroyed until '+until+'.';
+  }
+  if(blessedOn(b,i))return 'Cannot be destroyed: it is blessed, standing with an ally, '+
+    'and its side outnumbers every other. It becomes destructible again the moment any of that stops being true.';
+  return '';
+}
 function blessedOn(b,i){
   const t=b[i]&&b[i].teece;
   if(!t||!t.equips.some(e=>{const g=eqG(e);return g&&g.blessGuard;}))return false;
@@ -12539,6 +12562,12 @@ function renderBoard(){
       const un=undyLeft(t);
       if(un>0)badges.push('<span class="dfn undy" title="Undying: gets back up '+un+
         ' more time'+(un===1?'':'s')+'">\u21BB'+un+'</span>');
+      /* Cannot be destroyed. Common enough to belong on the badge row beside
+         Defence and Undying rather than only in a chip under the board: it is
+         the single fact that decides whether attacking this panel is worth
+         anything, and it was being read three feet away from the panel. */
+      const invT=invulnText(G.board,i);
+      if(invT)badges.push('<span class="dfn inv" title="'+escHtml(invT)+'">\u25C8</span>');
       /* Long names step down a size rather than being cut off: the panel is the
          only place the name appears once a Teece is on the board. Name and
          badges are stacked and centred together, so a name that takes three
@@ -12702,6 +12731,10 @@ function showDetail(i){
   if(kws.length)html+='<div class="dt" style="color:var(--gold)">'+kws.join(', ')+'</div>';
   const dfv=defOf(G.board,i);
   if(dfv>0)html+='<div class="dt" style="color:var(--gold)">Defence '+dfv+'</div>';
+  /* The badge on the panel carries this in a tooltip, and a phone has no
+     hover -- so the one place a thumb can read it has to say it too. */
+  const invD=invulnText(G.board,i);
+  if(invD)html+='<div class="dt" style="color:#7fd4ff">◈ '+escHtml(invD)+'</div>';
   const tm=DEF(t).timer;
   if(tm)html+='<div class="dt" style="color:var(--gold)">'+(t.transformed?'Fully grown.':
     'Becomes '+sidesLine(tm.sides)+' in '+Math.max(0,tm.turns-(t.age||0))+' more of your turns.')+'</div>';
@@ -13129,17 +13162,8 @@ function statusesFor(p){
         ', so whatever stands there gets +'+g.bones+'. Another goes down every time something dies on it or climbs out of a grave onto it.');
   }
 
-  /* --- held outside time --- */
-  for(let i=0;i<BN;i++){
-    const t=b[i].teece;
-    if(!t||t.immortalOwner==null)continue;
-    const ally=sameTeam(t.owner,p);
-    const until=t.immortalUntil
-      ? (t.immortalUntil<=G.turnNum?'the end of this turn':'the end of turn '+t.immortalUntil)
-      : 'the start of '+pname(t.immortalOwner)+"'s next turn";
-    push('immortal'+t.uid,ally?'good':'bad',(ally?'Safe: ':'Untouchable: ')+nm(t),
-      nm(t)+' cannot be destroyed until '+until+'.');
-  }
+  /* Held outside time used to be a chip down here. It is a badge on the panel
+     now -- beside Defence and Undying, where the thing it decides is decided. */
 
   /* --- the Web, and the two cards that change what standing on it means.
          None of it is printed anywhere else on the board. --- */
@@ -13632,7 +13656,7 @@ if(typeof module!=='undefined'){
     riseFromGrave,forcedMoves,fireMagic,flushDiscards,toGrave,isBossCard,playMagic,
     mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
     groundCells,playGround,areaShapeCells,makeTeece,gcards,countGrounds,groundAnchored,
-    groundGives,groundGiveLabel,
+    groundGives,groundGiveLabel,invulnText,blessedOn,
     isPlane,planeOn,PLANE,planeSpots,hangPlane,syncPlane,getGrid:()=>GRID,
     statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,
     graveActsFor,graveActAvailable,runGraveAct,dumpPlate,
