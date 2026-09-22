@@ -743,7 +743,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:66,date:'2026-09-22'};
+const VERSION={build:67,date:'2026-09-22'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4809,11 +4809,56 @@ function groundGives(b,i){
   }
   return out;
 }
+/* What the auras already standing on the board would pay or charge a Teece of
+   p's arriving on this panel -- a Mark of Plague two panels away is the reason
+   a bare panel can be worth avoiding, and nothing on the board said so.
+
+   Mirrors the aura pass of effSides, minus the clauses that cannot be answered
+   before anybody has arrived: a token-only, pixie-only or mark-only aura, and
+   one that scales with the arrival's own Defence, depend on WHICH Teece lands
+   and are left out rather than guessed at. An ally aura reaching 'adj' is
+   measured by plain adjacency here, because the extended kind reads the body
+   standing on the panel and there is not one yet. */
+function auraGives(b,i,p){
+  const out=[0,0,0,0];
+  if(p==null)return out;
+  const dbl=groundFlag(b[i].ground,'gDoublePosAll');
+  for(let j=0;j<BN;j++){
+    if(j===i)continue;
+    const o=b[j].teece;if(!o)continue;
+    const od=DEF(o),auras=[];
+    if(!o.silenced){
+      const own=(od.aura?[od.aura]:[]).concat(od.auras||[]);
+      for(let e=0;e<=(o.echo||0);e++)auras.push(...own);
+      for(const gid of (o.grafts||[])){const ga=CARDS[gid]&&CARDS[gid].aura;if(ga)auras.push(ga);}
+    }
+    for(const e of o.equips){const g=eqG(e);if(g&&g.aura)auras.push(g.aura);}
+    for(const a of auras){
+      if(!phaseIs(a.when))continue;
+      if(a.tokenOnly||a.pixieOnly||a.markOnly||a.byDef)continue;
+      const ally=sameTeam(o.owner,p);
+      if(a.who==='ally'&&!ally)continue;
+      if(a.who==='enemy'&&ally)continue;
+      if(!auraReaches(b,j,i,a))continue;
+      const n=a.n||0;
+      if(!n)continue;
+      const amt=(dbl&&n>0)?n*2:n;
+      for(let k=0;k<4;k++)out[k]+=amt;
+    }
+  }
+  return out;
+}
+/* Everything an arriving Teece of p's would gain or lose here: the terrain and
+   the auras together, which is the number worth reading off an empty panel. */
+function panelGives(b,i,p){
+  const g=groundGives(b,i),a=auraGives(b,i,p);
+  return [g[0]+a[0],g[1]+a[1],g[2]+a[2],g[3]+a[3]];
+}
 const GIVE_ARROW=['▲','▶','▼','◀'];
 /* One number when every side gets the same, and the sides themselves when they
    do not -- a Pedestal pays the top seven and the rest nothing, and averaging
    that into one figure would be worse than saying nothing. */
-function groundGiveLabel(d){
+function givesLabel(d){
   if(!d.some(v=>v))return '';
   if(d[0]===d[1]&&d[1]===d[2]&&d[2]===d[3])return sgn(d[0]);
   return d.map((v,k)=>v?GIVE_ARROW[k]+sgn(v):null).filter(Boolean).join(' ');
@@ -12576,19 +12621,24 @@ function renderBoard(){
     const bg=G.board[i].ground;
     if(bg){
       const gd=CARDS[bg.cardId];
-      /* Coloured by what the panel actually gives rather than by what the card
-         prints, so a stack, a modal instance or a Nascent Dimension counting
-         the field is the colour it has earned. */
-      const gives=groundGives(G.board,i);
-      const tot=gives.reduce((a,c)=>a+c,0);
-      const cls=tot>0?'bgplus':(tot<0?'bgminus':'bgutil');
+      /* The battleground's own tint follows what the TERRAIN gives, rather
+         than what the card prints, so a stack, a modal instance or a Nascent
+         Dimension counting the field is the colour it has earned. */
+      const gtot=groundGives(G.board,i).reduce((a,c)=>a+c,0);
+      const cls=gtot>0?'bgplus':(gtot<0?'bgminus':'bgutil');
       cell.innerHTML+='<div class="bglayer '+cls+'">'+gd.name+'</div>';
-      /* Shown only while nothing is standing there: once a Teece lands, its
-         own four numbers already say it, and two sets of figures on one panel
-         is worse than one. */
-      if(!G.board[i].teece){
-        const lbl=groundGiveLabel(gives);
-        if(lbl)cell.innerHTML+='<div class="bggive'+(tot<0?' neg':'')+
+    }
+    /* What an arriving Teece would get here, terrain and auras together, on
+       any empty panel whether or not it has a battleground -- a Mark of
+       Plague reaches bare panels, and that was invisible. Shown only while
+       nothing is standing there: once a Teece lands its own four numbers say
+       it, and two sets of figures on one panel is worse than one. */
+    if(!G.board[i].teece&&!G.board[i].razed){
+      const all=panelGives(G.board,i,G.turn);
+      const lbl=givesLabel(all);
+      if(lbl){
+        const tot=all.reduce((a,c)=>a+c,0);
+        cell.innerHTML+='<div class="bggive'+(tot<0?' neg':'')+
           (lbl.length>4?' small':'')+'">'+lbl+'</div>';
       }
     }
@@ -13720,8 +13770,8 @@ if(typeof module!=='undefined'){
     riseFromGrave,forcedMoves,fireMagic,flushDiscards,toGrave,isBossCard,playMagic,
     mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
     groundCells,playGround,areaShapeCells,makeTeece,gcards,countGrounds,groundAnchored,
-    groundGives,groundGiveLabel,invulnText,blessedOn,sameRow,sameCol,oppositeCell,
-    groundNum,groundOf,canHandDiscard,
+    groundGives,givesLabel,invulnText,blessedOn,sameRow,sameCol,oppositeCell,
+    groundNum,groundOf,canHandDiscard,auraGives,panelGives,
     isPlane,planeOn,PLANE,planeSpots,hangPlane,syncPlane,getGrid:()=>GRID,
     statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,
     graveActsFor,graveActAvailable,runGraveAct,dumpPlate,
