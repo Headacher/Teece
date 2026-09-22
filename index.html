@@ -743,7 +743,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:65,date:'2026-09-22'};
+const VERSION={build:66,date:'2026-09-22'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3481,6 +3481,34 @@ function groundFlag(g,key){
   if(g[key])return true;
   return gcards(g).some(gd=>gd[key]);
 }
+/* A ground field's VALUE, read off the whole stack the way groundFlag reads
+   the flags. This pairing is the trap: groundFlag answers yes from ANY card in
+   a folded or stacked ground, and anything that then fetched the value off
+   g.cardId alone got undefined. A Teece arriving on a Fading Rift that That
+   Which Unfolds had folded into another battleground took `undefined` to all
+   four sides, which is NaN -- and every other field read that way quietly lost
+   its effect instead of breaking loudly.
+
+   Neither helper tests gsil. Silence is the decision points' business, and they
+   ask groundFlag, which does test it; these two only read. That matters for
+   the ones that decide where a held card physically goes when the ground comes
+   apart, which must not depend on whether something was standing on it. */
+function groundNum(g,key){
+  /* Numbers compose, the way every other ground number composes in effSides:
+     two Fading Rifts folded together pay twice. */
+  if(!g)return 0;
+  let n=(typeof g[key]==='number')?g[key]:0;
+  for(const gd of gcards(g))if(typeof gd[key]==='number')n+=gd[key];
+  return n;
+}
+function groundOf(g,key){
+  /* Anything that is not a number cannot be added up: the first card in the
+     stack carrying it answers. */
+  if(!g)return null;
+  if(g[key]!=null)return g[key];
+  for(const gd of gcards(g))if(gd[key]!=null)return gd[key];
+  return null;
+}
 /* Anchored ground cannot be replaced or destroyed. The flag rides the stack,
    so a Dimension of Dimensions equipped onto a Swamp anchors the Swamp; the
    Warden of the Threshold lends the same thing while it stands. */
@@ -4850,7 +4878,7 @@ function defOf(b,i){
     d+=WEB_DEF;
     for(let j=0;j<BN;j++){
       const g=b[j].ground;if(!g||!groundFlag(g,'gSpiderDef'))continue;
-      d+=(g.gSpiderDef!=null?g.gSpiderDef:CARDS[g.cardId].gSpiderDef)||0;
+      d+=groundNum(g,'gSpiderDef');
     }
   }
   for(let j=0;j<BN;j++){
@@ -5015,7 +5043,7 @@ function putTeece(b,i,t,live){
   /* A Fading Rift pays the first thing to arrive on it and then is gone. It is
      a made card, so nothing buries it -- it simply stops being there. */
   if(groundFlag(b[i].ground,'gArrive')){
-    const g=b[i].ground,n=CARDS[g.cardId].gArrive;
+    const g=b[i].ground,n=groundNum(g,'gArrive');
     b[i].ground=null;
     for(let k=0;k<4;k++)t.temp[k]+=n;
     if(live)log(nm(t)+' arrives through the Fading Rift: '+sgn(n)+' until the end of the turn, and the rift closes behind it.');
@@ -5062,10 +5090,9 @@ function moveT(b,from,to,live){
 }
 function ageRateAt(b,i){
   const t=b[i].teece; if(!t)return 0;
-  const gd=b[i].ground?CARDS[b[i].ground.cardId]:null;
-  if(gd&&gd.gAgeStop)return 0;
+  if(groundFlag(b[i].ground,'gAgeStop'))return 0;
   let rate=1;
-  if(gd&&gd.gAgeRate)rate*=gd.gAgeRate;
+  {const r=groundNum(b[i].ground,'gAgeRate');if(r)rate*=r;}
   for(const e of t.equips){
     const g=eqG(e);
     if(g&&g.ageStop)return 0;
@@ -5121,7 +5148,7 @@ async function fireMove(from,to,cause){
   const b=G.board,t=b[to].teece;
   if(!t)return;
   const gd=b[to].ground?CARDS[b[to].ground.cardId]:null;
-  if(gd&&gd.gDestroyOnMove&&t.immortalOwner==null){
+  if(groundFlag(b[to].ground,'gDestroyOnMove')&&t.immortalOwner==null){
     log(nm(t)+' steps into '+gd.name+' and is swallowed.');
     await anim([to],'dying',190);
     await processDeath({cell:to,t,killers:[]});
@@ -5142,7 +5169,8 @@ async function fireMove(from,to,cause){
       log(nm(t)+' catches the updraught from '+nm(w)+': '+sgn(pf.n)+durTxt(pf.dur||'temp')+'.');
     }
   }
-  if(gd&&gd.gStand){t.standCell=to;log(nm(t)+' settles onto '+gd.name+': '+sgn(gd.gStand)+' while it stays.');}
+  const gst=groundNum(b[to].ground,'gStand');
+  if(gst){t.standCell=to;log(nm(t)+' settles onto '+gd.name+': '+sgn(gst)+' while it stays.');}
   else if(t.standCell!=null)t.standCell=null;
   for(const c of G.curses){
     if(c.cardId===t.cardId&&c.owner===t.baseOwner){
@@ -8853,7 +8881,7 @@ async function FXRUN(st,ctx){
   case 'riverToll':{
     const i=ctx.cell;
     const g=(i!=null&&b[i])?b[i].ground:null;
-    if(!g||!CARDS[g.cardId].gPin)return none('There is no river here to break.');
+    if(!groundFlag(g,'gPin'))return none('There is no river here to break.');
     const held=g.held||[];
     const n=st.n||1;
     if(held.length<n)return none('The river holds only '+held.length+' card'+(held.length===1?'':'s')+
@@ -9088,7 +9116,7 @@ async function catchDiscard(owner,cardId){
      card it is -- the shelf is theirs. */
   for(let i=0;i<BN;i++){
     const g=G.board[i].ground;
-    if(!g||!CARDS[g.cardId].gLib)continue;
+    if(!groundFlag(g,'gLib'))continue;
     const yes=await chooseOption(g.owner,[{v:'y',lbl:'Shelve it'},{v:'n',lbl:'Let it go to the graveyard'}],
       CARDS[cardId].name+' is discarded. Shelve it in the Eldritch Library?');
     if(yes!=='y')return false;
@@ -9123,7 +9151,7 @@ async function noteDiscard(owner,cardId){
   for(let i=0;i<BN;i++){
     const g=G.board[i].ground;
     if(!g)continue;
-    const gd=CARDS[g.cardId].gOnDiscard;
+    const gd=groundOf(g,'gOnDiscard');
     if(!gd)continue;
     const t=G.board[i].teece;
     if(!t)continue;
@@ -9574,17 +9602,17 @@ async function processDeath(d){
       }
     }
     const gr=G.board[cell].ground,grd=gr?CARDS[gr.cardId]:null;
-    const salvage=grd&&grd.gSalvage&&gr.owner===t.baseOwner;
+    const salvage=groundFlag(gr,'gSalvage')&&gr.owner===t.baseOwner;
     /* Trash Heap: whatever is thrown away on this panel is yours, whoever it
        belonged to. Every burial from here goes through bury() so the body and
        the equips buckled to it all land in the same graveyard. */
-    const heapTo=(grd&&grd.gGraveSteal)?gr.owner:null;
+    const heapTo=groundFlag(gr,'gGraveSteal')?gr.owner:null;
     const bury=(owner,cardId)=>{
       toGrave(heapTo!=null?heapTo:owner,cardId);
       if(heapTo!=null&&heapTo!==owner)log(CARDS[cardId].name+' is thrown onto '+pname(heapTo)+"'s Trash Heap.");
     };
     /* Recycling Bins: a card off the hand buys the body back. */
-    if(!handed&&!t.isToken&&!t.isCopy&&grd&&grd.gRecycle&&G.players[t.baseOwner].hand.length){
+    if(!handed&&!t.isToken&&!t.isCopy&&groundFlag(gr,'gRecycle')&&G.players[t.baseOwner].hand.length){
       const yes=await chooseOption(t.baseOwner,[{v:'y',lbl:'Discard a card to take it back'},{v:'n',lbl:'Let it go to the grave'}],
         nm(t)+' fell in the Recycling Bins. Discard a card to take it back to hand?');
       if(yes==='y'){
@@ -9636,11 +9664,11 @@ async function processDeath(d){
       /* A Graveyard keeps what dies on it. The card is buckled onto the
          battleground rather than buried, and comes back to its owner's hand
          when the Graveyard itself is broken up. */
-      else if(gr&&(grd.gInter||grd.gDump||grd.gPin)){
+      else if(gr&&(groundFlag(gr,'gInter')||groundFlag(gr,'gDump')||groundFlag(gr,'gPin'))){
         gr.held=gr.held||[];
         gr.held.push({cardId:t.cardId,owner:t.baseOwner});
-        log(nm(t)+(grd.gPin?' sinks into the River of Blood instead of going to a graveyard. '
-          :grd.gDump?' is packed into the Dumpster instead of going to a graveyard. '
+        log(nm(t)+(groundFlag(gr,'gPin')?' sinks into the River of Blood instead of going to a graveyard. '
+          :groundFlag(gr,'gDump')?' is packed into the Dumpster instead of going to a graveyard. '
           :' is equipped to the Graveyard instead of going to a graveyard. ')+gr.held.length+' held.');
       }
       else bury(t.baseOwner,t.cardId);
@@ -10131,8 +10159,15 @@ async function playHandDiscard(p,handIdx){
   const pl=G.players[p],id=pl.hand[handIdx],d=CARDS[id];
   if(!canHandDiscard(p,id))return false;
   /* A card with no list of its own is thrown away for nothing but its own
-     "when discarded" clause, which afterDiscard fires either way. */
-  const ok=d.handDiscard?await runSteps(d.handDiscard,{p,cell:null,t:null,first:true}):true;
+     "when discarded" clause, which afterDiscard fires either way.
+
+     handDiscard means two things and only one of them is a list of steps. On
+     Spare Parts and the Solar pair it is what happens INSTEAD of playing the
+     card; on Timekeeper it is bare permission -- `handDiscard:true` -- and the
+     effect is its ordinary onDiscard. Handing a boolean to runSteps put `true`
+     through a for..of, which throws, so the Discard button did nothing at all. */
+  const steps=Array.isArray(d.handDiscard)?d.handDiscard:null;
+  const ok=steps?await runSteps(steps,{p,cell:null,t:null,first:true}):true;
   if(!ok)return false;
   const idx=pl.hand.indexOf(id);
   const gone=idx>=0?handTake(p,idx):null;
@@ -10302,7 +10337,8 @@ async function playTeece(p,handIdx){
   }
   if(b[spot].ground){
     const gd0=CARDS[b[spot].ground.cardId];
-    if(gd0.gPlayMod){applyModT(t,gd0.gPlayMod,'perm');log(nm(t)+' is played onto '+gd0.name+': '+sgn(gd0.gPlayMod)+'.');}
+    {const pm=groundNum(b[spot].ground,'gPlayMod');
+     if(pm){applyModT(t,pm,'perm');log(nm(t)+' is played onto '+gd0.name+': '+sgn(pm)+'.');}}
   }
   spend();
   log(pname(p)+' plays '+d.name+' at the '+CN[spot]+
@@ -10517,10 +10553,10 @@ async function clearGroundAt(i,breaker){
   for(const held of (g.held||[])){
     /* A Graveyard hands back what it interred; a Dumpster is not a loan, and
        everything packed into it is tipped into its owner's graveyard. */
-    if(gd.gPin){
+    if(groundFlag(g,'gPin')){
       toGrave(held.owner,held.cardId);
       log(CARDS[held.cardId].name+' comes loose from the river and sinks into '+pposs(held.owner)+' graveyard.');
-    }else if(gd.gDump){
+    }else if(groundFlag(g,'gDump')){
       toGrave(g.owner,held.cardId);
       log(CARDS[held.cardId].name+' is tipped out of the Dumpster and into '+pname(g.owner)+"'s graveyard.");
     }else{
@@ -10545,16 +10581,17 @@ async function clearGroundAt(i,breaker){
   }
   /* Everything the Dimension of Energy swallowed goes off at once, in the
      order it came in, with nobody aiming any of it. */
-  if(gd.gSpellJar&&(g.spells||[]).length){
+  if(groundFlag(g,'gSpellJar')&&(g.spells||[]).length){
     log('The Dimension of Energy lets go: '+g.spells.length+' spell'+(g.spells.length===1?'':'s')+' discharge at random.');
     const was=G.blindCast;
     G.blindCast=true;
     try{ for(const sp of g.spells)await castCard(sp.owner,sp.cardId); }
     finally{ G.blindCast=was; }
   }
-  if(gd.gDiscardOnBreak&&breaker!=null&&breaker!==g.owner){
-    log(pname(breaker)+' broke '+gd.name+' and must discard '+gd.gDiscardOnBreak+'.');
-    await runSteps([{fx:'discard',n:gd.gDiscardOnBreak}],{p:breaker,first:false});
+  const dob=groundNum(g,'gDiscardOnBreak');
+  if(dob&&breaker!=null&&breaker!==g.owner){
+    log(pname(breaker)+' broke '+gd.name+' and must discard '+dob+'.');
+    await runSteps([{fx:'discard',n:dob}],{p:breaker,first:false});
   }
 }
 /* Every place the Plane could hang: a panel on the rim, and one of that panel's
@@ -11038,9 +11075,10 @@ async function endTurn(){
     const g=G.board[i].ground;
     if(!g)continue;
     const gd=CARDS[g.cardId];
-    if(gd.gEndTurn&&g.owner===p&&!G.board[i].teece){
-      summonToken(G.board,i,gd.gEndTurn,g.owner,true);
-      log(gd.name+' fields a '+CARDS[gd.gEndTurn].name+' at the '+CN[i]+'.');
+    const et=groundOf(g,'gEndTurn');
+    if(et&&g.owner===p&&!G.board[i].teece){
+      summonToken(G.board,i,et,g.owner,true);
+      log(gd.name+' fields a '+CARDS[et].name+' at the '+CN[i]+'.');
     }
   }
   /* A Vampire that takes a little from everyone, every turn. */
@@ -13179,7 +13217,7 @@ function statusesFor(p){
       const ggd=CARDS[g.cardId];
       push('inter'+i,'good',ggd.name+' holds '+g.held.length,
         'The '+ggd.name+' at the '+CN[i]+' holds '+g.held.map(h=>CARDS[h.cardId].name).join(', ')+
-        '. Break it open and '+(ggd.gInter?'every one of them goes back to its owner\u2019s hand.'
+        '. Break it open and '+(groundFlag(g,'gInter')?'every one of them goes back to its owner\u2019s hand.'
           :'every one of them goes into a graveyard.'));
     }
     if(g.bones)
@@ -13683,6 +13721,7 @@ if(typeof module!=='undefined'){
     mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
     groundCells,playGround,areaShapeCells,makeTeece,gcards,countGrounds,groundAnchored,
     groundGives,groundGiveLabel,invulnText,blessedOn,sameRow,sameCol,oppositeCell,
+    groundNum,groundOf,canHandDiscard,
     isPlane,planeOn,PLANE,planeSpots,hangPlane,syncPlane,getGrid:()=>GRID,
     statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,
     graveActsFor,graveActAvailable,runGraveAct,dumpPlate,
