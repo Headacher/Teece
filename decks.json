@@ -637,6 +637,39 @@
         "Black Hole Dimension eats every equip and every non-Boss Teece beside it and hands the lot back when it goes — and it goes on its own, at the start of your turn, once it holds three.",
         "The Extradimensional Plane of Matter is played OUTSIDE the board, hanging off the left or right edge of a panel. It is a tenth panel from then on — a Teece stands on it and fights across the edge it hangs on — and it drifts round the board carrying whatever is standing on it."
       ]
+    },
+    "rats": {
+      "name": "Rats",
+      "cards": [
+        825,
+        826,
+        827,
+        828,
+        829,
+        830,
+        831,
+        832,
+        833,
+        834,
+        835,
+        836,
+        837,
+        838,
+        839,
+        840,
+        841,
+        842,
+        843,
+        844
+      ],
+      "noDominate": true,
+      "blurb": "Something is lurking in the sewers of the metropolis, and there is a great deal of it. Ten of the twenty cards are the same Rat, and each one you play lets you play another for free, so a hand goes down in a single turn. Every body in the deck gets +1 for every ally standing with it — the swarm is worth more for being a swarm. The price is the win condition: Rats can never take the game by board domination, however far ahead they get. They win by still holding the field when somebody runs out of cards.",
+      "how": [
+        "Each Rat you play opens the door for the next one, free of the turn's Teece play. Nine panels is the only thing that stops you.",
+        "Every Teece here reads the crowd: +1 for every other ally on the board, and the Rat King hands out another +2 on top of that. Swarmcloak pays +2 per ally to whoever wears it.",
+        "You cannot win by domination, so being four Teece ahead does nothing. Fill the board, stay filled, and take it when a deck runs dry — Swarm digs two Rats back out of the graveyard to keep that going.",
+        "The Rat King counts as two sacrifices, so it pays half of the Rat Queen on its own — and the Queen hands every Teece sacrificed for her straight back to your hand."
+      ]
     }
   },
   "formats": [
