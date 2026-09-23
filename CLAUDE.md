@@ -41,6 +41,13 @@ past theirs; keep both sides' cards. Then re-run the tests on the MERGED tree:
 the shipping branch has its own engine work that your changes have never been
 tested against.
 
+**Push to the branch the owner can actually see.** Said plainly, because it has
+been said three times in this file and still gets missed: the only branch worth
+landing on is the one serving https://headacher.github.io/Teece/. A task branch
+is scaffolding. If you finish a change and it is not on
+`claude/overclocker-fly-gadget-bugs-rvlhsg`, you have not finished it — go and
+put it there, in the same session, without being asked again.
+
 Before believing anything is live, check the deployment rather than the push. The
 Pages build shows up as a `pages build and deployment` workflow run, and its
 `head_branch` tells you what is actually being served.

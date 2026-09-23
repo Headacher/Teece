@@ -748,7 +748,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:71,date:'2026-09-23'};
+const VERSION={build:72,date:'2026-09-23'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -10316,9 +10316,21 @@ function checkDomination(){
   const st=leadState();
   if(!st)return;
   if(st.blocked){
-    if(st.gap>=st.need)log(st.blockedForGood
-      ? 'The swarm holds the field, but a swarm does not take the board: '+teamName(st.lead.tm)+' cannot win by domination.'
-      : 'The Curse of Freezing holds the win back for now.');
+    if(st.gap>=st.need){
+      /* The Curse of Freezing lifts, so it is worth saying every time it holds
+         a win back. A deck that never wins this way is not news twice: it would
+         print on every scan of every turn for the rest of the game, and the
+         status chip says it permanently anyway. Once per side. */
+      if(!st.blockedForGood)log('The Curse of Freezing holds the win back for now.');
+      else{
+        G.nodomSaid=G.nodomSaid||{};
+        if(!G.nodomSaid[st.lead.tm]){
+          G.nodomSaid[st.lead.tm]=true;
+          log(teamName(st.lead.tm)+' hold'+(teamName(st.lead.tm)==='You'?'':'s')+
+              ' the field, but a swarm does not take the board: no win by domination, however far ahead.');
+        }
+      }
+    }
     return;
   }
   if(st.gap>=st.need){
@@ -12062,7 +12074,14 @@ function aiPlanFor(id){
       else if(!b[i].ground)cands.push(i);
     }
     if(!cands.length)return null;
-    return {thr:0.8,cands,mut:(bb,i)=>{
+    /* A battleground that fields a body every turn, or grows whatever stands on
+       it, is worth laying even though the board is no better the instant it
+       goes down. Egg Nest, Bat Cave, Landing Pad and both of the Rats' grounds
+       all read as dead effects without this. */
+    let bonus=0;
+    if(d.gEndTurn)bonus+=1.4;
+    if(d.gGrowSummon)bonus+=1.0;
+    return {thr:0.8,bonus,cands,mut:(bb,i)=>{
       if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
       else bb[i].ground={cardId:id,owner:p};}};
   }
@@ -12089,6 +12108,30 @@ function aiPlanFor(id){
       if(st.who==='enemy'&&ally)continue;
       applyModT(o,st.n,st.dur);
     }}};
+  /* Overwhelm pays every one of yours by the size of the swarm, so the target
+     is the whole board at once -- weighed the way 'mass' is. */
+  if(st.fx==='overwhelm'){
+    let mine=0;
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&sameTeam(t.owner,p))mine++;}
+    if(!mine)return null;
+    return {thr:1.8,cands:[0],mut:(bb)=>{
+      for(let i=0;i<BN;i++){const o=bb[i].teece;if(o&&sameTeam(o.owner,p))applyModT(o,mine,'temp');}}};
+  }
+  /* Pestilence is weighed as its Airborne half: an ally spent for -6 on an
+     enemy. The mode is chosen at the prompt, and Fetid leaves the body standing
+     with a nasty death on it, so casting on this reading is never a loss. */
+  if(st.fx==='pestilence'){
+    const mine=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&sameTeam(t.owner,p)&&canTarget(b,i,p))mine.push(i);}
+    const foes=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p))foes.push(i);}
+    if(!mine.length||!foes.length)return null;
+    const worst=foes.slice().sort((x,y)=>
+      effSides(b,y).reduce((a,c)=>a+c,0)-effSides(b,x).reduce((a,c)=>a+c,0))[0];
+    return {thr:1.6,cands:mine,mut:(bb,i)=>{
+      bb[i].teece=null;
+      if(bb[worst].teece)applyModT(bb[worst].teece,-6,'perm');}};
+  }
   if(st.fx==='bolt'){
     const cands=[];
     for(let c=0;c<3;c++)for(let r=0;r<3;r++){const i=r*3+c;if(b[i].teece){cands.push(i);break;}}
@@ -12317,6 +12360,11 @@ async function aiSupport(){
         if(g>bg){bg=g;best=c;}
       }else{bg=plan.pseudo||0;best=c;}
     }
+    /* What the card is worth LATER. boardValue reads the board as it stands, so
+       anything that pays next turn scores nothing and never gets played -- the
+       reason no end-of-turn battleground in the game had ever been laid by the
+       computer. A plan may name that worth itself. */
+    bg+=plan.bonus||0;
     if(best!=null&&bg>=plan.thr){
       AI_MUT_CTX={plan,best};
       const ok=await playFromHand(p,h);
