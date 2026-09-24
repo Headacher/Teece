@@ -753,7 +753,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:74,date:'2026-09-24'};
+const VERSION={build:76,date:'2026-09-24'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3311,11 +3311,21 @@ const CARDS = {
     onPlay:[{fx:'copy',all:true}],
     text:'+1 for every ally standing on a panel beside it. When played: a copy of this appears on every free panel beside it \u2014 which is four more allies standing beside it.'},
  847:{name:'Breeding Locust',type:'teece',locust:true,sides:[5,5,5,5],
-    onPlay:[{fx:'copy'}],onDeath:[{fx:'copy'}],
-    text:'When played, and again when destroyed: a copy of this appears on a free panel beside it.'},
+    /* One ability that fires in two circumstances, so both draw on ONE
+       allowance under the same key -- three between the played half, the
+       destroyed half, and every copy of the card. Uncapped, the when-destroyed
+       half was a loop rather than a chain: killing the breeder left a breeder,
+       and killing that one left another, for as long as anything on the board
+       could keep killing it. Eight deaths in a turn made eight copies, and
+       there was no number at which it stopped. */
+    onPlay:[{fx:'copy',turnCap:{key:'breeder',max:3,
+      msg:'The breeders have already bred three times this turn.'}}],
+    onDeath:[{fx:'copy',turnCap:{key:'breeder',max:3,
+      msg:'The breeders have already bred three times this turn.'}}],
+    text:'When played, and again when destroyed: a copy of this appears on a free panel beside it. Between this card and every copy of it, that happens three times in a turn and no more.'},
  848:{name:'Egg-Layer',type:'teece',locust:true,sides:[3,3,3,3],
-    act:[{name:'Lay',once:'turn',steps:[{fx:'copy'},{fx:'copy'}]}],
-    text:'Once per turn: two copies of this appear on free panels beside it, chosen one at a time.'},
+    act:[{name:'Lay',once:'turn',onceTurn:'egglayer',steps:[{fx:'copy'},{fx:'copy'}]}],
+    text:'Once per turn, among all copies: two copies of this appear on free panels beside it, chosen one at a time.'},
  849:{name:'Moulting Locust',type:'teece',locust:true,sides:[1,1,7,7],
     onArrive:{n:1,dur:'perm'},
     act:[{name:'Moult',once:'turn',steps:[{fx:'price',adj:1},{fx:'discard',n:1,cost:true},{fx:'copy'}]}],
@@ -3366,7 +3376,7 @@ const CARDS = {
  863:{name:'Wheat Field',type:'ground',gdefKind:{kind:'locust',n:3},
     text:'A Locust standing on this battleground has 3 Defence. Anything else standing on it gets nothing.'},
  864:{name:'Locust Nest',type:'ground',gPlayHold:5,
-    text:'A Teece PLAYED onto this battleground gets +5, for as long as it goes on standing there. Walking onto it afterwards earns nothing.'},
+    text:'A Teece played or summoned onto this battleground \u2014 copies included \u2014 gets +5, for as long as it goes on standing there. Walking onto it afterwards earns nothing.'},
  /* The Locust nobody drafts: what a trodden Grasshopper leaves behind. Big, and
     the one Token in the game that can be spent \u2014 and a Locust, so it is one
     of the panels the swarm needs filled. */
@@ -5474,8 +5484,22 @@ function turnCapGive(p,cap){
   const rec=turnCapRec(p,cap);
   if(rec&&rec.n>0)rec.n--;
 }
+/* "Once per turn, among all copies" -- the act equivalent of the Nymph's
+   turnCap, and the same reason for existing. once:'turn' is a tally on the
+   BODY, so a card that copies itself hands every copy a fresh charge: one
+   Egg-Layer laid two, those two laid four, and the board was full and the game
+   won before the first turn was over. This charge lives on the seat instead,
+   keyed by the name the card picks, so every copy draws on the one allowance.
+   Turn-scoped through turnCapRec, which resets itself on the turn number. */
+const onceTurnCap=name=>({key:'act:'+name,max:1});
+function onceTurnSpent(p,act){
+  if(!act.onceTurn)return false;
+  const rec=turnCapRec(p,onceTurnCap(act.onceTurn));
+  return !!(rec&&rec.n>=onceTurnCap(act.onceTurn).max);
+}
 function actAvailable(t,ent){
   if(onceGameSpent(t.owner,ent.act))return false;
+  if(onceTurnSpent(t.owner,ent.act))return false;
   if(ent.act.once==='game'&&t.actUsedGame[ent.key])return false;
   /* Magic Wings buys flights for the turn, so Fly is not always once */
   if(ent.key==='kfly'&&t.flyExtra)
@@ -5540,6 +5564,14 @@ function putTeece(b,i,t,live,how){
      summoned. Walking is not being born, so moveT is excluded -- otherwise a
      Teece with Flying could pace back and forth and farm the panel. */
   if(how!=='move'){
+    /* The Locust Nest pays a body that ARRIVES on it, however it arrived:
+       played from hand, copied onto the panel, summoned out of a graveyard or
+       made as a Token. Walking on is still worth nothing, which is the whole
+       distinction the card draws -- and `how` is already the place the game
+       knows the difference, so the Nest reads it here rather than only in
+       playTeece, where a copy landing on it was paid nothing at all. */
+    {const ph=groundNum(b[i].ground,'gPlayHold');
+     if(ph){t.standCell=i;if(live)log(nm(t)+' settles into '+CARDS[b[i].ground.cardId].name+': '+sgn(ph)+' for as long as it stays.');}}
     for(let j=0;j<BN;j++){
       const g=b[j].ground;
       if(!g||!groundFlag(g,'gGrowSummon'))continue;
@@ -11103,12 +11135,8 @@ async function playTeece(p,handIdx){
     const gd0=CARDS[b[spot].ground.cardId];
     {const pm=groundNum(b[spot].ground,'gPlayMod');
      if(pm){applyModT(t,pm,'perm');log(nm(t)+' is played onto '+gd0.name+': '+sgn(pm)+'.');}}
-    /* And the Locust Nest, which pays only for as long as it stays. standCell
-       is the marker a gStand battleground already uses, so walking off drops the
-       bonus by itself -- and walking back on does not earn it again, because
-       arriving on a Nest is not being played onto one. */
-    {const ph=groundNum(b[spot].ground,'gPlayHold');
-     if(ph){t.standCell=spot;log(nm(t)+' settles into '+gd0.name+': '+sgn(ph)+' for as long as it stays.');}}
+    /* The Locust Nest is marked in putTeece, which every arrival goes through,
+       so a copy laid onto it is paid the same as a card played onto it. */
   }
   spend();
   log(pname(p)+' plays '+d.name+' at the '+CN[spot]+
@@ -11654,6 +11682,7 @@ async function runAct(p,cell,ent){
   /* the ability found nothing to do, so it keeps its charge for this turn */
   if(ok==='NONE'){toast(ctx.noneMsg||'Nothing for that ability to do.');render();return false;}
   if(ent.act.onceGame)G.players[p].onceUsed[onceGameKey(ent.act.onceGame)]=true;
+  if(ent.act.onceTurn)turnCapTake(p,onceTurnCap(ent.act.onceTurn));
   if(ent.act.once==='game')t.actUsedGame[ent.key]=true;
   t.actUsedTurn[ent.key]=(t.actUsedTurn[ent.key]||0)+1;
   G.detailLock=null;
