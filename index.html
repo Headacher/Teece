@@ -338,6 +338,11 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
    one badge that changes what an attack is worth. */
 .teece .rgd .inv{font-size:13px;line-height:1;color:#7fd4ff;
   text-shadow:0 0 5px rgba(127,212,255,.85)}
+/* Stunned. The other side of the same coin as Invulnerable -- that one says this
+   panel cannot be killed, this one says it cannot kill -- so it is lit the same
+   way and in the colour of a thing that has been hit. */
+.teece .rgd .stun{font-size:12px;line-height:1;
+  filter:drop-shadow(0 0 4px rgba(255,196,64,.9))}
 .teece .ascii{position:absolute;top:12px;right:5px;bottom:12px;left:5px;margin:0;z-index:0;
   pointer-events:none;overflow:hidden;background:transparent;color:var(--artink);opacity:.46;
   display:flex;align-items:center;justify-content:center;
@@ -753,7 +758,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:79,date:'2026-09-24'};
+const VERSION={build:80,date:'2026-09-24'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -820,7 +825,9 @@ const KEYWORDS={
   steadfast:'Nothing can take attributes off it, and nothing can shove it.',
   needsflinger:'It destroys nothing unless an allied Flinger is standing on the board.',
   immovable:'It cannot move, and nothing can move it.',
-  march:'Once per your turn, move one space up, down or sideways. Everything standing beside where it lands may then be moved one space too, and its mover chooses where.'
+  march:'Once per your turn, move one space up, down or sideways. Everything standing beside where it lands may then be moved one space too, and its mover chooses where.',
+  lumber:'ONCE while it is on the field — not once a turn — move one space up, down or sideways. A body that leaves and comes back may lumber again.',
+  stun:'A stunned Teece destroys nothing and can activate no ability until the end of the stunning side’s next turn. It keeps every number it has and can still be destroyed itself.'
 };
 /* Gathered from the cards rather than written down, so a deck that gains or
    loses a keyword cannot leave this page saying the old thing. */
@@ -832,6 +839,18 @@ function deckKeywords(key){
      nothing in the loop below would ever find it and the deck's own page would
      sit there not mentioning that everything it fields flies. */
   if(dk.allFlying)add(['flying']);
+  /* Stun is a condition rather than a keyword: no card is stunned on its own
+     card, they LAY it. Gathered by looking for that, the same way this function
+     gathers everything else, so a deck that gains or loses the ability to stun
+     cannot leave the page saying the old thing. */
+  const stuns=o=>{
+    if(!o||typeof o!=='object')return false;
+    if(Array.isArray(o))return o.some(stuns);
+    if(o.stun||o.thenStun||o.gStun||o.fx==='stunMoved'||o.fx==='stunKiller')return true;
+    for(const k in o)if(stuns(o[k]))return true;
+    return false;
+  };
+  if(dk.cards.some(id=>CARDS[id]&&stuns(CARDS[id])))add(['stun']);
   for(const id of dk.cards){
     const c=CARDS[id]; if(!c)continue;
     add(c.kw); add(c.gkw);
@@ -1171,7 +1190,7 @@ const CARD_ART={
   580:[" \\_________/ ","  \\ooooooo/  ","   \\ooooo/   ","    '---'    "],
   "T6":["   .-----.   ", "  ( * * * )  ", "  |  ###  |  ", "   \\ | | /   ", "    ~~~~~    "],
 
-  "T9":["  \\\\  ^  //  ", "  ( O   O )  ", "  /[#####]\\  ", "  |  ###  |  ", "  /  | |  \\  "],
+  "TOGRE":["  \\\\  ^  //  ", "  ( O   O )  ", "  /[#####]\\  ", "  |  ###  |  ", "  /  | |  \\  "],
   "TFAM":["  \\  /\\_/\\  /", "   \\( o o )/ ", "   ==[###]== ", "    /  |  \\  ", "    '  '  '  "],
   1:["     ,-.     ", "    ( o )    ", "   /[###]\\   ", "  ' / | \\ '  ", "  _/     \\_  "],
   2:["  \\  ,-.  /  ", "   \\( ^ )/   ", "    [###]    ", "    / | \\    ", "   _/   \\_   "],
@@ -1630,7 +1649,13 @@ const CARDS = {
  T2:{name:'Token',type:'teece',token:true,sides:[2,2,2,2],text:'Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  T3:{name:'Token',type:'teece',token:true,sides:[3,3,3,3],text:'Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  T8:{name:'Token',type:'teece',token:true,sides:[8,8,8,8],text:'Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
- T9:{name:'Ogre Token',type:'teece',token:true,sides:[9,9,9,9],text:'Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ /* What Warstomp brings down. deck:'ogre' is not decoration -- without it
+    getCardDeck falls back to teece100 and the Token renders in the wrong deck's
+    colours, which is what it had been doing. Keyed by name rather than by the 9
+    it no longer has. */
+ TOGRE:{name:'Ogre Token',type:'teece',token:true,deck:'ogre',sides:[8,8,8,8],
+    onDeath:[{fx:'stunKiller'}],
+    text:'Ogre Token. 8 on every side, and whatever destroys it is stunned. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  T6:{name:'Token',type:'teece',token:true,sides:[6,6,6,6],text:'Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  T4:{name:'Token',type:'teece',token:true,sides:[4,4,4,4],text:'Token. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  TR:{name:'Rock Token',type:'teece',token:true,sides:[0,0,0,0],def:6,text:'Token with Defence 6. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
@@ -1924,67 +1949,87 @@ const CARDS = {
  339:{name:'Bedrock',type:'ground',gkw:['steadfast','ward'],
     text:'A Teece on this panel cannot lose attributes and cannot be selected by enemy effects.'},
  340:{name:'Avalanche Field',type:'ground',gdef:3,gdefAdjAlly:3,text:'A Teece on this panel gets +3 Defence. While adjacent to one of its allies, it has an additional +3 Defence.'},
- /* ---- Ogre: shoving things around ---- */
+ /* ---- Ogre: shove it, then make sure it cannot do anything about it.
+
+    The whole deck now turns on one condition. A STUNNED Teece destroys nothing
+    and activates nothing until the end of the stunning side's next turn -- it
+    keeps every number it has and can still be killed; what it loses is the two
+    things a Teece does. isStunned and applyStun are the whole of it, and combat
+    refuses a stunned killer in the same line that already refuses a harmless or
+    a blinded one.
+
+    Stun is a condition rather than a keyword: no Ogre is stunned on its own
+    card, they hand it out. deckKeywords finds it by looking for cards that lay
+    one rather than by being told.
+
+    LUMBER is the deck's other new word, and it is deliberately not March: once
+    per BODY, not once per turn. An Ogre gets to reposition itself one single
+    time and after that it is where it is. ---- */
  351:{name:'Ogre Bruiser',type:'teece',sides:[6,6,6,6],
-    text:'When played: you may move an adjacent Teece one space. If you do, it gets -2 permanently.',
-    onPlay:[{fx:'moveTarget',where:'adj',may:true,thenMod:{n:-2,dur:'perm'}}]},
+    text:'When played: you may select an adjacent Teece and move it. If you do, it gets -2 permanently and is stunned.',
+    onPlay:[{fx:'moveTarget',where:'adj',may:true,thenMod:{n:-2,dur:'perm'},thenStun:true}]},
  352:{name:'Ogre Hurler',type:'teece',sides:[4,4,8,8],
-    text:'When played: you may throw an adjacent Teece clean over this one, onto the panel on its far side. If you do, it gets -2 permanently.',
-    onPlay:[{fx:'moveTarget',where:'adj',dir:'opposite',may:true,thenMod:{n:-2,dur:'perm'}}]},
+    text:'When played: you may throw an adjacent Teece clean over this one, onto the panel on its far side. If you do, it gets -2 permanently and is stunned.',
+    onPlay:[{fx:'moveTarget',where:'adj',dir:'opposite',may:true,thenMod:{n:-2,dur:'perm'},thenStun:true}]},
  353:{name:'Ogre Sharpshooter',type:'teece',sides:[4,5,8,7],kw:['ranged'],
-    text:'Ranged. When played: you may knock any Teece one space directly away from this one. If you do, it gets -2 permanently.',
-    onPlay:[{fx:'moveTarget',where:'any',dir:'away',may:true,thenMod:{n:-2,dur:'perm'}}]},
+    text:'Ranged. When played: you may knock an ENEMY Teece one space directly away from this one. If you do, it gets -2 permanently and is stunned.',
+    onPlay:[{fx:'moveTarget',where:'any',who:'enemy',dir:'away',may:true,thenMod:{n:-2,dur:'perm'},thenStun:true}]},
  354:{name:'Ogre Warden',type:'teece',sides:[5,5,5,9],
-    text:'When played: choose an adjacent Teece. Its controller moves it one space; if it cannot move, it is destroyed.',
-    onPlay:[{fx:'moveTarget',where:'adj',byController:true,mustMove:true,elseDestroy:true}]},
- 355:{name:'Ogre Chieftain',type:'teece',sides:[8,8,8,8],sac:1,
-    text:'Sacrifice one fielded Teece to play. When played: move every adjacent Teece one space and give each -4 permanently.',
-    onPlay:[{fx:'moveAllAdj',n:-4,dur:'perm'}]},
+    text:'When played: choose an adjacent Teece. Its controller moves it one space and it is stunned; if it cannot move at all, it is destroyed instead.',
+    onPlay:[{fx:'moveTarget',where:'adj',byController:true,mustMove:true,elseDestroy:true,thenStun:true}]},
+ 355:{name:'Ogre Chieftain',type:'teece',sides:[8,8,8,8],sac:1,kw:['lumber'],
+    text:'Sacrifice one fielded Teece to play. When played: move every adjacent Teece one space, give each -4 permanently and stun them. Lumber: once while it stands, it may move one space.',
+    onPlay:[{fx:'moveAllAdj',n:-4,dur:'perm',stun:true}]},
  356:{name:'Ogre Warlord',type:'teece',sides:[4,10,10,10],sac:2,
     text:'Sacrifice two fielded Teece to play. When played: destroy every adjacent Teece. '+
-      'March, once per your turn: move one space, then if you did, move every Teece adjacent to it one space.',
+      'March, once per your turn: move one space, then if it moved, shove every ENEMY beside where it landed one space and stun them.',
     onPlay:[{fx:'destroyAdj'}],
-    act:[{name:'March',once:'turn',steps:[{fx:'march'}]}]},
- 357:{name:'Ogre Tactician',type:'teece',sides:[7,7,5,5],onAllyTargets:{n:2,dur:'temp'},
-    text:'Whenever one of your Teece selects an enemy with an effect, that Teece gets +2 until end of turn.'},
- 358:{name:'Ogre Trapper',type:'teece',sides:[3,8,8,3],onEnemyMove:[{fx:'modMoved',n:-3,dur:'perm',anyCause:true}],
-    text:'Whenever an enemy Teece is moved, however it was moved, that Teece gets -3 permanently.'},
- 359:{name:'Ogre Hexer',type:'teece',sides:[4,4,5,6],
-    text:'When played: curse an enemy Teece. Every time it moves for the rest of the game it gets -2 permanently, even if it changes zones.',
-    onPlay:[{fx:'curse'}]},
+    act:[{name:'March',once:'turn',steps:[{fx:'march',who:'enemy',stun:true}]}]},
+ 357:{name:'Ogre Tactician',type:'teece',sides:[7,7,5,5],
+    onEnemyMove:[{fx:'stunMoved',anyCause:true}],
+    text:'Whenever an enemy Teece moves, however it was moved, it is stunned. A stunned Teece cannot destroy anything and cannot activate anything until the end of your next turn.'},
+ 358:{name:'Ogre Trapper',type:'teece',sides:[3,8,8,3],
+    onEnemyMove:[{fx:'modMoved',n:-3,dur:'perm',anyCause:true,stun:true}],
+    text:'Whenever an enemy Teece is moved, however it was moved, that Teece gets -3 permanently and is stunned.'},
+ 359:{name:'Ogre Hexer',type:'teece',sides:[1,4,5,6],
+    text:'When played: select an adjacent enemy, and you may move it. Then it gets -2, is silenced, is stripped of every bonus worked onto it, has every equip it wears destroyed, has the battleground under it destroyed, and is stunned.',
+    onPlay:[{fx:'ogreHex'}]},
  360:{name:'Goblin Projectile',type:'teece',sides:[4,4,4,4],
     text:'When it moves: +3 until end of turn. Once per your turn: move any Teece one space.',
     onMove:[{fx:'mod',who:'self',n:3,dur:'temp'}],
     act:[{name:'Launch',once:'turn',steps:[{fx:'moveTarget',where:'any'}]}]},
- 361:{name:'Exploding Ogre',type:'teece',sides:[6,6,6,6],
-    text:'When it moves: you may destroy it to give every adjacent Teece -3 and blow them one space.',
-    onMove:[{fx:'selfDestruct',n:-3,dur:'perm'}]},
+ 361:{name:'Exploding Ogre',type:'teece',sides:[6,6,6,6],kw:['lumber'],
+    text:'Lumber: once while it stands, it may move one space. When it moves: you may destroy it to give every ENEMY beside it -3 permanently, blow them one space straight away from it and stun them.',
+    onMove:[{fx:'selfDestruct',n:-3,dur:'perm',who:'enemy',away:true,stun:true}]},
  362:{name:'Ogre Whelp',type:'teece',sides:[1,1,1,1],
-    text:'When played: return an adjacent non-Boss Teece to hand, or move it one space. When destroyed, once per game: return this to your hand.',
-    onPlay:[{fx:'handOrMove'}],grants:{},onDeath:[{fx:'selfToHand',once:'game'}]},
+    text:'When played: choose an adjacent Teece, then choose one thing — return it to your hand, move it one space, or stun it. A Boss cannot be returned to hand. When destroyed, once per game: this returns to your hand.',
+    onPlay:[{fx:'handOrMove',stun:true}],onDeath:[{fx:'selfToHand',once:'game'}]},
  363:{name:'Rockslide Call',type:'magic',rebound:true,
     text:'Drag an enemy one space toward one of your Teece in its row or column. The first time you cast this each game, it returns to your hand.',
     cast:[{fx:'dragToward'}]},
  364:{name:'Second Wind',type:'magic',
-    text:'Choose a Teece that moved this turn: it gets +3 or -3.',
+    text:'Choose a Teece that moved this turn: it gets +3 or -3, and either way it is stunned.',
     cast:[{fx:'choose',msg:'Second Wind:',opts:[
-      {lbl:'Give it +3',steps:[{fx:'movedMod',n:3,dur:'perm'}]},
-      {lbl:'Give it -3',steps:[{fx:'movedMod',n:-3,dur:'perm'}]}]}]},
- 365:{name:'Warstomp',type:'magic',text:'If any Teece moved this turn: summon an Ogre Token with 9 on every side.',
-    cast:[{fx:'movedToken',tok:'T9'}]},
+      {lbl:'Give it +3 and stun it',steps:[{fx:'movedMod',n:3,dur:'perm',stun:true}]},
+      {lbl:'Give it -3 and stun it',steps:[{fx:'movedMod',n:-3,dur:'perm',stun:true}]}]}]},
+ 365:{name:'Warstomp',type:'magic',
+    text:'If any Teece moved this turn: summon an Ogre Token with 8 on every side. Whatever destroys that Token is stunned.',
+    cast:[{fx:'movedToken',tok:'TOGRE'}]},
  366:{name:'Counterweight',type:'equip',mod:0,
-    text:'Whenever an enemy moves, the equipped Teece gets +2 until end of turn and may move one space.',
-    grants:{onEnemyMove:[{fx:'modSelf',n:2,dur:'temp'}]}},
+    text:'Whenever an enemy moves, the equipped Teece gets +2 until end of turn and may move one space. When the equipped Teece is destroyed, whatever destroyed it is stunned.',
+    grants:{onEnemyMove:[{fx:'modSelf',n:2,dur:'temp'},{fx:'move',range:'orth'}],
+            onDeath:[{fx:'stunKiller'}]}},
  367:{name:'Grudge Chain',type:'equip',mod:2,
-    text:'Equipped Teece gets +2 and Flying. Once per your turn: destroy this equip to move an enemy Teece one space.',
+    text:'Equipped Teece gets +2 and Flying. Destroy this equip: move an enemy Teece one space and stun it.',
     grants:{kw:['flying'],act:[{name:'Yank',once:'turn',steps:[
-      {fx:'moveTarget',where:'any',who:'enemy'},{fx:'sacEquip'}]}]}},
- 368:{name:'Shove Harness',type:'equip',mod:2,text:'Equipped Teece gets +2. When you equip it, shove an enemy one space.',
-    grants:{onEquip:[{fx:'moveTarget',where:'any',who:'enemy',may:true}]}},
+      {fx:'moveTarget',where:'any',who:'enemy',thenStun:true},{fx:'sacEquip'}]}]}},
+ 368:{name:'Shove Harness',type:'equip',mod:2,
+    text:'Equipped Teece gets +2. When you equip it, shove an enemy one space and stun it.',
+    grants:{onEquip:[{fx:'moveTarget',where:'any',who:'enemy',may:true,thenStun:true}]}},
  369:{name:'Sinkhole',type:'ground',gDestroyOnMove:true,
     text:'A Teece that moves onto this panel is destroyed.'},
- 370:{name:'Springshelf',type:'ground',gStand:5,
-    text:'A Teece that moves onto this panel gets +5 for as long as it stays there. A Teece played straight onto it gets nothing.'},
+ 370:{name:'Concussion Alley',type:'ground',gStun:true,
+    text:'A Teece standing on this battleground is stunned for as long as it stays, and the stun lifts the moment it steps off. Anything that stuns a Teece already standing here takes 4 off it as well.'},
  /* ---- Gadget: modalities, and machines that bend them ---- */
  441:{name:'Spring-Loaded Scout',type:'teece',sides:[3,3,3,3],revealPlay:true,
     text:'When this is the first card you draw on your turn you may reveal it and play it at once. Played any other way it arrives with +3.',
@@ -3668,6 +3713,10 @@ const SKITTER_ACT={name:'Skitter',once:'turn',steps:[{fx:'move',range:'orth'}]};
 /* March is the Ogre Overlord's step, printed as a keyword so the Army can hand
    it round: one space, and everything that ends up beside you is moved on too. */
 const MARCH_ACT={name:'March',once:'turn',steps:[{fx:'march'}]};
+/* Lumber is once per BODY rather than once a turn -- which is exactly what
+   once:'game' means here, since makeTeece hands a returning Teece a clean sheet.
+   An Ogre gets to reposition itself one time and then it is where it is. */
+const LUMBER_ACT={name:'Lumber',once:'game',steps:[{fx:'move',range:'orth'}]};
 const DRAIN_STEP_ACT={name:'Step',once:'turn',times:9,steps:[{fx:'move',range:'orth'},{fx:'spendDrainStep'}]};
 /* A step a Teece has EARNED rather than one it always has. Offered only while
    it is owed one, and spent by taking it -- so a card that hands out a move
@@ -4188,7 +4237,7 @@ function makeTeece(cardId,owner,opts){
     grafts:[],noSac:false,infect:null,dieEOT:false,graveMarks:0,stepOwed:0,
     boon:(bonusApplies(owner)?G.enemyBonus:0)+boon,
     silenced:false,magicUsedTurn:0,
-    temp2:[0,0,0,0],temp2Until:0,defTemp2:0,defTemp2Until:0,baseTemp:null,flyExtra:0,immortalUntil:0,
+    temp2:[0,0,0,0],temp2Until:0,defTemp2:0,defTemp2Until:0,baseTemp:null,flyExtra:0,immortalUntil:0,stunUntil:0,
     actUsedTurn:{},actUsedGame:{}};
 }
 function newState(mode,vsAI,decks,extra){
@@ -5416,6 +5465,7 @@ function actsOf(b,i){
   if(hasKw(b,i,'flying'))out.push({key:'kfly',act:FLY_ACT});
   if(hasKw(b,i,'skitter'))out.push({key:'kskit',act:SKITTER_ACT});
   if(hasKw(b,i,'march'))out.push({key:'kmarch',act:MARCH_ACT});
+  if(hasKw(b,i,'lumber'))out.push({key:'klumber',act:LUMBER_ACT});
   /* the step a drain-watcher is owed, offered only while it is owed */
   if(t.drainMove)out.push({key:'kdrainstep',act:DRAIN_STEP_ACT});
   if(t.stepOwed>0)out.push({key:'kowedstep',act:OWED_STEP_ACT});
@@ -5437,6 +5487,9 @@ function actsOf(b,i){
 function actBlockedReason(b,i,ent){
   const t=b[i].teece;
   if(!t)return null;
+  /* A stun stops every ability, not just the ones that move, so it is answered
+     before the movement cases and the button says why rather than doing nothing. */
+  if(isStunned(t,b,i))return 'stunned';
   const st=ent.act.steps&&ent.act.steps[0];
   if(!st||st.fx!=='move')return null;
   if(hasKw(b,i,'immovable'))return 'held';
@@ -5720,7 +5773,12 @@ async function fireMove(from,to,cause){
       if(h.anyCause||cause==null||cause===w.owner)hooks.push(h);
     }
     for(const h of hooks){
-      if(h.fx==='modMoved'){applyModT(t,h.n,h.dur);log(nm(t)+' gets '+sgn(h.n)+durTxt(h.dur)+'.');}
+      if(h.fx==='modMoved'){
+        applyModT(t,h.n,h.dur);log(nm(t)+' gets '+sgn(h.n)+durTxt(h.dur)+'.');
+        if(h.stun)applyStun(b,to,true);
+      }
+      /* The Ogre Tactician: no number at all, just the rattle. */
+      else if(h.fx==='stunMoved')applyStun(b,to,true);
       else if(h.fx==='modSelf'){applyModT(w,h.n,h.dur);log(nm(w)+' gets '+sgn(h.n)+durTxt(h.dur)+'.');}
       else await runSteps([h],{p:w.owner,cell:i,t:w,first:false});
     }
@@ -5736,7 +5794,7 @@ function scanDeaths(b){
   const dead={};
   const canKill=ki=>{
     const k=b[ki].teece;
-    if(k&&(k.harmless||k.blinded))return false;
+    if(k&&(k.harmless||k.blinded||isStunned(k,b,ki)))return false;
     if(kws[ki].indexOf('needsflinger')<0)return true;
     return b.some(c=>c.teece&&sameTeam(c.teece.owner,k.owner)&&DEF(c.teece).flinger);
   };
@@ -7310,10 +7368,82 @@ async function FXRUN(st,ctx){
     moveT(b,c,dst,true);
     log(nm(t)+' is moved to the '+CN[dst]+'.');
     if(st.thenMod){applyModT(t,st.thenMod.n,st.thenMod.dur);log(nm(t)+' gets '+sgn(st.thenMod.n)+durTxt(st.thenMod.dur)+'.');}
+    /* Stunned where it LANDS, not where it was standing, so Concussion Alley
+       charges its 4 when a shove is what put the Teece onto it. */
+    if(st.thenStun)applyStun(b,dst,true);
     if(st.thenSpiderMod&&isSpiderling(t)){applyModT(t,st.thenSpiderMod.n,st.thenSpiderMod.dur);
       log(nm(t)+' is nursed along: '+sgn(st.thenSpiderMod.n)+durTxt(st.thenSpiderMod.dur)+'.');}
     await fireMove(c,dst,p);
     if(!sameTeam(t.owner,p))noteTargeted(p);
+    return;}
+  /* The Ogre Hexer, which is the deck's answer to a Teece that has been built up
+     rather than a Teece that is simply in the way. One card, because every part
+     of it lands on the same chosen body and asking six times would be unplayable
+     on a phone. Order matters: the move first, so the -4 for a shove onto
+     Concussion Alley is charged before the rest; then the numbers; then the
+     things hanging off it. */
+  case 'ogreHex':{
+    const src=ctx.cell;
+    const cands=ADJ[src].filter(j=>{
+      const o=b[j].teece;
+      return o&&!sameTeam(o.owner,p)&&canTarget(b,j,p);
+    });
+    if(!cands.length)return none('No enemy beside it to break.');
+    let c=await pickCell(cands,'Choose an adjacent enemy to break.',null,!!ctx.first);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    let t=b[c].teece;
+    if(!t)return;
+    /* The move is the optional half. Everything after it is not. */
+    if(!hasKw(b,c,'immovable')){
+      const outs=ADJ[c].filter(j=>openAt(b,j));
+      if(outs.length){
+        const r=await chooseCell(p,outs,'Move '+nm(t)+' one space first, or skip.',
+          {skip:true,mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);}});
+        if(r!=null&&r!=='CANCEL'){
+          moveT(b,c,r,true);
+          log(nm(t)+' is dragged to the '+CN[r]+'.');
+          await fireMove(c,r,p);
+          c=r;
+          t=b[c].teece;
+          if(!t)return;
+        }
+      }
+    }
+    if(!t.silenced){t.silenced=true;log(nm(t)+' is silenced: its abilities are negated for the rest of the game.');}
+    /* "Strip it of all positive attribute effects" -- everything stacked ON it,
+       not the line it was printed with. A negative stays: this takes bonuses
+       away, it does not heal.
+
+       The strip runs BEFORE the -2, not after. Written in the card's own order
+       it swallowed its own penalty: a Teece on +5 went to +3 and then the strip
+       took the 3 as a bonus, so the -2 never happened. Stripping first and then
+       charging leaves it where the card plainly means it to be -- printed line,
+       minus two. */
+    let stripped=0;
+    for(const bank of [t.perm,t.temp,t.temp2]){
+      if(!bank)continue;
+      for(let k=0;k<4;k++)if(bank[k]>0){stripped+=bank[k];bank[k]=0;}
+    }
+    if(t.defPerm>0){stripped+=t.defPerm;t.defPerm=0;}
+    if(t.baseTemp){t.baseTemp=null;stripped++;}
+    log(stripped?nm(t)+' is stripped of every bonus worked onto it.'
+               :nm(t)+' had no bonuses left to strip.');
+    applyModT(t,-2,'perm');
+    log(nm(t)+' gets -2.');
+    for(const e of t.equips.slice()){
+      t.equips.splice(t.equips.indexOf(e),1);
+      equipCameOff(t,e,true);
+      toGrave(e.owner,e.cardId);
+      log(CARDS[e.cardId].name+' is torn off '+nm(t)+' and destroyed.');
+    }
+    if(b[c].ground){
+      log(CARDS[b[c].ground.cardId].name+' is smashed out from under '+nm(t)+'.');
+      await clearGroundAt(c,p);
+    }
+    applyStun(b,c,true);
+    await anim([c],'zap');
+    noteTargeted(p);
     return;}
   case 'march':{
     const src=ctx.cell, mt=b[src].teece;
@@ -7331,13 +7461,21 @@ async function FXRUN(st,ctx){
     for(const j of ADJ[step].slice()){
       const o=b[j].teece;
       if(!o||hasKw(b,j,'immovable'))continue;
+      /* who:'enemy' marches the other side only, which is what stops the Warlord
+         scattering its own as it walks. */
+      if(st.who==='enemy'&&sameTeam(o.owner,p))continue;
       const outs=ADJ[j].filter(k=>!b[k].teece);
-      if(!outs.length){log(nm(o)+' has nowhere to be shoved.');continue;}
+      if(!outs.length){
+        log(nm(o)+' has nowhere to be shoved.');
+        if(st.stun)applyStun(b,j,true);
+        continue;
+      }
       const r=await chooseCell(p,outs,'Shove '+nm(o)+' one space, or skip.',
         {skip:true,mut:(bb,k)=>{if(bb[j].teece)moveT(bb,j,k,false);}});
-      if(r==null||r==='CANCEL')continue;
+      if(r==null||r==='CANCEL'){if(st.stun)applyStun(b,j,true);continue;}
       moveT(b,j,r,true);
       log(nm(o)+' is marched to the '+CN[r]+'.');
+      if(st.stun)applyStun(b,r,true);
       await fireMove(j,r,p);
     }
     return;}
@@ -7624,11 +7762,13 @@ async function FXRUN(st,ctx){
           moveT(b,j,dst,true);
           applyModT(b[dst].teece,st.n,st.dur);
           log(nm(t)+' is blown back to the '+CN[dst]+' and gets '+sgn(st.n)+durTxt(st.dur)+'.');
+          if(st.stun)applyStun(b,dst,true);
           await fireMove(j,dst,p);
           continue;
         }
         applyModT(t,st.n,st.dur);
         log(nm(t)+' has nowhere to be blown, and gets '+sgn(st.n)+durTxt(st.dur)+'.');
+        if(st.stun)applyStun(b,j,true);
         continue;
       }
       if(hasKw(b,j,'immovable'))continue;
@@ -7640,12 +7780,16 @@ async function FXRUN(st,ctx){
           moveT(b,j,r,true);
           applyModT(b[r].teece,st.n,st.dur);
           log(nm(t)+' is hurled to the '+CN[r]+' and gets '+sgn(st.n)+durTxt(st.dur)+'.');
+          if(st.stun)applyStun(b,r,true);
           await fireMove(j,r,p);
           continue;
         }
       }
       applyModT(t,st.n,st.dur);
       log(nm(t)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');
+      /* Pinned with nowhere to go still takes the blow and still gets rattled:
+         what the sweep does is not conditional on the shove landing. */
+      if(st.stun)applyStun(b,j,true);
     }
     return;}
   case 'rowColMove':{
@@ -7992,6 +8136,7 @@ async function FXRUN(st,ctx){
     if(c==null)return;
     applyModT(b[c].teece,st.n,st.dur);
     log(nm(b[c].teece)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');
+    if(st.stun)applyStun(b,c,true);
     return;}
   case 'movedToken':{
     if(!G.movedThisTurn.length){log('Nothing has moved this turn.');return 'ABORT';}
@@ -8005,21 +8150,44 @@ async function FXRUN(st,ctx){
     log('An Ogre Token stomps in at the '+CN[c]+'.');
     return;}
   case 'selfDestruct':{
-    const opts=[{v:'yes',lbl:'Blow up'},{v:'no',lbl:'Stay put'}];
-    const pick=await chooseOption(p,opts,'Destroy '+nm(ctx.t)+' to blast everything adjacent?');
-    if(pick!=='yes')return;
     const src=ctx.cell;
-    for(const j of ADJ[src].slice()){
+    const hits=ADJ[src].filter(j=>b[j].teece&&!(st.who==='enemy'&&sameTeam(b[j].teece.owner,p)));
+    const opts=[{v:'yes',lbl:'Blow up'},{v:'no',lbl:'Stay put'}];
+    const pick=await chooseOption(p,opts,'Destroy '+nm(ctx.t)+' to blast '+
+      (st.who==='enemy'?'every enemy beside it':'everything adjacent')+'?');
+    if(pick!=='yes')return;
+    for(const j of hits.slice()){
       const o=b[j].teece;
       if(!o)continue;
       applyModT(o,st.n,st.dur);
       log(nm(o)+' is caught in the blast: '+sgn(st.n)+durTxt(st.dur)+'.');
-      const opt2=ADJ[j].filter(k=>!b[k].teece);
-      if(opt2.length&&!hasKw(b,j,'immovable')){
-        const r=await chooseCell(p,opt2,'Blow '+nm(o)+' one space, or skip.',
-          {skip:true,mut:(bb,k)=>{if(bb[j].teece)moveT(bb,j,k,false);}});
-        if(r!=null&&r!=='CANCEL'){moveT(b,j,r,true);await fireMove(j,r,p);}
+      /* st.away throws it straight out from the blast rather than asking where:
+         a blast pushes, it does not steer. Same reading as moveAllAdj's away. */
+      if(!hasKw(b,j,'immovable')){
+        if(st.away){
+          const dst=oppositeCell(src,j);
+          if(dst>=0&&openAt(b,dst)){
+            moveT(b,j,dst,true);
+            log(nm(o)+' is blown back to the '+CN[dst]+'.');
+            if(st.stun)applyStun(b,dst,true);
+            await fireMove(j,dst,p);
+            continue;
+          }
+        }else{
+          const opt2=ADJ[j].filter(k=>!b[k].teece);
+          if(opt2.length){
+            const r=await chooseCell(p,opt2,'Blow '+nm(o)+' one space, or skip.',
+              {skip:true,mut:(bb,k)=>{if(bb[j].teece)moveT(bb,j,k,false);}});
+            if(r!=null&&r!=='CANCEL'){
+              moveT(b,j,r,true);
+              if(st.stun)applyStun(b,r,true);
+              await fireMove(j,r,p);
+              continue;
+            }
+          }
+        }
       }
+      if(st.stun)applyStun(b,j,true);
     }
     const me=b[src].teece;
     if(me)await processDeath({cell:src,t:me,killers:[],cost:true});
@@ -8035,7 +8203,9 @@ async function FXRUN(st,ctx){
     if(!isBossCard(t.cardId))opts.push({v:'hand',lbl:'Return to hand'});
     else log(nm(t)+' is a Boss: it cannot be returned to hand.');
     opts.push({v:'move',lbl:'Move it one space'});
+    if(st.stun)opts.push({v:'stun',lbl:'Stun it'});
     const pick=opts.length===1?'move':await chooseOption(p,opts,'What happens to '+nm(t)+'?');
+    if(pick==='stun'){applyStun(b,c,true);return;}
     if(pick==='hand'){
       b[c].teece=null;
       for(const uid of t.controls)revertControl(b,uid,true);
@@ -10146,6 +10316,50 @@ async function undyingReturn(t,cell){
 /* Held outside time. Pause, a Stasis Field and a zombie that has just hauled
    itself up all hang on the same flag, and "cannot be destroyed" has to mean it
    everywhere rather than only in a fight. */
+/* ============ stun ============
+   A stunned Teece destroys nothing and activates nothing until the end of its
+   stunner's next turn. It keeps every number it has and can still be destroyed;
+   what it loses is the two things a Teece DOES.
+
+   Two shapes, and isStunned has to answer for both. A stun laid on by a card is
+   timed, and rides on the body as a turn number the way an immortality does.
+   Concussion Alley's is not timed at all: it holds for exactly as long as the
+   Teece stands on it and lets go the moment it steps off, so it is read off the
+   panel rather than off the body.
+
+   'Cannot destroy' is a road already built -- harmless and blinded are the two
+   flags scanDeaths' canKill already refuses -- so stun joins them there rather
+   than teaching combat a third thing. */
+function isStunned(t,b,i){
+  if(!t)return false;
+  if(t.stunUntil&&G&&G.turnNum<t.stunUntil)return true;
+  if(b&&i!=null&&groundFlag(b[i].ground,'gStun'))return true;
+  return false;
+}
+/* Every stun in the game is laid on here, which is what gives Concussion Alley's
+   second-hit rule one place to live: stunning something that the Alley is
+   already holding costs it 4. Read before the new stun is written, or the panel
+   would charge for its own. */
+function applyStun(b,i,live){
+  const t=b[i].teece;
+  if(!t)return false;
+  if(groundFlag(b[i].ground,'gStun')&&isStunned(t,b,i)){
+    applyModT(t,-4,'perm');
+    if(live)log(nm(t)+' is rattled a second time in Concussion Alley: -4.');
+  }
+  t.stunUntil=Math.max(t.stunUntil||0,nextTurnExpiry());
+  if(live)log(nm(t)+' is stunned: it destroys nothing and activates nothing until the end of '+
+    pposs(G.turn)+' next turn.');
+  return true;
+}
+/* What to say on a badge or a chip, or null when it is not stunned at all. */
+function stunText(b,i){
+  const t=b[i].teece;
+  if(!isStunned(t,b,i))return null;
+  return groundFlag(b[i].ground,'gStun')&&!(t.stunUntil&&G.turnNum<t.stunUntil)
+    ? nm(t)+' is stunned by Concussion Alley: it destroys nothing and activates nothing while it stands there. Stepping off lifts it at once.'
+    : nm(t)+' is stunned: it destroys nothing and activates nothing until the end of the stunning side\u2019s next turn. It keeps every number it has, and can still be destroyed.';
+}
 const isHeldSafe=t=>{
   if(!t)return false;
   if(t.immortalOwner!=null)return true;
@@ -10272,6 +10486,17 @@ async function processDeath(d){
       for(const kuid of d.killers)for(let i=0;i<BN;i++){
         const k=b[i].teece;
         if(k&&k.uid===kuid){applyModT(k,st.n,st.dur);log(nm(k)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');}
+      }
+      continue;
+    }
+    /* Counterweight: whatever struck the blow is left reeling. Handled beside
+       'killer' rather than in FXRUN because the list of killers is only in scope
+       here -- a killer that fell in the same wave is already off the board and
+       simply does not get stunned, which is the same allowance 'killer' makes. */
+    if(st.fx==='stunKiller'){
+      for(const kuid of d.killers)for(let i=0;i<BN;i++){
+        const k=b[i].teece;
+        if(k&&k.uid===kuid)applyStun(b,i,true);
       }
       continue;
     }
@@ -11681,6 +11906,7 @@ async function runAct(p,cell,ent){
   const b=G.board,t=b[cell].teece;
   if(!t||t.owner!==p)return false;
   if(hexOn(p,'silence')){toast('Silenced: no abilities may be activated.');return false;}
+  if(isStunned(t,b,cell)){toast(nm(t)+' is stunned: it cannot activate anything.');return false;}
   if(!actAvailable(t,ent))return false;
   const ctx={p,cell,t,first:true,ent};
   const ok=await runSteps(ent.act.steps,ctx);
@@ -11816,6 +12042,7 @@ async function endTurn(){
       if(t.temp2Until&&G.turnNum>=t.temp2Until){t.temp2=[0,0,0,0];t.temp2Until=0;}
       if(t.defTemp2Until&&G.turnNum>=t.defTemp2Until){t.defTemp2=0;t.defTemp2Until=0;}
       if(t.immortalUntil&&G.turnNum>=t.immortalUntil){t.immortalOwner=null;t.immortalUntil=0;t.harmless=false;}
+      if(t.stunUntil&&G.turnNum>=t.stunUntil){t.stunUntil=0;log(nm(t)+' shakes off the stun.');}
     }
   }
   for(let i=0;i<BN;i++){
@@ -12278,7 +12505,7 @@ function cloneBoard(b){
       temp2:(c.teece.temp2||[0,0,0,0]).slice(),temp2Until:c.teece.temp2Until||0,
       defTemp2:c.teece.defTemp2||0,defTemp2Until:c.teece.defTemp2Until||0,
       baseTemp:c.teece.baseTemp?c.teece.baseTemp.slice():null,flyExtra:c.teece.flyExtra||0,
-      immortalUntil:c.teece.immortalUntil||0,
+      immortalUntil:c.teece.immortalUntil||0,stunUntil:c.teece.stunUntil||0,
       animGround:c.teece.animGround?Object.assign({},c.teece.animGround):null,
       actUsedTurn:Object.assign({},c.teece.actUsedTurn),actUsedGame:Object.assign({},c.teece.actUsedGame)}):null,
     /* the Graveyard's roll of interred cards is an array: copy it, or a
@@ -12436,6 +12663,13 @@ function boardValue(b,p){
       if(s[k]<6)risk+=(6-s[k])*0.22;
     }
     let w=(t.isToken?2:8)+sum*0.13-risk+t.equips.length*0.6;
+    /* A stunned Teece still holds its panel and still shows its numbers, but it
+       destroys nothing and activates nothing -- so it is worth markedly less than
+       the same body awake, to whichever side owns it. simCombat already sees half
+       of this (a stunned killer kills nobody in the scan); what it could not see
+       is that the Ogre deck's whole plan is to put the other side in that state,
+       so the computer got no credit at all for doing the one thing the deck does. */
+    if(isStunned(t,b,i))w*=0.45;
     /* Lives still in hand are worth real board presence, but the seventh is
        worth much less than the first -- three is as far as it is counted. */
     const lives=undyLeft(t);
@@ -12550,7 +12784,18 @@ function aiPlanFor(id){
       cands.push(i);
     }
     if(!cands.length)return null;
-    return {thr:0.8,cands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
+    /* An equip that gives no number and only arms a watcher moves the simulated
+       board by nothing at all, so it never cleared the threshold and was never
+       put on: Counterweight, whose +2 and whose shove both arrive later. What it
+       is worth has to be named, the way a battleground's later worth is. */
+    let ebonus=0;
+    const eg=d.grants||{};
+    if(!d.mod&&!d.modPerAlly&&!d.modPerAdjAlly&&!d.modPerOwn&&!eg.def){
+      if(eg.onEnemyMove||eg.onAllyMove||eg.onMove)ebonus+=1.1;
+      if(eg.onDeath||eg.onKill)ebonus+=0.9;
+      if(eg.act)ebonus+=0.6;
+    }
+    return {thr:0.8,bonus:ebonus,cands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
   }
   if(d.type==='ground'){
     /* A battleground written to go ON TOP of one wants the occupied panels,
@@ -12574,6 +12819,11 @@ function aiPlanFor(id){
        moment the battleground goes down, so neither scores without this. */
     if(d.gdefKind)bonus+=1.0;
     if(d.gPlayHold)bonus+=1.4;
+    /* A panel that does something to whoever ARRIVES on it is worth laying
+       before anybody has: Sinkhole swallows what walks in, Concussion Alley
+       holds a stun on whatever stands there. Neither shows on an empty board. */
+    if(d.gDestroyOnMove)bonus+=1.2;
+    if(d.gStun)bonus+=1.2;
     return {thr:0.8,bonus,cands,mut:(bb,i)=>{
       if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
       else bb[i].ground={cardId:id,owner:p};}};
@@ -12605,6 +12855,66 @@ function aiPlanFor(id){
       if(st.who==='enemy'&&ally)continue;
       applyModT(o,st.n,st.dur);
     }}};
+  /* Rockslide Call drags an enemy one step toward something of yours in its line,
+     which is only ever worth anything for where it leaves the enemy standing --
+     so the plan walks the same geometry the effect does and lets boardValue
+     judge the result. */
+  if(st.fx==='dragToward'){
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(!t||sameTeam(t.owner,p)||hasKw(b,i,'immovable')||!canTarget(b,i,p))continue;
+      if(isPlane(i))continue;
+      for(let j=0;j<BN;j++){
+        if(j===i||isPlane(j))continue;
+        const o=b[j].teece;
+        if(!o||!sameTeam(o.owner,p))continue;
+        if(!sameRow(i,j)&&!sameCol(i,j))continue;
+        const dst=sameRow(i,j)?i+(j>i?1:-1):i+(j>i?BW:-BW);
+        if(dst<0||dst>=BN||isPlane(dst)||b[dst].teece)continue;
+        cands.push({i,dst});
+        break;
+      }
+    }
+    if(!cands.length)return null;
+    return {thr:1.0,cands:cands.map((x,n)=>n),mut:(bb,n)=>{
+      const m=cands[n];
+      if(bb[m.i].teece&&!bb[m.dst].teece)moveT(bb,m.i,m.dst,false);
+    }};
+  }
+  /* Warstomp puts a body down, which the board CAN show -- it simply had no
+     branch. Guarded on the same condition the effect itself checks. */
+  if(st.fx==='movedToken'){
+    if(!G.movedThisTurn.length)return null;
+    const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
+    if(!empt.length)return null;
+    return {thr:0.8,cands:empt,mut:(bb,i)=>{putTeece(bb,i,makeTeece(st.tok,p),false);}};
+  }
+  /* A spell that is nothing but a modality. Which option fires is answered at
+     the prompt by aiPickOpt, so all the plan owes is a fair price for casting at
+     all: the best of the options it can read. Second Wind is two movedMods, so
+     it is weighed as the better of "+n on one of mine" and "-n on one of
+     theirs", and the prompt then picks. */
+  if(st.fx==='choose'){
+    const inner=(st.opts||[]).map(o=>(o.steps||[])[0]).filter(Boolean);
+    if(!inner.length||!inner.every(x=>x.fx==='movedMod'))return null;
+    const moved=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(t&&G.movedThisTurn.indexOf(t.uid)>=0&&canTarget(b,i,p))moved.push(i);
+    }
+    if(!moved.length)return null;
+    const picks=[];
+    for(const i of moved)for(const x of inner)picks.push({i,n:x.n,dur:x.dur,stun:!!x.stun});
+    return {thr:1.0,cands:picks.map((x,n)=>n),mut:(bb,n)=>{
+      const m=picks[n];
+      if(!bb[m.i].teece)return;
+      applyModT(bb[m.i].teece,m.n,m.dur);
+      /* A stun is worth real board value: a stunned Teece kills nothing, and
+         simCombat reads that through scanDeaths' canKill. */
+      if(m.stun)bb[m.i].teece.stunUntil=nextTurnExpiry();
+    }};
+  }
   /* A spell paid for in your own bodies. All three of the Locust deck's spells
      are this shape: take n of yours, then do something with what is left. The
      plan pays the n weakest on a clone -- through simDeath, so a Nymph spent
@@ -13634,6 +13944,11 @@ function renderBoard(){
          anything, and it was being read three feet away from the panel. */
       const invT=invulnText(G.board,i);
       if(invT)badges.push('<span class="dfn inv" title="'+escHtml(invT)+'">\u25C8</span>');
+      /* Stunned. It belongs here for the same reason Invulnerable does: whether
+         this panel can kill anything is the first thing you need to know about
+         it, and a chip under the board is three feet from the panel. */
+      const stT=stunText(G.board,i);
+      if(stT)badges.push('<span class="dfn stun" title="'+escHtml(stT)+'">\u{1F4A5}</span>');
       /* Long names step down a size rather than being cut off: the panel is the
          only place the name appears once a Teece is on the board. Name and
          badges are stacked and centred together, so a name that takes three
@@ -14047,6 +14362,8 @@ function statusesFor(p){
     const t=b[i].teece;
     if(!t)continue;
     const mine=sameTeam(t.owner,p);
+    {const stT=stunText(b,i);
+     if(stT)push('stun'+t.uid,mine?'bad':'good','Stunned: '+nm(t),stT);}
     if(t.blinded)push('blind'+t.uid,mine?'bad':'good','Blinded: '+nm(t),
       nm(t)+' is blinded. It keeps every number it has and can still be destroyed, but it destroys nothing itself.');
     if(t.echo)push('echo'+t.uid,mine?'good':'bad','Doubled: '+nm(t),
@@ -14810,6 +15127,7 @@ if(typeof module!=='undefined'){
     panelMark,hasMark,countMark,markCountFor,markLines,markLine,checkTicTacToe,markOfCard,markOfId,markValue,
     swarmHold,checkSwarmWin,swarmValue,adjAllyCount,ownedCount,turnCapTake,applyDeckRules,
     simDeath,simCombat,simOnPlay,aiPlanFor,aiSupport,aiActMuts,aiActs,
+    isStunned,applyStun,stunText,PLAYERS,nextTurnExpiry,actBlockedReason,LUMBER_ACT,
     payRecall,getLines:()=>LINES};
 }
 </script>

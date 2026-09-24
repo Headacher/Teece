@@ -78,11 +78,13 @@
         369,
         370
       ],
-      "blurb": "Shove everything. Ogres move enemies around and the penalties they hand out are permanent, so a shoved Teece never recovers. Negative attributes are lethal.",
+      "blurb": "Shove everything, then make sure it cannot do anything about it. Ogres move Teece around and the penalties they hand out are permanent — but the new weapon is STUN: a stunned Teece destroys nothing and can activate no ability until the end of your next turn. It keeps every number it has. It simply stops working. Almost every card here lays one, so a shoved board is a board that cannot fight back, and negative attributes are still lethal.",
       "how": [
-        "Almost every Ogre moves something as it lands, and the -2 it hands out sticks for the rest of the game.",
-        "Ogre Trapper punishes movement however it happened, so your own shoves feed it too.",
-        "Sinkhole destroys whatever moves onto it. Springshelf pays +5 to whatever moves on — and nothing to a Teece played straight there."
+        "Stun is the deck. A stunned Teece cannot destroy anything and cannot use any ability — not even Flying — until the end of your next turn, which means it is useless for the whole of its controller's turn. The panel shows a burst badge, and a chip under the board names every stunned Teece on the field.",
+        "Ogre Trapper and Ogre Tactician punish movement however it happened, so your own shoves feed them — and the Tactician stuns on every enemy move for nothing at all.",
+        "Lumber is not March: ONCE while the body stands, not once a turn. The Chieftain and the Exploding Ogre each get one repositioning and then they are where they are.",
+        "Ogre Hexer is the answer to something that has been built up rather than something in the way: -2, silenced, stripped of every bonus, every equip destroyed, the battleground under it destroyed, and stunned.",
+        "Sinkhole destroys whatever moves onto it. Concussion Alley holds a stun on whatever stands there and lets go the instant it leaves — and anything that stuns a Teece already standing on it takes 4 off as well."
       ]
     },
     "robot": {
