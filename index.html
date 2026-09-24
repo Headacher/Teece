@@ -753,7 +753,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:74,date:'2026-09-24'};
+const VERSION={build:75,date:'2026-09-24'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3311,8 +3311,18 @@ const CARDS = {
     onPlay:[{fx:'copy',all:true}],
     text:'+1 for every ally standing on a panel beside it. When played: a copy of this appears on every free panel beside it \u2014 which is four more allies standing beside it.'},
  847:{name:'Breeding Locust',type:'teece',locust:true,sides:[5,5,5,5],
-    onPlay:[{fx:'copy'}],onDeath:[{fx:'copy'}],
-    text:'When played, and again when destroyed: a copy of this appears on a free panel beside it.'},
+    /* One ability that fires in two circumstances, so both draw on ONE
+       allowance under the same key -- three between the played half, the
+       destroyed half, and every copy of the card. Uncapped, the when-destroyed
+       half was a loop rather than a chain: killing the breeder left a breeder,
+       and killing that one left another, for as long as anything on the board
+       could keep killing it. Eight deaths in a turn made eight copies, and
+       there was no number at which it stopped. */
+    onPlay:[{fx:'copy',turnCap:{key:'breeder',max:3,
+      msg:'The breeders have already bred three times this turn.'}}],
+    onDeath:[{fx:'copy',turnCap:{key:'breeder',max:3,
+      msg:'The breeders have already bred three times this turn.'}}],
+    text:'When played, and again when destroyed: a copy of this appears on a free panel beside it. Between this card and every copy of it, that happens three times in a turn and no more.'},
  848:{name:'Egg-Layer',type:'teece',locust:true,sides:[3,3,3,3],
     act:[{name:'Lay',once:'turn',onceTurn:'egglayer',steps:[{fx:'copy'},{fx:'copy'}]}],
     text:'Once per turn, among all copies: two copies of this appear on free panels beside it, chosen one at a time.'},
