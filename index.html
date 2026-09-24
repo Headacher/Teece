@@ -758,7 +758,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:80,date:'2026-09-24'};
+const VERSION={build:81,date:'2026-09-24'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -2008,9 +2008,9 @@ const CARDS = {
     text:'Drag an enemy one space toward one of your Teece in its row or column. The first time you cast this each game, it returns to your hand.',
     cast:[{fx:'dragToward'}]},
  364:{name:'Second Wind',type:'magic',
-    text:'Choose a Teece that moved this turn: it gets +3 or -3, and either way it is stunned.',
+    text:'Choose a Teece that moved this turn: it gets +3, or it gets -3 and is stunned. The +3 never stuns one of your own — it is meant as a reward, not a knock on the head.',
     cast:[{fx:'choose',msg:'Second Wind:',opts:[
-      {lbl:'Give it +3 and stun it',steps:[{fx:'movedMod',n:3,dur:'perm',stun:true}]},
+      {lbl:'Give it +3 (stuns only an enemy)',steps:[{fx:'movedMod',n:3,dur:'perm',stun:'enemy'}]},
       {lbl:'Give it -3 and stun it',steps:[{fx:'movedMod',n:-3,dur:'perm',stun:true}]}]}]},
  365:{name:'Warstomp',type:'magic',
     text:'If any Teece moved this turn: summon an Ogre Token with 8 on every side. Whatever destroys that Token is stunned.',
@@ -5775,10 +5775,10 @@ async function fireMove(from,to,cause){
     for(const h of hooks){
       if(h.fx==='modMoved'){
         applyModT(t,h.n,h.dur);log(nm(t)+' gets '+sgn(h.n)+durTxt(h.dur)+'.');
-        if(h.stun)applyStun(b,to,true);
+        if(h.stun)applyStun(b,to,true,w.owner);
       }
       /* The Ogre Tactician: no number at all, just the rattle. */
-      else if(h.fx==='stunMoved')applyStun(b,to,true);
+      else if(h.fx==='stunMoved')applyStun(b,to,true,w.owner);
       else if(h.fx==='modSelf'){applyModT(w,h.n,h.dur);log(nm(w)+' gets '+sgn(h.n)+durTxt(h.dur)+'.');}
       else await runSteps([h],{p:w.owner,cell:i,t:w,first:false});
     }
@@ -7370,7 +7370,7 @@ async function FXRUN(st,ctx){
     if(st.thenMod){applyModT(t,st.thenMod.n,st.thenMod.dur);log(nm(t)+' gets '+sgn(st.thenMod.n)+durTxt(st.thenMod.dur)+'.');}
     /* Stunned where it LANDS, not where it was standing, so Concussion Alley
        charges its 4 when a shove is what put the Teece onto it. */
-    if(st.thenStun)applyStun(b,dst,true);
+    if(st.thenStun)stunFromStep({stun:st.thenStun},b,dst,p,true);
     if(st.thenSpiderMod&&isSpiderling(t)){applyModT(t,st.thenSpiderMod.n,st.thenSpiderMod.dur);
       log(nm(t)+' is nursed along: '+sgn(st.thenSpiderMod.n)+durTxt(st.thenSpiderMod.dur)+'.');}
     await fireMove(c,dst,p);
@@ -7441,7 +7441,7 @@ async function FXRUN(st,ctx){
       log(CARDS[b[c].ground.cardId].name+' is smashed out from under '+nm(t)+'.');
       await clearGroundAt(c,p);
     }
-    applyStun(b,c,true);
+    applyStun(b,c,true,p);
     await anim([c],'zap');
     noteTargeted(p);
     return;}
@@ -7467,15 +7467,15 @@ async function FXRUN(st,ctx){
       const outs=ADJ[j].filter(k=>!b[k].teece);
       if(!outs.length){
         log(nm(o)+' has nowhere to be shoved.');
-        if(st.stun)applyStun(b,j,true);
+        if(st.stun)stunFromStep(st,b,j,p,true);
         continue;
       }
       const r=await chooseCell(p,outs,'Shove '+nm(o)+' one space, or skip.',
         {skip:true,mut:(bb,k)=>{if(bb[j].teece)moveT(bb,j,k,false);}});
-      if(r==null||r==='CANCEL'){if(st.stun)applyStun(b,j,true);continue;}
+      if(r==null||r==='CANCEL'){if(st.stun)stunFromStep(st,b,j,p,true);continue;}
       moveT(b,j,r,true);
       log(nm(o)+' is marched to the '+CN[r]+'.');
-      if(st.stun)applyStun(b,r,true);
+      if(st.stun)stunFromStep(st,b,r,p,true);
       await fireMove(j,r,p);
     }
     return;}
@@ -7762,13 +7762,13 @@ async function FXRUN(st,ctx){
           moveT(b,j,dst,true);
           applyModT(b[dst].teece,st.n,st.dur);
           log(nm(t)+' is blown back to the '+CN[dst]+' and gets '+sgn(st.n)+durTxt(st.dur)+'.');
-          if(st.stun)applyStun(b,dst,true);
+          if(st.stun)stunFromStep(st,b,dst,p,true);
           await fireMove(j,dst,p);
           continue;
         }
         applyModT(t,st.n,st.dur);
         log(nm(t)+' has nowhere to be blown, and gets '+sgn(st.n)+durTxt(st.dur)+'.');
-        if(st.stun)applyStun(b,j,true);
+        if(st.stun)stunFromStep(st,b,j,p,true);
         continue;
       }
       if(hasKw(b,j,'immovable'))continue;
@@ -7780,7 +7780,7 @@ async function FXRUN(st,ctx){
           moveT(b,j,r,true);
           applyModT(b[r].teece,st.n,st.dur);
           log(nm(t)+' is hurled to the '+CN[r]+' and gets '+sgn(st.n)+durTxt(st.dur)+'.');
-          if(st.stun)applyStun(b,r,true);
+          if(st.stun)stunFromStep(st,b,r,p,true);
           await fireMove(j,r,p);
           continue;
         }
@@ -7789,7 +7789,7 @@ async function FXRUN(st,ctx){
       log(nm(t)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');
       /* Pinned with nowhere to go still takes the blow and still gets rattled:
          what the sweep does is not conditional on the shove landing. */
-      if(st.stun)applyStun(b,j,true);
+      if(st.stun)stunFromStep(st,b,j,p,true);
     }
     return;}
   case 'rowColMove':{
@@ -8136,7 +8136,7 @@ async function FXRUN(st,ctx){
     if(c==null)return;
     applyModT(b[c].teece,st.n,st.dur);
     log(nm(b[c].teece)+' gets '+sgn(st.n)+durTxt(st.dur)+'.');
-    if(st.stun)applyStun(b,c,true);
+    if(st.stun)stunFromStep(st,b,c,p,true);
     return;}
   case 'movedToken':{
     if(!G.movedThisTurn.length){log('Nothing has moved this turn.');return 'ABORT';}
@@ -8169,7 +8169,7 @@ async function FXRUN(st,ctx){
           if(dst>=0&&openAt(b,dst)){
             moveT(b,j,dst,true);
             log(nm(o)+' is blown back to the '+CN[dst]+'.');
-            if(st.stun)applyStun(b,dst,true);
+            if(st.stun)stunFromStep(st,b,dst,p,true);
             await fireMove(j,dst,p);
             continue;
           }
@@ -8180,14 +8180,14 @@ async function FXRUN(st,ctx){
               {skip:true,mut:(bb,k)=>{if(bb[j].teece)moveT(bb,j,k,false);}});
             if(r!=null&&r!=='CANCEL'){
               moveT(b,j,r,true);
-              if(st.stun)applyStun(b,r,true);
+              if(st.stun)stunFromStep(st,b,r,p,true);
               await fireMove(j,r,p);
               continue;
             }
           }
         }
       }
-      if(st.stun)applyStun(b,j,true);
+      if(st.stun)stunFromStep(st,b,j,p,true);
     }
     const me=b[src].teece;
     if(me)await processDeath({cell:src,t:me,killers:[],cost:true});
@@ -8205,7 +8205,7 @@ async function FXRUN(st,ctx){
     opts.push({v:'move',lbl:'Move it one space'});
     if(st.stun)opts.push({v:'stun',lbl:'Stun it'});
     const pick=opts.length===1?'move':await chooseOption(p,opts,'What happens to '+nm(t)+'?');
-    if(pick==='stun'){applyStun(b,c,true);return;}
+    if(pick==='stun'){applyStun(b,c,true,p);return;}
     if(pick==='hand'){
       b[c].teece=null;
       for(const uid of t.controls)revertControl(b,uid,true);
@@ -10332,7 +10332,14 @@ async function undyingReturn(t,cell){
    than teaching combat a third thing. */
 function isStunned(t,b,i){
   if(!t)return false;
-  if(t.stunUntil&&G&&G.turnNum<t.stunUntil)return true;
+  /* The FLAG is the state; the number on it is only the turn at the end of which
+     the endTurn sweep lifts it. Comparing turns here as well cut a turn off every
+     stun: set on turn 1 with an expiry of 3, it stopped reading as stunned the
+     moment turn 3 began, so the victim got the whole of that turn back. It is the
+     same shape immortalUntil uses -- isHeldSafe reads the flag and lets endTurn
+     do the arithmetic -- and it now lasts what the cards say it lasts: the rest
+     of this turn, the turn between, and all of the stunner's next turn. */
+  if(t.stunUntil)return true;
   if(b&&i!=null&&groundFlag(b[i].ground,'gStun'))return true;
   return false;
 }
@@ -10340,7 +10347,7 @@ function isStunned(t,b,i){
    second-hit rule one place to live: stunning something that the Alley is
    already holding costs it 4. Read before the new stun is written, or the panel
    would charge for its own. */
-function applyStun(b,i,live){
+function applyStun(b,i,live,by){
   const t=b[i].teece;
   if(!t)return false;
   if(groundFlag(b[i].ground,'gStun')&&isStunned(t,b,i)){
@@ -10348,9 +10355,22 @@ function applyStun(b,i,live){
     if(live)log(nm(t)+' is rattled a second time in Concussion Alley: -4.');
   }
   t.stunUntil=Math.max(t.stunUntil||0,nextTurnExpiry());
+  /* Named off the side that laid it rather than off whoever is up: a
+     Counterweight rattles a killer during the OTHER side's turn, and saying
+     "until the end of their next turn" there names the wrong side. */
+  const who=(by!=null?by:G.turn);
   if(live)log(nm(t)+' is stunned: it destroys nothing and activates nothing until the end of '+
-    pposs(G.turn)+' next turn.');
+    pposs(who)+' next turn.');
   return true;
+}
+/* A step's stun, honouring stun:'enemy' -- one that spares the caster's own side.
+   Second Wind's +3 half is a gift, so it must not rattle what it is given to. */
+function stunFromStep(st,b,i,p,live){
+  if(!st.stun)return false;
+  const t=b[i].teece;
+  if(!t)return false;
+  if(st.stun==='enemy'&&sameTeam(t.owner,p))return false;
+  return applyStun(b,i,live,p);
 }
 /* What to say on a badge or a chip, or null when it is not stunned at all. */
 function stunText(b,i){
@@ -10496,7 +10516,7 @@ async function processDeath(d){
     if(st.fx==='stunKiller'){
       for(const kuid of d.killers)for(let i=0;i<BN;i++){
         const k=b[i].teece;
-        if(k&&k.uid===kuid)applyStun(b,i,true);
+        if(k&&k.uid===kuid)applyStun(b,i,true,t.baseOwner);
       }
       continue;
     }
