@@ -753,7 +753,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:73,date:'2026-09-24'};
+const VERSION={build:74,date:'2026-09-24'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4643,14 +4643,20 @@ function checkTicTacToe(){
    A deck marked swarmWin names the card field that counts -- Locust names
    'locust' -- and its side takes the game the moment every panel on the board
    is holding one of them. Read over the TEAM, because allies win together and
-   an ally's Locust is that panel filled. A razed panel is not a panel anybody
-   can stand on, so it is not one the swarm is asked to fill; if raze has taken
-   the board apart entirely there is nothing to hold and nothing to win.
+   an ally's Locust is that panel filled.
+
+   A razed panel puts the ending out of reach for good. Nothing can ever stand
+   on one, so "a Locust on every panel" can never come true again -- and that
+   makes Raze and the Curse of Razing the answer to this deck, which is the
+   right way round. Skipping razed panels instead, which is what this did at
+   first, handed the swarm a FASTER win the more the other side tore the board
+   up: it beat the Witch by filling seven panels while the Witch was busy
+   removing the other two.
 
    It is a harder thing than wiping the enemy out, but not the same thing: a
    side with no bodies left on the board is still in the game while it holds
    Teece in hand or deck, so nine panels of Locust can stand with the game
-   still running. */
+   still running -- and in practice does, on about turn 20. */
 function swarmHold(b,tm){
   let kind=null;
   for(const q of seatsOnTeam(tm)){
@@ -4658,14 +4664,15 @@ function swarmHold(b,tm){
     if(pq&&pq.swarmWin){kind=pq.swarmWin;break;}
   }
   if(!kind)return null;
-  let held=0,panels=0;
+  let held=0,panels=0,razed=0;
   for(let i=0;i<BN;i++){
-    if(b[i].razed)continue;
+    if(b[i].razed){razed++;continue;}
     panels++;
     const t=b[i].teece;
     if(t&&sameTeam(t.owner,tm)&&CARDS[t.cardId][kind])held++;
   }
-  return {kind,label:kind.charAt(0).toUpperCase()+kind.slice(1),held,panels,done:panels>0&&held===panels};
+  return {kind,label:kind.charAt(0).toUpperCase()+kind.slice(1),held,panels,razed,
+          done:panels>0&&razed===0&&held===panels};
 }
 function checkSwarmWin(){
   if(G.over)return;
@@ -6051,8 +6058,15 @@ async function FXRUN(st,ctx){
         :(empt.length+' copies of '+DEF(ctx.t).name+' spill onto the '+empt.map(j=>CN[j]).join(', ')+'.'));
       await anim(empt,'placed',140);
       return;}
+    /* st.may is what makes the placement an offer. Every card that carries this
+       says the copy APPEARS -- Splitter, Mitosis, and three of the Locusts --
+       so none of them passes it, and none of them may be declined. Offering the
+       skip anyway meant aiPickCell took it whenever the panel was not worth
+       0.05 to the board: measured over 200 real decisions the computer threw
+       the copy away 17% of the time, and the Moulting Locust, which pays a card
+       for it, paid and got nothing back in 43 uses out of 150. */
     const c=await pickCell(empt,'Choose a space for the copy.',
-      (bb,i)=>{const cp=makeTeece(ctx.t.cardId,p);cp.isCopy=true;putTeece(bb,i,cp,false);},true);
+      (bb,i)=>{const cp=makeTeece(ctx.t.cardId,p);cp.isCopy=true;putTeece(bb,i,cp,false);},!!st.may);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const cp=makeTeece(ctx.t.cardId,p);cp.isCopy=true;
@@ -12288,6 +12302,22 @@ function simDeath(b,d){
       }
     }else if(st.fx==='token'&&st.where==='here'){
       if(!b[cell].teece)putTeece(b,cell,makeTeece(st.tok,t.owner),false);
+    }else if(st.fx==='copy'&&!t.simBorn){
+      /* The swarm answering being killed. Without this no simulation sees a
+         Locust Nymph burst, so the computer neither understands that its own are
+         worth spending nor that the 0/0/0/0 it is about to step on answers back
+         on every side of itself.
+
+         One generation only. The real thing is held to three bursts a turn by a
+         tally on the seat, and a simulation must not touch that tally -- so what
+         it does instead is refuse to let a body it invented burst again. The
+         chain was bounded anyway, by free panels and simCombat's own guard, but
+         unbounded it priced a Nymph well above what one really does. */
+      const spots=ADJ[cell].filter(j=>openAt(b,j));
+      for(const j of (st.all?spots:spots.slice(0,1))){
+        const cp=makeTeece(t.cardId,t.owner);cp.isCopy=true;cp.simBorn=true;
+        putTeece(b,j,cp,false);
+      }
     }
   }
   for(const uid of t.links)for(let i=0;i<BN;i++){
@@ -12349,6 +12379,10 @@ function swarmValue(b,p){
   for(const tm of teamsInPlay()){
     const h=swarmHold(b,tm);
     if(!h||!h.panels)continue;
+    /* A razed panel has put it out of reach for good, so there is nothing here
+       left to aim at -- the bodies still score, through boardValue's own count
+       of them, but filling the board is no longer worth anything extra. */
+    if(h.razed)continue;
     const frac=h.held/h.panels;
     const w=h.done?400:(h.held*3+Math.pow(frac,4)*90);
     v+=tm===teamOf(p)?w:-w*1.15;
@@ -12425,6 +12459,12 @@ function simOnPlay(b,cell,id,p){
       for(const j of pool){if(placed>=lim)break;putTeece(b,j,makeTeece('TSP',p),false);placed++;}
     }else if(st.fx==='webSides'){
       if(isWebbed(b,cell))for(let k=0;k<4;k++)t.perm[k]+=(st.mod[k]||0);
+    }else if(st.fx==='swarmMind'){
+      /* Banked on the seat for the rest of the game, so nothing about it shows
+         on the board the instant it is played. Laid onto the simulated bodies
+         instead: it undercounts, because the Teece not yet played are paid too,
+         and undercounting a Boss is the safe direction to be wrong in. */
+      for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&o.owner===p)applyModT(o,st.n,'perm');}
     }else if(st.fx==='control'){
       let best=-1,bs=-1;
       for(let i=0;i<BN;i++){
@@ -12494,12 +12534,21 @@ function aiPlanFor(id){
     let bonus=0;
     if(d.gEndTurn)bonus+=1.4;
     if(d.gGrowSummon)bonus+=1.0;
+    /* Defence that does not exist until the right body is standing on it, and a
+       bonus paid to whatever is PLAYED onto it next. Neither is on the board the
+       moment the battleground goes down, so neither scores without this. */
+    if(d.gdefKind)bonus+=1.0;
+    if(d.gPlayHold)bonus+=1.4;
     return {thr:0.8,bonus,cands,mut:(bb,i)=>{
       if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
       else bb[i].ground={cardId:id,owner:p};}};
   }
   if(d.type!=='magic')return null;
-  const st=d.cast[0];
+  /* Past the price gate. A spell that asks the whole price before it takes any
+     of it puts {fx:'price'} first, and dispatching on that step meant every
+     such spell was invisible here and never cast at all -- three of the Locust
+     deck's twenty cards, and anything else written that way later. */
+  const st=d.cast.find(s2=>s2.fx!=='price')||d.cast[0];
   if(st.fx==='mod'){
     const cands=[];
     for(let i=0;i<BN;i++){
@@ -12521,6 +12570,51 @@ function aiPlanFor(id){
       if(st.who==='enemy'&&ally)continue;
       applyModT(o,st.n,st.dur);
     }}};
+  /* A spell paid for in your own bodies. All three of the Locust deck's spells
+     are this shape: take n of yours, then do something with what is left. The
+     plan pays the n weakest on a clone -- through simDeath, so a Nymph spent
+     this way bursts on the clone exactly as it will on the board -- and then
+     applies whichever reward it recognises. */
+  if(st.fx==='sacAlly'){
+    const need=d.cast.filter(s2=>s2.fx==='sacAlly').length;
+    const mine=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&sameTeam(t.owner,p)&&canSacrifice(b,i))mine.push(i);}
+    if(mine.length<need)return null;
+    /* Never spend the last of them: a side with nothing standing is a side one
+       scan away from losing, whatever the spell pays. */
+    if(realCount(p)-need<1&&totalTeece(p)-need<2)return null;
+    const pay=mine.map(i=>({i,v:effSides(b,i).reduce((a,c)=>a+c,0)}))
+                  .sort((x,y)=>x.v-y.v).slice(0,need).map(x=>x.i);
+    const kill=d.cast.some(s2=>s2.fx==='destroy');
+    const foes=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p)&&!isHeldSafe(t))foes.push(i);
+    }
+    if(kill&&!foes.length)return null;
+    const worst=foes.slice().sort((x,y)=>
+      effSides(b,y).reduce((a,c)=>a+c,0)-effSides(b,x).reduce((a,c)=>a+c,0))[0];
+    const lift=d.cast.find(s2=>s2.fx==='mass');
+    /* Cards taken out of a graveyard never touch the board, so what Gleaning is
+       worth has to be named rather than simulated. */
+    const grab=d.cast.find(s2=>s2.fx==='graveToHand');
+    let bonus=0;
+    if(grab){
+      let pile=0;
+      const seats=grab.any?Array.from({length:PLAYERS()},(_,q)=>q):[p];
+      for(const q of seats)pile+=G.players[q].grave.length;
+      if(!pile)return null;
+      bonus=2.4*Math.min(grab.n||1,pile);
+    }
+    return {thr:1.2,bonus,cands:[0],mut:(bb)=>{
+      for(const c of pay)simDeath(bb,{cell:c,t:bb[c].teece,killers:[]});
+      if(kill&&worst!=null&&bb[worst].teece)simDeath(bb,{cell:worst,t:bb[worst].teece,killers:[]});
+      if(lift)for(let i=0;i<BN;i++){
+        const o=bb[i].teece;
+        if(o&&sameTeam(o.owner,p))applyModT(o,lift.n,lift.dur);
+      }
+    }};
+  }
   /* Overwhelm pays every one of yours by the size of the swarm, so the target
      is the whole board at once -- weighed the way 'mass' is. */
   if(st.fx==='overwhelm'){
@@ -12873,7 +12967,15 @@ async function aiActs(){
 }
 function aiActMuts(cell,ent){
   const b=G.board,p=G.turn,muts=[];
-  const st=ent.act.steps[0];
+  /* X : Y ; Z -- weighed on Z, the thing it does, not on Y, the thing it costs.
+     An ability whose first step is its price had no branch here at all, so it
+     offered the planner nothing to weigh, scored -1 and never fired: the
+     Moulting Locust's Moult, the Compactor Arm, Garbage Man and the Chainmail of
+     the End Times were all dead abilities for this one reason. What the price
+     takes is usually a card out of a hand, which the board score cannot see
+     anyway. */
+  const steps=ent.act.steps||[];
+  const st=steps.find(s2=>s2.fx!=='price'&&!s2.cost)||steps[0];
   if(st.fx==='move'){
     for(const j of movePool(cell,st.range))
       if(openAt(b,j))muts.push(bb=>{if(bb[cell].teece)moveT(bb,cell,j,false);});
@@ -12924,6 +13026,25 @@ function aiActMuts(cell,ent){
       const o=b[j].teece;if(!o||j===cell)continue;
       if(st.who==='enemy'?sameTeam(o.owner,p):!sameTeam(o.owner,p))continue;
       muts.push(bb=>{const a=bb[cell].teece;bb[cell].teece=bb[j].teece;bb[j].teece=a;});
+    }
+  }else if(st.fx==='copy'){
+    /* One option per free panel beside it, or, where the step lays one on every
+       panel at once, the single option of doing exactly that. An ability with
+       several copy steps lays that many, filling outwards from the panel each
+       option starts at -- which is the shape the Egg-Layer's two really take. */
+    const cid=b[cell].teece&&b[cell].teece.cardId;
+    const spots=ADJ[cell].filter(j=>openAt(b,j));
+    if(cid!=null&&spots.length){
+      const n=steps.filter(s2=>s2.fx==='copy').length||1;
+      const lay=(bb,js)=>{
+        for(const j of js){
+          if(!openAt(bb,j))continue;
+          const cp=makeTeece(cid,p);cp.isCopy=true;
+          putTeece(bb,j,cp,false);
+        }
+      };
+      if(st.all)muts.push(bb=>lay(bb,spots));
+      else for(const j of spots)muts.push(bb=>lay(bb,[j].concat(spots.filter(x=>x!==j)).slice(0,n)));
     }
   }else if(st.fx==='rot'){
     muts.push(bb=>{const t=bb[cell].teece,s=t.base;t.base=[s[3],s[0],s[1],s[2]];});
@@ -13141,7 +13262,8 @@ function showDeckInfo(key){
     (dk.swarmWin
       ? '<span class="rk">And one more</span><span>This deck adds a win of its own: the moment every panel on the '+
         'board is holding one of your '+escHtml(dk.swarmWin)+'s, the game is yours. It is checked as a turn ends, '+
-        'so the board has to still be full when one closes.</span>'
+        'so the board has to still be full when one closes \u2014 and a panel razed off the board puts it out of '+
+        'reach for good, which is what Raze and the Curse of Razing are for.</span>'
       : '')+
     (dk.allFlying
       ? '<span class="rk">Winged</span><span>Every Teece this deck fields has Flying, printed on the deck rather than '+
@@ -14146,11 +14268,17 @@ function statusesFor(p){
      way to see how many panels are left to fill. */
   if(pl.swarmWin){
     const h=swarmHold(b,teamOf(p));
-    if(h)push('swarm','good',
+    if(h&&h.razed)push('swarm','bad',h.label+' win is gone',
+      (h.razed===1?'A panel has':h.razed+' panels have')+' been razed off the board, and nothing can ever stand '+
+      'on '+(h.razed===1?'it':'them')+' again \u2014 so every panel holding one of your '+h.label+'s can never come '+
+      'true, and that way of winning is out of reach for the rest of the game. You still win by wiping them out, '+
+      'or by holding the bigger field when a deck runs dry.');
+    else if(h)push('swarm','good',
       h.label+'s: '+h.held+' of '+h.panels+' panels',
       'Your deck wins outright the moment every panel on the board is holding one of your '+
       h.label+'s. '+h.held+' of the '+h.panels+' '+(h.held===1?'is':'are')+' yours now; the check is made '+
-      'at the end of a turn, so the board has to be full when one closes.');
+      'at the end of a turn, so the board has to be full when one closes. '+
+      'A razed panel would end that chance for good.');
   }
   if(pl.swarmMind)push('hivemind','good','Hive mind '+sgn(pl.swarmMind),
     'The Locust Hivemind has been played: every Teece you control has '+sgn(pl.swarmMind)+
@@ -14620,6 +14748,7 @@ if(typeof module!=='undefined'){
     aiPlayTeece,aiSupport,fireMagic,
     panelMark,hasMark,countMark,markCountFor,markLines,markLine,checkTicTacToe,markOfCard,markOfId,markValue,
     swarmHold,checkSwarmWin,swarmValue,adjAllyCount,ownedCount,turnCapTake,applyDeckRules,
+    simDeath,simCombat,simOnPlay,aiPlanFor,aiSupport,aiActMuts,aiActs,
     payRecall,getLines:()=>LINES};
 }
 </script>
