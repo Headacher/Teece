@@ -753,7 +753,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:76,date:'2026-09-24'};
+const VERSION={build:77,date:'2026-09-24'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -904,7 +904,7 @@ const CARD_ART={
   862:["   ><  ><    "," ><  ^^^  >< ","   ><   ><   "," ~~~~~~~~~~~ ","  + + + + +  "],
   863:[" | | | | | | "," | | | | | | "," \\|/\\|/\\|/\\| "," ~~~~~~~~~~~ ","  . . . . .  "],
   864:["   /~~~~~\\   ","  / (o)(o) \\ "," | .-. .-.  |","  \\ ~~~~~ /  ","   ~~~~~~~   "],
-  'TLOC8':[" \\\\\\\\ ^ //// "," ( O   O ) 8 ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
+  'TLOC8':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
   541:["  \\  .-.  /  ", "   \\( o )/   ", "    (/|\\)    ", "    _/ \\_    ", "   [$]  ...  "],
   542:["  \\  .-.  /  ", "   \\( - )/   ", "    (/|\\)    ", "   _/   \\_   ", "  |RIP| ...  "],
@@ -3307,10 +3307,10 @@ const CARDS = {
     onDeath:[{fx:'copy',all:true,turnCap:{key:'nymph',max:3,
       msg:'The nymphs have already burst three times this turn.'}}],
     text:'When destroyed: a copy of this appears on every free panel beside it. Between this card and every copy of it, that happens three times in a turn and no more.'},
- 846:{name:'Locust Brood',type:'teece',locust:true,sides:[4,4,4,4],modPerAdjAlly:1,
+ 846:{name:'Locust Brood',type:'teece',locust:true,sides:[4,3,2,3],modPerAdjAlly:1,
     onPlay:[{fx:'copy',all:true}],
     text:'+1 for every ally standing on a panel beside it. When played: a copy of this appears on every free panel beside it \u2014 which is four more allies standing beside it.'},
- 847:{name:'Breeding Locust',type:'teece',locust:true,sides:[5,5,5,5],
+ 847:{name:'Breeding Locust',type:'teece',locust:true,sides:[5,4,3,4],
     /* One ability that fires in two circumstances, so both draw on ONE
        allowance under the same key -- three between the played half, the
        destroyed half, and every copy of the card. Uncapped, the when-destroyed
@@ -3323,33 +3323,33 @@ const CARDS = {
     onDeath:[{fx:'copy',turnCap:{key:'breeder',max:3,
       msg:'The breeders have already bred three times this turn.'}}],
     text:'When played, and again when destroyed: a copy of this appears on a free panel beside it. Between this card and every copy of it, that happens three times in a turn and no more.'},
- 848:{name:'Egg-Layer',type:'teece',locust:true,sides:[3,3,3,3],
+ 848:{name:'Egg-Layer',type:'teece',locust:true,sides:[2,3,1,2],
     act:[{name:'Lay',once:'turn',onceTurn:'egglayer',steps:[{fx:'copy'},{fx:'copy'}]}],
     text:'Once per turn, among all copies: two copies of this appear on free panels beside it, chosen one at a time.'},
- 849:{name:'Moulting Locust',type:'teece',locust:true,sides:[1,1,7,7],
+ 849:{name:'Moulting Locust',type:'teece',locust:true,sides:[1,0,6,5],
     onArrive:{n:1,dur:'perm'},
     act:[{name:'Moult',once:'turn',steps:[{fx:'price',adj:1},{fx:'discard',n:1,cost:true},{fx:'copy'}]}],
     text:'Whenever a Teece is played or summoned anywhere on the board: +1 permanently. Once per turn: discard a card, and a copy of this appears on a free panel beside it.'},
- 850:{name:'Grasshopper',type:'teece',locust:true,sides:[1,1,1,1],
+ 850:{name:'Grasshopper',type:'teece',locust:true,sides:[0,2,1,0],
     onDeath:[{fx:'token',tok:'TLOC8',count:2,foeTurn:true}],
-    text:'When destroyed on an opponent\u2019s turn: two 8/8/8/8 Locust Tokens are summoned. Unlike every other Token, they can be sacrificed.'},
- 851:{name:'Chitin Shell',type:'teece',locust:true,sides:[2,1,5,4],
+    text:'When destroyed on an opponent\u2019s turn: two 7/8/6/7 Locust Tokens are summoned. Unlike every other Token, they can be sacrificed.'},
+ 851:{name:'Chitin Shell',type:'teece',locust:true,sides:[1,1,4,2],
     handDiscard:[{fx:'shieldNext'}],
     onPlay:[{fx:'selfCopyToHand',fromHand:true}],
     text:'Discard this from your hand: the next ally you play cannot be destroyed until the start of your next turn. When played from your hand, and only from your hand: another Chitin Shell goes into it.'},
- 852:{name:'Carrion Locust',type:'teece',locust:true,sides:[4,5,6,7],
+ 852:{name:'Carrion Locust',type:'teece',locust:true,sides:[3,4,5,6],
     onPlay:[{fx:'graveSummon',kind:'locust',mod:2,silence:true}],
     text:'When played: summon a Locust out of your graveyard with +2. It comes up silenced, so whatever was printed on it stays buried.'},
- 853:{name:'Devouring Locust',type:'teece',locust:true,sides:[9,3,9,4],
+ 853:{name:'Devouring Locust',type:'teece',locust:true,sides:[8,2,8,3],
     onDeath:[{fx:'copyForAlly'}],
     text:'When destroyed: you may sacrifice an ally, and a copy of this stands up on the panel that ally was holding.'},
- 854:{name:'Gorged Locust',type:'teece',locust:true,sides:[9,9,9,9],
+ 854:{name:'Gorged Locust',type:'teece',locust:true,sides:[8,9,7,8],
     onPlay:[{fx:'sacAlly'}],
     text:'When played: sacrifice an allied Teece \u2014 this one included, if it is the only one you have.'},
- 855:{name:'Locust Locus',type:'teece',locust:true,sides:[3,3,3,3],sac:2,def:6,kw:['steadfast'],
+ 855:{name:'Locust Locus',type:'teece',locust:true,sides:[1,4,2,2],sac:2,def:6,kw:['steadfast'],
     onPlay:[{fx:'nextDef',n:6,count:4,kind:'locust'}],
     text:'Sacrifice two fielded Teece to play. Defence 6, and nothing can take attributes off it. When played: the next four Locusts you play each arrive with +6 Defence.'},
- 856:{name:'The Locust Hivemind',type:'teece',locust:true,sides:[12,12,12,12],sac:4,
+ 856:{name:'The Locust Hivemind',type:'teece',locust:true,sides:[11,12,10,11],sac:4,
     onPlay:[{fx:'swarmMind',n:3}],
     text:'Sacrifice four fielded Teece to play. When played: every Teece you control gets +3 for the rest of the game, and goes on getting it long after the Hivemind itself is buried.'},
  /* ---- Locust equips ---- */
@@ -3380,8 +3380,8 @@ const CARDS = {
  /* The Locust nobody drafts: what a trodden Grasshopper leaves behind. Big, and
     the one Token in the game that can be spent \u2014 and a Locust, so it is one
     of the panels the swarm needs filled. */
- 'TLOC8':{name:'Locust',type:'teece',token:true,deck:'locust',locust:true,sacOK:true,sides:[8,8,8,8],
-    text:'Locust Token. 8 on every side, and it CAN be sacrificed to play a Teece or to a curse. It never counts toward winning by domination, but it is a Locust, so it counts as one of the panels the swarm needs.'},
+ 'TLOC8':{name:'Locust',type:'teece',token:true,deck:'locust',locust:true,sacOK:true,sides:[7,8,6,7],
+    text:'Locust Token. 7/8/6/7 — still the biggest body this deck fields — and it CAN be sacrificed to play a Teece or to a curse. It never counts toward winning by domination, but it is a Locust, so it counts as one of the panels the swarm needs.'},
 };
 const DEF=t=>CARDS[t.cardId];
 /* What an equip actually grants, once the modality it was bolted on with is
