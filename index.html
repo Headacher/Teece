@@ -166,6 +166,9 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="rats"],.dcard[data-card-deck="rats"]{--cardbg:#3d3a32;--artink:#e9e4d4;background:var(--cardbg);color:#e7e2d3;border-color:#211f1a}
 .card[data-card-deck="rats"] .kwl,.dcard[data-card-deck="rats"] .dkw{color:#b7d66a}
 .card[data-card-deck="rats"] .ct,.dcard[data-card-deck="rats"] .dty{color:#b7d66a}
+.card[data-card-deck="locust"],.dcard[data-card-deck="locust"]{--cardbg:#4a4318;--artink:#f8f2cd;background:var(--cardbg);color:#f3edc9;border-color:#292507}
+.card[data-card-deck="locust"] .kwl,.dcard[data-card-deck="locust"] .dkw{color:#e6c94f}
+.card[data-card-deck="locust"] .ct,.dcard[data-card-deck="locust"] .dty{color:#e6c94f}
 
 .card[data-card-deck]::after,.dcard[data-card-deck]::after{position:absolute;top:2px;right:3px;font-size:11px;line-height:1;opacity:.85;z-index:1}
 .card[data-card-deck="classic"]::after,.dcard[data-card-deck="classic"]::after{content:'🂡'}
@@ -191,6 +194,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="madness"]::after,.dcard[data-card-deck="madness"]::after{content:'🌀'}
 .card[data-card-deck="dimension"]::after,.dcard[data-card-deck="dimension"]::after{content:'🌌'}
 .card[data-card-deck="rats"]::after,.dcard[data-card-deck="rats"]::after{content:'🐀'}
+.card[data-card-deck="locust"]::after,.dcard[data-card-deck="locust"]::after{content:'🦗'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -214,6 +218,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece[data-card-deck="madness"]{--cardbg:#4a1d6b;--artink:#fdeaff;background:var(--cardbg);color:#f3e4fb;border-color:#2b0f40}
 .teece[data-card-deck="dimension"]{--cardbg:#252a78;--artink:#e6ecff;background:var(--cardbg);color:#e4e8fb;border-color:#141746}
 .teece[data-card-deck="rats"]{--cardbg:#3d3a32;--artink:#e9e4d4;background:var(--cardbg);color:#e7e2d3;border-color:#211f1a}
+.teece[data-card-deck="locust"]{--cardbg:#4a4318;--artink:#f8f2cd;background:var(--cardbg);color:#f3edc9;border-color:#292507}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -748,7 +753,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:72,date:'2026-09-23'};
+const VERSION={build:73,date:'2026-09-24'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -823,6 +828,10 @@ function deckKeywords(key){
   const dk=DECKS[key]; if(!dk)return [];
   const found=[];
   const add=ks=>{for(const k of ks||[])if(KEYWORDS[k]&&found.indexOf(k)<0)found.push(k);};
+  /* Winged is printed on the DECK rather than on any of its twenty cards, so
+     nothing in the loop below would ever find it and the deck's own page would
+     sit there not mentioning that everything it fields flies. */
+  if(dk.allFlying)add(['flying']);
   for(const id of dk.cards){
     const c=CARDS[id]; if(!c)continue;
     add(c.kw); add(c.gkw);
@@ -846,7 +855,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -873,6 +882,29 @@ const CARD_ART={
   842:["    .--.     ","   ( oo )    ","    \\__/     ","     ||      ","    ~~~~     "],
   843:["  \\~~~~~~~/  "," ~( o o o )~ "," ~( ~~~~ )~  ","  /~~~~~~~\\  ","   ~ ~ ~ ~   "],
   844:["  +-------+  ","  | o . o |  ","  |  . .  |  ","  | o . o |  ","  +-------+  "],
+  /* ---- Locusts: one locust drawn with its wings out and printed across the
+         swarm, the Hivemind as a wall of eyes, and the field it eats ---- */
+  845:["     .-.     ","    ( o )    ","     /|\\     ","    _/ \\_    ","   . . . .   "],
+  846:["  ><  ><  >< ","   .-.       ","  ( o ) ><   ","  _/|\\_  ><  "," ~~~~~~~~~~~ "],
+  847:["  \\\\\\ ^ ///  ","   ( o o )   ","    \\===/    ","   _/ | \\_   ","    ~~~~~    "],
+  848:["   \\\\ ^ //   ","   ( o o )   ","    \\===/    ","   ooo ooo   ","   o o o o   "],
+  849:["   \\\\ ^ //   ","  ( o   o )  ","   )=====(   ","  (_______)  ","   ~ ~ ~ ~   "],
+  850:["      ^      ","     (o)     ","   __/|\\__   ","   \\  |  /   ","   ^     ^   "],
+  851:["   .-----.   ","  / ( o ) \\  "," | ======= | ","  \\ _____ /  ","   `-----`   "],
+  852:["  \\\\\\ ^ ///  ","   ( x x )   ","    \\===/    ","   _/ | \\_   ","   + + + +   "],
+  853:["  \\\\\\ ^ ///  ","  ( O v O )  ","   \\ vvv /   ","   _/   \\_   ","    ~~~~~    "],
+  854:[" \\\\\\\\ ^ //// "," (  O   O  ) ","  \\ =====  / ","  (_______)  ","   ~~ ~~ ~~  "],
+  855:["   \\\\ ^ //   ","   ( o o )   ","  +=======+  ","  |#######|  ","  +=======+  "],
+  856:[" (o)(o)(o)(o)","  \\  | |  /  "," (o)- ^ -(o) ","  /  | |  \\  "," (o)(o)(o)(o)"],
+  857:["  +-------+  ","  |#|#|#|#|  ","  |#|###|#|  ","  |#|#|#|#|  ","  +-------+  "],
+  858:["    /\\ /\\    ","   < (o) >   ","    \\ - /    ","     \\ /     ","      v      "],
+  859:["    .---.    ","   ( ~~~ )   ","    \\ ~ /    ","     \\./     ","   . . . .   "],
+  860:[" | | | | | | "," \\ | / | / | ","  ><  ><  >< ","  _  _  _  _ "," .  .  .  .  "],
+  861:["  +--+ +--+  ","  |xx| |xx|  ","  +--+ +--+  ","   \\     /   ","    ->  <-   "],
+  862:["   ><  ><    "," ><  ^^^  >< ","   ><   ><   "," ~~~~~~~~~~~ ","  + + + + +  "],
+  863:[" | | | | | | "," | | | | | | "," \\|/\\|/\\|/\\| "," ~~~~~~~~~~~ ","  . . . . .  "],
+  864:["   /~~~~~\\   ","  / (o)(o) \\ "," | .-. .-.  |","  \\ ~~~~~ /  ","   ~~~~~~~   "],
+  'TLOC8':[" \\\\\\\\ ^ //// "," ( O   O ) 8 ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
   541:["  \\  .-.  /  ", "   \\( o )/   ", "    (/|\\)    ", "    _/ \\_    ", "   [$]  ...  "],
   542:["  \\  .-.  /  ", "   \\( - )/   ", "    (/|\\)    ", "   _/   \\_   ", "  |RIP| ...  "],
@@ -3251,6 +3283,95 @@ const CARDS = {
  /* The one Rat nobody drafts: what the Nest puts out, night after night. */
  'TNEST':{name:'Rat',type:'teece',token:true,deck:'rats',rat:true,sides:[3,3,3,3],modPerAlly:1,
     text:'Rat Token. +1 for every ally standing with it. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ /* ---- Locusts: a swarm that pays for itself in copies, and the only swarm
+    deck with an ending of its own.
+
+    Two of the three passives are rules of the DECK rather than of any card, and
+    live in decks.json: allFlying is Winged, which hands Flying to everything
+    the seat controls, and swarmWin is the ending -- every panel holding one of
+    yours takes the game outright. The price is the one the Rats pay for the
+    same trick: noDominate, so being four bodies ahead is worth nothing at all.
+
+    `locust:true` is the field all of it reads. The Wheat Field pays it, the
+    Carrion Locust digs for it, Locust Locus arms Defence for it, and the ending
+    counts it -- so a Locust drafted into somebody else's deck keeps every one
+    of those and loses only the deck's own rules, which is the right way round:
+    one Locust in a Robot deck has no business flying.
+
+    Nothing here special-cases a copy. `copy` makes a body and does not run its
+    when-played, which is the brake on the whole deck: a Locust Brood fills four
+    panels and none of those four fills four more. What DOES carry is when-
+    destroyed, because processDeath reads it off the card either way -- so the
+    Nymph chains, and the three-a-turn cap is what stops it. ---- */
+ 845:{name:'Locust Nymph',type:'teece',locust:true,sides:[0,0,0,0],
+    onDeath:[{fx:'copy',all:true,turnCap:{key:'nymph',max:3,
+      msg:'The nymphs have already burst three times this turn.'}}],
+    text:'When destroyed: a copy of this appears on every free panel beside it. Between this card and every copy of it, that happens three times in a turn and no more.'},
+ 846:{name:'Locust Brood',type:'teece',locust:true,sides:[4,4,4,4],modPerAdjAlly:1,
+    onPlay:[{fx:'copy',all:true}],
+    text:'+1 for every ally standing on a panel beside it. When played: a copy of this appears on every free panel beside it \u2014 which is four more allies standing beside it.'},
+ 847:{name:'Breeding Locust',type:'teece',locust:true,sides:[5,5,5,5],
+    onPlay:[{fx:'copy'}],onDeath:[{fx:'copy'}],
+    text:'When played, and again when destroyed: a copy of this appears on a free panel beside it.'},
+ 848:{name:'Egg-Layer',type:'teece',locust:true,sides:[3,3,3,3],
+    act:[{name:'Lay',once:'turn',steps:[{fx:'copy'},{fx:'copy'}]}],
+    text:'Once per turn: two copies of this appear on free panels beside it, chosen one at a time.'},
+ 849:{name:'Moulting Locust',type:'teece',locust:true,sides:[1,1,7,7],
+    onArrive:{n:1,dur:'perm'},
+    act:[{name:'Moult',once:'turn',steps:[{fx:'price',adj:1},{fx:'discard',n:1,cost:true},{fx:'copy'}]}],
+    text:'Whenever a Teece is played or summoned anywhere on the board: +1 permanently. Once per turn: discard a card, and a copy of this appears on a free panel beside it.'},
+ 850:{name:'Grasshopper',type:'teece',locust:true,sides:[1,1,1,1],
+    onDeath:[{fx:'token',tok:'TLOC8',count:2,foeTurn:true}],
+    text:'When destroyed on an opponent\u2019s turn: two 8/8/8/8 Locust Tokens are summoned. Unlike every other Token, they can be sacrificed.'},
+ 851:{name:'Chitin Shell',type:'teece',locust:true,sides:[2,1,5,4],
+    handDiscard:[{fx:'shieldNext'}],
+    onPlay:[{fx:'selfCopyToHand',fromHand:true}],
+    text:'Discard this from your hand: the next ally you play cannot be destroyed until the start of your next turn. When played from your hand, and only from your hand: another Chitin Shell goes into it.'},
+ 852:{name:'Carrion Locust',type:'teece',locust:true,sides:[4,5,6,7],
+    onPlay:[{fx:'graveSummon',kind:'locust',mod:2,silence:true}],
+    text:'When played: summon a Locust out of your graveyard with +2. It comes up silenced, so whatever was printed on it stays buried.'},
+ 853:{name:'Devouring Locust',type:'teece',locust:true,sides:[9,3,9,4],
+    onDeath:[{fx:'copyForAlly'}],
+    text:'When destroyed: you may sacrifice an ally, and a copy of this stands up on the panel that ally was holding.'},
+ 854:{name:'Gorged Locust',type:'teece',locust:true,sides:[9,9,9,9],
+    onPlay:[{fx:'sacAlly'}],
+    text:'When played: sacrifice an allied Teece \u2014 this one included, if it is the only one you have.'},
+ 855:{name:'Locust Locus',type:'teece',locust:true,sides:[3,3,3,3],sac:2,def:6,kw:['steadfast'],
+    onPlay:[{fx:'nextDef',n:6,count:4,kind:'locust'}],
+    text:'Sacrifice two fielded Teece to play. Defence 6, and nothing can take attributes off it. When played: the next four Locusts you play each arrive with +6 Defence.'},
+ 856:{name:'The Locust Hivemind',type:'teece',locust:true,sides:[12,12,12,12],sac:4,
+    onPlay:[{fx:'swarmMind',n:3}],
+    text:'Sacrifice four fielded Teece to play. When played: every Teece you control gets +3 for the rest of the game, and goes on getting it long after the Hivemind itself is buried.'},
+ /* ---- Locust equips ---- */
+ 857:{name:'Swarm Plating',type:'equip',mod:0,modPerAdjAlly:3,
+    text:'The equipped Teece gets +3 for every ally standing on a panel beside it.'},
+ 858:{name:'Hive Sigil',type:'equip',mod:0,modPerOwn:1,
+    text:'The equipped Teece gets +1 for every Teece its controller holds the field with, itself counted.'},
+ 859:{name:'Pheromone Gland',type:'equip',mod:0,
+    grants:{aura:{who:'ally',where:'adj',n:4}},
+    text:'Allies standing on a panel beside the equipped Teece get +4.'},
+ /* ---- Locust magic. Each of these takes more than the last, so each asks the
+    whole price before it takes any of it: paying two bodies and finding out
+    there was never a third is worse than being told no. ---- */
+ 860:{name:'Crop Devastation',type:'magic',
+    cast:[{fx:'price',ally:3,teece:1},{fx:'sacAlly',cost:true},{fx:'sacAlly',cost:true},{fx:'sacAlly',cost:true},{fx:'destroy'}],
+    text:'Sacrifice three of your Teece, then select any Teece on the field and destroy it.'},
+ 861:{name:'Gleaning',type:'magic',
+    cast:[{fx:'price',ally:2,grave:1},{fx:'sacAlly',cost:true},{fx:'sacAlly',cost:true},{fx:'graveToHand',n:3,any:true}],
+    text:'Sacrifice two of your Teece, then take any three cards out of the graveyards \u2014 yours, theirs, or some of each \u2014 into your hand.'},
+ 862:{name:'Feeding Season',type:'magic',
+    cast:[{fx:'sacAlly',cost:true},{fx:'mass',who:'ally',n:4,dur:'perm'}],
+    text:'Sacrifice one of your Teece: every ally left standing gets +4 permanently.'},
+ /* ---- Locust battlegrounds ---- */
+ 863:{name:'Wheat Field',type:'ground',gdefKind:{kind:'locust',n:3},
+    text:'A Locust standing on this battleground has 3 Defence. Anything else standing on it gets nothing.'},
+ 864:{name:'Locust Nest',type:'ground',gPlayHold:5,
+    text:'A Teece PLAYED onto this battleground gets +5, for as long as it goes on standing there. Walking onto it afterwards earns nothing.'},
+ /* The Locust nobody drafts: what a trodden Grasshopper leaves behind. Big, and
+    the one Token in the game that can be spent \u2014 and a Locust, so it is one
+    of the panels the swarm needs filled. */
+ 'TLOC8':{name:'Locust',type:'teece',token:true,deck:'locust',locust:true,sacOK:true,sides:[8,8,8,8],
+    text:'Locust Token. 8 on every side, and it CAN be sacrificed to play a Teece or to a curse. It never counts toward winning by domination, but it is a Locust, so it counts as one of the panels the swarm needs.'},
 };
 const DEF=t=>CARDS[t.cardId];
 /* What an equip actually grants, once the modality it was bolted on with is
@@ -4082,7 +4203,9 @@ function newState(mode,vsAI,decks,extra){
     return top.length?rest.concat(top):list;
   };
   const mk=p=>({deck:stack(shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice())),hand:[],plate:[],grave:[],onceUsed:{},pendingDraw:0,undying:{},riding:{},
-    nextDefBonus:0,nextMod:0,nextSides:null,nextShield:false,noDeckOut:false,noDominate:false,coffined:{},teecePlayedLastTurn:false,teecePlayedThisTurn:0,turnsTaken:0,
+    nextDefBonus:0,nextDefLeft:0,nextDefKind:null,
+    nextMod:0,nextSides:null,nextShield:false,noDeckOut:false,noDominate:false,coffined:{},teecePlayedLastTurn:false,teecePlayedThisTurn:0,turnsTaken:0,
+    allFlying:false,swarmWin:null,swarmMind:0,turnCaps:{},
     hexes:[],forget:0,confuse:null,recall:null});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
@@ -4516,6 +4639,51 @@ function checkTicTacToe(){
   endGame(win.tm,who+(who==='You'?' end':' ends')+' the turn with three '+win.ln.letter+
     's in a row \u2014 the '+win.ln.cells.map(i=>CN[i]).join(', ')+'.');
 }
+/* ============ the swarm's own ending ============
+   A deck marked swarmWin names the card field that counts -- Locust names
+   'locust' -- and its side takes the game the moment every panel on the board
+   is holding one of them. Read over the TEAM, because allies win together and
+   an ally's Locust is that panel filled. A razed panel is not a panel anybody
+   can stand on, so it is not one the swarm is asked to fill; if raze has taken
+   the board apart entirely there is nothing to hold and nothing to win.
+
+   It is a harder thing than wiping the enemy out, but not the same thing: a
+   side with no bodies left on the board is still in the game while it holds
+   Teece in hand or deck, so nine panels of Locust can stand with the game
+   still running. */
+function swarmHold(b,tm){
+  let kind=null;
+  for(const q of seatsOnTeam(tm)){
+    const pq=G.players&&G.players[q];
+    if(pq&&pq.swarmWin){kind=pq.swarmWin;break;}
+  }
+  if(!kind)return null;
+  let held=0,panels=0;
+  for(let i=0;i<BN;i++){
+    if(b[i].razed)continue;
+    panels++;
+    const t=b[i].teece;
+    if(t&&sameTeam(t.owner,tm)&&CARDS[t.cardId][kind])held++;
+  }
+  return {kind,label:kind.charAt(0).toUpperCase()+kind.slice(1),held,panels,done:panels>0&&held===panels};
+}
+function checkSwarmWin(){
+  if(G.over)return;
+  for(const tm of teamsInPlay()){
+    const h=swarmHold(G.board,tm);
+    if(!h||!h.done)continue;
+    /* The Curse of Freezing holds this back the way it holds the others. The
+       deck's own no-domination rule does not: this is not domination. */
+    if(seatsOnTeam(tm).some(sq=>hexOn(sq,'nowin'))){
+      log('Every panel is a '+h.label+', and the Curse of Freezing holds the win back for now.');
+      return;
+    }
+    const who=teamName(tm);
+    endGame(tm,who+(who==='You'?' have':' has')+' a '+h.label+' standing on every one of the '+
+      h.panels+' panels. All is '+h.label+'.');
+    return;
+  }
+}
 /* Whether an aura reaches a given Teece at all. effSides spells the same test
    out inline; this is the copy the keyword and Defence passes share. */
 const auraWho=(a,ally)=>a.who==='ally'?ally:(a.who==='enemy'?!ally:true);
@@ -4540,6 +4708,24 @@ function adjAlly(b,i,j){
   if(ADJ[i].indexOf(j)>=0)return true;
   const a=b[i].teece,c=b[j].teece;
   return !!(a&&c&&sameTeam(a.owner,c.owner)&&fieldWide(b));
+}
+/* How many allies are on the panels TOUCHING this one, where allyCount reads
+   the whole field. The Locust deck is paid both ways and they compose. */
+function adjAllyCount(b,i){
+  const t=b[i].teece; if(!t)return 0;
+  let n=0;
+  for(const j of ADJ[i]){
+    const o=b[j].teece;
+    if(o&&o.uid!==t.uid&&sameTeam(o.owner,t.owner))n++;
+  }
+  return n;
+}
+/* Bodies this seat is holding the field with, read off whatever board is being
+   asked -- a clone as readily as the real one, which livingCount cannot do. */
+function ownedCount(b,p){
+  let n=0;
+  for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&o.owner===p)n++;}
+  return n;
 }
 function hasAllyAdj(b,i){
   const t=b[i].teece; if(!t)return false;
@@ -4694,6 +4880,12 @@ function effSides(b,i,parts){
   const eh=(!t.silenced)&&DEF(t).emptyHand;
   if(eh&&G&&G.players&&G.players[t.owner]&&handCount(t.owner)===0)
     addMod(s,eh,'Holding no cards');
+  /* The Locust Hivemind is banked on the SEAT, not on the body that bought it:
+     once it has been played its +3 stands for the rest of the game and keeps
+     paying long after the Hivemind itself is buried. Read off the controller,
+     so a Teece taken off the swarm stops being paid by it. */
+  const hmind=(G&&G.players&&G.players[t.owner]&&G.players[t.owner].swarmMind)||0;
+  if(hmind)addMod(s,hmind,'The Locust Hivemind, for the rest of the game');
   for(const bo of bonusesOn(b,i)){
     const n=formationCount(b,i,bo);
     if(n)addMod(s,bo.n*n,formationLabel(bo));
@@ -4728,6 +4920,17 @@ function effSides(b,i,parts){
       const em=allyCount(b,i,false);
       if(em)addMod(s,ed.modPerAlly*em,ed.name+', for each of the '+em+' allies beside its wearer');
     }
+    /* Two narrower readings of the same crowd. Swarm Plating counts only the
+       panels touching its wearer; the Hive Sigil counts every body its wearer's
+       controller has anywhere, itself included. */
+    if(ed.modPerAdjAlly){
+      const en=adjAllyCount(b,i);
+      if(en)addMod(s,ed.modPerAdjAlly*en,ed.name+', for each of the '+en+' allies beside its wearer');
+    }
+    if(ed.modPerOwn){
+      const eo=ownedCount(b,t.owner);
+      if(eo)addMod(s,ed.modPerOwn*eo,ed.name+', for each of the '+eo+' Teece its wearer controls');
+    }
     if(ed.modPerAge)addMod(s,ed.modPerAge*(t.age||0),ed.name+', per turn stood');
     /* aXe and swOrd are dead weight on the wrong letter. */
     if(ed.modIfMark&&markOfCard(DEF(t)).indexOf(ed.modIfMark.letter)>=0)
@@ -4754,6 +4957,13 @@ function effSides(b,i,parts){
   if(DEF(t).modPerAlly){
     const mates=allyCount(b,i,false);
     if(mates)addMod(s,DEF(t).modPerAlly*mates,DEF(t).name+', for each of the '+mates+' other allies standing');
+  }
+  /* The same reading, narrowed to the panels touching it. Printed on the card,
+     so silence never touches it -- and read fresh, because a Locust Brood fills
+     those panels itself on the way in. */
+  if(DEF(t).modPerAdjAlly){
+    const near=adjAllyCount(b,i);
+    if(near)addMod(s,DEF(t).modPerAdjAlly*near,DEF(t).name+', for each of the '+near+' allies beside it');
   }
   /* Living Dump is the heap behind its controller made flesh. Printed on the
      card, so silence never touches it, and read fresh every scan because the
@@ -4800,6 +5010,10 @@ function effSides(b,i,parts){
     for(const gd of gcards(gg)){
       addGround(s,gd.gmod,gd.name+where);
       if(gd.gStand&&t.standCell===gi)addGround(s,gd.gStand,gd.name+', for standing still');
+      /* The Locust Nest pays what was PLAYED onto it and only while it stays.
+         standCell is the marker gStand already uses, so leaving -- or landing
+         anywhere else -- drops the bonus with no bookkeeping of its own. */
+      if(gd.gPlayHold&&t.standCell===gi)addGround(s,gd.gPlayHold,gd.name+', for the panel it was played onto');
       if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addGround(s,gd.gRangedPlus,gd.name+', for being Ranged');
       /* The Dumpster pays for what is packed into it, and the Patch for a row
          held end to end. */
@@ -5055,6 +5269,9 @@ function defOf(b,i){
       if(gd.gHeldDef&&b[i].ground.held)d+=gd.gHeldDef*b[i].ground.held.length;
       /* the Bunker is worth holding with somebody: a second wall for a neighbour */
       if(gd.gdefAdjAlly&&hasAllyAdj(b,i))d+=gd.gdefAdjAlly;
+      /* The Wheat Field feeds Locusts and nothing else. Named as a card field
+         rather than a card id, so any deck could lay a ground for its own. */
+      if(gd.gdefKind&&DEF(t)[gd.gdefKind.kind])d+=gd.gdefKind.n;
     }
   }
   /* Standing on a battleground at all, whatever that battleground is saying.
@@ -5104,6 +5321,11 @@ function kwOf(b,i,noGround){
   const t=b[i].teece; if(!t)return[];
   const ks=[]; const d=DEF(t);
   if(d.kw)ks.push(...d.kw);
+  /* Winged. The Locust deck gives Flying to everything its seat controls, as a
+     rule of the deck rather than a keyword printed twenty times. Read off the
+     CONTROLLER, so a Locust somebody has stolen flies for the thief and an
+     enemy body the swarm has taken flies for the swarm. */
+  if(G&&G.players&&G.players[t.owner]&&G.players[t.owner].allFlying&&ks.indexOf('flying')<0)ks.push('flying');
   const fkw=formOf(t);
   if(fkw&&fkw.kw)ks.push(...fkw.kw);
   if((d.spider||t.cardId==='TSP')&&isWebbed(b,i))ks.push('skitter');
@@ -5218,6 +5440,33 @@ const onceGameKey=k=>'ag:'+k;
 function onceGameSpent(p,act){
   return !!(act.onceGame&&G.players[p]&&G.players[p].onceUsed[onceGameKey(act.onceGame)]);
 }
+/* An allowance spent over one turn and shared by everything that draws on it.
+   The Locust Nymph bursts three times a turn "among all of its copies", however
+   many bodies are doing the bursting, so the tally cannot live on a body: it
+   lives on the seat, keyed by the turn number so it resets on its own and works
+   on ANYBODY's turn -- a nymph trodden on during the enemy's turn draws on that
+   turn's allowance rather than on its owner's last one. */
+function turnCapRec(p,cap){
+  const pl=G&&G.players&&G.players[p];
+  if(!pl)return null;
+  pl.turnCaps=pl.turnCaps||{};
+  const rec=pl.turnCaps[cap.key];
+  if(!rec||rec.turn!==G.turnNum)pl.turnCaps[cap.key]={turn:G.turnNum,n:0};
+  return pl.turnCaps[cap.key];
+}
+function turnCapTake(p,cap){
+  const rec=turnCapRec(p,cap);
+  if(!rec)return true;
+  if(rec.n>=cap.max)return false;
+  rec.n++;
+  return true;
+}
+/* Handed back when the step it was taken for found nothing to do, so a nymph
+   that died hemmed in on every side has not spent one of the three. */
+function turnCapGive(p,cap){
+  const rec=turnCapRec(p,cap);
+  if(rec&&rec.n>0)rec.n--;
+}
 function actAvailable(t,ent){
   if(onceGameSpent(t.owner,ent.act))return false;
   if(ent.act.once==='game'&&t.actUsedGame[ent.key])return false;
@@ -5292,6 +5541,18 @@ function putTeece(b,i,t,live,how){
       const gn=groundNum(g,'gGrowSummon');
       applyModT(o,gn,'perm');
       if(live)log(nm(o)+' feeds on the new arrival: '+sgn(gn)+' permanently.');
+    }
+    /* The Breeding Pit's rule printed on a card instead of a battleground: a
+       Moulting Locust grows by a point every time a body is played or summoned
+       anywhere. The arriving body itself is not one of the arrivals it watched,
+       which is where this parts company with the Pit. */
+    for(let j=0;j<BN;j++){
+      const o=b[j].teece;
+      if(!o||o===t||o.silenced)continue;
+      const oa=DEF(o).onArrive;
+      if(!oa)continue;
+      applyModT(o,oa.n,oa.dur);
+      if(live)log(nm(o)+' counts another body onto the field: '+sgn(oa.n)+durTxt(oa.dur)+'.');
     }
   }
 }
@@ -5656,8 +5917,23 @@ async function runSteps(steps,ctx){
        quietly, because a card printed with a day clause AND a night clause is
        working exactly as written when only one of them fires. */
     if(!phaseIs(st.when)){offPhase++;continue;}
+    /* A clause that only answers somebody else's turn: the Grasshopper answers
+       being trodden on, not being spent for a Boss on your own turn. */
+    if(st.foeTurn&&sameTeam(G.turn,ctx.deadOwner!=null?ctx.deadOwner:ctx.p))continue;
+    /* A clause that only fires when the card came out of a HAND. Everything
+       that puts a card down by effect -- out of a graveyard, off the top of the
+       deck, as somebody's copy -- skips it, which is what "except by effect"
+       means on a card that hands you another of itself for playing it. */
+    if(st.fromHand&&!ctx.fromHand)continue;
+    /* A clause with a cap on how often one side may fire it in a turn. Taken
+       before the step runs, and given back below if the step found nothing. */
+    if(st.turnCap&&!turnCapTake(ctx.deadOwner!=null?ctx.deadOwner:ctx.p,st.turnCap)){
+      if(st.turnCap.msg){log(st.turnCap.msg);toast(st.turnCap.msg);}
+      continue;
+    }
     ran++;
     const r=await FXRUN(st,ctx);
+    if(st.turnCap&&(r==='NONE'||r==='ABORT'))turnCapGive(ctx.deadOwner!=null?ctx.deadOwner:ctx.p,st.turnCap);
     if(r==='ABORT')return false;
     /* A step marked as the price of the ones after it. If it found nothing to
        take, what follows was never paid for, so the list stops here rather
@@ -5759,8 +6035,22 @@ async function FXRUN(st,ctx){
     await anim(mhit,'zap');
     return;}
   case 'copy':{
+    if(!ctx.t||ctx.cell==null)return none('There is nothing here to copy.');
     const empt=ADJ[ctx.cell].filter(j=>openAt(b,j));
     if(!empt.length)return none('No adjacent space for the copy.');
+    /* all: one on EVERY free panel touching it, with nothing to choose. The
+       swarm does not pick where it lands -- that is the whole of it -- and it
+       keeps a phone out of four placement prompts in a row on one death. */
+    if(st.all){
+      for(const j of empt){
+        const cpa=makeTeece(ctx.t.cardId,p);cpa.isCopy=true;
+        putTeece(b,j,cpa,true);
+      }
+      log(empt.length===1
+        ?('A copy of '+DEF(ctx.t).name+' appears at the '+CN[empt[0]]+'.')
+        :(empt.length+' copies of '+DEF(ctx.t).name+' spill onto the '+empt.map(j=>CN[j]).join(', ')+'.'));
+      await anim(empt,'placed',140);
+      return;}
     const c=await pickCell(empt,'Choose a space for the copy.',
       (bb,i)=>{const cp=makeTeece(ctx.t.cardId,p);cp.isCopy=true;putTeece(bb,i,cp,false);},true);
     if(c==='CANCEL')return 'ABORT';
@@ -6758,7 +7048,11 @@ async function FXRUN(st,ctx){
     return;}
   case 'graveSummon':{
     const pl=G.players[p];
-    const ids=pl.grave.filter(id=>CARDS[id].type==='teece'&&!isBossCard(id));
+    /* st.kind narrows the pile to one card field -- the Carrion Locust digs up
+       Locusts and nothing else. st.mod is what it arrives carrying, and
+       st.silence muzzles it, which is also the brake on the chain: a silenced
+       Carrion Locust has no when-played left to dig up a third. */
+    const ids=pl.grave.filter(id=>CARDS[id].type==='teece'&&!isBossCard(id)&&(!st.kind||CARDS[id][st.kind]));
     const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
     if(!ids.length||!empt.length)return none('Nothing to summon from the grave.');
     const pick=await chooseOption(p,ids.map((id,x)=>({v:String(x),lbl:CARDS[id].name,cid:id})),'Summon which card from the grave?',!!ctx.first);
@@ -6770,20 +7064,37 @@ async function FXRUN(st,ctx){
       {mut:(bb,i)=>{putTeece(bb,i,makeTeece(cid,p),false);}});
     if(c==null||c==='CANCEL'){pl.grave.push(cid);return;}
     putTeece(b,c,makeTeece(cid,p),true);
-    const suid=b[c].teece.uid;
-    attachRiders(p,cid,b[c].teece,true);
-    log(pname(p)+' summons '+CARDS[cid].name+' from the grave.');
-    await fireRevivedOnPlay(cid,c,p,suid);
+    const snt=b[c].teece,suid=snt.uid;
+    if(st.mod)for(let k=0;k<4;k++)snt.perm[k]+=st.mod;
+    if(st.silence)snt.silenced=true;
+    attachRiders(p,cid,snt,true);
+    log(pname(p)+' summons '+CARDS[cid].name+' from the grave'+
+      (st.mod?' with '+sgn(st.mod):'')+(st.silence?', and it comes up silenced':'')+'.');
+    if(!st.silence)await fireRevivedOnPlay(cid,c,p,suid);
     return;}
   case 'graveToHand':{
-    const pl=G.players[p];
-    if(!pl.grave.length)return none('The grave is empty.');
-    const pick=await chooseOption(p,pl.grave.map((id,x)=>({v:String(x),lbl:CARDS[id].name,cid:id})),'Return which card to hand?',!!ctx.first);
-    if(pick==='CANCEL')return 'ABORT';
-    if(pick==null)return;
-    const cid=pl.grave.splice(parseInt(pick,10),1)[0];
-    handPush(p,cid);
-    log(pname(p)+' returns '+CARDS[cid].name+' to hand.');
+    /* st.any picks over EVERY graveyard on the table rather than your own, and
+       st.n takes more than one. The pool is rebuilt between picks, because each
+       one shifts the indices of everything after it in its own pile. */
+    const gn=st.n||1;
+    const graveName=q=>q===p?'the grave':(pname(q)==='You'?'your grave':pname(q)+'\u2019s grave');
+    for(let x=0;x<gn;x++){
+      const pool=[];
+      const seats=st.any?Array.from({length:PLAYERS()},(_,q)=>q):[p];
+      for(const q of seats)G.players[q].grave.forEach((id,ix)=>pool.push({q,ix,id}));
+      if(!pool.length)return x?undefined:none(st.any?'Every graveyard is empty.':'The grave is empty.');
+      const pick=await chooseOption(p,pool.map((o,y)=>({v:String(y),
+          lbl:CARDS[o.id].name+(o.q===p?'':' \u2014 '+graveName(o.q)),cid:o.id})),
+        'Return which card to hand?'+(gn>1?' ('+(x+1)+' of '+gn+')':''),!!ctx.first&&x===0);
+      if(pick==='CANCEL')return x?undefined:'ABORT';
+      if(pick==null)return;
+      const o=pool[parseInt(pick,10)];
+      G.players[o.q].grave.splice(o.ix,1);
+      handPush(p,o.id);
+      log(o.q===p
+        ?(pname(p)+' returns '+CARDS[o.id].name+' to hand.')
+        :(pname(p)+' takes '+CARDS[o.id].name+' out of '+graveName(o.q)+'.'));
+    }
     return;}
   case 'toDeckOrField':{
     return;}
@@ -6825,8 +7136,19 @@ async function FXRUN(st,ctx){
     log('The '+CN[c]+' panel is fortified: +'+st.n+' Defence.');
     return;}
   case 'nextDef':{
-    G.players[ctx.deadOwner!=null?ctx.deadOwner:p].nextDefBonus+=st.n;
-    log('The next Teece played gets +'+st.n+' Defence.');
+    const dwho=ctx.deadOwner!=null?ctx.deadOwner:p;
+    const dpl=G.players[dwho];
+    dpl.nextDefBonus+=st.n;
+    /* st.count arms several charges and st.kind spends them only on bodies
+       carrying that card field: Locust Locus holds four, for Locusts. A bare
+       nextDef is one charge for whatever comes next, which is what every
+       existing caller means by it. */
+    dpl.nextDefLeft=(dpl.nextDefLeft||0)+(st.count||1);
+    if(st.kind)dpl.nextDefKind=st.kind;
+    const dwhat=st.kind?(st.kind.charAt(0).toUpperCase()+st.kind.slice(1)+'s'):'Teece';
+    log((st.count||1)>1
+      ?('The next '+st.count+' '+dwhat+' played get +'+st.n+' Defence.')
+      :('The next Teece played gets +'+st.n+' Defence.'));
     return;}
   case 'nextMod':{
     if(st.who==='enemy'){
@@ -7078,6 +7400,55 @@ async function FXRUN(st,ctx){
   /* "You can play another Rat" -- not this Rat, ANY Rat, so the door is opened
      on the field the card prints rather than on a card id. Each Rat that comes
      through opens it again, which is the whole swarm in one line. */
+  /* ---- Locusts ----
+     The Devouring Locust does not so much die as move house: it eats one of its
+     own and stands back up in the space that opens. Offered rather than forced,
+     because skipping costs nothing and a swarm down to its last body should not
+     be made to spend it. */
+  case 'copyForAlly':{
+    if(!ctx.t)return none('There is nothing here to copy.');
+    const cown=ctx.deadOwner!=null?ctx.deadOwner:p;
+    const ccid=ctx.t.cardId;
+    const cmine=[];
+    for(let i=0;i<BN;i++){
+      const o=b[i].teece;
+      if(o&&sameTeam(o.owner,cown)&&o.uid!==ctx.t.uid&&canSacrifice(b,i))cmine.push(i);
+    }
+    if(!cmine.length)return none('No ally left to give up a panel.');
+    const cc=await chooseCell(cown,cmine,
+      'Sacrifice an ally, and '+CARDS[ccid].name+' stands up where it was standing? Or skip.',
+      {skip:true,mut:(bb,i)=>{bb[i].teece=null;const sm=makeTeece(ccid,cown);sm.isCopy=true;putTeece(bb,i,sm,false);}});
+    if(cc==null||cc==='CANCEL')return 'NONE';
+    const cvic=b[cc].teece;
+    if(!cvic)return 'NONE';
+    log(nm(cvic)+' is sacrificed.');
+    await processDeath({cell:cc,t:cvic,killers:[],cost:true});
+    /* The ally's own death may have filled the panel it emptied -- another
+       Locust bursting, a Token arriving where it fell. Nothing is owed then. */
+    if(!openAt(b,cc))return none('The panel filled up as the ally fell.');
+    const cnew=makeTeece(ccid,cown);cnew.isCopy=true;
+    putTeece(b,cc,cnew,true);
+    log('A copy of '+CARDS[ccid].name+' takes the '+CN[cc]+'.');
+    await anim([cc],'placed',140);
+    return;}
+  /* A card that hands you another of itself. What goes into the hand is the
+     CARD, so nothing about the body that was just played rides along with it. */
+  case 'selfCopyToHand':{
+    const scid=ctx.t?ctx.t.cardId:ctx.cardId;
+    if(scid==null)return none('There is nothing to copy.');
+    const swho=ctx.deadOwner!=null?ctx.deadOwner:p;
+    handPush(swho,scid);
+    log(pname(swho)+' takes another '+CARDS[scid].name+' into hand.');
+    return;}
+  /* Banked on the seat for the rest of the game, which is why it is not an
+     aura: effSides reads it for every body that seat controls, and it goes on
+     paying long after the Hivemind that bought it is buried. */
+  case 'swarmMind':{
+    const mpl=G.players[p];
+    mpl.swarmMind=(mpl.swarmMind||0)+st.n;
+    log('The hive mind settles over the swarm: every Teece '+pname(p)+' '+
+      vb(p,'controls','control')+' has '+sgn(mpl.swarmMind)+' for the rest of the game.');
+    return;}
   case 'playKind':{
     G.freePlay={p,kind:st.kind,kindTxt:st.kindTxt||('Another '+st.kind)};
     log(pname(p)+' may play '+(st.kindTxt||('another '+st.kind))+' this turn, free of the turn\u2019s Teece play.');
@@ -7852,7 +8223,7 @@ async function FXRUN(st,ctx){
     if(who==null)return;
     for(const q of hexTargets(p,who)){
       const sacs=[];
-      for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===q&&!t.isToken&&canSacrifice(b,i))sacs.push(i);}
+      for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===q&&(!t.isToken||DEF(t).sacOK)&&canSacrifice(b,i))sacs.push(i);}
       if(!sacs.length){log('Nothing for '+pname(q)+' to sacrifice.');continue;}
       const c=await chooseCell(q,sacs,'Choose one of your Teece to sacrifice.',{mut:null});
       if(c==null||c==='CANCEL')continue;
@@ -9132,6 +9503,13 @@ async function FXRUN(st,ctx){
       let n=0;
       for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))n++;
       if(n<st.teece)short.push(st.teece+' Teece on the field to destroy');
+    }
+    /* A free panel touching the source. A list that pays a card away for a copy
+       has to know there is somewhere for the copy to stand before it takes the
+       price, or the card is thrown away for nothing at all. */
+    if(st.adj&&ctx.cell!=null){
+      const an=ADJ[ctx.cell].filter(j=>openAt(b,j)).length;
+      if(an<st.adj)short.push(st.adj+' free panel'+(st.adj===1?'':'s')+' beside it');
     }
     if(st.grave&&G.players[p].grave.length<st.grave)
       short.push(st.grave+' card'+(st.grave===1?'':'s')+' in your graveyard');
@@ -10489,7 +10867,9 @@ function sacPool(p,skipHand){
   const b=G.board,cells=[],hands=[];
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
-    if(t&&t.owner===p&&!t.isToken&&canSacrifice(b,i))cells.push(i);
+    /* A Token is not a card and cannot pay for one -- except where its own card
+       says otherwise, which is what sacOK marks. */
+    if(t&&t.owner===p&&(!t.isToken||DEF(t).sacOK)&&canSacrifice(b,i))cells.push(i);
   }
   const pl=G.players[p];
   for(let x=0;x<pl.hand.length;x++){
@@ -10709,6 +11089,12 @@ async function playTeece(p,handIdx){
     const gd0=CARDS[b[spot].ground.cardId];
     {const pm=groundNum(b[spot].ground,'gPlayMod');
      if(pm){applyModT(t,pm,'perm');log(nm(t)+' is played onto '+gd0.name+': '+sgn(pm)+'.');}}
+    /* And the Locust Nest, which pays only for as long as it stays. standCell
+       is the marker a gStand battleground already uses, so walking off drops the
+       bonus by itself -- and walking back on does not earn it again, because
+       arriving on a Nest is not being played onto one. */
+    {const ph=groundNum(b[spot].ground,'gPlayHold');
+     if(ph){t.standCell=spot;log(nm(t)+' settles into '+gd0.name+': '+sgn(ph)+' for as long as it stays.');}}
   }
   spend();
   log(pname(p)+' plays '+d.name+' at the '+CN[spot]+
@@ -10727,7 +11113,15 @@ async function playTeece(p,handIdx){
     spinT(t,cf.dir);
     log(nm(t)+' arrives confused, turned '+dirTxt(cf.dir)+'.');
   }
-  if(pl.nextDefBonus){applyDef(t,pl.nextDefBonus);log(nm(t)+' arrives with +'+pl.nextDefBonus+' Defence.');pl.nextDefBonus=0;}
+  /* A Defence charge waiting on the next arrival. Locust Locus arms four of
+     them and only for Locusts, so a body that does not match walks past without
+     spending one; a charge with no kind named is spent by whatever comes next. */
+  if(pl.nextDefBonus&&(!pl.nextDefKind||d[pl.nextDefKind])){
+    applyDef(t,pl.nextDefBonus);
+    log(nm(t)+' arrives with +'+pl.nextDefBonus+' Defence.');
+    pl.nextDefLeft=(pl.nextDefLeft||1)-1;
+    if(pl.nextDefLeft<=0){pl.nextDefBonus=0;pl.nextDefLeft=0;pl.nextDefKind=null;}
+  }
   if(pl.nextMod){const nmd=pl.nextMod;pl.nextMod=0;applyModT(t,nmd,'perm');log(nm(t)+' arrives with '+sgn(nmd)+'.');}
   /* Cadet Annette hands the cover it was under to whoever comes next. An
      immortality with no turn set on it lifts at the start of its owner's turn. */
@@ -10753,7 +11147,9 @@ async function playTeece(p,handIdx){
   const groundCard=b[spot].ground&&CARDS[b[spot].ground.cardId];
   const dbl=(groundCard&&groundCard.gDouble)?2:1;
   const dblFx=(groundCard&&groundCard.gDoubleEffects)?2:1;
-  if(d.onPlay)for(let k=0;k<dblFx;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked});
+  /* fromHand is the one thing every other way of putting a card down lacks, so
+     a clause marked "except by effect" can tell them apart. */
+  if(d.onPlay)for(let k=0;k<dblFx;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked,fromHand:true});
   for(let i=0;i<BN;i++){
     const w=b[i].teece;
     if(!w||w.uid===t.uid)continue;
@@ -11516,6 +11912,7 @@ async function endTurn(){
   await resolveCombat();
   if(stale(ep))return;
   checkTicTacToe();
+  if(!G.over)checkSwarmWin();
   if(!G.over)checkDomination();
   if(!G.over)checkStalemate();
   if(G.over)return;
@@ -11944,8 +12341,22 @@ function markValue(b,p){
   }
   return v;
 }
+/* What the swarm's ending is worth to weigh a placement against. Shaped like
+   markValue: the last panel is worth far more than the first, so the computer
+   fills a board it is nearly holding rather than trading bodies at the edges. */
+function swarmValue(b,p){
+  let v=0;
+  for(const tm of teamsInPlay()){
+    const h=swarmHold(b,tm);
+    if(!h||!h.panels)continue;
+    const frac=h.held/h.panels;
+    const w=h.done?400:(h.held*3+Math.pow(frac,4)*90);
+    v+=tm===teamOf(p)?w:-w*1.15;
+  }
+  return v;
+}
 function boardValue(b,p){
-  let v=markValue(b,p);
+  let v=markValue(b,p)+swarmValue(b,p);
   for(let i=0;i<BN;i++){
     const t=b[i].teece;if(!t)continue;
     const s=effSides(b,i);
@@ -11995,7 +12406,9 @@ function simOnPlay(b,cell,id,p){
       }
     }else if(st.fx==='copy'){
       const e=ADJ[cell].filter(j=>openAt(b,j));
-      if(e.length){const cp=makeTeece(id,p);cp.isCopy=true;putTeece(b,e[0],cp,false);}
+      /* all: every one of them, which is the whole reason a Locust Brood is
+         worth putting where four panels are open. */
+      for(const j of (st.all?e:e.slice(0,1))){const cp=makeTeece(id,p);cp.isCopy=true;putTeece(b,j,cp,false);}
     }else if(st.fx==='token'){
       let placed=0;
       const pool=(st.where==='adj'?ADJ[cell]:ALL());
@@ -12719,8 +13132,21 @@ function showDeckInfo(key){
         'A rule of this deck rather than of any card in it, which is why none of them print it.</span>'
       : '')+
     '<span class="rk">Reviving</span><span>A Teece brought back from a graveyard is played: its when-played effect triggers, controlled by whoever revived it.</span>'+
-    '<span class="rk">Winning</span><span>Wipe out every enemy Teece, end a turn four Teece ahead (Tokens never count), '+
-      'or hold the bigger field when a player must draw from an empty deck.</span>'+
+    '<span class="rk">Winning</span><span>Wipe out every enemy Teece, '+
+      (dk.noDominate
+        ? 'or hold the bigger field when a player must draw from an empty deck. '+
+          'This deck can NEVER take the game by ending a turn four Teece ahead, however far ahead it gets.'
+        : 'end a turn four Teece ahead (Tokens never count), '+
+          'or hold the bigger field when a player must draw from an empty deck.')+'</span>'+
+    (dk.swarmWin
+      ? '<span class="rk">And one more</span><span>This deck adds a win of its own: the moment every panel on the '+
+        'board is holding one of your '+escHtml(dk.swarmWin)+'s, the game is yours. It is checked as a turn ends, '+
+        'so the board has to still be full when one closes.</span>'
+      : '')+
+    (dk.allFlying
+      ? '<span class="rk">Winged</span><span>Every Teece this deck fields has Flying, printed on the deck rather than '+
+        'on the cards \u2014 so anything it steals flies too.</span>'
+      : '')+
     '</div>'+
     '<div class="row"><button class="btn primary" id="infoClose">Back to the decks</button></div>';
   box.innerHTML=h;
@@ -13496,8 +13922,16 @@ function statusesFor(p){
   }
   if(arrive)push('arrive',arrive<0?'bad':'good','Next Teece '+sgn(arrive),
     'The next Teece you play arrives with '+sgn(arrive)+', from '+src.join(' and ')+'.');
-  if(pl.nextDefBonus)push('nextdef','good','Next Teece +'+pl.nextDefBonus+' Defence',
-    'The next Teece you play arrives with +'+pl.nextDefBonus+' Defence.');
+  /* Usually one charge for whatever comes next. Locust Locus arms four, and only
+     for Locusts, so the chip has to be able to say both. */
+  if(pl.nextDefBonus){
+    const dn=pl.nextDefLeft||1;
+    const dkind=pl.nextDefKind?pl.nextDefKind.charAt(0).toUpperCase()+pl.nextDefKind.slice(1):'Teece';
+    const dwhat=dn>1?dn+' '+dkind+'s':dkind;
+    push('nextdef','good','Next '+dwhat+': +'+pl.nextDefBonus+' Defence',
+      'The next '+dwhat+' you play '+(dn>1?'each arrive':'arrives')+' with +'+pl.nextDefBonus+' Defence.'+
+      (pl.nextDefKind?' Anything else you play walks past without spending a charge.':''));
+  }
   if(pl.nextSides)push('nextsides','good','Next Teece carries the altar',
     'The next Teece you play arrives with '+sidesLine(pl.nextSides)+', half of what was sacrificed to the Curse of Sacrifice.');
   if(pl.nextMod)push('nextmod',pl.nextMod<0?'bad':'good','Next Teece '+sgn(pl.nextMod),
@@ -13707,6 +14141,20 @@ function statusesFor(p){
   }
 
   /* --- the deck --- */
+  /* The swarm's own ending, and how near it is. Worth a chip of its own: it is
+     the one win condition nothing on the board draws, and the count is the only
+     way to see how many panels are left to fill. */
+  if(pl.swarmWin){
+    const h=swarmHold(b,teamOf(p));
+    if(h)push('swarm','good',
+      h.label+'s: '+h.held+' of '+h.panels+' panels',
+      'Your deck wins outright the moment every panel on the board is holding one of your '+
+      h.label+'s. '+h.held+' of the '+h.panels+' '+(h.held===1?'is':'are')+' yours now; the check is made '+
+      'at the end of a turn, so the board has to be full when one closes.');
+  }
+  if(pl.swarmMind)push('hivemind','good','Hive mind '+sgn(pl.swarmMind),
+    'The Locust Hivemind has been played: every Teece you control has '+sgn(pl.swarmMind)+
+    ' on all four sides for the rest of the game, whether the Hivemind itself is still standing or not.');
   if(pl.noDominate)push('nodom','warn','No win by domination',
     'Your deck cannot take the game by holding the field, however far ahead of everyone you get. '+
     'It wins by still holding the most Teece when a deck runs dry.');
@@ -14002,6 +14450,29 @@ async function start(mode,vsAI){
     throw err;
   }
 }
+/* Everything a DECK is, as opposed to everything its cards are. Written once
+   rather than once per game mode: every one of these used to be spelled out in
+   both the two-seat branch and the three-seat one, and a deck rule added to one
+   of them quietly did nothing in the other. */
+function applyDeckRules(p,key){
+  const dk=DECKS[key]||{};
+  const pl=G.players[p];
+  pl.noDeckOut=(key==='berserker');
+  /* A deck may print its own turn: Garbage plays two Teece and draws two cards
+     every turn, for as long as it is the deck being played. */
+  pl.perTurn=dk.perTurn||null;
+  /* Madness lets a seat throw any card away on its own turn, as often as it
+     likes. A rule of the deck rather than of any card, so nothing in the deck
+     has to print it. */
+  pl.freeDiscard=!!dk.freeDiscard;
+  /* Rats and Locusts never take the field on domination, however far ahead they
+     get, the way Berserker's deck never runs out. */
+  pl.noDominate=!!dk.noDominate;
+  /* Winged, and the swarm's own ending: both rules of the Locust deck rather
+     than of anything in it. */
+  pl.allFlying=!!dk.allFlying;
+  pl.swarmWin=dk.swarmWin||null;
+}
 async function startInner(mode,vsAI){
   document.getElementById('startOverlay').classList.add('hidden');
   if(mode==='rogue'){
@@ -14024,12 +14495,7 @@ async function startInner(mode,vsAI){
     G=newState('three',vsAI,keys.map(k=>DECKS[k].cards.slice()),
       {seats:3,width:4,teams:fmt.teams,enemyBonus:hcap,aiSeats:vsAI?[1,2]:[]});
     G.deckNames=keys.map(k=>DECKS[k].name);
-    for(let i=0;i<3;i++){
-      G.players[i].noDeckOut=(keys[i]==='berserker');
-      G.players[i].perTurn=DECKS[keys[i]].perTurn||null;
-      G.players[i].freeDiscard=!!DECKS[keys[i]].freeDiscard;
-      G.players[i].noDominate=!!DECKS[keys[i]].noDominate;
-    }
+    for(let i=0;i<3;i++)applyDeckRules(i,keys[i]);
     G.formatName=fmt.name;
     log(fmt.name+': '+keys.map((k,i)=>pname(i)+' brings '+DECKS[k].name).join(', ')+
       (hcap?'. Every Teece against you carries '+hcapLabel(hcap)+'.':'.'));
@@ -14047,21 +14513,8 @@ async function startInner(mode,vsAI){
     }else theirs=await pickDeck('Player 2');
     G=newState('deck',vsAI,[DECKS[mine].cards.slice(),DECKS[theirs].cards.slice()],{enemyBonus:hcap});
     G.deckNames=[DECKS[mine].name,DECKS[theirs].name];
-    G.players[0].noDeckOut=(mine==='berserker');
-    G.players[1].noDeckOut=(theirs==='berserker');
-    /* A deck may print its own turn: Garbage plays two Teece and draws two
-       cards every turn, for as long as it is the deck being played. */
-    G.players[0].perTurn=DECKS[mine].perTurn||null;
-    G.players[1].perTurn=DECKS[theirs].perTurn||null;
-    /* Madness lets a seat throw any card away on its own turn, as often as it
-       likes. A rule of the deck rather than of any card, so nothing in the
-       deck has to print it. */
-    G.players[0].freeDiscard=!!DECKS[mine].freeDiscard;
-    G.players[1].freeDiscard=!!DECKS[theirs].freeDiscard;
-    /* Rats never take the field on domination, however far ahead they get. A
-       rule of the deck, like Berserker's deck that cannot run out. */
-    G.players[0].noDominate=!!DECKS[mine].noDominate;
-    G.players[1].noDominate=!!DECKS[theirs].noDominate;
+    applyDeckRules(0,mine);
+    applyDeckRules(1,theirs);
     log(DECKS[mine].name+' faces '+DECKS[theirs].name+
       (hcap?', and every enemy Teece carries '+hcapLabel(hcap)+' on all four sides.':'.'));
     render();
@@ -14166,6 +14619,7 @@ if(typeof module!=='undefined'){
     noteGraveReturn,attachRiders,equipCameOff,addBone,clearGroundAt,processDeath,defOf,kwOf,actsOf,
     aiPlayTeece,aiSupport,fireMagic,
     panelMark,hasMark,countMark,markCountFor,markLines,markLine,checkTicTacToe,markOfCard,markOfId,markValue,
+    swarmHold,checkSwarmWin,swarmValue,adjAllyCount,ownedCount,turnCapTake,applyDeckRules,
     payRecall,getLines:()=>LINES};
 }
 </script>
