@@ -753,7 +753,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:77,date:'2026-09-24'};
+const VERSION={build:78,date:'2026-09-24'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -904,7 +904,7 @@ const CARD_ART={
   862:["   ><  ><    "," ><  ^^^  >< ","   ><   ><   "," ~~~~~~~~~~~ ","  + + + + +  "],
   863:[" | | | | | | "," | | | | | | "," \\|/\\|/\\|/\\| "," ~~~~~~~~~~~ ","  . . . . .  "],
   864:["   /~~~~~\\   ","  / (o)(o) \\ "," | .-. .-.  |","  \\ ~~~~~ /  ","   ~~~~~~~   "],
-  'TLOC8':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
+  'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
   541:["  \\  .-.  /  ", "   \\( o )/   ", "    (/|\\)    ", "    _/ \\_    ", "   [$]  ...  "],
   542:["  \\  .-.  /  ", "   \\( - )/   ", "    (/|\\)    ", "   _/   \\_   ", "  |RIP| ...  "],
@@ -3316,23 +3316,27 @@ const CARDS = {
        destroyed half, and every copy of the card. Uncapped, the when-destroyed
        half was a loop rather than a chain: killing the breeder left a breeder,
        and killing that one left another, for as long as anything on the board
-       could keep killing it. Eight deaths in a turn made eight copies, and
-       there was no number at which it stopped. */
-    onPlay:[{fx:'copy',turnCap:{key:'breeder',max:3,
-      msg:'The breeders have already bred three times this turn.'}}],
-    onDeath:[{fx:'copy',turnCap:{key:'breeder',max:3,
-      msg:'The breeders have already bred three times this turn.'}}],
-    text:'When played, and again when destroyed: a copy of this appears on a free panel beside it. Between this card and every copy of it, that happens three times in a turn and no more.'},
+       could keep killing it.
+
+       Three for the WHOLE GAME, not three a turn. Per turn it was still a
+       renewable engine -- kill it on your turn, kill it again next turn, for as
+       long as the game lasted -- so the allowance never resets and dying does
+       not hand any of it back. */
+    onPlay:[{fx:'copy',gameCap:{key:'breeder',max:3,label:'Breeding Locust',
+      msg:'The breeders have bred three times, and that is all they get.'}}],
+    onDeath:[{fx:'copy',gameCap:{key:'breeder',max:3,label:'Breeding Locust',
+      msg:'The breeders have bred three times, and that is all they get.'}}],
+    text:'When played, and again when destroyed: a copy of this appears on a free panel beside it. Between this card and every copy of it, that happens three times in the whole game and no more.'},
  848:{name:'Egg-Layer',type:'teece',locust:true,sides:[2,3,1,2],
     act:[{name:'Lay',once:'turn',onceTurn:'egglayer',steps:[{fx:'copy'},{fx:'copy'}]}],
     text:'Once per turn, among all copies: two copies of this appear on free panels beside it, chosen one at a time.'},
  849:{name:'Moulting Locust',type:'teece',locust:true,sides:[1,0,6,5],
-    onArrive:{n:1,dur:'perm'},
+    onArrive:{n:1,dur:'perm',mine:true},
     act:[{name:'Moult',once:'turn',steps:[{fx:'price',adj:1},{fx:'discard',n:1,cost:true},{fx:'copy'}]}],
-    text:'Whenever a Teece is played or summoned anywhere on the board: +1 permanently. Once per turn: discard a card, and a copy of this appears on a free panel beside it.'},
+    text:'Whenever a Teece of YOURS reaches the board \u2014 played, copied, summoned, hatched, however it got there: +1 permanently. Once per turn: discard a card, and a copy of this appears on a free panel beside it.'},
  850:{name:'Grasshopper',type:'teece',locust:true,sides:[0,2,1,0],
-    onDeath:[{fx:'token',tok:'TLOC8',count:2,foeTurn:true}],
-    text:'When destroyed on an opponent\u2019s turn: two 7/8/6/7 Locust Tokens are summoned. Unlike every other Token, they can be sacrificed.'},
+    onDeath:[{fx:'token',tok:'TLOCUST',count:2,foeTurn:true}],
+    text:'When destroyed on an opponent\u2019s turn: two 6/6/6/6 Locust Tokens are summoned. Unlike every other Token, they can be sacrificed.'},
  851:{name:'Chitin Shell',type:'teece',locust:true,sides:[1,1,4,2],
     handDiscard:[{fx:'shieldNext'}],
     onPlay:[{fx:'selfCopyToHand',fromHand:true}],
@@ -3380,8 +3384,8 @@ const CARDS = {
  /* The Locust nobody drafts: what a trodden Grasshopper leaves behind. Big, and
     the one Token in the game that can be spent \u2014 and a Locust, so it is one
     of the panels the swarm needs filled. */
- 'TLOC8':{name:'Locust',type:'teece',token:true,deck:'locust',locust:true,sacOK:true,sides:[7,8,6,7],
-    text:'Locust Token. 7/8/6/7 — still the biggest body this deck fields — and it CAN be sacrificed to play a Teece or to a curse. It never counts toward winning by domination, but it is a Locust, so it counts as one of the panels the swarm needs.'},
+ 'TLOCUST':{name:'Locust',type:'teece',token:true,deck:'locust',locust:true,sacOK:true,sides:[6,6,6,6],
+    text:'Locust Token. 6 on every side, and it CAN be sacrificed to play a Teece or to a curse — the only Token in the game that can. It never counts toward winning by domination, but it is a Locust, so it counts as one of the panels the swarm needs.'},
 };
 const DEF=t=>CARDS[t.cardId];
 /* What an equip actually grants, once the modality it was bolted on with is
@@ -4215,7 +4219,7 @@ function newState(mode,vsAI,decks,extra){
   const mk=p=>({deck:stack(shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice())),hand:[],plate:[],grave:[],onceUsed:{},pendingDraw:0,undying:{},riding:{},
     nextDefBonus:0,nextDefLeft:0,nextDefKind:null,
     nextMod:0,nextSides:null,nextShield:false,noDeckOut:false,noDominate:false,coffined:{},teecePlayedLastTurn:false,teecePlayedThisTurn:0,turnsTaken:0,
-    allFlying:false,swarmWin:null,swarmMind:0,turnCaps:{},
+    allFlying:false,swarmWin:null,swarmMind:0,turnCaps:{},gameCaps:{},
     hexes:[],forget:0,confuse:null,recall:null});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
@@ -5484,6 +5488,33 @@ function turnCapGive(p,cap){
   const rec=turnCapRec(p,cap);
   if(rec&&rec.n>0)rec.n--;
 }
+/* The same allowance, spent once for the WHOLE GAME rather than once a turn.
+   Nothing resets it: a card that dies, comes back and dies again draws on the
+   tally its earlier bodies already spent, and so does every copy of it. Kept on
+   the seat beside the turn-scoped ones, for the same reason -- a tally shared
+   between copies cannot live on a body. */
+function gameCapRec(p,cap){
+  const pl=G&&G.players&&G.players[p];
+  if(!pl)return null;
+  pl.gameCaps=pl.gameCaps||{};
+  if(!pl.gameCaps[cap.key])pl.gameCaps[cap.key]={n:0};
+  return pl.gameCaps[cap.key];
+}
+function gameCapLeft(p,cap){
+  const rec=gameCapRec(p,cap);
+  return rec?Math.max(0,cap.max-rec.n):cap.max;
+}
+function gameCapTake(p,cap){
+  const rec=gameCapRec(p,cap);
+  if(!rec)return true;
+  if(rec.n>=cap.max)return false;
+  rec.n++;
+  return true;
+}
+function gameCapGive(p,cap){
+  const rec=gameCapRec(p,cap);
+  if(rec&&rec.n>0)rec.n--;
+}
 /* "Once per turn, among all copies" -- the act equivalent of the Nymph's
    turnCap, and the same reason for existing. once:'turn' is a tally on the
    BODY, so a card that copies itself hands every copy a fresh charge: one
@@ -5590,6 +5621,10 @@ function putTeece(b,i,t,live,how){
       if(!o||o===t||o.silenced)continue;
       const oa=DEF(o).onArrive;
       if(!oa)continue;
+      /* mine: only bodies belonging to whoever controls the watcher. Read off the
+         OWNER rather than the team, the way loneMod does -- an ally's Teece is
+         not yours -- so a swarm is not fed by the other side filling the board. */
+      if(oa.mine&&t.owner!==o.owner)continue;
       applyModT(o,oa.n,oa.dur);
       if(live)log(nm(o)+' counts another body onto the field: '+sgn(oa.n)+durTxt(oa.dur)+'.');
     }
@@ -5970,9 +6005,15 @@ async function runSteps(steps,ctx){
       if(st.turnCap.msg){log(st.turnCap.msg);toast(st.turnCap.msg);}
       continue;
     }
+    /* And the same cap counted for the whole game rather than for the turn. */
+    if(st.gameCap&&!gameCapTake(ctx.deadOwner!=null?ctx.deadOwner:ctx.p,st.gameCap)){
+      if(st.gameCap.msg){log(st.gameCap.msg);toast(st.gameCap.msg);}
+      continue;
+    }
     ran++;
     const r=await FXRUN(st,ctx);
     if(st.turnCap&&(r==='NONE'||r==='ABORT'))turnCapGive(ctx.deadOwner!=null?ctx.deadOwner:ctx.p,st.turnCap);
+    if(st.gameCap&&(r==='NONE'||r==='ABORT'))gameCapGive(ctx.deadOwner!=null?ctx.deadOwner:ctx.p,st.gameCap);
     if(r==='ABORT')return false;
     /* A step marked as the price of the ones after it. If it found nothing to
        take, what follows was never paid for, so the list stops here rather
@@ -14308,6 +14349,29 @@ function statusesFor(p){
       h.label+'s. '+h.held+' of the '+h.panels+' '+(h.held===1?'is':'are')+' yours now; the check is made '+
       'at the end of a turn, so the board has to be full when one closes. '+
       'A razed panel would end that chance for good.');
+  }
+  for(const gk in (pl.gameCaps||{})){
+    const spent=pl.gameCaps[gk].n;
+    /* The cap's own numbers live on the card, so find them off the board and the
+       hand rather than writing a second copy of them here. */
+    let cap=null;
+    const look=st2=>{if(st2&&st2.gameCap&&st2.gameCap.key===gk)cap=st2.gameCap;};
+    for(const cid of Object.keys(CARDS)){
+      const cd=CARDS[cid];
+      for(const st2 of (cd.onPlay||[]))look(st2);
+      for(const st2 of (cd.onDeath||[]))look(st2);
+      for(const a2 of (cd.act||[]))for(const st2 of (a2.steps||[]))look(st2);
+      if(cap)break;
+    }
+    if(!cap)continue;
+    const left=Math.max(0,cap.max-spent);
+    push('gcap'+gk,left?'good':'warn',
+      (cap.label||gk)+': '+left+' of '+cap.max+' left',
+      left
+        ?((cap.label||gk)+' may do it '+left+' more time'+(left===1?'':'s')+' this game. '+
+          'It is '+cap.max+' for the whole game between the card and every copy of it, and nothing gives any of it back \u2014 '+
+          'dying does not reset it.')
+        :((cap.label||gk)+' has spent all '+cap.max+' for this game. Nothing brings them back.'));
   }
   if(pl.swarmMind)push('hivemind','good','Hive mind '+sgn(pl.swarmMind),
     'The Locust Hivemind has been played: every Teece you control has '+sgn(pl.swarmMind)+

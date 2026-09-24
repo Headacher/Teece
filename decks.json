@@ -699,13 +699,13 @@
       "allFlying": true,
       "swarmWin": "locust",
       "noRogue": true,
-      "blurb": "A swarm deck that wins by filling the board with copies of itself. Winged: every Teece you control has Flying, printed on the deck rather than on the cards. Swarm: you can never take the game by holding the field four Teece ahead — instead you win outright the moment every panel on the board is holding a Locust of yours. Half the deck answers being destroyed by putting more of itself down, so it is the one swarm with real recovery: the Nymph bursts onto every panel beside it, the Breeding Locust does it coming and going, and the Carrion Locust digs the dead back up. No two Locusts are the same shape, so which edge of one is facing you decides the trade — the deck is soft underneath almost everywhere. Once the swarm is out and the enemy has been eaten by a thousand hungry mouths, all will become Locust.",
+      "blurb": "A swarm deck that wins by filling the board with copies of itself. Winged: every Teece you control has Flying, printed on the deck rather than on the cards. Swarm: you can never take the game by holding the field four Teece ahead — instead you win outright the moment every panel on the board is holding a Locust of yours. Half the deck answers being destroyed by putting more of itself down, so it is the one swarm with real recovery: the Nymph bursts onto every panel beside it, the Breeding Locust does it coming and going, and the Carrion Locust digs the dead back up. No two of the twelve Locusts you draft are the same shape, so which edge of one is facing you decides the trade — the deck is soft underneath almost everywhere. Once the swarm is out and the enemy has been eaten by a thousand hungry mouths, all will become Locust.",
       "how": [
         "The ending is the deck: a Locust on every panel takes the game as a turn closes, however far behind you are on bodies. The chip beside the board counts how many of the panels are yours — and warns you if one is ever razed off the board, because nothing can stand on a razed panel and that puts the ending out of reach for good. Raze and the Curse of Razing are the answer to this deck.",
         "A copy does not fire its own when-played, so a Locust Brood fills four panels and stops. When-DESTROYED does fire, which is why the Locust Nymph chains — and why it is capped at three bursts a turn across every copy of it.",
         "Everything flies, so the swarm can shuffle one space a turn to close the last gap, diagonals included.",
         "The two Bosses are what the swarm is for: Locust Locus costs two bodies and arms the next four Locusts with +6 Defence, and the Locust Hivemind costs four and pays every Teece you control +3 for the rest of the game, buried or not.",
-        "A trodden Grasshopper leaves two 7/8/6/7 Tokens that can be sacrificed — the only spendable Tokens in the game, and half the price of the Hivemind on their own."
+        "A trodden Grasshopper leaves two 6/6/6/6 Tokens that can be sacrificed — the only spendable Tokens in the game, and half the price of the Hivemind on their own."
       ]
     }
   },
