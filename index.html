@@ -753,7 +753,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:78,date:'2026-09-24'};
+const VERSION={build:79,date:'2026-09-24'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3304,7 +3304,7 @@ const CARDS = {
     destroyed, because processDeath reads it off the card either way -- so the
     Nymph chains, and the three-a-turn cap is what stops it. ---- */
  845:{name:'Locust Nymph',type:'teece',locust:true,sides:[0,0,0,0],
-    onDeath:[{fx:'copy',all:true,turnCap:{key:'nymph',max:3,
+    onDeath:[{fx:'copy',all:true,turnCap:{key:'nymph',max:3,label:'Locust Nymph',
       msg:'The nymphs have already burst three times this turn.'}}],
     text:'When destroyed: a copy of this appears on every free panel beside it. Between this card and every copy of it, that happens three times in a turn and no more.'},
  846:{name:'Locust Brood',type:'teece',locust:true,sides:[4,3,2,3],modPerAdjAlly:1,
@@ -3318,15 +3318,12 @@ const CARDS = {
        and killing that one left another, for as long as anything on the board
        could keep killing it.
 
-       Three for the WHOLE GAME, not three a turn. Per turn it was still a
-       renewable engine -- kill it on your turn, kill it again next turn, for as
-       long as the game lasted -- so the allowance never resets and dying does
-       not hand any of it back. */
-    onPlay:[{fx:'copy',gameCap:{key:'breeder',max:3,label:'Breeding Locust',
-      msg:'The breeders have bred three times, and that is all they get.'}}],
-    onDeath:[{fx:'copy',gameCap:{key:'breeder',max:3,label:'Breeding Locust',
-      msg:'The breeders have bred three times, and that is all they get.'}}],
-    text:'When played, and again when destroyed: a copy of this appears on a free panel beside it. Between this card and every copy of it, that happens three times in the whole game and no more.'},
+       Three a turn, refilled each turn, the way the Nymph's allowance is. */
+    onPlay:[{fx:'copy',turnCap:{key:'breeder',max:3,label:'Breeding Locust',
+      msg:'The breeders have already bred three times this turn.'}}],
+    onDeath:[{fx:'copy',turnCap:{key:'breeder',max:3,label:'Breeding Locust',
+      msg:'The breeders have already bred three times this turn.'}}],
+    text:'When played, and again when destroyed: a copy of this appears on a free panel beside it. Between this card and every copy of it, that happens three times in a turn and no more.'},
  848:{name:'Egg-Layer',type:'teece',locust:true,sides:[2,3,1,2],
     act:[{name:'Lay',once:'turn',onceTurn:'egglayer',steps:[{fx:'copy'},{fx:'copy'}]}],
     text:'Once per turn, among all copies: two copies of this appear on free panels beside it, chosen one at a time.'},
@@ -4219,7 +4216,7 @@ function newState(mode,vsAI,decks,extra){
   const mk=p=>({deck:stack(shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice())),hand:[],plate:[],grave:[],onceUsed:{},pendingDraw:0,undying:{},riding:{},
     nextDefBonus:0,nextDefLeft:0,nextDefKind:null,
     nextMod:0,nextSides:null,nextShield:false,noDeckOut:false,noDominate:false,coffined:{},teecePlayedLastTurn:false,teecePlayedThisTurn:0,turnsTaken:0,
-    allFlying:false,swarmWin:null,swarmMind:0,turnCaps:{},gameCaps:{},
+    allFlying:false,swarmWin:null,swarmMind:0,turnCaps:{},
     hexes:[],forget:0,confuse:null,recall:null});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
@@ -5488,33 +5485,7 @@ function turnCapGive(p,cap){
   const rec=turnCapRec(p,cap);
   if(rec&&rec.n>0)rec.n--;
 }
-/* The same allowance, spent once for the WHOLE GAME rather than once a turn.
-   Nothing resets it: a card that dies, comes back and dies again draws on the
-   tally its earlier bodies already spent, and so does every copy of it. Kept on
-   the seat beside the turn-scoped ones, for the same reason -- a tally shared
-   between copies cannot live on a body. */
-function gameCapRec(p,cap){
-  const pl=G&&G.players&&G.players[p];
-  if(!pl)return null;
-  pl.gameCaps=pl.gameCaps||{};
-  if(!pl.gameCaps[cap.key])pl.gameCaps[cap.key]={n:0};
-  return pl.gameCaps[cap.key];
-}
-function gameCapLeft(p,cap){
-  const rec=gameCapRec(p,cap);
-  return rec?Math.max(0,cap.max-rec.n):cap.max;
-}
-function gameCapTake(p,cap){
-  const rec=gameCapRec(p,cap);
-  if(!rec)return true;
-  if(rec.n>=cap.max)return false;
-  rec.n++;
-  return true;
-}
-function gameCapGive(p,cap){
-  const rec=gameCapRec(p,cap);
-  if(rec&&rec.n>0)rec.n--;
-}
+
 /* "Once per turn, among all copies" -- the act equivalent of the Nymph's
    turnCap, and the same reason for existing. once:'turn' is a tally on the
    BODY, so a card that copies itself hands every copy a fresh charge: one
@@ -6005,15 +5976,9 @@ async function runSteps(steps,ctx){
       if(st.turnCap.msg){log(st.turnCap.msg);toast(st.turnCap.msg);}
       continue;
     }
-    /* And the same cap counted for the whole game rather than for the turn. */
-    if(st.gameCap&&!gameCapTake(ctx.deadOwner!=null?ctx.deadOwner:ctx.p,st.gameCap)){
-      if(st.gameCap.msg){log(st.gameCap.msg);toast(st.gameCap.msg);}
-      continue;
-    }
     ran++;
     const r=await FXRUN(st,ctx);
     if(st.turnCap&&(r==='NONE'||r==='ABORT'))turnCapGive(ctx.deadOwner!=null?ctx.deadOwner:ctx.p,st.turnCap);
-    if(st.gameCap&&(r==='NONE'||r==='ABORT'))gameCapGive(ctx.deadOwner!=null?ctx.deadOwner:ctx.p,st.gameCap);
     if(r==='ABORT')return false;
     /* A step marked as the price of the ones after it. If it found nothing to
        take, what follows was never paid for, so the list stops here rather
@@ -14350,12 +14315,16 @@ function statusesFor(p){
       'at the end of a turn, so the board has to be full when one closes. '+
       'A razed panel would end that chance for good.');
   }
-  for(const gk in (pl.gameCaps||{})){
-    const spent=pl.gameCaps[gk].n;
-    /* The cap's own numbers live on the card, so find them off the board and the
-       hand rather than writing a second copy of them here. */
+  /* An allowance a card shares between all of its copies for the turn. Nothing
+     on the board shows it, and a player who does not know the swarm has already
+     burst its three reads the silence as a broken card. Only shown once some of
+     it has actually been spent this turn, and the numbers are read off whichever
+     card carries the cap rather than written down a second time here. */
+  for(const gk in (pl.turnCaps||{})){
+    const rec=pl.turnCaps[gk];
+    if(!rec||rec.turn!==G.turnNum||!rec.n)continue;
     let cap=null;
-    const look=st2=>{if(st2&&st2.gameCap&&st2.gameCap.key===gk)cap=st2.gameCap;};
+    const look=st2=>{if(st2&&st2.turnCap&&st2.turnCap.key===gk&&st2.turnCap.label)cap=st2.turnCap;};
     for(const cid of Object.keys(CARDS)){
       const cd=CARDS[cid];
       for(const st2 of (cd.onPlay||[]))look(st2);
@@ -14364,14 +14333,13 @@ function statusesFor(p){
       if(cap)break;
     }
     if(!cap)continue;
-    const left=Math.max(0,cap.max-spent);
-    push('gcap'+gk,left?'good':'warn',
-      (cap.label||gk)+': '+left+' of '+cap.max+' left',
+    const left=Math.max(0,cap.max-rec.n);
+    push('tcap'+gk,left?'good':'warn',
+      cap.label+': '+left+' of '+cap.max+' left this turn',
       left
-        ?((cap.label||gk)+' may do it '+left+' more time'+(left===1?'':'s')+' this game. '+
-          'It is '+cap.max+' for the whole game between the card and every copy of it, and nothing gives any of it back \u2014 '+
-          'dying does not reset it.')
-        :((cap.label||gk)+' has spent all '+cap.max+' for this game. Nothing brings them back.'));
+        ?(cap.label+' may do it '+left+' more time'+(left===1?'':'s')+' before the turn ends. It is '+cap.max+
+          ' a turn between the card and every copy of it, and the allowance refills when the next turn starts.')
+        :(cap.label+' has spent all '+cap.max+' of its turn. The allowance refills at the start of the next turn.'));
   }
   if(pl.swarmMind)push('hivemind','good','Hive mind '+sgn(pl.swarmMind),
     'The Locust Hivemind has been played: every Teece you control has '+sgn(pl.swarmMind)+
