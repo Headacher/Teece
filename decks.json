@@ -50,6 +50,7 @@
       "blurb": "Defence soaks up the difference. A Teece with Defence 2 only dies to an attack that beats it by three or more.",
       "how": [
         "Colossus is 10 on every side and destroys nothing at all unless your Master Rock Flinger is standing.",
+        "Master Rock Flinger pays every Teece on your side, itself included, +X where X is that Teece's own Defence, and gives it Flying.",
         "Rock Sergeant pays every other ally its own Defence, and Stoneheart pays its wearer +1 for each point it has — the deck stacks Defence, then spends it as attack.",
         "Muckraider and Bedrock cannot lose attributes at all, and cannot be selected by enemy effects."
       ]

@@ -758,7 +758,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:81,date:'2026-09-24'};
+const VERSION={build:82,date:'2026-09-25'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -823,7 +823,7 @@ const KEYWORDS={
   ranged:'Strikes the first enemy beyond the next panel, straight up, down or sideways. Nothing strikes back.',
   ward:'Your opponents cannot target it with anything.',
   steadfast:'Nothing can take attributes off it, and nothing can shove it.',
-  needsflinger:'It destroys nothing unless an allied Flinger is standing on the board.',
+  needsflinger:'It destroys nothing unless an allied Master Rock Flinger is standing on the board.',
   immovable:'It cannot move, and nothing can move it.',
   march:'Once per your turn, move one space up, down or sideways. Everything standing beside where it lands may then be moved one space too, and its mover chooses where.',
   lumber:'ONCE while it is on the field — not once a turn — move one space up, down or sideways. A body that leaves and comes back may lumber again.',
@@ -1595,6 +1595,8 @@ function canPlay(p,cardId){
      modPerMark{letter,n}   scales with that letter's count across the whole field
      modIfMark{letter,n}    an equip that only pays a Teece carrying that letter
      aura{...,markOnly}     an aura that only reaches Teece carrying that letter
+     aura{...,includeSelf}  an aura that pays the Teece radiating it as well
+     aura{...,byDef}        the amount is the RECEIVER's Defence, not a number
    day and night:
      flipTime{}     turn Day to Night or Night to Day
      setTime{to}    set it to one of them outright
@@ -1911,7 +1913,7 @@ const CARDS = {
     text:'Defence 1. Whenever an enemy Teece is played, it gets -1.',onEnemyPlay:{n:-1,dur:'perm'}},
  323:{name:'Stonewall',type:'teece',sides:[7,7,4,7],def:1,text:'Defence 1.'},
  324:{name:'Colossus',type:'teece',sides:[10,10,10,10],kw:['needsflinger'],
-    text:'Cannot destroy enemy Teece unless Master Rock Flinger is on the field.'},
+    text:'Cannot destroy enemy Teece unless one of your Master Rock Flingers is on the field.'},
  325:{name:'Muckraider',type:'teece',sides:[0,0,8,8],kw:['steadfast','ward'],
     text:'Its attributes cannot decrease, and it cannot be selected by enemy effects.'},
  326:{name:'Barricade Builder',type:'teece',sides:[6,7,7,5],
@@ -1923,9 +1925,9 @@ const CARDS = {
  328:{name:'Rock Sergeant',type:'teece',sides:[7,7,7,7],def:1,sac:1,
     text:'Sacrifice one fielded Teece to play. Defence 1. When played: select an ally; give it +X, where X is its Defence.',
     onPlay:[{fx:'modByDef',who:'ally',notSelf:true}]},
- 329:{name:'Master Rock Flinger',type:'teece',sides:[8,8,8,8],def:2,sac:2,
-    text:'Sacrifice two fielded Teece to play. Defence 2. Allies get +X where X is their Defence, and Flying.',
-    aura:{who:'ally',where:'global',byDef:true,n:0,kw:['flying']}},
+ 329:{name:'Master Rock Flinger',type:'teece',sides:[8,8,8,8],def:2,sac:2,flinger:true,
+    text:'Sacrifice two fielded Teece to play. Defence 2. Every allied Teece, itself included, gets +X where X is its Defence, and Flying.',
+    aura:{who:'ally',where:'global',byDef:true,n:0,kw:['flying'],includeSelf:true}},
  330:{name:'Quarry Foreman',type:'teece',sides:[4,4,4,4],def:1,
     text:'Defence 1. Every other allied Teece gets +2 Defence.',aura:{who:'ally',where:'global',n:0,def:2}},
  331:{name:'Rubble',type:'teece',sides:[2,2,2,2],
@@ -5129,8 +5131,14 @@ function effSides(b,i,parts){
      a negative away. Fire landed only because it composes here instead. */
   if(b[i].fire)addGround(s,-FIRE_N,'The panel is on fire');
   for(let j=0;j<BN;j++){
-    if(j===i)continue;
     const o=b[j].teece; if(!o)continue;
+    /* A Teece standing inside its own aura. Nearly every aura in the game pays
+       the neighbours and not the source, so the panel it radiates from is
+       skipped -- unless the aura says includeSelf, which the Master Rock
+       Flinger's does: it hands its whole side Defence-as-attack and Flying and
+       is one of them. Read per aura rather than per Teece, so a card with one
+       aura that counts itself and one that does not gets both right. */
+    const self=(j===i);
     const auras=[]; const od=DEF(o);
     /* auras (plural) is one card radiating more than one thing -- a Solar
        Teece that feeds its own side by day and bleeds the other by night. An
@@ -5143,6 +5151,7 @@ function effSides(b,i,parts){
     if(!o.silenced)for(const gid of (o.grafts||[])){const ga=CARDS[gid]&&CARDS[gid].aura;if(ga)auras.push(ga);}
     for(const e of o.equips){const g=eqG(e);if(g&&g.aura)auras.push(g.aura);}
     for(const a of auras){
+      if(self&&!a.includeSelf)continue;
       const ally=sameTeam(o.owner,t.owner);
       if(!phaseIs(a.when))continue;
       if(a.who==='ally'&&!ally)continue;
@@ -5154,7 +5163,7 @@ function effSides(b,i,parts){
       const amt0=a.byDef?defOf(b,i):a.n;
       const amt=(selfDbl&&amt0>0)?amt0*2:amt0;
       for(let k=0;k<4;k++)s[k]+=amt;
-      put(nm(o)+(sameTeam(o.owner,t.owner)?', an ally at the ':', an enemy at the ')+CN[j],
+      put(self?'Its own aura':nm(o)+(sameTeam(o.owner,t.owner)?', an ally at the ':', an enemy at the ')+CN[j],
         [amt,amt,amt,amt]);
     }
   }
@@ -5357,9 +5366,9 @@ function defOf(b,i){
     }
   }
   for(let j=0;j<BN;j++){
-    if(j===i)continue;
     const o=b[j].teece;if(!o||o.silenced)continue;
     const a=DEF(o).aura;
+    if(j===i&&!(a&&a.includeSelf))continue;
     if(a&&a.def&&((a.who==='ally')===sameTeam(o.owner,t.owner))&&a.where==='global')d+=a.def;
   }
   return d;
@@ -5414,14 +5423,15 @@ function kwOf(b,i,noGround){
   if(!t.silenced&&d.posture&&d.posture.edgeKw&&rimSides(i).length===1)ks.push(...d.posture.edgeKw);
   let onWeb=null;
   for(let j=0;j<BN;j++){
-    if(j===i)continue;
     const o=b[j].teece;if(!o||o.silenced)continue;
     const kauras=[];
     if(DEF(o).aura)kauras.push(DEF(o).aura);
     for(const e of o.equips){const g=eqG(e);if(g&&g.aura)kauras.push(g.aura);}
     for(const a of kauras)
-      if(a.kw&&auraWho(a,sameTeam(o.owner,t.owner))&&auraReaches(b,j,i,a)&&
+      if((j!==i||a.includeSelf)&&
+         a.kw&&auraWho(a,sameTeam(o.owner,t.owner))&&auraReaches(b,j,i,a)&&
          (!a.markOnly||markOfCard(d).indexOf(a.markOnly)>=0))ks.push(...a.kw);
+    if(j===i)continue;
     /* an enemy spider holds everything caught in the Web still */
     if(DEF(o).webLock&&!sameTeam(o.owner,t.owner)){
       if(onWeb===null)onWeb=isWebbed(b,i);
