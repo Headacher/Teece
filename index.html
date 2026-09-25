@@ -169,6 +169,9 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="locust"],.dcard[data-card-deck="locust"]{--cardbg:#4a4318;--artink:#f8f2cd;background:var(--cardbg);color:#f3edc9;border-color:#292507}
 .card[data-card-deck="locust"] .kwl,.dcard[data-card-deck="locust"] .dkw{color:#e6c94f}
 .card[data-card-deck="locust"] .ct,.dcard[data-card-deck="locust"] .dty{color:#e6c94f}
+.card[data-card-deck="devil"],.dcard[data-card-deck="devil"]{--cardbg:#5a0f14;--artink:#ffd6c4;background:var(--cardbg);color:#f8e2d9;border-color:#2c0508}
+.card[data-card-deck="devil"] .kwl,.dcard[data-card-deck="devil"] .dkw{color:#ff9a4a}
+.card[data-card-deck="devil"] .ct,.dcard[data-card-deck="devil"] .dty{color:#ff9a4a}
 
 .card[data-card-deck]::after,.dcard[data-card-deck]::after{position:absolute;top:2px;right:3px;font-size:11px;line-height:1;opacity:.85;z-index:1}
 .card[data-card-deck="classic"]::after,.dcard[data-card-deck="classic"]::after{content:'🂡'}
@@ -195,6 +198,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="dimension"]::after,.dcard[data-card-deck="dimension"]::after{content:'🌌'}
 .card[data-card-deck="rats"]::after,.dcard[data-card-deck="rats"]::after{content:'🐀'}
 .card[data-card-deck="locust"]::after,.dcard[data-card-deck="locust"]::after{content:'🦗'}
+.card[data-card-deck="devil"]::after,.dcard[data-card-deck="devil"]::after{content:'😈'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -219,6 +223,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece[data-card-deck="dimension"]{--cardbg:#252a78;--artink:#e6ecff;background:var(--cardbg);color:#e4e8fb;border-color:#141746}
 .teece[data-card-deck="rats"]{--cardbg:#3d3a32;--artink:#e9e4d4;background:var(--cardbg);color:#e7e2d3;border-color:#211f1a}
 .teece[data-card-deck="locust"]{--cardbg:#4a4318;--artink:#f8f2cd;background:var(--cardbg);color:#f3edc9;border-color:#292507}
+.teece[data-card-deck="devil"]{--cardbg:#5a0f14;--artink:#ffd6c4;background:var(--cardbg);color:#f8e2d9;border-color:#2c0508}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -758,7 +763,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:82,date:'2026-09-25'};
+const VERSION={build:83,date:'2026-09-25'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -874,7 +879,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -923,6 +928,27 @@ const CARD_ART={
   862:["   ><  ><    "," ><  ^^^  >< ","   ><   ><   "," ~~~~~~~~~~~ ","  + + + + +  "],
   863:[" | | | | | | "," | | | | | | "," \\|/\\|/\\|/\\| "," ~~~~~~~~~~~ ","  . . . . .  "],
   864:["   /~~~~~\\   ","  / (o)(o) \\ "," | .-. .-.  |","  \\ ~~~~~ /  ","   ~~~~~~~   "],
+  /* ---- Devils: horns, contracts, and the one who is new here ---- */
+  865:["  (\\_/)  \\   ","  (o o)---|> ","  /)=(\\  /   ","   / \\       ","  ^   ^      "],
+  866:["   /\\   /\\   ","  ( o _ o )  ","  _|=====|_  "," |  PACT  |  "," |________|~ "],
+  867:["  /\\     /\\  "," ( >  _  < ) ","  \\ \\vvv/ /  ","   \\_____/   ","    x   x    "],
+  868:["  /\\     /\\  "," (  o   o  ) ","  \\  ___  /  ","  [$] | [$]  ","   ~drip~    "],
+  869:["   /\\   /\\   ","  ( o . o )  ","   \\  o  /   ","   /|   |\\   ","  sorry! :)  "],
+  870:["  /\\     /\\  "," ( $     $ ) ","  \\  ~~~  /  ","   +2 +2 +2  ","  %%%%%%%%%  "],
+  871:["    /\\ /\\    ","   ( o o )   ","   /(   )\\   ","    [===]    ","   deal?     "],
+  872:["  /\\     /\\  "," ( o  |  o ) ","   \\_/ \\_/   ","  +3 | +3    ","  ===^===    "],
+  873:[" /\\       /\\ ","(  @     @  )"," \\  \\___/  / "," <\\_______/> ","  ~~  ~~  ~~ "],
+  874:["  /\\     /\\  "," ( -     - ) ","  \\  ...  /  ","   \\_____/   ","   -3 -3 -3  "],
+  875:[" /\\\\     //\\ ","(  O  _  O  )"," \\  \\vvv/  / "," /|#######|\\ ","  ^^^^^^^^^  "],
+  876:[" \\/\\/\\/\\/\\/\\ "," /\\       /\\ ","(  X     X  )"," \\ \\VVVVV/ / ","  \\_______/  "],
+  877:["  +-------+  ","  | ~~~~~ |  ","  | ~~~~~ |  ","  | x___  |  ","  +-------+  "],
+  878:["  /\\/\\ /\\/\\  "," /  ~~ ~~  \\ ","/ ~~  ^  ~~ \\","  ~~ /|\\ ~~  ","     / \\     "],
+  879:["    .---.    ","   / (X) \\   ","  |  ===  |  ","   \\ ___ /   ","    `---`    "],
+  880:["  666 666 6  ","  6  6 6 6   ","  666 0 666  ","  6 6 6 6 6  ","  666 666 0  "],
+  881:["   _______   ","  /  ___  \\  "," |  / X \\  | "," |  \\___/  | ","  \\_______/  "],
+  882:["   .  o  .   ","  o ( ~ ) o  ","   ( ~~~ )   ","  ~~~~~~~~~  ","   \\_____/   "],
+  883:["  _________  "," | $ SOUL$ | "," |  BANK   | "," |_|_|_|_|_| "," =========== "],
+  884:[" |=|=|=|=|=| "," | | o o | | "," | | --- | | "," |=|=|=|=|=| ","  #  #  #  # "],
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
   541:["  \\  .-.  /  ", "   \\( o )/   ", "    (/|\\)    ", "    _/ \\_    ", "   [$]  ...  "],
@@ -1556,7 +1582,7 @@ function canPlay(p,cardId){
     if(need&&sacPool(p,G.players[p].hand.indexOf(cardId)).worth<need)return false;
     return true;
   }
-  if(cd.type==='magic')return !hexOn(p,'silence');
+  if(cd.type==='magic')return !hexOn(p,'silence')&&!hexOn(p,'nomagic');
   if(cd.type==='equip'){
     /* Puppet Strings asks the grave, not the field: what makes it playable is a
        body lying in your own graveyard and a panel free to stand it up on. */
@@ -1944,8 +1970,7 @@ const CARDS = {
     text:'Choose one of your Teece: roll it anywhere along its row or column, then every enemy beside it gets -2.',
     cast:[{fx:'rowColMove',n:-2,dur:'perm'}]},
  336:{name:'Studded Plate',type:'equip',mod:1,def:3,text:'Equipped Teece gets +1 and +3 Defence.',grants:{def:3}},
- 337:{name:'Stoneheart',type:'equip',mod:0,text:'Equipped Teece converts any Defence it has into offence, losing all its Defence and gaining that many stats permanently.',
-    grants:{onEquip:[{fx:'stoneConvert'}]}},
+ 337:{name:'Stoneheart',type:'equip',mod:0,defToOff:true,text:'Equipped Teece has no Defence: every point of Defence it would have is added to all four of its sides instead, for as long as it wears this.'},
  338:{name:'Clinging Moss',type:'equip',mod:0,text:'Equipped Teece gets +1 Defence. When it is destroyed, you may move this to another Teece.',
     grants:{def:1,reequip:true}},
  339:{name:'Bedrock',type:'ground',gkw:['steadfast','ward'],
@@ -3430,6 +3455,118 @@ const CARDS = {
     of the panels the swarm needs filled. */
  'TLOCUST':{name:'Locust',type:'teece',token:true,deck:'locust',locust:true,sacOK:true,sides:[6,6,6,6],
     text:'Locust Token. 6 on every side, and it CAN be sacrificed to play a Teece or to a curse — the only Token in the game that can. It never counts toward winning by domination, but it is a Locust, so it counts as one of the panels the swarm needs.'},
+ /* ---- Devils: evil, but lawfully.
+
+    Every Devil offers a PACT when it is played, and every PACT reads the way an
+    ability reads everywhere else in the game: PRICE ; REWARD. The price is the
+    `cost` list and the reward is the `gain` list, kept apart on the card rather
+    than marked step by step, because a PACT is always the whole price or none of
+    it -- paid, skipped with a SOUL, waived by a Seal or the Soul Bank, or written
+    onto the tab at Soul Debtor's Prison to be paid twice later. offerPact is the
+    one place that asks, and every way a PACT can be offered goes through it:
+    being played, the Infernal Contract, Devil Numbers, and Infernal Bargain's
+    two printed PACTs.
+
+    `devil:true` is what the Soul Bank reads, so a Devil drafted into another deck
+    is still a Devil there. The SOUL the deck starts with is a rule of the DECK,
+    in decks.json, the way Winged is the Locusts'. ---- */
+ 865:{name:'Hellbow Imp',type:'teece',devil:true,sides:[6,6,6,9],kw:['ranged'],
+    onPlay:[{fx:'pact'}],
+    pact:{y:'silence this',z:'you may rotate this',ai:'take',
+      cost:[{fx:'silenceSelf'}],gain:[{fx:'rot',may:true}]},
+    text:'Ranged. PACT — Silence this ; you may rotate this.'},
+ 866:{name:'Contract Clerk',type:'teece',devil:true,sides:[5,6,6,6],
+    onPlay:[{fx:'pact'}],
+    pact:{y:'send the top card of your deck to the graveyard',z:'draw a card',ai:'take',aiMinDeck:5,
+      price:{deck:1},cost:[{fx:'millOwn',n:1}],gain:[{fx:'draw',n:1}]},
+    text:'PACT — Send the top card of your deck to the graveyard ; draw a card.'},
+ 867:{name:'Spiteful Fiend',type:'teece',devil:true,sides:[6,6,4,6],
+    onPlay:[{fx:'pact'}],
+    pact:{y:'this gets -4',z:'when this is destroyed, it destroys the enemy that killed it',ai:'soul',
+      cost:[{fx:'mod',who:'self',n:-4,dur:'perm'}],gain:[{fx:'markDeath',step:{fx:'killerDies'}}]},
+    text:'PACT — This gets -4 ; when this is destroyed, it destroys the enemy that killed it.'},
+ 868:{name:'Blood Broker',type:'teece',devil:true,sides:[4,8,8,4],
+    onPlay:[{fx:'pact'}],
+    pact:{y:'sacrifice another ally',z:'this gets +4',ai:'soul',
+      price:{ally:1},cost:[{fx:'sacAlly',notSelf:true}],gain:[{fx:'mod',who:'self',n:4,dur:'perm'}]},
+    text:'PACT — Sacrifice an ally ; this gets +4.'},
+ 869:{name:'Beginner Devil',type:'teece',devil:true,sides:[7,7,7,7],
+    onPlay:[{fx:'pact'}],
+    pact:{y:'discard your hand, destroy every Teece you control and send your whole deck to the graveyard',z:'this gets +1',ai:'free',
+      cost:[{fx:'discardOwnHand'},{fx:'destroyOwn'},{fx:'millOwn',all:true}],gain:[{fx:'mod',who:'self',n:1,dur:'perm'}]},
+    flavor:'“Sorry, I’m new!”',
+    text:'PACT — Discard your hand, destroy all Teece you control and send your deck to the graveyard ; this gets +1.'},
+ 870:{name:'Usurer Devil',type:'teece',devil:true,sides:[6,2,6,6],startGrow:1,
+    onPlay:[{fx:'pact'}],
+    pact:{y:'this gets -2',z:'it gains an additional +2 at the start of each of your turns',ai:'take',
+      cost:[{fx:'mod',who:'self',n:-2,dur:'perm'}],gain:[{fx:'growMore',n:2}]},
+    text:'+1 at the start of each of your turns. PACT — This gets -2 ; this gains an additional +2 at the start of each of your turns.'},
+ 871:{name:'Bargain Imp',type:'teece',devil:true,sides:[3,3,3,3],
+    onPlay:[{fx:'shieldTurn'},{fx:'pact'}],
+    pact:{y:'sacrifice this',z:'the next two Teece you play cannot be destroyed until the end of the turn they are played',ai:'take',
+      cost:[{fx:'sacSelf'}],gain:[{fx:'nextInvuln',n:2}]},
+    text:'Cannot be destroyed until the end of the turn it is played. PACT — Sacrifice this ; the next two Teece you play cannot be destroyed until the end of the turn you play them.'},
+ 872:{name:'Fair Dealer',type:'teece',devil:true,sides:[6,6,6,6],
+    onPlay:[{fx:'pact'}],
+    pact:{y:'every enemy Teece gets +3, and so does the next Teece each opponent plays',z:'every Teece you control gets +3',ai:'more',
+      cost:[{fx:'mass',who:'enemy',n:3,dur:'perm'},{fx:'foeNextMod',n:3}],gain:[{fx:'mass',who:'ally',n:3,dur:'perm'}]},
+    text:'PACT — All your opponents’ Teece get +3, and the next Teece each of them plays gets +3 ; all your Teece get +3.'},
+ 873:{name:'The Adversary',type:'teece',devil:true,sides:[6,0,6,6],def:2,kw:['flying'],invertLoss:true,
+    onPlay:[{fx:'pact'}],
+    pact:{y:'silence every ally, and you cannot play magic until the end of your second turn from now',
+      z:'destroy every equip and battleground your opponents own, silence all their Teece and strip every bonus off them',ai:'foes',
+      cost:[{fx:'silenceAll',who:'ally'},{fx:'hexSelf',kind:'nomagic',count:3}],
+      gain:[{fx:'razeFoeGear'},{fx:'silenceAll',who:'enemy'},{fx:'stripBonus',who:'enemy'}]},
+    text:'Defence 2. Flying. Whenever this would lose stats, it gains that many instead. PACT — Silence all your allies, and you cannot play magic for your next 2 turns ; destroy all your opponents’ equips and battlegrounds, silence all their Teece and remove every positive effect on their attributes.'},
+ 874:{name:'Withering Tempter',type:'teece',devil:true,sides:[6,12,6,6],endMod:{n:-3,msg:' withers'},
+    onPlay:[{fx:'pact'}],
+    pact:{y:'discard a card',z:'each opponent discards a card',ai:'take',
+      price:{hand:1},cost:[{fx:'discard',n:1}],gain:[{fx:'discard',n:1,foe:true}]},
+    text:'-3 at the end of every turn. PACT — Discard a card ; your opponent discards a card.'},
+ 875:{name:'Pit Lord',type:'teece',devil:true,sides:[6,6,6,6],sac:1,def:6,onPact:{n:1,kw:'flying'},
+    onPlay:[{fx:'pact'}],
+    pact:{y:'every Teece you control loses all its Defence',z:'this gets +2',ai:'soul',
+      cost:[{fx:'loseDef',who:'ally'}],gain:[{fx:'mod',who:'self',n:2,dur:'perm'}]},
+    text:'Sacrifice one fielded Teece to play. Defence 6. Whenever any PACT is accepted: this gets +1 permanently, and Flying until the end of the turn. PACT — All your Teece lose all their Defence ; this gets +2.'},
+ 876:{name:'Archdevil',type:'teece',devil:true,sides:[20,6,6,6],sac:2,
+    onPlay:[{fx:'pact'}],
+    pact:{y:'this loses 20 from its top',z:'it gains 20 on its left, right and bottom',ai:'take',
+      cost:[{fx:'sidesSelf',sides:[-20,0,0,0]}],gain:[{fx:'sidesSelf',sides:[0,20,20,20]}]},
+    text:'Sacrifice two fielded Teece to play. PACT — This loses 20 from its top ; this gains 20 on its left, right and bottom.'},
+ /* ---- Devil equips ---- */
+ 877:{name:'Infernal Contract',type:'equip',mod:2,
+    grants:{act:[{name:'Renegotiate',once:'turn',steps:[{fx:'pactAgain'}]}]},
+    text:'+2. Once per turn: the equipped Teece offers its PACT again.'},
+ 878:{name:'Brimstone Wings',type:'equip',mod:0,
+    grants:{kw:['ranged','flying'],onDeath:[{fx:'soulGain',n:1}]},
+    text:'The equipped Teece has Ranged and Flying. When the equipped Teece is destroyed: gain a SOUL.'},
+ 879:{name:'Seal of Exemption',type:'equip',mod:0,
+    grants:{def:2,pactFree:true},
+    text:'Defence 2. The equipped Teece’s PACT costs nothing. Plate it onto a Devil in your hand and the PACT it offers as it lands is already free.'},
+ /* ---- Devil magic ---- */
+ 880:{name:'Devil Numbers',type:'magic',
+    cast:[{fx:'devilNumbers'},{fx:'pactAlly'}],
+    text:'Select a Teece: all of its printed sides become 6, and then one of them becomes 0. Then you may select an ally: it offers its PACT again.'},
+ 881:{name:'Infernal Bargain',type:'magic',
+    cast:[{fx:'choose',msg:'Choose a PACT. A SOUL cannot pay for either.',opts:[
+      {lbl:'Every Teece you control is destroyed at the start of your next turn ; until then, they all have +5 and Flying',
+       steps:[{fx:'pactCast',pact:{y:'every Teece you control is destroyed at the start of your next turn',
+         z:'every Teece you control has +5 and Flying until the start of your next turn',ai:'take',noSoul:true,
+         cost:[{fx:'doomSelf'}],gain:[{fx:'hellfire',n:5,kw:'flying'}]}}]},
+      {lbl:'You skip your next 3 turns ; every Teece your opponents control is destroyed at the start of your next turn',
+       steps:[{fx:'pactCast',pact:{y:'you skip your next three turns',
+         z:'every Teece your opponents control is destroyed at the start of your next turn',ai:'take',noSoul:true,
+         cost:[{fx:'skipTurns',n:3}],gain:[{fx:'doomFoes'}]}}]}]}],
+    text:'Choose a PACT. You cannot use a SOUL to pay these costs.\n— Destroy all Teece you control at the start of your next turn ; all your Teece have +5 and Flying until the start of your next turn.\n— You skip your next 3 turns ; destroy all Teece your opponents control at the start of your next turn.'},
+ 882:{name:'Soul Harvest',type:'magic',
+    cast:[{fx:'soulGain',n:1},{fx:'harvestBack'}],
+    text:'Gain a SOUL. Then you may sacrifice an ally: if you do, this card returns to your hand.'},
+ /* ---- Devil battlegrounds ---- */
+ 883:{name:'The Soul Bank',type:'ground',gPactFree:true,gPactBoost:{n:1,kw:'teleport'},
+    text:'A Devil played onto this battleground does not pay the price of its PACT. Whenever any PACT is accepted, every Devil standing here gets +1 permanently and can Teleport until the end of the turn.'},
+ 884:{name:'Soul Debtor’s Prison',type:'ground',gDebt:true,
+    gact:[{name:'Break the Prison',steps:[{fx:'breakGround'}]}],
+    text:'When you would pay the price of a PACT and you hold no SOUL, you may put a counter on this instead: the counter is that price, owed. When this is destroyed, every price owed on it is paid twice. On their own turn, whoever controls a Teece standing on this may destroy it.'},
 };
 const DEF=t=>CARDS[t.cardId];
 /* What an equip actually grants, once the modality it was bolted on with is
@@ -3861,7 +3998,8 @@ function enemySeats(p){
 const HEX_TXT={
   silence:'no magic, and no activated abilities',
   freeze:'no Teece may be played',
-  nowin:'no win yet'
+  nowin:'no win yet',
+  nomagic:'no magic'
 };
 function addHex(target,kind,by,count){
   const pl=G.players[target];
@@ -4268,6 +4406,7 @@ function newState(mode,vsAI,decks,extra){
     nextDefBonus:0,nextDefLeft:0,nextDefKind:null,
     nextMod:0,nextSides:null,nextShield:false,noDeckOut:false,noDominate:false,coffined:{},teecePlayedLastTurn:false,teecePlayedThisTurn:0,turnsTaken:0,
     allFlying:false,swarmWin:null,swarmMind:0,turnCaps:{},
+    souls:0,nextInvuln:0,skipTurns:0,hellfire:null,doomSelf:false,doomFoes:false,
     hexes:[],forget:0,confuse:null,recall:null});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
@@ -4955,6 +5094,10 @@ function effSides(b,i,parts){
      so a Teece taken off the swarm stops being paid by it. */
   const hmind=(G&&G.players&&G.players[t.owner]&&G.players[t.owner].swarmMind)||0;
   if(hmind)addMod(s,hmind,'The Locust Hivemind, for the rest of the game');
+  /* Infernal Bargain's hellfire is banked on the seat too, for as long as the
+     PACT runs: every Teece that seat controls, until its next turn begins. */
+  const hfire=G&&G.players&&G.players[t.owner]&&G.players[t.owner].hellfire;
+  if(hfire&&hfire.n)addMod(s,hfire.n,'Infernal Bargain, until the start of '+ownOf(t.owner)+' next turn');
   for(const bo of bonusesOn(b,i)){
     const n=formationCount(b,i,bo);
     if(n)addMod(s,bo.n*n,formationLabel(bo));
@@ -4982,6 +5125,7 @@ function effSides(b,i,parts){
     if(ed.modWhen){const mw=phasePick(ed.modWhen);if(mw)addMod(s,mw,ed.name+(isDay()?', by day':', by night'));}
     if(perkN('equipPlus')&&sameTeam(t.owner,0))addMod(s,perkN('equipPlus'),ed.name+', honed over the run');
     if(ed.modPerDef)addMod(s,ed.modPerDef*defOf(b,i),ed.name+', per point of Defence');
+    if(ed.defToOff){const dv=defOf(b,i,true);if(dv>0)addMod(s,dv,ed.name+', '+dv+' Defence turned into attack');}
     /* An equip that reads the crowd the way modPerAlly does on a card. The
        Rat deck pays per ally from three directions at once -- the body, the
        King's aura and this -- and they all have to compose here. */
@@ -5321,13 +5465,17 @@ function sidesParts(b,i){
 const partLine=a=>(a[0]===a[1]&&a[1]===a[2]&&a[2]===a[3])
   ? sgn(a[0])+' to every side'
   : SIDE_NAMES.map((n,k)=>a[k]?sgn(a[k])+' '+n:null).filter(Boolean).join(', ');
-function defOf(b,i){
+/* raw reads the Defence a Teece WOULD have, before a Stoneheart takes it. */
+function defOf(b,i,raw){
   const t=b[i].teece; if(!t)return 0;
-  /* A Teece that has had its Defence beaten into attack has none, from any
-     source, for good -- "losing all its Defence" rather than losing the amount
-     that was converted, which is what keeps a battleground's Defence from
-     quietly handing some back afterwards. */
-  if(t.stoneHeart)return 0;
+  /* Stoneheart is a standing conversion, not a one-off: while it is worn the
+     Teece has no Defence at all, and effSides adds every point it would have
+     had to all four sides instead -- read fresh each scan, so Defence gained
+     after the equip went on is converted too, and it comes back as Defence the
+     moment the Stoneheart comes off. */
+  if(!raw&&t.equips.some(e=>CARDS[e.cardId].defToOff))return 0;
+  /* The Pit Lord's PACT takes a Teece's Defence off it for good. */
+  if(t.defGone)return 0;
   let d=(DEF(t).def||0)+(t.defPerm||0)+(t.defTemp2||0);
   if(DEF(t).defPerAlly)d+=DEF(t).defPerAlly*allyCount(b,i,true);
   for(const e of t.equips){
@@ -5402,6 +5550,8 @@ function kwOf(b,i,noGround){
      CONTROLLER, so a Locust somebody has stolen flies for the thief and an
      enemy body the swarm has taken flies for the swarm. */
   if(G&&G.players&&G.players[t.owner]&&G.players[t.owner].allFlying&&ks.indexOf('flying')<0)ks.push('flying');
+  {const hf=G&&G.players&&G.players[t.owner]&&G.players[t.owner].hellfire;
+   if(hf&&hf.kw&&ks.indexOf(hf.kw)<0)ks.push(hf.kw);}
   const fkw=formOf(t);
   if(fkw&&fkw.kw)ks.push(...fkw.kw);
   if((d.spider||t.cardId==='TSP')&&isWebbed(b,i))ks.push('skitter');
@@ -5966,6 +6116,7 @@ function resolvePending(val){
 
 /* ============ fx executor ============ */
 function hasInvertLoss(t){
+  if(!t.silenced&&DEF(t).invertLoss)return true;
   return t.equips.some(e=>{const g=eqG(e);return g&&g.invertLoss;});
 }
 function forceDeath(t){ if(t)for(let k=0;k<4;k++)t.perm[k]=-999; }
@@ -6018,6 +6169,186 @@ const dirTxt=d=>d==='cw'?'clockwise':'counter-clockwise';
    charge it: 'NONE' travels back out of runSteps in place of true. Every
    other caller only tests the result for truthiness, so a card played from
    hand is still spent even when it fizzles. */
+/* ============ Devils: PACTs ============
+   A PACT is PRICE ; REWARD, and it is always the whole price or none of it.
+   There are five ways to answer one, and this is the only place that asks:
+
+     pay   -- the price runs, then the reward
+     soul  -- a SOUL is spent in place of the price (not on a card that says no)
+     free  -- a Seal of Exemption, or a Devil played onto the Soul Bank
+     debt  -- out of SOULS, the price goes on the tab at Soul Debtor's Prison,
+              to be paid twice over the day the Prison comes down
+     no    -- nothing happens at all
+
+   A price that cannot be met is not offered, and a PACT nobody can pay for in
+   any way is reported and passed over without a question. */
+/* "your next turn", where pposs reads "yours". */
+const ownOf=p=>{const n=pname(p);return n==='You'?'your':n+"'s";};
+const whoIn=p=>{const n=pname(p);return n==='You'?'you':n;};
+const pactOf=t=>(t&&!t.silenced&&DEF(t).pact)||null;
+function pactFreeWhy(b,t,played){
+  if(!t)return null;
+  for(const e of t.equips){const g=eqG(e);if(g&&g.pactFree)return CARDS[e.cardId].name;}
+  const c=b.findIndex(x=>x.teece===t);
+  if(played&&c>=0&&DEF(t).devil&&b[c].ground&&!b[c].ground.gsil)
+    for(const gd of gcards(b[c].ground))if(gd.gPactFree)return gd.name;
+  return null;
+}
+/* The Prison a seat may run a tab at: its own, anywhere on the board. */
+function debtPrison(p){
+  for(let i=0;i<BN;i++){const g=G.board[i].ground;if(g&&g.owner===p&&groundFlag(g,'gDebt'))return i;}
+  return -1;
+}
+function pactShort(p,t,pk){
+  const pr=pk.price||{},b=G.board,out=[];
+  if(pr.hand&&handCount(p)<pr.hand)out.push(pr.hand===1?'a card in hand to discard':pr.hand+' cards in hand to discard');
+  if(pr.deck&&G.players[p].deck.length<pr.deck)out.push('a card left in your deck');
+  if(pr.ally){
+    let n=0;
+    for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&o!==t&&sameTeam(o.owner,p)&&canSacrifice(b,i))n++;}
+    if(n<pr.ally)out.push('another ally to sacrifice');
+  }
+  return out;
+}
+function aiPactPick(p,pk,opts){
+  const has=v=>opts.some(o=>o.v===v);
+  let want=pk.ai||'take';
+  if(want==='never')return 'no';
+  if(has('free'))return 'free';
+  const b=G.board;
+  let mine=0,foes=0;
+  for(let i=0;i<BN;i++){const o=b[i].teece;if(!o)continue;if(sameTeam(o.owner,p))mine++;else foes++;}
+  /* The Fair Dealer pays both sides: worth it only with more bodies to pay. */
+  if(want==='more')want=mine>foes+1?'take':'soul';
+  /* The Adversary's price is steep and its reward scales with the enemy. */
+  if(want==='foes')want=foes>=2?'take':'soul';
+  if(pk.aiMinDeck&&G.players[p].deck.length<pk.aiMinDeck)want='free';
+  if(want==='take'){if(has('pay'))return 'pay';if(has('soul'))return 'soul';return 'no';}
+  if(want==='soul'){if(has('soul'))return 'soul';if(has('debt'))return 'debt';return 'no';}
+  return 'no';
+}
+async function offerPact(p,pk,o){
+  if(!pk||G.over)return 'NONE';
+  const b=G.board,pl=G.players[p],t=o.t||null;
+  const free=pactFreeWhy(b,t,o.played);
+  const short=pactShort(p,t,pk);
+  const souls=pl.souls||0;
+  const jail=debtPrison(p);
+  const opts=[];
+  if(free)opts.push({v:'free',lbl:'Accept — '+free+' pays the price'});
+  else{
+    if(!short.length)opts.push({v:'pay',lbl:'Accept, and '+pk.y});
+    if(souls>0&&!pk.noSoul)opts.push({v:'soul',lbl:'Accept, and spend a SOUL instead ('+souls+' held)'});
+    if(souls<=0&&jail>=0)opts.push({v:'debt',lbl:'Accept, and owe the price to Soul Debtor’s Prison'});
+  }
+  const cap=x=>x.charAt(0).toUpperCase()+x.slice(1);
+  if(!opts.length){
+    const m=o.src+' offers a PACT, but '+whoIn(p)+' cannot pay for it: no '+short.join(' and no ')+
+      (pk.noSoul?'.':', and no SOUL.');
+    log(m);toast(m);
+    return 'NONE';
+  }
+  opts.push({v:'no',lbl:'Refuse'});
+  const ch=isAIP(p)?aiPactPick(p,pk,opts)
+    :await chooseOption(p,opts,'PACT — '+o.src+': '+cap(pk.y)+' ; '+pk.z+'.');
+  if(ch==null||ch==='no'||ch==='CANCEL'){
+    log(pname(p)+' '+vb(p,'refuses','refuse')+' the PACT of '+o.src+'.');
+    return 'NONE';
+  }
+  const cellOf=()=>{const c=t?b.findIndex(x=>x.teece===t):-1;return c>=0?c:null;};
+  const ctx={p,cell:cellOf(),t,first:false,noModal:true,pact:true};
+  if(ch==='pay'){
+    log(pname(p)+' '+vb(p,'accepts','accept')+' the PACT of '+o.src+', and '+vb(p,'pays','pay')+': '+pk.y+'.');
+    await runSteps(pk.cost,ctx);
+    if(G.over)return;
+  }else if(ch==='soul'){
+    pl.souls=souls-1;
+    log(pname(p)+' '+vb(p,'accepts','accept')+' the PACT of '+o.src+', and '+vb(p,'spends','spend')+' a SOUL rather than pay ('+
+      pl.souls+' left).');
+  }else if(ch==='debt'){
+    const g=b[jail].ground;
+    g.debt=(g.debt||[]).concat([{p,uid:t?t.uid:null,src:o.src,y:pk.y,cost:pk.cost}]);
+    log(pname(p)+' '+vb(p,'accepts','accept')+' the PACT of '+o.src+', and '+vb(p,'puts','put')+' the price on the tab at Soul Debtor’s Prison ('+
+      g.debt.length+' owed).');
+  }else{
+    log(pname(p)+' '+vb(p,'accepts','accept')+' the PACT of '+o.src+': '+free+' pays the price.');
+  }
+  /* The reward runs on wherever the Teece is now, which may be nowhere: a
+     Bargain Imp is sacrificed as its own price, and its reward is still owed. */
+  ctx.cell=cellOf();
+  await runSteps(pk.gain,ctx);
+  if(G.over)return;
+  pactAccepted();
+  return;
+}
+/* "Whenever a PACT is accepted" -- anybody's. */
+function pactAccepted(){
+  const b=G.board;
+  for(let i=0;i<BN;i++){
+    const w=b[i].teece;if(!w)continue;
+    const op=(!w.silenced)&&DEF(w).onPact;
+    if(op){
+      applyModT(w,op.n,'perm');
+      if(op.kw&&w.kwTemp.indexOf(op.kw)<0)w.kwTemp.push(op.kw);
+      log(nm(w)+' feeds on the bargain: '+sgn(op.n)+' permanently'+(op.kw?', and '+op.kw+' until the end of the turn':'')+'.');
+    }
+    if(DEF(w).devil&&b[i].ground&&!b[i].ground.gsil){
+      for(const gd of gcards(b[i].ground)){
+        const gb=gd.gPactBoost;if(!gb)continue;
+        applyModT(w,gb.n,'perm');
+        if(gb.kw&&w.kwTemp.indexOf(gb.kw)<0)w.kwTemp.push(gb.kw);
+        log(nm(w)+' draws interest from '+gd.name+': '+sgn(gb.n)+' permanently'+(gb.kw?', and '+gb.kw+' until the end of the turn':'')+'.');
+      }
+    }
+  }
+}
+/* The Prison comes down and every price written on its tab is paid, twice, by
+   whoever ran it up. "This" in a price means the body that made the PACT, if
+   it is still standing; if it is not, that part of the price has nothing left
+   to take. */
+async function payDebt(g){
+  const debts=(g.debt||[]).slice();g.debt=[];
+  if(!debts.length)return;
+  log('Soul Debtor’s Prison falls, and '+(debts.length===1?'the debt on it comes':'all '+debts.length+' debts on it come')+
+    ' due twice over.');
+  for(const d of debts){
+    for(let r=0;r<2;r++){
+      const b=G.board;
+      const c=d.uid!=null?b.findIndex(x=>x.teece&&x.teece.uid===d.uid):-1;
+      log(pname(d.p)+' '+vb(d.p,'pays','pay')+(r?' again':'')+' for '+d.src+': '+d.y+'.');
+      await runSteps(d.cost,{p:d.p,cell:c>=0?c:null,t:c>=0?b[c].teece:null,first:false,noModal:true});
+      if(G.over)return;
+    }
+  }
+}
+/* What the Devils leave waiting for the start of a seat's turn. */
+async function pactsComeDue(p){
+  const pl=G.players[p],b=G.board;
+  if(pl.hellfire){pl.hellfire=null;log('The hellfire on '+ownOf(p)+' Teece goes out.');}
+  const doom=async(test,msg)=>{
+    const cells=[];
+    for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&test(o))cells.push(i);}
+    log(msg);
+    if(!cells.length)return;
+    await anim(cells,'dying',190);
+    for(const i of cells){
+      const o=b[i].teece;
+      if(!o||!test(o))continue;
+      await processDeath({cell:i,t:o,killers:[]});
+      if(G.over)return;
+    }
+  };
+  if(pl.doomSelf){
+    pl.doomSelf=false;
+    await doom(o=>o.owner===p,'The bargain comes due: every Teece '+whoIn(p)+' '+vb(p,'controls','control')+' is destroyed.');
+    if(G.over)return;
+  }
+  /* Held back through skipped turns: "your next turn" is the next one taken. */
+  if(pl.doomFoes&&!(pl.skipTurns>0)){
+    pl.doomFoes=false;
+    await doom(o=>!sameTeam(o.owner,p),'The bargain comes due: every Teece '+ownOf(p)+' opponents control is destroyed.');
+  }
+}
 async function runSteps(steps,ctx){
   const list=steps||[];
   let did=list.length===0,offPhase=0,ran=0;
@@ -7005,9 +7336,9 @@ async function FXRUN(st,ctx){
      included -- which is the whole trick of a zombie that gets back up. */
   case 'sacAlly':{
     const mine=[];
-    for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&sameTeam(o.owner,p)&&canSacrifice(b,i))mine.push(i);}
+    for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&sameTeam(o.owner,p)&&canSacrifice(b,i)&&!(st.notSelf&&o===ctx.t))mine.push(i);}
     if(!mine.length)return none('No allied Teece to sacrifice.');
-    const c=await pickCell(mine,'Choose an allied Teece to sacrifice (this one included).',null,false);
+    const c=await pickCell(mine,st.notSelf?'Choose another allied Teece to sacrifice.':'Choose an allied Teece to sacrifice (this one included).',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return 'ABORT';
     const victim=b[c].teece;
@@ -7989,25 +8320,230 @@ async function FXRUN(st,ctx){
     log(nm(t)+' takes '+sgn(n)+' on its '+SIDE_NAMES[k]+' side.');
     await anim([c],'zap');
     return;}
-  /* Stoneheart. It used to be a flag read in exactly one of the four places an
-     equip lands on a Teece -- the one where the Teece arrives already plated
-     from hand -- so equipping it onto something standing on the board, which is
-     how an equip is normally played, converted nothing at all.
-
-     It is an onEquip step now, because every one of those four paths already
-     fires onEquip and none of them has to know this card exists.
-
-     The Defence goes rather than being cancelled out by a matching penalty: a
-     penalty big enough to zero a Defence that included a battleground's three
-     turned negative the moment the Teece walked off that battleground. */
-  case 'stoneConvert':{
-    const c=ctx.cell,t=ctx.t||(c!=null?b[c].teece:null);
-    if(!t||c==null)return none('There is nothing for the Stoneheart to beat in.');
-    const n=defOf(b,c);
-    t.stoneHeart=true;
-    if(n<=0)return none(nm(t)+' has no Defence to turn into attack.');
-    applyModT(t,n,'perm');
-    log(nm(t)+' beats '+n+' Defence into attack: '+sgn(n)+' permanently, and no Defence left.');
+  /* ============ Devils: the PACT and the SOUL ============ */
+  case 'pact':{
+    const t=ctx.t;
+    if(!t||!DEF(t).pact)return none('There is no PACT here.');
+    return await offerPact(p,DEF(t).pact,{t,src:DEF(t).name,played:!!ctx.fromHand});}
+  /* The Infernal Contract offers the same PACT again. Refusing it is doing
+     nothing, so the charge is kept. */
+  case 'pactAgain':{
+    const t=ctx.t,pk=pactOf(t);
+    if(!pk)return none(t&&t.silenced?nm(t)+' is silenced: it has no PACT left to offer.':'There is no PACT to offer again.');
+    return await offerPact(p,pk,{t,src:DEF(t).name});}
+  case 'pactAlly':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&o.owner===p&&pactOf(o))cands.push(i);}
+    if(!cands.length){log('No ally of yours has a PACT to offer.');return;}
+    const c=isAIP(p)?null:await pickCell(cands,'Choose an ally: it offers its PACT again. Or skip.',null,true);
+    if(c==='CANCEL'||c==null)return;
+    const o=b[c].teece;
+    await offerPact(p,pactOf(o),{t:o,src:DEF(o).name});
+    return;}
+  /* A PACT printed on a spell. Walking away from it calls the spell off, and
+     the card stays in hand: nothing has happened yet. */
+  case 'pactCast':{
+    const r=await offerPact(p,st.pact,{t:null,src:CARDS[ctx.cardId]?CARDS[ctx.cardId].name:'The bargain'});
+    return r==='NONE'?'ABORT':r;}
+  case 'soulGain':{
+    const who=ctx.deadOwner!=null?ctx.deadOwner:p;
+    const pl=G.players[who];
+    pl.souls=(pl.souls||0)+(st.n||1);
+    log(pname(who)+' '+vb(who,'gains','gain')+' a SOUL, and '+vb(who,'holds','hold')+' '+pl.souls+'.');
+    return;}
+  case 'silenceSelf':{
+    if(!ctx.t)return;
+    ctx.t.silenced=true;
+    log(nm(ctx.t)+' is silenced.');
+    return;}
+  case 'millOwn':{
+    const pl=G.players[p];
+    const n=st.all?pl.deck.length:(st.n||1);
+    const got=[];
+    for(let k=0;k<n&&pl.deck.length;k++)got.push(pl.deck.pop());
+    if(!got.length)return none(pname(p)+' has nothing left in the deck to bury.');
+    log(pname(p)+' '+vb(p,'sends','send')+(st.all?' the whole deck — '+got.length+' card'+(got.length===1?'':'s')+' —':' '+got.map(c=>CARDS[c].name).join(' and '))+' to the graveyard.');
+    for(const cid of got){await discardCard(p,cid);if(G.over)return;}
+    return;}
+  case 'markDeath':{
+    if(!ctx.t)return;
+    ctx.t.deathFx=(ctx.t.deathFx||[]).concat([st.step]);
+    log(nm(ctx.t)+' will take its killer with it.');
+    return;}
+  case 'destroyOwn':{
+    const cells=[];
+    for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&o.owner===p)cells.push(i);}
+    if(!cells.length)return none('You control no Teece to destroy.');
+    await anim(cells,'dying',190);
+    for(const i of cells){
+      const o=b[i].teece;
+      if(!o||o.owner!==p)continue;
+      await processDeath({cell:i,t:o,killers:[]});
+      if(G.over)return;
+    }
+    return;}
+  case 'growMore':{
+    if(!ctx.t)return;
+    ctx.t.growMore=(ctx.t.growMore||0)+st.n;
+    log(nm(ctx.t)+' now grows '+sgn((DEF(ctx.t).startGrow||0)+ctx.t.growMore)+' at the start of each of '+ownOf(ctx.t.owner)+' turns.');
+    return;}
+  case 'shieldTurn':{
+    if(!ctx.t)return;
+    ctx.t.immortalOwner=p;ctx.t.immortalUntil=G.turnNum;
+    log(nm(ctx.t)+' cannot be destroyed until the end of this turn.');
+    return;}
+  case 'sacSelf':{
+    const t=ctx.t;
+    const c=t?b.findIndex(x=>x.teece===t):-1;
+    if(c<0)return none('There is nothing left here to sacrifice.');
+    log(nm(t)+' is sacrificed.');
+    await processDeath({cell:c,t,killers:[],cost:true});
+    return;}
+  case 'nextInvuln':{
+    const pl=G.players[p];
+    pl.nextInvuln=(pl.nextInvuln||0)+st.n;
+    log('The next '+(pl.nextInvuln===1?'Teece':pl.nextInvuln+' Teece')+' '+whoIn(p)+' '+vb(p,'plays','play')+
+      ' cannot be destroyed until the end of the turn '+(pl.nextInvuln===1?'it is':'they are')+' played.');
+    return;}
+  case 'foeNextMod':{
+    for(const q of enemySeats(p)){
+      G.players[q].nextMod=(G.players[q].nextMod||0)+st.n;
+      log('The next Teece '+whoIn(q)+' '+vb(q,'plays','play')+' arrives with '+sgn(st.n)+'.');
+    }
+    return;}
+  case 'hexSelf':{
+    addHex(p,st.kind,p,st.count||2);
+    log(pname(p)+': '+(HEX_TXT[st.kind]||st.kind)+', until the end of '+ownOf(p)+' '+
+      (st.count>2?'turn after next':'next turn')+'.');
+    return;}
+  case 'silenceAll':{
+    const hit=[];
+    for(let i=0;i<BN;i++){
+      const o=b[i].teece;if(!o||o.silenced)continue;
+      const ally=sameTeam(o.owner,p);
+      if(st.who==='ally'&&!ally)continue;
+      if(st.who==='enemy'&&ally)continue;
+      o.silenced=true;hit.push(i);
+    }
+    if(!hit.length)return none('Nothing there to silence.');
+    log('Every '+(st.who==='ally'?'allied':'enemy')+' Teece is silenced.');
+    await anim(hit,'zap');
+    return;}
+  case 'razeFoeGear':{
+    let n=0;
+    for(let i=0;i<BN;i++){
+      const host=b[i].teece;
+      if(!host)continue;
+      for(let x=host.equips.length-1;x>=0;x--){
+        const e=host.equips[x];
+        if(sameTeam(e.owner,p))continue;
+        host.equips.splice(x,1);
+        equipCameOff(host,e,true);
+        toGrave(e.owner,e.cardId);
+        log(CARDS[e.cardId].name+' is torn off '+nm(host)+' and destroyed.');
+        n++;
+      }
+    }
+    for(let i=0;i<BN;i++){
+      const g=b[i].ground;
+      if(!g||sameTeam(g.owner,p))continue;
+      log(CARDS[g.cardId].name+' is destroyed.');
+      await clearGroundAt(i,p);
+      n++;
+      if(G.over)return;
+    }
+    if(!n)log('Your opponents have no equips or battlegrounds to lose.');
+    return;}
+  case 'stripBonus':{
+    let n=0;
+    for(let i=0;i<BN;i++){
+      const o=b[i].teece;if(!o)continue;
+      const ally=sameTeam(o.owner,p);
+      if(st.who==='ally'&&!ally)continue;
+      if(st.who==='enemy'&&ally)continue;
+      for(const a of [o.perm,o.temp,o.temp2])if(a)for(let k=0;k<4;k++)if(a[k]>0){a[k]=0;n++;}
+      if(o.defPerm>0){o.defPerm=0;n++;}
+      if(o.defTemp2>0){o.defTemp2=0;n++;}
+    }
+    log(n?'Every bonus on their Teece is stripped away.':'There was no bonus on their Teece to strip.');
+    return;}
+  case 'loseDef':{
+    let n=0;
+    for(let i=0;i<BN;i++){
+      const o=b[i].teece;if(!o)continue;
+      if(st.who==='ally'&&!sameTeam(o.owner,p))continue;
+      if(st.who==='enemy'&&sameTeam(o.owner,p))continue;
+      if(!o.defGone){o.defGone=true;n++;}
+    }
+    log(n?'Every '+(st.who==='ally'?'allied':'enemy')+' Teece loses all its Defence.':'There was no Defence to lose.');
+    return;}
+  case 'sidesSelf':{
+    if(!ctx.t)return;
+    applySides(ctx.t,st.sides,'perm');
+    log(nm(ctx.t)+' takes '+sidesLine(st.sides)+' permanently.');
+    return;}
+  case 'devilNumbers':{
+    const cands=[];for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return none('No valid target.');
+    const c=await pickCell(cands,'Choose a Teece: its printed sides all become 6, and then one of them becomes 0.',
+      (bb,i)=>{bb[i].teece.base=[6,6,6,6];},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)){await anim([c],'zap');return;}
+    if(tapeSave(b,c,p)){await anim([c],'zap');return;}
+    const t=b[c].teece;
+    t.base=[6,6,6,6];
+    let k;
+    if(isAIP(p)){
+      /* On an enemy the 0 goes where it will hurt, which is wherever an ally of
+         the caster is standing across from it; on an ally, where nothing is. */
+      const mine=sameTeam(t.owner,p);
+      let best=0,bv=-1e9;
+      for(let q=0;q<4;q++){
+        const bb=cloneBoard(b);bb[c].teece.base=[6,6,6,6];bb[c].teece.base[q]=0;
+        simCombat(bb);
+        const v=boardValue(bb,p)*(mine?1:1);
+        if(v>bv){bv=v;best=q;}
+      }
+      k=best;
+    }else k=await pickSide(p,'Which side of '+nm(t)+' drops to 0?');
+    if(k==null)k=0;
+    t.base[k]=0;
+    ctx.last=c;
+    log(nm(t)+' is renumbered: 6 on every printed side, and 0 on its '+SIDE_NAMES[k]+'.');
+    await anim([c],'zap');
+    return;}
+  case 'skipTurns':{
+    const pl=G.players[p];
+    pl.skipTurns=(pl.skipTurns||0)+st.n;
+    log(pname(p)+' will skip '+(pl.skipTurns===1?'the next turn':'the next '+pl.skipTurns+' turns')+'.');
+    return;}
+  case 'doomSelf':{
+    G.players[p].doomSelf=true;
+    log('At the start of '+ownOf(p)+' next turn, every Teece '+whoIn(p)+' '+vb(p,'controls','control')+' is destroyed.');
+    return;}
+  case 'doomFoes':{
+    G.players[p].doomFoes=true;
+    log('At the start of '+ownOf(p)+' next turn, every Teece '+ownOf(p)+' opponents control is destroyed.');
+    return;}
+  case 'hellfire':{
+    G.players[p].hellfire={n:st.n,kw:st.kw||null};
+    log('Every Teece '+whoIn(p)+' '+vb(p,'controls','control')+' has '+sgn(st.n)+(st.kw?' and '+st.kw:'')+
+      ' until the start of '+ownOf(p)+' next turn.');
+    return;}
+  /* Soul Harvest comes back to hand for a body. The computer never feeds it
+     one: nothing about the board tells it when to stop. */
+  case 'harvestBack':{
+    if(!G.castingFrom||G.castingFrom.p!==p)return;
+    const mine=[];
+    for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&sameTeam(o.owner,p)&&canSacrifice(b,i))mine.push(i);}
+    if(!mine.length||isAIP(p))return;
+    const c=await pickCell(mine,'Sacrifice an ally to take Soul Harvest back into your hand? Or skip.',null,true);
+    if(c==='CANCEL'||c==null)return;
+    const v=b[c].teece;
+    log(nm(v)+' is sacrificed.');
+    await processDeath({cell:c,t:v,killers:[],cost:true});
+    G.magicReturn=true;
     return;}
   case 'modByDef':{
     const cands=[];
@@ -11437,6 +11973,12 @@ async function playTeece(p,handIdx){
     log(nm(t)+' arrives under cover: it cannot be destroyed until the '+
       (long?'end':'start')+' of '+pposs(p)+' next turn.');
   }
+  /* The Bargain Imp's reward: cover that lasts out the turn it is played. */
+  if(pl.nextInvuln>0){
+    pl.nextInvuln--;
+    t.immortalOwner=p;t.immortalUntil=G.turnNum;
+    log(nm(t)+' arrives under the bargain: it cannot be destroyed until the end of this turn.');
+  }
   if(pl.nextSides){
     const ns=pl.nextSides;pl.nextSides=null;
     for(let k=0;k<4;k++)t.perm[k]+=ns[k];
@@ -11660,6 +12202,8 @@ async function clearGroundAt(i,breaker){
     try{ for(const sp of g.spells)await castCard(sp.owner,sp.cardId); }
     finally{ G.blindCast=was; }
   }
+  /* Soul Debtor's Prison: every price on the tab, paid twice. */
+  if((g.debt||[]).length){await payDebt(g);if(G.over)return;}
   const dob=groundNum(g,'gDiscardOnBreak');
   if(dob&&breaker!=null&&breaker!==g.owner){
     log(pname(breaker)+' broke '+gd.name+' and must discard '+dob+'.');
@@ -11893,6 +12437,7 @@ async function castCard(p,cid,opts){
 async function playMagic(p,handIdx){
   const pl=G.players[p],id=pl.hand[handIdx],d=CARDS[id];
   if(hexOn(p,'silence')){toast('Silenced: you cannot cast magic.');return false;}
+  if(hexOn(p,'nomagic')){toast('The Adversary\u2019s PACT holds: you cannot play magic yet.');return false;}
   /* A Dimension of Energy on the field eats the spell before it is cast. It
      takes everybody's, not only its owner's, and the card is not spent -- it
      hangs on the battleground until something breaks the battleground open. */
@@ -11907,12 +12452,12 @@ async function playMagic(p,handIdx){
     render();
     return true;
   }
-  const wasCasting=G.castingMagic,wasConsumed=G.magicConsumed,wasFrom=G.castingFrom;
-  G.castingMagic=true;G.magicConsumed=false;G.castingFrom={p,handIdx,cardId:id};
-  let ok,consumed;
+  const wasCasting=G.castingMagic,wasConsumed=G.magicConsumed,wasFrom=G.castingFrom,wasReturn=G.magicReturn;
+  G.castingMagic=true;G.magicConsumed=false;G.castingFrom={p,handIdx,cardId:id};G.magicReturn=false;
+  let ok,consumed,back;
   try{ ok=await runSteps(d.cast,{p,cell:null,t:null,first:true,cardId:id,handIdx}); }
-  finally{ consumed=G.magicConsumed;G.castingMagic=wasCasting;G.magicConsumed=wasConsumed;
-           G.castingFrom=wasFrom; }
+  finally{ consumed=G.magicConsumed;back=G.magicReturn;G.castingMagic=wasCasting;G.magicConsumed=wasConsumed;
+           G.castingFrom=wasFrom;G.magicReturn=wasReturn; }
   if(!ok)return false;
   /* The hand can have shifted under the cast -- a card drawn, a card thrown
      away, a Teece called out of it -- so the spell is found again by what it
@@ -11922,6 +12467,9 @@ async function playMagic(p,handIdx){
   log(pname(p)+' casts '+d.name+'.');
   if(d.rebound&&!pl.onceUsed['rb'+id]){
     pl.onceUsed['rb'+id]=true;
+    handPush(p,id);
+    log(d.name+' returns to '+pname(p)+"'s hand.");
+  }else if(back&&at>=0){
     handPush(p,id);
     log(d.name+' returns to '+pname(p)+"'s hand.");
   }else if(!consumed&&at>=0)toGrave(p,id);
@@ -12038,7 +12586,8 @@ function mustPlayTeece(p){
 async function endTurn(){
   if(!G||G.over||G.pending||G._endingTurn)return;
   const pl=G.players[G.turn];
-  if(mustPlayTeece(G.turn)){
+  const skipping=!!G.skipTurn;G.skipTurn=false;
+  if(!skipping&&mustPlayTeece(G.turn)){
     /* said once a turn, however many times End Turn gets pressed */
     if(!pl.toldMustPlay){
       pl.toldMustPlay=true;
@@ -12079,7 +12628,7 @@ async function endTurn(){
     const t=G.board[i].teece;
     if(!t)continue;
     const em=t.silenced?null:DEF(t).endMod;
-    if(em){applyModT(t,em.n,'perm');log(nm(t)+' puts on another ring: '+sgn(em.n)+'.');}
+    if(em){applyModT(t,em.n,'perm');log(nm(t)+(em.msg||' puts on another ring')+': '+sgn(em.n)+'.');}
   }
   /* endAura pays out at the end of every turn, either side's, the way endMod
      pays out to its own Teece. Auras proper are recomputed in effSides and
@@ -12289,6 +12838,9 @@ const QUIET_LIMIT=()=>3*PLAYERS();
 function checkStalemate(){
   if(G.over)return;
   if(G.eventFlag){G.quiet=0;G.eventFlag=false;return;}
+  /* A board held still by an Infernal Bargain is not a dead board: the turns
+     being skipped end in a wipe that is already paid for. */
+  if(G.players.some(pl=>pl.skipTurns>0||pl.doomFoes||pl.doomSelf)){G.quiet=0;return;}
   G.quiet++;
   if(G.quiet>=QUIET_LIMIT()){
     const cs=teamsInPlay().map(tm=>({tm,n:teamReal(tm)}));
@@ -12429,6 +12981,27 @@ async function startTurn(){
     const t=G.board[i].teece;
     if(t&&t.owner===p){t.actUsedTurn={};t.dodged=false;t.magicUsedTurn=0;t.drainsThisTurn=0;t.drainMove=false;}
     if(t&&t.immortalOwner===p&&!t.immortalUntil)t.immortalOwner=null;
+  }
+  /* The Devils' bargains that come due as this turn begins, and the turns an
+     Infernal Bargain gave away. A skipped turn is still a turn that ENDS -- the
+     board ticks over as it always does -- but nothing is drawn or played in it. */
+  await pactsComeDue(p);
+  if(stale(ep)||G.over)return;
+  if(pl.skipTurns>0){
+    pl.skipTurns--;
+    log('--- Turn '+G.turnNum+': '+pname(p)+' --- skipped, as the PACT demands'+
+      (pl.skipTurns?' ('+pl.skipTurns+' more to skip).':'.'));
+    render();
+    G.skipTurn=true;
+    await endTurn();
+    return;
+  }
+  /* The Usurer Devil's interest, paid at the start of its owner's turn. */
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(!t||t.owner!==p||t.silenced)continue;
+    const n=(DEF(t).startGrow||0)+(t.growMore||0);
+    if(n){applyModT(t,n,'perm');log(nm(t)+' collects its interest: '+sgn(n)+'.');}
   }
   /* Wet Cardboard sags at the start of EVERY turn, whoever is taking it, so
      this runs over the whole board rather than over one seat's Teece. */
@@ -12854,6 +13427,10 @@ function aiPlanFor(id){
        holds a stun on whatever stands there. Neither shows on an empty board. */
     if(d.gDestroyOnMove)bonus+=1.2;
     if(d.gStun)bonus+=1.2;
+    /* The Soul Bank pays nothing until a Devil is played onto it, and the
+       Prison nothing until there is a price to put on its tab. */
+    if(d.gPactFree||d.gPactBoost)bonus+=1.0;
+    if(d.gDebt)bonus+=0.6;
     return {thr:0.8,bonus,cands,mut:(bb,i)=>{
       if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
       else bb[i].ground={cardId:id,owner:p};}};
@@ -12877,6 +13454,15 @@ function aiPlanFor(id){
       for(const s2 of d.cast)if(s2.fx==='mod'&&(s2===st||s2.who==='last'))applyModT(bb[i].teece,s2.n,s2.dur);
     }};
   }
+  /* Devil Numbers: weighed as the renumbering alone, with the 0 left off, so
+     it is cast where turning a Teece into 6/6/6/6 is already worth it. */
+  if(st.fx==='devilNumbers'){
+    const cands=[];for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return null;
+    return {thr:2.2,cands,mut:(bb,i)=>{if(bb[i].teece)bb[i].teece.base=[6,6,6,6];}};
+  }
+  /* Soul Harvest puts nothing on the board, but a SOUL is a PACT paid. */
+  if(st.fx==='soulGain')return {thr:0.8,bonus:1.0,cands:[0],mut:()=>{}};
   if(st.fx==='mass')return {thr:1.8,cands:[0],mut:(bb)=>{
     for(let i=0;i<BN;i++){
       const o=bb[i].teece;if(!o)continue;
@@ -14125,7 +14711,8 @@ function showDetail(i){
   const cd=DEF(t);
   const locked=G.detailLock===i;
   let html=(locked?'<div class="dlock">Selected</div>':'')+
-    '<div class="dn">'+nm(t)+'</div><div class="dt">'+cd.text+'</div>';
+    '<div class="dn">'+nm(t)+'</div><div class="dt">'+cd.text+'</div>'+
+    (cd.flavor?'<div class="dt" style="font-style:italic;opacity:.8">'+cd.flavor+'</div>':'');
   const un=undyLeft(t);
   if(un>0){
     const u=undyOf(t.cardId),next=(u.y||0)*((t.undyUsed||0)+1);
@@ -14304,7 +14891,8 @@ function showDetailCard(id,worn){
       (worn&&worn.length&&ps.join()!==cd.sides.join()?' &nbsp;plated, from '+sidesBlock(cd.sides):'')+
       (cd.sac?' \u00b7 sacrifice '+cd.sac:'')+(cd.def?' \u00b7 Defence '+cd.def:'')+'</div>':
       '<div class="dstats" style="color:var(--gold)">'+cd.type+'</div>')+
-    '<div class="dt">'+cd.text+'</div>';
+    '<div class="dt">'+cd.text+'</div>'+
+    (cd.flavor?'<div class="dt" style="font-style:italic;opacity:.8">'+cd.flavor+'</div>':'');
   if(worn&&worn.length){
     html+='<div class="dstats" style="color:var(--gold)">Plated, and arrives wearing:</div>';
     for(const e of worn)html+='<div class="dstats" style="font-size:11px">'+CARDS[e.cardId].name+
@@ -14367,6 +14955,27 @@ function statusesFor(p){
       ' ('+cd.text+')',
       ()=>runGraveAct(p,ent));
   }
+
+  /* --- the Devils' ledger --- */
+  if(pl.souls)push('souls','good',pl.souls+' SOUL'+(pl.souls===1?'':'S'),
+    'You hold '+pl.souls+' SOUL'+(pl.souls===1?'':'S')+'. When a PACT is offered, you may spend one instead of paying its price, and still take the reward.');
+  {const jc=debtPrison(p);
+   const owed=jc>=0?(b[jc].ground.debt||[]):[];
+   if(owed.length)push('debt','warn','Owed: '+owed.length,
+     'Soul Debtor\u2019s Prison holds '+owed.length+' price'+(owed.length===1?'':'s')+' on your tab: '+
+     owed.map(d=>d.src+' \u2014 '+d.y).join('; ')+'. When the Prison is destroyed, every one of them is paid twice.');}
+  if(pl.skipTurns)push('skip','bad','Skipping '+pl.skipTurns+' turn'+(pl.skipTurns===1?'':'s'),
+    'Infernal Bargain: your next '+(pl.skipTurns===1?'turn is':pl.skipTurns+' turns are')+' skipped.'+
+    (pl.doomFoes?' Then, as your next turn begins, every Teece your opponents control is destroyed.':''));
+  else if(pl.doomFoes)push('doomFoes','good','Their Teece fall next turn',
+    'Infernal Bargain: at the start of your next turn, every Teece your opponents control is destroyed.');
+  if(pl.doomSelf)push('doomSelf','bad','Your Teece fall next turn',
+    'Infernal Bargain: at the start of your next turn, every Teece you control is destroyed.');
+  if(pl.hellfire)push('hellfire','good','Hellfire '+sgn(pl.hellfire.n),
+    'Infernal Bargain: every Teece you control has '+sgn(pl.hellfire.n)+(pl.hellfire.kw?' and '+pl.hellfire.kw:'')+' until the start of your next turn.');
+  if(pl.nextInvuln)push('nextInvuln','good','Next '+(pl.nextInvuln===1?'Teece':pl.nextInvuln+' Teece')+' safe',
+    'The Bargain Imp\u2019s PACT: the next '+(pl.nextInvuln===1?'Teece':pl.nextInvuln+' Teece')+' you play cannot be destroyed until the end of the turn it is played.');
+  if(hexOn(p,'nomagic'))push('nomagic','bad','No magic','The Adversary\u2019s PACT: you cannot play magic until it lifts.');
 
   /* --- Curses sitting on the seat --- */
   if(hexOn(p,'freeze'))push('freeze','bad','Frozen','A Curse of Freezing is on you: no Teece may be played until it lifts.');
@@ -15008,6 +15617,8 @@ function applyDeckRules(p,key){
      than of anything in it. */
   pl.allFlying=!!dk.allFlying;
   pl.swarmWin=dk.swarmWin||null;
+  /* The Devils start the game holding a SOUL. */
+  pl.souls=dk.souls||0;
 }
 async function startInner(mode,vsAI){
   document.getElementById('startOverlay').classList.add('hidden');

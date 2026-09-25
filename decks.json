@@ -710,6 +710,41 @@
         "The two Bosses are what the swarm is for: Locust Locus costs two bodies and arms the next four Locusts with +6 Defence, and the Locust Hivemind costs four and pays every Teece you control +3 for the rest of the game, buried or not.",
         "A trodden Grasshopper leaves two 6/6/6/6 Tokens that can be sacrificed — the only spendable Tokens in the game, and half the price of the Hivemind on their own."
       ]
+    },
+    "devil": {
+      "name": "Devils",
+      "cards": [
+        865,
+        866,
+        867,
+        868,
+        869,
+        870,
+        871,
+        872,
+        873,
+        874,
+        875,
+        876,
+        877,
+        878,
+        879,
+        880,
+        881,
+        882,
+        883,
+        884
+      ],
+      "souls": 1,
+      "blurb": "Devils are evil, but lawfully. Every one of them offers you a PACT the moment it is played — a price before the semicolon, a reward after it — and it is always up to you whether to take it. Refuse and the Devil simply stands there as printed, which is already a good fighter: this is a beginner deck, big plain numbers first and bargains second. Passive: you begin the game holding a SOUL, and a SOUL can be spent to ignore the price of any PACT. Trump: Soul Debtor’s Prison lets you go wild once your SOULS run out, putting every price on its tab — but if it is ever destroyed, you pay back double what you owe.",
+      "how": [
+        "A PACT reads PRICE ; REWARD. When a Devil lands you are asked: pay the price, spend a SOUL instead, or refuse. Refusing costs nothing.",
+        "You start with one SOUL, and the chip beside the board shows how many you hold. Soul Harvest makes another every time it is cast, and comes back to your hand if you feed it an ally; Brimstone Wings pays one out when its wearer dies.",
+        "Some PACTs are free: a Devil played onto The Soul Bank, or wearing the Seal of Exemption — plate the Seal onto a Devil still in your hand and the PACT it offers on landing is already paid. The Bank also pays every Devil standing on it +1 and Teleport whenever anybody accepts a PACT.",
+        "Soul Debtor’s Prison: with no SOUL left, any price can go on its tab instead. When the Prison is destroyed, every price on it is paid twice. Whoever controls a Teece standing on it can break it on their own turn — your opponent included, so do not let them stand there.",
+        "The Infernal Contract lets a Devil offer its PACT again once a turn, and Devil Numbers renumbers any Teece to 6/6/6/6 with one side at 0 before letting an ally offer its PACT again.",
+        "Beginner Devil’s PACT throws away your hand, your whole board and your whole deck for +1. Sorry, it’s new. Take it only when something else is paying."
+      ]
     }
   },
   "formats": [
@@ -1236,6 +1271,26 @@
     861,
     862,
     863,
-    864
+    864,
+    865,
+    866,
+    867,
+    868,
+    869,
+    870,
+    871,
+    872,
+    873,
+    874,
+    875,
+    876,
+    877,
+    878,
+    879,
+    880,
+    881,
+    882,
+    883,
+    884
   ]
 }
