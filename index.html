@@ -763,7 +763,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:83,date:'2026-09-25'};
+const VERSION={build:84,date:'2026-09-25'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -947,7 +947,7 @@ const CARD_ART={
   880:["  666 666 6  ","  6  6 6 6   ","  666 0 666  ","  6 6 6 6 6  ","  666 666 0  "],
   881:["   _______   ","  /  ___  \\  "," |  / X \\  | "," |  \\___/  | ","  \\_______/  "],
   882:["   .  o  .   ","  o ( ~ ) o  ","   ( ~~~ )   ","  ~~~~~~~~~  ","   \\_____/   "],
-  883:["  _________  "," | $ SOUL$ | "," |  BANK   | "," |_|_|_|_|_| "," =========== "],
+  883:["    _____    ","   / \|/ \   ","  | --X-- |  ","  |_/_|_\_|  "," ~~~~~~~~~~~ "],
   884:[" |=|=|=|=|=| "," | | o o | | "," | | --- | | "," |=|=|=|=|=| ","  #  #  #  # "],
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
@@ -3461,13 +3461,13 @@ const CARDS = {
     ability reads everywhere else in the game: PRICE ; REWARD. The price is the
     `cost` list and the reward is the `gain` list, kept apart on the card rather
     than marked step by step, because a PACT is always the whole price or none of
-    it -- paid, skipped with a SOUL, waived by a Seal or the Soul Bank, or written
-    onto the tab at Soul Debtor's Prison to be paid twice later. offerPact is the
-    one place that asks, and every way a PACT can be offered goes through it:
-    being played, the Infernal Contract, Devil Numbers, and Infernal Bargain's
-    two printed PACTs.
+    it -- paid, skipped with a SOUL, waived by a Seal, or written onto the tab at
+    Soul Debtor's Prison to be paid twice later. offerPact is the one place that
+    asks, and every way a PACT can be offered goes through it: being played, the
+    PACT button a rejected Devil keeps, the Infernal Contract, Devil Numbers, the
+    Sacrificial Altar, and Infernal Bargain's two printed PACTs.
 
-    `devil:true` is what the Soul Bank reads, so a Devil drafted into another deck
+    `devil:true` marks the deck's own bodies, so a Devil drafted into another deck
     is still a Devil there. The SOUL the deck starts with is a rule of the DECK,
     in decks.json, the way Winged is the Locusts'. ---- */
  865:{name:'Hellbow Imp',type:'teece',devil:true,sides:[6,6,6,9],kw:['ranged'],
@@ -3562,8 +3562,11 @@ const CARDS = {
     cast:[{fx:'soulGain',n:1},{fx:'harvestBack'}],
     text:'Gain a SOUL. Then you may sacrifice an ally: if you do, this card returns to your hand.'},
  /* ---- Devil battlegrounds ---- */
- 883:{name:'The Soul Bank',type:'ground',gPactFree:true,gPactBoost:{n:1,kw:'teleport'},
-    text:'A Devil played onto this battleground does not pay the price of its PACT. Whenever any PACT is accepted, every Devil standing here gets +1 permanently and can Teleport until the end of the turn.'},
+ /* A PACT offered by the ground rather than by a card: whoever controls the
+    Teece standing here is asked at the start of their own turn. X is read off
+    the Teece before it goes, so a SOUL spent instead still pays the full X. */
+ 883:{name:'Sacrificial Altar',type:'ground',gAltar:true,
+    text:'At the start of your turn, if a Teece you control stands on this, you are offered a PACT \u2014 Sacrifice the Teece on this battleground ; select a Teece and give it +X permanently, where X is the sacrificed Teece\u2019s lowest stat.'},
  884:{name:'Soul Debtor’s Prison',type:'ground',gDebt:true,
     gact:[{name:'Break the Prison',steps:[{fx:'breakGround'}]}],
     text:'When you would pay the price of a PACT and you hold no SOUL, you may put a counter on this instead: the counter is that price, owed. When this is destroyed, every price owed on it is paid twice. On their own turn, whoever controls a Teece standing on this may destroy it.'},
@@ -3845,6 +3848,8 @@ function movePool(i,range){
 }
 const FLY_ACT={name:'Fly',once:'turn',steps:[{fx:'move',range:'step'}]};
 const TELE_ACT={name:'Teleport',once:'turn',steps:[{fx:'move',range:'tele'}]};
+/* A Devil whose PACT was rejected keeps offering it, once a turn, until taken. */
+const PACT_ACT={name:'PACT',once:'turn',steps:[{fx:'pactLater'}]};
 /* Skitter is one orthogonal space, which is what keeps it distinct from Flying:
    a flier crosses corners, a spider runs the strands. Spiders and Spiderlings
    have it while they stand on the Web, and the Skitter equip carries it off. */
@@ -5630,6 +5635,7 @@ function actsOf(b,i){
   if(t.drainMove)out.push({key:'kdrainstep',act:DRAIN_STEP_ACT});
   if(t.stepOwed>0)out.push({key:'kowedstep',act:OWED_STEP_ACT});
   if(hasKw(b,i,'teleport'))out.push({key:'ktele',act:TELE_ACT});
+  if(t.pactOpen&&!t.silenced&&d.pact)out.push({key:'kpact',act:PACT_ACT});
   if(b[i].ground&&!b[i].ground.gsil)
     for(const gd of gcards(b[i].ground))
       if(gd.gact)gd.gact.forEach((a,x)=>{if(phaseIs(a.when))out.push({key:'g'+gd.name+'_'+x,act:a});});
@@ -6175,10 +6181,11 @@ const dirTxt=d=>d==='cw'?'clockwise':'counter-clockwise';
 
      pay   -- the price runs, then the reward
      soul  -- a SOUL is spent in place of the price (not on a card that says no)
-     free  -- a Seal of Exemption, or a Devil played onto the Soul Bank
+     free  -- a Seal of Exemption
      debt  -- out of SOULS, the price goes on the tab at Soul Debtor's Prison,
               to be paid twice over the day the Prison comes down
-     no    -- nothing happens at all
+     no    -- rejected. Nothing happens now, but a Devil's PACT rejected as it
+              lands stays on it as a once-per-turn PACT button until taken
 
    A price that cannot be met is not offered, and a PACT nobody can pay for in
    any way is reported and passed over without a question. */
@@ -6186,12 +6193,9 @@ const dirTxt=d=>d==='cw'?'clockwise':'counter-clockwise';
 const ownOf=p=>{const n=pname(p);return n==='You'?'your':n+"'s";};
 const whoIn=p=>{const n=pname(p);return n==='You'?'you':n;};
 const pactOf=t=>(t&&!t.silenced&&DEF(t).pact)||null;
-function pactFreeWhy(b,t,played){
+function pactFreeWhy(b,t){
   if(!t)return null;
   for(const e of t.equips){const g=eqG(e);if(g&&g.pactFree)return CARDS[e.cardId].name;}
-  const c=b.findIndex(x=>x.teece===t);
-  if(played&&c>=0&&DEF(t).devil&&b[c].ground&&!b[c].ground.gsil)
-    for(const gd of gcards(b[c].ground))if(gd.gPactFree)return gd.name;
   return null;
 }
 /* The Prison a seat may run a tab at: its own, anywhere on the board. */
@@ -6230,15 +6234,15 @@ function aiPactPick(p,pk,opts){
 async function offerPact(p,pk,o){
   if(!pk||G.over)return 'NONE';
   const b=G.board,pl=G.players[p],t=o.t||null;
-  const free=pactFreeWhy(b,t,o.played);
+  const free=pactFreeWhy(b,t);
   const short=pactShort(p,t,pk);
   const souls=pl.souls||0;
   const jail=debtPrison(p);
   const opts=[];
   if(free)opts.push({v:'free',lbl:'Accept — '+free+' pays the price'});
   else{
-    if(!short.length)opts.push({v:'pay',lbl:'Accept, and '+pk.y});
-    if(souls>0&&!pk.noSoul)opts.push({v:'soul',lbl:'Accept, and spend a SOUL instead ('+souls+' held)'});
+    if(!short.length)opts.push({v:'pay',lbl:'Accept PACT: '+pk.y});
+    if(souls>0&&!pk.noSoul)opts.push({v:'soul',lbl:'Pay with a SOUL ('+souls+' held)'});
     if(souls<=0&&jail>=0)opts.push({v:'debt',lbl:'Accept, and owe the price to Soul Debtor’s Prison'});
   }
   const cap=x=>x.charAt(0).toUpperCase()+x.slice(1);
@@ -6248,11 +6252,12 @@ async function offerPact(p,pk,o){
     log(m);toast(m);
     return 'NONE';
   }
-  opts.push({v:'no',lbl:'Refuse'});
+  opts.push({v:'no',lbl:o.later?'Reject PACT \u2014 it stays on the Devil, once per turn':'Reject PACT'});
   const ch=isAIP(p)?aiPactPick(p,pk,opts)
     :await chooseOption(p,opts,'PACT — '+o.src+': '+cap(pk.y)+' ; '+pk.z+'.');
   if(ch==null||ch==='no'||ch==='CANCEL'){
-    log(pname(p)+' '+vb(p,'refuses','refuse')+' the PACT of '+o.src+'.');
+    log(pname(p)+' '+vb(p,'rejects','reject')+' the PACT of '+o.src+
+      (o.later?', which stays on the Devil to be taken once per turn.':'.'));
     return 'NONE';
   }
   const cellOf=()=>{const c=t?b.findIndex(x=>x.teece===t):-1;return c>=0?c:null;};
@@ -6292,14 +6297,7 @@ function pactAccepted(){
       if(op.kw&&w.kwTemp.indexOf(op.kw)<0)w.kwTemp.push(op.kw);
       log(nm(w)+' feeds on the bargain: '+sgn(op.n)+' permanently'+(op.kw?', and '+op.kw+' until the end of the turn':'')+'.');
     }
-    if(DEF(w).devil&&b[i].ground&&!b[i].ground.gsil){
-      for(const gd of gcards(b[i].ground)){
-        const gb=gd.gPactBoost;if(!gb)continue;
-        applyModT(w,gb.n,'perm');
-        if(gb.kw&&w.kwTemp.indexOf(gb.kw)<0)w.kwTemp.push(gb.kw);
-        log(nm(w)+' draws interest from '+gd.name+': '+sgn(gb.n)+' permanently'+(gb.kw?', and '+gb.kw+' until the end of the turn':'')+'.');
-      }
-    }
+
   }
 }
 /* The Prison comes down and every price written on its tab is paid, twice, by
@@ -6319,6 +6317,23 @@ async function payDebt(g){
       await runSteps(d.cost,{p:d.p,cell:c>=0?c:null,t:c>=0?b[c].teece:null,first:false,noModal:true});
       if(G.over)return;
     }
+  }
+}
+/* The Sacrificial Altar asks each of this seat's Teece standing on one. Walked
+   as a list taken first, because the first answer can change the board. */
+async function altarOffers(p){
+  const b=G.board,asks=[];
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(t&&t.owner===p&&groundFlag(b[i].ground,'gAltar'))asks.push({t,name:gcards(b[i].ground).find(gd=>gd.gAltar).name});
+  }
+  for(const a of asks){
+    const i=b.findIndex(c=>c.teece===a.t);
+    if(i<0||!groundFlag(b[i].ground,'gAltar'))continue;
+    const x=Math.max(0,Math.min(...effSides(b,i)));
+    await offerPact(p,{y:'sacrifice '+nm(a.t),z:'select a Teece and give it +'+x+' permanently',ai:x>=4?'take':'never',
+      cost:[{fx:'sacSelf'}],gain:[{fx:'altarBoost',n:x}]},{t:a.t,src:a.name});
+    if(G.over)return;
   }
 }
 /* What the Devils leave waiting for the start of a seat's turn. */
@@ -8324,7 +8339,27 @@ async function FXRUN(st,ctx){
   case 'pact':{
     const t=ctx.t;
     if(!t||!DEF(t).pact)return none('There is no PACT here.');
-    return await offerPact(p,DEF(t).pact,{t,src:DEF(t).name,played:!!ctx.fromHand});}
+    /* Rejected, the PACT is not gone: it stays on the Devil as a once-per-turn
+       ability until it is taken. Taking it closes it. */
+    const r=await offerPact(p,DEF(t).pact,{t,src:DEF(t).name,later:true});
+    if(r==='NONE'&&!G.over&&G.board.some(c=>c.teece===t))t.pactOpen=true;
+    return r;}
+  case 'pactLater':{
+    const t=ctx.t,pk=pactOf(t);
+    if(!pk||!t.pactOpen)return none('There is no PACT left open here.');
+    const r=await offerPact(p,pk,{t,src:DEF(t).name,later:true});
+    if(r!=='NONE')t.pactOpen=false;
+    return r;}
+  case 'altarBoost':{
+    const cands=[];for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return none('There is no Teece left to give +'+st.n+' to.');
+    const c=await pickCell(cands,'Choose a Teece: it gets +'+st.n+' permanently.',
+      (bb,i)=>{applyModT(bb[i].teece,st.n,'perm');},false);
+    if(c==='CANCEL'||c==null)return;
+    applyModT(b[c].teece,st.n,'perm');
+    log(nm(b[c].teece)+' gets '+sgn(st.n)+' permanently.');
+    await anim([c],'zap');
+    return;}
   /* The Infernal Contract offers the same PACT again. Refusing it is doing
      nothing, so the charge is kept. */
   case 'pactAgain':{
@@ -13003,6 +13038,8 @@ async function startTurn(){
     const n=(DEF(t).startGrow||0)+(t.growMore||0);
     if(n){applyModT(t,n,'perm');log(nm(t)+' collects its interest: '+sgn(n)+'.');}
   }
+  await altarOffers(p);
+  if(stale(ep)||G.over)return;
   /* Wet Cardboard sags at the start of EVERY turn, whoever is taking it, so
      this runs over the whole board rather than over one seat's Teece. */
   for(let i=0;i<BN;i++){
@@ -13427,9 +13464,9 @@ function aiPlanFor(id){
        holds a stun on whatever stands there. Neither shows on an empty board. */
     if(d.gDestroyOnMove)bonus+=1.2;
     if(d.gStun)bonus+=1.2;
-    /* The Soul Bank pays nothing until a Devil is played onto it, and the
+    /* The Altar pays nothing until something has stood on it a turn, and the
        Prison nothing until there is a price to put on its tab. */
-    if(d.gPactFree||d.gPactBoost)bonus+=1.0;
+    if(d.gAltar)bonus+=0.6;
     if(d.gDebt)bonus+=0.6;
     return {thr:0.8,bonus,cands,mut:(bb,i)=>{
       if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
