@@ -768,7 +768,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:87,date:'2026-09-26'};
+const VERSION={build:88,date:'2026-09-26'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3632,8 +3632,8 @@ const CARDS = {
     text:'The Runeblade itself, standing on the field as an 8/8/8/8 Teece with Flying. When it is destroyed the Runeblade goes to your graveyard, and returning it to your hand lifts it off the field. It is the sword, not a warrior: it never counts toward holding the field.'},
  886:{name:'Sigil-Sworn Warrior',type:'teece',sides:[5,5,5,5],bonus:{when:'rune',n:4},
     text:'While wielding the Runeblade: +4.'},
- 887:{name:'Runeblade Elder',type:'teece',sides:[1,2,2,3],bonus:{when:'rune',n:9},
-    text:'While wielding the Runeblade: +9.'},
+ 887:{name:'Runeblade Elder',type:'teece',sides:[1,2,2,3],bonus:{when:'rune',n:8},
+    text:'While wielding the Runeblade: +8.'},
  888:{name:'Sigil Hurler',type:'teece',sides:[6,6,9,7],kwWhen:{when:'rune',kw:['ranged']},
     text:'While wielding the Runeblade: Ranged.'},
  889:{name:'Skyleap Raider',type:'teece',sides:[6,7,6,6],kwWhen:{when:'rune',kw:['flying']},
@@ -5109,10 +5109,17 @@ function formationCount(b,i,bo){
     for(let j=0;j<BN;j++)if(mate(j))return 0;
     return 1;
   }
-  /* The Runeblade tribe: holding the sword, or anybody anywhere holding it. */
-  if(bo.when==='rune')return wieldsRune(t)?1:0;
+  /* The Runeblade tribe: holding the sword, the sword itself on the field, or anybody anywhere holding it. */
+  if(bo.when==='rune'){
+    if(wieldsRune(t))return 1;
+    for(let j=0;j<BN;j++)if(isRuneForm(b[j].teece)&&b[j].teece.baseOwner===t.owner)return 1;
+    return 0;
+  }
   if(bo.when==='runeAny'){
-    for(let j=0;j<BN;j++)if(b[j].teece&&wieldsRune(b[j].teece))return 1;
+    for(let j=0;j<BN;j++){
+      const o=b[j].teece;
+      if(o&&(wieldsRune(o)||(isRuneForm(o)&&sameTeam(o.baseOwner,0))))return 1;
+    }
     return 0;
   }
   return 0;
@@ -5277,8 +5284,11 @@ function effSides(b,i,parts){
       if(eo)addMod(s,ed.modPerOwn*eo,ed.name+', for each of the '+eo+' Teece its wearer controls');
     }
     if(ed.modPerAge)addMod(s,ed.modPerAge*(t.age||0),ed.name+', per turn stood');
-    /* Runebladeblade pays only beside the sword; the Chosen rides on the sword. */
-    if(ed.modIfRune&&wieldsRune(t))addMod(s,ed.modIfRune,ed.name+', worn with the Runeblade');
+    /* Runebladeblade pays when the Teece holds the sword or the sword is on the field; the Chosen rides on the sword. */
+    if(ed.modIfRune){
+      const hasRune=wieldsRune(t)||b.some(c=>isRuneForm(c.teece)&&c.teece.baseOwner===t.owner);
+      if(hasRune)addMod(s,ed.modIfRune,ed.name+', worn with the Runeblade');
+    }
     if(e.chosen)addMod(s,2,'The Runeblade\u2019s Chosen');
     /* aXe and swOrd are dead weight on the wrong letter. */
     if(ed.modIfMark&&markOfCard(DEF(t)).indexOf(ed.modIfMark.letter)>=0)
@@ -9151,8 +9161,13 @@ async function FXRUN(st,ctx){
     return;}
   case 'bladerang':{
     const cands=[];
-    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.equips.some(e=>isRuneEq(e)&&e.owner===p)&&ADJ[i].length)cands.push(i);}
-    if(!cands.length){const m='No Teece is holding a Runeblade of yours to throw.';log(m);toast(m);return 'ABORT';}
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      const holdsRune=t&&t.equips.some(e=>isRuneEq(e)&&e.owner===p);
+      const isRune=isRuneForm(t)&&t.baseOwner===p;
+      if((holdsRune||isRune)&&ADJ[i].length)cands.push(i);
+    }
+    if(!cands.length){const m='No Runeblade of yours is on the field to throw.';log(m);toast(m);return 'ABORT';}
     const c=await pickCell(cands,'Choose the Teece that throws the Runeblade.',
       (bb,i)=>{const k=bestThrow(bb,i,p);if(k!=null)throwRune(bb,i,k,p,false);},false);
     if(c==='CANCEL')return 'ABORT';
@@ -14292,7 +14307,9 @@ function aiPlanFor(id){
     const cands=[];
     for(let i=0;i<BN;i++){
       const t=b[i].teece;
-      if(!t||!t.equips.some(e=>isRuneEq(e)&&e.owner===p))continue;
+      const holdsRune=t&&t.equips.some(e=>isRuneEq(e)&&e.owner===p);
+      const isRune=isRuneForm(t)&&t.baseOwner===p;
+      if(!(holdsRune||isRune))continue;
       for(let k=0;k<4;k++)if(sideNbr(i,k)>=0)cands.push({i,k});
     }
     if(!cands.length)return null;
