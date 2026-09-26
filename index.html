@@ -768,7 +768,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:89,date:'2026-09-26'};
+const VERSION={build:90,date:'2026-09-26'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3650,8 +3650,8 @@ const CARDS = {
     onPlay:[{fx:'runeForm'}],
     text:'When played: you can summon the Runeblade anywhere as an 8/8/8/8 Teece with Flying.'},
  893:{name:'Grudgebearer',type:'teece',sides:[7,7,7,6],
-    onPlay:[{fx:'runeShackle',stun:true}],
-    text:'When played: you can equip the Runeblade to the Teece that destroyed it. That Teece is stunned for as long as the Runeblade is equipped to it.'},
+    onDeath:[{fx:'runeShackle',stun:true}],
+    text:'When destroyed: you can equip the Runeblade to the Teece that destroyed it. That Teece is stunned for as long as the Runeblade is equipped to it.'},
  894:{name:'Bladeless Exile',type:'teece',sides:[9,10,5,10],bonus:{when:'runeAny',n:-5},
     text:'While any Teece is equipped with the Runeblade: -5.'},
  895:{name:'Blade-Sworn Squire',type:'teece',sides:[3,3,3,3],runeGuard:true,
