@@ -172,6 +172,9 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="devil"],.dcard[data-card-deck="devil"]{--cardbg:#5a0f14;--artink:#ffd6c4;background:var(--cardbg);color:#f8e2d9;border-color:#2c0508}
 .card[data-card-deck="devil"] .kwl,.dcard[data-card-deck="devil"] .dkw{color:#ff9a4a}
 .card[data-card-deck="devil"] .ct,.dcard[data-card-deck="devil"] .dty{color:#ff9a4a}
+.card[data-card-deck="runeblade"],.dcard[data-card-deck="runeblade"]{--cardbg:#1c3547;--artink:#d6efff;background:var(--cardbg);color:#e2f0f8;border-color:#0b1a24}
+.card[data-card-deck="runeblade"] .kwl,.dcard[data-card-deck="runeblade"] .dkw{color:#8fdcff}
+.card[data-card-deck="runeblade"] .ct,.dcard[data-card-deck="runeblade"] .dty{color:#8fdcff}
 
 .card[data-card-deck]::after,.dcard[data-card-deck]::after{position:absolute;top:2px;right:3px;font-size:11px;line-height:1;opacity:.85;z-index:1}
 .card[data-card-deck="classic"]::after,.dcard[data-card-deck="classic"]::after{content:'🂡'}
@@ -199,6 +202,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card[data-card-deck="rats"]::after,.dcard[data-card-deck="rats"]::after{content:'🐀'}
 .card[data-card-deck="locust"]::after,.dcard[data-card-deck="locust"]::after{content:'🦗'}
 .card[data-card-deck="devil"]::after,.dcard[data-card-deck="devil"]::after{content:'😈'}
+.card[data-card-deck="runeblade"]::after,.dcard[data-card-deck="runeblade"]::after{content:'🗡️'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -224,6 +228,7 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece[data-card-deck="rats"]{--cardbg:#3d3a32;--artink:#e9e4d4;background:var(--cardbg);color:#e7e2d3;border-color:#211f1a}
 .teece[data-card-deck="locust"]{--cardbg:#4a4318;--artink:#f8f2cd;background:var(--cardbg);color:#f3edc9;border-color:#292507}
 .teece[data-card-deck="devil"]{--cardbg:#5a0f14;--artink:#ffd6c4;background:var(--cardbg);color:#f8e2d9;border-color:#2c0508}
+.teece[data-card-deck="runeblade"]{--cardbg:#1c3547;--artink:#d6efff;background:var(--cardbg);color:#e2f0f8;border-color:#0b1a24}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -763,7 +768,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:84,date:'2026-09-25'};
+const VERSION={build:85,date:'2026-09-26'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -879,7 +884,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -949,6 +954,29 @@ const CARD_ART={
   882:["   .  o  .   ","  o ( ~ ) o  ","   ( ~~~ )   ","  ~~~~~~~~~  ","   \\_____/   "],
   883:["    _____    ","   / \|/ \   ","  | --X-- |  ","  |_/_|_\_|  "," ~~~~~~~~~~~ "],
   884:[" |=|=|=|=|=| "," | | o o | | "," | | --- | | "," |=|=|=|=|=| ","  #  #  #  # "],
+  /* ---- Runeblade: one sword, and the tribe that carries it ---- */
+  885:["      ^      ","     |*|     ","     |R|     ","   =={+}==   ","      I      "],
+  'TRUNEB':["  \\   ^   /  ","   \\ |*| /   ","  ==|R|==    ","    {+}      ","  ~~ I ~~    "],
+  886:["    (o_o)    ","   --|+|--/  ","     |=|/    ","     / \\     ","    sworn    "],
+  887:["    .---.    ","   ( -.- )   ","    \\vvv/    ","   /|WWW|\\   ","    _/ \\_    "],
+  888:["   o    >>-- ","  /|\\_/      ","   |         ","  / \\        "," ~~~~~~~~~~~ "],
+  889:["  \\  o  /    ","   \\/|\\/     ","    / \\      ","   /   \\     ","  ~ ~ ~ ~    "],
+  890:["    .-^-.    ","   ( o o )   ","    ( - )    ","   /|shh|\\   ","    ~   ~    "],
+  891:["   o    |    ","  /|\\-=+=-   ","   |    |    ","  / \\   |    ","   keeper    "],
+  892:["  *  ^  *    ","   * | *     ","    \\|/      ","   ( o )     ","   /| |\\     "],
+  893:["   >___<     ","  ( >.< )    ","  -o=o=o-    ","   |   |     ","  grudge     "],
+  894:["   _____     ","  ( ._. )    ","  /|   |\\    "," o |   | o   ","   /   \\     "],
+  895:["    o        ","   /|[#]     ","   / \\       ","  ->  <-     ","  squire     "],
+  896:["  \\_   _/    ","   (o o)     ","  /|=W=|\\    ","   | | |     ","   _/ \\_     "],
+  897:["    _T_      ","   ( o )     ","  __/|\\__    "," |=ANVIL=|   ","   /___\\     "],
+  898:["  .--->      "," /  ^        ","|  |R|       "," \\  v        ","  <---'      "],
+  899:["  )  (  )    "," ( )( )( )   ","  \\/\\/\\/\\/   "," =RAGNAROK=  "," ~~~~~~~~~~  "],
+  900:["   /\\/\\/\\    ","   |_____|   ","     |R|     ","   =={+}==   ","      I      "],
+  901:["   ^    ^    ","  |R|  |R|   ","  |R|  |R|   "," ={+}=={+}=  ","   I    I    "],
+  902:["      ?      ","     /|      ","    |~|      ","   ={+}=     ","     I   ~   "],
+  903:["      ^      ","     |.|     ","     |:|     ","   =={o}==   ","   decoy     "],
+  904:["      |      ","     |R|     ","   ={+}=     ","  /#####\\    "," /#######\\   "],
+  905:["   _/^\\_     ","  |((*))|    ","  | ^^^ |    ","  |_____|    ","  o o o      "],
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
   541:["  \\  .-.  /  ", "   \\( o )/   ", "    (/|\\)    ", "    _/ \\_    ", "   [$]  ...  "],
@@ -1596,9 +1624,21 @@ function canPlay(p,cardId){
       const t=G.board[i].teece;
       if(t&&t.owner===p&&(!cd.onlyToken||t.isToken))return true;
     }
+    if(cd.runeblade&&sheathSpots(p).length)return true;
     return false;
   }
   return true;
+}
+/* Runestones a seat may set a Runeblade in: its own side's, and empty of one. */
+function sheathSpots(p){
+  const out=[],b=G.board,seen=[];
+  for(let i=0;i<BN;i++){
+    const g=b[i].ground;
+    if(!g||seen.indexOf(g)>=0||!groundFlag(g,'gSheath')||!sameTeam(g.owner,p))continue;
+    seen.push(g);
+    if(!(g.sheath&&g.sheath.length))out.push(i);
+  }
+  return out;
 }
 
 /* fx vocabulary:
@@ -3570,6 +3610,83 @@ const CARDS = {
  884:{name:'Soul Debtor’s Prison',type:'ground',gDebt:true,
     gact:[{name:'Break the Prison',steps:[{fx:'breakGround'}]}],
     text:'When you would pay the price of a PACT and you hold no SOUL, you may put a counter on this instead: the counter is that price, owed. When this is destroyed, every price owed on it is paid twice. On their own turn, whoever controls a Teece standing on this may destroy it.'},
+ /* ---- Runeblade: a nomad tribe of the far north, and the one sword its whole
+    culture is built around.
+
+    The Runeblade is a single equip card, and the deck starts the game holding
+    it -- `startHand` in decks.json, a rule of the DECK the way the Devils' SOUL
+    is. Everything else in the deck asks one question of a Teece: is it
+    wielding the Runeblade? wieldsRune answers it, off the equips alone, so an
+    aura, a keyword, a bonus and a battleground all mean the same thing by it.
+    `runeblade` marks the sword itself; `asRuneblade` is the Blade That's Close
+    Enough, which counts as it for everything that reads the field.
+
+    The sword is never lost for long. Once a turn it comes back to its owner's
+    hand from wherever it is -- worn by anybody, set in a Runestone, standing on
+    the field as a Teece, or lying in the graveyard or the deck -- and every
+    one of those places is read by runeSpots and emptied by takeRune, so a card
+    that moves the sword never has to know where it was. ---- */
+ 885:{name:'Runeblade',type:'equip',mod:0,runeblade:true,deck:'runeblade',
+    text:'Once a turn: return this to your hand. Activate this effect from anywhere — worn by any Teece, set in a Runestone, standing on the field as a Teece, or lying in your graveyard or your deck.'},
+ 'TRUNEB':{name:'The Runeblade',type:'teece',token:true,deck:'runeblade',runeCard:885,sacOK:true,sides:[8,8,8,8],kw:['flying'],
+    text:'The Runeblade itself, standing on the field as an 8/8/8/8 Teece with Flying. When it is destroyed the Runeblade goes to your graveyard, and returning it to your hand lifts it off the field. It is the sword, not a warrior: it never counts toward holding the field.'},
+ 886:{name:'Sigil-Sworn Warrior',type:'teece',sides:[5,5,5,5],bonus:{when:'rune',n:4},
+    text:'While wielding the Runeblade: +4.'},
+ 887:{name:'Runeblade Elder',type:'teece',sides:[1,2,2,3],bonus:{when:'rune',n:9},
+    text:'While wielding the Runeblade: +9.'},
+ 888:{name:'Sigil Hurler',type:'teece',sides:[6,6,9,7],kwWhen:{when:'rune',kw:['ranged']},
+    text:'While wielding the Runeblade: Ranged.'},
+ 889:{name:'Skyleap Raider',type:'teece',sides:[6,7,6,6],kwWhen:{when:'rune',kw:['flying']},
+    text:'While wielding the Runeblade: Flying.'},
+ /* The -2 is an aura and lifts the moment the enemy is no longer beside it. The
+    silence is laid on as the enemy is found there, and like every other silence
+    in the game it is not given back by walking away. */
+ 890:{name:'Hush-Seer',type:'teece',sides:[3,5,6,3],aura:{who:'enemy',where:'adj',n:-2,needRune:true,silence:true},
+    text:'While wielding the Runeblade: adjacent enemies have -2 and are silenced.'},
+ 891:{name:'Keeper of the Blade',type:'teece',sides:[7,6,7,8],
+    act:[{name:'Call the Runeblade',once:'turn',steps:[{fx:'runeRecall',extra:true}]}],
+    text:'Once a turn: add the Runeblade back to your hand, from wherever it is.'},
+ 892:{name:'Blade-Waker',type:'teece',sides:[3,7,7,7],
+    onPlay:[{fx:'runeForm'}],
+    text:'When played: you can summon the Runeblade anywhere as an 8/8/8/8 Teece with Flying.'},
+ 893:{name:'Grudgebearer',type:'teece',sides:[7,7,7,6],
+    onPlay:[{fx:'runeShackle',stun:true}],
+    text:'When played: you can equip the Runeblade to the Teece that destroyed it. That Teece is stunned for as long as the Runeblade is equipped to it.'},
+ 894:{name:'Bladeless Exile',type:'teece',sides:[9,10,5,10],bonus:{when:'runeAny',n:-5},
+    text:'While any Teece is equipped with the Runeblade: -5.'},
+ 895:{name:'Blade-Sworn Squire',type:'teece',sides:[3,3,3,3],runeGuard:true,
+    text:'If this is about to be destroyed while it is equipped with the Runeblade: destroy the Runeblade instead and move this one space. Then this cannot be destroyed until the end of your next turn.'},
+ 896:{name:'Tribal Chieftain',type:'teece',sides:[9,9,9,9],sac:1,
+    aura:{who:'ally',where:'global',n:2,runeOnly:true,includeSelf:true},
+    text:'Sacrifice one fielded Teece to play. The ally that wields the Runeblade has +2.'},
+ 897:{name:'The Ancestor-Smith',type:'teece',sides:[12,12,12,12],sac:2,
+    onPlay:[{fx:'runeCreate'}],
+    text:'Sacrifice two fielded Teece to play. When played: create a second Runeblade and equip it to this. It works exactly like the first.'},
+ /* ---- Runeblade magic ---- */
+ 898:{name:'Bladerang',type:'magic',
+    cast:[{fx:'bladerang'}],
+    text:'Select a Teece equipped with the Runeblade and choose a direction: up, down, left or right. The Runeblade is thrown that way, passing through every enemy in its path and giving each -4. If it strikes an ally it stops, and is equipped to that ally, who gets +4. If it strikes no ally, it comes back to the Teece that threw it.'},
+ 899:{name:'Ragnarok',type:'magic',
+    cast:[{fx:'ragnarok'}],
+    text:'Choose a modality.\n— Apocalypse: silence the Runeblade and destroy it and the Teece it is equipped to, then select two Teece and destroy them. That Runeblade never returns.\n— Triumph: the next Teece played with the Runeblade has +5 and Flying until the end of the turn.'},
+ 900:{name:'The Runeblade’s Chosen',type:'magic',
+    cast:[{fx:'runeChosen'}],
+    text:'Select a Teece equipped with the Runeblade. Until the Runeblade leaves the field, it gains: “The equipped Teece is invulnerable, has +2 and has Flying.”'},
+ /* ---- Runeblade equips ---- */
+ /* Soft hyphens: one fourteen-letter word is wider than a card in hand, and
+    it may only break where the sword's name does. */
+ 901:{name:'Rune\u00ADblade\u00ADblade',type:'equip',mod:0,modIfRune:4,
+    text:'The equipped Teece has +4 while it is also equipped with the Runeblade.'},
+ 902:{name:'Blade That’s Close Enough To The Runeblade',type:'equip',mod:0,asRuneblade:true,
+    grants:{onKill:{steps:[{fx:'stunPick',stun:true}],foeOnly:true}},
+    text:'Treat this as the Runeblade while it is on the field. When the equipped Teece destroys an enemy, you can select another enemy: stun it.'},
+ 903:{name:'Decoy Runeblade',type:'equip',mod:1,grants:{decoy:true},
+    text:'The equipped Teece has +1. If the Runeblade, or a Teece of yours equipped with the Runeblade, would be destroyed: you can destroy this instead, and the Runeblade and the Teece equipped with it cannot be destroyed until the end of your next turn.'},
+ /* ---- Runeblade battlegrounds ---- */
+ 904:{name:'Runestone',type:'ground',gSheath:true,gRuneStone:{n:3,held:-3},
+    text:'You can equip the Runeblade to this battleground: play it from your hand onto this panel. A Teece on this battleground has +3 — or -3 instead, while the Runeblade is set in it.'},
+ 905:{name:'Barrow Forge',type:'ground',gRuneForge:3,
+    text:'When a Teece equipped with the Runeblade is destroyed on this battleground, put a counter on it. Remove 3 counters from this battleground: forge another Runeblade into your hand. It works exactly like the original.'},
 };
 const DEF=t=>CARDS[t.cardId];
 /* What an equip actually grants, once the modality it was bolted on with is
@@ -3586,7 +3703,8 @@ function eqG(e){
    says which half of itself is awake. */
 function eqLabel(e){
   const n=CARDS[e.cardId].name;
-  return e.mode?n+' \u2014 '+e.mode.charAt(0).toUpperCase()+e.mode.slice(1):n;
+  const l=e.mode?n+' \u2014 '+e.mode.charAt(0).toUpperCase()+e.mode.slice(1):n;
+  return l+(e.chosen?' (Chosen)':'')+(e.shackle?' (binding its wearer)':'');
 }
 const isBossCard=id=>(CARDS[id].sac||0)>=2;
 /* "Until the end of your next turn" outlives temp, which endTurn empties every
@@ -3786,6 +3904,7 @@ function invulnText(b,i){
       : 'the start of '+(pname(t.immortalOwner)==='You'?'your':pname(t.immortalOwner)+"'s")+' next turn';
     return 'Cannot be destroyed until '+until+'.';
   }
+  if(runeGuarded(t))return 'Cannot be destroyed: it holds the Runeblade\u2019s Chosen, for as long as that sword stays on the field.';
   if(blessedOn(b,i))return 'Cannot be destroyed: it is blessed, standing with an ally, '+
     'and its side outnumbers every other. It becomes destructible again the moment any of that stops being true.';
   return '';
@@ -4990,6 +5109,12 @@ function formationCount(b,i,bo){
     for(let j=0;j<BN;j++)if(mate(j))return 0;
     return 1;
   }
+  /* The Runeblade tribe: holding the sword, or anybody anywhere holding it. */
+  if(bo.when==='rune')return wieldsRune(t)?1:0;
+  if(bo.when==='runeAny'){
+    for(let j=0;j<BN;j++)if(b[j].teece&&wieldsRune(b[j].teece))return 1;
+    return 0;
+  }
   return 0;
 }
 function formationLabel(bo){
@@ -4998,6 +5123,8 @@ function formationLabel(bo){
   if(bo.when==='line')return 'In line with an ally';
   if(bo.when==='corners')return 'Holding the corners together';
   if(bo.when==='soloMid')return 'Alone on the middle panel';
+  if(bo.when==='rune')return 'Wielding the Runeblade';
+  if(bo.when==='runeAny')return 'A Teece on the field holds the Runeblade';
   return 'Formation';
 }
 /* The formation bonuses on the Teece at i: its own, and any an equip lends it.
@@ -5150,6 +5277,9 @@ function effSides(b,i,parts){
       if(eo)addMod(s,ed.modPerOwn*eo,ed.name+', for each of the '+eo+' Teece its wearer controls');
     }
     if(ed.modPerAge)addMod(s,ed.modPerAge*(t.age||0),ed.name+', per turn stood');
+    /* Runebladeblade pays only beside the sword; the Chosen rides on the sword. */
+    if(ed.modIfRune&&wieldsRune(t))addMod(s,ed.modIfRune,ed.name+', worn with the Runeblade');
+    if(e.chosen)addMod(s,2,'The Runeblade\u2019s Chosen');
     /* aXe and swOrd are dead weight on the wrong letter. */
     if(ed.modIfMark&&markOfCard(DEF(t)).indexOf(ed.modIfMark.letter)>=0)
       addMod(s,ed.modIfMark.n,ed.name+', in the hands of '+(ed.modIfMark.letter==='X'?'an X':'an O'));
@@ -5233,6 +5363,12 @@ function effSides(b,i,parts){
          anywhere else -- drops the bonus with no bookkeeping of its own. */
       if(gd.gPlayHold&&t.standCell===gi)addGround(s,gd.gPlayHold,gd.name+', for the panel it was played onto');
       if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addGround(s,gd.gRangedPlus,gd.name+', for being Ranged');
+      /* The Runestone pays whoever stands on it, and charges them instead while
+         the Runeblade is set in it. */
+      if(gd.gRuneStone){
+        const held=!!(gg.sheath&&gg.sheath.length);
+        addGround(s,held?gd.gRuneStone.held:gd.gRuneStone.n,gd.name+(held?', with the Runeblade set in it':'')+where);
+      }
       /* The Dumpster pays for what is packed into it, and the Patch for a row
          held end to end. */
       if(gd.gHeldPer&&gg.held&&gg.held.length)
@@ -5309,6 +5445,9 @@ function effSides(b,i,parts){
       if(a.tokenOnly&&!t.isToken)continue;
       if(a.pixieOnly&&!DEF(t).pixie)continue;
       if(a.markOnly&&markOfCard(DEF(t)).indexOf(a.markOnly)<0)continue;
+      /* needRune is the source holding the sword; runeOnly is the receiver. */
+      if(a.needRune&&!wieldsRune(o))continue;
+      if(a.runeOnly&&!wieldsRune(t))continue;
       const amt0=a.byDef?defOf(b,i):a.n;
       const amt=(selfDbl&&amt0>0)?amt0*2:amt0;
       for(let k=0;k<4;k++)s[k]+=amt;
@@ -5375,6 +5514,7 @@ function groundGives(b,i){
     for(const gd of gcards(gg)){
       add(gd.gmod);
       if(gd.gPerGround)add(gd.gPerGround*countGrounds(b));
+      if(gd.gRuneStone)add((gg.sheath&&gg.sheath.length)?gd.gRuneStone.held:gd.gRuneStone.n);
       for(const pm of (gd.gPhaseMod||[]))if(!pm.who&&phaseIs(pm.when))add(pm.n);
     }
   }
@@ -5415,7 +5555,8 @@ function auraGives(b,i,p){
     for(const e of o.equips){const g=eqG(e);if(g&&g.aura)auras.push(g.aura);}
     for(const a of auras){
       if(!phaseIs(a.when))continue;
-      if(a.tokenOnly||a.pixieOnly||a.markOnly||a.byDef)continue;
+      if(a.tokenOnly||a.pixieOnly||a.markOnly||a.byDef||a.runeOnly)continue;
+      if(a.needRune&&!wieldsRune(o))continue;
       const ally=sameTeam(o.owner,p);
       if(a.who==='ally'&&!ally)continue;
       if(a.who==='enemy'&&ally)continue;
@@ -5567,6 +5708,7 @@ function kwOf(b,i,noGround){
     const g=eqG(e);
     if(g&&g.kw)ks.push(...g.kw);
     if(g&&g.kwWhen){const kw=phasePick(g.kwWhen);if(kw)ks.push(...kw);}
+    if(e.chosen)ks.push('flying');
   }
   if(b[i].ground&&!noGround&&!b[i].ground.gsil)
     for(const gd of gcards(b[i].ground))if(gd.gkw)ks.push(...gd.gkw);
@@ -5585,6 +5727,7 @@ function kwOf(b,i,noGround){
     for(const a of kauras)
       if((j!==i||a.includeSelf)&&
          a.kw&&auraWho(a,sameTeam(o.owner,t.owner))&&auraReaches(b,j,i,a)&&
+         (!a.needRune||wieldsRune(o))&&(!a.runeOnly||wieldsRune(t))&&
          (!a.markOnly||markOfCard(d).indexOf(a.markOnly)>=0))ks.push(...a.kw);
     if(j===i)continue;
     /* an enemy spider holds everything caught in the Web still */
@@ -5966,7 +6109,7 @@ function scanDeaths(b){
   };
   const mark=(vi,ki)=>{const v=b[vi].teece;if(!dead[vi])dead[vi]={cell:vi,t:v,killers:[]};
     if(ki!=null&&dead[vi].killers.indexOf(b[ki].teece.uid)<0)dead[vi].killers.push(b[ki].teece.uid);};
-  const immune=i=>b[i].teece&&(b[i].teece.immortalOwner!=null||blessedOn(b,i));
+  const immune=i=>b[i].teece&&(b[i].teece.immortalOwner!=null||runeGuarded(b[i].teece)||blessedOn(b,i));
   /* Harbinger of War: while it stands, nobody has allies. Every pairing on the
      board is a fight, its own side included -- and it is standing in the middle
      of that board itself. */
@@ -6362,6 +6505,361 @@ async function pactsComeDue(p){
   if(pl.doomFoes&&!(pl.skipTurns>0)){
     pl.doomFoes=false;
     await doom(o=>!sameTeam(o.owner,p),'The bargain comes due: every Teece '+ownOf(p)+' opponents control is destroyed.');
+  }
+}
+/* ============ Runeblade ============
+   One sword, and a whole tribe that reads it. A Teece "wields the Runeblade"
+   when it is wearing one -- the sword itself, a second one somebody forged, or
+   the Blade That's Close Enough, which counts as it while it is on the field.
+   wieldsRune is the only place that question is answered, so the bonuses, the
+   keywords, the Hush-Seer's aura and the Bladeless Exile's penalty can never
+   disagree about who is holding it.
+
+   The sword itself is harder to pin down. A real Runeblade can be in a hand,
+   a graveyard or a deck, worn by anybody, set in a Runestone, or standing on
+   the field as a Teece, and it comes back to its owner's hand from any of
+   those once a turn. runeSpots lists every one a seat owns and takeRune lifts
+   it out of wherever it is, so each card that moves the sword asks the same
+   two functions rather than knowing the six places it can be. */
+const RUNEBLADE=885;
+function isRuneEq(e){const d=e&&CARDS[e.cardId];return !!(d&&(d.runeblade||d.asRuneblade));}
+function isRealRune(e){const d=e&&CARDS[e.cardId];return !!(d&&d.runeblade);}
+function wieldsRune(t){return !!(t&&t.equips&&t.equips.some(isRuneEq));}
+function isRuneForm(t){return !!(t&&CARDS[t.cardId]&&CARDS[t.cardId].runeCard);}
+/* The Runeblade's Chosen rides on the worn sword, not on the Teece: it lasts
+   exactly as long as that sword stays on the field, whoever is holding it. */
+function runeGuarded(t){return !!(t&&t.equips&&t.equips.some(e=>e.chosen));}
+/* "Until the end of your next turn" said on anybody's turn. nextTurnExpiry is
+   only right on your own; a wielder saved during the enemy's turn is covered
+   through the turn that comes next for its owner, not the one after it. */
+function endOfNextTurn(q){
+  const n=PLAYERS(),ahead=((q-G.turn)%n+n)%n;
+  return G.turnNum+(ahead===0?n:ahead);
+}
+function runeSpots(p){
+  const out=[],pl=G&&G.players&&G.players[p],b=G&&G.board;
+  if(!pl||!b)return out;
+  pl.hand.forEach((id,x)=>{if(CARDS[id]&&CARDS[id].runeblade)out.push({where:'hand',x});});
+  pl.grave.forEach((id,x)=>{if(CARDS[id]&&CARDS[id].runeblade)out.push({where:'grave',x});});
+  pl.deck.forEach((id,x)=>{if(CARDS[id]&&CARDS[id].runeblade)out.push({where:'deck',x});});
+  const seenG=[];
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(t){
+      t.equips.forEach((e,y)=>{if(isRealRune(e)&&e.owner===p)out.push({where:'equip',i,y,e});});
+      if(isRuneForm(t)&&t.baseOwner===p)out.push({where:'form',i});
+    }
+    const g=b[i].ground;
+    if(g&&g.sheath&&g.sheath.length&&seenG.indexOf(g)<0){
+      seenG.push(g);
+      g.sheath.forEach((e,y)=>{if(e.owner===p)out.push({where:'sheath',i,y});});
+    }
+  }
+  return out;
+}
+function runeSpotText(p,s){
+  const b=G.board;
+  if(s.where==='hand')return 'in '+ownOf(p)+' hand';
+  if(s.where==='grave')return 'in '+ownOf(p)+' graveyard';
+  if(s.where==='deck')return 'in '+ownOf(p)+' deck';
+  if(s.where==='equip')return 'worn by '+nm(b[s.i].teece)+' at the '+CN[s.i];
+  if(s.where==='form')return 'standing on the field at the '+CN[s.i];
+  if(s.where==='sheath')return 'set in '+CARDS[b[s.i].ground.cardId].name+' at the '+CN[s.i];
+  return 'somewhere';
+}
+/* The same places, said as where the sword is coming FROM. */
+function runeSpotFrom(p,sp){
+  const b=G.board;
+  if(sp.where==='hand')return 'out of '+ownOf(p)+' hand';
+  if(sp.where==='grave')return 'out of '+ownOf(p)+' graveyard';
+  if(sp.where==='deck')return 'out of '+ownOf(p)+' deck';
+  if(sp.where==='equip')return 'off '+nm(b[sp.i].teece)+' at the '+CN[sp.i];
+  if(sp.where==='form')return 'up off the field at the '+CN[sp.i];
+  if(sp.where==='sheath')return 'out of '+CARDS[b[sp.i].ground.cardId].name+' at the '+CN[sp.i];
+  return 'from somewhere';
+}
+/* Where the computer would rather take the sword from: the places it is doing
+   nothing first, an enemy that is merely holding it next, and last of all an
+   enemy it is binding, because a stunned enemy is the point of putting it there. */
+function runeSpotRank(p,s){
+  if(s.where==='grave')return 0;
+  if(s.where==='deck')return 1;
+  if(s.where==='hand')return 2;
+  if(s.where==='equip'){
+    const t=G.board[s.i].teece;
+    if(t&&!sameTeam(t.owner,p))return s.e.shackle?9:3;
+    return 7;
+  }
+  if(s.where==='sheath')return 5;
+  if(s.where==='form')return 6;
+  return 8;
+}
+async function pickRuneSpot(p,spots,msg,cancel){
+  if(!spots.length)return null;
+  if(spots.length===1)return spots[0];
+  if(isAIP(p)||!HAS_DOM)return spots.slice().sort((x,y)=>runeSpotRank(p,x)-runeSpotRank(p,y))[0];
+  /* Two swords in the one graveyard are the same answer, so the question
+     offers each place once. */
+  const opts=[],keep=[];
+  for(const sp of spots){
+    const l=runeSpotText(p,sp);
+    if(opts.some(o=>o.lbl.toLowerCase()===('the runeblade '+l).toLowerCase()))continue;
+    opts.push({v:String(keep.length),lbl:'The Runeblade '+l});
+    keep.push(sp);
+  }
+  if(keep.length===1)return keep[0];
+  const pick=await chooseOption(p,opts,msg,!!cancel);
+  if(pick==='CANCEL')return 'CANCEL';
+  if(pick==null)return null;
+  return keep[parseInt(pick,10)];
+}
+/* Lift a Runeblade out of wherever it is. Returns the worn object when it came
+   off a Teece -- the one place it carries anything of its own -- and a fresh
+   card otherwise. Taken off the field, the Chosen and a binding stay behind
+   with the old object: both last only while the sword is where it was. */
+function takeRune(p,sp){
+  const pl=G.players[p],b=G.board;
+  const fresh=()=>({cardId:RUNEBLADE,owner:p});
+  if(sp.where==='hand'){return handTake(p,sp.x)?fresh():null;}
+  if(sp.where==='grave'){if(!CARDS[pl.grave[sp.x]]||!CARDS[pl.grave[sp.x]].runeblade)return null;pl.grave.splice(sp.x,1);return fresh();}
+  if(sp.where==='deck'){if(!CARDS[pl.deck[sp.x]]||!CARDS[pl.deck[sp.x]].runeblade)return null;pl.deck.splice(sp.x,1);return fresh();}
+  if(sp.where==='equip'){
+    const t=b[sp.i].teece,y=t?t.equips.indexOf(sp.e):-1;
+    if(y<0)return null;
+    t.equips.splice(y,1);
+    equipCameOff(t,sp.e,true);
+    return sp.e;
+  }
+  if(sp.where==='form'){
+    const t=b[sp.i].teece;
+    if(!t||!isRuneForm(t))return null;
+    b[sp.i].teece=null;
+    G.eventFlag=true;
+    /* Anything bolted onto the sword while it stood there has nothing left to
+       hang on. */
+    for(const e of t.equips)toGrave(e.owner,e.cardId);
+    return fresh();
+  }
+  if(sp.where==='sheath'){
+    const g=b[sp.i].ground;
+    if(!g||!g.sheath||!g.sheath[sp.y])return null;
+    const e=g.sheath[sp.y];
+    g.sheath=g.sheath.filter((_,k)=>k!==sp.y);
+    return {cardId:e.cardId,owner:e.owner};
+  }
+  return null;
+}
+/* "Once a turn", per sword: a seat holding two Runeblades may call each back
+   once. Counted rather than kept on the swords, because a sword in a hand is a
+   bare card id with nowhere to write that it has already come back. */
+const runeCap=p=>({key:'runeRecall',max:Math.max(1,runeSpots(p).length)});
+function runeRecallReady(p){
+  if(!G||G.over||G.pending||G.turn!==p)return false;
+  if(hexOn(p,'silence'))return false;
+  if(!runeSpots(p).some(sp=>sp.where!=='hand'))return false;
+  const cap=runeCap(p),rec=turnCapRec(p,cap);
+  return !!rec&&rec.n<cap.max;
+}
+function runeRecallLeft(p){
+  const cap=runeCap(p),rec=turnCapRec(p,cap);
+  return rec?Math.max(0,cap.max-rec.n):0;
+}
+async function runRuneRecall(p){
+  if(!runeRecallReady(p))return false;
+  const ctx={p,cell:null,t:null,first:true};
+  const ok=await runSteps([{fx:'runeRecall'}],ctx);
+  if(!ok){render();return false;}
+  if(ok==='NONE'){toast(ctx.noneMsg||'The Runeblade is already in your hand.');render();return false;}
+  turnCapTake(p,runeCap(p));
+  G.detailLock=null;
+  await resolveCombat();
+  render();
+  return true;
+}
+/* Ragnarok's Triumph: the next Teece to take up the sword, whether it lands
+   already wearing it or has it bolted on afterwards. */
+function runeTriumph(p,t){
+  const pl=G.players[p];
+  if(!pl||!pl.triumph||!t||!wieldsRune(t))return;
+  pl.triumph--;
+  applyModT(t,5,'temp');
+  if(t.kwTemp.indexOf('flying')<0)t.kwTemp.push('flying');
+  log('Triumph! '+nm(t)+' takes up the Runeblade: +5 and Flying until the end of the turn.');
+}
+/* The Hush-Seer's silence. The -2 is an ordinary aura and composes in effSides;
+   the silence is laid on the moment an enemy is found beside it, swept here
+   because an enemy arrives beside it in a dozen ways that never touch the card. */
+function syncRuneSilence(){
+  const b=G.board;
+  for(let i=0;i<BN;i++){
+    const o=b[i].teece;
+    if(!o||o.silenced)continue;
+    const a=DEF(o).aura;
+    if(!a||!a.silence||(a.needRune&&!wieldsRune(o)))continue;
+    for(const j of ADJ[i]){
+      const v=b[j].teece;
+      if(!v||v.silenced||sameTeam(v.owner,o.owner))continue;
+      v.silenced=true;
+      log(nm(v)+' stands beside '+nm(o)+' and the Runeblade, and is silenced.');
+    }
+  }
+}
+/* Where the Decoy Runeblade is, for a seat: worn by anybody, but it has to be
+   that seat's own decoy. */
+function findDecoy(q){
+  const b=G.board;
+  for(let i=0;i<BN;i++){
+    const w=b[i].teece;if(!w)continue;
+    const x=w.equips.findIndex(e=>{const g=eqG(e);return e.owner===q&&g&&g.decoy;});
+    if(x>=0)return {i,x,host:w};
+  }
+  return null;
+}
+/* A death that is about to happen to something holding the Runeblade, and the
+   two cards that can stop it. Asked in processDeath, where every destruction in
+   the game meets, rather than in the combat scan alone -- "about to be
+   destroyed" is just as true of Destroy, a wipe or a trap. A cost is never
+   saved: Ragnarok breaking its own wielder is paying, not dying.
+
+   The Decoy is offered first because it is a choice and it keeps the sword.
+   The Squire's own rule is not a choice: holding the sword, it cannot die, and
+   the sword breaks instead. */
+async function runeSaves(d){
+  const b=G.board,t=d.t,cell=d.cell;
+  const owners=[];
+  for(const e of t.equips)if(isRuneEq(e)&&sameTeam(t.owner,e.owner)&&owners.indexOf(e.owner)<0)owners.push(e.owner);
+  if(isRuneForm(t)&&owners.indexOf(t.baseOwner)<0&&sameTeam(t.owner,t.baseOwner))owners.push(t.baseOwner);
+  for(const q of owners){
+    const dc=findDecoy(q);
+    if(!dc)continue;
+    const yes=(isAIP(q)||!HAS_DOM)?'y':await chooseOption(q,
+      [{v:'y',lbl:'Destroy the Decoy Runeblade instead'},{v:'n',lbl:'Let it fall'}],
+      nm(t)+(isRuneForm(t)?' is':', holding the Runeblade, is')+' about to be destroyed. Destroy the Decoy Runeblade in its place?');
+    if(yes!=='y')continue;
+    const host=b[dc.i].teece,x=host?host.equips.findIndex(e=>{const g=eqG(e);return e.owner===q&&g&&g.decoy;}):-1;
+    if(x<0)continue;
+    const de=host.equips.splice(x,1)[0];
+    equipCameOff(host,de,true);
+    toGrave(de.owner,de.cardId);
+    t.immortalOwner=q;t.immortalUntil=endOfNextTurn(q);
+    log('The Decoy Runeblade shatters in its place: '+nm(t)+(isRuneForm(t)?'':' and the Runeblade it holds')+
+      ' cannot be destroyed until the end of '+ownOf(q)+' next turn.');
+    await anim([cell],'zap');
+    return true;
+  }
+  if(!t.silenced&&DEF(t).runeGuard){
+    const x=t.equips.findIndex(isRuneEq);
+    if(x>=0){
+      const e=t.equips.splice(x,1)[0];
+      equipCameOff(t,e,true);
+      toGrave(e.owner,e.cardId);
+      if(d.killers&&d.killers.length)G.players[e.owner].runeKiller=d.killers[0];
+      log(nm(t)+' is about to fall, and '+CARDS[e.cardId].name+' breaks in its place.');
+      let at=cell;
+      if(!hasKw(b,cell,'immovable')){
+        const empt=ADJ[cell].filter(j=>openAt(b,j));
+        if(empt.length){
+          const c=await chooseCell(t.owner,empt,'Move '+nm(t)+' one space.',
+            {mut:(bb,j)=>{if(bb[cell].teece){bb[cell].teece.immortalOwner=t.owner;moveT(bb,cell,j,false);}}});
+          const dst=(c==null||c==='CANCEL'||empt.indexOf(c)<0)?empt[0]:c;
+          if(b[cell].teece===t&&openAt(b,dst)){
+            moveT(b,cell,dst,true);at=dst;
+            log(nm(t)+' steps to the '+CN[dst]+'.');
+            await fireMove(cell,dst,t.owner);
+          }
+        }
+      }
+      if(b[at]&&b[at].teece===t){
+        t.immortalOwner=t.owner;t.immortalUntil=endOfNextTurn(t.owner);
+        log(nm(t)+' cannot be destroyed until the end of '+ownOf(t.owner)+' next turn.');
+        await anim([at],'zap');
+      }
+      return true;
+    }
+  }
+  return false;
+}
+/* Bladerang's flight: every panel straight out from the thrower along one
+   side, through enemies, until an ally catches it or it runs off the board.
+   sideNbr walks it, so it crosses onto the Plane and back off it the way a
+   Ranged shot does. */
+function bladerangPath(b,from,k,p){
+  const hit=[];let catcher=-1,j=sideNbr(from,k),guard=0;
+  while(j>=0&&guard++<BN+2){
+    const o=b[j].teece;
+    if(o){if(sameTeam(o.owner,p)){catcher=j;break;}hit.push(j);}
+    j=sideNbr(j,k);
+  }
+  return {hit,catcher};
+}
+function throwRune(b,from,k,p,live){
+  const thrower=b[from].teece;
+  if(!thrower)return null;
+  const x=thrower.equips.findIndex(e=>isRealRune(e)&&e.owner===p)>=0
+    ?thrower.equips.findIndex(e=>isRealRune(e)&&e.owner===p)
+    :thrower.equips.findIndex(e=>isRuneEq(e)&&e.owner===p);
+  if(x<0)return null;
+  const e=thrower.equips[x];
+  const path=bladerangPath(b,from,k,p);
+  for(const j of path.hit){
+    const o=b[j].teece;if(!o)continue;
+    applyModT(o,-4,'perm');
+    if(live)log('The Runeblade passes through '+nm(o)+': -4.');
+  }
+  if(path.catcher>=0){
+    const c=b[path.catcher].teece;
+    thrower.equips.splice(x,1);
+    /* A binding belongs to the Teece it was holding, not to the sword. */
+    const moved=live?e:Object.assign({},e);
+    delete moved.shackle;
+    c.equips.push(moved);
+    applyModT(c,4,'perm');
+    if(live)log(nm(c)+' catches '+CARDS[e.cardId].name+' at the '+CN[path.catcher]+' and gets +4.');
+  }else if(live)log('Nothing of '+ownOf(p)+' catches it, and '+CARDS[e.cardId].name+' comes back to '+nm(thrower)+'.');
+  return path;
+}
+function bestThrow(b,from,p){
+  let best=null,bv=-1e9;
+  for(let k=0;k<4;k++){
+    if(sideNbr(from,k)<0)continue;
+    const bb=cloneBoard(b);
+    if(!bb[from].teece)continue;
+    if(!throwRune(bb,from,k,p,false))continue;
+    simCombat(bb);
+    const v=boardValue(bb,p);
+    if(v>bv){bv=v;best=k;}
+  }
+  return best;
+}
+/* The Barrow Forge's own ability, fired by its owner off the chip. */
+async function runForge(p,i){
+  if(!G||G.over||G.pending||G.turn!==p)return false;
+  if(hexOn(p,'silence')){toast('Silenced: no abilities may be activated.');return false;}
+  const g=G.board[i]&&G.board[i].ground;
+  if(!g||g.owner!==p||!groundFlag(g,'gRuneForge'))return false;
+  const need=groundNum(g,'gRuneForge')||3;
+  if((g.runeCtr||0)<need)return false;
+  g.runeCtr-=need;
+  handPush(p,RUNEBLADE);
+  log(pname(p)+' '+vb(p,'forges','forge')+' another Runeblade at '+CARDS[g.cardId].name+' — '+
+    need+' counters spent, '+g.runeCtr+' left. It goes into '+ownOf(p)+' hand.');
+  render();
+  return true;
+}
+/* What the computer does with the sword before anything else in its turn: a
+   Runeblade lying idle in the graveyard or the deck, or held by an enemy it is
+   not binding, comes home; a Forge with the counters for it forges. */
+async function aiRunes(){
+  const p=G.turn;
+  for(let i=0;i<BN;i++){
+    const g=G.board[i].ground;
+    if(g&&g.owner===p&&groundFlag(g,'gRuneForge')&&(g.runeCtr||0)>=(groundNum(g,'gRuneForge')||3))await runForge(p,i);
+  }
+  for(let guard=0;guard<4&&runeRecallReady(p);guard++){
+    const good=runeSpots(p).some(sp=>runeSpotRank(p,sp)<=3&&sp.where!=='hand');
+    if(!good)break;
+    if(!await runRuneRecall(p))break;
+    if(G.over)return;
   }
 }
 async function runSteps(steps,ctx){
@@ -8580,6 +9078,218 @@ async function FXRUN(st,ctx){
     await processDeath({cell:c,t:v,killers:[],cost:true});
     G.magicReturn=true;
     return;}
+  /* ============ Runeblade ============ */
+  /* Back to the hand, from wherever it is. The Runeblade's own "once a turn"
+     is charged by runRuneRecall, which is the button; the Keeper of the Blade
+     runs the same step as an ability of its own, on its own charge. */
+  case 'runeRecall':{
+    const spots=runeSpots(p).filter(sp=>sp.where!=='hand');
+    if(!spots.length)return none(runeSpots(p).length?'The Runeblade is already in your hand.':'There is no Runeblade of yours anywhere to call back.');
+    const sp=await pickRuneSpot(p,spots,'Call back which Runeblade?',ctx.first);
+    if(sp==='CANCEL')return 'ABORT';
+    if(!sp)return;
+    const where=runeSpotFrom(p,sp),at=(sp.where==='equip'||sp.where==='form')?sp.i:null;
+    if(!takeRune(p,sp))return none('The Runeblade is not where it was.');
+    handPush(p,RUNEBLADE);
+    log('The Runeblade returns to '+ownOf(p)+' hand, '+where+'.');
+    if(at!=null)await anim([at],'zap');
+    return;}
+  /* The Blade-Waker stands the sword up on its own. "You can": skipping the
+     panel prompt leaves the sword exactly where it was. */
+  case 'runeForm':{
+    const spots=runeSpots(p).filter(sp=>sp.where!=='form');
+    if(!spots.length)return none('There is no Runeblade of yours to wake.');
+    const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
+    if(!empt.length)return none('There is no open panel for the Runeblade to stand on.');
+    const c=await pickCell(empt,'Summon the Runeblade anywhere as an 8/8/8/8 Teece with Flying, or skip.',
+      (bb,i)=>{putTeece(bb,i,makeTeece('TRUNEB',p),false);},true);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const sp=await pickRuneSpot(p,spots,'Wake which Runeblade?',false);
+    if(!sp||sp==='CANCEL')return;
+    const where=runeSpotFrom(p,sp);
+    if(!takeRune(p,sp))return none('The Runeblade is not where it was.');
+    if(!openAt(b,c)){handPush(p,RUNEBLADE);return none('The panel filled before the Runeblade could stand there, so it goes to your hand.');}
+    summonToken(b,c,'TRUNEB',p,true);
+    log('The Runeblade rises '+where+' and stands at the '+CN[c]+' as an 8/8/8/8 Teece with Flying.');
+    await anim([c],'placed',140);
+    return;}
+  /* The Grudgebearer hands the sword to whatever last killed a Teece holding
+     it -- and that Teece cannot do anything while it has to carry it. The
+     binding is a flag on the worn sword, read by isStunned, so it lifts the
+     moment the sword leaves by any road. */
+  case 'runeShackle':{
+    const kuid=G.players[p].runeKiller;
+    const kc=kuid!=null?b.findIndex(x=>x.teece&&x.teece.uid===kuid):-1;
+    if(kc<0)return none(kuid==null?'Nothing has destroyed the Runeblade yet.':'The Teece that destroyed the Runeblade is no longer on the field.');
+    const killer=b[kc].teece;
+    if(!canTarget(b,kc,p))return none(nm(killer)+' cannot be targeted.');
+    const spots=runeSpots(p).filter(sp=>!(sp.where==='equip'&&sp.i===kc)&&!(sp.where==='form'&&sp.i===kc));
+    if(!spots.length)return none('There is no Runeblade of yours to bind it with.');
+    const c=await pickCell([kc],'Equip the Runeblade to '+nm(killer)+', the Teece that destroyed it? It is stunned for as long as it wears it. Or skip.',
+      (bb,i)=>{if(bb[i].teece)bb[i].teece.equips.push({cardId:RUNEBLADE,owner:p,shackle:true});},true);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const sp=await pickRuneSpot(p,spots,'Bind it with which Runeblade?',false);
+    if(!sp||sp==='CANCEL')return;
+    const where=runeSpotFrom(p,sp);
+    if(tapeSave(b,kc,p)){await anim([kc],'zap');return;}
+    if(!takeRune(p,sp))return none('The Runeblade is not where it was.');
+    const k2=b.findIndex(x=>x.teece&&x.teece.uid===kuid);
+    if(k2<0){handPush(p,RUNEBLADE);return none('The killer is gone, and the Runeblade goes to your hand.');}
+    b[k2].teece.equips.push({cardId:RUNEBLADE,owner:p,shackle:true});
+    log('The Runeblade comes '+where+' and binds itself to '+nm(b[k2].teece)+', which is stunned for as long as it holds it.');
+    await anim([k2],'zap');
+    return;}
+  case 'runeCreate':{
+    const t=ctx.t,c=t?b.findIndex(x=>x.teece===t):-1;
+    if(c<0)return none('There is nothing left here to take up a Runeblade.');
+    t.equips.push({cardId:RUNEBLADE,owner:p});
+    log('A second Runeblade is forged, and '+nm(t)+' takes it up. It works exactly like the first.');
+    runeTriumph(p,t);
+    await anim([c],'zap');
+    return;}
+  case 'bladerang':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.equips.some(e=>isRuneEq(e)&&e.owner===p)&&ADJ[i].length)cands.push(i);}
+    if(!cands.length){const m='No Teece is holding a Runeblade of yours to throw.';log(m);toast(m);return 'ABORT';}
+    const c=await pickCell(cands,'Choose the Teece that throws the Runeblade.',
+      (bb,i)=>{const k=bestThrow(bb,i,p);if(k!=null)throwRune(bb,i,k,p,false);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const dirs=[0,1,2,3].filter(k=>sideNbr(c,k)>=0);
+    const firsts=dirs.map(k=>sideNbr(c,k));
+    const f=await pickCell(firsts,'Throw it which way? Choose the panel beside '+nm(b[c].teece)+' that it flies across first.',
+      (bb,j)=>{const k=dirs[firsts.indexOf(j)];if(k!=null&&bb[c].teece)throwRune(bb,c,k,p,false);},false);
+    if(f==='CANCEL')return 'ABORT';
+    if(f==null)return;
+    const k=dirs[firsts.indexOf(f)];
+    const path=throwRune(b,c,k,p,true);
+    const hit=path?path.hit.concat(path.catcher>=0?[path.catcher]:[]):[];
+    if(path&&!path.hit.length&&path.catcher<0)log('The Runeblade flies '+SIDE_NAMES[k]+'ward over empty panels and comes back.');
+    if(hit.length)await anim(hit,'zap');
+    return;}
+  /* Ragnarok is a modality, so it answers to everything that bends one -- a
+     Coupling Rig fires both, a Safety Interlock neither. Written out rather
+     than as a plain choose so the computer picks the mode on purpose instead
+     of at random. st.mode forces one, which is how a test asks for it. */
+  case 'ragnarok':{
+    const ctl=ctx.noModal?{all:false,times:1,off:false}:modalCtl(p,ctx.cell);
+    if(ctl.off)return none('Safety Interlock holds: the modality does nothing.');
+    const wielders=()=>{
+      const o=[];
+      for(let i=0;i<BN;i++){
+        const t=b[i].teece;
+        if(!t||!t.equips.some(e=>isRuneEq(e)&&e.owner===p))continue;
+        if(!sameTeam(t.owner,p)&&(isHeldSafe(t)||!canTarget(b,i,p)))continue;
+        o.push(i);
+      }
+      return o;
+    };
+    const apocalypse=async()=>{
+      const ws=wielders();
+      if(!ws.length){log('There is no Runeblade of '+ownOf(p)+' on the field for the Apocalypse to break.');return 'NONE';}
+      const c=await pickCell(ws,'Apocalypse: choose the Teece holding the Runeblade. The sword is broken for good, and that Teece is destroyed with it.',
+        (bb,i)=>{bb[i].teece=null;},false);
+      if(c==='CANCEL')return 'ABORT';
+      if(c==null)return 'NONE';
+      ctx.first=false;
+      const t=b[c].teece;
+      let x=t.equips.findIndex(e=>isRealRune(e)&&e.owner===p);
+      if(x<0)x=t.equips.findIndex(e=>isRuneEq(e)&&e.owner===p);
+      const e=t.equips.splice(x,1)[0];
+      equipCameOff(t,e,true);
+      log(CARDS[e.cardId].name+' is silenced and shattered. It never returns.');
+      await anim([c],'dying',190);
+      await processDeath({cell:c,t,killers:[],cost:true});
+      if(G.over)return;
+      for(let n=0;n<2;n++){
+        const cands=[];
+        for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&canTarget(b,i,p)&&!isHeldSafe(o))cands.push(i);}
+        if(!cands.length){log('Nothing else is left for Ragnarok to take.');break;}
+        const v=await pickCell(cands,'Apocalypse: choose a Teece to destroy ('+(n+1)+' of 2).',(bb,i)=>{bb[i].teece=null;},false);
+        if(v==null||v==='CANCEL')break;
+        if(tapeSave(b,v,p)){await anim([v],'zap');continue;}
+        const vt=b[v].teece;
+        log(nm(vt)+' is destroyed in the Ragnarok.');
+        await anim([v],'dying',190);
+        await processDeath({cell:v,t:vt,killers:[]});
+        if(G.over)return;
+      }
+    };
+    const triumph=()=>{
+      const pl=G.players[p];
+      pl.triumph=(pl.triumph||0)+1;
+      log('Triumph: the next Teece '+whoIn(p)+' '+vb(p,'plays','play')+' with the Runeblade has +5 and Flying until the end of that turn.');
+    };
+    if(ctl.all){
+      log('Every mode fires'+(ctl.times>1?', twice over.':'.'));
+      for(let r=0;r<ctl.times;r++){
+        const ra=await apocalypse();
+        if(ra==='ABORT'&&r===0)return 'ABORT';
+        if(G.over)return;
+        triumph();
+      }
+      fireModal(p);
+      return;
+    }
+    const canA=wielders().length>0;
+    let pick=st.mode||null;
+    if(!pick){
+      if(isAIP(p)){
+        let foes=0;
+        for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&!sameTeam(o.owner,p)&&canTarget(b,i,p)&&!isHeldSafe(o))foes++;}
+        pick=canA&&foes?'apocalypse':'triumph';
+      }else{
+        const opts=[];
+        if(canA)opts.push({v:'apocalypse',lbl:'Apocalypse — break a Runeblade and its wielder for good; destroy two Teece'});
+        opts.push({v:'triumph',lbl:'Triumph — the next Teece played with the Runeblade has +5 and Flying this turn'});
+        pick=await chooseOption(p,opts,'Ragnarok — choose a modality.'+(canA?'':' (No Runeblade of yours is on the field to break.)'),ctx.first);
+        if(pick==='CANCEL')return 'ABORT';
+        if(pick==null)return;
+      }
+    }
+    if(ctl.times>1)log((pick==='apocalypse'?'Apocalypse':'Triumph')+' fires twice.');
+    for(let r=0;r<ctl.times;r++){
+      if(pick==='apocalypse'){
+        const ra=await apocalypse();
+        if(ra==='ABORT'&&r===0)return 'ABORT';
+        if(ra==='NONE'&&r===0)return 'NONE';
+      }else triumph();
+      if(G.over)return;
+    }
+    fireModal(p);
+    return;}
+  case 'runeChosen':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(t&&sameTeam(t.owner,p)&&t.equips.some(e=>isRuneEq(e)&&e.owner===p&&!e.chosen))cands.push(i);
+    }
+    if(!cands.length){const m='No Teece of yours is holding a Runeblade that is not already Chosen.';log(m);toast(m);return 'ABORT';}
+    const pickE=t=>t.equips.find(e=>isRealRune(e)&&e.owner===p&&!e.chosen)||t.equips.find(e=>isRuneEq(e)&&e.owner===p&&!e.chosen);
+    const c=await pickCell(cands,'Choose the Teece holding the Runeblade: until the sword leaves the field, its wielder is invulnerable, has +2 and has Flying.',
+      (bb,i)=>{const t=bb[i].teece,e=pickE(t);if(e)t.equips=t.equips.map(x=>x===e?Object.assign({},x,{chosen:true}):x);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const e=pickE(b[c].teece);
+    if(!e)return none('That Runeblade is already Chosen.');
+    e.chosen=true;
+    log(CARDS[e.cardId].name+' is Chosen: until it leaves the field, whoever holds it is invulnerable, has +2 and has Flying.');
+    await anim([c],'zap');
+    return;}
+  /* The Blade That's Close Enough, on a kill: another enemy, stunned. */
+  case 'stunPick':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&!sameTeam(o.owner,p)&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length)return none('There is no other enemy to stun.');
+    const c=await pickCell(cands,'Select another enemy to stun, or skip.',
+      (bb,i)=>{if(bb[i].teece)bb[i].teece.stunUntil=nextTurnExpiry();},true);
+    if(c==='CANCEL'||c==null)return;
+    if(tapeSave(b,c,p)){await anim([c],'zap');return;}
+    applyStun(b,c,true,p);
+    await anim([c],'zap');
+    return;}
   case 'modByDef':{
     const cands=[];
     for(let i=0;i<BN;i++){
@@ -10558,6 +11268,11 @@ function bounceToHand(t,keepEquips){
   if(t.equips.length)log((t.equips.length===1?CARDS[t.equips[0].cardId].name:'The equips on '+nm(t))+
     (keepEquips?' '+(t.equips.length===1?'goes':'go')+' back to hand.':' '+(t.equips.length===1?'is':'are')+' destroyed.'));
   t.equips=[];
+  if(t.isToken&&DEF(t).runeCard){
+    handPush(t.baseOwner,DEF(t).runeCard);
+    log('The Runeblade returns to '+ownOf(t.baseOwner)+' hand.');
+    return;
+  }
   if(t.isToken||t.isCopy){log(nm(t)+' vanishes.');return;}
   handPush(t.baseOwner,t.cardId);
   log(nm(t)+' returns to '+pname(t.baseOwner)+"'s hand.");
@@ -10922,6 +11637,8 @@ function isStunned(t,b,i){
      of this turn, the turn between, and all of the stunner's next turn. */
   if(t.stunUntil)return true;
   if(b&&i!=null&&groundFlag(b[i].ground,'gStun'))return true;
+  /* Made to carry somebody else's Runeblade by the Grudgebearer. */
+  if(t.equips&&t.equips.some(e=>e.shackle))return true;
   return false;
 }
 /* Every stun in the game is laid on here, which is what gives Concussion Alley's
@@ -10957,6 +11674,8 @@ function stunFromStep(st,b,i,p,live){
 function stunText(b,i){
   const t=b[i].teece;
   if(!isStunned(t,b,i))return null;
+  if(!t.stunUntil&&t.equips.some(e=>e.shackle))
+    return nm(t)+' is bound by a Runeblade it was made to carry: it destroys nothing and activates nothing for as long as it wears it. It keeps every number it has, and can still be destroyed.';
   return groundFlag(b[i].ground,'gStun')&&!(t.stunUntil&&G.turnNum<t.stunUntil)
     ? nm(t)+' is stunned by Concussion Alley: it destroys nothing and activates nothing while it stands there. Stepping off lifts it at once.'
     : nm(t)+' is stunned: it destroys nothing and activates nothing until the end of the stunning side\u2019s next turn. It keeps every number it has, and can still be destroyed.';
@@ -10964,6 +11683,7 @@ function stunText(b,i){
 const isHeldSafe=t=>{
   if(!t)return false;
   if(t.immortalOwner!=null)return true;
+  if(runeGuarded(t))return true;
   /* Blessing of the Dump is cover held by a formation rather than by a clock,
      so it has to be worked out from where the Teece is standing right now. */
   if(G&&G.board){
@@ -10989,6 +11709,17 @@ async function processDeath(d){
   if(!d.cost&&isHeldSafe(t)){
     log(nm(t)+' is held outside time, and cannot be destroyed.');
     return;
+  }
+  /* The Decoy Runeblade and the Blade-Sworn Squire. */
+  if(!d.cost&&(wieldsRune(t)||isRuneForm(t))&&await runeSaves(d))return;
+  if(b[cell].teece!==t)return;
+  /* Who destroyed the Runeblade, for the Grudgebearer: the first killer of a
+     Teece holding one, or of the sword standing on its own. Read before the
+     equips are buried, which is the last moment the body still says so. */
+  const heldRune=wieldsRune(t);
+  if(d.killers&&d.killers.length){
+    for(const e of t.equips)if(isRuneEq(e))G.players[e.owner].runeKiller=d.killers[0];
+    if(isRuneForm(t))G.players[t.baseOwner].runeKiller=d.killers[0];
   }
   b[cell].teece=null;
   G.eventFlag=true;
@@ -11264,6 +11995,12 @@ async function processDeath(d){
       if(!CARDS[ag.cardId].token)toGrave(ag.owner,ag.cardId);
       log(CARDS[ag.cardId].name+' is destroyed on its feet and never lies back down.');
     }
+    /* The Runeblade standing on its own is a Token only in how it stands: the
+       card underneath is the sword, and it goes to the graveyard like one. */
+    if(t.isToken&&DEF(t).runeCard){
+      bury(t.baseOwner,DEF(t).runeCard);
+      log('The Runeblade falls, and lies in '+ownOf(t.baseOwner)+' graveyard.');
+    }
     if(!handed&&!t.isToken&&!t.isCopy){
       if(salvage){handPush(t.baseOwner,t.cardId);log(nm(t)+' is salvaged back to hand.');}
       /* A Graveyard keeps what dies on it. The card is buckled onto the
@@ -11283,6 +12020,11 @@ async function processDeath(d){
      stayed down. */
   const bg=G.board[cell]&&G.board[cell].ground;
   if(bg&&groundFlag(bg,'gBone')&&!t.isToken)addBone(bg,true,nm(t)+' was destroyed on it');
+  /* The Barrow Forge counts every wielder that falls on it, either side's. */
+  if(bg&&heldRune&&groundFlag(bg,'gRuneForge')){
+    bg.runeCtr=(bg.runeCtr||0)+1;
+    log(CARDS[bg.cardId].name+' takes a counter as a Runeblade wielder falls on it: '+bg.runeCtr+' now.');
+  }
 }
 /* Three standing arrangements that have to be true again after ANY change to
    the board, and that nothing can be relied on to announce: a Teece that has
@@ -11298,6 +12040,7 @@ async function syncGrounds(){
      re-assert it from the state on every sweep. Idempotent and cheap, and it
      means nothing has to remember to do it. */
   syncPlane();
+  syncRuneSilence();
   const b=G.board;
   for(let i=0;i<BN;i++){
     const g=b[i].ground;
@@ -11981,6 +12724,7 @@ async function playTeece(p,handIdx){
       const eg=eqG(e);
       if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:spot,t,first:false,equip:e});
     }
+    runeTriumph(p,t);
   }
   if(pl.confuse){
     const cf=pl.confuse;pl.confuse=null;
@@ -12116,14 +12860,36 @@ async function playEquip(p,handIdx){
     if(h===handIdx)continue;
     if(CARDS[pl.hand[h]].type==='teece')hands.push(h);
   }
-  if(!cands.length&&!hands.length){toast(ed.onlySpiderling?'No Spiderling to equip.':
+  /* The Runeblade can be set in a Runestone instead of into a hand. */
+  const sheaths=ed.runeblade?sheathSpots(p):[];
+  if(!cands.length&&!hands.length&&!sheaths.length){toast(ed.onlySpiderling?'No Spiderling to equip.':
     ed.onlyToken?'No Drone to equip.':'No Teece to equip, on the board or in hand.');return false;}
-  const c=await chooseCell(p,cands,'Choose a Teece for '+CARDS[id].name+(ed.anyOwner?' \u2014 either side\u2019s':'')+
+  const targets=cands.concat(sheaths.filter(i=>cands.indexOf(i)<0));
+  const sheathe=(bb,i)=>{const g=bb[i].ground;if(g)bb[i].ground=Object.assign({},g,{sheath:(g.sheath||[]).concat([{cardId:id,owner:p}])});};
+  const c=await chooseCell(p,targets,'Choose a Teece for '+CARDS[id].name+(ed.anyOwner?' \u2014 either side\u2019s':'')+
+    (sheaths.length?', or a Runestone to set it in':'')+
     (hands.length?', on the board or in your hand.':'.'),
-    {cancel:true,hands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}});
+    {cancel:true,hands,mut:(bb,i)=>{if(cands.indexOf(i)>=0&&bb[i].teece)bb[i].teece.equips.push({cardId:id,owner:p});else sheathe(bb,i);}});
   if(c==null||c==='CANCEL')return false;
   if(typeof c==='string'&&c[0]==='h'){
     if(!plateHand(p,handIdx,parseInt(c.slice(1),10)))return false;
+    render();
+    return true;
+  }
+  let intoStone=sheaths.indexOf(c)>=0&&cands.indexOf(c)<0;
+  if(sheaths.indexOf(c)>=0&&cands.indexOf(c)>=0){
+    const how=await chooseOption(p,[{v:'t',lbl:'Equip it to '+nm(b[c].teece)},{v:'s',lbl:'Set it in '+CARDS[b[c].ground.cardId].name}],
+      'The Runeblade: into a hand, or into the stone?',true);
+    if(how==null||how==='CANCEL')return false;
+    intoStone=how==='s';
+  }
+  if(intoStone){
+    handTake(p,handIdx);
+    const g=b[c].ground;
+    g.sheath=(g.sheath||[]).concat([{cardId:id,owner:p}]);
+    log(pname(p)+' '+vb(p,'sets','set')+' '+CARDS[id].name+' in '+CARDS[g.cardId].name+' at the '+CN[c]+'.');
+    await anim([c],'zap');
+    await resolveCombat();
     render();
     return true;
   }
@@ -12133,6 +12899,7 @@ async function playEquip(p,handIdx){
   log(pname(p)+' equips '+CARDS[id].name+' to '+nm(b[c].teece)+'.');
   const eg=CARDS[id].grants;
   if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:c,t:b[c].teece,first:false,equip:worn});
+  if(isRuneEq(worn)&&b[c].teece)runeTriumph(p,b[c].teece);
   await resolveCombat();
   render();
   return true;
@@ -12196,6 +12963,11 @@ async function clearGroundAt(i,breaker){
   const cells=[];
   for(let j=0;j<BN;j++)if(b[j].ground&&(g.gid?b[j].ground.gid===g.gid:j===i))cells.push(j);
   for(const j of cells)b[j].ground=null;
+  /* A Runeblade set in a Runestone falls out when the stone comes apart. */
+  for(const e of (g.sheath||[])){
+    toGrave(e.owner,e.cardId);
+    log('The Runeblade falls out of '+gd.name+' and into '+ownOf(e.owner)+' graveyard.');
+  }
   /* Whatever was interred here goes home to its owner's hand, however the
      Graveyard came apart -- its own act, an enemy laying a battleground over
      it, or a Quake. */
@@ -13168,6 +13940,14 @@ function simDeath(b,d){
      and the body it is holding up both stand in the sacrifice pool, and killing
      the first takes the second off the board before its turn comes. */
   if(!t||b[cell].teece!==t)return;
+  /* The Squire does not die holding the sword: the sword breaks instead. The
+     step it takes is left out, and it simply stands where it is, covered. */
+  if(!t.silenced&&DEF(t).runeGuard&&wieldsRune(t)){
+    const x=t.equips.findIndex(isRuneEq);
+    t.equips=t.equips.filter((_,k)=>k!==x);
+    t.immortalOwner=t.owner;
+    return;
+  }
   b[cell].teece=null;
   for(const kuid of d.killers){
     for(let i=0;i<BN;i++){
@@ -13468,6 +14248,8 @@ function aiPlanFor(id){
        Prison nothing until there is a price to put on its tab. */
     if(d.gAltar)bonus+=0.6;
     if(d.gDebt)bonus+=0.6;
+    /* The Barrow Forge pays nothing until three wielders have fallen on it. */
+    if(d.gRuneForge)bonus+=0.5;
     return {thr:0.8,bonus,cands,mut:(bb,i)=>{
       if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
       else bb[i].ground={cardId:id,owner:p};}};
@@ -13500,6 +14282,51 @@ function aiPlanFor(id){
   }
   /* Soul Harvest puts nothing on the board, but a SOUL is a PACT paid. */
   if(st.fx==='soulGain')return {thr:0.8,bonus:1.0,cands:[0],mut:()=>{}};
+  /* The Runeblade's three spells, each weighed by doing it on a clone. Bladerang
+     is every thrower and every direction; the prompt then finds the same one. */
+  if(st.fx==='bladerang'){
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(!t||!t.equips.some(e=>isRuneEq(e)&&e.owner===p))continue;
+      for(let k=0;k<4;k++)if(sideNbr(i,k)>=0)cands.push({i,k});
+    }
+    if(!cands.length)return null;
+    return {thr:1.5,cands:cands.map((_,n)=>n),mut:(bb,n)=>{throwRune(bb,cands[n].i,cands[n].k,p,false);}};
+  }
+  /* Ragnarok is cast for the Apocalypse only: two Teece off the board for a
+     sword and its wielder. The computer never plates a sword onto a card in
+     hand, so Triumph would mostly wait on a sword it was never going to play. */
+  if(st.fx==='ragnarok'){
+    const ws=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(!t||!t.equips.some(e=>isRuneEq(e)&&e.owner===p))continue;
+      if(!sameTeam(t.owner,p)&&(isHeldSafe(t)||!canTarget(b,i,p)))continue;
+      ws.push(i);
+    }
+    const foes=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p)&&!isHeldSafe(t))foes.push(i);}
+    if(!ws.length||!foes.length)return null;
+    const worst=foes.slice().sort((x,y)=>
+      effSides(b,y).reduce((a,c)=>a+c,0)-effSides(b,x).reduce((a,c)=>a+c,0)).slice(0,2);
+    return {thr:4.0,cands:ws,mut:(bb,i)=>{
+      if(bb[i].teece)simDeath(bb,{cell:i,t:bb[i].teece,killers:[]});
+      for(const w of worst)if(bb[w].teece&&w!==i)bb[w].teece=null;
+    }};
+  }
+  if(st.fx==='runeChosen'){
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(t&&sameTeam(t.owner,p)&&t.equips.some(e=>isRuneEq(e)&&e.owner===p&&!e.chosen))cands.push(i);
+    }
+    if(!cands.length)return null;
+    return {thr:1.2,cands,mut:(bb,i)=>{
+      const t=bb[i].teece;let done=false;
+      t.equips=t.equips.map(e=>{if(!done&&isRuneEq(e)&&e.owner===p&&!e.chosen){done=true;return Object.assign({},e,{chosen:true});}return e;});
+    }};
+  }
   if(st.fx==='mass')return {thr:1.8,cands:[0],mut:(bb)=>{
     for(let i=0;i<BN;i++){
       const o=bb[i].teece;if(!o)continue;
@@ -13945,6 +14772,9 @@ async function aiActs(){
         gain=(G.turnNum>=3&&anyEmpty)?0.75:-1;
       }else if(st.fx==='draw'){
         gain=G.players[p].hand.length<5?0.85:-1;
+      }else if(st.fx==='runeRecall'){
+        /* Worth it when a sword is lying idle, or an enemy holds one it is not bound by. */
+        gain=runeSpots(p).some(sp=>sp.where!=='hand'&&runeSpotRank(p,sp)<=3)?0.9:-1;
       }else{
         const muts=aiActMuts(i,ent);
         for(const m of muts){
@@ -14108,6 +14938,8 @@ function aiActMuts(cell,ent){
 async function aiTurn(){
   if(!G||G.over)return;
   const ep=G.epoch, p=G.turn;
+  await aiRunes();
+  if(stale(ep)||G.over)return;
   for(let k=0;k<3;k++){if(!await aiSupport())break;if(stale(ep)||G.over)return;}
   await aiPlayTeece();
   if(stale(ep)||G.over)return;
@@ -14249,6 +15081,13 @@ function showDeckInfo(key){
     (dk.freeDiscard
       ? '<span class="rk">Discarding</span><span>On your turn you may throw away any card in your hand, as often as you like. '+
         'A rule of this deck rather than of any card in it, which is why none of them print it.</span>'
+      : '')+
+    /* A card the deck hands you before the game starts is not one of its
+       twenty, so nothing else on this page would ever show it. */
+    ((dk.startHand||[]).length
+      ? '<span class="rk">Starting hand</span><span>You begin the game holding '+
+        dk.startHand.map(id=>escHtml(CARDS[id].name)).join(' and ')+' on top of your opening hand. '+
+        dk.startHand.map(id=>escHtml(CARDS[id].name)+': '+escHtml(CARDS[id].text)).join(' ')+'</span>'
       : '')+
     '<span class="rk">Reviving</span><span>A Teece brought back from a graveyard is played: its when-played effect triggers, controlled by whoever revived it.</span>'+
     '<span class="rk">Winning</span><span>Wipe out every enemy Teece, '+
@@ -14716,6 +15555,11 @@ function panelHtml(i){
   if(c.ground&&(c.ground.spells||[]).length)
     h+='<div class="dt" style="color:var(--gold)">'+c.ground.spells.length+' spell'+(c.ground.spells.length===1?'':'s')+
       ' hanging here: '+c.ground.spells.map(s=>CARDS[s.cardId].name).join(', ')+'.</div>';
+  if(c.ground&&(c.ground.sheath||[]).length)
+    h+='<div class="dt" style="color:var(--gold)">'+(o=>o.charAt(0).toUpperCase()+o.slice(1))(ownOf(c.ground.sheath[0].owner))+
+      ' Runeblade is set in this stone.</div>';
+  if(c.ground&&c.ground.runeCtr)
+    h+='<div class="dt" style="color:var(--gold)">'+c.ground.runeCtr+' forge counter'+(c.ground.runeCtr===1?'':'s')+'.</div>';
   if(c.ground&&c.ground.held&&c.ground.held.length)
     h+='<div class="dt" style="color:var(--gold)">'+c.ground.held.length+' card'+(c.ground.held.length===1?'':'s')+
       ' held: '+c.ground.held.map(hc=>CARDS[hc.cardId].name).join(', ')+'.</div>';
@@ -14992,6 +15836,39 @@ function statusesFor(p){
       ' ('+cd.text+')',
       ()=>runGraveAct(p,ent));
   }
+
+  /* --- the Runeblade. It answers from anywhere, so wherever it is, the chip
+         is where it is tapped. --- */
+  {const spots=runeSpots(p),away=spots.filter(sp=>sp.where!=='hand');
+   if(away.length){
+     const where=away.map(sp=>runeSpotText(p,sp)).join('; ');
+     const WHERE={equip:'worn',form:'on the field',sheath:'in the stone',grave:'in the graveyard',deck:'in the deck'};
+     const left=runeRecallLeft(p);
+     if(runeRecallReady(p))
+       push('runeRecall','act','Runeblade: return to hand',
+         'Your Runeblade is '+where+'. Tap this to return it to your hand \u2014 once a turn for each Runeblade you own'+
+         (spots.length>1?' ('+left+' of '+spots.length+' left this turn)':'')+'. It answers from anywhere.',
+         ()=>runRuneRecall(p));
+     else push('runeWhere','good','Runeblade: '+(away.length===1?WHERE[away[0].where]:away.length+' away'),
+       'Your Runeblade is '+where+'.'+(G.turn===p&&!left?' It has already come back as many times as it can this turn.':
+         ' On your turn, once a turn, it can be returned to your hand from there.'));
+   }}
+  if(pl.triumph)push('triumph','good','Triumph waiting',
+    'Ragnarok\u2019s Triumph: the next Teece you play with the Runeblade \u2014 plated onto it in hand, or equipped with it afterwards \u2014 has +5 and Flying until the end of that turn.');
+  {const seenF=[];
+   for(let i=0;i<BN;i++){
+     const g=b[i].ground;
+     if(!g||seenF.indexOf(g)>=0||!groundFlag(g,'gRuneForge'))continue;
+     seenF.push(g);
+     const need=groundNum(g,'gRuneForge')||3,have=g.runeCtr||0,mineF=g.owner===p;
+     if(mineF&&have>=need&&G.turn===p&&!hexOn(p,'silence'))
+       push('forge'+i,'act',CARDS[g.cardId].name+': forge a Runeblade',
+         CARDS[g.cardId].name+' at the '+CN[i]+' holds '+have+' counters. Tap this to spend '+need+' of them and forge another Runeblade into your hand.',
+         ()=>runForge(p,i));
+     else if(have)push('forgeN'+i,mineF?'good':'warn',CARDS[g.cardId].name+': '+have+' of '+need,
+       CARDS[g.cardId].name+' at the '+CN[i]+' holds '+have+' counter'+(have===1?'':'s')+'. At '+need+', '+
+       (mineF?'you':pname(g.owner))+' can spend them to forge another Runeblade.');
+   }}
 
   /* --- the Devils' ledger --- */
   if(pl.souls)push('souls','good',pl.souls+' SOUL'+(pl.souls===1?'':'S'),
@@ -15656,6 +16533,9 @@ function applyDeckRules(p,key){
   pl.swarmWin=dk.swarmWin||null;
   /* The Devils start the game holding a SOUL. */
   pl.souls=dk.souls||0;
+  /* The Runeblade tribe starts the game holding the Runeblade, on top of the
+     opening hand rather than instead of a card of it. */
+  for(const id of (dk.startHand||[]))if(CARDS[id])handPush(p,id);
 }
 async function startInner(mode,vsAI){
   document.getElementById('startOverlay').classList.add('hidden');
@@ -15806,7 +16686,9 @@ if(typeof module!=='undefined'){
     swarmHold,checkSwarmWin,swarmValue,adjAllyCount,ownedCount,turnCapTake,applyDeckRules,
     simDeath,simCombat,simOnPlay,aiPlanFor,aiSupport,aiActMuts,aiActs,
     isStunned,applyStun,stunText,PLAYERS,nextTurnExpiry,actBlockedReason,LUMBER_ACT,
-    payRecall,getLines:()=>LINES};
+    payRecall,getLines:()=>LINES,
+    RUNEBLADE,wieldsRune,isRuneForm,runeGuarded,runeSpots,takeRune,runRuneRecall,runeRecallReady,runForge,
+    sheathSpots,throwRune,bladerangPath,bestThrow,endOfNextTurn,aiRunes,isHeldSafe,isStunned,invulnText,applyDeckRules};
 }
 </script>
 </body>

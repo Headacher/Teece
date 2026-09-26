@@ -745,6 +745,44 @@
         "The Infernal Contract lets a Devil offer its PACT again once a turn, and Devil Numbers renumbers any Teece to 6/6/6/6 with one side at 0 before letting an ally offer its PACT again.",
         "Beginner Devil’s PACT throws away your hand, your whole board and your whole deck for +1. Sorry, it’s new. Take it only when something else is paying."
       ]
+    },
+    "runeblade": {
+      "name": "Runeblade",
+      "cards": [
+        886,
+        887,
+        888,
+        889,
+        890,
+        891,
+        892,
+        893,
+        894,
+        895,
+        896,
+        897,
+        898,
+        899,
+        900,
+        901,
+        902,
+        903,
+        904,
+        905
+      ],
+      "startHand": [
+        885
+      ],
+      "noRogue": true,
+      "blurb": "Far to the north, an ancient tribe of nomadic warriors perfect ancestral magics. Their most powerful artefact is the Runeblade, the magical sword their entire culture has been built around for countless millennia, carved with thousands of tiny sigils by their ancestors. Said to have slain the World Dragon, vanquished the Vampire Lord and felled the Leviathan, those sigils have made the Runeblade immortal — and when a member of the tribe wields it, they gain special powers. Passive: you start the game with the Runeblade equip card in your hand, and once a turn it comes back to your hand from anywhere.",
+      "how": [
+        "The Runeblade is one equip card. On its own it adds nothing; almost every Teece in the deck reads it instead — the Runeblade Elder is 1/2/2/3 without it and gets +9 with it, the Sigil Hurler becomes Ranged, the Skyleap Raider flies, and the Hush-Seer silences and weakens every enemy beside it.",
+        "Once a turn, on your turn, the Runeblade returns to your hand from wherever it is: off a dead Teece in your graveyard, off whoever is wearing it, out of a Runestone, or up off the field when it is standing there as a Teece. The chip beside the board is the button. The Keeper of the Blade calls it back a second time.",
+        "Hand it on: the Blade-Waker stands the sword up as an 8/8/8/8 Flyer, Bladerang throws it through every enemy in a line and into an ally's hand, and the Grudgebearer bolts it onto whatever killed your last wielder — which is stunned for as long as it has to hold it.",
+        "Keep it alive: the Blade-Sworn Squire breaks the Runeblade to dodge its own death, the Decoy Runeblade dies in the real one's place, and The Runeblade’s Chosen makes its wielder invulnerable until the sword leaves the field.",
+        "Make more: The Ancestor-Smith forges a second Runeblade onto itself, and the Barrow Forge makes another every third time a wielder falls on it. The Bladeless Exile is the price of all this — huge, but -5 while any Teece anywhere holds the sword.",
+        "Ragnarok ends it: break a Runeblade for good, with its wielder, and two Teece of your choice go down with it. Or take Triumph, and the next Teece to take up the sword gets +5 and Flying for the turn."
+      ]
     }
   },
   "formats": [
@@ -1291,6 +1329,26 @@
     881,
     882,
     883,
-    884
+    884,
+    886,
+    887,
+    888,
+    889,
+    890,
+    891,
+    892,
+    893,
+    894,
+    895,
+    896,
+    897,
+    898,
+    899,
+    900,
+    901,
+    902,
+    903,
+    904,
+    905
   ]
 }
