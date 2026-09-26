@@ -768,7 +768,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:86,date:'2026-09-26'};
+const VERSION={build:87,date:'2026-09-26'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -11724,19 +11724,21 @@ async function processDeath(d){
   }
   b[cell].teece=null;
   G.eventFlag=true;
-  log(nm(t)+' is destroyed.');
-  for(let i=0;i<BN;i++){
-    const w=b[i].teece;
-    if(!w||w.uid===t.uid||w.silenced||!sameTeam(w.owner,t.owner))continue;
-    const wd=DEF(w);
-    if(wd.onAllyDeath){
-      if(wd.onAllyDeath.n)applyModT(w,wd.onAllyDeath.n,wd.onAllyDeath.dur);
-      for(const k of (wd.onAllyDeath.kw||[]))if(w.kwTemp.indexOf(k)<0)w.kwTemp.push(k);
-      log(nm(w)+' answers the fall'+(wd.onAllyDeath.n?': '+sgn(wd.onAllyDeath.n)+durTxt(wd.onAllyDeath.dur):'')+
-        ((wd.onAllyDeath.kw||[]).length?', and takes '+wd.onAllyDeath.kw.join(' and ')+' until the end of the turn':'')+'.');
+  log(nm(t)+' is '+(d.cost?'sacrificed':'destroyed')+'.');
+  if(!d.cost){
+    for(let i=0;i<BN;i++){
+      const w=b[i].teece;
+      if(!w||w.uid===t.uid||w.silenced||!sameTeam(w.owner,t.owner))continue;
+      const wd=DEF(w);
+      if(wd.onAllyDeath){
+        if(wd.onAllyDeath.n)applyModT(w,wd.onAllyDeath.n,wd.onAllyDeath.dur);
+        for(const k of (wd.onAllyDeath.kw||[]))if(w.kwTemp.indexOf(k)<0)w.kwTemp.push(k);
+        log(nm(w)+' answers the fall'+(wd.onAllyDeath.n?': '+sgn(wd.onAllyDeath.n)+durTxt(wd.onAllyDeath.dur):'')+
+          ((wd.onAllyDeath.kw||[]).length?', and takes '+wd.onAllyDeath.kw.join(' and ')+' until the end of the turn':'')+'.');
+      }
     }
   }
-  if(isSpiderling(t))bumpSpiderWatchers(b,'die',true);
+  if(!d.cost&&isSpiderling(t))bumpSpiderWatchers(b,'die',true);
   const ctx={p:t.owner,deadCell:cell,deadOwner:t.owner,cell,t,killers:d.killers||[],noModal:true};
   /* killers' own on-kill rewards: a killer that also died this same combat wave
      (simultaneous mutual kills) is gone from the board, so fall back to the
@@ -11786,15 +11788,16 @@ async function processDeath(d){
   /* victim's death effects, then anything laid on the body itself, then
      equip-granted ones. t.deathFx is what a card hangs on ANOTHER Teece --
      Pestilence sours an ally and the souring travels with the body, so it
-     survives being moved, stolen or handed around. */
-  let deathFx=(t.silenced?[]:(DEF(t).onDeath||[])).slice();
-  if(t.deathFx&&t.deathFx.length)deathFx.push(...t.deathFx);
-  if(cell!=null&&G.board[cell]&&G.board[cell].ground&&groundFlag(G.board[cell].ground,'gDeathModal')){
+     survives being moved, stolen or handed around. Sacrifices (d.cost:true)
+     are not destroyed: they are removed as a cost and do not fire death effects. */
+  let deathFx=d.cost?[]:(t.silenced?[]:(DEF(t).onDeath||[])).slice();
+  if(!d.cost&&t.deathFx&&t.deathFx.length)deathFx.push(...t.deathFx);
+  if(!d.cost&&cell!=null&&G.board[cell]&&G.board[cell].ground&&groundFlag(G.board[cell].ground,'gDeathModal')){
     deathFx.push({fx:'choose',modal:true,msg:'The Platform gives out:',opts:[
       {lbl:'Every Teece gets +2',steps:[{fx:'allMod',n:2,dur:'perm'}]},
       {lbl:'Every Teece gets -2',steps:[{fx:'allMod',n:-2,dur:'perm'}]}]});
   }
-  for(const e of t.equips){const g=eqG(e);if(g&&g.onDeath)deathFx.push(...g.onDeath);}
+  for(const e of t.equips){const g=eqG(e);if(!d.cost&&g&&g.onDeath)deathFx.push(...g.onDeath);}
   const groundCard=G.board[cell].ground&&CARDS[G.board[cell].ground.cardId];
   const dblG=groundCard&&groundCard.gDouble;
   const dblFx=groundCard&&groundCard.gDoubleEffects;
