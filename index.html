@@ -768,7 +768,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:88,date:'2026-09-26'};
+const VERSION={build:89,date:'2026-09-26'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -5683,6 +5683,8 @@ function isSteadfast(t){
   if((d.kw||[]).indexOf('steadfast')>=0)return true;
   if((t.kwPerm||[]).indexOf('steadfast')>=0)return true;
   if((t.kwTemp||[]).indexOf('steadfast')>=0)return true;
+  /* Check keywords granted by equips. */
+  for(const e of t.equips){const g=eqG(e);if(g&&(g.kw||[]).indexOf('steadfast')>=0)return true;}
   if(G&&G.board){
     const i=G.board.findIndex(c=>c.teece===t);
     if(i>=0&&G.board[i].ground&&!G.board[i].ground.gsil){
