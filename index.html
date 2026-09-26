@@ -768,7 +768,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:85,date:'2026-09-26'};
+const VERSION={build:86,date:'2026-09-26'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3668,7 +3668,7 @@ const CARDS = {
     text:'Select a Teece equipped with the Runeblade and choose a direction: up, down, left or right. The Runeblade is thrown that way, passing through every enemy in its path and giving each -4. If it strikes an ally it stops, and is equipped to that ally, who gets +4. If it strikes no ally, it comes back to the Teece that threw it.'},
  899:{name:'Ragnarok',type:'magic',
     cast:[{fx:'ragnarok'}],
-    text:'Choose a modality.\n— Apocalypse: silence the Runeblade and destroy it and the Teece it is equipped to, then select two Teece and destroy them. That Runeblade never returns.\n— Triumph: the next Teece played with the Runeblade has +5 and Flying until the end of the turn.'},
+    text:'Choose a modality.\n— Apocalypse: silence the Runeblade and destroy it and the Teece it is equipped to, then select two Teece and destroy them. That Runeblade never returns. Only the real Runeblade will do \u2014 not the Blade That\u2019s Close Enough.\n— Triumph: the next Teece played with the Runeblade has +5 and Flying until the end of the turn.'},
  900:{name:'The Runeblade’s Chosen',type:'magic',
     cast:[{fx:'runeChosen'}],
     text:'Select a Teece equipped with the Runeblade. Until the Runeblade leaves the field, it gains: “The equipped Teece is invulnerable, has +2 and has Flying.”'},
@@ -9176,11 +9176,13 @@ async function FXRUN(st,ctx){
   case 'ragnarok':{
     const ctl=ctx.noModal?{all:false,times:1,off:false}:modalCtl(p,ctx.cell);
     if(ctl.off)return none('Safety Interlock holds: the modality does nothing.');
+    /* Only the real sword can be broken: the Blade That's Close Enough counts
+       as the Runeblade for most things, but not for this. */
     const wielders=()=>{
       const o=[];
       for(let i=0;i<BN;i++){
         const t=b[i].teece;
-        if(!t||!t.equips.some(e=>isRuneEq(e)&&e.owner===p))continue;
+        if(!t||!t.equips.some(e=>isRealRune(e)&&e.owner===p))continue;
         if(!sameTeam(t.owner,p)&&(isHeldSafe(t)||!canTarget(b,i,p)))continue;
         o.push(i);
       }
@@ -9195,8 +9197,7 @@ async function FXRUN(st,ctx){
       if(c==null)return 'NONE';
       ctx.first=false;
       const t=b[c].teece;
-      let x=t.equips.findIndex(e=>isRealRune(e)&&e.owner===p);
-      if(x<0)x=t.equips.findIndex(e=>isRuneEq(e)&&e.owner===p);
+      const x=t.equips.findIndex(e=>isRealRune(e)&&e.owner===p);
       const e=t.equips.splice(x,1)[0];
       equipCameOff(t,e,true);
       log(CARDS[e.cardId].name+' is silenced and shattered. It never returns.');
@@ -14301,7 +14302,7 @@ function aiPlanFor(id){
     const ws=[];
     for(let i=0;i<BN;i++){
       const t=b[i].teece;
-      if(!t||!t.equips.some(e=>isRuneEq(e)&&e.owner===p))continue;
+      if(!t||!t.equips.some(e=>isRealRune(e)&&e.owner===p))continue;
       if(!sameTeam(t.owner,p)&&(isHeldSafe(t)||!canTarget(b,i,p)))continue;
       ws.push(i);
     }
