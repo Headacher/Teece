@@ -581,6 +581,8 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 #infoBox .icount{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 #infoBox ul{margin:6px 0 0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.6}
 #infoBox li{margin:4px 0}
+#infoBox .cardList{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0 0}
+#infoBox .cardItem{padding:8px 10px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;font-size:13px;color:var(--cream2)}
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .mode{display:flex;flex-direction:column;background:var(--panel2);
   border:1px solid var(--line);border-radius:10px;padding:13px 15px}
@@ -768,7 +770,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:93,date:'2026-09-27'};
+const VERSION={build:94,date:'2026-09-27'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -15131,6 +15133,12 @@ function showDeckInfo(key){
         'on the cards \u2014 so anything it steals flies too.</span>'
       : '')+
     '</div>'+
+    '<h3>The '+dk.cards.length+' cards</h3><div class="cardList">';
+  for(const cid of dk.cards){
+    const c=CARDS[cid];
+    if(c)h+='<div class="cardItem">'+escHtml(c.name)+'</div>';
+  }
+  h+='</div>'+
     '<div class="row"><button class="btn primary" id="infoClose">Back to the decks</button></div>';
   box.innerHTML=h;
   ov.classList.remove('hidden');
