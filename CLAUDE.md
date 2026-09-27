@@ -139,6 +139,17 @@ needs a real origin and fails on `file://`. Chromium is preinstalled at
 started before an edit keeps serving the old file and the failures it produces
 look like real bugs in whatever you just wrote.
 
+A fresh browser context is a first-time player: the page opens on the tutorial,
+and the first turn of the first game opens the screen tour. Both take every tap,
+so a test that is not about them clicks straight into an overlay. Mark both seen
+before the page loads:
+
+```js
+await context.addInitScript(()=>{try{
+  localStorage.setItem('teece.tutorial','seen');localStorage.setItem('teece.tour','seen');
+}catch(e){}});
+```
+
 Three more things a page test gets wrong before it gets right:
 
 - `G.turn` flips to the next seat inside `endTurn`, **before** `startTurn` has
@@ -204,6 +215,17 @@ the page, or it buries the content underneath. On a phone `aside` stacks below
 - A card in hand and the same card in a draft both render from `CARD_ART` and
   `data-card-deck`; the deck palette rules name `.card` and `.dcard` together so
   the two never diverge.
+
+### The tutorial quotes the rules and the classic cards
+
+`TUT_PAGES` is eight pages of rules drawn with real classic cards by id (Grunt
+7s, Gate 10/1/10/1, Southpaw's left 9 …), and its captions do the arithmetic out
+loud: "its left edge is 9 and the Grunt's right edge is 7". It also states the
+numbers the engine keeps elsewhere — the lead of four (`WIN_LEAD`), five cards
+to open, six to keep. Change a classic card's sides or one of those rules and
+the page teaching it goes on saying the old thing, so re-read the pages in the
+same commit. `tourStops` points at elements by id (`#turnPanel`, `#domBar`,
+`#myHand`, …); rename one and its stop silently drops out of the tour.
 
 ### An ability reads as X : Y ; Z
 

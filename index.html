@@ -32,6 +32,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outl
 header{grid-column:1/-1;display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding-bottom:8px}
 header h1{font-family:var(--disp);font-size:34px;font-weight:400;margin:0;letter-spacing:.02em}
 header .sub{color:var(--muted);font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+header #helpBtn{margin-left:auto;align-self:center;padding:4px 10px}
 main{display:flex;flex-direction:column;gap:12px;align-items:center}
 
 .handrow{width:100%;min-height:108px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
@@ -596,6 +597,147 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .overlay .mode p{font-size:12.5px;line-height:1.5;margin:5px 0 0}
 .overlay .mode .row{margin-top:auto;padding-top:12px}
 @media(max-width:560px){.modes{grid-template-columns:1fr}}
+.mast{display:flex;align-items:center;gap:12px}
+.mast h2{flex:1;min-width:0}
+.mast .btn{flex:none}
+.overlay h2 .ver{white-space:nowrap;display:inline-block}
+#startOverlay .modes{margin-top:16px}
+
+/* ---- tutorial. Eight short pages the first time the game is opened, then a
+       tour of the real screen the first time a game reaches your turn. The
+       pages draw their examples with the board's own .cell and .teece and the
+       hand's own .card, so what they teach is what the game looks like.
+       The box never scrolls as a whole: its middle does, and the buttons stay
+       pinned to its foot, so Next is on a phone screen however long the page
+       it sits under. ---- */
+#tutOverlay{z-index:35}
+#tutOverlay .box{max-width:560px;width:100%;padding:0;display:flex;flex-direction:column;overflow:hidden;
+  max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px)}
+.tuthead{display:flex;align-items:center;gap:10px;padding:14px 20px 0}
+.tutstep{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.tutskip{margin-left:auto;background:none;border:0;color:var(--muted);font-size:12px;padding:4px 2px;text-decoration:underline}
+.tutskip:hover{color:var(--cream)}
+.tutbody{flex:1;min-height:0;overflow:auto;padding:2px 20px 12px}
+#tutOverlay h2{margin:4px 0 0}
+#tutOverlay .tutbody p{color:var(--cream2);font-size:13.5px;line-height:1.55;margin:8px 0}
+#tutOverlay .tutbody p.fine{color:var(--muted);font-size:12.5px}
+.tutbody b{color:var(--cream);font-weight:700}
+.tutlist{margin:6px 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+.tutlist li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:baseline;
+  font-size:13.5px;line-height:1.5;color:var(--cream2)}
+.tutlist .n{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;
+  background:var(--panel2);border:1px solid var(--gold);color:var(--gold);font-size:11px;font-weight:700}
+.tutlist .k{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);white-space:nowrap;width:100px}
+.tutart{display:flex;flex-direction:column;align-items:center;gap:10px;margin:12px 0 6px;padding:14px 10px;
+  border-radius:10px;background:#120f0b;border:1px solid var(--line)}
+.tutart .cap{font-size:12px;color:var(--muted);text-align:center;line-height:1.45;max-width:420px}
+.tutart .cap b{color:var(--cream2)}
+.tutrow{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap}
+.tutnav{display:flex;align-items:center;gap:10px;padding:12px 20px 14px;border-top:1px solid var(--line);flex-wrap:wrap;
+  position:relative;transition:box-shadow .2s}
+/* More of the page below the fold: a shadow over the buttons says so. */
+.tutnav.more{box-shadow:0 -14px 16px -8px rgba(0,0,0,.6)}
+@media(max-width:480px){
+  #tutOverlay{padding:10px}
+  #tutOverlay .box{max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px)}
+  .tuthead{padding:12px 16px 0}
+  .tutbody{padding:2px 16px 10px}
+  .tutnav{padding:10px 16px 12px}
+}
+.tutdots{display:flex;gap:6px;margin-right:auto}
+.tutdots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.tutdots i.on{background:var(--gold)}
+.tutnav .btn{padding:8px 14px}
+/* A small board. Its panels are real .cell and its Teece real .teece, sized
+   by --tcs rather than by the live board's --cs. */
+.tgrid{display:grid;grid-template-columns:repeat(var(--tw,3),var(--tcs,84px));grid-auto-rows:var(--tcs,84px);gap:6px}
+.tcell{width:var(--tcs,84px);height:var(--tcs,84px)}
+.tgrid .tcell{width:auto;height:auto}
+/* A three-wide example board is as big as a real one on a desk, and shrinks
+   to fit the width a phone leaves it rather than pushing the page sideways. */
+.tgrid.fit{--tcs:min(96px,calc((100vw - 104px) / 3))!important}
+.tutart .teece{cursor:default}
+/* Every example is single digits but the Gate's 10, so the name can have more
+   of the tile than the live board, which has to clear two-digit numbers. */
+.tutart .teece .mid{padding:0 14px}
+.tutart .teece .nm{font-size:11px}
+.tbig{--tcs:132px}
+.tbig .teece .s{font-size:21px}
+.tbig .teece .nm{font-size:17px}
+.tbig .teece .ascii{font-size:10px}
+.tbig .teece .mid{padding:0 30px}
+.tanat{display:grid;grid-template-columns:auto auto auto;gap:4px 10px;align-items:center;justify-items:center}
+.tanat .lab{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.tanat .lab b{display:block;text-align:center;font-size:15px;letter-spacing:0;color:var(--gold)}
+.tkey{display:flex;gap:6px 16px;flex-wrap:wrap;justify-content:center;font-size:12px;color:var(--cream2)}
+.tkey span{display:inline-flex;align-items:center;gap:6px}
+.tkey .sw{width:14px;height:14px;border-radius:4px;border:2px solid var(--p0);background:var(--cream)}
+.tkey .sw.o1{border-color:var(--p1)} .tkey .sw.o2{border-color:var(--p2)}
+.tkey .up{color:var(--up);font-weight:700} .tkey .down{color:var(--down);font-weight:700}
+.tkey .dotx{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px var(--gold)}
+/* The two edges that meet, and the side of the fight each one is on. */
+.tutart .teece .s.win,.tutart .teece .s.lose{border-radius:4px;padding:0 3px;text-shadow:none}
+.tutart .teece .s.win{background:var(--gold);color:#241f18}
+.tutart .teece .s.tie{outline:2px solid var(--gold);outline-offset:1px;border-radius:4px}
+.tutart .teece .s.lose{background:var(--down);color:#fff}
+/* Destroyed: a red frame and a badge in the corner, clear of the numbers the
+   caption is talking about. */
+.tutart .teece.tdoom{box-shadow:inset 0 0 0 3px var(--down)}
+.tutart .teece.tdoom::after{content:'\2715';position:absolute;top:-7px;right:-7px;width:17px;height:17px;border-radius:50%;
+  background:var(--down);color:#fff;font-size:10px;font-weight:700;line-height:1;z-index:3;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #191410}
+.tutart .cell.tfade{opacity:.45}
+.tutart .cell .tnote{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#6d5f4c;padding:4px}
+/* The fight, played out on a loop: the Southpaw lands, the two edges that
+   touch light up, and the smaller one goes. Five seconds a round, and every
+   piece keyed to the same clock so they cannot drift apart. */
+@keyframes tArrive{0%,8%{opacity:0;transform:scale(.8)}16%,100%{opacity:1;transform:scale(1)}}
+@keyframes tWin{0%,24%{background:transparent;color:inherit}32%,100%{background:var(--gold);color:#241f18}}
+@keyframes tLoseN{0%,24%{background:transparent;color:inherit}32%,100%{background:var(--down);color:#fff}}
+@keyframes tLose{0%,48%{opacity:1;transform:none;box-shadow:none}51%{transform:translateX(-3px)}54%{transform:translateX(3px)}
+  57%{transform:translateX(-2px)}60%{transform:none;box-shadow:inset 0 0 0 3px var(--down);opacity:1}70%,100%{opacity:.08}}
+.tfight .arrive{animation:tArrive 5s ease-out infinite}
+.tfight .s.win{animation:tWin 5s linear infinite}
+.tfight .s.lose{animation:tLoseN 5s linear infinite}
+.tfight .loser{animation:tLose 5s linear infinite}
+.tmini{--tcs:58px}
+.tmini .teece{inset:5px}
+.tmini .teece .mid,.tmini .teece .ascii{display:none}
+.tmini .teece .s{font-size:10.5px}
+.tmeter{display:flex;gap:14px;align-items:stretch}
+.tmeter .dombar{height:auto}
+.thand{display:grid;grid-template-columns:repeat(4,auto);gap:8px;justify-content:center}
+@media(max-width:480px){.thand{grid-template-columns:repeat(2,auto)}}
+/* The hand stretches its cards to one height, and the name on a Teece card is
+   centred against that height. Wrapped for its label, a card here is no longer
+   stretched, so it is given the height outright. */
+.thand .card,.thand .card.t-teece{cursor:default;height:112px}
+.thand .tlbl{display:block;text-align:center;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-top:5px}
+.ttrack{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center}
+.ttrack .tk{padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);font-size:12px;color:var(--cream2)}
+.ttrack .ar{color:var(--muted);font-size:12px}
+.ttrack .tk.end{background:var(--p0);border-color:var(--p0);color:#0d1815;font-weight:700}
+.tbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;padding:7px 10px;
+  border:1px solid var(--gold);border-radius:8px;background:rgba(201,162,39,.08);font-size:12px;color:var(--cream2)}
+.tbar .btn{padding:4px 9px;font-size:11px}
+
+/* The tour: a ring round one real thing on the screen, everything else dimmed
+   by the ring's own shadow, and a card saying what it is. The layer takes every
+   tap while it is up so nothing is played by accident; the card goes wherever
+   there is room for it beside the ring, and pins to the foot of the window
+   when there is none. */
+#tourLayer{position:fixed;inset:0;z-index:50}
+#tourRing{position:fixed;border:2px solid var(--gold);border-radius:12px;pointer-events:none;
+  box-shadow:0 0 0 200vmax rgba(8,6,4,.72),0 0 16px rgba(201,162,39,.55);transition:top .18s,left .18s,width .18s,height .18s}
+#tourCard{position:fixed;width:min(360px,calc(100vw - 24px));background:var(--panel);border:1px solid var(--gold);
+  border-radius:12px;padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+#tourCard .tstep{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+#tourCard h3{font-family:var(--disp);font-weight:400;font-size:21px;margin:2px 0 4px}
+#tourCard p{font-size:13px;line-height:1.5;color:var(--cream2);margin:0}
+#tourCard .tnav{display:flex;align-items:center;gap:8px;margin-top:12px}
+#tourCard .tnav .btn{padding:7px 13px}
+#tourCard .tnav .tutskip{margin-left:0;margin-right:auto}
 
 #draftOverlay .box{max-width:760px;width:100%}
 #draftCards{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:14px 0}
@@ -674,6 +816,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   <header>
     <h1>Teece</h1>
     <span class="sub" id="modeLbl">three by three</span>
+    <button class="btn" id="helpBtn">How to play</button>
   </header>
   <main>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -694,7 +837,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
     <div class="handrow" id="myHand"></div>
   </main>
   <aside>
-    <div class="panel">
+    <div class="panel" id="turnPanel">
       <div class="turnline" id="turnInfo"></div>
       <div class="counts" id="counts"></div>
       <div id="warnBar" class="hidden"></div>
@@ -710,10 +853,11 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 
 <div class="overlay" id="startOverlay">
   <div class="box">
-    <h2>Teece <span class="ver" id="verTag"></span></h2>
-    <p class="sub" id="startSub"></p>
-
+    <div class="mast">
+      <h2>Teece <span class="ver" id="verTag"></span></h2>
+      <button class="btn" id="howBtn">How to play</button>
     </div>
+    <p class="sub" id="startSub"></p>
 
     <div class="modes">
       <div class="mode feature">
@@ -768,13 +912,22 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   </div>
 </div>
 
+<div class="overlay hidden" id="tutOverlay">
+  <div class="box" id="tutBox" role="dialog" aria-modal="true" aria-labelledby="tutTitle"></div>
+</div>
+
+<div id="tourLayer" class="hidden">
+  <div id="tourRing"></div>
+  <div id="tourCard" role="dialog" aria-modal="true" aria-labelledby="tourTitle"></div>
+</div>
+
 <div id="toast"></div>
 <script>
 /* ============ card registry ============ */
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:96,date:'2026-09-27'};
+const VERSION={build:97,date:'2026-09-27'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -13911,6 +14064,7 @@ async function startTurn(){
   render();
   if(stale(ep)||G.over)return;
   if(isAIP(p)){await wait(420);if(stale(ep))return;await aiTurn();}
+  else if(p===0)maybeTour();
 }
 const wait=ms=>HAS_DOM?new Promise(r=>setTimeout(r,ms)):Promise.resolve();
 async function anim(cells,cls,ms){
@@ -15734,7 +15888,7 @@ function renderHand(p){
   h.innerHTML='';
   const lbl=document.createElement('div');
   lbl.className='handlbl';
-  lbl.textContent=pname(p)+' hand';
+  lbl.textContent=(pname(p)==='You'?'Your':pname(p)+'’s')+' hand';
   h.appendChild(lbl);
   /* The switch lives on your own hand only: the other seats' rows follow it. */
   if(p===0){
@@ -16491,7 +16645,7 @@ function render(){
     'three by three');
   if(!G.over){
     const t=G.turn,d=document.getElementById('turnInfo');
-    d.innerHTML='<span class="dot d'+t+'"></span><strong>'+pname(t)+"'s turn</strong>"+
+    d.innerHTML='<span class="dot d'+t+'"></span><strong>'+(pname(t)==='You'?'Your':pname(t)+"'s")+' turn</strong>'+
       (skyShowing()?'<span class="phase '+(isDay()?'day':'night')+'">'+
       (isDay()?'\u2600\uFE0F Day':'\u{1F319} Night')+(timePinned()?' \u00b7 held':'')+'</span>':'');
     document.getElementById('endTurn').disabled=false;
@@ -16541,6 +16695,392 @@ function renderDraft(p,offer,k,res){
   const drafted=(G_DRAFT&&G_DRAFT.decks[p])||[];
   deck.textContent=drafted.length?'Drafted so far: '+drafted.map(id=>CARDS[id].name).join(', '):'';
 }
+/* ============ tutorial ============
+   Two parts, in the order a new player needs them. The rules come first, as
+   eight short pages over the menu the first time the game is opened -- what a
+   Teece is, how a fight goes, what a turn is, how to win -- because nothing on
+   the game screen makes sense without them. The screen comes second, as a tour
+   of the real thing the first time a game reaches your turn, because a control
+   is only worth pointing at once it is there to point at.
+
+   Each part remembers it has been seen, per browser. Storage that throws (a
+   private window, blocked site data) reads as never seen, so a first visit
+   still gets its tutorial, and SEEN_NOW keeps it from coming back more than
+   once a visit. Skipping the pages skips the tour with them: skip means "I
+   already know this game". */
+const TUT_KEY='teece.tutorial',TOUR_KEY='teece.tour';
+const SEEN_NOW={};
+function tutSeen(k){
+  if(SEEN_NOW[k])return true;
+  try{return localStorage.getItem(k)==='seen';}catch(e){return false;}
+}
+function tutMark(k){
+  SEEN_NOW[k]=true;
+  try{localStorage.setItem(k,'seen');}catch(e){}
+}
+/* One Teece drawn exactly the way the board draws one -- the drawing, the four
+   numbers and their colours, the owner's border -- for an example that stands
+   on no board. hot lights the edges in a fight: {1:'win',3:'lose'}. Always the
+   cream classic palette, whatever deck the card is from, so the numbers read
+   the same on every page. */
+function tutTeece(id,owner,o){
+  o=o||{};
+  const cd=CARDS[id],s=cd.sides,art=CARD_ART[id],hot=o.hot||{};
+  const nmCls=cd.name.length>15?'nm longer':(cd.name.length>10?'nm long':'nm');
+  let h='<div class="teece o'+owner+(art?' arted':'')+(o.cls?' '+o.cls:'')+'" data-card-deck="classic">'+
+    (art?'<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>':'')+
+    '<div class="mid"><div class="'+nmCls+'">'+escHtml(cd.name)+'</div></div>';
+  for(let k=0;k<4;k++)
+    h+='<div class="s s'+k+(s[k]>7?' up':'')+(s[k]<3?' down':'')+(hot[k]?' '+hot[k]:'')+'">'+s[k]+'</div>';
+  return h+(o.dot?'<div class="actdot"></div>':'')+'</div>';
+}
+/* A small board, row by row. Each entry is one panel: '' for an empty one, a
+   tutTeece string, or {h,cls} for a panel that needs a class of its own.
+   o.w is how many panels wide, o.cs how big each one is. */
+function tutGrid(cells,o){
+  o=o||{};
+  return '<div class="tgrid'+(o.cls?' '+o.cls:'')+'" style="--tw:'+(o.w||3)+(o.cs?';--tcs:'+o.cs+'px':'')+'">'+
+    cells.map(c=>{const o=typeof c==='string'?{h:c}:c;
+      return '<div class="cell tcell'+(o.cls?' '+o.cls:'')+'">'+(o.h||'')+'</div>';}).join('')+'</div>';
+}
+/* A card as the hand draws it, with what kind of card it is written under it. */
+function tutHandCard(id,label){
+  const cd=CARDS[id],art=CARD_ART[id];
+  let h='<div><div class="card t-'+cd.type+(art?' arted':'')+'" data-card-deck="classic">'+
+    (art?'<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>':'');
+  if(cd.type==='teece'){
+    for(let k=0;k<4;k++)h+='<div class="hs hs'+k+'">'+cd.sides[k]+'</div>';
+    h+='<div class="hcn cn">'+escHtml(cd.name)+'</div>';
+  }else{
+    h+='<div class="ct">'+cd.type+'</div><div class="cn">'+escHtml(cd.name)+'</div>'+
+      '<div class="cs">'+escHtml(cd.text.split('\n')[0])+'</div>';
+  }
+  return h+'</div><span class="tlbl">'+label+'</span></div>';
+}
+/* The pages. Card ids are the classic set: 1 Grunt 7/7/7/7, 2 Hypeman 6s,
+   6 Sniper 4/4/8/8, 8 Gate 10/1/10/1, 9 Sensei 8s, 10 Southpaw 6/6/6/9,
+   13 Whetstone, 16 Hex, 19 High Ground. Sides run top, right, bottom, left. */
+const TUT_PAGES=[
+  {t:'Welcome to Teece',
+   art:()=>'<div class="tutart">'+tutGrid([
+       tutTeece(1,1),'',tutTeece(6,1),
+       '',tutTeece(9,0),'',
+       tutTeece(2,0),'',tutTeece(8,0)],{cls:'fit'})+'</div>',
+   body:'<p>Teece is a duel on a small board of panels. You and your opponent take turns putting down cards '+
+     'called <b>Teece</b>: yours have a teal border, theirs a red one.</p>'+
+     '<p>Every Teece has four numbers, one on each edge. When two enemies stand side by side, the bigger number '+
+     'on the edges that touch wins, and the smaller Teece is destroyed.</p>'+
+     '<p>Hold more of the board than the other side and you win. The next few pages show you how. They take '+
+     'about two minutes.</p>'},
+  {t:'Reading a Teece',
+   art:()=>'<div class="tutart"><div class="tanat">'+
+       '<span></span><span class="lab">top<b>4</b></span><span></span>'+
+       '<span class="lab">left<b>8</b></span>'+
+       '<div class="tbig"><div class="cell tcell">'+tutTeece(6,0,{dot:true})+'</div></div>'+
+       '<span class="lab">right<b>4</b></span>'+
+       '<span></span><span class="lab">bottom<b>8</b></span><span></span></div>'+
+       '<div class="tkey"><span><i class="sw"></i>yours</span><span><i class="sw o1"></i>theirs</span>'+
+       '<span><b class="up">8+</b> high</span><span><b class="down">0–2</b> low</span>'+
+       '<span><i class="dotx"></i>ability ready</span></div></div>',
+   body:'<p>The four numbers are how hard it hits on each edge: top, right, bottom and left. They are all it '+
+     'fights with, and effects spend the whole game pushing them up and down.</p>'+
+     '<p>A number in green is 8 or more, and one in red is 2 or less. A gold dot in the corner means one of '+
+     'your Teece has an ability ready to use.</p>'+
+     '<p class="fine">Hover over or tap any card, in your hand or on the board, and the <b>Detail</b> panel '+
+     'shows the whole card, including where every bonus on it came from.</p>'},
+  {t:'How a fight works',
+   art:()=>'<div class="tutart"><div class="tfight">'+tutGrid([
+       tutTeece(1,1,{cls:'loser',hot:{1:'lose'}}),tutTeece(10,0,{cls:'arrive',hot:{3:'win'}})],{w:2,cs:104})+'</div>'+
+       '<div class="cap">Your Southpaw lands beside their Grunt. Its left edge is <b>9</b> and the Grunt’s '+
+       'right edge is <b>7</b>, so the Grunt is destroyed.</div>'+
+       tutGrid([tutTeece(1,1,{hot:{1:'tie'}}),tutTeece(1,0,{hot:{3:'tie'}})],{cls:'tmini',w:2,cs:64})+
+       '<div class="cap">7 against 7 is a tie, and a tie does nothing.</div></div>',
+   body:'<p>Only enemies standing <b>side by side</b> fight: above, below, left or right. Only the two edges '+
+     'that touch are compared. The smaller number is destroyed, and a tie does nothing.</p>'+
+     '<p>There is no attack button. A fight happens the moment two enemies touch, and the whole board is '+
+     'checked again every time a number anywhere changes. Lowering a single number can lose a fight that was '+
+     'a tie a moment ago.</p>'+
+     '<p class="fine">A Teece with any number below zero is destroyed outright. A \u{1F6E1}️ badge is '+
+     '<b>Defence</b>, which soaks the difference: a Teece with Defence 2 only loses to an edge that beats it '+
+     'by three or more.</p>'},
+  {t:'Point your strong edges',
+   art:()=>'<div class="tutart">'+tutGrid([
+       '',tutTeece(1,1,{cls:'tdoom',hot:{2:'lose'}}),'',
+       tutTeece(2,1,{hot:{1:'win'}}),tutTeece(8,0,{cls:'tdoom',hot:{0:'win',3:'lose'}}),tutTeece(1,0),
+       {h:tutTeece(9,1),cls:'tfade'},'',''],{cls:'fit'})+
+       '<div class="cap">Your Gate’s <b>10</b> beats the Grunt’s 7 above it, but its <b>1</b> loses to '+
+       'the Hypeman’s 6 beside it. Both fights happen at once, so both Teece are destroyed.</div></div>',
+   body:'<p>A Teece fights <b>every</b> enemy it touches, with a different edge for each one, all at the same '+
+     'time. Where you put a Teece matters as much as which one you play.</p>'+
+     '<p>Point your big edges at the enemy, and your small ones at the wall, an empty panel or a friend. Teece '+
+     'on the same side never fight, and neither do Teece that only touch diagonally, so the Sensei in the corner '+
+     'is out of reach.</p>'},
+  {t:'Your turn',
+   art:()=>'<div class="tutart"><div class="ttrack">'+
+       '<span class="tk">Draw a card</span><span class="ar">→</span>'+
+       '<span class="tk">Play one Teece</span><span class="ar">→</span>'+
+       '<span class="tk">Equips, magic, battlegrounds</span><span class="ar">→</span>'+
+       '<span class="tk">Abilities</span><span class="ar">→</span>'+
+       '<span class="tk end">End Turn</span></div>'+
+       '<div class="tbar"><span>Choose a space for Grunt.</span><span class="btn">Cancel</span></div>'+
+       '<div class="cap">When the game needs an answer, the question appears in a bar like this above the board, '+
+       'and everything you can pick glows gold. <b>Cancel</b> or Esc backs out.</div></div>',
+   body:'<ul class="tutlist">'+
+     '<li><span class="n">1</span><span>Your turn starts with a draw. Everyone opens with five cards, and the '+
+       'first turn of the game has no draw.</span></li>'+
+     '<li><span class="n">2</span><span>Play <b>one Teece</b>: tap it in your hand, then tap an empty panel. '+
+       'Point at a panel first and the bar shows the numbers it would have there.</span></li>'+
+     '<li><span class="n">3</span><span>Play as many <b>equips, magic and battlegrounds</b> as you like.</span></li>'+
+     '<li><span class="n">4</span><span>Tap one of your Teece on the board to use its <b>abilities</b>. They '+
+       'appear as buttons just under the board.</span></li>'+
+     '<li><span class="n">5</span><span>Press <b>End Turn</b>. You can keep six cards at most; anything over '+
+       'that is thrown away at random.</span></li></ul>'+
+     '<p class="fine">If you have no Teece on the board and played none last turn, you must play one before '+
+     'you can end your turn.</p>'},
+  {t:'Four kinds of card',
+   art:()=>'<div class="tutart"><div class="thand">'+
+       tutHandCard(1,'Teece')+tutHandCard(13,'Equip')+tutHandCard(16,'Magic')+tutHandCard(19,'Battleground')+
+       '</div></div>',
+   body:'<ul class="tutlist">'+
+     '<li><span class="k">Teece</span><span>Goes onto an empty panel and fights. One per turn.</span></li>'+
+     '<li><span class="k">Equip</span><span>Attaches to one of your Teece for good. Put it on a Teece that is '+
+       'still in your hand, and that Teece arrives already wearing it.</span></li>'+
+     '<li><span class="k">Magic</span><span>Takes effect once, then goes to your graveyard.</span></li>'+
+     '<li><span class="k">Battleground</span><span>Is laid on panels of the board and changes whatever stands '+
+       'there. An empty panel shows what its battleground gives, like +3.</span></li></ul>'+
+     '<p class="fine">The biggest Teece, Minibosses and Bosses, ask you to sacrifice some of your own Teece '+
+     'from the board to play them.</p>'},
+  {t:'How to win',
+   art:()=>'<div class="tutart"><div class="tmeter">'+tutGrid([
+       tutTeece(1,0),tutTeece(9,0),'',
+       tutTeece(2,0),'',tutTeece(1,1),
+       tutTeece(8,0),tutTeece(10,0),''],{cls:'tmini'})+
+       '<div class="dombar"><div class="domlead" style="color:var(--p0)">4/4</div><div class="dommeter">'+
+       '<div class="domseg on t0"></div><div class="domseg on t0"></div>'+
+       '<div class="domseg on t0"></div><div class="domseg on t0"></div></div></div></div>'+
+       '<div class="cap">Five Teece to one is four ahead. End your turn like this and the game is yours.</div></div>',
+   body:'<ul class="tutlist">'+
+     '<li><span class="k">Take the field</span><span>End your turn <b>four Teece ahead</b> on the board. The '+
+       'meter beside the board lights one bar for every Teece of lead. Tokens do not count.</span></li>'+
+     '<li><span class="k">Wipe them out</span><span>A side with no Teece left anywhere, whether on the board, '+
+       'in hand or in the deck, is out.</span></li>'+
+     '<li><span class="k">Outlast them</span><span>When a player has to draw from an empty deck, whoever has '+
+       'more Teece on the board wins.</span></li></ul>'+
+     '<p class="fine">A few decks change these rules. Some can never win by taking the field, and one wins by '+
+     'filling the board. The <b>i</b> on each deck explains its rules.</p>'},
+  {t:'Your first game',
+   art:()=>{
+     const keys=Object.keys(DECKS||{}).slice(0,3);
+     if(!keys.length)return '';
+     return '<div class="tutart"><div class="tutrow">'+keys.map(k=>
+       '<div class="dcard nostat dsym" style="cursor:default"><div class="dsymbol">'+(DECK_SYM[k]||'❓')+
+       '</div><div class="dnm">'+escHtml(DECKS[k].name)+'</div><span class="dinfo" aria-hidden="true">i</span></div>'
+     ).join('')+'</div><div class="cap">Every deck plays differently. The <b>i</b> in the corner explains a deck '+
+       'without choosing it.</div></div>';
+   },
+   body:()=>'<ul class="tutlist">'+
+     '<li><span class="n">1</span><span>Choose <b>Decks</b>, then <b>vs Computer</b>. Pick your deck, then '+
+       'one for the computer.</span></li>'+
+     '<li><span class="n">2</span><span>Pick a difficulty. <b>Easy</b> makes a gentle first game.</span></li>'+
+     (tutSeen(TOUR_KEY)?'':'<li><span class="n">3</span><span>When your first turn begins, a short tour shows '+
+       'you where everything is on the screen.</span></li>')+
+     '</ul>'+
+     '<p class="fine"><b>Roguelike</b> drafts cards from every deck against a computer that gets stronger each '+
+     'level, and is best once you know your way around. <b>How to play</b> brings these pages back any time, '+
+     'from the menu or from the top of the game screen.</p>'}
+];
+let TUT=null;
+function openTutorial(first){
+  if(!HAS_DOM)return;
+  TUT={i:0,first:!!first};
+  document.getElementById('tutOverlay').classList.remove('hidden');
+  tutRender();
+}
+function closeTutorial(skip){
+  document.getElementById('tutOverlay').classList.add('hidden');
+  tutMark(TUT_KEY);
+  if(skip)tutMark(TOUR_KEY);
+  TUT=null;
+}
+function tutGo(d){
+  if(!TUT)return;
+  const n=TUT.i+d;
+  if(n<0||n>=TUT_PAGES.length)return;
+  TUT.i=n;
+  tutRender();
+}
+function tutRender(){
+  const box=document.getElementById('tutBox');
+  const pg=TUT_PAGES[TUT.i],n=TUT_PAGES.length,last=TUT.i===n-1;
+  /* The last page's buttons depend on where you are. From the menu it offers
+     the game it just described; over a game in progress, the way back to it
+     and the tour of the screen it is sitting on. */
+  const inGame=!!G;
+  const body=typeof pg.body==='function'?pg.body():pg.body;
+  let foot='<div class="tutdots" aria-hidden="true">';
+  for(let k=0;k<n;k++)foot+='<i'+(k===TUT.i?' class="on"':'')+'></i>';
+  foot+='</div>';
+  if(TUT.i)foot+='<button class="btn" id="tutBack">Back</button>';
+  if(!last)foot+='<button class="btn primary" id="tutNext">Next</button>';
+  else if(inGame)foot+=(G.over?'':'<button class="btn" id="tutTour">Tour the screen</button>')+
+    '<button class="btn primary" id="tutDone">Back to the game</button>';
+  else foot+='<button class="btn primary" id="tutPlay">Play vs Computer</button>';
+  box.innerHTML='<div class="tuthead"><span class="tutstep">How to play · '+(TUT.i+1)+' of '+n+'</span>'+
+    '<button class="tutskip" id="tutSkip">'+(TUT.first&&!last?'Skip tutorial':'Close')+'</button></div>'+
+    '<div class="tutbody"><h2 id="tutTitle">'+pg.t+'</h2>'+pg.art()+body+'</div>'+
+    '<div class="tutnav">'+foot+'</div>';
+  const tb=box.querySelector('.tutbody'),nav=box.querySelector('.tutnav');
+  tb.scrollTop=0;
+  const more=()=>nav.classList.toggle('more',tb.scrollHeight-tb.scrollTop-tb.clientHeight>4);
+  tb.addEventListener('scroll',more,{passive:true});
+  more();
+  const on=(id,f)=>{const b=document.getElementById(id);if(b)b.addEventListener('click',f);};
+  on('tutSkip',()=>closeTutorial(TUT.first&&!last));
+  on('tutBack',()=>tutGo(-1));
+  on('tutNext',()=>tutGo(1));
+  on('tutDone',()=>closeTutorial(false));
+  on('tutTour',()=>{closeTutorial(false);startTour();});
+  on('tutPlay',()=>{closeTutorial(false);start('deck',true);});
+  const focus=document.getElementById('tutNext')||document.getElementById('tutPlay')||document.getElementById('tutDone');
+  if(focus)focus.focus({preventScroll:true});
+}
+
+/* The tour. Each stop is a real element on the game screen; one that is not
+   showing right now (a collapsed hand, no other seats) is left out rather than
+   pointed at nothing. */
+let TOUR=null;
+function tourStops(){
+  if(!G)return [];
+  const opp=document.getElementById('oppHands');
+  const stops=[
+    {el:opp&&!opp.classList.contains('collapsed')&&opp.children.length?opp:null,
+     t:PLAYERS()>2?'The other hands':(G.vsAI?'What the computer holds':'Your opponent’s hand'),
+     x:'Hands are played face up, so this is every card the other side is holding. Plan around it. '+
+       '<b>Hide</b> tucks it out of the way.'},
+    {el:document.querySelector('.boardrow'),t:'The board',
+     x:'Teece go onto the empty panels. When the game asks you to choose something, the choices glow gold and '+
+       'the question appears in the bar just above.'},
+    {el:document.getElementById('domBar'),t:'The race',
+     x:'One light for every Teece you lead by on the board. Fill it at the end of your turn and the game is yours.'},
+    {el:document.getElementById('myHand'),t:'Your hand',
+     x:'Tap a card to play it. Faded cards cannot be played right now, usually because this turn’s Teece '+
+       'is already down. <b>Square cards</b> shrinks every card to its drawing and name.'},
+    {el:document.getElementById('turnPanel'),t:'Turn and End Turn',
+     x:'Whose turn it is, and what each side has left in hand, deck and graveyard. Press <b>End Turn</b> when '+
+       'you are done.'},
+    {el:document.getElementById('detail'),t:'Detail',
+     x:'Hover over or tap anything, whether a card, a Teece or a panel, to read it in full here. Tap one of '+
+       'your own Teece to select it, and its abilities appear as buttons under the board.'},
+    {el:document.getElementById('logPanel'),t:'Log',
+     x:'Everything that has happened, with the newest at the top. When something dies and you are not sure '+
+       'why, the answer is here.'},
+    {el:document.getElementById('helpBtn'),t:'How to play',
+     x:'The rules are always one tap away. Good luck.'}
+  ];
+  return stops.filter(s=>s.el&&s.el.getClientRects().length);
+}
+function startTour(){
+  if(!HAS_DOM||!G)return;
+  const stops=tourStops();
+  if(!stops.length)return;
+  TOUR={i:0,stops};
+  document.getElementById('tourLayer').classList.remove('hidden');
+  tourShow();
+}
+function endTour(){
+  TOUR=null;
+  tutMark(TOUR_KEY);
+  document.getElementById('tourLayer').classList.add('hidden');
+}
+function tourGo(d){
+  if(!TOUR)return;
+  const n=TOUR.i+d;
+  if(n<0)return;
+  if(n>=TOUR.stops.length){endTour();return;}
+  TOUR.i=n;
+  tourShow();
+}
+function tourShow(){
+  const st=TOUR.stops[TOUR.i],n=TOUR.stops.length,last=TOUR.i===n-1;
+  const card=document.getElementById('tourCard');
+  card.innerHTML='<div class="tstep">Tour · '+(TOUR.i+1)+' of '+n+'</div>'+
+    '<h3 id="tourTitle">'+st.t+'</h3><p>'+st.x+'</p>'+
+    '<div class="tnav">'+(last?'<span class="tutskip"></span>':'<button class="tutskip" id="tourSkip">Skip tour</button>')+
+    (TOUR.i?'<button class="btn" id="tourBack">Back</button>':'')+
+    '<button class="btn primary" id="tourNext">'+(last?'Let’s play':'Next')+'</button></div>';
+  const on=(id,f)=>{const b=document.getElementById(id);if(b)b.addEventListener('click',f);};
+  on('tourSkip',endTour);
+  on('tourBack',()=>tourGo(-1));
+  on('tourNext',()=>tourGo(1));
+  tourScroll();
+  tourPlace();
+  document.getElementById('tourNext').focus({preventScroll:true});
+}
+/* Bring the stop into the window with room left for the card: the two are
+   centred together when they fit, and the stop goes to the top of the window
+   when they do not, with the card over its foot. */
+function tourScroll(){
+  const el=TOUR.stops[TOUR.i].el,card=document.getElementById('tourCard');
+  const vh=window.innerHeight,m=12,ch=card.offsetHeight;
+  const r=el.getBoundingClientRect();
+  const both=r.height+m+ch;
+  const want=both<=vh-2*m?(vh-both)/2:m;
+  window.scrollBy({top:r.top-want,left:0,behavior:'auto'});
+}
+function tourPlace(){
+  if(!TOUR)return;
+  const el=TOUR.stops[TOUR.i].el;
+  const ring=document.getElementById('tourRing'),card=document.getElementById('tourCard');
+  const vw=document.documentElement.clientWidth,vh=window.innerHeight,m=12,pad=6;
+  const r=el.getBoundingClientRect();
+  const L=Math.max(4,r.left-pad),T=Math.max(4,r.top-pad);
+  const R=Math.min(vw-4,r.right+pad),B=Math.min(vh-4,r.bottom+pad);
+  ring.style.left=L+'px';ring.style.top=T+'px';
+  ring.style.width=Math.max(0,R-L)+'px';ring.style.height=Math.max(0,B-T)+'px';
+  const cw=card.offsetWidth,ch=card.offsetHeight;
+  let top;
+  if(vh-B>=ch+m)top=B+m;
+  else if(T>=ch+m)top=T-m-ch;
+  else top=vh-ch-m;
+  const left=Math.min(Math.max(m,r.left+r.width/2-cw/2),vw-cw-m);
+  card.style.top=Math.max(m,top)+'px';
+  card.style.left=Math.max(m,left)+'px';
+}
+/* Called as a human seat's turn is handed over. Waits a beat so the turn has
+   finished drawing, and gives up quietly on anything that would make pointing
+   at the screen wrong: a question already open, another overlay up, the game
+   gone. It is asked again next turn, so a turn it skips costs nothing. */
+function maybeTour(){
+  if(!HAS_DOM||!G||G.over||TOUR||tutSeen(TOUR_KEY))return;
+  const g=G;
+  setTimeout(()=>{
+    if(G!==g||G.over||G.pending||G.turn!==0||TOUR||tutSeen(TOUR_KEY))return;
+    if(document.querySelector('.overlay:not(.hidden)'))return;
+    startTour();
+  },450);
+}
+if(HAS_DOM){
+  window.addEventListener('resize',()=>{if(TOUR)tourPlace();});
+  window.addEventListener('scroll',()=>{if(TOUR)tourPlace();},{passive:true});
+  /* Caught at the window, ahead of the game's own Escape handler, so closing a
+     page of the tutorial never also cancels a question the game is asking
+     underneath it. */
+  window.addEventListener('keydown',e=>{
+    if(TOUR){
+      if(e.key==='Escape')endTour();
+      else if(e.key==='ArrowRight')tourGo(1);
+      else if(e.key==='ArrowLeft')tourGo(-1);
+      else return;
+    }else if(TUT){
+      if(e.key==='Escape')closeTutorial(TUT.first&&TUT.i<TUT_PAGES.length-1);
+      else if(e.key==='ArrowRight')tutGo(1);
+      else if(e.key==='ArrowLeft')tutGo(-1);
+      else return;
+    }else return;
+    e.preventDefault();e.stopPropagation();
+  },true);
+}
+
 /* ============ boot & mode select ============ */
 async function start(mode,vsAI){
   if(!HAS_DOM)return;
@@ -16666,6 +17206,8 @@ if(HAS_DOM){
   document.getElementById('endTurn').onclick=endTurn;
   document.getElementById('restart').onclick=restart;
   document.getElementById('endRestart').onclick=restart;
+  document.getElementById('howBtn').onclick=()=>openTutorial(false);
+  document.getElementById('helpBtn').onclick=()=>openTutorial(false);
   document.getElementById('toggleOppHands').onclick=()=>{
     const oh=document.getElementById('oppHands');
     const btn=document.getElementById('toggleOppHands');
@@ -16693,6 +17235,9 @@ if(HAS_DOM){
     }
   });
   render();
+  /* A first visit opens on the rules rather than on a menu of modes that mean
+     nothing yet. */
+  if(!tutSeen(TUT_KEY))openTutorial(true);
 }
 /* ============ exports for harness ============ */
 if(typeof module!=='undefined'){
