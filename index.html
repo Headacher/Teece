@@ -68,6 +68,17 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card.arted .ct,.card.arted .cn,.card.arted .cs{position:relative;z-index:1;
   text-shadow:0 0 3px var(--cardbg),0 0 3px var(--cardbg),0 0 2px var(--cardbg)}
 .card.arted.t-magic .ascii,.card.arted.t-equip .ascii,.card.arted.t-ground .ascii{opacity:.4}
+/* Text view: the name first, the drawing under it, and nothing laid over the
+   drawing but the side numbers. A magic, equip or battleground card stacks
+   name, drawing and rules down the card; a Teece card puts its name just under
+   the top number and gives the drawing the space between that and the bottom
+   one. Square view keeps its own centred layout. */
+body:not(.sqhand) .card.t-magic .ascii,body:not(.sqhand) .card.t-equip .ascii,body:not(.sqhand) .card.t-ground .ascii{
+  position:relative;inset:auto;flex:0 0 auto;margin:4px -4px 2px;opacity:.6;order:2}
+body:not(.sqhand) .card .cs{order:3}
+body:not(.sqhand) .card.t-teece .hcn,body:not(.sqhand) .card.arted.t-teece .hcn{position:absolute;top:21px;bottom:auto;
+  transform:none;z-index:1}
+body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 58px);min-height:40px}
 .discardBtn{position:absolute;left:4px;bottom:4px;font-size:9px;letter-spacing:.06em;text-transform:uppercase;
   background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:5px;padding:2px 5px;
   cursor:pointer;z-index:2}
@@ -368,15 +379,23 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece .actdot{position:absolute;top:2px;left:4px;width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px var(--gold)}
 
 @keyframes dieShake{
-  0%{transform:translateX(0)}20%{transform:translateX(-3px)}40%{transform:translateX(3px)}
-  60%{transform:translateX(-2px)}80%{transform:translateX(2px)}100%{transform:translateX(0);opacity:.3}}
-.teece.dying{animation:dieShake .19s ease-in-out both;box-shadow:inset 0 0 0 3px var(--down)}
+  0%{transform:translateX(0)}12%{transform:translateX(-4px) rotate(-2deg)}24%{transform:translateX(4px) rotate(2deg)}
+  36%{transform:translateX(-3px)}48%{transform:translateX(2px)}60%{transform:translateX(0);opacity:1}
+  100%{transform:scale(.82);opacity:.1;filter:grayscale(1)}}
+.teece.dying{animation:dieShake .42s ease-in both;box-shadow:inset 0 0 0 3px var(--down)}
+/* The winner of a fight swells and flares before the loser goes. */
+@keyframes strikeFlare{0%{transform:scale(1)}45%{transform:scale(1.1);box-shadow:0 0 16px 4px rgba(201,162,39,.85)}
+  100%{transform:scale(1);box-shadow:0 0 0 0 rgba(201,162,39,0)}}
+.teece.strike{animation:strikeFlare .24s ease-out both;z-index:5}
 @keyframes zapPulse{0%{box-shadow:inset 0 0 0 0 rgba(201,162,39,0)}
-  45%{box-shadow:inset 0 0 0 3px var(--gold);background:#2a2015}
+  40%{box-shadow:inset 0 0 0 4px var(--gold),0 0 12px rgba(201,162,39,.5);background:#2a2015}
   100%{box-shadow:inset 0 0 0 0 rgba(201,162,39,0)}}
-.cell.zap{animation:zapPulse .17s ease-out}
-@keyframes placePop{0%{transform:scale(.84);opacity:.4}100%{transform:scale(1);opacity:1}}
-.teece.placed{animation:placePop .15s ease-out}
+.cell.zap{animation:zapPulse .26s ease-out}
+/* A summon drops onto the panel: in from a little above and larger, a small
+   overshoot, then settled. */
+@keyframes placePop{0%{transform:translateY(-10px) scale(1.18);opacity:0}
+  60%{transform:translateY(0) scale(.96);opacity:1}100%{transform:scale(1);opacity:1}}
+.teece.placed{animation:placePop .3s cubic-bezier(.2,.8,.3,1.2) both}
 .teece .shield{position:absolute;left:0;right:0;bottom:1px;text-align:center;font-size:9px;
   letter-spacing:.02em;color:#6b5a3c;font-weight:700}
 #detail .dlock{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
@@ -533,6 +552,10 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .counts .cn{color:var(--cream2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .counts .cv{text-align:right;font-variant-numeric:tabular-nums;color:var(--cream2)}
 .counts .cv.low{color:var(--down);font-weight:700}
+/* The grave count is the way into the graveyard, so it looks pressable. */
+.counts .gravebtn{font:inherit;font-variant-numeric:tabular-nums;background:var(--panel2);border:1px solid var(--line);
+  border-radius:5px;padding:1px 7px;margin-left:auto;cursor:pointer;color:var(--cream2);min-width:28px}
+.counts .gravebtn:hover{border-color:var(--gold);color:var(--cream)}
 #detail .dn{font-family:var(--disp);font-size:20px}
 #detail .dsep{margin-top:9px;padding-top:7px;border-top:1px solid var(--line);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .optcard{border-color:var(--gold)!important}
@@ -940,7 +963,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:99,date:'2026-09-27'};
+const VERSION={build:100,date:'2026-09-27'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -12388,6 +12411,14 @@ async function resolveCombat(){
       }
     }
     if(dodged){deaths=scanDeaths(G.board);if(!deaths.length)break;}
+    /* The fight, in two beats: whatever won lunges at what it beat, then the
+       loser shakes and fades. A death with no killer -- a number pushed below
+       zero -- goes straight to the second beat. */
+    const strikers=[];
+    for(const d of deaths)for(const kuid of (d.killers||[]))
+      for(let i2=0;i2<BN;i2++){const k=G.board[i2].teece;if(k&&k.uid===kuid&&strikers.indexOf(i2)<0)strikers.push(i2);}
+    if(strikers.length)await anim(strikers,'strike');
+    if(stale(ep))return;
     await anim(deaths.map(d=>d.cell),'dying',190);
     G._deathWave={};
     for(const d of deaths)G._deathWave[d.t.uid]=d.t;
@@ -14101,11 +14132,18 @@ async function startTurn(){
   if(isAIP(p)){await wait(420);if(stale(ep))return;if(G.tut)await tutOppTurn();else await aiTurn();}
 }
 const wait=ms=>HAS_DOM?new Promise(r=>setTimeout(r,ms)):Promise.resolve();
+/* How long each effect holds the game, set here once rather than at the eighty
+   places that call it. Long enough to see what happened -- a Teece landing, a
+   fight being won, a death -- and short enough that a computer turn of four
+   or five of them still moves. The CSS keyframes are matched to these. With
+   reduced motion the animations are off, so the pauses shrink to a beat. */
+const ANIM_MS={placed:300,strike:240,dying:420,zap:260};
+const REDUCED_MOTION=HAS_DOM&&typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 async function anim(cells,cls,ms){
   if(!HAS_DOM||!G||!cells||!cells.length)return;
   G.anim={cells:cells.filter(c=>c!=null),cls};
   render();
-  await wait(ms||150);
+  await wait(REDUCED_MOTION?(ms||150):(ANIM_MS[cls]||ms||150));
   G.anim=null;
   render();
 }
@@ -15649,7 +15687,7 @@ function renderBoard(){
       const s=effSides(G.board,i),kws=kwOf(G.board,i),aul=actsOf(G.board,i);
       const tp=document.createElement('div');
       const bart=CARD_ART[t.cardId];
-      tp.className='teece o'+t.owner+(bart?' arted':'')+((an==='dying'||an==='placed')?' '+an:'');
+      tp.className='teece o'+t.owner+(bart?' arted':'')+((an==='dying'||an==='placed'||an==='strike')?' '+an:'');
       tp.setAttribute('data-card-deck',getCardDeck(t.cardId));
       /* One badge row under the name: a bow for Ranged, a shield and its number
          for Defence, a turning arrow and its number for how many more times an
@@ -15917,6 +15955,17 @@ function syncHandSlots(){
   for(const child of Array.from(box.children))if(want.indexOf(child.id)<0)child.remove();
   for(let p=1;p<PLAYERS();p++)handSlot(p);
 }
+/* Whose cards this screen may show. Against the computer, only yours. At a
+   hotseat everyone shares the screen, so only the hand whose turn it is -- and
+   any hand a question is being put to right now, since its owner has to be
+   able to answer it. The developer code shows everything. */
+let SHOW_ALL_HANDS=false;
+function handVisible(p){
+  if(SHOW_ALL_HANDS||!G)return true;
+  if(G.pending&&G.pending.p===p)return true;
+  if(G.vsAI)return !isAIP(p);
+  return p===G.turn;
+}
 function renderHand(p){
   const pl=G.players[p],h=handSlot(p);
   if(!h)return;
@@ -15939,6 +15988,17 @@ function renderHand(p){
   }
   const pd=G.pending;
   const targeting=!!(pd&&pd.kind==='cell'&&pd.hands&&pd.p===p);
+  /* A hand nobody at this screen should see is dealt face down: its count, and
+     nothing else. */
+  if(!handVisible(p)){
+    for(let i=0;i<pl.hand.length;i++){
+      const back=document.createElement('div');
+      back.className='card back';
+      back.setAttribute('aria-label','A card in '+pposs(p)+' hand');
+      h.appendChild(back);
+    }
+    return;
+  }
   for(let i=0;i<pl.hand.length;i++){
     const id=pl.hand[i],cd=CARDS[id];
     const worn=plateOf(p,i);
@@ -16517,9 +16577,39 @@ function renderCounts(){
     h+='<span class="cn"><span class="dot d'+p+'"></span>'+pname(p)+tag+out+'</span>'+
       '<span class="cv">'+pl.hand.length+'</span>'+
       '<span class="cv'+(pl.deck.length<=2&&!pl.noDeckOut&&G.mode!=='rogue'?' low':'')+'">'+pl.deck.length+'</span>'+
-      '<span class="cv">'+pl.grave.length+'</span>';
+      '<button type="button" class="cv gravebtn" data-p="'+p+'" title="See '+pposs(p)+' graveyard"'+
+        ' aria-label="'+pname(p)+': '+pl.grave.length+' in the graveyard. Show them.">'+pl.grave.length+'</button>';
   }
   c.innerHTML=h;
+  for(const b of c.querySelectorAll('.gravebtn'))b.onclick=()=>showGrave(+b.dataset.p);
+}
+/* A graveyard is open information: either side's can be read at any time, the
+   last card to go in at the top. Shown in the deck-info overlay, card by card
+   the way the deck pages list theirs. */
+function showGrave(p){
+  if(!G||!G.players[p])return;
+  const box=document.getElementById('infoBox'),ov=document.getElementById('infoOverlay');
+  const grave=G.players[p].grave.slice().reverse();
+  const who=pname(p)==='You'?'Your':pname(p)+'\u2019s';
+  let h='<h2 style="margin:0">'+escHtml(who)+' graveyard</h2>'+
+    '<div class="icount">'+grave.length+' card'+(grave.length===1?'':'s')+(grave.length>1?' \u00b7 most recent first':'')+'</div>';
+  if(!grave.length)h+='<p>Nothing has gone to this graveyard yet.</p>';
+  else{
+    h+='<div class="cardList">';
+    for(const cid of grave){
+      const c=CARDS[cid];if(!c)continue;
+      h+='<div class="cardItem" data-type="'+c.type+'">';
+      if(c.type==='teece'&&c.sides)h+='<div class="cstats">'+c.sides.map(n=>'<div class="stat">'+n+'</div>').join('')+'</div>';
+      h+='<div class="cname">'+escHtml(c.name)+'</div><div class="ctext">'+escHtml(c.type)+(c.text?' \u2014 '+escHtml(c.text):'')+'</div></div>';
+    }
+    h+='</div>';
+  }
+  h+='<div class="row"><button class="btn primary" id="infoClose">Close</button></div>';
+  box.innerHTML=h;
+  ov.classList.remove('hidden');
+  const close=()=>ov.classList.add('hidden');
+  document.getElementById('infoClose').addEventListener('click',close);
+  ov.onclick=e=>{if(e.target===ov)close();};
 }
 /* ---- the meter ----
    Where the race stands, drawn rather than written. "Four fielded" is not a
@@ -17209,6 +17299,19 @@ function tutCoach(){
   }
 }
 if(HAS_DOM){
+  /* Developer code: up up down down left right left right shows every hand, and
+     the same again hides them. Watched on its own listener, which never stops
+     the keys reaching anything else. */
+  const CODE=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight'];
+  let got=0;
+  window.addEventListener('keydown',e=>{
+    got=e.key===CODE[got]?got+1:(e.key===CODE[0]?1:0);
+    if(got<CODE.length)return;
+    got=0;
+    SHOW_ALL_HANDS=!SHOW_ALL_HANDS;
+    toast('Developer: every hand '+(SHOW_ALL_HANDS?'shown':'hidden')+'.');
+    if(G)render();
+  });
   /* Caught at the window, ahead of the game's own Escape handler. */
   window.addEventListener('keydown',e=>{
     if(!RULES)return;

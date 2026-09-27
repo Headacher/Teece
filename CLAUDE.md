@@ -235,6 +235,20 @@ and must end on "Tutorial complete" on desktop and a phone viewport alike.
 classic cards by id. They quote numbers the engine keeps elsewhere (`WIN_LEAD`,
 five cards to open, six to keep); re-read them when those change.
 
+### Hands are hidden, and a developer code shows them
+
+`handVisible(p)` decides whose cards a hand row draws: against the computer only
+yours, at a hotseat only the seat whose turn it is (plus any seat a prompt is
+asking right now). Every other hand is dealt face down. Typing up up down down
+left right left right toggles `SHOW_ALL_HANDS` to show every hand. A page test
+that reads the computer's hand from the DOM must turn that on first; `G` always
+has the real hands.
+
+Animation lengths live in `ANIM_MS`, not at the call sites, and the CSS
+keyframes (`placePop`, `strikeFlare`, `dieShake`, `zapPulse`) are matched to
+them. A fight is two beats in `resolveCombat`: the killers `strike`, then the
+losers go `dying`.
+
 ### An ability reads as X : Y ; Z
 
 X is what turns it on, Y is what it costs, Z is what it does. Keep the three
