@@ -528,6 +528,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 #detail .dpart.base{border-bottom:1px dotted var(--line);padding-bottom:3px}
 #detail .dpart.note{display:block;color:var(--gold);font-size:11px}
 #detail .abtn{margin-top:8px;margin-right:6px}
+#detail .abtn.silenced{text-decoration:line-through;opacity:.6}
 #log{height:180px;overflow:auto;font-size:11.5px;line-height:1.5;color:var(--muted)}
 #log div{padding:1px 0;border-bottom:1px solid rgba(255,255,255,.04)}
 #log div:first-child{color:var(--cream)}
@@ -927,7 +928,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:97,date:'2026-09-27'};
+const VERSION={build:98,date:'2026-09-27'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3844,8 +3845,8 @@ const CARDS = {
  /* ---- Runeblade battlegrounds ---- */
  904:{name:'Runestone',type:'ground',gSheath:true,gRuneStone:{n:3,held:-3},
     text:'You can equip the Runeblade to this battleground: play it from your hand onto this panel. A Teece on this battleground has +3 — or -3 instead, while the Runeblade is set in it.'},
- 905:{name:'Barrow Forge',type:'ground',gRuneForge:3,
-    text:'When a Teece equipped with the Runeblade is destroyed on this battleground, put a counter on it. Remove 3 counters from this battleground: forge another Runeblade into your hand. It works exactly like the original.'},
+ 905:{name:'Barrow Forge',type:'ground',gRuneForge:2,
+    text:'When a Teece equipped with the Runeblade is destroyed on this battleground, put a counter on it. Remove 2 counters from this battleground: forge another Runeblade into your hand. It works exactly like the original.'},
 };
 const DEF=t=>CARDS[t.cardId];
 /* What an equip actually grants, once the modality it was bolted on with is
@@ -15791,7 +15792,8 @@ function showDetail(i){
   const locked=G.detailLock===i;
   let html=(locked?'<div class="dlock">Selected</div>':'')+
     '<div class="dn">'+nm(t)+'</div><div class="dt">'+cd.text+'</div>'+
-    (cd.flavor?'<div class="dt" style="font-style:italic;opacity:.8">'+cd.flavor+'</div>':'');
+    (cd.flavor?'<div class="dt" style="font-style:italic;opacity:.8">'+cd.flavor+'</div>':'')+
+    (t.silenced?'<div class="dt" style="color:var(--bad);font-weight:bold">⛔ Silenced</div>':'');
   const un=undyLeft(t);
   if(un>0){
     const u=undyOf(t.cardId),next=(u.y||0)*((t.undyUsed||0)+1);
@@ -15861,8 +15863,8 @@ function showDetail(i){
   }
   for(const ent of (t.owner===G.turn?negatedActs(G.board,i):[])){
     const btn=document.createElement('button');
-    btn.className='btn abtn';
-    btn.textContent=ent.act.name+' (silenced)';
+    btn.className='btn abtn silenced';
+    btn.textContent=ent.act.name;
     btn.title=nm(t)+' was silenced: this ability is negated for the rest of the game.';
     btn.disabled=true;
     d.appendChild(btn);
@@ -16099,14 +16101,15 @@ function statusesFor(p){
     'A Curse of Forgetting is on you: your next '+(pl.forget===1?'draw is':pl.forget+' draws are')+' discarded on sight.');
 
   /* --- abilities that have been negated outright --- */
-  for(let i=0;i<BN;i++){
+  /* Silenced Teece now shown on the card detail itself, not in notifications */
+  /*for(let i=0;i<BN;i++){
     const t=b[i].teece;
     if(!t||!t.silenced||!sameTeam(t.owner,p))continue;
     if(!(DEF(t).act||[]).length)continue;
     push('silenced'+t.uid,'bad','Silenced: '+nm(t),
       nm(t)+' was silenced. Its '+(DEF(t).act||[]).map(a=>a.name).join(' and ')+
       ' cannot be activated again for the rest of the game, though the card still describes it.');
-  }
+  }*/
 
   /* --- and the two things a Solar deck leaves on a body --- */
   for(let i=0;i<BN;i++){
@@ -16215,14 +16218,15 @@ function statusesFor(p){
     'Cursed for the rest of the game, losing 2 permanently on every move: '+theirs.join(', ')+'.');
 
   /* --- silenced Teece --- */
-  for(let i=0;i<BN;i++){
+  /* Silenced Teece now shown on the card detail itself, not in notifications */
+  /*for(let i=0;i<BN;i++){
     const t=b[i].teece;
     if(!t||!t.silenced)continue;
     const ally=sameTeam(t.owner,p);
     push('silenced'+t.uid,ally?'bad':'good','Silenced: '+nm(t),
       nm(t)+' is silenced: its abilities and its aura do nothing, and it no longer gets back up '+
       'if it was Undying.');
-  }
+  }*/
 
   /* --- modalities. Read the same sources as modalCtl, but never consume
          G.modalNext, which only firing a modality is allowed to do. --- */
