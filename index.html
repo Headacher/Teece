@@ -774,7 +774,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:95,date:'2026-09-27'};
+const VERSION={build:96,date:'2026-09-27'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3638,8 +3638,8 @@ const CARDS = {
     text:'The Runeblade itself, standing on the field as an 8/8/8/8 Teece with Flying. When it is destroyed the Runeblade goes to your graveyard, and returning it to your hand lifts it off the field. It is the sword, not a warrior: it never counts toward holding the field.'},
  886:{name:'Sigil-Sworn Warrior',type:'teece',sides:[5,5,5,5],bonus:{when:'rune',n:4},
     text:'While wielding the Runeblade: +4.'},
- 887:{name:'Runeblade Elder',type:'teece',sides:[1,2,2,3],bonus:{when:'rune',n:8},
-    text:'While wielding the Runeblade: +8.'},
+ 887:{name:'Runeblade Elder',type:'teece',sides:[1,2,2,3],bonus:{when:'rune',n:7},
+    text:'While wielding the Runeblade: +7.'},
  888:{name:'Sigil Hurler',type:'teece',sides:[6,6,9,7],kwWhen:{when:'rune',kw:['ranged']},
     text:'While wielding the Runeblade: Ranged.'},
  889:{name:'Skyleap Raider',type:'teece',sides:[6,7,6,6],kwWhen:{when:'rune',kw:['flying']},
@@ -3662,10 +3662,10 @@ const CARDS = {
     text:'While any Teece is equipped with the Runeblade: -5.'},
  895:{name:'Blade-Sworn Squire',type:'teece',sides:[3,3,3,3],runeGuard:true,
     text:'If this is about to be destroyed while it is equipped with the Runeblade: destroy the Runeblade instead and move this one space. Then this cannot be destroyed until the end of your next turn.'},
- 896:{name:'Tribal Chieftain',type:'teece',sides:[9,9,9,9],sac:1,
+ 896:{name:'Tribal Chieftain',type:'teece',sides:[7,7,7,7],sac:1,
     aura:{who:'ally',where:'global',n:2,runeOnly:true,includeSelf:true},
     text:'Sacrifice one fielded Teece to play. The ally that wields the Runeblade has +2.'},
- 897:{name:'The Ancestor-Smith',type:'teece',sides:[12,12,12,12],sac:2,
+ 897:{name:'The Ancestor-Smith',type:'teece',sides:[11,11,11,11],sac:2,
     onPlay:[{fx:'runeCreate'}],
     text:'Sacrifice two fielded Teece to play. When played: create a second Runeblade and equip it to this. It works exactly like the first.'},
  /* ---- Runeblade magic ---- */
