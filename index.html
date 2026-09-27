@@ -32,7 +32,6 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outl
 header{grid-column:1/-1;display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding-bottom:8px}
 header h1{font-family:var(--disp);font-size:34px;font-weight:400;margin:0;letter-spacing:.02em}
 header .sub{color:var(--muted);font-size:12px;letter-spacing:.16em;text-transform:uppercase}
-header #helpBtn{margin-left:auto;align-self:center;padding:4px 10px}
 main{display:flex;flex-direction:column;gap:12px;align-items:center}
 
 .handrow{width:100%;min-height:108px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
@@ -53,17 +52,22 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .card .ct{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#7a6a4d}
 .card .cn{font-family:var(--disp);font-size:15px;line-height:1.05}
 .card .cs{font-size:11px;font-weight:700;margin-top:auto}
-.card .ascii{position:absolute;top:10px;right:8px;bottom:11px;left:8px;margin:0;z-index:0;
-  pointer-events:none;overflow:hidden;background:transparent;color:var(--artink);opacity:.5;
+.card{container-type:inline-size}
+/* The drawing is the face of the card: as wide as the card, centred behind the
+   name and the numbers, and just faint enough for them to read over it. Sized
+   off the card's own width (13 columns of monospace are about 7.8em), so it
+   fills a hand card, a board panel and a draft card alike. */
+.card .ascii{position:absolute;inset:4px;margin:0;z-index:0;
+  pointer-events:none;overflow:hidden;background:transparent;color:var(--artink);opacity:.72;
   display:flex;align-items:center;justify-content:center;
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Courier New',monospace;
-  font-size:8px;line-height:1.02;white-space:pre}
+  font-size:10px;font-size:calc(100cqw / 8.3);line-height:1.02;white-space:pre}
 /* the face has to stay readable over the drawing */
 .card.arted .hcn,.card.arted .hs{text-shadow:0 0 3px var(--cardbg,var(--cream)),0 0 3px var(--cardbg,var(--cream)),0 0 2px var(--cardbg,var(--cream))}
 .card.arted .hcn{position:relative;z-index:1}
 .card.arted .ct,.card.arted .cn,.card.arted .cs{position:relative;z-index:1;
   text-shadow:0 0 3px var(--cardbg),0 0 3px var(--cardbg),0 0 2px var(--cardbg)}
-.card.arted.t-magic .ascii,.card.arted.t-equip .ascii,.card.arted.t-ground .ascii{opacity:.26}
+.card.arted.t-magic .ascii,.card.arted.t-equip .ascii,.card.arted.t-ground .ascii{opacity:.4}
 .discardBtn{position:absolute;left:4px;bottom:4px;font-size:9px;letter-spacing:.06em;text-transform:uppercase;
   background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:5px;padding:2px 5px;
   cursor:pointer;z-index:2}
@@ -333,7 +337,6 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .teece .s1{right:4px;top:50%;transform:translateY(-50%)}
 .teece .s2{bottom:1px;left:50%;transform:translateX(-50%)}
 .teece .s3{left:4px;top:50%;transform:translateY(-50%)}
-.teece .up{color:var(--up)} .teece .down{color:var(--down)}
 .teece .eq{position:absolute;top:2px;right:4px;font-size:8px;color:#7a6a4d;letter-spacing:.05em}
 /* Tight enough that a bow, a shield and a turning arrow together still sit in
    the gap the side numbers leave. */
@@ -354,11 +357,12 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
    way and in the colour of a thing that has been hit. */
 .teece .rgd .stun{font-size:12px;line-height:1;
   filter:drop-shadow(0 0 4px rgba(255,196,64,.9))}
-.teece .ascii{position:absolute;top:12px;right:5px;bottom:12px;left:5px;margin:0;z-index:0;
-  pointer-events:none;overflow:hidden;background:transparent;color:var(--artink);opacity:.46;
+.teece{container-type:size}
+.teece .ascii{position:absolute;inset:2px;margin:0;z-index:0;
+  pointer-events:none;overflow:hidden;background:transparent;color:var(--artink);opacity:.72;
   display:flex;align-items:center;justify-content:center;
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Courier New',monospace;
-  font-size:7px;line-height:1.02;white-space:pre}
+  font-size:9px;font-size:calc(100cqw / 8.3);line-height:1.02;white-space:pre}
 .teece.arted .mid,.teece.arted .s{text-shadow:0 0 3px var(--cardbg),0 0 3px var(--cardbg),0 0 2px var(--cardbg)}
 .teece.arted .s{z-index:1}
 .teece .actdot{position:absolute;top:2px;left:4px;width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px var(--gold)}
@@ -400,6 +404,23 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
   body.actpin #app{padding-bottom:var(--actpin,110px)}
 }
 button,.teece,.cell,.card{touch-action:manipulation}
+/* Every number sits on a chip of its own. Printed straight onto the card it was
+   dark ink on crimson, pale text on cream and green on green depending on the
+   deck, and the drawing behind it made it worse; on a chip it reads the same
+   on every card in the game. */
+.teece .s,.card .hs,.dcard .ds{background:rgba(16,12,9,.8);color:#f7f0e2;border-radius:4px;padding:0 3px;
+  min-width:1.3em;text-align:center;line-height:1.25;text-shadow:none!important;
+  box-shadow:0 0 0 1px rgba(255,255,255,.1)}
+.card .hs.pl{color:var(--gold)}
+/* Chips sit flush to the edges and the name keeps to the middle between them:
+   a chip is wider than a bare number was, and a name squeezed any harder
+   breaks mid-word. */
+.teece .s{font-size:13px;padding:0 2px;min-width:1.15em}
+.teece .s1{right:2px} .teece .s3{left:2px}
+.teece .mid{padding:0 18px}
+.card .hs{font-size:12px;padding:0 2px;min-width:1.15em}
+.card .hs1{right:3px} .card .hs3{left:3px}
+.card .hcn{padding:0 18px;font-size:12px}
 #promptBar{min-height:38px;width:100%;max-width:560px;display:flex;align-items:center;justify-content:center;
   gap:10px;padding:8px 12px;border:1px dashed var(--line);border-radius:8px;text-align:center;flex-wrap:wrap}
 #promptBar.hot{border-color:var(--gold);border-style:solid;background:rgba(201,162,39,.07)}
@@ -604,8 +625,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .overlay h2 .ver{white-space:nowrap;display:inline-block}
 #startOverlay .modes{margin-top:16px}
 
-/* ---- tutorial. Eight short pages the first time the game is opened, then a
-       tour of the real screen the first time a game reaches your turn. The
+/* ---- the rules pages, opened from the menu. The
        pages draw their examples with the board's own .cell and .teece and the
        hand's own .card, so what they teach is what the game looks like.
        The box never scrolls as a whole: its middle does, and the buttons stay
@@ -723,22 +743,17 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   border:1px solid var(--gold);border-radius:8px;background:rgba(201,162,39,.08);font-size:12px;color:var(--cream2)}
 .tbar .btn{padding:4px 9px;font-size:11px}
 
-/* The tour: a ring round one real thing on the screen, everything else dimmed
-   by the ring's own shadow, and a card saying what it is. The layer takes every
-   tap while it is up so nothing is played by accident; the card goes wherever
-   there is room for it beside the ring, and pins to the foot of the window
-   when there is none. */
-#tourLayer{position:fixed;inset:0;z-index:50}
-#tourRing{position:fixed;border:2px solid var(--gold);border-radius:12px;pointer-events:none;
-  box-shadow:0 0 0 200vmax rgba(8,6,4,.72),0 0 16px rgba(201,162,39,.55);transition:top .18s,left .18s,width .18s,height .18s}
-#tourCard{position:fixed;width:min(360px,calc(100vw - 24px));background:var(--panel);border:1px solid var(--gold);
-  border-radius:12px;padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
-#tourCard .tstep{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
-#tourCard h3{font-family:var(--disp);font-weight:400;font-size:21px;margin:2px 0 4px}
-#tourCard p{font-size:13px;line-height:1.5;color:var(--cream2);margin:0}
-#tourCard .tnav{display:flex;align-items:center;gap:8px;margin-top:12px}
-#tourCard .tnav .btn{padding:7px 13px}
-#tourCard .tnav .tutskip{margin-left:0;margin-right:auto}
+/* The tutorial's coach: what the current lesson wants, pinned to the foot of
+   the window over everything but the overlays, and a pulse on the one thing it
+   wants touched. */
+#coach{position:fixed;left:50%;transform:translateX(-50%);bottom:8px;z-index:17;width:min(560px,calc(100vw - 16px));
+  background:#1d1710;border:1px solid var(--gold);border-radius:12px;padding:10px 14px 12px;
+  box-shadow:0 8px 28px rgba(0,0,0,.65)}
+#coach .ch{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+#coach .cx{font-size:13.5px;line-height:1.5;color:var(--cream2);margin-top:4px}
+#coach .cx b{color:var(--cream)}
+.tuthi{outline:2px solid var(--gold);outline-offset:2px;animation:tutGlow 1.2s ease-in-out infinite}
+@keyframes tutGlow{0%,100%{box-shadow:0 0 0 0 rgba(201,162,39,0)}50%{box-shadow:0 0 16px 4px rgba(201,162,39,.8)}}
 
 #draftOverlay .box{max-width:760px;width:100%}
 #draftCards{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:14px 0}
@@ -764,7 +779,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   pointer-events:none;overflow:hidden;background:transparent;color:var(--artink);opacity:.42;
   display:flex;align-items:center;justify-content:center;
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Courier New',monospace;
-  font-size:15px;line-height:1.02;white-space:pre}
+  font-size:20px;line-height:1.02;white-space:pre;opacity:.5}
 .dcard.arted .dnm,.dcard.arted .ds,.dcard.arted .dkw,.dcard.arted .dty{text-shadow:0 0 4px var(--cardbg,var(--cream)),0 0 4px var(--cardbg,var(--cream)),0 0 3px var(--cardbg,var(--cream))}
 .dcard .dnm,.dcard .dtx{position:relative;z-index:1}
 .dcard .ds{z-index:1}
@@ -817,7 +832,6 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   <header>
     <h1>Teece</h1>
     <span class="sub" id="modeLbl">three by three</span>
-    <button class="btn" id="helpBtn">How to play</button>
   </header>
   <main>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -856,7 +870,8 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   <div class="box">
     <div class="mast">
       <h2>Teece <span class="ver" id="verTag"></span></h2>
-      <button class="btn" id="howBtn">How to play</button>
+      <button class="btn primary" id="tutBtn">Tutorial</button>
+      <button class="btn" id="rulesBtn">Rules</button>
     </div>
     <p class="sub" id="startSub"></p>
 
@@ -917,10 +932,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   <div class="box" id="tutBox" role="dialog" aria-modal="true" aria-labelledby="tutTitle"></div>
 </div>
 
-<div id="tourLayer" class="hidden">
-  <div id="tourRing"></div>
-  <div id="tourCard" role="dialog" aria-modal="true" aria-labelledby="tourTitle"></div>
-</div>
+<div id="coach" class="hidden" role="status" aria-live="polite"></div>
 
 <div id="toast"></div>
 <script>
@@ -928,7 +940,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:98,date:'2026-09-27'};
+const VERSION={build:99,date:'2026-09-27'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3847,6 +3859,21 @@ const CARDS = {
     text:'You can equip the Runeblade to this battleground: play it from your hand onto this panel. A Teece on this battleground has +3 — or -3 instead, while the Runeblade is set in it.'},
  905:{name:'Barrow Forge',type:'ground',gRuneForge:2,
     text:'When a Teece equipped with the Runeblade is destroyed on this battleground, put a counter on it. Remove 2 counters from this battleground: forge another Runeblade into your hand. It works exactly like the original.'},
+ /* ---- the tutorial's cards. Nothing but their numbers, so a new player learns
+        the rules rather than a card. In no deck and not in the pool, so they
+        never reach a draft; deck:'classic' only gives them the cream face. ---- */
+ 960:{name:'Recruit',type:'teece',deck:'classic',sides:[6,6,6,6],text:'No effect.'},
+ 961:{name:'Squire',type:'teece',deck:'classic',sides:[7,7,7,7],text:'No effect.'},
+ 962:{name:'Champion',type:'teece',deck:'classic',sides:[15,15,15,15],sac:1,text:'Sacrifice one fielded Teece to play.'},
+ 963:{name:'Training Blade',type:'equip',deck:'classic',mod:3,text:'Equipped Teece gets +3.'},
+ 964:{name:'Weaken',type:'magic',deck:'classic',text:'An enemy Teece gets -2.',
+    cast:[{fx:'mod',who:'enemy',where:'any',n:-2,dur:'perm'}]},
+ 965:{name:'Training Dummy',type:'teece',deck:'classic',sides:[3,3,3,3],text:'No effect.'},
+ 966:{name:'Brute',type:'teece',deck:'classic',sides:[6,6,6,6],text:'No effect.'},
+ 967:{name:'Knight',type:'teece',deck:'classic',sides:[9,9,9,9],text:'No effect.'},
+ 968:{name:'Sentinel',type:'teece',deck:'classic',sides:[5,10,9,5],text:'No effect.'},
+ 969:{name:'Warlord',type:'teece',deck:'classic',sides:[14,14,14,14],text:'No effect.'},
+ 970:{name:'Scout',type:'teece',deck:'classic',sides:[4,4,4,4],text:'No effect.'},
 };
 const DEF=t=>CARDS[t.cardId];
 /* What an equip actually grants, once the modality it was bolted on with is
@@ -6394,6 +6421,10 @@ function chooseCell(p,cells,msg,opt){
     return Promise.resolve(markTargetDeath(cells[Math.floor(Math.random()*cells.length)]));
   if(isAIP(p)||!HAS_DOM){
     return Promise.resolve(aiPickCell(cells,opt,p)).then(markTargetDeath);
+  }
+  if(G&&G.tut&&p===0){
+    const f=tutFilter(cells,opt.hands,msg);
+    if(f){cells=f.cells;opt=Object.assign({},opt,{hands:f.hands});}
   }
   return new Promise(res=>{G.previewCell=null;G.previewTouch=false;
     G.pending={kind:'cell',p,cells,hands:opt.hands||null,msg,opt,
@@ -12541,12 +12572,13 @@ function deckOut(p){
 function endGame(winner,why){
   if(G.over)return;
   G.over=true;G.winner=winner;G.pending=null;
-  log('GAME OVER: '+(winner==null?'Draw.':teamName(winner)+' wins.')+' '+why);
+  log('GAME OVER: '+(winner==null?'Draw.':teamName(winner)+(teamName(winner)==='You'?' win.':' wins.'))+' '+why);
   if(HAS_DOM){
     const t=document.getElementById('endTitle'),x=document.getElementById('endText'),btn=document.getElementById('endRestart');
     if(G.mode==='rogue')rogueEnd(winner,why,t,x,btn);
+    else if(G.tut&&winner===0)tutEnd(t,x,btn);
     else{
-      t.textContent=winner==null?'A draw':teamName(winner)+' wins';
+      t.textContent=winner==null?'A draw':(teamName(winner)==='You'?'You win':teamName(winner)+' wins');
       x.textContent=why;
       btn.textContent='New game';btn.onclick=restart;
     }
@@ -12737,6 +12769,7 @@ async function playFromHand(p,handIdx){
   const pl=G.players[p];
   const id=pl.hand[handIdx];
   if(id==null)return false;
+  if(!tutMayPlay(p,id))return false;
   const d=CARDS[id];
   let ok=false;
   if(d.type==='teece')ok=await playTeece(p,handIdx);
@@ -13574,6 +13607,7 @@ function mustPlayTeece(p){
 /* ============ turn flow ============ */
 async function endTurn(){
   if(!G||G.over||G.pending||G._endingTurn)return;
+  if(!tutMayEnd())return;
   const pl=G.players[G.turn];
   const skipping=!!G.skipTurn;G.skipTurn=false;
   if(!skipping&&mustPlayTeece(G.turn)){
@@ -14064,8 +14098,7 @@ async function startTurn(){
   log('--- Turn '+G.turnNum+': '+pname(p)+' ---');
   render();
   if(stale(ep)||G.over)return;
-  if(isAIP(p)){await wait(420);if(stale(ep))return;await aiTurn();}
-  else if(p===0)maybeTour();
+  if(isAIP(p)){await wait(420);if(stale(ep))return;if(G.tut)await tutOppTurn();else await aiTurn();}
 }
 const wait=ms=>HAS_DOM?new Promise(r=>setTimeout(r,ms)):Promise.resolve();
 async function anim(cells,cls,ms){
@@ -15447,7 +15480,7 @@ function previewTileHtml(i){
     sides=platedSides(cardId,spec.plate||[]);
     tag='in hand';
   }
-  const num=k=>'<div class="s s'+k+' '+(sides[k]>7?'up':'')+(sides[k]<3?'down':'')+'">'+sides[k]+'</div>';
+  const num=k=>'<div class="s s'+k+'">'+sides[k]+'</div>';
   return '<div class="pvwrap" aria-live="polite"><div class="teece ghost o'+owner+(doomed?' doomed':'')+
     '" data-card-deck="'+getCardDeck(cardId)+'">'+
     '<div class="mid"><div class="gtag">'+tag+'</div>'+
@@ -15649,10 +15682,10 @@ function renderBoard(){
       tp.innerHTML=(bart?'<pre class="ascii" aria-hidden="true">'+bart.map(escHtml).join('\n')+'</pre>':'')+
         '<div class="mid"><div class="'+nmCls+'">'+tnm+'</div>'+
         (badges.length?'<div class="rgd">'+badges.join('')+'</div>':'')+'</div>'+
-        '<div class="s s0 '+(s[0]>7?'up':'')+(s[0]<3?'down':'')+'">'+s[0]+'</div>'+
-        '<div class="s s1 '+(s[1]>7?'up':'')+(s[1]<3?'down':'')+'">'+s[1]+'</div>'+
-        '<div class="s s2 '+(s[2]>7?'up':'')+(s[2]<3?'down':'')+'">'+s[2]+'</div>'+
-        '<div class="s s3 '+(s[3]>7?'up':'')+(s[3]<3?'down':'')+'">'+s[3]+'</div>';
+        '<div class="s s0">'+s[0]+'</div>'+
+        '<div class="s s1">'+s[1]+'</div>'+
+        '<div class="s s2">'+s[2]+'</div>'+
+        '<div class="s s3">'+s[3]+'</div>';
       if(t.equips.length)tp.innerHTML+='<div class="eq">E'+t.equips.length+'</div>';
       const hasActs=t.owner===G.turn&&aul.some(e=>actAvailable(t,e));
       if(hasActs)tp.innerHTML+='<div class="actdot"></div>';
@@ -16659,6 +16692,7 @@ function render(){
   if(G.detailLock!=null&&!G.board[G.detailLock].teece){G.detailLock=null;G.detailHover=null;}
   if(G.detailLock!=null)showDetail(G.detailLock);
   else if(G.detailHover==null)showDetail(null);
+  tutCoach();
 }
 function draftName(p){
   if(!G_DRAFT)return 'Player '+(p+1);
@@ -16699,20 +16733,17 @@ function renderDraft(p,offer,k,res){
   const drafted=(G_DRAFT&&G_DRAFT.decks[p])||[];
   deck.textContent=drafted.length?'Drafted so far: '+drafted.map(id=>CARDS[id].name).join(', '):'';
 }
-/* ============ tutorial ============
-   Two parts, in the order a new player needs them. The rules come first, as
-   eight short pages over the menu the first time the game is opened -- what a
-   Teece is, how a fight goes, what a turn is, how to win -- because nothing on
-   the game screen makes sense without them. The screen comes second, as a tour
-   of the real thing the first time a game reaches your turn, because a control
-   is only worth pointing at once it is there to point at.
+/* ============ tutorial and rules ============
+   Two things for a new player. The tutorial is a short practice game against a
+   scripted Trainer, played on the real screen, and a first visit opens straight
+   into it. The rules are eight pages opened from the menu: what a Teece is, how
+   a fight goes, what a turn is, how to win.
 
-   Each part remembers it has been seen, per browser. Storage that throws (a
-   private window, blocked site data) reads as never seen, so a first visit
-   still gets its tutorial, and SEEN_NOW keeps it from coming back more than
-   once a visit. Skipping the pages skips the tour with them: skip means "I
-   already know this game". */
-const TUT_KEY='teece.tutorial',TOUR_KEY='teece.tour';
+   The tutorial remembers it has been finished or skipped, per browser. Storage
+   that throws (a private window, blocked site data) reads as never seen, so a
+   first visit still gets its tutorial, and SEEN_NOW keeps it from coming back
+   more than once a visit. */
+const TUT_KEY='teece.tutorial';
 const SEEN_NOW={};
 function tutSeen(k){
   if(SEEN_NOW[k])return true;
@@ -16735,7 +16766,7 @@ function tutTeece(id,owner,o){
     (art?'<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>':'')+
     '<div class="mid"><div class="'+nmCls+'">'+escHtml(cd.name)+'</div></div>';
   for(let k=0;k<4;k++)
-    h+='<div class="s s'+k+(s[k]>7?' up':'')+(s[k]<3?' down':'')+(hot[k]?' '+hot[k]:'')+'">'+s[k]+'</div>';
+    h+='<div class="s s'+k+(hot[k]?' '+hot[k]:'')+'">'+s[k]+'</div>';
   return h+(o.dot?'<div class="actdot"></div>':'')+'</div>';
 }
 /* A small board, row by row. Each entry is one panel: '' for an empty one, a
@@ -16784,12 +16815,10 @@ const TUT_PAGES=[
        '<span class="lab">right<b>4</b></span>'+
        '<span></span><span class="lab">bottom<b>8</b></span><span></span></div>'+
        '<div class="tkey"><span><i class="sw"></i>yours</span><span><i class="sw o1"></i>theirs</span>'+
-       '<span><b class="up">8+</b> high</span><span><b class="down">0–2</b> low</span>'+
        '<span><i class="dotx"></i>ability ready</span></div></div>',
    body:'<p>The four numbers are how hard it hits on each edge: top, right, bottom and left. They are all it '+
      'fights with, and effects spend the whole game pushing them up and down.</p>'+
-     '<p>A number in green is 8 or more, and one in red is 2 or less. A gold dot in the corner means one of '+
-     'your Teece has an ability ready to use.</p>'+
+     '<p>A gold dot in the corner means one of your Teece has an ability ready to use.</p>'+
      '<p class="fine">Hover over or tap any card, in your hand or on the board, and the <b>Detail</b> panel '+
      'shows the whole card, including where every bonus on it came from.</p>'},
   {t:'How a fight works',
@@ -16886,51 +16915,42 @@ const TUT_PAGES=[
      '<li><span class="n">1</span><span>Choose <b>Decks</b>, then <b>vs Computer</b>. Pick your deck, then '+
        'one for the computer.</span></li>'+
      '<li><span class="n">2</span><span>Pick a difficulty. <b>Easy</b> makes a gentle first game.</span></li>'+
-     (tutSeen(TOUR_KEY)?'':'<li><span class="n">3</span><span>When your first turn begins, a short tour shows '+
-       'you where everything is on the screen.</span></li>')+
      '</ul>'+
      '<p class="fine"><b>Roguelike</b> drafts cards from every deck against a computer that gets stronger each '+
-     'level, and is best once you know your way around. <b>How to play</b> brings these pages back any time, '+
-     'from the menu or from the top of the game screen.</p>'}
+     'level, and is best once you know your way around. The <b>Tutorial</b> on the menu plays a short practice game '+
+     'that walks you through all of this.</p>'}
 ];
-let TUT=null;
-function openTutorial(first){
+/* ---- the rules pages: opened from the menu, never over a game ---- */
+let RULES=null;
+function openRules(){
   if(!HAS_DOM)return;
-  TUT={i:0,first:!!first};
+  RULES={i:0};
   document.getElementById('tutOverlay').classList.remove('hidden');
-  tutRender();
+  rulesRender();
 }
-function closeTutorial(skip){
+function closeRules(){
   document.getElementById('tutOverlay').classList.add('hidden');
-  tutMark(TUT_KEY);
-  if(skip)tutMark(TOUR_KEY);
-  TUT=null;
+  RULES=null;
 }
-function tutGo(d){
-  if(!TUT)return;
-  const n=TUT.i+d;
+function rulesGo(d){
+  if(!RULES)return;
+  const n=RULES.i+d;
   if(n<0||n>=TUT_PAGES.length)return;
-  TUT.i=n;
-  tutRender();
+  RULES.i=n;
+  rulesRender();
 }
-function tutRender(){
+function rulesRender(){
   const box=document.getElementById('tutBox');
-  const pg=TUT_PAGES[TUT.i],n=TUT_PAGES.length,last=TUT.i===n-1;
-  /* The last page's buttons depend on where you are. From the menu it offers
-     the game it just described; over a game in progress, the way back to it
-     and the tour of the screen it is sitting on. */
-  const inGame=!!G;
+  const pg=TUT_PAGES[RULES.i],n=TUT_PAGES.length,last=RULES.i===n-1;
   const body=typeof pg.body==='function'?pg.body():pg.body;
   let foot='<div class="tutdots" aria-hidden="true">';
-  for(let k=0;k<n;k++)foot+='<i'+(k===TUT.i?' class="on"':'')+'></i>';
+  for(let k=0;k<n;k++)foot+='<i'+(k===RULES.i?' class="on"':'')+'></i>';
   foot+='</div>';
-  if(TUT.i)foot+='<button class="btn" id="tutBack">Back</button>';
+  if(RULES.i)foot+='<button class="btn" id="tutBack">Back</button>';
   if(!last)foot+='<button class="btn primary" id="tutNext">Next</button>';
-  else if(inGame)foot+=(G.over?'':'<button class="btn" id="tutTour">Tour the screen</button>')+
-    '<button class="btn primary" id="tutDone">Back to the game</button>';
-  else foot+='<button class="btn primary" id="tutPlay">Play vs Computer</button>';
-  box.innerHTML='<div class="tuthead"><span class="tutstep">How to play · '+(TUT.i+1)+' of '+n+'</span>'+
-    '<button class="tutskip" id="tutSkip">'+(TUT.first&&!last?'Skip tutorial':'Close')+'</button></div>'+
+  else foot+='<button class="btn" id="tutLearn">Tutorial</button><button class="btn primary" id="tutPlay">Play vs Computer</button>';
+  box.innerHTML='<div class="tuthead"><span class="tutstep">Rules · '+(RULES.i+1)+' of '+n+'</span>'+
+    '<button class="tutskip" id="tutSkip">Close</button></div>'+
     '<div class="tutbody"><h2 id="tutTitle">'+pg.t+'</h2>'+pg.art()+body+'</div>'+
     '<div class="tutnav">'+foot+'</div>';
   const tb=box.querySelector('.tutbody'),nav=box.querySelector('.tutnav');
@@ -16939,148 +16959,263 @@ function tutRender(){
   tb.addEventListener('scroll',more,{passive:true});
   more();
   const on=(id,f)=>{const b=document.getElementById(id);if(b)b.addEventListener('click',f);};
-  on('tutSkip',()=>closeTutorial(TUT.first&&!last));
-  on('tutBack',()=>tutGo(-1));
-  on('tutNext',()=>tutGo(1));
-  on('tutDone',()=>closeTutorial(false));
-  on('tutTour',()=>{closeTutorial(false);startTour();});
-  on('tutPlay',()=>{closeTutorial(false);start('deck',true);});
-  const focus=document.getElementById('tutNext')||document.getElementById('tutPlay')||document.getElementById('tutDone');
+  on('tutSkip',closeRules);
+  on('tutBack',()=>rulesGo(-1));
+  on('tutNext',()=>rulesGo(1));
+  on('tutLearn',()=>{closeRules();startTutorial();});
+  on('tutPlay',()=>{closeRules();start('deck',true);});
+  const focus=document.getElementById('tutNext')||document.getElementById('tutPlay');
   if(focus)focus.focus({preventScroll:true});
 }
 
-/* The tour. Each stop is a real element on the game screen; one that is not
-   showing right now (a collapsed hand, no other seats) is left out rather than
-   pointed at nothing. */
-let TOUR=null;
-function tourStops(){
-  if(!G)return [];
-  const opp=document.getElementById('oppHands');
-  const stops=[
-    {el:opp&&!opp.classList.contains('collapsed')&&opp.children.length?opp:null,
-     t:PLAYERS()>2?'The other hands':(G.vsAI?'What the computer holds':'Your opponent’s hand'),
-     x:'Hands are played face up, so this is every card the other side is holding. Plan around it. '+
-       '<b>Hide</b> tucks it out of the way.'},
-    {el:document.querySelector('.boardrow'),t:'The board',
-     x:'Teece go onto the empty panels. When the game asks you to choose something, the choices glow gold and '+
-       'the question appears in the bar just above.'},
-    {el:document.getElementById('domBar'),t:'The race',
-     x:'One light for every Teece you lead by on the board. Fill it at the end of your turn and the game is yours.'},
-    {el:document.getElementById('myHand'),t:'Your hand',
-     x:'Tap a card to play it. Faded cards cannot be played right now, usually because this turn’s Teece '+
-       'is already down. <b>Square cards</b> shrinks every card to its drawing and name.'},
-    {el:document.getElementById('turnPanel'),t:'Turn and End Turn',
-     x:'Whose turn it is, and what each side has left in hand, deck and graveyard. Press <b>End Turn</b> when '+
-       'you are done.'},
-    {el:document.getElementById('detail'),t:'Detail',
-     x:'Hover over or tap anything, whether a card, a Teece or a panel, to read it in full here. Tap one of '+
-       'your own Teece to select it, and its abilities appear as buttons under the board.'},
-    {el:document.getElementById('logPanel'),t:'Log',
-     x:'Everything that has happened, with the newest at the top. When something dies and you are not sure '+
-       'why, the answer is here.'},
-    {el:document.getElementById('helpBtn'),t:'How to play',
-     x:'The rules are always one tap away. Good luck.'}
-  ];
-  return stops.filter(s=>s.el&&s.el.getClientRects().length);
+/* ============ the interactive tutorial ============
+   A real game on the real screen, with every move but the right one refused.
+   You hold cards that do nothing but their numbers; the Trainer holds five and
+   plays one a turn, each put down exactly where the next lesson needs it. Each
+   of your turns is one lesson, and each lesson is a list of steps. The step you
+   are on is simply the first one whose done() is not yet true, read off the
+   board every render, so there is no step counter to fall out of step with the
+   game: cancel a prompt halfway and the step you are on is still the right one.
+
+   While a step is current it decides three things: which card in hand may be
+   played (playFromHand), which answers a prompt will take (chooseCell), and
+   whether End Turn works (endTurn). Everything else in the engine runs as it
+   does in any game, which is the point -- the fights, the equips riding in
+   from the hand and the sacrifice are the engine's own.
+
+   The board, for reference:  0 1 2
+                              3 4 5
+                              6 7 8                                          */
+const TUTC={recruit:960,squire:961,champion:962,blade:963,weaken:964,
+  dummy:965,brute:966,knight:967,sentinel:968,warlord:969,scout:970};
+for(const [id,from] of [[960,1],[961,9],[962,12],[963,13],[964,16],
+  [965,5],[966,2],[967,11],[968,8],[969,12],[970,6]])CARD_ART[id]=CARD_ART[from];
+/* What the Trainer plays on each of its turns, by turn number. */
+const TUT_OPP={2:{card:966,cell:4},4:{card:967,cell:2},6:{card:968,cell:0},8:{card:969,cell:8},10:{card:970,cell:5}};
+const tutOwn=(c,id)=>{const t=G.board[c].teece;return !!(t&&t.owner===0&&(id==null||t.cardId===id));};
+const tutSac=pd=>/sacrifice/i.test((pd&&pd.msg)||'');
+const TUT_LESSONS=[
+  {t:'Play a Teece',steps:[
+    {play:960,pick:[3],done:()=>tutOwn(3),
+     say:'This is the board. The red-bordered Teece is the Trainer’s <b>Training Dummy</b>, with 3 on every edge. '+
+       'Your hand is at the bottom of the screen. Tap a <b>Recruit</b> to play it.',
+     sayPick:'Now tap the glowing panel, just left of the Dummy.'},
+    {end:true,
+     say:'Your Recruit’s right edge is 6 and the Dummy’s left edge is 3. Enemies that touch compare the two edges '+
+       'that meet, and the smaller one is destroyed at once. You play one Teece a turn. Press <b>End Turn</b>.'}]},
+  {t:'Equips',steps:[
+    {play:963,pick:[3],done:()=>{const t=G.board[3].teece;return !!(t&&t.equips.length);},
+     say:'The Trainer put a <b>Brute</b> beside your Recruit. 6 against 6 is a tie, and a tie does nothing. '+
+       'You drew a <b>Training Blade</b>, an equip. Tap it.',
+     sayPick:'Tap your Recruit on the board to equip it.'},
+    {play:960,pick:[6],done:()=>tutOwn(6),
+     say:'+3 makes your Recruit 9, and 9 beats the Brute’s 6. Equips do not use up your Teece for the turn, '+
+       'so play your other <b>Recruit</b> as well.',
+     sayPick:'Tap the glowing panel.'},
+    {end:true,say:'Teece on the same side never fight each other. Press <b>End Turn</b>.'}]},
+  {t:'Equip a card in your hand',steps:[
+    {play:963,pick:['h:961'],
+     done:()=>{const i=G.players[0].hand.indexOf(961);return i<0||plateOf(0,i).length>0;},
+     say:'The <b>Knight</b> has 9 on every edge, and your Squire has only 7. An equip can also go onto a Teece that is '+
+       'still in your hand. Tap the new <b>Training Blade</b>.',
+     sayPick:'Now tap the <b>Squire</b> in your hand, not one on the board.'},
+    {play:961,pick:[1],done:()=>tutOwn(1),
+     say:'The Squire will arrive already wearing the Blade. Its numbers turn gold to show it: 10 on every edge. Play it.',
+     sayPick:'Put it beside the Knight: tap the glowing panel.'},
+    {end:true,
+     say:'10 beats 9. You have three Teece and the Trainer has none. End a turn with <b>four more</b> Teece than the '+
+       'other side and you win; the meter beside the board counts the lead. Press <b>End Turn</b>.'}]},
+  {t:'Magic',steps:[
+    {play:964,pick:[0],done:()=>!G.board[0].teece,
+     say:'The <b>Sentinel</b> ties your Squire, 10 against 10, and your Recruit, 9 against 9. Magic can break a tie. '+
+       'Tap <b>Weaken</b>.',
+     sayPick:'Now tap the Sentinel.'},
+    {end:true,
+     say:'Weaken took 2 off every edge, so the Sentinel’s 8 and 7 lost both fights at once. A magic card works once, '+
+       'then goes to your graveyard. Press <b>End Turn</b>.'}]},
+  {t:'Sacrifice',steps:[
+    {play:962,pick:pd=>tutSac(pd)?[6]:[7],done:()=>tutOwn(7),
+     say:'The <b>Warlord</b> has 14 on every edge. Your <b>Champion</b> has 15, but the biggest Teece cost a '+
+       '<b>sacrifice</b>: one of your own Teece, taken off the board. Tap the Champion.',
+     sayPick:pd=>tutSac(pd)?'Sacrifice the Recruit in the bottom corner: tap it.'
+       :'Now tap the glowing panel beside the Warlord.'},
+    {end:true,
+     say:'15 beats 14. A sacrifice costs you a Teece on the board, so it is worth paying for a big one. Press '+
+       '<b>End Turn</b>.'}]},
+  {t:'Take the field',steps:[
+    {play:960,pick:[4],done:()=>tutOwn(4),
+     say:'You have three Teece to the Trainer’s one, a lead of two. Destroy the <b>Scout</b> and you lead by four. '+
+       'Play your <b>Recruit</b> in the middle, beside it.',
+     sayPick:'Tap the glowing middle panel.'},
+    {end:true,
+     say:'Four to none, and the meter is full. The lead is counted when a turn ends, so press <b>End Turn</b> to win.'}]}
+];
+function tutLesson(){
+  if(!G||!G.tut||G.over||G.turn!==0)return null;
+  return TUT_LESSONS[(G.turnNum-1)/2]||null;
 }
-function startTour(){
-  if(!HAS_DOM||!G)return;
-  const stops=tourStops();
-  if(!stops.length)return;
-  TOUR={i:0,stops};
-  document.getElementById('tourLayer').classList.remove('hidden');
-  tourShow();
+function tutStep(){
+  const L=tutLesson();
+  return L?L.steps.find(s=>!s.done||!s.done())||null:null;
 }
-function endTour(){
-  TOUR=null;
-  tutMark(TOUR_KEY);
-  document.getElementById('tourLayer').classList.add('hidden');
+const tutText=(v,pd)=>typeof v==='function'?v(pd):v;
+/* Gates. Each answers "is this move the one the lesson is asking for", and
+   says so on the spot when it is not. */
+function tutRefuse(){
+  toast('Not that one yet: follow the tutorial at the bottom of the screen.');
+  return false;
 }
-function tourGo(d){
-  if(!TOUR)return;
-  const n=TOUR.i+d;
-  if(n<0)return;
-  if(n>=TOUR.stops.length){endTour();return;}
-  TOUR.i=n;
-  tourShow();
+function tutMayPlay(p,id){
+  if(!G||!G.tut||p!==0)return true;
+  const st=tutStep();
+  return (st&&st.play===id)?true:tutRefuse();
 }
-function tourShow(){
-  const st=TOUR.stops[TOUR.i],n=TOUR.stops.length,last=TOUR.i===n-1;
-  const card=document.getElementById('tourCard');
-  card.innerHTML='<div class="tstep">Tour · '+(TOUR.i+1)+' of '+n+'</div>'+
-    '<h3 id="tourTitle">'+st.t+'</h3><p>'+st.x+'</p>'+
-    '<div class="tnav">'+(last?'<span class="tutskip"></span>':'<button class="tutskip" id="tourSkip">Skip tour</button>')+
-    (TOUR.i?'<button class="btn" id="tourBack">Back</button>':'')+
-    '<button class="btn primary" id="tourNext">'+(last?'Let’s play':'Next')+'</button></div>';
-  const on=(id,f)=>{const b=document.getElementById(id);if(b)b.addEventListener('click',f);};
-  on('tourSkip',endTour);
-  on('tourBack',()=>tourGo(-1));
-  on('tourNext',()=>tourGo(1));
-  tourScroll();
-  tourPlace();
-  document.getElementById('tourNext').focus({preventScroll:true});
+function tutMayEnd(){
+  if(!G||!G.tut||G.turn!==0)return true;
+  const st=tutStep();
+  return (st&&st.end)?true:tutRefuse();
 }
-/* Bring the stop into the window with room left for the card: the two are
-   centred together when they fit, and the stop goes to the top of the window
-   when they do not, with the card over its foot. */
-function tourScroll(){
-  const el=TOUR.stops[TOUR.i].el,card=document.getElementById('tourCard');
-  const vh=window.innerHeight,m=12,ch=card.offsetHeight;
-  const r=el.getBoundingClientRect();
-  const both=r.height+m+ch;
-  const want=both<=vh-2*m?(vh-both)/2:m;
-  window.scrollBy({top:r.top-want,left:0,behavior:'auto'});
+/* Narrow a prompt to the answers the step allows: cells by index, cards in hand
+   as 'h:<card id>'. A prompt the step says nothing about is left alone. */
+function tutFilter(cells,hands,msg){
+  const st=tutStep();
+  if(!st||!st.pick)return null;
+  const allow=typeof st.pick==='function'?st.pick({msg}):st.pick;
+  const hand=G.players[0].hand;
+  const c2=(cells||[]).filter(c=>allow.indexOf(c)>=0);
+  const h2=(hands||[]).filter(h=>allow.indexOf('h:'+hand[h])>=0);
+  if(!c2.length&&!h2.length)return null;
+  return {cells:c2,hands:hands?h2:null};
 }
-function tourPlace(){
-  if(!TOUR)return;
-  const el=TOUR.stops[TOUR.i].el;
-  const ring=document.getElementById('tourRing'),card=document.getElementById('tourCard');
-  const vw=document.documentElement.clientWidth,vh=window.innerHeight,m=12,pad=6;
-  const r=el.getBoundingClientRect();
-  const L=Math.max(4,r.left-pad),T=Math.max(4,r.top-pad);
-  const R=Math.min(vw-4,r.right+pad),B=Math.min(vh-4,r.bottom+pad);
-  ring.style.left=L+'px';ring.style.top=T+'px';
-  ring.style.width=Math.max(0,R-L)+'px';ring.style.height=Math.max(0,B-T)+'px';
-  const cw=card.offsetWidth,ch=card.offsetHeight;
-  let top;
-  if(vh-B>=ch+m)top=B+m;
-  else if(T>=ch+m)top=T-m-ch;
-  else top=vh-ch-m;
-  const left=Math.min(Math.max(m,r.left+r.width/2-cw/2),vw-cw-m);
-  card.style.top=Math.max(m,top)+'px';
-  card.style.left=Math.max(m,left)+'px';
+async function startTutorial(){
+  if(!HAS_DOM)return;
+  EPOCH++;
+  G=null;G_DRAFT=null;R=null;
+  closeRules();
+  for(const id of ['startOverlay','endOverlay','draftOverlay'])document.getElementById(id).classList.add('hidden');
+  const T=TUTC;
+  G=newState('deck',true,[[T.recruit],[T.dummy]],{aiSeats:[1],seatNames:['You','Trainer']});
+  G.deckNames=['Tutorial','the Trainer'];
+  G.tut={key:null};
+  G.turn=0;
+  const me=G.players[0],op=G.players[1];
+  me.hand=[];me.plate=[];op.hand=[];op.plate=[];
+  /* Drawn from the end: a Blade on turn 3, another on 5, Weaken on 7, the
+     Champion on 9 and the last Recruit on 11. The rest is there so nobody's
+     deck runs dry. */
+  me.deck=[T.recruit,T.recruit,T.recruit,T.recruit,T.champion,T.weaken,T.blade,T.blade];
+  op.deck=Array(8).fill(T.dummy);
+  for(const id of [T.recruit,T.recruit,T.squire])handPush(0,id);
+  for(const id of [T.brute,T.knight,T.sentinel,T.warlord,T.scout])handPush(1,id);
+  putTeece(G.board,4,makeTeece(T.dummy,1),true);
+  buildGeometry(3);
+  log('The tutorial: you against the Trainer.');
+  render();
+  await startTurn();
 }
-/* Called as a human seat's turn is handed over. Waits a beat so the turn has
-   finished drawing, and gives up quietly on anything that would make pointing
-   at the screen wrong: a question already open, another overlay up, the game
-   gone. It is asked again next turn, so a turn it skips costs nothing. */
-function maybeTour(){
-  if(!HAS_DOM||!G||G.over||TOUR||tutSeen(TOUR_KEY))return;
-  const g=G;
-  setTimeout(()=>{
-    if(G!==g||G.over||G.pending||G.turn!==0||TOUR||tutSeen(TOUR_KEY))return;
-    if(document.querySelector('.overlay:not(.hidden)'))return;
-    startTour();
-  },450);
+/* The Trainer's turn: one scripted Teece, played through the engine exactly as
+   the computer plays one, then End Turn. */
+async function tutOppTurn(){
+  const ep=G.epoch,mv=TUT_OPP[G.turnNum];
+  await wait(900);
+  if(stale(ep)||G.over)return;
+  if(mv){
+    const idx=G.players[1].hand.indexOf(mv.card);
+    if(idx>=0){
+      AI_TEECE_PLAN={sacP:[],c:mv.cell};
+      try{await playFromHand(1,idx);}finally{AI_TEECE_PLAN=null;}
+    }
+    if(stale(ep)||G.over)return;
+    await wait(1100);
+    if(stale(ep))return;
+  }
+  await endTurn();
+}
+function tutQuit(){
+  tutMark(TUT_KEY);
+  G=null;
+  restart();
+}
+function tutEnd(t,x,btn){
+  tutMark(TUT_KEY);
+  t.textContent='Tutorial complete';
+  x.innerHTML='You won by taking the field: four Teece ahead as your turn ended. There are two other ways to win: '+
+    'destroy every Teece the other side has, on the board, in hand and in the deck, or have more on the board when '+
+    'someone runs out of cards to draw.<br><br>Real cards do more than their numbers. Hover over or tap any card to '+
+    'read it, and tap the <b>i</b> on a deck before you choose it.';
+  btn.textContent='Play a real game';
+  btn.onclick=restart;
+}
+/* The coach: what the current step says, pinned to the foot of the window, and
+   a glow on the one thing it is asking you to touch. */
+function tutCoach(){
+  if(!HAS_DOM)return;
+  const el=document.getElementById('coach'),app=document.getElementById('app');
+  for(const h of document.querySelectorAll('.tuthi'))h.classList.remove('tuthi');
+  if(!G||!G.tut||G.over){
+    el.classList.add('hidden');
+    app.style.paddingBottom='';
+    document.getElementById('toast').style.bottom='';
+    return;
+  }
+  el.classList.remove('hidden');
+  const L=tutLesson(),st=tutStep(),pd=G.pending;
+  const asking=!!(pd&&pd.p===0);
+  let head,text;
+  if(!L){head='The Trainer’s turn';text='Watch where it plays.';}
+  else{
+    head='Lesson '+((G.turnNum+1)/2)+' of '+TUT_LESSONS.length+' · '+L.t;
+    text=st?tutText(asking&&st.sayPick?st.sayPick:st.say,pd):'';
+  }
+  el.innerHTML='<div class="ch"><span>'+head+'</span><button class="tutskip" id="coachSkip">Skip tutorial</button></div>'+
+    '<div class="cx">'+text+'</div>';
+  document.getElementById('coachSkip').onclick=tutQuit;
+  /* The glow. */
+  let hi=[];
+  if(L&&st){
+    if(asking)hi=Array.from(document.querySelectorAll('#board .cell.target,#myHand .card.target'));
+    else if(st.end)hi=[document.getElementById('endTurn')];
+    else if(st.play!=null){
+      const cards=document.querySelectorAll('#myHand .card'),hand=G.players[0].hand;
+      hand.forEach((id,i)=>{if(id===st.play&&cards[i])hi.push(cards[i]);});
+    }
+  }
+  for(const h of hi)h.classList.add('tuthi');
+  /* Room at the foot of the page for the coach, and for the action bar when it
+     pins itself there too; the coach sits on top of the bar. */
+  const ab=document.getElementById('actionBar');
+  const abH=(ab&&ab.classList.contains('pin')&&getComputedStyle(ab).position==='fixed')?ab.offsetHeight:0;
+  el.style.bottom=(abH+8)+'px';
+  app.style.paddingBottom=(el.offsetHeight+abH+24)+'px';
+  document.getElementById('toast').style.bottom=(el.offsetHeight+abH+18)+'px';
+  /* Bring the thing to touch into view once per step, clear of the coach below
+     and of the question bar when it pins to the top. */
+  const key=G.turnNum+':'+(L?L.steps.indexOf(st):'-')+':'+asking;
+  if(hi.length&&G.tut.key!==key){
+    G.tut.key=key;
+    /* Looked up again when the frame comes: a render in between replaces the
+       element, and a detached one measures as sitting at the top of the page. */
+    requestAnimationFrame(()=>{
+      const t=document.querySelector('.tuthi');
+      if(!t)return;
+      const r=t.getBoundingClientRect(),pb=document.getElementById('promptBar');
+      const top=(pb&&getComputedStyle(pb).position==='fixed')?pb.getBoundingClientRect().bottom+8:8;
+      const bot=window.innerHeight-el.offsetHeight-abH-16;
+      if(r.top<top||r.bottom>bot){
+        const want=Math.max(top,(top+bot-r.height)/2);
+        window.scrollBy({top:r.top-want,left:0,behavior:'auto'});
+      }
+    });
+  }
 }
 if(HAS_DOM){
-  window.addEventListener('resize',()=>{if(TOUR)tourPlace();});
-  window.addEventListener('scroll',()=>{if(TOUR)tourPlace();},{passive:true});
-  /* Caught at the window, ahead of the game's own Escape handler, so closing a
-     page of the tutorial never also cancels a question the game is asking
-     underneath it. */
+  /* Caught at the window, ahead of the game's own Escape handler. */
   window.addEventListener('keydown',e=>{
-    if(TOUR){
-      if(e.key==='Escape')endTour();
-      else if(e.key==='ArrowRight')tourGo(1);
-      else if(e.key==='ArrowLeft')tourGo(-1);
-      else return;
-    }else if(TUT){
-      if(e.key==='Escape')closeTutorial(TUT.first&&TUT.i<TUT_PAGES.length-1);
-      else if(e.key==='ArrowRight')tutGo(1);
-      else if(e.key==='ArrowLeft')tutGo(-1);
-      else return;
-    }else return;
+    if(!RULES)return;
+    if(e.key==='Escape')closeRules();
+    else if(e.key==='ArrowRight')rulesGo(1);
+    else if(e.key==='ArrowLeft')rulesGo(-1);
+    else return;
     e.preventDefault();e.stopPropagation();
   },true);
 }
@@ -17184,6 +17319,7 @@ function restart(){
   document.getElementById('draftOverlay').classList.add('hidden');
   document.getElementById('startOverlay').classList.remove('hidden');
   G=null;G_DRAFT=null;R=null;
+  tutCoach();
   document.getElementById('board').innerHTML='';
   const db=document.getElementById('domBar');
   if(db)db.innerHTML='';
@@ -17210,8 +17346,8 @@ if(HAS_DOM){
   document.getElementById('endTurn').onclick=endTurn;
   document.getElementById('restart').onclick=restart;
   document.getElementById('endRestart').onclick=restart;
-  document.getElementById('howBtn').onclick=()=>openTutorial(false);
-  document.getElementById('helpBtn').onclick=()=>openTutorial(false);
+  document.getElementById('tutBtn').onclick=()=>startTutorial();
+  document.getElementById('rulesBtn').onclick=()=>openRules();
   document.getElementById('toggleOppHands').onclick=()=>{
     const oh=document.getElementById('oppHands');
     const btn=document.getElementById('toggleOppHands');
@@ -17239,9 +17375,9 @@ if(HAS_DOM){
     }
   });
   render();
-  /* A first visit opens on the rules rather than on a menu of modes that mean
-     nothing yet. */
-  if(!tutSeen(TUT_KEY))openTutorial(true);
+  /* A first visit opens on the tutorial rather than on a menu of modes that
+     mean nothing yet. */
+  if(!tutSeen(TUT_KEY))startTutorial();
 }
 /* ============ exports for harness ============ */
 if(typeof module!=='undefined'){
