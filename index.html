@@ -768,7 +768,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:92,date:'2026-09-27'};
+const VERSION={build:93,date:'2026-09-27'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1758,8 +1758,8 @@ const CARDS = {
       {lbl:'Give a Teece -1',steps:[{fx:'mod',who:'any',where:'any',n:-1,dur:'perm'}]}]}],
     text:'Eager Acolyte Token. When discarded: Select a Teece; give it +1 or -1. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  TS:{name:'Sprout',type:'teece',token:true,sides:[3,3,3,3],
-    text:'Sprout Token. When destroyed: every other allied Teece gets +1. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.',
-    onDeath:[{fx:'mass',who:'ally',n:1,dur:'perm'}]},
+    text:'Sprout Token. When destroyed: every other allied Teece gets +2. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.',
+    onDeath:[{fx:'mass',who:'ally',n:2,dur:'perm'}]},
  /* The four the Apocalypse deck fields. apoc names which of the four a card is,
     the way mark names a Tic Tac Toe letter, so the two Marks can pay out on the
     one they are tied to without checking ids. */
