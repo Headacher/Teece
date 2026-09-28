@@ -828,6 +828,24 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .dcard.perkcard .dtx{margin-top:10px;padding-top:0;color:var(--cream2)}
 .dcard.perkcard .dkw{margin-top:auto;padding-top:10px;color:var(--gold)}
 .dcard.dsym{width:110px;min-height:110px;align-items:center;justify-content:center;gap:6px}
+/* A draft card reads top to bottom: name, drawing, rules. The four numbers are
+   tabs on the four edges they fight with -- top on the top, left on the left --
+   so the middle of the card is left to the drawing instead of being crossed by
+   a row of numbers and a bottom number parked in the art. */
+.dcard.t-teece{min-height:250px;padding:30px 30px 34px}
+.dcard.t-teece .ds{background:rgba(16,12,9,.82);color:#f7f0e2;font-size:18px;line-height:1;text-shadow:none;
+  display:flex;align-items:center;justify-content:center;min-width:34px;min-height:34px;padding:0 4px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.1)}
+.dcard.t-teece .ds0{top:0;left:50%;transform:translateX(-50%);border-radius:0 0 17px 17px;min-height:26px}
+.dcard.t-teece .ds2{top:auto;bottom:0;left:50%;transform:translateX(-50%);border-radius:17px 17px 0 0;min-height:26px}
+.dcard.t-teece .ds1{top:50%;right:0;transform:translateY(-50%);border-radius:17px 0 0 17px;min-width:26px}
+.dcard.t-teece .ds3{top:50%;left:0;transform:translateY(-50%);border-radius:0 17px 17px 0;min-width:26px}
+.dcard.t-teece .dnm{margin-top:4px}
+.dcard.t-teece .dtx{padding-top:6px}
+/* The drawing sits in the flow between the name and the rules, on every draft
+   card that has one. */
+.dcard.arted .ascii{position:relative;inset:auto;order:2;flex:0 0 auto;margin:10px -6px 4px;font-size:15px;opacity:.72}
+.dcard.arted .dtx{order:3}
 .dcard.dsym .dsymbol{font-size:44px;line-height:1}
 .dcard.dsym .dnm{margin-top:0;font-size:15px}
 /* Thirteen decks at 110px go two to a row on a phone and run off the bottom.
@@ -978,7 +996,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:105,date:'2026-09-28'};
+const VERSION={build:106,date:'2026-09-28'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -17219,9 +17237,12 @@ function renderDraft(p,offer,k,res){
         '<div class="ds ds2">'+cd.sides[2]+'</div>'+
         '<div class="ds ds3">'+cd.sides[3]+'</div>';
     }
+    /* No keyword line and no "teece" label: the rules text already says
+       Ranged or Flying, and a card with four number tabs is plainly a Teece.
+       The other three kinds still say what they are. */
     dc.innerHTML+='<div class="dnm">'+cd.name+'</div>';
-    if(cd.kw)dc.innerHTML+='<div class="dkw">'+cd.kw.join(' / ')+'</div>';
-    dc.innerHTML+='<div class="dty">'+cd.type+'</div><div class="dtx">'+cd.text.split('\n')[0]+'</div>';
+    if(cd.type!=='teece')dc.innerHTML+='<div class="dty">'+cd.type+'</div>';
+    dc.innerHTML+='<div class="dtx">'+cd.text.split('\n')[0]+'</div>';
     dc.addEventListener('click',()=>{if(!ready())return;res(id);overlay.classList.add('hidden');});
     cards.appendChild(dc);
   }
