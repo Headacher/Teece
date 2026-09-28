@@ -73,7 +73,8 @@ Every push carries a bump, in the same commit as the change: `build` up by one
 
 A deck is registered in seven places, and missing one of them fails quietly —
 the cards exist and simply never reach a player. Take the next free block of
-twenty ids (Dimension is 805–824), then:
+twenty ids (Wizard is 906–925, with its conjured tokens at 926–941, and the
+tutorial's cards sit at 960–970), then:
 
 - `CARDS` in `index.html` — the twenty cards, plus any token cards they make.
   A token carries `token:true` and `deck:'<key>'`, which keeps it out of drafts
@@ -248,6 +249,27 @@ Animation lengths live in `ANIM_MS`, not at the call sites, and the CSS
 keyframes (`placePop`, `strikeFlare`, `dieShake`, `zapPulse`) are matched to
 them. A fight is two beats in `resolveCombat`: the killers `strike`, then the
 losers go `dying`.
+
+### The Wizard conjures, combines and leaves weather behind
+
+Wizards conjure element tokens (Fire 926, Water 927, Wind 928, Earth 929)
+straight into the hand through `conjureEl`; each element's spell is the
+`element` fx, which reads `archmageFor` for the stronger version. Two different
+elements combine through `combineOpts`/`combineAt` into the tokens in
+`EL_COMBO`, from a Combine button that takes the Discard button's place;
+Alchemical Compounds is a wildcard (`alchemy`), and Holy needs a Grand Magus
+(`holyCombine`) on the field. A magic card's `elem` list is what the
+Elementals' `onMagicElem` reads, so Steam counts as Fire and as Water.
+
+The Fireball's fire is a `scorch` fire: it gives no standing penalty, and
+`scorchFires` (run at the top of every `resolveCombat`) takes -4 off whatever
+stands in it for good and puts that fire out. The Sandstorm moves what stands
+on it in `sandstormTurn`, at the start of every turn. A Ley Line pays on
+arrival through `groundArrive`, called from `playTeece` and `fireMove`.
+
+Measured against every other deck in AI-vs-AI games, the Wizard wins far more
+than any other deck, and the power is in the conjuring, not the bodies:
+turning conjuring off drops it to about 42%, and body size barely moves it.
 
 ### An ability reads as X : Y ; Z
 

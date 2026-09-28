@@ -783,6 +783,39 @@
         "Make more: The Ancestor-Smith forges a second Runeblade onto itself, and the Barrow Forge makes another every third time a wielder falls on it. The Bladeless Exile is the price of all this — huge, but -5 while any Teece anywhere holds the sword.",
         "Ragnarok ends it: break a Runeblade for good, with its wielder, and two Teece of your choice go down with it. Or take Triumph, and the next Teece to take up the sword gets +5 and Flying for the turn."
       ]
+    },
+    "wizard": {
+      "name": "Wizard",
+      "cards": [
+        906,
+        907,
+        908,
+        909,
+        910,
+        911,
+        912,
+        913,
+        914,
+        915,
+        916,
+        917,
+        918,
+        919,
+        920,
+        921,
+        922,
+        923,
+        924,
+        925
+      ],
+      "blurb": "Advanced deck, and very complicated. The Wizards are an ancient race who have shepherded every sentient being along the enlightened path of magic. They purged their dark sorcerers long ago, exiling them to the undead planet where zombies and vampires wage their eternal war. With their Elemental helpers, and the reluctant help of their sisters the Witches and the trickster Pixies, they are the oldest and most respected masters of magic in Teece. Only the most skilled can wield them.",
+      "how": [
+        "Every Wizard conjures an element when it is played: Fire (a Teece gets -2), Water (+2), Wind (move a Teece one space) or Earth (a battleground with +3 Defence). Elements go straight into your hand as magic cards.",
+        "Two different elements in hand can be combined with the Combine button on the card, which costs no play: Steam, Fireball, Lava, Ice, Mud or Sandstorm, each stronger than either half.",
+        "With a Grand Magus on the field, Fire, Water, Wind and Earth together combine into Holy: destroy a Teece and raise one of yours from the graveyard in its place.",
+        "An Archmage on the field makes every element stronger. The Elementals grow each time you play magic of their own element.",
+        "Elements count toward your hand limit of six, so spend or combine them before your turn ends."
+      ]
     }
   },
   "formats": [
@@ -1349,6 +1382,26 @@
     902,
     903,
     904,
-    905
+    905,
+    906,
+    907,
+    908,
+    909,
+    910,
+    911,
+    912,
+    913,
+    914,
+    915,
+    916,
+    917,
+    918,
+    919,
+    920,
+    921,
+    922,
+    923,
+    924,
+    925
   ]
 }
