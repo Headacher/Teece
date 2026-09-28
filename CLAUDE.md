@@ -219,7 +219,16 @@ the page, or it buries the content underneath. On a phone `aside` stacks below
 
 The interactive tutorial (`startTutorial`) is a real game against a Trainer
 whose five moves are fixed in `TUT_OPP`, played with effect-free cards 960–970
-that are in no deck and not in the pool. Each of your turns is one lesson in
+that are in no deck and not in the pool.
+
+**The pool is not what the roguelike drafts from.** `allDraftable` walks every
+card in `CARDS` and skips only `token`, `perkOnly` and `tutorial` cards (the
+classic, Gadget and Garbage cards are drafted that way on purpose). So any card
+that must never reach a player's deck needs one of those flags, or it turns up
+in roguelike drafts: the tutorial's 14/14/14/14 no-sacrifice Warlord did,
+builds 99–107, until the cards were given `tutorial:true`. The Witches'
+random `conjure` walks every magic card the same way and skips tokens and
+tutorial cards. Each of your turns is one lesson in
 `TUT_LESSONS`; the current step is the first whose `done()` is false, read off
 the board every render. The step gates three places: `playFromHand` (which card),
 `chooseCell` (which panels or hand cards a prompt will take, via `tutFilter`)

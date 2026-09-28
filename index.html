@@ -996,7 +996,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:107,date:'2026-09-28'};
+const VERSION={build:108,date:'2026-09-28'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1829,7 +1829,7 @@ const CARD_ART={
 function allDraftable(){
   const out=[];
   for(const k of Object.keys(CARDS)){
-    if(CARDS[k].token||CARDS[k].perkOnly)continue;
+    if(CARDS[k].token||CARDS[k].perkOnly||CARDS[k].tutorial)continue;
     const id=Number(k);
     if(!Number.isFinite(id))continue;
     const dk=DECKS[getCardDeck(id)];
@@ -4045,20 +4045,22 @@ const CARDS = {
  941:{name:'Sandstorm',type:'ground',token:true,deck:'wizard',gmod:-3,gSandstorm:true,
     text:'A Teece on this panel has -3. At the start of every turn, this battleground\u2019s owner moves it one space.'},
  /* ---- the tutorial's cards. Nothing but their numbers, so a new player learns
-        the rules rather than a card. In no deck and not in the pool, so they
-        never reach a draft; deck:'classic' only gives them the cream face. ---- */
- 960:{name:'Recruit',type:'teece',deck:'classic',sides:[6,6,6,6],text:'No effect.'},
- 961:{name:'Squire',type:'teece',deck:'classic',sides:[7,7,7,7],text:'No effect.'},
- 962:{name:'Champion',type:'teece',deck:'classic',sides:[15,15,15,15],sac:1,text:'Sacrifice one fielded Teece to play.'},
- 963:{name:'Training Blade',type:'equip',deck:'classic',mod:3,text:'Equipped Teece gets +3.'},
- 964:{name:'Weaken',type:'magic',deck:'classic',text:'An enemy Teece gets -2.',
+        the rules rather than a card. The roguelike drafts from every card in
+        CARDS, not from the pool, so tutorial:true is what keeps them out of it
+        and out of anything conjured at random; deck:'classic' only gives them
+        the cream face. ---- */
+ 960:{name:'Recruit',type:'teece',deck:'classic',tutorial:true,sides:[6,6,6,6],text:'No effect.'},
+ 961:{name:'Squire',type:'teece',deck:'classic',tutorial:true,sides:[7,7,7,7],text:'No effect.'},
+ 962:{name:'Champion',type:'teece',deck:'classic',tutorial:true,sides:[15,15,15,15],sac:1,text:'Sacrifice one fielded Teece to play.'},
+ 963:{name:'Training Blade',type:'equip',deck:'classic',tutorial:true,mod:3,text:'Equipped Teece gets +3.'},
+ 964:{name:'Weaken',type:'magic',deck:'classic',tutorial:true,text:'An enemy Teece gets -2.',
     cast:[{fx:'mod',who:'enemy',where:'any',n:-2,dur:'perm'}]},
- 965:{name:'Training Dummy',type:'teece',deck:'classic',sides:[3,3,3,3],text:'No effect.'},
- 966:{name:'Brute',type:'teece',deck:'classic',sides:[6,6,6,6],text:'No effect.'},
- 967:{name:'Knight',type:'teece',deck:'classic',sides:[9,9,9,9],text:'No effect.'},
- 968:{name:'Sentinel',type:'teece',deck:'classic',sides:[5,10,9,5],text:'No effect.'},
- 969:{name:'Warlord',type:'teece',deck:'classic',sides:[14,14,14,14],text:'No effect.'},
- 970:{name:'Scout',type:'teece',deck:'classic',sides:[4,4,4,4],text:'No effect.'},
+ 965:{name:'Training Dummy',type:'teece',deck:'classic',tutorial:true,sides:[3,3,3,3],text:'No effect.'},
+ 966:{name:'Brute',type:'teece',deck:'classic',tutorial:true,sides:[6,6,6,6],text:'No effect.'},
+ 967:{name:'Knight',type:'teece',deck:'classic',tutorial:true,sides:[9,9,9,9],text:'No effect.'},
+ 968:{name:'Sentinel',type:'teece',deck:'classic',tutorial:true,sides:[5,10,9,5],text:'No effect.'},
+ 969:{name:'Warlord',type:'teece',deck:'classic',tutorial:true,sides:[14,14,14,14],text:'No effect.'},
+ 970:{name:'Scout',type:'teece',deck:'classic',tutorial:true,sides:[4,4,4,4],text:'No effect.'},
 };
 const DEF=t=>CARDS[t.cardId];
 /* What an equip actually grants, once the modality it was bolted on with is
@@ -10288,7 +10290,8 @@ async function FXRUN(st,ctx){
     /* Pixie magic avoids Spider. */
     const source=ctx.t||{cardId:-1};
     const sourceCard=CARDS[source.cardId];
-    let pool=Object.keys(CARDS).filter(k=>/^[0-9]+$/.test(k)&&CARDS[k].type==='magic').map(Number);
+    /* Real cards only: not the tutorial's, and not a Wizard's elements. */
+    let pool=Object.keys(CARDS).filter(k=>/^[0-9]+$/.test(k)&&CARDS[k].type==='magic'&&!CARDS[k].token&&!CARDS[k].tutorial).map(Number);
     if(sourceCard&&sourceCard.pixie)pool=pool.filter(cid=>!CARDS[cid].spider);
     if(!pool.length)return none('There is no magic to conjure.');
     const got=[];
