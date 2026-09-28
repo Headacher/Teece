@@ -978,7 +978,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:102,date:'2026-09-28'};
+const VERSION={build:103,date:'2026-09-28'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3939,37 +3939,37 @@ const CARDS = {
         spell (the Combine button on the card), and all four combine into Holy
         while a Grand Magus stands on your side. Elements and everything made
         from them are tokens: in no deck and never drafted. */
- 906:{name:'Earth Elemental',type:'teece',sides:[6,5,6,5],onPlay:[{fx:'conjureEl',give:['earth']}],
+ 906:{name:'Earth Elemental',type:'teece',sides:[3,2,3,2],onPlay:[{fx:'conjureEl',give:['earth']}],
     onMagic:[{fx:'mod',who:'self',n:2,dur:'perm'}],onMagicElem:'earth',
     text:'When played: conjure Earth. When you play an Earth magic card: +2 permanently.'},
- 907:{name:'Wind Elemental',type:'teece',sides:[5,6,5,6],onPlay:[{fx:'conjureEl',give:['wind']}],
+ 907:{name:'Wind Elemental',type:'teece',sides:[2,3,2,3],onPlay:[{fx:'conjureEl',give:['wind']}],
     onMagic:[{fx:'mod',who:'self',n:2,dur:'perm'}],onMagicElem:'wind',
     text:'When played: conjure Wind. When you play a Wind magic card: +2 permanently.'},
- 908:{name:'Fire Elemental',type:'teece',sides:[7,5,5,5],onPlay:[{fx:'conjureEl',give:['fire']}],
+ 908:{name:'Fire Elemental',type:'teece',sides:[4,2,2,2],onPlay:[{fx:'conjureEl',give:['fire']}],
     onMagic:[{fx:'mod',who:'self',n:2,dur:'perm'}],onMagicElem:'fire',
     text:'When played: conjure Fire. When you play a Fire magic card: +2 permanently.'},
- 909:{name:'Water Elemental',type:'teece',sides:[5,5,6,6],onPlay:[{fx:'conjureEl',give:['water']}],
+ 909:{name:'Water Elemental',type:'teece',sides:[2,2,3,3],onPlay:[{fx:'conjureEl',give:['water']}],
     onMagic:[{fx:'mod',who:'self',n:2,dur:'perm'}],onMagicElem:'water',
     text:'When played: conjure Water. When you play a Water magic card: +2 permanently.'},
- 910:{name:'Ungrounded Wizard',type:'teece',sides:[4,5,4,5],kw:['flying'],
+ 910:{name:'Ungrounded Wizard',type:'teece',sides:[1,2,1,2],kw:['flying'],
     onPlay:[{fx:'conjureEl',opts:['earth','wind','fire']}],
     text:'Flying. When played: conjure Earth, Wind or Fire.'},
- 911:{name:'Steadfast Wizard',type:'teece',sides:[6,5,6,5],kw:['immovable'],
+ 911:{name:'Steadfast Wizard',type:'teece',sides:[3,2,3,2],kw:['immovable'],
     onPlay:[{fx:'conjureEl',opts:['wind','fire','water']}],
     text:'It cannot move or be moved. When played: conjure Wind, Fire or Water.'},
- 912:{name:'Logic Wizard',type:'teece',sides:[4,5,5,4],onPlay:[{fx:'conjureEl',opts:['earth','wind','water']}],
+ 912:{name:'Logic Wizard',type:'teece',sides:[1,2,2,1],onPlay:[{fx:'conjureEl',opts:['earth','wind','water']}],
     onMagic:[{fx:'mod',who:'self',n:1,dur:'perm'}],
     text:'When played: conjure Earth, Wind or Water. When you play a magic card: +1 permanently.'},
- 913:{name:'Dark Wizard',type:'teece',sides:[7,6,7,6],noGain:true,onPlay:[{fx:'conjureEl',opts:['earth','wind','fire']}],
+ 913:{name:'Dark Wizard',type:'teece',sides:[4,3,4,3],noGain:true,onPlay:[{fx:'conjureEl',opts:['earth','wind','fire']}],
     text:'Immune to positive attribute effects. When played: conjure Earth, Wind or Fire.'},
- 914:{name:'Steam Wizard',type:'teece',sides:[4,5,4,5],steamDouble:true,onPlay:[{fx:'conjureEl',opts:['fire','water']}],
+ 914:{name:'Steam Wizard',type:'teece',sides:[1,2,1,2],steamDouble:true,onPlay:[{fx:'conjureEl',opts:['fire','water']}],
     text:'When played: conjure Fire or Water. Whenever a Teece gains or loses attributes from a magic card you cast, it gains or loses double.'},
- 915:{name:'Sand Wizard',type:'teece',sides:[5,5,5,5],onGroundMod:2,onPlay:[{fx:'conjureEl',opts:['earth','wind']}],
+ 915:{name:'Sand Wizard',type:'teece',sides:[2,2,2,2],onGroundMod:2,onPlay:[{fx:'conjureEl',opts:['earth','wind']}],
     onMove:[{fx:'mod',who:'self',n:2,dur:'temp'}],
     text:'When played: conjure Earth or Wind. +2 while it stands on a battleground. When it moves: +2 until the end of the turn.'},
- 916:{name:'Archmage',type:'teece',sides:[9,9,9,9],sac:1,archmage:true,onPlay:[{fx:'conjureEl'}],
+ 916:{name:'Archmage',type:'teece',sides:[6,6,6,6],sac:1,archmage:true,onPlay:[{fx:'conjureEl'}],
     text:'Sacrifice one fielded Teece to play. When played: conjure any element. While it stands, your elements are stronger: Fire gives -4, Water gives +4, Wind moves a Teece to any empty panel, and Earth lays +6 Defence.'},
- 917:{name:'Grand Magus',type:'teece',sides:[12,12,12,12],sac:2,holyCombine:true,onPlay:[{fx:'conjureEl'}],
+ 917:{name:'Grand Magus',type:'teece',sides:[9,9,9,9],sac:2,holyCombine:true,onPlay:[{fx:'conjureEl'}],
     text:'Sacrifice two fielded Teece to play. When played: conjure any element. While it stands, Fire, Water, Wind and Earth in your hand can combine, all four at once, into Holy.'},
  918:{name:'Twin Conjuring',type:'magic',wiz:'conjure',cast:[{fx:'conjureEl',n:2}],
     text:'Conjure any two elements.'},

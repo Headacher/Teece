@@ -267,9 +267,11 @@ stands in it for good and puts that fire out. The Sandstorm moves what stands
 on it in `sandstormTurn`, at the start of every turn. A Ley Line pays on
 arrival through `groundArrive`, called from `playTeece` and `fireMove`.
 
-Measured against every other deck in AI-vs-AI games, the Wizard wins far more
-than any other deck, and the power is in the conjuring, not the bodies:
-turning conjuring off drops it to about 42%, and body size barely moves it.
+Balance, measured in AI-vs-AI games against every other deck: with bodies
+around 5s it won 85% (Runeblade, the strongest other deck, wins 70% of the
+same matchups), and the conjuring was the source. The owner then took 3 off
+every side of all twelve Teece, bosses included, and it won 21% (build 103).
+Re-soak it after any change to the elements or the bodies.
 
 ### An ability reads as X : Y ; Z
 
