@@ -271,7 +271,9 @@ Balance, measured in AI-vs-AI games against every other deck: with bodies
 around 5s it won 85% (Runeblade, the strongest other deck, wins 70% of the
 same matchups), and the conjuring was the source. The owner then took 3 off
 every side of all twelve Teece, bosses included, and it won 21% (build 103).
-Re-soak it after any change to the elements or the bodies.
+Settled at 2 off every side and 1 back on the Archmage and Grand Magus
+(8s and 11s): 51% (build 104). Re-soak it after any change to the elements or
+the bodies.
 
 ### An ability reads as X : Y ; Z
 
