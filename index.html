@@ -996,7 +996,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:106,date:'2026-09-28'};
+const VERSION={build:107,date:'2026-09-28'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -14218,6 +14218,7 @@ async function endTurn(){
   if(!G.over)checkSwarmWin();
   if(!G.over)checkDomination();
   if(!G.over)checkStalemate();
+  if(!G.over)checkTurnLimit();
   if(G.over)return;
   G.players[p].teecePlayedLastTurn=G.players[p].teecePlayedThisTurn>0;
   tickHexes(p);
@@ -14283,6 +14284,16 @@ function renderWarn(){
    neither deck can deck the other out, so once both hands are empty and the
    board has settled the two sides just hand the turn back and forth. */
 const QUIET_LIMIT=()=>3*PLAYERS();
+/* No game runs forever. When the hundredth turn ends -- counted across every
+   seat, as the turn banner counts them -- the side with more Teece on the field
+   takes it, Tokens not counted, and level is a draw: the same reckoning a
+   deck running dry uses. */
+const TURN_LIMIT=100;
+function checkTurnLimit(){
+  if(G.over||G.turnNum<TURN_LIMIT)return;
+  endGame(deckOutWinner(),'Turn '+TURN_LIMIT+' is over, and time is up. The side with more Teece on the field takes it: '+
+    scoreLine()+'.');
+}
 function checkStalemate(){
   if(G.over)return;
   if(G.eventFlag){G.quiet=0;G.eventFlag=false;return;}
@@ -15753,7 +15764,8 @@ function showDeckInfo(key){
         ? 'or hold the bigger field when a player must draw from an empty deck. '+
           'This deck can NEVER take the game by ending a turn four Teece ahead, however far ahead it gets.'
         : 'end a turn four Teece ahead (Tokens never count), '+
-          'or hold the bigger field when a player must draw from an empty deck.')+'</span>'+
+          'or hold the bigger field when a player must draw from an empty deck.')+
+      ' If turn '+TURN_LIMIT+' ends first, the bigger field wins it.</span>'+
     (dk.swarmWin
       ? '<span class="rk">And one more</span><span>This deck adds a win of its own: the moment every panel on the '+
         'board is holding one of your '+escHtml(dk.swarmWin)+'s, the game is yours. It is checked as a turn ends, '+
@@ -17196,7 +17208,11 @@ function render(){
     'three by three');
   if(!G.over){
     const t=G.turn,d=document.getElementById('turnInfo');
+    const left=TURN_LIMIT-G.turnNum;
     d.innerHTML='<span class="dot d'+t+'"></span><strong>'+(pname(t)==='You'?'Your':pname(t)+"'s")+' turn</strong>'+
+      /* Ten turns out, the clock shows itself: the field is about to be counted. */
+      (left<10?'<span class="teamtag" style="color:var(--gold);margin-left:6px" title="When turn '+TURN_LIMIT+
+        ' ends, whoever has more Teece on the field wins.">turn '+G.turnNum+' of '+TURN_LIMIT+'</span>':'')+
       (skyShowing()?'<span class="phase '+(isDay()?'day':'night')+'">'+
       (isDay()?'\u2600\uFE0F Day':'\u{1F319} Night')+(timePinned()?' \u00b7 held':'')+'</span>':'');
     document.getElementById('endTurn').disabled=false;
@@ -17588,8 +17604,8 @@ const TUT_PAGES=[
        'meter beside the board lights one bar for every Teece of lead. Tokens do not count.</span></li>'+
      '<li><span class="k">Wipe them out</span><span>A side with no Teece left anywhere, whether on the board, '+
        'in hand or in the deck, is out.</span></li>'+
-     '<li><span class="k">Outlast them</span><span>When a player has to draw from an empty deck, whoever has '+
-       'more Teece on the board wins.</span></li></ul>'+
+     '<li><span class="k">Outlast them</span><span>When a player has to draw from an empty deck, or when turn '+
+       '100 ends, whoever has more Teece on the board wins.</span></li></ul>'+
      '<p class="fine">A few decks change these rules. Some can never win by taking the field, and one wins by '+
      'filling the board. The <b>i</b> on each deck explains its rules.</p>'},
   {t:'Your first game',

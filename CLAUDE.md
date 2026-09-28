@@ -275,6 +275,14 @@ Settled at 2 off every side and 1 back on the Archmage and Grand Magus
 (8s and 11s): 51% (build 104). Re-soak it after any change to the elements or
 the bodies.
 
+### Games end at turn 100
+
+`checkTurnLimit` runs at the end of every turn, after the other win checks:
+when turn `TURN_LIMIT` (100, counted across all seats the way the turn banner
+counts) ends, `deckOutWinner` decides it -- most Teece on the field, Tokens
+not counted, level is a draw. The turn panel shows "turn N of 100" for the last
+ten. A soak that loops "up to 300 turns" now always stops by 100.
+
 ### An ability reads as X : Y ; Z
 
 X is what turns it on, Y is what it costs, Z is what it does. Keep the three
