@@ -557,6 +557,8 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   border-radius:5px;padding:1px 7px;margin-left:auto;cursor:pointer;color:var(--cream2);min-width:28px}
 .counts .gravebtn:hover{border-color:var(--gold);color:var(--cream)}
 #detail .dn{font-family:var(--disp);font-size:20px}
+#detail .dart.card{width:100%;height:118px;min-height:0;margin:2px 0 8px;padding:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+#detail .dart .ascii{inset:6px;opacity:.9;font-size:min(calc(100cqw / 8.3),18px)}
 #detail .dsep{margin-top:9px;padding-top:7px;border-top:1px solid var(--line);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .optcard{border-color:var(--gold)!important}
 #detail .dt{font-size:12px;color:var(--muted);line-height:1.45;margin-top:4px}
@@ -963,7 +965,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:100,date:'2026-09-27'};
+const VERSION={build:101,date:'2026-09-28'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -15861,7 +15863,7 @@ function showDetail(i){
   }
   const cd=DEF(t);
   const locked=G.detailLock===i;
-  let html=(locked?'<div class="dlock">Selected</div>':'')+
+  let html=(locked?'<div class="dlock">Selected</div>':'')+detailArt(t.cardId)+
     '<div class="dn">'+nm(t)+'</div><div class="dt">'+cd.text+'</div>'+
     (cd.flavor?'<div class="dt" style="font-style:italic;opacity:.8">'+cd.flavor+'</div>':'')+
     (t.silenced?'<div class="dt" style="color:var(--bad);font-weight:bold">⛔ Silenced</div>':'');
@@ -16056,11 +16058,20 @@ function renderHand(p){
     h.appendChild(card);
   }
 }
+/* The card's drawing at the head of the Detail panel, on the card's own deck
+   colours. It borrows .card for the palette, the deck symbol in the corner and
+   the art sizing, and overrides the hand card's shape. */
+function detailArt(id){
+  const art=CARD_ART[id];
+  if(!art)return '';
+  return '<div class="card arted dart" data-card-deck="'+getCardDeck(id)+'" aria-hidden="true">'+
+    '<pre class="ascii">'+art.map(escHtml).join('\n')+'</pre></div>';
+}
 function showDetailCard(id,worn){
   const cd=CARDS[id],d=document.getElementById('detailBody');
   if(!d)return;
   const ps=cd.type==='teece'?platedSides(id,worn):null;
-  let html='<div class="dn">'+cd.name+'</div>'+
+  let html=detailArt(id)+'<div class="dn">'+cd.name+'</div>'+
     (cd.type==='teece'?'<div class="dstats" style="color:var(--gold)">'+sidesBlock(ps)+
       (worn&&worn.length&&ps.join()!==cd.sides.join()?' &nbsp;plated, from '+sidesBlock(cd.sides):'')+
       (cd.sac?' \u00b7 sacrifice '+cd.sac:'')+(cd.def?' \u00b7 Defence '+cd.def:'')+'</div>':
