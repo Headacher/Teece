@@ -978,7 +978,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:104,date:'2026-09-28'};
+const VERSION={build:105,date:'2026-09-28'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -11709,7 +11709,8 @@ async function FXRUN(st,ctx){
     const c=await pickCell(cands,'Choose a panel for the Fireball.',burn,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
-    let centre=c;
+    /* The fire lands on the panel chosen, whatever was just moved off it. */
+    const centre=c;
     const opts=[];
     const t=b[c].teece,g=b[c].ground;
     const tDest=t&&!hasKw(b,c,'immovable')&&canTarget(b,c,p)?ADJ[c].filter(j=>openAt(b,j)):[];
@@ -11720,11 +11721,11 @@ async function FXRUN(st,ctx){
       opts.push({v:'n',lbl:'Leave it where it is'});
       const how=await chooseOption(p,opts,'Fireball: move anything before it lands?');
       if(how==='t'){
-        const d=await chooseCell(p,tDest,'Move '+nm(t)+' where?',{mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);burn(bb,j);}});
-        if(d!=null&&d!=='CANCEL'){moveT(b,c,d,true);log(nm(t)+' is flung to the '+CN[d]+'.');await fireMove(c,d,p);centre=d;}
+        const d=await chooseCell(p,tDest,'Move '+nm(t)+' where?',{mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);burn(bb,c);}});
+        if(d!=null&&d!=='CANCEL'){moveT(b,c,d,true);log(nm(t)+' is flung to the '+CN[d]+'.');await fireMove(c,d,p);}
       }else if(how==='g'){
         const d=await chooseCell(p,gDest,'Move '+CARDS[g.cardId].name+' where?',{});
-        if(d!=null&&d!=='CANCEL'){b[d].ground=b[c].ground;b[c].ground=null;log(CARDS[g.cardId].name+' is flung to the '+CN[d]+'.');centre=d;}
+        if(d!=null&&d!=='CANCEL'){b[d].ground=b[c].ground;b[c].ground=null;log(CARDS[g.cardId].name+' is flung to the '+CN[d]+'.');}
       }
     }
     const lit=[centre].concat(ADJ[centre]).filter(j=>!isPlane(j));
