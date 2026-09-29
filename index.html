@@ -996,7 +996,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:108,date:'2026-09-28'};
+const VERSION={build:109,date:'2026-09-29'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3652,11 +3652,12 @@ const CARDS = {
     grants:{teeceReturn:true,onDeath:[{fx:'ratRecall'}]},
     text:'The equipped Teece gets +1. When it is destroyed, it goes back to your hand \u2014 and so does any number of your other Teece.'},
  /* ---- Rat battlegrounds ---- */
- 843:{name:"Rat's Nest",type:'ground',gEndTurn:'TNEST',gEndTurnAny:true,
-    text:'At the end of every turn, anybody\u2019s, a 3/3/3/3 Rat is summoned here under your control if nothing is standing on it.'},
+ 843:{name:"Rat's Nest",type:'ground',gEndTurn:825,gEndTurnAny:true,
+    text:'At the end of every turn, anybody\u2019s, a Rat is summoned here under your control if nothing is standing on it: the full card, 5/5/5/5 with +1 for every ally standing with it.'},
  844:{name:'Breeding Pit',type:'ground',gGrowSummon:1,
     text:'Whenever a Teece is summoned anywhere on the board, the Teece standing on this battleground gets +1 permanently.'},
- /* The one Rat nobody drafts: what the Nest puts out, night after night. */
+ /* The Nest used to put out this cut-down token. It now fields the real Rat,
+    825, and this stays only so an old reference cannot break. */
  'TNEST':{name:'Rat',type:'teece',token:true,deck:'rats',rat:true,sides:[3,3,3,3],modPerAlly:1,
     text:'Rat Token. +1 for every ally standing with it. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  /* ---- Locusts: a swarm that pays for itself in copies, and the only swarm
@@ -14292,6 +14293,32 @@ const QUIET_LIMIT=()=>3*PLAYERS();
    takes it, Tokens not counted, and level is a draw: the same reckoning a
    deck running dry uses. */
 const TURN_LIMIT=100;
+/* A player about to take their last turn before the limit is told so, and has
+   to say they have read it before the turn goes on. It is their last when no
+   later turn of theirs fits inside the limit. Shown once per seat. */
+function isLastTurn(p){
+  return G.turnNum<=TURN_LIMIT&&G.turnNum+PLAYERS()>TURN_LIMIT;
+}
+function lastTurnNotice(p){
+  if(!HAS_DOM||!G||G.over||!isLastTurn(p))return Promise.resolve();
+  G.lastTurnTold=G.lastTurnTold||{};
+  if(G.lastTurnTold[p])return Promise.resolve();
+  G.lastTurnTold[p]=true;
+  const box=document.getElementById('infoBox'),ov=document.getElementById('infoOverlay');
+  const who=pname(p)==='You'?'This is your last turn':'Last turn for '+pname(p);
+  box.innerHTML='<h2 style="margin:0">'+escHtml(who)+'</h2>'+
+    '<div class="icount">turn '+G.turnNum+' of '+TURN_LIMIT+'</div>'+
+    '<p>When turn '+TURN_LIMIT+' ends the game is over, and whoever has more Teece on the field wins. '+
+    'Tokens do not count, and a level field is a draw. Right now: '+escHtml(scoreLine())+'.</p>'+
+    '<div class="row"><button class="btn primary" id="lastTurnOk">Got it</button></div>';
+  ov.classList.remove('hidden');
+  ov.onclick=null;
+  return new Promise(res=>{
+    const ok=document.getElementById('lastTurnOk');
+    ok.focus({preventScroll:true});
+    ok.addEventListener('click',()=>{ov.classList.add('hidden');res();});
+  });
+}
 function checkTurnLimit(){
   if(G.over||G.turnNum<TURN_LIMIT)return;
   endGame(deckOutWinner(),'Turn '+TURN_LIMIT+' is over, and time is up. The side with more Teece on the field takes it: '+
@@ -14539,6 +14566,7 @@ async function startTurn(){
   log('--- Turn '+G.turnNum+': '+pname(p)+' ---');
   render();
   if(stale(ep)||G.over)return;
+  if(!isAIP(p)&&!G.tut){await lastTurnNotice(p);if(stale(ep)||G.over)return;}
   if(isAIP(p)){await wait(420);if(stale(ep))return;if(G.tut)await tutOppTurn();else await aiTurn();}
 }
 const wait=ms=>HAS_DOM?new Promise(r=>setTimeout(r,ms)):Promise.resolve();

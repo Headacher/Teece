@@ -290,7 +290,10 @@ the bodies.
 when turn `TURN_LIMIT` (100, counted across all seats the way the turn banner
 counts) ends, `deckOutWinner` decides it -- most Teece on the field, Tokens
 not counted, level is a draw. The turn panel shows "turn N of 100" for the last
-ten. A soak that loops "up to 300 turns" now always stops by 100.
+ten, and `lastTurnNotice` stops a human seat at the start of its final turn
+with a notice it must acknowledge (not the computer's, not the tutorial's). A
+page test that runs a game near turn 100 has to press `#lastTurnOk`. A soak that
+loops "up to 300 turns" now always stops by 100.
 
 ### An ability reads as X : Y ; Z
 
