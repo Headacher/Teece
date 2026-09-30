@@ -452,13 +452,14 @@
         696,
         697,
         698,
-        699
+        699,
+        700
       ],
       "blurb": "The sun at the corner of the board turns to a moon at the start of every round, so each of your own turns runs the other way from the last. Half of what this deck prints is worth having in one half of the cycle and worth nothing in the other — so play the sky, not just the card.",
       "how": [
         "A card that only works in one half of the cycle tells you so when you play it in the other.",
         "Equips read the sky too: Twilight Cloak is +3 Defence by night, and +7 with Flying by day.",
-        "Stopped Sundial pins the sky where it stands — the round stops turning it, and no card can turn it either."
+        "Stopped Sundial stops the round turning the sky while it stands, though cards can still turn it. It never destroys anything itself."
       ]
     },
     "army": {
@@ -1402,6 +1403,7 @@
     922,
     923,
     924,
-    925
+    925,
+    700
   ]
 }

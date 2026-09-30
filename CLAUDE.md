@@ -299,6 +299,16 @@ with a notice it must acknowledge (not the computer's, not the tutorial's). A
 page test that runs a game near turn 100 has to press `#lastTurnOk`. A soak that
 loops "up to 300 turns" now always stops by 100.
 
+### Day and Night exist only with Solar cards
+
+The round turns the sky only when `skyShowing()` finds a card that reads it
+somewhere in the game (board, hands, decks, graves); otherwise the phase stays
+Day and nothing reads it. The Stopped Sundial (`timeStop`) stops only that
+round's turn: `setPhase` still lets a card change the sky under it. A magic card
+with `onlyWhen:'night'` refuses to be played at the wrong time, and a
+`graveAct` with `when` is only offered in that half of the cycle. `defender` is
+a keyword `scanDeaths` reads: that Teece never destroys anything in combat.
+
 ### An ability reads as X : Y ; Z
 
 X is what turns it on, Y is what it costs, Z is what it does. Keep the three
