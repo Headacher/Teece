@@ -204,6 +204,10 @@ the page, or it buries the content underneath. On a phone `aside` stacks below
   `aiPickCell` only ever looks at the board, so the computer and every headless
   prompt will ignore those targets entirely. Anything the AI has to be able to
   choose needs its own branch, the way `chooseSacrifice` does.
+- A keyword's engine name and what a player reads can differ: `KW_LABEL` maps
+  one to the other (`steadfast` reads "Immune to stat reduction"), and the
+  Detail panel and deck pages show keywords through `kwLabel`. Card text should
+  use the player-facing words.
 - `effSides` is the single source of truth for a Teece's current numbers; auras,
   equips, grounds and doubling all compose there.
 - Effects that must land before combat go on the effect stack via `queueFx`;
