@@ -996,7 +996,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:109,date:'2026-09-29'};
+const VERSION={build:110,date:'2026-09-30'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3688,19 +3688,15 @@ const CARDS = {
     onPlay:[{fx:'copy',all:true}],
     text:'+1 for every ally standing on a panel beside it. When played: a copy of this appears on every free panel beside it \u2014 which is four more allies standing beside it.'},
  847:{name:'Breeding Locust',type:'teece',locust:true,sides:[5,4,3,4],
-    /* One ability that fires in two circumstances, so both draw on ONE
-       allowance under the same key -- three between the played half, the
-       destroyed half, and every copy of the card. Uncapped, the when-destroyed
-       half was a loop rather than a chain: killing the breeder left a breeder,
-       and killing that one left another, for as long as anything on the board
-       could keep killing it.
-
-       Three a turn, refilled each turn, the way the Nymph's allowance is. */
-    onPlay:[{fx:'copy',turnCap:{key:'breeder',max:3,label:'Breeding Locust',
-      msg:'The breeders have already bred three times this turn.'}}],
-    onDeath:[{fx:'copy',turnCap:{key:'breeder',max:3,label:'Breeding Locust',
-      msg:'The breeders have already bred three times this turn.'}}],
-    text:'When played, and again when destroyed: a copy of this appears on a free panel beside it. Between this card and every copy of it, that happens three times in a turn and no more.'},
+    /* The copy comes up SILENCED, and that is the whole of the brake: a silenced
+       Teece has no when-destroyed left (processDeath skips it), so killing the
+       copy leaves nothing behind. The card breeds twice in its life and its
+       offspring never breed at all. This replaced a three-a-turn allowance
+       shared across every copy, which was the only thing keeping the
+       when-destroyed half from being an endless loop. */
+    onPlay:[{fx:'copy',silence:true}],
+    onDeath:[{fx:'copy',silence:true}],
+    text:'When played, and again when destroyed: a silenced copy of this appears on a free panel beside it.'},
  848:{name:'Egg-Layer',type:'teece',locust:true,sides:[2,3,1,2],
     act:[{name:'Lay',once:'turn',onceTurn:'egglayer',steps:[{fx:'copy'},{fx:'copy'}]}],
     text:'Once per turn, among all copies: two copies of this appear on free panels beside it, chosen one at a time.'},
@@ -7420,6 +7416,7 @@ async function FXRUN(st,ctx){
     if(st.all){
       for(const j of empt){
         const cpa=makeTeece(ctx.t.cardId,p);cpa.isCopy=true;
+        if(st.silence)cpa.silenced=true;
         putTeece(b,j,cpa,true);
       }
       log(empt.length===1
@@ -7439,8 +7436,12 @@ async function FXRUN(st,ctx){
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const cp=makeTeece(ctx.t.cardId,p);cp.isCopy=true;
+    /* st.silence: the copy arrives with every ability negated, so it cannot
+       copy itself in turn. */
+    if(st.silence)cp.silenced=true;
     putTeece(b,c,cp,true);
-    log('A copy of '+DEF(ctx.t).name+' appears at the '+CN[c]+'.');
+    log((st.silence?'A silenced copy of ':'A copy of ')+DEF(ctx.t).name+' appears at the '+CN[c]+'.');
+    await anim([c],'placed');
     return;}
   case 'token':{
     /* st.safe holds what it summons outside time with no expiry set, which is
