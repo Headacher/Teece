@@ -997,7 +997,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:112,date:'2026-09-30'};
+const VERSION={build:113,date:'2026-09-30'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3994,9 +3994,9 @@ const CARDS = {
     text:'Sacrifice two fielded Teece to play. When played: conjure any element. While it stands, Fire, Water, Wind and Earth in your hand can combine, all four at once, into Holy.'},
  918:{name:'Twin Conjuring',type:'magic',wiz:'conjure',cast:[{fx:'conjureEl',n:2}],
     text:'Conjure any two elements.'},
- 919:{name:'Alchemical Compounds',type:'magic',alchemy:true,wiz:'conjure',cast:[{fx:'conjureEl',give:['water','wind']}],
+ 919:{name:'Alchemical Compounds',type:'magic',alchemy:true,wiz:'conjure',cast:[{fx:'conjureEl',opts:['water','wind']}],
     grants:{graveAct:[{name:'Recall the Compounds',onceGame:'alchemy',steps:[{fx:'graveSelfToHand'}]}]},
-    text:'It counts as Earth, Fire, Water or Wind for combining. Conjure Water and Wind. Once a game, from your graveyard: return it to your hand.'},
+    text:'It counts as Earth, Fire, Water or Wind for combining. Conjure Water or Wind. Once a game, from your graveyard: return it to your hand.'},
  920:{name:'Spell Mirror',type:'magic',wiz:'conjure',
     cast:[{fx:'choose',msg:'Spell Mirror:',opts:[
       {lbl:'Copy a magic card in your hand',steps:[{fx:'copyHandMagic'}]},
