@@ -368,6 +368,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
   font-variant-numeric:tabular-nums}
 /* \u21BB is a text glyph rather than an emoji, so it needs a size of its own to
    sit level with the bow and the shield beside it. */
+.teece .rgd .fly.flown{filter:grayscale(1);opacity:.35}
 .teece .rgd .undy{font-size:13px;line-height:1;gap:1px}
 /* Invulnerable. A text glyph like the Undying arrow, so it needs its own size
    to sit level; given a light of its own because "cannot be destroyed" is the
@@ -996,7 +997,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:111,date:'2026-09-30'};
+const VERSION={build:112,date:'2026-09-30'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -16146,6 +16147,13 @@ function renderBoard(){
          corner were unpositioned and landed on top of the card. */
       const badges=[];
       if(kws.indexOf('ranged')>=0)badges.push('<span title="Ranged">\u{1F3F9}</span>');
+      /* Flying, beside the bow and the shield. Greyed once its flight is spent
+         on its own turn, so a glance says which of your fliers can still go. */
+      if(kws.indexOf('flying')>=0){
+        const fe=aul.find(e=>e.key==='kfly');
+        const flown=!!(fe&&t.owner===G.turn&&!actAvailable(t,fe));
+        badges.push('<span class="fly'+(flown?' flown':'')+'" title="'+(flown?'Flying \u2014 already flown this turn':'Flying')+'">\u{1FABD}</span>');
+      }
       const dv=defOf(G.board,i);
       if(dv>0)badges.push('<span class="dfn" title="Defence '+dv+'">\u{1F6E1}\uFE0F'+dv+'</span>');
       const un=undyLeft(t);
