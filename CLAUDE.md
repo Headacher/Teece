@@ -73,8 +73,8 @@ Every push carries a bump, in the same commit as the change: `build` up by one
 
 A deck is registered in seven places, and missing one of them fails quietly —
 the cards exist and simply never reach a player. Take the next free block of
-twenty ids (Wizard is 906–925, with its conjured tokens at 926–941, and the
-tutorial's cards sit at 960–970), then:
+twenty ids (Wizard is 906–925, with its conjured tokens at 926–941, the
+tutorial's cards sit at 960–970, and Gun is 1001–1020), then:
 
 - `CARDS` in `index.html` — the twenty cards, plus any token cards they make.
   A token carries `token:true` and `deck:'<key>'`, which keeps it out of drafts
@@ -287,6 +287,31 @@ every side of all twelve Teece, bosses included, and it won 21% (build 103).
 Settled at 2 off every side and 1 back on the Archmage and Grand Magus
 (8s and 11s): 51% (build 104). Re-soak it after any change to the elements or
 the bodies.
+
+### The Gun spends bullets, six shots a turn
+
+Bullets are numbers on the seat (`bullets`, plus Speedloader's `hotBullets`,
+which are spent first and lapse in `endTurn`), not cards. `shots` counts the
+magazine: `MAG_SIZE` is 6, `startTurn` refills it for the seat whose turn it
+is, and `reloadMag` refills it early. Any seat holding bullets has a gun, so a
+Warzone arms the other side and a drafted Gun card brings the gun with it;
+`hasGun` only decides whether the chip and the count beside the name show.
+
+The gun is the `gun` status chip under the board: `drawGun` opens a cell
+prompt with `opt.gun` (which turns the pointer over the board into a
+crosshair) and keeps reopening it until it is holstered or runs dry. Every
+shot, from anywhere, goes through `shootTeece`, and that is where all of the
+"when shot" cards answer — `shotGain`, `shotKw`, `onShotAny`, `shotStun`,
+`shotExec` and the Warzone's `gShotBullet`. `fireGunAt` is the paid-for pull of
+the trigger (a bullet, a shot, then `resolveCombat`). A Gun Range is shot by
+raising `gmod` on the ground instance itself. The Stuntman's dodge is
+`gunDodge`, called from `processDeath`; the Gun Devil's eight lines are
+`gunLine`. The Avatar of the Gun God (`gunGod`) turns the chip off for the seat
+that bolted it on and gives its wearer an act, `gunGodShot`.
+
+The computer shoots in `aiGun`, one best shot at a time on a cloned board via
+`simShot`, and keeps three bullets back while it holds a Gun Devil. Balance in
+AI-vs-AI games against every other deck: 59% over 500 games (build 115).
 
 ### Games end at turn 100
 

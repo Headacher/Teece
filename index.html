@@ -200,6 +200,9 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="wizard"],.dcard[data-card-deck="wizard"]{--cardbg:#2a4a8c;--artink:#f7e3a6;background:var(--cardbg);color:#eef3ff;border-color:#16295a}
 .card[data-card-deck="wizard"] .kwl,.dcard[data-card-deck="wizard"] .dkw{color:#f5cf6b}
 .card[data-card-deck="wizard"] .ct,.dcard[data-card-deck="wizard"] .dty{color:#f5cf6b}
+.card[data-card-deck="gun"],.dcard[data-card-deck="gun"]{--cardbg:#3b3f45;--artink:#f0c674;background:var(--cardbg);color:#eceae4;border-color:#1c1e21}
+.card[data-card-deck="gun"] .kwl,.dcard[data-card-deck="gun"] .dkw{color:#f0a04b}
+.card[data-card-deck="gun"] .ct,.dcard[data-card-deck="gun"] .dty{color:#f0a04b}
 
 .card[data-card-deck]::after,.dcard[data-card-deck]::after{position:absolute;top:2px;right:3px;font-size:11px;line-height:1;opacity:.85;z-index:1}
 .card[data-card-deck="classic"]::after,.dcard[data-card-deck="classic"]::after{content:'🂡'}
@@ -229,6 +232,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="devil"]::after,.dcard[data-card-deck="devil"]::after{content:'😈'}
 .card[data-card-deck="runeblade"]::after,.dcard[data-card-deck="runeblade"]::after{content:'🗡️'}
 .card[data-card-deck="wizard"]::after,.dcard[data-card-deck="wizard"]::after{content:'🔮'}
+.card[data-card-deck="gun"]::after,.dcard[data-card-deck="gun"]::after{content:'🔫'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -256,6 +260,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .teece[data-card-deck="devil"]{--cardbg:#5a0f14;--artink:#ffd6c4;background:var(--cardbg);color:#f8e2d9;border-color:#2c0508}
 .teece[data-card-deck="runeblade"]{--cardbg:#1c3547;--artink:#d6efff;background:var(--cardbg);color:#e2f0f8;border-color:#0b1a24}
 .teece[data-card-deck="wizard"]{--cardbg:#2a4a8c;--artink:#f7e3a6;background:var(--cardbg);color:#eef3ff;border-color:#16295a}
+.teece[data-card-deck="gun"]{--cardbg:#3b3f45;--artink:#f0c674;background:var(--cardbg);color:#eceae4;border-color:#1c1e21}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -478,6 +483,9 @@ button,.teece,.cell,.card{touch-action:manipulation}
 #promptBar .msg{font-size:13px}
 
 /* the status strip: standing curses and pending effects, between field and hand */
+/* the gun is out: the pointer over a panel is a crosshair */
+body.gunmode #board .cell.target,body.gunmode #board .cell.target *{cursor:crosshair}
+body.gunmode #board .cell.target{box-shadow:inset 0 0 0 2px #f0a04b}
 #statusBar{width:100%;max-width:620px;display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:center;align-items:center}
 #statusBar .stgrp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center}
 #statusBar .stwho{display:inline-flex;align-items:center;gap:5px;color:var(--muted);
@@ -997,7 +1005,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:114,date:'2026-09-30'};
+const VERSION={build:115,date:'2026-10-01'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1119,7 +1127,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F52E}'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F52E}',gun:'\u{1F52B}'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -1248,6 +1256,26 @@ const CARD_ART={
   939:["  ~^~^~^~    ", " ^~.~^~.~^   ", "~^~^~^~^~^~  ", " ~~~~~~~~~   ", "'''''''''''  "],
   940:["  .  o  .    ", " ~.~~o~~.~   ", "~~~~~~~~~~~  ", " ~ ~ ~ ~ ~   ", "'''''''''''  "],
   941:[" . :  .: .   ", " :. .:: .: . ", " .:: . .:.:  ", " . :.:: . :. ", " :. . .: .   "],
+  1001:["   ___       ", "  [___]==-   ", "  (o o)  /   ", " /|===|\\     ", "  /   \\      "],
+  1002:["   [####]    ", "  ([o  o])   ", "   |====|    ", "  /| [] |\\   ", " o o    o o  "],
+  1003:["   .----.    ", "  ( o  o )   ", "  (  ()  ) ->", "  ( .... )   ", "   '----'    "],
+  1004:["    /\\/\\     ", "   [o  o]    ", "  -|=##=|-   ", "  z |  | z   ", "   /    \\    "],
+  1005:["  \\_[==]_/   ", "   (o  o)    ", "  /|::::|\\   ", "    \\  /     ", "     ''      "],
+  1006:["  -(+)-      ", "   [o-o]===  ", "   |   |     ", "   |___|     ", "   /   \\     "],
+  1007:["  [######]   ", "  [#O##O#]   ", "  [######]   ", "  [##||##]   ", "  [_|  |_]   "],
+  1008:["    .--.     ", "   ( xx )    ", "  /|====|\\   ", " X |    | X  ", "   /    \\    "],
+  1009:["  [=][=][=]  ", "   (o  o)    ", "  /|$$$$|\\   ", "   |____|    ", "   /    \\    "],
+  1010:["   \\o/  ->   ", "    |   ->   ", "   / \\       ", "  ~~~~~~~    ", "   *  * *    "],
+  1011:["  _________  ", " |[]|=====|\\ ", " |__|=====|_|", "  (o)    (o) ", "  =========  "],
+  1012:["  \\  |  /    ", "  (\\_|_/)    ", " -( >  < )-  ", "  (\\VVV/)    ", "  /  |  \\    "],
+  1013:["  o o o o o  ", " /=========\\ ", " |o o o o o| ", " \\=========/ ", "  o o o o o  "],
+  1014:["   _.--._    ", "  /|####|\\   ", "  ||####||   ", "  ||####||   ", "   '----'    "],
+  1015:["   \\ | /     ", "  -( @ )-    ", "   / | \\     ", "  ==[#]==>   ", "     |       "],
+  1016:["    .--.     ", "  .( oo ).   ", " ( o () o )  ", "  '( oo )'   ", "    '--'     "],
+  1017:["      ^      ", "     /#\\     ", "    |###|    ", "    |###|    ", "   ->>>>>-   "],
+  1018:["    .---.    ", "   ( (+) )   ", "  -( -+- )-  ", "   ( (+) )   ", "    '---'    "],
+  1019:[" x  ~  *  x  ", "  #  x  ~ #  ", " ~  ##  x  ~ ", "  x  ~  #  * ", " ''''''''''' "],
+  1020:["  |o|  |o|   ", "  |_|  |_|   ", "  ---  ---   ", "  ===  ===   ", " ''''''''''' "],
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
   541:["  \\  .-.  /  ", "   \\( o )/   ", "    (/|\\)    ", "    _/ \\_    ", "   [$]  ...  "],
@@ -4056,6 +4084,55 @@ const CARDS = {
     text:'A Teece on this panel cannot move or be moved and has +5 Defence.'},
  941:{name:'Sandstorm',type:'ground',token:true,deck:'wizard',gmod:-3,gSandstorm:true,
     text:'A Teece on this panel has -3. At the start of every turn, this battleground\u2019s owner moves it one space.'},
+ /* ---- Gun: 1001-1020 ----
+        Bullets are a seat's own count, not cards. On your turn the gun comes
+        out from the chip under the board: tap a Teece to spend a bullet and
+        give it -1. Six shots a turn, then the magazine is empty until the
+        start of your next turn, unless something reloads it. Anyone holding
+        bullets can shoot, so a Warzone arms the other side too. */
+ 1001:{name:'Gunslinger',type:'teece',sides:[3,3,5,5],onPlay:[{fx:'bullets',n:3}],
+    text:'When played: gain 3 bullets.'},
+ 1002:{name:'Ammo Mule',type:'teece',sides:[6,9,2,2],onDeath:[{fx:'bullets',n:3}],
+    text:'When destroyed: gain 3 bullets.'},
+ 1003:{name:'Bullet Sponge',type:'teece',sides:[5,5,5,5],shotGain:7,
+    text:'When it is shot, it gets +1 instead, until it has gained +7 this way.'},
+ 1004:{name:'Shock Trooper',type:'teece',sides:[2,7,8,2],shotStun:true,
+    text:'Whenever an enemy Teece is shot, it is also stunned.'},
+ 1005:{name:'Ammo Drone',type:'teece',sides:[0,0,0,0],kw:['flying'],
+    onPlay:[{fx:'bullets',n:6}],onDeath:[{fx:'bullets',reload:true}],
+    text:'Flying. When played: gain 6 bullets. When destroyed: reload your magazine.'},
+ 1006:{name:'Sharpshooter',type:'teece',sides:[8,2,8,8],kw:['ranged'],onShotAny:1,
+    text:'Ranged. Whenever any Teece is shot: +1 until the end of the turn.'},
+ 1007:{name:'Kevlar Juggernaut',type:'teece',sides:[9,9,0,7],kw:['steadfast'],shotKw:['ranged','flying'],
+    text:'Immune to stat reduction. When it is shot: Ranged and Flying until the end of the turn.'},
+ 1008:{name:'Executioner',type:'teece',sides:[2,4,4,7],shotExec:5,gunDiscard:true,handDiscard:[{fx:'bullets',n:2}],
+    text:'When an enemy Teece is shot for the fifth time in one turn, destroy it. Discard this card from your hand: gain 2 bullets.'},
+ 1009:{name:'Quartermaster',type:'teece',sides:[6,6,6,6],onPlay:[{fx:'bullets',n:1}],gunDiscard:true,handDiscard:[{fx:'bullets',n:2}],
+    text:'When played: gain a bullet. Discard this card from your hand: gain 2 bullets.'},
+ 1010:{name:'Stuntman',type:'teece',sides:[4,5,4,5],shotDodge:true,
+    text:'When it is about to be destroyed: you may spend a bullet to shoot it and move it one space, and it is not destroyed. Once a turn.'},
+ 1011:{name:'Armored Ammo Truck',type:'teece',sides:[2,2,2,2],sac:1,def:8,
+    onPlay:[{fx:'bullets',n:4,reload:true}],onDeath:[{fx:'bullets',n:2}],
+    text:'Sacrifice one fielded Teece to play. Defence 8. When played: gain 4 bullets and reload your magazine. When destroyed: gain 2 bullets.'},
+ 1012:{name:'The Gun Devil',type:'teece',sides:[9,9,9,9],sac:2,def:2,kw:['ranged'],onPlay:[{fx:'gunDevil'}],
+    text:'Sacrifice two fielded Teece to play. Defence 2. Ranged. When played: fire a bullet from your reserves in every direction, starting at the top and going clockwise (top, top right, right, bottom right, and so on) until all eight have fired or you run out. Each bullet hits the first Teece in its line, and any Teece it hits is destroyed.'},
+ 1013:{name:'Bandolier',type:'equip',mod:-1,grants:{endBullets:2},
+    text:'Equipped Teece gets -1. At the end of every turn, yours or not: gain 2 bullets.'},
+ 1014:{name:'Kevlar Vest',type:'equip',mod:1,grants:{onDeath:[{fx:'bullets',n:4}]},
+    text:'Equipped Teece gets +1. When it is destroyed: gain 4 bullets.'},
+ 1015:{name:'Avatar of the Gun God',type:'equip',trump:true,
+    grants:{kw:['flying'],gunGod:true,act:[{name:'Gun God: -5',times:99,steps:[{fx:'gunGodShot'}]}]},
+    text:'Trump card. While this is worn you can no longer fire your gun. Instead, the equipped Teece has Flying and can select an enemy in its row or column and spend a bullet to give it -5. Its shots come out of the same magazine.'},
+ 1016:{name:'Speedloader',type:'magic',gunAi:'load',cast:[{fx:'bullets',n:4,hot:true,reload:true}],
+    text:'Gain 4 bullets, but they must all be used this turn. Reload your magazine.'},
+ 1017:{name:'Armor-Piercing Rounds',type:'magic',gunAi:'ap',cast:[{fx:'apRounds'}],
+    text:'Select a panel. The Teece on it is silenced and every equip it wears is destroyed, any battleground on it is destroyed, and that Teece gets an extra -1 whenever it is shot this turn.'},
+ 1018:{name:'Headshot',type:'magic',gunAi:'head',cast:[{fx:'headshot'}],
+    text:'Select a Teece. Every time it is shot this turn, it gets an extra -2.'},
+ 1019:{name:'Warzone',type:'ground',gShotBullet:true,
+    text:'Whenever a Teece on this panel is shot, every player gains a bullet. Anyone holding bullets can shoot.'},
+ 1020:{name:'Gun Range',type:'ground',gGunRange:true,
+    text:'You can shoot this battleground with your gun. A Teece on it has +1 for every time it has been shot.'},
  /* ---- the tutorial's cards. Nothing but their numbers, so a new player learns
         the rules rather than a card. The roguelike drafts from every card in
         CARDS, not from the pool, so tutorial:true is what keeps them out of it
@@ -4937,7 +5014,7 @@ function newState(mode,vsAI,decks,extra){
     nextMod:0,nextSides:null,nextShield:false,noDeckOut:false,noDominate:false,coffined:{},teecePlayedLastTurn:false,teecePlayedThisTurn:0,turnsTaken:0,
     allFlying:false,swarmWin:null,swarmMind:0,turnCaps:{},
     souls:0,nextInvuln:0,skipTurns:0,hellfire:null,doomSelf:false,doomFoes:false,
-    hexes:[],forget:0,confuse:null,recall:null});
+    hexes:[],forget:0,confuse:null,recall:null,bullets:0,hotBullets:0,shots:0,hasGun:false});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
     width:BW,
@@ -6222,6 +6299,11 @@ function actBlockedReason(b,i,ent){
      before the movement cases and the button says why rather than doing nothing. */
   if(isStunned(t,b,i))return 'stunned';
   const st=ent.act.steps&&ent.act.steps[0];
+  if(st&&st.fx==='gunGodShot'){
+    if(bulletsOf(t.owner)<1)return 'no bullets';
+    if(shotsLeft(t.owner)<1)return 'magazine empty';
+    return godTargets(b,i,t.owner).length?null:'no enemy in line';
+  }
   if(!st||st.fx!=='move')return null;
   if(hasKw(b,i,'immovable'))return 'held';
   return movePool(i,st.range).some(j=>openAt(b,j))?null:'nowhere to go';
@@ -11867,6 +11949,97 @@ async function FXRUN(st,ctx){
     handPush(p,id);
     log(CARDS[id].name+' returns to '+pposs(p)+' hand.');
     return;}
+  /* ---- Gun ---- */
+  /* Bullets into a seat's reserve, and/or the magazine reloaded. hot bullets
+     are Speedloader's: spent first, and gone at the end of the turn. A death
+     effect pays the dead Teece's side. */
+  case 'bullets':{
+    const own=ctx.deadOwner!=null?ctx.deadOwner:p;
+    if(st.n)gainBullets(own,st.n,!!st.hot);
+    if(st.reload)reloadMag(own);
+    const bits=[];
+    if(st.n)bits.push(vb(own,'gains','gain')+' '+st.n+' bullet'+(st.n===1?'':'s')+(st.hot?' that must be used this turn':''));
+    if(st.reload)bits.push(vb(own,'reloads','reload')+' '+(own===p||ctx.deadOwner!=null?pposs(own):'the')+' magazine');
+    log(pname(own)+' '+bits.join(' and ')+' ('+bulletsOf(own)+' held).');
+    return;}
+  case 'gunDevil':{
+    const src=ctx.cell;
+    if(src==null||isPlane(src))return none('The Gun Devil has no line to fire along.');
+    if(bulletsOf(p)<1)return none('The Gun Devil has no bullets to fire.');
+    const r0=row(src),c0=col(src);
+    for(let k=0;k<GUN_DIRS.length;k++){
+      if(G.over)return;
+      if(bulletsOf(p)<1){log('The Gun Devil’s reserves run dry.');break;}
+      spendBullet(p);
+      const hit=gunLine(G.board,r0,c0,GUN_DIRS[k]);
+      if(hit<0){log('The Gun Devil fires '+GUN_DIR_NAME[k]+'; the bullet hits nothing.');continue;}
+      log('The Gun Devil fires '+GUN_DIR_NAME[k]+' into '+nm(b[hit].teece)+'.');
+      await shootTeece(p,hit,{kill:true});
+    }
+    return;}
+  case 'apRounds':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+      else if(b[i].ground&&!groundAnchored(b,i))cands.push(i);
+    }
+    if(!cands.length)return none('There is no panel worth piercing.');
+    const c=await pickCell(cands,'Choose a panel for the Armor-Piercing Rounds.',(bb,i)=>{
+      const o=bb[i].teece;
+      if(o&&canTarget(bb,i,p)){o.silenced=true;o.equips=[];}
+      if(bb[i].ground&&!groundAnchored(bb,i))bb[i].ground=null;
+    },false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece;
+    if(t&&canTarget(b,c,p)){
+      if(wardMagic(b,c,p)||tapeSave(b,c,p)){await anim([c],'zap');return;}
+      if(!t.silenced){t.silenced=true;log(nm(t)+' is silenced: its abilities are negated for the rest of the game.');}
+      for(const e of t.equips.slice()){
+        t.equips.splice(t.equips.indexOf(e),1);
+        equipCameOff(t,e,true);
+        if(!CARDS[e.cardId].token)toGrave(e.owner,e.cardId);
+        log(CARDS[e.cardId].name+' is shot off '+nm(t)+' and destroyed.');
+      }
+      t.apTurn=G.turnNum;
+      log(nm(t)+' takes an extra -1 from every shot this turn.');
+      if(!sameTeam(t.owner,p))noteTargeted(p);
+    }
+    if(b[c].ground){
+      log(CARDS[b[c].ground.cardId].name+' at the '+CN[c]+' is shot to pieces.');
+      await clearGroundAt(c,p);
+    }
+    await anim([c],'zap');
+    return;}
+  case 'headshot':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return none('There is no Teece to line up.');
+    const c=await pickCell(cands,'Choose a Teece to line up a headshot on.',(bb,i)=>{
+      if(bb[i].teece)applyModT(bb[i].teece,-2*Math.min(2,bulletsOf(p),shotsLeft(p)),'perm');},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece;
+    if(wardMagic(b,c,p)||tapeSave(b,c,p)){await anim([c],'zap');return;}
+    const hs=t.headshot&&t.headshot.turn===G.turnNum?t.headshot.n:0;
+    t.headshot={turn:G.turnNum,n:hs+2};
+    log(nm(t)+' is in the crosshairs: every shot this turn takes an extra -'+t.headshot.n+'.');
+    if(!sameTeam(t.owner,p))noteTargeted(p);
+    await anim([c],'zap');
+    return;}
+  case 'gunGodShot':{
+    const src=ctx.cell;
+    if(bulletsOf(p)<1)return none('You have no bullets.');
+    if(shotsLeft(p)<1)return none('The magazine is empty until your next turn.');
+    const cands=godTargets(b,src,p);
+    if(!cands.length)return none('No enemy stands in its row or column.');
+    const c=await pickCell(cands,'Choose an enemy in its row or column: spend a bullet to give it -5.',
+      (bb,i)=>{if(bb[i].teece)simShot(bb,i,5);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    spendBullet(p);G.players[p].shots=(G.players[p].shots||0)+1;
+    await shootTeece(p,c,{dmg:5,by:ctx.t?nm(ctx.t):null});
+    return;}
   case 'move':{
     const i=ctx.cell;
     if(hasKw(b,i,'immovable'))return none('It cannot move.');
@@ -12367,6 +12540,8 @@ async function processDeath(d){
   }
   /* The Decoy Runeblade and the Blade-Sworn Squire. */
   if(!d.cost&&(wieldsRune(t)||isRuneForm(t))&&await runeSaves(d))return;
+  /* The Stuntman, shot clear of the blow. */
+  if(!d.cost&&await gunDodge(d))return;
   if(b[cell].teece!==t)return;
   /* Who destroyed the Runeblade, for the Grudgebearer: the first killer of a
      Teece holding one, or of the sword standing on its own. Read before the
@@ -14231,6 +14406,22 @@ async function endTurn(){
       log(nm(G.board[pick].teece)+' catches a second wind: '+sgn(n)+'.');
     }
   }
+  /* Speedloader's bullets do not keep past the turn they were loaded on, and
+     every Bandolier pays its owner at the end of every turn, anybody's. */
+  if(G.players[p].hotBullets){
+    log(pname(p)+' '+vb(p,'loses','lose')+' '+G.players[p].hotBullets+' unspent bullet'+(G.players[p].hotBullets===1?'':'s')+' from the Speedloader.');
+    G.players[p].hotBullets=0;
+  }
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(!t)continue;
+    for(const e of t.equips){
+      const g=eqG(e);
+      if(!g||!g.endBullets||!G.players[e.owner])continue;
+      gainBullets(e.owner,g.endBullets);
+      log(CARDS[e.cardId].name+' on '+nm(t)+' hands '+pname(e.owner)+' '+g.endBullets+' bullets ('+bulletsOf(e.owner)+' held).');
+    }
+  }
   G.turnDiscards=[];
   /* Cards that go back to a hand at the end of the turn they were discarded. */
   if(G.handBack&&G.handBack.length){
@@ -14497,6 +14688,8 @@ async function startTurn(){
   pl.failedThisTurn=[];
   pl.toldMustPlay=false;
   pl.turnsTaken=(pl.turnsTaken||0)+1;
+  /* The magazine is full again at the start of each of your own turns. */
+  pl.shots=0;
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
     if(t&&t.owner===p){t.actUsedTurn={};t.dodged=false;t.magicUsedTurn=0;t.drainsThisTurn=0;t.drainMove=false;}
@@ -14938,6 +15131,9 @@ function aiPlanFor(id){
       if(eg.onDeath||eg.onKill)ebonus+=0.9;
       if(eg.act)ebonus+=0.6;
     }
+    /* Bullets later, and the Gun God's -5 a shot, are worth more than the -1. */
+    if(eg.endBullets)ebonus+=1.6;
+    if(eg.gunGod)ebonus+=bulletsOf(p)>1?2.0:0.3;
     return {thr:0.8,bonus:ebonus,cands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
   }
   if(d.type==='ground'){
@@ -14976,6 +15172,9 @@ function aiPlanFor(id){
     /* The Wizard's two pay whoever stands there later, not the board now. */
     if(d.gConjure)bonus+=1.0;
     if(d.gOnMagic)bonus+=0.6;
+    /* The Gun's two pay out shot by shot. */
+    if(d.gShotBullet)bonus+=1.0;
+    if(d.gGunRange&&bulletsOf(p)>1)bonus+=0.9;
     return {thr:0.8,bonus,cands,mut:(bb,i)=>{
       if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
       else bb[i].ground={cardId:id,owner:p};}};
@@ -14983,6 +15182,7 @@ function aiPlanFor(id){
   if(d.type!=='magic')return null;
   if(d.onlyWhen&&!phaseIs(d.onlyWhen))return null;
   if(d.wiz)return aiWizPlan(d);
+  if(d.gunAi)return aiGunMagicPlan(d);
   /* Past the price gate. A spell that asks the whole price before it takes any
      of it puts {fx:'price'} first, and dispatching on that step meant every
      such spell was invisible here and never cast at all -- three of the Locust
@@ -15682,6 +15882,10 @@ async function aiTurn(){
     if(stale(ep)||G.over)return;
   }
   for(let k=0;k<2;k++){if(!await aiSupport())break;if(stale(ep)||G.over)return;}
+  await aiGun();
+  if(stale(ep)||G.over)return;
+  await aiGunDiscard();
+  if(stale(ep)||G.over)return;
   await aiActs();
   if(stale(ep)||G.over)return;
   await aiForcedPlay();
@@ -16636,6 +16840,24 @@ function statusesFor(p){
       ()=>runGraveAct(p,ent));
   }
 
+  /* --- the gun. On your own turn, with bullets and a shot left in the
+         magazine, the chip takes it out; otherwise it says what is in it. --- */
+  if(pl.hasGun||bulletsOf(p)>0){
+    const bl=bulletsOf(p),sl=shotsLeft(p),hot=pl.hotBullets||0;
+    const cnt=bl+' bullet'+(bl===1?'':'s');
+    const why='You hold '+cnt+(hot?', '+hot+' of them loaded by a Speedloader and lost if they are not fired this turn':'')+
+      '. On your turn, take out the gun and tap a Teece to spend a bullet and give it -1. The magazine holds '+MAG_SIZE+
+      ' shots a turn ('+sl+' left); it is full again at the start of your next turn, or sooner if something reloads it.';
+    if(gunGodFor(p))
+      push('gun','good','\u{1F52B} '+cnt+' \u00b7 Gun God',
+        'You hold '+cnt+'. The Avatar of the Gun God has taken your gun: the Teece wearing it shoots instead, for -5 a bullet, at any enemy in its row or column.');
+    else if(G.turn===p&&canFireGun(p))
+      push('gun','act','\u{1F52B} Shoot \u00b7 '+cnt+' \u00b7 '+sl+'/'+MAG_SIZE,why,()=>drawGun(p));
+    else if(G.turn===p&&bl>0&&sl<1)
+      push('gun','warn','\u{1F52B} Magazine empty \u00b7 '+cnt,why);
+    else push('gun','good','\u{1F52B} '+cnt,why);
+  }
+
   /* --- the Runeblade. It answers from anywhere, so wherever it is, the chip
          is where it is tapped. --- */
   {const spots=runeSpots(p),away=spots.filter(sp=>sp.where!=='hand');
@@ -17080,7 +17302,8 @@ function renderCounts(){
     const pl=G.players[p];
     const tag=teamed?' <span class="teamtag">side '+(teamOf(p)+1)+'</span>':'';
     const out=seatAlive(p)?'':' <span class="teamtag">out</span>';
-    h+='<span class="cn"><span class="dot d'+p+'"></span>'+pname(p)+tag+out+'</span>'+
+    const ammo=pl.hasGun?' <span class="teamtag ammo" title="'+bulletsOf(p)+' bullet'+(bulletsOf(p)===1?'':'s')+'">\u{1F52B}'+bulletsOf(p)+'</span>':'';
+    h+='<span class="cn"><span class="dot d'+p+'"></span>'+pname(p)+tag+ammo+out+'</span>'+
       '<span class="cv">'+pl.hand.length+'</span>'+
       '<span class="cv'+(pl.deck.length<=2&&!pl.noDeckOut&&G.mode!=='rogue'?' low':'')+'">'+pl.deck.length+'</span>'+
       '<button type="button" class="cv gravebtn" data-p="'+p+'" title="See '+pposs(p)+' graveyard"'+
@@ -17174,6 +17397,8 @@ function renderLog(){
 function renderPrompt(){
   const pb=document.getElementById('promptBar'),pd=G.pending;
   pb.classList.toggle('hot',!!pd);
+  /* With the gun out the pointer over the board is a crosshair. */
+  document.body.classList.toggle('gunmode',!!(pd&&pd.kind==='cell'&&pd.opt&&pd.opt.gun));
   if(!pd){pb.classList.remove('haspv');pb.innerHTML='<span class="msg">&nbsp;</span>';return;}
   const haspv=!!(pd.kind==='cell'&&pd.opt&&pd.opt.preview);
   pb.classList.toggle('haspv',haspv);
@@ -17193,7 +17418,7 @@ function renderPrompt(){
     pb.appendChild(b);
   };
   if(pd.kind==='cell'){
-    if(pd.opt.cancel)add('Cancel','CANCEL');
+    if(pd.opt.cancel)add(pd.opt.cancelLbl||'Cancel','CANCEL');
     if(pd.opt.skip)add('Skip',null);
   }else if(pd.kind==='opt'){
     pd.opts.forEach((o,x)=>add(o.lbl,o.v,o.cid,'opt'+x));
@@ -17508,6 +17733,313 @@ async function aiCombine(){
     }
     if(!done||G.over)return;
   }
+}
+
+/* ============ Gun: bullets, the magazine, and shooting ============
+   Bullets are a count on the seat, not cards. On its own turn a seat holding
+   bullets can take out its gun -- the chip under the board -- and tap a Teece
+   to spend one and give it -1. The magazine holds six shots a turn; once they
+   are fired the gun is empty until the start of that seat's next turn, unless
+   something reloads it. Speedloader's bullets are hot: spent before the rest,
+   and gone when the turn ends.
+
+   Every shot goes through shootTeece, which is what "when shot" means to the
+   cards: the Bullet Sponge, the Juggernaut, the Sharpshooter, the Shock
+   Trooper and the Executioner all answer there, and so does the Warzone.
+   A shot is not magic, so it is not turned aside the way a spell is; Ward
+   still stops an enemy from picking the Teece out. */
+const MAG_SIZE=6;
+const GUN_DIRS=[[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1],[-1,-1]];
+const GUN_DIR_NAME=['up','up and right','right','down and right','down','down and left','left','up and left'];
+function bulletsOf(p){const pl=G&&G.players&&G.players[p];return pl?(pl.bullets||0)+(pl.hotBullets||0):0;}
+function shotsLeft(p){const pl=G&&G.players&&G.players[p];return pl?Math.max(0,MAG_SIZE-(pl.shots||0)):0;}
+function gainBullets(p,n,hot){
+  const pl=G.players[p];
+  if(!pl||!n)return;
+  pl.hasGun=true;
+  if(hot)pl.hotBullets=(pl.hotBullets||0)+n;
+  else pl.bullets=(pl.bullets||0)+n;
+}
+function spendBullet(p){
+  const pl=G.players[p];
+  if((pl.hotBullets||0)>0){pl.hotBullets--;return true;}
+  if((pl.bullets||0)>0){pl.bullets--;return true;}
+  return false;
+}
+function reloadMag(p){G.players[p].shots=0;G.players[p].hasGun=true;}
+/* An Avatar of the Gun God that p bolted on takes the gun out of p's hand. */
+function gunGodFor(p){
+  if(!G||!G.board)return false;
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(t&&t.equips.some(e=>{const g=eqG(e);return g&&g.gunGod&&e.owner===p;}))return true;
+  }
+  return false;
+}
+function godTargets(b,src,p){
+  const out=[];
+  if(src==null)return out;
+  for(let i=0;i<BN;i++){
+    if(i===src||!b[i].teece||sameTeam(b[i].teece.owner,p)||!canTarget(b,i,p))continue;
+    if(sameRow(i,src)||sameCol(i,src))out.push(i);
+  }
+  return out;
+}
+/* Everything the gun can be pointed at: any Teece it may pick out, and a Gun
+   Range, which is a target in its own right. */
+function gunTargets(p){
+  const b=G.board,out=[];
+  for(let i=0;i<BN;i++){
+    if((b[i].teece&&canTarget(b,i,p))||groundFlag(b[i].ground,'gGunRange'))out.push(i);
+  }
+  return out;
+}
+function canFireGun(p){
+  return !!(G&&!G.over&&G.turn===p&&!gunGodFor(p)&&bulletsOf(p)>0&&shotsLeft(p)>0&&gunTargets(p).length);
+}
+/* The first panel with a Teece on it, walking from (r,c) one step at a time
+   in direction d, or -1 when the bullet leaves the board. */
+function gunLine(b,r,c,d){
+  r+=d[0];c+=d[1];
+  while(r>=0&&r<BW&&c>=0&&c<BW){
+    const j=r*BW+c;
+    if(b[j].teece)return j;
+    r+=d[0];c+=d[1];
+  }
+  return -1;
+}
+/* What a shot does to the numbers alone, for the computer to weigh on a
+   cloned board. The watchers are left out: they are what the real shot is for. */
+function simShot(bb,i,dmg){
+  const t=bb[i].teece;
+  if(!t)return;
+  const d=DEF(t),turn=G.turnNum;
+  let n=dmg||1;
+  if(t.apTurn===turn)n+=1;
+  if(t.headshot&&t.headshot.turn===turn)n+=t.headshot.n;
+  if(!t.silenced&&d.shotGain&&(t.shotGained||0)<d.shotGain){applyModT(t,1,'perm');return;}
+  applyModT(t,-n,'perm');
+}
+async function shootTeece(p,i,o){
+  o=o||{};
+  const b=G.board,t=b[i].teece;
+  if(!t)return;
+  const d=DEF(t),turn=G.turnNum;
+  if(!t.shotLog||t.shotLog.turn!==turn)t.shotLog={turn,n:0};
+  t.shotLog.n++;
+  let n=o.dmg||1;
+  if(t.apTurn===turn)n+=1;
+  if(t.headshot&&t.headshot.turn===turn)n+=t.headshot.n;
+  const awake=!t.silenced;
+  if(o.kill){}
+  else if(awake&&d.shotGain&&(t.shotGained||0)<d.shotGain){
+    t.shotGained=(t.shotGained||0)+1;
+    applyModT(t,1,'perm');
+    log(nm(t)+' soaks up the bullet: +1 ('+t.shotGained+' of +'+d.shotGain+').');
+  }else{
+    applyModT(t,-n,'perm');
+    log(nm(t)+' is shot'+(o.by?' by '+o.by:'')+': -'+n+(isSteadfast(t)?', which it shrugs off':'')+'.');
+  }
+  if(awake&&d.shotKw){
+    for(const k of d.shotKw)if(t.kwTemp.indexOf(k)<0)t.kwTemp.push(k);
+    log(nm(t)+' takes '+d.shotKw.map(kwLabel).join(' and ')+' until the end of the turn.');
+  }
+  if(o.kill){forceDeath(t);log(nm(t)+' is cut down by the Gun Devil.');}
+  if(!sameTeam(t.owner,p))noteTargeted(p);
+  for(let j=0;j<BN;j++){
+    const w=b[j].teece;
+    if(!w||w.silenced)continue;
+    const wd=DEF(w);
+    if(wd.onShotAny){applyModT(w,wd.onShotAny,'temp');log(nm(w)+' draws a bead: '+sgn(wd.onShotAny)+' until the end of the turn.');}
+    if(sameTeam(w.owner,t.owner)||b[i].teece!==t)continue;
+    if(wd.shotStun)applyStun(b,i,true,w.owner);
+    if(wd.shotExec&&t.shotLog.n>=wd.shotExec&&!o.kill&&!isHeldSafe(t)){
+      forceDeath(t);
+      log(nm(w)+' calls it: '+nm(t)+' has been shot '+t.shotLog.n+' times this turn and is executed.');
+    }
+  }
+  if(groundFlag(b[i].ground,'gShotBullet')){
+    for(let q=0;q<PLAYERS();q++)if(seatAlive(q))gainBullets(q,1);
+    log('The Warzone answers the shot: every player picks up a bullet.');
+  }
+  G.eventFlag=true;
+  await anim([i],'zap');
+}
+/* One pull of the trigger, paid for: a bullet out of the reserve and a shot
+   out of the magazine, then the fight settles. On a Gun Range with a Teece
+   standing on it the shooter says which of the two it meant. */
+async function fireGunAt(p,i,what){
+  const b=G.board,g=b[i].ground,t=b[i].teece;
+  const canT=!!(t&&canTarget(b,i,p)),canG=groundFlag(g,'gGunRange');
+  if(!canT&&!canG)return false;
+  if(!what){
+    what=canT?'t':'g';
+    if(canT&&canG){
+      if(isAIP(p)||!HAS_DOM)what=sameTeam(t.owner,p)?'g':'t';
+      else{
+        const pick=await chooseOption(p,[{v:'t',lbl:'Shoot '+nm(t)},{v:'g',lbl:'Shoot the Gun Range'}],'What are you shooting?',true);
+        if(pick==null||pick==='CANCEL')return false;
+        what=pick;
+      }
+    }
+  }
+  if(!spendBullet(p))return false;
+  G.players[p].shots=(G.players[p].shots||0)+1;
+  if(what==='g'){
+    g.gmod=(g.gmod||0)+1;
+    g.rangeShots=(g.rangeShots||0)+1;
+    log(pname(p)+' '+vb(p,'shoots','shoot')+' the Gun Range: whatever stands on it now has +'+g.rangeShots+'.');
+    G.eventFlag=true;
+    await anim([i],'zap');
+  }else await shootTeece(p,i,{});
+  await resolveCombat();
+  render();
+  return true;
+}
+const gunMsg=p=>'\u{1F52B} Gun out: tap a Teece to shoot it for -1. '+bulletsOf(p)+' bullet'+(bulletsOf(p)===1?'':'s')+
+  ', '+shotsLeft(p)+' of '+MAG_SIZE+' shots left in the magazine.';
+/* Taking the gun out. It stays out, shot after shot, until it is holstered,
+   the magazine or the reserve runs dry, or nothing is left to aim at. */
+async function drawGun(p){
+  if(!G||G.over||G.pending||G.turn!==p)return;
+  if(gunGodFor(p)){toast('The Gun God has your gun: shoot through the Teece wearing the Avatar.');return;}
+  if(!canFireGun(p)){
+    toast(bulletsOf(p)<1?'You have no bullets.':(shotsLeft(p)<1?'The magazine is empty until your next turn.':'There is nothing to shoot.'));
+    return;
+  }
+  const ep=G.epoch;
+  while(!stale(ep)&&!G.over&&G.turn===p&&canFireGun(p)){
+    const c=await chooseCell(p,gunTargets(p),gunMsg(p),{cancel:true,cancelLbl:'Holster',gun:true});
+    if(stale(ep)||c==null||c==='CANCEL')break;
+    await fireGunAt(p,c);
+  }
+  if(stale(ep))return;
+  if(G.turn===p&&!G.over&&bulletsOf(p)>0&&shotsLeft(p)<1)toast('Click. The magazine is empty until your next turn.');
+  render();
+}
+/* The Stuntman: about to be destroyed, it can be shot clear -- a bullet, the
+   shot's -1, and one space -- and the blow misses. Once a turn, and never
+   against a death that is already certain whatever it does. */
+async function gunDodge(d){
+  const b=G.board,t=d.t,cell=d.cell,p=t.owner;
+  if(!DEF(t).shotDodge||t.silenced||b[cell].teece!==t)return false;
+  if(t.gunDodgeTurn===G.turnNum||t.perm.some(v=>v<=-900))return false;
+  if(bulletsOf(p)<1||hasKw(b,cell,'immovable'))return false;
+  const empt=ADJ[cell].filter(j=>openAt(b,j));
+  if(!empt.length)return false;
+  const mut=(bb,j)=>{if(bb[cell].teece){simShot(bb,cell,1);moveT(bb,cell,j,false);}};
+  let dst;
+  if(isAIP(p)||!HAS_DOM){
+    dst=empt.find(j=>{const bb=cloneBoard(b);if(!bb[cell].teece)return false;mut(bb,j);simCombat(bb);
+      return !!(bb[j].teece&&bb[j].teece.uid===t.uid);});
+    /* A bullet that only moves the body somewhere it dies anyway is wasted. */
+    if(dst==null)return false;
+  }else{
+    const yes=await chooseOption(p,[{v:'y',lbl:'Shoot it clear (1 bullet)'},{v:'n',lbl:'Let it be destroyed'}],
+      nm(t)+' is about to be destroyed. Spend a bullet to shoot it and move it one space?');
+    if(yes!=='y')return false;
+    const c=await chooseCell(p,empt,'Move '+nm(t)+' where?',{mut});
+    dst=(c==null||c==='CANCEL')?empt[0]:c;
+  }
+  if(b[cell].teece!==t||!spendBullet(p))return false;
+  t.gunDodgeTurn=G.turnNum;
+  log(pname(p)+' '+vb(p,'shoots','shoot')+' '+nm(t)+' clear of the blow.');
+  await shootTeece(p,cell,{});
+  if(b[cell].teece!==t||!openAt(b,dst))return true;
+  moveT(b,cell,dst,true);
+  log(nm(t)+' dives to the '+CN[dst]+'.');
+  await fireMove(cell,dst,p);
+  return true;
+}
+/* The computer's trigger finger: the best shot on the board, one at a time,
+   for as long as a shot leaves the board better than it found it. It keeps
+   three bullets back while a Gun Devil is waiting in its hand, and spends hot
+   bullets on anything that is not a loss, since they will not keep. */
+function aiGunPick(p,god){
+  const b=G.board,base=boardValue(b,p),pl=G.players[p];
+  const keep=pl.hand.some(id=>(CARDS[id].onPlay||[]).some(s=>s.fx==='gunDevil'))?3:0;
+  if(!(pl.hotBullets>0)&&(pl.bullets||0)<=keep)return null;
+  let best=null,bg=(pl.hotBullets>0)?-0.01:0.15;
+  const cands=[];
+  if(god){for(const j of godTargets(b,god.cell,p))cands.push({i:j,what:'t'});}
+  else for(const i of gunTargets(p)){
+    if(b[i].teece&&canTarget(b,i,p))cands.push({i,what:'t'});
+    if(groundFlag(b[i].ground,'gGunRange'))cands.push({i,what:'g'});
+  }
+  for(const c of cands){
+    const bb=cloneBoard(b);
+    if(c.what==='g')bb[c.i].ground.gmod=(bb[c.i].ground.gmod||0)+1;
+    else simShot(bb,c.i,god?5:1);
+    simCombat(bb);
+    let g=boardValue(bb,p)-base;
+    /* What the Executioner will do on the fifth shot is not in the numbers. */
+    const t=b[c.i].teece;
+    if(c.what==='t'&&t&&!sameTeam(t.owner,p)&&t.shotLog&&t.shotLog.turn===G.turnNum){
+      for(let j=0;j<BN;j++){const w=b[j].teece;if(w&&!w.silenced&&sameTeam(w.owner,p)&&DEF(w).shotExec)g+=t.shotLog.n*0.6;}
+    }
+    if(g>bg){bg=g;best=c;}
+  }
+  return best;
+}
+async function aiGun(){
+  const p=G.turn,ep=G.epoch;
+  for(let guard=0;guard<14;guard++){
+    if(stale(ep)||G.over||bulletsOf(p)<1||shotsLeft(p)<1)return;
+    if(gunGodFor(p)){
+      let god=null;
+      for(let i=0;i<BN&&!god;i++){
+        const t=G.board[i].teece;
+        if(!t||t.owner!==p||isStunned(t,G.board,i))continue;
+        const ent=actsOf(G.board,i).find(e=>e.act.steps[0].fx==='gunGodShot');
+        if(ent&&actAvailable(t,ent))god={cell:i,ent};
+      }
+      if(!god)return;
+      const pick=aiGunPick(p,god);
+      if(!pick)return;
+      const ok=await runAct(p,god.cell,god.ent);
+      if(!ok)return;
+    }else{
+      const pick=aiGunPick(p,null);
+      if(!pick)return;
+      const ok=await fireGunAt(p,pick.i,pick.what);
+      if(!ok)return;
+    }
+    await wait(220);
+  }
+}
+/* A Teece that would rather be bullets: thrown away once the turn's Teece play
+   is spent and the hand is filling up. */
+async function aiGunDiscard(){
+  const p=G.turn,pl=G.players[p];
+  if(!G.teecePlayed||pl.hand.length<5)return;
+  const h=pl.hand.findIndex(id=>CARDS[id].gunDiscard);
+  if(h>=0)await playHandDiscard(p,h);
+}
+function aiGunMagicPlan(d){
+  const b=G.board,p=G.turn,pl=G.players[p];
+  const armed=!gunGodFor(p)&&shotsLeft(p)>0&&bulletsOf(p)>0;
+  switch(d.gunAi){
+    case 'load':{
+      const spare=gunTargets(p).some(i=>b[i].teece&&!sameTeam(b[i].teece.owner,p));
+      return spare?{thr:0.5,bonus:(shotsLeft(p)<3?1.6:1.0),cands:[0],mut:()=>{}}:null;}
+    case 'head':{
+      if(!armed)return null;
+      const c=[];for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p))c.push(i);}
+      const n=Math.min(3,bulletsOf(p),shotsLeft(p));
+      return c.length&&n>=2?{thr:1.0,cands:c,mut:(bb,i)=>{if(bb[i].teece)applyModT(bb[i].teece,-2*n,'perm');}}:null;}
+    case 'ap':{
+      const c=[];
+      for(let i=0;i<BN;i++){
+        const t=b[i].teece;
+        if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p)&&(t.equips.length||DEF(t).act||DEF(t).aura||b[i].ground))c.push(i);
+        else if(!t&&b[i].ground&&b[i].ground.owner!=null&&!sameTeam(b[i].ground.owner,p)&&!groundAnchored(b,i))c.push(i);
+      }
+      return c.length?{thr:0.8,bonus:0.6,cands:c,mut:(bb,i)=>{
+        const o=bb[i].teece;
+        if(o){o.silenced=true;o.equips=[];}
+        if(bb[i].ground&&!groundAnchored(bb,i))bb[i].ground=null;}}:null;}
+  }
+  return null;
 }
 
 /* ============ tutorial and rules ============
@@ -18180,7 +18712,8 @@ if(HAS_DOM){
 }
 /* ============ exports for harness ============ */
 if(typeof module!=='undefined'){
-  module.exports={newState,playFromHand,endTurn,runAct,CARDS,POOL,CLASSIC,DECKS,makeTeece,defOf,canTarget,processDeath,resolveCombat,
+  module.exports={bulletsOf,shotsLeft,gainBullets,shootTeece,fireGunAt,canFireGun,gunTargets,gunGodFor,aiGun,aiGunPick,MAG_SIZE,
+    newState,playFromHand,endTurn,runAct,CARDS,POOL,CLASSIC,DECKS,makeTeece,defOf,canTarget,processDeath,resolveCombat,
     startTurn,getG:()=>G,setG:s=>{G=s;},actsOf,actAvailable,effSides,scanDeaths,render,
     aiDraftDeck,aiTurn,realCount,totalTeece,hcapLabel,HCAPS,
     getGeom:()=>({BW,BN,ADJ,DIAG,CN}),buildGeometry,
