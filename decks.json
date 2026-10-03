@@ -851,6 +851,40 @@
         "Shoot your own Teece when it pays: the Bullet Sponge gets +1 instead of -1, the Kevlar Juggernaut cannot lose stats and takes Ranged and Flying for the turn, and a Gun Range battleground grows +1 every time you shoot it.",
         "The Gun Devil fires a bullet from your reserves in all eight directions when it is played, and whatever each one hits is destroyed, yours included. The Avatar of the Gun God takes your gun away and gives its wearer a -5 shot down its row and column instead."
       ]
+    },
+    "fusion": {
+      "name": "Fusion",
+      "cards": [
+        1021,
+        1022,
+        1023,
+        1024,
+        1025,
+        1026,
+        1027,
+        1028,
+        1029,
+        1030,
+        1031,
+        1032,
+        1033,
+        1034,
+        1035,
+        1036,
+        1037,
+        1038,
+        1039,
+        1040
+      ],
+      "blurb": "Advanced deck. In the space between the dimensions the Dimension Teece glide through there is a space between spaces, where the energy of different dimensions commingles and combines. The Fusion Teece emerge from it: strange combinations of different entities. Every one of the twelve can be played on its own, or FUSED with any other Teece into one card that is both of them -- every side added together, and every effect and every equip kept.",
+      "how": [
+        "Every Fusion Teece has the Fuse keyword. On your turn, tap Fuse on one in your hand and pick another Teece in your hand -- any Teece, from any deck. The two become one card whose sides are the two added together, carrying both cards' keywords, Defence and effects. Play it as your Teece for the turn and both when-played effects fire.",
+        "Once per turn you can also fuse on the board: a Fusion Teece standing beside another of your Teece can use Fuse to become one body with it, on either of the two panels. Both bodies' equips and every bonus and penalty on them are kept. A Mergeling in the fusion adds +3.",
+        "A fusion is one card where there were two, and the board counts bodies, so fuse to win fights rather than for the sake of it. When a fusion is destroyed, every when-destroyed effect it carries fires, and the cards it was made of go to the graveyard separately.",
+        "A fusion does not fuse again. Hyperfusion is the exception: it fuses two fusions from your hand, your side of the field, or one of each, and the result counts as a Boss.",
+        "Contact Fusion fuses any two of your Teece anywhere on the board, with +2. Phase Drift teleports one of your Teece and gives it +5 for the turn, kept for good if it fuses that turn.",
+        "It That Stands Alone gives +5 to a Teece that is not a fusion, and Fusion Core gives +4 to one that is. Unstable Catalyst breaks and draws you 2 cards when its wearer fuses. The Fusion Chamber draws you 2 when a fusion is made on it, and the Space Between Spaces gives a fusion standing there +6."
+      ]
     }
   },
   "formats": [
@@ -1458,6 +1492,26 @@
     1017,
     1018,
     1019,
-    1020
+    1020,
+    1021,
+    1022,
+    1023,
+    1024,
+    1025,
+    1026,
+    1027,
+    1028,
+    1029,
+    1030,
+    1031,
+    1032,
+    1033,
+    1034,
+    1035,
+    1036,
+    1037,
+    1038,
+    1039,
+    1040
   ]
 }

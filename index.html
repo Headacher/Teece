@@ -88,6 +88,10 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .discardBtn:hover{border-color:var(--gold)}
 .discardBtn:disabled{opacity:.4;cursor:default}
 .combineBtn{border-color:#f5cf6b;color:#f5cf6b;font-weight:700}
+/* On a Teece the bottom number sits centred along the same edge, and a Fusion
+   hand puts a Fuse button on almost every card: kept to a small pill tucked
+   into the corner so the number beside it stays readable. */
+.card.t-teece .discardBtn{left:2px;bottom:2px;font-size:8px;letter-spacing:0;padding:1px 3px;border-radius:4px}
 /* The button sits in the card's bottom corner, so the rules text stops short of it. */
 .card:has(.discardBtn){padding-bottom:22px}
 .card.t-equip{background:#e6dcc6}
@@ -203,6 +207,9 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="gun"],.dcard[data-card-deck="gun"]{--cardbg:#3b3f45;--artink:#f0c674;background:var(--cardbg);color:#eceae4;border-color:#1c1e21}
 .card[data-card-deck="gun"] .kwl,.dcard[data-card-deck="gun"] .dkw{color:#f0a04b}
 .card[data-card-deck="gun"] .ct,.dcard[data-card-deck="gun"] .dty{color:#f0a04b}
+.card[data-card-deck="fusion"],.dcard[data-card-deck="fusion"]{--cardbg:#2a2150;--artink:#7ff0e0;background:var(--cardbg);color:#ece6ff;border-color:#140f2e}
+.card[data-card-deck="fusion"] .kwl,.dcard[data-card-deck="fusion"] .dkw{color:#ff7ad9}
+.card[data-card-deck="fusion"] .ct,.dcard[data-card-deck="fusion"] .dty{color:#ff7ad9}
 
 .card[data-card-deck]::after,.dcard[data-card-deck]::after{position:absolute;top:2px;right:3px;font-size:11px;line-height:1;opacity:.85;z-index:1}
 .card[data-card-deck="classic"]::after,.dcard[data-card-deck="classic"]::after{content:'🂡'}
@@ -233,6 +240,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="runeblade"]::after,.dcard[data-card-deck="runeblade"]::after{content:'🗡️'}
 .card[data-card-deck="wizard"]::after,.dcard[data-card-deck="wizard"]::after{content:'🔮'}
 .card[data-card-deck="gun"]::after,.dcard[data-card-deck="gun"]::after{content:'🔫'}
+.card[data-card-deck="fusion"]::after,.dcard[data-card-deck="fusion"]::after{content:'⚛️'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -261,6 +269,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .teece[data-card-deck="runeblade"]{--cardbg:#1c3547;--artink:#d6efff;background:var(--cardbg);color:#e2f0f8;border-color:#0b1a24}
 .teece[data-card-deck="wizard"]{--cardbg:#2a4a8c;--artink:#f7e3a6;background:var(--cardbg);color:#eef3ff;border-color:#16295a}
 .teece[data-card-deck="gun"]{--cardbg:#3b3f45;--artink:#f0c674;background:var(--cardbg);color:#eceae4;border-color:#1c1e21}
+.teece[data-card-deck="fusion"]{--cardbg:#2a2150;--artink:#7ff0e0;background:var(--cardbg);color:#ece6ff;border-color:#140f2e}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -1005,7 +1014,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:115,date:'2026-10-01'};
+const VERSION={build:116,date:'2026-10-03'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1066,7 +1075,7 @@ function rebuildWebCards(){
 /* What a keyword is called where a player reads it. Steadfast is still the
    engine's name for it, and still what a card lists in kw, but a player reads
    what it does. */
-const KW_LABEL={steadfast:'Immune to stat reduction',defender:'Defender'};
+const KW_LABEL={steadfast:'Immune to stat reduction',defender:'Defender',fuse:'Fuse'};
 const kwLabel=k=>KW_LABEL[k]||k;
 const KEYWORDS={
   flying:'Once per your turn, move one space — diagonals included.',
@@ -1080,6 +1089,7 @@ const KEYWORDS={
   immovable:'It cannot move, and nothing can move it.',
   march:'Once per your turn, move one space up, down or sideways. Everything standing beside where it lands may then be moved one space too, and its mover chooses where.',
   lumber:'ONCE while it is on the field — not once a turn — move one space up, down or sideways. A body that leaves and comes back may lumber again.',
+  fuse:'Fuse it with another Teece into one card that is both of them: every side added together, and every effect and every equip kept. Fuse two cards in your hand whenever you like on your turn, or, once per turn, two of your Teece standing side by side on the board. A fusion does not fuse again.',
   stun:'A stunned Teece destroys nothing and can activate no ability until the end of the stunning side’s next turn. It keeps every number it has and can still be destroyed itself.'
 };
 /* Gathered from the cards rather than written down, so a deck that gains or
@@ -1127,7 +1137,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F52E}',gun:'\u{1F52B}'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F52E}',gun:'\u{1F52B}',fusion:'\u269B\uFE0F'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -1276,6 +1286,26 @@ const CARD_ART={
   1018:["    .---.    ", "   ( (+) )   ", "  -( -+- )-  ", "   ( (+) )   ", "    '---'    "],
   1019:[" x  ~  *  x  ", "  #  x  ~ #  ", " ~  ##  x  ~ ", "  x  ~  #  * ", " ''''''''''' "],
   1020:["  |o|  |o|   ", "  |_|  |_|   ", "  ---  ---   ", "  ===  ===   ", " ''''''''''' "],
+  1021:["  /\\_/\\ ~~>  ", "  (o o)/^\\   ", "  /|w|\\ \\/   ", " / |_| \\     ", "  ^^ ^^ S    "],
+  1022:["   o  ->     ", "  /|\\-)      ", "   |__.      ", "  /|  |\\     ", " / |  | \\    "],
+  1023:["   ____  _   ", "  /####\\( )  ", " |######|o\\  ", "  \\####/  \\  ", "  ||  ||  ~  "],
+  1024:["     .       ", "   .(@).     ", "  ( o o )    ", "  (~~~~~)    ", " ~~~~~~~~~~  "],
+  1025:["   .---.     ", "  ( o o )    ", "   '-v-'     ", "  / / \\ \\    ", "  z | | z    "],
+  1026:[" \\\\  ,_  //  ", "  \\\\(o >//   ", "   (\\__/)    ", "   /|  |\\    ", "   ^    ^    "],
+  1027:["  .  ..  .   ", " ( \\(oo)/ )  ", "  ) /\\/\\ (   ", " (  '  '  )  ", "  '  ..  '   "],
+  1028:["   \\ | /     ", "  (o)|(o)    ", "  -[===]-    ", "  /  |  \\    ", " <   |   >   "],
+  1029:["    /\\_/\\    ", "   ( -.- )   ", "  /|  -  |\\  ", "   |_____|   ", "  /_/   \\_\\  "],
+  1030:["   __@__     ", "  (x   x)    ", "  /|=X=|\\    ", "  _|___|_    ", " (_______)   "],
+  1031:["  (o)  (o)   ", "  /|\\<>/|\\   ", "   |    |    ", "  / \\  / \\   ", "   ~~~~~~    "],
+  1032:["   .-^-.     ", "  (o) (o)    ", "  ( =+= )    ", "  <-+ +->    ", "   '---'     "],
+  1033:["  [A]   [B]  ", "    \\   /    ", "     \\ /     ", "    [AB]     ", "   *  *  *   "],
+  1034:["  ~ ~ ~ ~ ~  ", "  ( o )  ..  ", "  ~ ~>>~ ~ ~ ", "  ..  ( o )  ", "  ~ ~ ~ ~ ~  "],
+  1035:[" [AB]   [CD] ", "   \\\\   //   ", "    \\\\ //    ", "  *[ABCD]*   ", "  * * * * *  "],
+  1036:["      |      ", "     /#\\     ", "    | o |    ", "    |___|    ", "   alone..   "],
+  1037:["    .---.    ", "   / (+) \\   ", "  | (+@+) |  ", "   \\ (+) /   ", "    '---'    "],
+  1038:["    _____    ", "   | ~!~ |   ", "   |(*!*)|   ", "   | ~!~ |   ", "    '---'    "],
+  1039:["  .-------.  ", "  | o + o |  ", "  |  \\ /  |  ", "  |  (O)  |  ", "  '-------'  "],
+  1040:[" .  *  .  *  ", "   * |~| .   ", " .  |~ ~|  * ", "  * |~|  .   ", " .  *  .  *  "],
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
   541:["  \\  .-.  /  ", "   \\( o )/   ", "    (/|\\)    ", "    _/ \\_    ", "   [$]  ...  "],
@@ -4133,6 +4163,59 @@ const CARDS = {
     text:'Whenever a Teece on this panel is shot, every player gains a bullet. Anyone holding bullets can shoot.'},
  1020:{name:'Gun Range',type:'ground',gGunRange:true,
     text:'You can shoot this battleground with your gun. A Teece on it has +1 for every time it has been shot.'},
+ /* ---- Fusion: 1021-1040 ----
+        Out of the space between the spaces the Dimension Teece glide through,
+        where the energy of different dimensions commingles. Every one of the
+        twelve Teece carries the Fuse keyword: two cards in hand, or once a turn
+        two of your Teece standing side by side, become ONE card that is both of
+        them -- numbers added together, every effect and every equip kept. A
+        fusion is made on the fly as a card of its own (makeFusionCard), so the
+        rest of the engine reads it as any other card, and it goes into the
+        graveyard as the cards it was made of. A fusion does not fuse again,
+        except through Hyperfusion. */
+ 1021:{name:'Chimera',type:'teece',sides:[5,5,5,5],kw:['fuse'],
+    text:'Fuse.'},
+ 1022:{name:'Centaurion',type:'teece',sides:[4,4,4,4],kw:['fuse','ranged'],
+    text:'Fuse. Ranged.'},
+ 1023:{name:'Shellephant',type:'teece',sides:[3,3,3,3],kw:['fuse'],def:4,
+    text:'Fuse. Defence 4.'},
+ 1024:{name:'Slime Sprout',type:'teece',sides:[0,7,0,7],kw:['fuse'],endMod:{n:1,msg:' swells'},
+    text:'Fuse. At the end of every turn, yours or not: +1 permanently.'},
+ 1025:{name:'Jellybolt',type:'teece',sides:[5,4,5,2],kw:['fuse'],
+    onPlay:[{fx:'fuStun',stun:true}],onDeath:[{fx:'stunKiller'}],
+    text:'Fuse. When played: stun a Teece. When destroyed: stun the Teece that destroyed it.'},
+ 1026:{name:'Gryphon',type:'teece',sides:[3,3,7,3],kw:['fuse','flying'],
+    text:'Fuse. Flying.'},
+ 1027:{name:'Ghostmoth',type:'teece',sides:[3,3,2,6],kw:['fuse','ward'],
+    text:'Fuse. Ward: it cannot be targeted.'},
+ 1028:{name:'Mirror Mantis',type:'teece',sides:[5,0,5,5],kw:['fuse'],invertLoss:true,
+    text:'Fuse. Whenever it would lose attributes, it gains them instead.'},
+ 1029:{name:'Null Sphinx',type:'teece',sides:[2,2,2,2],kw:['fuse'],
+    onPlay:[{fx:'fuNullify'}],onDeath:[{fx:'shieldNext',long:true}],
+    text:'Fuse. When played: silence a Teece and wipe away every positive and negative effect on its numbers. When destroyed: the next Teece you play cannot be destroyed until the end of your next turn.'},
+ 1030:{name:'Bone Hermit',type:'teece',sides:[1,4,5,1],kw:['fuse'],onDeath:[{fx:'graveToHand'}],
+    text:'Fuse. When destroyed: return a card from your graveyard to your hand.'},
+ 1031:{name:'Paradox Twins',type:'teece',sides:[1,1,1,1],kw:['fuse'],
+    onPlay:[{fx:'hexPlayer',kind:'freeze',count:2,exclude:'self',msg:'Which opponent cannot play Teece next turn?'},{fx:'fuNoWin'}],
+    text:'Fuse. When played: an opponent cannot play Teece on their next turn, and you cannot win the game until the start of your next turn.'},
+ 1032:{name:'Mergeling',type:'teece',sides:[3,3,3,5],kw:['fuse'],fuseBonus:3,
+    text:'Fuse. When it fuses with another Teece on the board, the fusion gets +3 permanently.'},
+ 1033:{name:'Contact Fusion',type:'magic',fuAi:'contact',cast:[{fx:'fuContact',n:2}],
+    text:'Select two of your Teece anywhere on the board and fuse them, onto either one’s panel. The fusion gets +2 permanently.'},
+ 1034:{name:'Phase Drift',type:'magic',fuAi:'drift',cast:[{fx:'fuDrift',n:5}],
+    text:'Select one of your Teece. You may teleport it to any empty panel. Then it gets +5 until the end of the turn; if it fuses this turn, the +5 is permanent.'},
+ 1035:{name:'Hyperfusion',type:'magic',trump:true,fuAi:'hyper',cast:[{fx:'fuHyper'}],
+    text:'Trump card. Fuse two fusions together, from your hand, your side of the field, or one of each. The result counts as a Boss.'},
+ 1036:{name:'It That Stands Alone',type:'equip',mod:0,modUnlessFusion:5,
+    text:'Equipped Teece gets +5, unless it is a fusion.'},
+ 1037:{name:'Fusion Core',type:'equip',mod:0,modIfFusion:4,
+    text:'Equipped Teece gets +4 if it is a fusion.'},
+ 1038:{name:'Unstable Catalyst',type:'equip',mod:0,grants:{fuseBreak:2},
+    text:'If the equipped Teece fuses, this equip is destroyed and you draw 2 cards.'},
+ 1039:{name:'Fusion Chamber',type:'ground',gFuseDraw:2,
+    text:'Whenever a Teece fuses on this battleground, you may draw 2 cards.'},
+ 1040:{name:'The Space Between Spaces',type:'ground',gFusionMod:6,
+    text:'A fusion on this battleground gets +6.'},
  /* ---- the tutorial's cards. Nothing but their numbers, so a new player learns
         the rules rather than a card. The roguelike drafts from every card in
         CARDS, not from the pool, so tutorial:true is what keeps them out of it
@@ -4169,7 +4252,9 @@ function eqLabel(e){
   const l=e.mode?n+' \u2014 '+e.mode.charAt(0).toUpperCase()+e.mode.slice(1):n;
   return l+(e.chosen?' (Chosen)':'')+(e.shackle?' (binding its wearer)':'');
 }
-const isBossCard=id=>(CARDS[id].sac||0)>=2;
+/* A Hyperfusion counts as a Boss without costing two bodies to play: it was
+   paid for with the four cards it is made of. */
+const isBossCard=id=>(CARDS[id].sac||0)>=2||!!CARDS[id].boss;
 /* "Until the end of your next turn" outlives temp, which endTurn empties every
    turn. These carry the turn number they die at: your next turn is PLAYERS()
    turns away, so something laid on turn N clears at the end of turn N+PLAYERS().
@@ -4997,6 +5082,7 @@ function newState(mode,vsAI,decks,extra){
      reads enemyBonus, and a game built without a run behind it sees none. */
   const pk=Object.assign({},(extra&&extra.perks)||{});
   UID=1;extra=extra||{};
+  forgetFusions();
   const nP=extra.seats||2;
   const teams=extra.teams||Array.from({length:nP},(_,i)=>i);
   buildGeometry(extra.width||3);
@@ -5129,7 +5215,8 @@ function platedSides(cardId,worn){
   if(!worn||!worn.length)return s;
   const selfDbl=!!cd.selfDoublePos;
   for(const e of worn){
-    const m=CARDS[e.cardId].mod;
+    const ec=CARDS[e.cardId];
+    const m=(ec.modIfFusion&&cd.fusion)?ec.modIfFusion:(ec.modUnlessFusion&&!cd.fusion)?ec.modUnlessFusion:ec.mod;
     if(m==null)continue;
     if(Array.isArray(m))for(let k=0;k<4;k++)s[k]+=(selfDbl&&m[k]>0)?m[k]*2:m[k];
     else{const v=(selfDbl&&m>0)?m*2:m;for(let k=0;k<4;k++)s[k]+=v;}
@@ -5779,6 +5866,9 @@ function effSides(b,i,parts){
     /* aXe and swOrd are dead weight on the wrong letter. */
     if(ed.modIfMark&&markOfCard(DEF(t)).indexOf(ed.modIfMark.letter)>=0)
       addMod(s,ed.modIfMark.n,ed.name+', in the hands of '+(ed.modIfMark.letter==='X'?'an X':'an O'));
+    /* The Fusion deck's two halves of the same question. */
+    if(ed.modIfFusion&&DEF(t).fusion)addMod(s,ed.modIfFusion,ed.name+', worn by a fusion');
+    if(ed.modUnlessFusion&&!DEF(t).fusion)addMod(s,ed.modUnlessFusion,ed.name+', standing alone');
     /* The Goggles read the hand across the table, and both they and the
        Mindwyrm pay out the moment a hand runs dry. Counted off the LARGEST
        enemy hand rather than every enemy hand added together, so the number
@@ -5859,6 +5949,7 @@ function effSides(b,i,parts){
          anywhere else -- drops the bonus with no bookkeeping of its own. */
       if(gd.gPlayHold&&t.standCell===gi)addGround(s,gd.gPlayHold,gd.name+', for the panel it was played onto');
       if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addGround(s,gd.gRangedPlus,gd.name+', for being Ranged');
+      if(gd.gFusionMod&&DEF(t).fusion)addGround(s,gd.gFusionMod,gd.name+', for a fusion'+where);
       /* The Runestone pays whoever stands on it, and charges them instead while
          the Runeblade is set in it. */
       if(gd.gRuneStone){
@@ -6277,6 +6368,9 @@ function actsOf(b,i){
   if(t.drainMove)out.push({key:'kdrainstep',act:DRAIN_STEP_ACT});
   if(t.stepOwed>0)out.push({key:'kowedstep',act:OWED_STEP_ACT});
   if(hasKw(b,i,'teleport'))out.push({key:'ktele',act:TELE_ACT});
+  /* Fuse is printed as a keyword, and only the card's OWN printing counts: a
+     keyword lent by an aura or an equip does not make a body fusible. */
+  if(!t.silenced&&canFuseOnBoard(t))out.push({key:'kfuse',act:FUSE_ACT});
   if(t.pactOpen&&!t.silenced&&d.pact)out.push({key:'kpact',act:PACT_ACT});
   if(b[i].ground&&!b[i].ground.gsil)
     for(const gd of gcards(b[i].ground))
@@ -6304,6 +6398,7 @@ function actBlockedReason(b,i,ent){
     if(shotsLeft(t.owner)<1)return 'magazine empty';
     return godTargets(b,i,t.owner).length?null:'no enemy in line';
   }
+  if(st&&st.fx==='fuseAdj')return fusePartners(b,i).length?null:'no ally beside it';
   if(!st||st.fx!=='move')return null;
   if(hasKw(b,i,'immovable'))return 'held';
   return movePool(i,st.range).some(j=>openAt(b,j))?null:'nowhere to go';
@@ -12027,6 +12122,9 @@ async function FXRUN(st,ctx){
     if(!sameTeam(t.owner,p))noteTargeted(p);
     await anim([c],'zap');
     return;}
+  case 'fuseAdj':case 'fuContact':case 'fuDrift':case 'fuHyper':
+  case 'fuStun':case 'fuNullify':case 'fuNoWin':
+    return await fusionFx(st,ctx,pickCell,none);
   case 'gunGodShot':{
     const src=ctx.cell;
     if(bulletsOf(p)<1)return none('You have no bullets.');
@@ -12106,6 +12204,10 @@ function bounceToHand(t,keepEquips){
   log(nm(t)+' returns to '+pname(t.baseOwner)+"'s hand.");
 }
 function toGrave(owner,cardId){
+  /* A fusion is not a card anybody printed. It goes into the ground as the
+     cards it was made of, each one counted as buried in its own right. */
+  const fu=CARDS[cardId]&&CARDS[cardId].fusion;
+  if(fu){for(const part of fu)toGrave(owner,part);return;}
   G.players[owner].grave.push(cardId);
   G.graveThisTurn.push({owner,cardId});
   noteBuried(cardId);
@@ -14688,6 +14790,15 @@ async function startTurn(){
   pl.failedThisTurn=[];
   pl.toldMustPlay=false;
   pl.turnsTaken=(pl.turnsTaken||0)+1;
+  /* A curse that reads "until the start of your next turn" -- the Paradox
+     Twins' hold on their own side's win -- lifts here, not at a turn's end. */
+  for(let q=0;q<PLAYERS();q++){
+    const hq=G.players[q];
+    if(hq&&hq.hexes&&hq.hexes.some(h=>h.liftAtStart&&h.by===p)){
+      hq.hexes=hq.hexes.filter(h=>!(h.liftAtStart&&h.by===p));
+      log('The paradox resolves: '+pname(q)+' can win again.');
+    }
+  }
   /* The magazine is full again at the start of each of your own turns. */
   pl.shots=0;
   for(let i=0;i<BN;i++){
@@ -15133,6 +15244,12 @@ function aiPlanFor(id){
     }
     /* Bullets later, and the Gun God's -5 a shot, are worth more than the -1. */
     if(eg.endBullets)ebonus+=1.6;
+    if(eg.fuseBreak)ebonus+=fusionsInPlay(p)?0.4:1.0;
+    if(d.modIfFusion||d.modUnlessFusion){
+      const fc=cands.filter(i=>!!DEF(b[i].teece).fusion===!!d.modIfFusion);
+      if(!fc.length)return null;
+      return {thr:0.8,bonus:0,cands:fc,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
+    }
     if(eg.gunGod)ebonus+=bulletsOf(p)>1?2.0:0.3;
     return {thr:0.8,bonus:ebonus,cands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
   }
@@ -15175,6 +15292,9 @@ function aiPlanFor(id){
     /* The Gun's two pay out shot by shot. */
     if(d.gShotBullet)bonus+=1.0;
     if(d.gGunRange&&bulletsOf(p)>1)bonus+=0.9;
+    /* The Fusion pair pay a fusion, and a fusion made later. */
+    if(d.gFuseDraw)bonus+=fusionsInPlay(p)?0.9:0.5;
+    if(d.gFusionMod)bonus+=fusionsInPlay(p)?0.4:0.6;
     return {thr:0.8,bonus,cands,mut:(bb,i)=>{
       if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
       else bb[i].ground={cardId:id,owner:p};}};
@@ -15183,6 +15303,7 @@ function aiPlanFor(id){
   if(d.onlyWhen&&!phaseIs(d.onlyWhen))return null;
   if(d.wiz)return aiWizPlan(d);
   if(d.gunAi)return aiGunMagicPlan(d);
+  if(d.fuAi)return aiFusionMagicPlan(d);
   /* Past the price gate. A spell that asks the whole price before it takes any
      of it puts {fx:'price'} first, and dispatching on that step meant every
      such spell was invisible here and never cast at all -- three of the Locust
@@ -15737,6 +15858,9 @@ function aiActMuts(cell,ent){
   if(st.fx==='move'){
     for(const j of movePool(cell,st.range))
       if(openAt(b,j))muts.push(bb=>{if(bb[cell].teece)moveT(bb,cell,j,false);});
+  }else if(st.fx==='fuseAdj'){
+    for(const j of fusePartners(b,cell))for(const dst of [cell,j])
+      muts.push(bb=>{if(bb[cell].teece&&bb[j].teece)fuseOnBoard(bb,cell,j,dst,{live:false});});
   }else if(st.fx==='spiderling'){
     const onWeb=st.where==='web'||st.where==='webAll';
     const after=ent.act.steps.find(s2=>s2.fx==='mod');
@@ -15873,6 +15997,8 @@ async function aiTurn(){
   await aiRunes();
   if(stale(ep)||G.over)return;
   for(let k=0;k<3;k++){if(!await aiSupport())break;if(stale(ep)||G.over)return;}
+  for(let k=0;k<2;k++){if(!await aiFuseHand())break;if(stale(ep)||G.over)return;}
+  if(stale(ep)||G.over)return;
   await aiPlayTeece();
   if(stale(ep)||G.over)return;
   /* a second Teece is on the table when something bought one: a Brigadeer
@@ -16617,7 +16743,7 @@ function showDetail(i){
     const btn=document.createElement('button');
     btn.className='btn abtn'+(av?' primary':'');
     btn.textContent=ent.act.name+(gagged?' (silenced)':!actAvailable(t,ent)?' (used)':blocked?' ('+blocked+')':'');
-    if(blocked)btn.title=nm(t)+' has no open panel to move to.';
+    if(blocked)btn.title=blocked==='no ally beside it'?nm(t)+' has none of your Teece beside it to fuse with.':nm(t)+' has no open panel to move to.';
     btn.disabled=!av;
     btn.addEventListener('click',()=>{runAct(G.turn,i,ent);});
     d.appendChild(btn);
@@ -16728,6 +16854,16 @@ function renderHand(p){
       cb.disabled=(p!==G.turn||G.over||!!G.pending);
       cb.addEventListener('click',e=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)combineAt(p,i);});
       card.appendChild(cb);
+    }else if(canFuseHand(p,i)){
+      /* A Fusion Teece with a partner in hand offers Fuse in the same place. */
+      const fb=document.createElement('button');
+      fb.className='discardBtn combineBtn';
+      fb.type='button';
+      fb.textContent='Fuse';
+      fb.title='Fuse '+cd.name+' with another Teece in your hand into one card that is both of them.';
+      fb.disabled=(p!==G.turn||G.over||!!G.pending);
+      fb.addEventListener('click',e=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)fuseHandAt(p,i);});
+      card.appendChild(fb);
     }else if(canHandDiscard(p,id)){
       const db=document.createElement('button');
       db.className='discardBtn';
@@ -17459,7 +17595,7 @@ function renderActionBar(){
     const btn=document.createElement('button');
     btn.className='btn'+(av?' primary':'');
     btn.textContent=ent.act.name+(gagged?' (silenced)':!actAvailable(t,ent)?' (used)':blocked?' ('+blocked+')':'');
-    if(blocked)btn.title=nm(t)+' has no open panel to move to.';
+    if(blocked)btn.title=blocked==='no ally beside it'?nm(t)+' has none of your Teece beside it to fuse with.':nm(t)+' has no open panel to move to.';
     btn.disabled=!av;
     btn.addEventListener('click',()=>{runAct(G.turn,i,ent);});
     ab.appendChild(btn);
@@ -18038,6 +18174,478 @@ function aiGunMagicPlan(d){
         const o=bb[i].teece;
         if(o){o.silenced=true;o.equips=[];}
         if(bb[i].ground&&!groundAnchored(bb,i))bb[i].ground=null;}}:null;}
+  }
+  return null;
+}
+
+/* ============ Fusion: two cards made into one ============
+   A Teece with the Fuse keyword can be fused with any other Teece: two cards
+   in hand, whenever its owner likes on their own turn, or -- once per turn --
+   two of the owner's Teece standing side by side on the board. The result is
+   ONE card that is both of them: every side added together, Defence added,
+   keywords pooled, and every effect of both kept (two when-played lists both
+   fire, two when-destroyed lists both fire). On the board it keeps both
+   bodies' equips and every number laid on either of them.
+
+   A fusion is built as a card of its own and registered in CARDS under an id
+   of its own ('FU' and a count), so effSides, defOf, kwOf, actsOf,
+   processDeath, the hand and the Detail panel read it exactly as they read any
+   printed card. It carries `fusion:[a,b]`, the two cards it was made of, and
+   toGrave buries it as those two. Built from the same pair it is the same
+   card, so the computer weighing a fusion on a cloned board a hundred times
+   does not leave a hundred cards behind. newState forgets them all.
+
+   A fusion does not fuse again -- it has no Fuse keyword of its own -- except
+   through Hyperfusion, which fuses two fusions into a Boss. */
+let FUSE_SEQ=0;
+let FUSE_CACHE={};
+const FUSE_ACT={name:'Fuse',onceTurn:'fuse',steps:[{fx:'fuseAdj'}]};
+/* Fields a fusion works out for itself rather than copying from its parts. */
+const FUSE_OWN={name:1,text:1,flavor:1,deck:1,type:1,sides:1,def:1,sac:1,kw:1,fusion:1,boss:1,
+  token:1,topDeck:1,tutorial:1,perkOnly:1,aura:1,auras:1,undying:1};
+function forgetFusions(){
+  for(const k of Object.keys(CARDS))if(CARDS[k].fusion){delete CARDS[k];delete CARD_ART[k];delete DECK_OF[k];}
+  FUSE_CACHE={};
+}
+/* What may go into a fusion at all. A two-form Teece, a Runeblade's body and a
+   Token have no single printed line to add up. */
+function fusibleCard(id){
+  const d=CARDS[id];
+  return !!(d&&d.type==='teece'&&!d.token&&!d.forms&&!d.runeCard&&!d.tutorial);
+}
+const isFuser=id=>!!(CARDS[id]&&!CARDS[id].fusion&&(CARDS[id].kw||[]).indexOf('fuse')>=0);
+/* The card text of one part, as it reads inside a fusion. */
+function fusePartText(X){
+  if(X.fusion)return X.text.replace(/^(Hyperfusion, counting as a Boss|Fusion)\.\s*/,'');
+  const own=(X.text||'').replace(/^Fuse\.\s*/,'').trim();
+  return '['+X.name+'] '+(own||'No effect.');
+}
+function makeFusionCard(a,b,opt){
+  opt=opt||{};
+  const key=a+'|'+b+(opt.boss?'|boss':'');
+  if(FUSE_CACHE[key]&&CARDS[FUSE_CACHE[key]])return FUSE_CACHE[key];
+  const A=CARDS[a],B=CARDS[b];
+  const id='FU'+(++FUSE_SEQ);
+  const d={name:A.name+' + '+B.name,type:'teece',deck:'fusion',fusion:[a,b]};
+  d.sides=[0,1,2,3].map(k=>A.sides[k]+B.sides[k]);
+  const df=(A.def||0)+(B.def||0);
+  if(df)d.def=df;
+  const sc=Math.max(A.sac||0,B.sac||0);
+  if(sc)d.sac=sc;
+  const kw=[];
+  for(const k of (A.kw||[]).concat(B.kw||[]))if(k!=='fuse'&&kw.indexOf(k)<0)kw.push(k);
+  if(kw.length)d.kw=kw;
+  /* Two auras cannot share the one `aura` slot; the second rides in `auras`,
+     which effSides and auraGives already read alongside it. */
+  const au=[].concat(A.aura?[A.aura]:[],A.auras||[],B.aura?[B.aura]:[],B.auras||[]);
+  if(au.length){d.aura=au[0];if(au.length>1)d.auras=au.slice(1);}
+  /* Everything else: lists are joined, numbers added, flags held if either
+     half holds them, and a {n} counter (End-of-turn growth) adds its n. */
+  const keys=Object.keys(A).concat(Object.keys(B).filter(k=>!(k in A)));
+  for(const k of keys){
+    if(FUSE_OWN[k])continue;
+    const x=A[k],y=B[k];
+    if(x===undefined){d[k]=y;continue;}
+    if(y===undefined){d[k]=x;continue;}
+    if(Array.isArray(x)&&Array.isArray(y)){d[k]=x.concat(y);continue;}
+    if(typeof x==='number'&&typeof y==='number'){d[k]=x+y;continue;}
+    if(typeof x==='boolean'&&typeof y==='boolean'){d[k]=x||y;continue;}
+    if(x&&y&&typeof x==='object'&&typeof y==='object'&&typeof x.n==='number'&&typeof y.n==='number'){
+      d[k]=Object.assign({},x,{n:x.n+y.n});continue;}
+    d[k]=x;
+  }
+  if(opt.boss)d.boss=true;
+  d.text=(opt.boss?'Hyperfusion, counting as a Boss. ':'Fusion. ')+fusePartText(A)+' '+fusePartText(B);
+  /* The drawing is the left of one and the right of the other, stitched. */
+  const aa=CARD_ART[a],ba=CARD_ART[b];
+  if(aa&&ba)CARD_ART[id]=aa.map((l,r)=>l.slice(0,6)+(ba[r]||'             ').slice(6));
+  else if(aa||ba)CARD_ART[id]=(aa||ba).slice();
+  CARDS[id]=d;
+  FUSE_CACHE[key]=id;
+  return id;
+}
+/* A body p may put into a fusion: p's own (not a borrowed one), a real card,
+   and not already a fusion. */
+function bodyFusible(t,p){
+  return !!(t&&t.owner===p&&t.baseOwner===p&&!t.isToken&&!t.isCopy&&fusibleCard(t.cardId)&&
+    !DEF(t).fusion&&!isRuneForm(t));
+}
+function canFuseOnBoard(t){
+  return !!(t&&isFuser(t.cardId)&&bodyFusible(t,t.owner));
+}
+function fusePartners(b,i){
+  const t=b[i]&&b[i].teece;
+  if(!t)return [];
+  return ADJ[i].filter(j=>j!==i&&b[j]&&bodyFusible(b[j].teece,t.owner));
+}
+/* Two bodies made into one. The printed lines are not re-read: each body's
+   own base is kept, turned and handicapped the way it already was, and added. */
+function fuseBodies(ta,tc,fid,p){
+  const nt=makeTeece(fid,p);
+  const uniq=a=>a.filter((k,x)=>a.indexOf(k)===x);
+  for(let k=0;k<4;k++){
+    nt.base[k]=ta.base[k]+tc.base[k];
+    nt.perm[k]=ta.perm[k]+tc.perm[k];
+    nt.temp[k]=ta.temp[k]+tc.temp[k];
+    nt.temp2[k]=((ta.temp2&&ta.temp2[k])||0)+((tc.temp2&&tc.temp2[k])||0);
+  }
+  nt.boon=(ta.boon||0)+(tc.boon||0);
+  nt.temp2Until=Math.max(ta.temp2Until||0,tc.temp2Until||0);
+  nt.defPerm=(ta.defPerm||0)+(tc.defPerm||0);
+  nt.defTemp2=(ta.defTemp2||0)+(tc.defTemp2||0);
+  nt.defTemp2Until=Math.max(ta.defTemp2Until||0,tc.defTemp2Until||0);
+  nt.kwPerm=uniq((ta.kwPerm||[]).concat(tc.kwPerm||[]));
+  nt.kwTemp=uniq((ta.kwTemp||[]).concat(tc.kwTemp||[]));
+  nt.equips=ta.equips.concat(tc.equips);
+  nt.links=ta.links.concat(tc.links);
+  nt.controls=ta.controls.concat(tc.controls);
+  nt.grafts=(ta.grafts||[]).concat(tc.grafts||[]);
+  nt.silenced=!!(ta.silenced||tc.silenced);
+  nt.blinded=!!(ta.blinded||tc.blinded);
+  nt.stunUntil=Math.max(ta.stunUntil||0,tc.stunUntil||0);
+  const cover=ta.immortalOwner!=null?ta:tc.immortalOwner!=null?tc:null;
+  if(cover){nt.immortalOwner=cover.immortalOwner;nt.immortalUntil=cover.immortalUntil||0;}
+  return nt;
+}
+/* Fuse the bodies on panels a and c, the fusion standing on dst (one of the
+   two). o.board: fused straight off the board, which is what the Mergeling's
+   +3 answers. o.bonus: a flat permanent bonus (Contact Fusion's +2). o.boss:
+   a Hyperfusion. Pure on a cloned board when o.live is false. */
+function fuseOnBoard(b,a,c,dst,o){
+  o=o||{};
+  const ta=b[a].teece,tc=b[c].teece,p=ta.owner;
+  const fid=makeFusionCard(ta.cardId,tc.cardId,{boss:!!o.boss});
+  const nt=fuseBodies(ta,tc,fid,p);
+  b[a].teece=null;b[c].teece=null;b[dst].teece=nt;
+  if(o.live)log(nm(ta)+' and '+nm(tc)+' fuse on the '+CN[dst]+' into '+CARDS[fid].name+' ('+sidesLine(nt.base)+').');
+  if(o.bonus){applyModT(nt,o.bonus,'perm');if(o.live)log(nm(nt)+' gets '+sgn(o.bonus)+' permanently.');}
+  if(o.board)for(const x of [ta,tc])if(!x.silenced&&DEF(x).fuseBonus){
+    applyModT(nt,DEF(x).fuseBonus,'perm');
+    if(o.live)log(DEF(x).name+' binds the fusion tighter: '+sgn(DEF(x).fuseBonus)+' permanently.');
+  }
+  /* Phase Drift's +5 sets for good if the body it was given to fuses. */
+  for(const x of [ta,tc]){
+    const fc=x.fuseCharge;
+    if(!fc||fc.turn!==G.turnNum||!fc.n)continue;
+    for(let k=0;k<4;k++){nt.temp[k]-=fc.n;nt.perm[k]+=fc.n;}
+    if(o.live)log('The drift settles into '+nm(nt)+': its '+sgn(fc.n)+' is permanent.');
+  }
+  return nt;
+}
+/* What fusing sets off around the fusion: an Unstable Catalyst breaks and pays
+   two cards, and a Fusion Chamber offers two more. */
+async function breakCatalysts(p,list,t){
+  const keep=[];
+  for(const e of list){
+    const g=eqG(e);
+    if(!g||!g.fuseBreak){keep.push(e);continue;}
+    if(t)equipCameOff(t,e,true);
+    toGrave(e.owner,e.cardId);
+    log(CARDS[e.cardId].name+' cannot hold the fusion and breaks: '+pname(e.owner)+' '+
+      vb(e.owner,'draws','draw')+' '+g.fuseBreak+'.');
+    drawCards(e.owner,g.fuseBreak);
+  }
+  return keep;
+}
+async function afterFusion(p,cell){
+  const b=G.board,nt=b[cell]&&b[cell].teece;
+  G.eventFlag=true;
+  if(!nt)return;
+  nt.equips=await breakCatalysts(p,nt.equips,nt);
+  const g=b[cell].ground;
+  const n=(g&&!g.gsil)?groundNum(g,'gFuseDraw'):0;
+  if(n&&G.players[p].deck.length){
+    let take;
+    if(isAIP(p)||!HAS_DOM)take=handCount(p)<5;
+    else take=(await chooseOption(p,[{v:'y',lbl:'Draw '+n+' cards'},{v:'n',lbl:'No thanks'}],
+      'The fusion took place in the '+CARDS[g.cardId].name+'. Draw '+n+' cards?'))==='y';
+    if(take){log('The '+CARDS[g.cardId].name+' hums with the fusion.');drawCards(p,n);}
+  }
+  await anim([cell],'placed');
+}
+function fusionsInPlay(p){
+  let n=0;
+  for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p&&DEF(t).fusion)n++;}
+  for(const id of G.players[p].hand)if(CARDS[id]&&CARDS[id].fusion)n++;
+  return n;
+}
+/* ---- fusing in hand ---- */
+function fuseHandOpts(p,i){
+  const pl=G&&G.players[p];
+  if(!pl)return [];
+  const hand=pl.hand,id=hand[i];
+  if(!isFuser(id)||!fusibleCard(id))return [];
+  const out=[],seen={};
+  for(let j=0;j<hand.length;j++){
+    if(j===i)continue;
+    const c=hand[j];
+    if(!fusibleCard(c)||CARDS[c].fusion)continue;
+    const k=c+'/'+plateOf(p,j).length;
+    if(seen[k])continue;
+    seen[k]=1;
+    const s=CARDS[id].sides.map((v,x)=>v+CARDS[c].sides[x]);
+    out.push({j,v:String(j),cid:c,lbl:'Fuse with '+CARDS[c].name+' → '+sidesLine(s)});
+  }
+  return out;
+}
+const canFuseHand=(p,i)=>fuseHandOpts(p,i).length>0;
+async function fuseHandAt(p,i,jPick){
+  if(!G||G.over||G.pending||p!==G.turn)return false;
+  const opts=fuseHandOpts(p,i);
+  if(!opts.length)return false;
+  let o=opts[0];
+  if(jPick!=null)o=opts.find(x=>x.j===jPick)||null;
+  else if(opts.length>1&&!isAIP(p)&&HAS_DOM){
+    const pick=await chooseOption(p,opts,'Fuse '+CARDS[G.players[p].hand[i]].name+' with:',true);
+    if(pick==null||pick==='CANCEL')return false;
+    o=opts.find(x=>x.v===pick)||null;
+  }
+  if(!o)return false;
+  const hand=G.players[p].hand,a=hand[i],c=hand[o.j];
+  const fid=makeFusionCard(a,c);
+  const first=handTake(p,Math.max(i,o.j)),second=handTake(p,Math.min(i,o.j));
+  log(pname(p)+' '+vb(p,'fuses','fuse')+' '+CARDS[a].name+' and '+CARDS[c].name+' in hand into '+
+    CARDS[fid].name+' ('+sidesLine(CARDS[fid].sides)+').');
+  const plate=await breakCatalysts(p,(second.plate||[]).concat(first.plate||[]),null);
+  handPush(p,fid,plate);
+  G.eventFlag=true;
+  render();
+  return true;
+}
+/* The computer fuses in hand whenever it has a pair, the strongest pair first.
+   Fusing is the deck: measured over 1040 AI-vs-AI games against every other
+   deck, a computer that never fused in hand won 24%, one that fused only with
+   cards to spare 44%, and one that fuses every pair it can, up to two a turn,
+   51%. */
+async function aiFuseHand(){
+  const p=G.turn,pl=G.players[p];
+  if(G.teecePlayed&&!(G.freePlay&&G.freePlay.p===p))return false;
+  if(hexOn(p,'freeze'))return false;
+  if(pl.hand.filter(id=>CARDS[id].type==='teece').length<2)return false;
+  let best=null,bv=-1;
+  for(let i=0;i<pl.hand.length;i++)for(const o of fuseHandOpts(p,i)){
+    const s=CARDS[pl.hand[i]].sides.concat(CARDS[o.cid].sides).reduce((x,y)=>x+y,0);
+    if(s>bv){bv=s;best={i,j:o.j};}
+  }
+  if(!best)return false;
+  const ok=await fuseHandAt(p,best.i,best.j);
+  if(ok)await wait(300);
+  return ok;
+}
+/* ---- the deck's effect steps ---- */
+/* The best fusion of the body on `a` with any of `parts`, played out on bb. */
+function simBestFuse(bb,a,parts,p,o){
+  let best=null,bv=-1e9;
+  for(const c of parts){
+    if(c===a||!bb[c].teece||!bb[a].teece)continue;
+    for(const dst of [a,c]){
+      const cb=cloneBoard(bb);
+      fuseOnBoard(cb,a,c,dst,o);
+      simCombat(cb);
+      const v=boardValue(cb,p);
+      if(v>bv){bv=v;best={c,dst};}
+    }
+  }
+  if(best)fuseOnBoard(bb,a,best.c,best.dst,o);
+  return best;
+}
+async function fusionFx(st,ctx,pickCell,none){
+  const b=G.board,p=ctx.p;
+  switch(st.fx){
+  case 'fuseAdj':{
+    const i=ctx.cell,t=ctx.t;
+    if(i==null||!t||b[i].teece!==t)return none('Nothing to fuse.');
+    const parts=fusePartners(b,i);
+    if(!parts.length)return none('No Teece of yours stands beside it to fuse with.');
+    const o={board:true};
+    const j=await pickCell(parts,'Fuse '+nm(t)+' with which of your Teece beside it?',
+      (bb,c)=>simBestFuse(bb,i,[c],p,o),false);
+    if(j==='CANCEL')return 'ABORT';
+    if(j==null)return;
+    const dst=await pickCell([i,j],'Which panel does the fusion stand on?',
+      (bb,d)=>{if(bb[i].teece&&bb[j].teece)fuseOnBoard(bb,i,j,d,o);},false);
+    if(dst==='CANCEL')return 'ABORT';
+    fuseOnBoard(b,i,j,dst==null?i:dst,Object.assign({live:true},o));
+    await afterFusion(p,dst==null?i:dst);
+    return;}
+  case 'fuContact':{
+    const own=[];
+    for(let i=0;i<BN;i++)if(bodyFusible(b[i].teece,p))own.push(i);
+    if(own.length<2)return none('You need two Teece on the board that can fuse.');
+    const o={board:true,bonus:st.n||0};
+    const a=await pickCell(own,'Contact Fusion: choose the first of two of your Teece to fuse.',
+      (bb,i)=>simBestFuse(bb,i,own,p,o),false);
+    if(a==='CANCEL')return 'ABORT';
+    if(a==null)return;
+    const rest=own.filter(i=>i!==a);
+    const c=await pickCell(rest,'Choose the Teece to fuse it with.',(bb,j)=>simBestFuse(bb,a,[j],p,o),false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const dst=await pickCell([a,c],'Which panel does the fusion stand on?',
+      (bb,d)=>{if(bb[a].teece&&bb[c].teece)fuseOnBoard(bb,a,c,d,o);},false);
+    if(dst==='CANCEL')return 'ABORT';
+    const at=dst==null?a:dst;
+    fuseOnBoard(b,a,c,at,Object.assign({live:true},o));
+    await afterFusion(p,at);
+    return;}
+  case 'fuDrift':{
+    const own=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p)own.push(i);}
+    if(!own.length)return none('You have no Teece to drift.');
+    const n=st.n||5;
+    let c=await pickCell(own,'Phase Drift: choose one of your Teece. It gets '+sgn(n)+' until the end of the turn.',
+      (bb,i)=>{if(bb[i].teece)applyModT(bb[i].teece,n,'temp');},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece;
+    if(!hasKw(b,c,'immovable')){
+      const dests=[];for(let j=0;j<BN;j++)if(j!==c&&openAt(b,j))dests.push(j);
+      if(dests.length){
+        let to;
+        if(isAIP(p)||!HAS_DOM){
+          /* The computer drifts a body that can fuse next to a partner it can
+             fuse with, and otherwise to wherever the board likes it best. */
+          let bj=null,bv=boardValue(b,p)+0.05;
+          for(const j of dests){
+            const bb=cloneBoard(b);
+            moveT(bb,c,j,false);
+            if(bb[j].teece)applyModT(bb[j].teece,n,'temp');
+            simCombat(bb);
+            let v=boardValue(bb,p);
+            if(bb[j].teece&&canFuseOnBoard(bb[j].teece)&&fusePartners(bb,j).length)v+=0.6;
+            if(v>bv){bv=v;bj=j;}
+          }
+          to=bj;
+        }else to=await chooseCell(p,dests,'Teleport '+nm(t)+' to any empty panel, or skip.',{skip:true,mut:null});
+        if(to!=null&&to!=='CANCEL'&&b[c].teece===t){
+          moveT(b,c,to,true);
+          log(nm(t)+' drifts through the space between spaces to the '+CN[to]+'.');
+          await fireMove(c,to,p);
+          c=to;
+        }
+      }
+    }
+    if(b[c].teece!==t)return;
+    const before=t.temp[0];
+    applyModT(t,n,'temp');
+    const got=t.temp[0]-before;
+    t.fuseCharge={turn:G.turnNum,n:got};
+    log(nm(t)+' gets '+sgn(got)+' until the end of the turn; if it fuses this turn, it keeps it.');
+    await anim([c],'zap');
+    return;}
+  case 'fuHyper':{
+    /* Every fusion p holds, on the field or in hand. */
+    const pool=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&t.baseOwner===p&&DEF(t).fusion)pool.push({cell:i,id:t.cardId});}
+    const skip=(G.castingFrom&&G.castingFrom.p===p)?G.castingFrom.handIdx:-1;
+    G.players[p].hand.forEach((id,x)=>{if(x!==skip&&CARDS[id].fusion)pool.push({hand:x,id});});
+    if(pool.length<2)return none('Hyperfusion needs two fusions, in your hand or on your side of the field.');
+    const lbl=s=>(s.cell!=null?'On the field: ':'In hand: ')+CARDS[s.id].name+' ('+sidesLine(CARDS[s.id].sides)+')';
+    const total=s=>s.cell!=null?effSides(b,s.cell).reduce((x,y)=>x+y,0):CARDS[s.id].sides.reduce((x,y)=>x+y,0);
+    let A,C;
+    if(isAIP(p)||!HAS_DOM){
+      const r=pool.slice().sort((x,y)=>total(y)-total(x));
+      A=r[0];C=r[1];
+    }else{
+      const opts=pool.map((s,x)=>({v:String(x),lbl:lbl(s),cid:s.id}));
+      const pa=await chooseOption(p,opts,'Hyperfusion: choose the first fusion.',!!ctx.first);
+      if(pa==null||pa==='CANCEL')return 'ABORT';
+      A=pool[+pa];
+      const pc=await chooseOption(p,opts.filter(x=>x.v!==pa),'Choose the fusion to fuse it with.',!!ctx.first);
+      if(pc==null||pc==='CANCEL')return 'ABORT';
+      C=pool[+pc];
+    }
+    if(A.cell!=null&&C.cell!=null){
+      const dst=await pickCell([A.cell,C.cell],'Which panel does the Hyperfusion stand on?',
+        (bb,d)=>{if(bb[A.cell].teece&&bb[C.cell].teece)fuseOnBoard(bb,A.cell,C.cell,d,{boss:true,board:true});},false);
+      if(dst==='CANCEL')return 'ABORT';
+      const at=dst==null?A.cell:dst;
+      fuseOnBoard(b,A.cell,C.cell,at,{live:true,boss:true,board:true});
+      log('It is a Hyperfusion: it counts as a Boss.');
+      await afterFusion(p,at);
+      return;
+    }
+    if(A.cell==null&&C.cell==null){
+      const fid=makeFusionCard(A.id,C.id,{boss:true});
+      const first=handTake(p,Math.max(A.hand,C.hand)),second=handTake(p,Math.min(A.hand,C.hand));
+      log(pname(p)+' '+vb(p,'hyperfuses','hyperfuse')+' '+CARDS[A.id].name+' and '+CARDS[C.id].name+
+        ' in hand into a Boss ('+sidesLine(CARDS[fid].sides)+').');
+      const plate=await breakCatalysts(p,(second.plate||[]).concat(first.plate||[]),null);
+      handPush(p,fid,plate);
+      G.eventFlag=true;
+      return;
+    }
+    /* One on the field, one in hand: the card in hand joins the body. */
+    const onB=A.cell!=null?A:C,inH=A.cell!=null?C:A;
+    const g=handTake(p,inH.hand);
+    const ht=makeTeece(g.id,p);
+    ht.equips=(g.plate||[]).slice();
+    const ta=b[onB.cell].teece;
+    const fid=makeFusionCard(ta.cardId,g.id,{boss:true});
+    const nt=fuseBodies(ta,ht,fid,p);
+    b[onB.cell].teece=nt;
+    log(nm(ta)+' takes '+CARDS[g.id].name+' out of '+pposs(p)+' hand and hyperfuses with it into a Boss ('+sidesLine(nt.base)+').');
+    await afterFusion(p,onB.cell);
+    return;}
+  case 'fuStun':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&o!==ctx.t&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length)return none('There is nothing else to stun.');
+    const c=await pickCell(cands,'Stun a Teece.',(bb,i)=>{if(bb[i].teece)bb[i].teece.stunUntil=nextTurnExpiry();},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    applyStun(b,c,true,p);
+    if(!sameTeam(b[c].teece.owner,p))noteTargeted(p);
+    await anim([c],'zap');
+    return;}
+  case 'fuNullify':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&o!==ctx.t&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length)return none('There is nothing else to silence.');
+    const wipe=o=>{
+      o.silenced=true;o.perm=[0,0,0,0];o.temp=[0,0,0,0];o.temp2=[0,0,0,0];
+      o.defPerm=0;o.defTemp2=0;o.kwPerm=[];o.kwTemp=[];
+    };
+    const c=await pickCell(cands,'Silence a Teece and wipe every effect on its numbers.',
+      (bb,i)=>{if(bb[i].teece)wipe(bb[i].teece);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(tapeSave(b,c,p)){await anim([c],'zap');return;}
+    const o=b[c].teece;
+    wipe(o);
+    log(nm(o)+' is silenced, and every bonus and penalty on its numbers is wiped away: it stands at '+
+      sidesLine(effSides(b,c))+'.');
+    if(!sameTeam(o.owner,p))noteTargeted(p);
+    await anim([c],'zap');
+    return;}
+  case 'fuNoWin':{
+    const pl=G.players[p];
+    pl.hexes=pl.hexes||[];
+    pl.hexes.push({kind:'nowin',by:p,count:99,liftAtStart:true});
+    log(pname(p)+' cannot win the game until the start of '+pposs(p)+' next turn.');
+    return;}
+  }
+}
+/* What the computer makes of the three Fusion spells, weighed on a clone. */
+function aiFusionMagicPlan(d){
+  const b=G.board,p=G.turn;
+  const own=[];
+  for(let i=0;i<BN;i++)if(bodyFusible(b[i].teece,p))own.push(i);
+  switch(d.fuAi){
+    case 'contact':{
+      if(own.length<2)return null;
+      return {thr:0.6,bonus:0.3,cands:[0],mut:bb=>{
+        let best=null,bv=-1e9;
+        for(const a of own){const cb=cloneBoard(bb);if(simBestFuse(cb,a,own,p,{board:true,bonus:d.cast[0].n||0})){
+          simCombat(cb);const v=boardValue(cb,p);if(v>bv){bv=v;best=a;}}}
+        if(best!=null)simBestFuse(bb,best,own,p,{board:true,bonus:d.cast[0].n||0});
+      }};}
+    case 'drift':{
+      const c=[];for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p)c.push(i);}
+      return c.length?{thr:1.0,bonus:0.2,cands:c,mut:(bb,i)=>{if(bb[i].teece)applyModT(bb[i].teece,5,'temp');}}:null;}
+    case 'hyper':{
+      if(fusionsInPlay(p)<2)return null;
+      return {thr:0.5,bonus:1.5,cands:[0],mut:()=>{}};}
   }
   return null;
 }
@@ -18712,7 +19320,9 @@ if(HAS_DOM){
 }
 /* ============ exports for harness ============ */
 if(typeof module!=='undefined'){
-  module.exports={bulletsOf,shotsLeft,gainBullets,shootTeece,fireGunAt,canFireGun,gunTargets,gunGodFor,aiGun,aiGunPick,MAG_SIZE,
+  module.exports={makeFusionCard,fuseOnBoard,fusePartners,canFuseOnBoard,canFuseHand,fuseHandAt,fuseHandOpts,
+    aiFuseHand,aiFusionMagicPlan,fusionsInPlay,forgetFusions,
+    bulletsOf,shotsLeft,gainBullets,shootTeece,fireGunAt,canFireGun,gunTargets,gunGodFor,aiGun,aiGunPick,MAG_SIZE,
     newState,playFromHand,endTurn,runAct,CARDS,POOL,CLASSIC,DECKS,makeTeece,defOf,canTarget,processDeath,resolveCombat,
     startTurn,getG:()=>G,setG:s=>{G=s;},actsOf,actAvailable,effSides,scanDeaths,render,
     aiDraftDeck,aiTurn,realCount,totalTeece,hcapLabel,HCAPS,

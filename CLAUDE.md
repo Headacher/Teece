@@ -74,7 +74,8 @@ Every push carries a bump, in the same commit as the change: `build` up by one
 A deck is registered in seven places, and missing one of them fails quietly —
 the cards exist and simply never reach a player. Take the next free block of
 twenty ids (Wizard is 906–925, with its conjured tokens at 926–941, the
-tutorial's cards sit at 960–970, and Gun is 1001–1020), then:
+tutorial's cards sit at 960–970, Gun is 1001–1020, and Fusion is 1021–1040),
+then:
 
 - `CARDS` in `index.html` — the twenty cards, plus any token cards they make.
   A token carries `token:true` and `deck:'<key>'`, which keeps it out of drafts
@@ -312,6 +313,44 @@ that bolted it on and gives its wearer an act, `gunGodShot`.
 The computer shoots in `aiGun`, one best shot at a time on a cloned board via
 `simShot`, and keeps three bullets back while it holds a Gun Devil. Balance in
 AI-vs-AI games against every other deck: 59% over 500 games (build 115).
+
+### Fusion makes cards that nobody printed
+
+Every Fusion Teece prints the `fuse` keyword. Two Teece cards in hand (one of
+them a fuser, the other any Teece) fuse through `fuseHandOpts`/`fuseHandAt`,
+from a Fuse button that takes the Discard button's place; two of a seat's own
+Teece standing side by side fuse through the `kfuse` act (`FUSE_ACT`, which
+`actsOf` adds to any body whose OWN card prints `fuse`), once per turn per
+seat via `onceTurn:'fuse'`.
+
+`makeFusionCard(a,b)` builds the result as a real card and registers it in
+`CARDS` under a string id (`FU1`, `FU2`, ...) with `fusion:[a,b]` and
+`deck:'fusion'`: sides and Defence added, keywords pooled (minus `fuse`, which
+is why a fusion never fuses again), lists such as `onPlay`/`onDeath`/`act`
+joined, numbers added, a second aura pushed into `auras`, art stitched from
+both halves. Everything downstream therefore reads it as any other card. The
+same pair always returns the same id (`FUSE_CACHE`), so the AI simulating a
+fusion on a cloned board does not leave cards behind, and `newState` clears
+them all (`forgetFusions`) — a fusion card made before a `newState` in a test
+is gone after it. `toGrave` buries a fusion as its parts, recursively.
+
+On the board `fuseOnBoard` adds the two bodies' own bases (so turns and
+handicaps carry), perm/temp/temp2, Defence, keywords, equips, links and
+grafts. `afterFusion` then breaks any Unstable Catalyst (`grants.fuseBreak`,
+also checked on hand plating) and offers the Fusion Chamber's draw
+(`gFuseDraw`). Hyperfusion (`fuHyper`) fuses two fusions from hand, field or
+one of each into a card with `boss:true`, which `isBossCard` now also reads.
+Phase Drift parks its +5 on `t.fuseCharge`, which `fuseOnBoard` turns
+permanent. The Paradox Twins' "cannot win until the start of your next turn"
+is a `nowin` hex marked `liftAtStart`, removed in `startTurn` rather than
+counted down in `tickHexes`.
+
+The computer fuses in hand in `aiFuseHand` (strongest pair, up to twice a
+turn, before it plays a Teece), on the board when `aiActMuts` scores it, and
+casts the three spells through `aiFusionMagicPlan`. Fusing is the deck: a
+computer that never fused in hand won 24%; fusing every pair it can, up to two
+a turn, won 47.5% and 50.5% in two 1040-game AI-vs-AI soaks against every
+other deck (build 116).
 
 ### Games end at turn 100
 
