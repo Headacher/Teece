@@ -1019,7 +1019,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:130,date:'2026-10-05'};
+const VERSION={build:131,date:'2026-10-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1074,8 +1074,8 @@ function rebuildWebCards(){
     if(DECKS[key].web)for(const id of DECKS[key].cards)WEB_CARDS[id]=true;
 }
 /* The keywords a card can print, in the words the engine actually enforces.
-   Read off the code rather than the card text: Flying is DIAG (all eight
-   neighbours), Skitter is ADJ (the four orthogonals), Ranged only reaches past
+   Read off the code rather than the card text: Flying and Skitter are both ADJ
+   (the four orthogonals), Ranged only reaches past
    the next panel, and Steadfast refuses every penalty, not just a shove. */
 /* What a keyword is called where a player reads it. Steadfast is still the
    engine's name for it, and still what a card lists in kw, but a player reads
@@ -1083,7 +1083,7 @@ function rebuildWebCards(){
 const KW_LABEL={steadfast:'Immune to stat reduction',defender:'Defender',fuse:'Fuse'};
 const kwLabel=k=>KW_LABEL[k]||k;
 const KEYWORDS={
-  flying:'Once per your turn, move one space — diagonals included.',
+  flying:'Once per your turn, move one space.',
   skitter:'Once per your turn, move one space up, down or sideways. Spiders and Spiderlings have it while they stand on the Web.',
   teleport:'Once per your turn, move to any empty panel on the board.',
   ranged:'Strikes the first enemy beyond the next panel, straight up, down or sideways. Nothing strikes back.',
@@ -2186,7 +2186,7 @@ const CARDS = {
  134:{name:'Ballista',type:'teece',sides:[7,7,7,2],kw:['ranged'],text:'Ranged.'},
  135:{name:'Slinger',type:'teece',sides:[5,5,6,6],kw:['ranged'],text:'Ranged.'},
  136:{name:'Sharpshooter',type:'teece',sides:[6,6,6,4],kw:['ranged'],text:'Ranged.'},
- /* ---- Flying: one move per turn, diagonals allowed ---- */
+ /* ---- Flying: one move per turn, one adjacent space ---- */
  137:{name:'Kestrel',type:'teece',sides:[6,6,6,8],kw:['flying'],text:'Flying: once per your turn, move one space.'},
  138:{name:'Gargoyle',type:'teece',sides:[7,7,5,5],kw:['flying'],text:'Flying: once per your turn, move one space.'},
  139:{name:'Wisp',type:'teece',sides:[5,5,7,7],kw:['flying'],text:'Flying: once per your turn, move one space.'},
@@ -4601,18 +4601,17 @@ function patchFull(b,i){
   }
   return allyCount>=3;
 }
-/* Where a move of a given range may land. Flying is one space with diagonals
-   allowed -- which is what every flier's card text says, and what the Flying
-   section comment has always said -- so it is NOT the whole board. Teleport is
+/* Where a move of a given range may land. Flying is one adjacent space -- which
+   is what every flier's card text says -- so it is NOT the whole board. Teleport is
    the one that goes anywhere; before this they shared a branch and Fly was
    simply a second Teleport. One definition, because actBlockedReason needs the
    same answer to label "(nowhere to go)". */
 function movePool(i,range){
   if(range==='orth')return ADJ[i];
   if(range==='web'){const w=[];for(let j=0;j<BN;j++)if(j!==i&&isWebbed(G.board,j))w.push(j);return w;}
-  /* DIAG is misleadingly named: it holds all eight neighbours, orthogonals
-     included, so it is already "one space, diagonals allowed" on its own. */
-  if(range==='step')return DIAG[i];
+  /* One space, to an adjacent panel: up, down or sideways. Flying used to read
+     DIAG, which holds all eight neighbours, so a flier could cross corners. */
+  if(range==='step')return ADJ[i];
   const all=[];for(let j=0;j<BN;j++)if(j!==i)all.push(j);
   return all;
 }
