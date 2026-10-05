@@ -1023,7 +1023,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:132,date:'2026-10-05'};
+const VERSION={build:133,date:'2026-10-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -16674,7 +16674,7 @@ function showDeckInfo(key){
   document.getElementById('infoClose').addEventListener('click',close);
   ov.onclick=e=>{if(e.target===ov)close();};
 }
-let DECK_SORT='all';
+let DECK_SORT='level';
 const DECK_GROUPS={
   level:[['beginner','Beginner','Few moving parts'],['intermediate','Intermediate','A mechanic to learn'],['advanced','Advanced','Rules of their own']],
   kind:[['swarm','Swarm','Many small Teece'],['warrior','Warrior','Big Teece, direct fights'],['utility','Utility','Tricks, magic and tools']]
@@ -16714,7 +16714,7 @@ function pickDeck(who,opts){
       const bar=document.createElement('div');
       bar.className='dsort';
       bar.innerHTML='<span>Sort by</span>';
-      for(const m of [['all','All'],['level','Complexity'],['kind','Type']]){
+      for(const m of [['level','Complexity'],['kind','Type'],['alpha','A\u2013Z']]){
         const b=document.createElement('button');
         b.type='button';
         b.textContent=m[1];
@@ -16724,7 +16724,7 @@ function pickDeck(who,opts){
       }
       box.appendChild(bar);
       const keys=Object.keys(DECKS);
-      if(DECK_SORT==='all'){for(const k of keys)box.appendChild(tile(k));return;}
+      if(DECK_SORT==='alpha'){for(const k of keys.slice().sort((a,b)=>DECKS[a].name.localeCompare(DECKS[b].name)))box.appendChild(tile(k));return;}
       for(const g of DECK_GROUPS[DECK_SORT]){
         const inG=keys.filter(k=>DECKS[k][DECK_SORT]===g[0]);
         if(!inG.length)continue;
