@@ -1019,7 +1019,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:123,date:'2026-10-05'};
+const VERSION={build:124,date:'2026-10-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -5687,9 +5687,9 @@ function swarmHold(b,tm){
     if(b[i].razed){razed++;continue;}
     panels++;
     const t=b[i].teece;
-    if(t&&sameTeam(t.owner,tm)&&CARDS[t.cardId][kind])held++;
+    if(t&&sameTeam(t.owner,tm)&&(kind==='any'||CARDS[t.cardId][kind]))held++;
   }
-  return {kind,label:kind.charAt(0).toUpperCase()+kind.slice(1),held,panels,razed,
+  return {kind,label:kind==='any'?'Teece':kind.charAt(0).toUpperCase()+kind.slice(1),held,panels,razed,
           done:panels>0&&razed===0&&held===panels};
 }
 function checkSwarmWin(){
@@ -5704,8 +5704,10 @@ function checkSwarmWin(){
       return;
     }
     const who=teamName(tm);
-    endGame(tm,who+(who==='You'?' have':' has')+' a '+h.label+' standing on every one of the '+
-      h.panels+' panels. All is '+h.label+'.');
+    endGame(tm,h.kind==='any'
+      ?who+(who==='You'?' have':' has')+' covered every one of the '+h.panels+' panels with Teece.'
+      :who+(who==='You'?' have':' has')+' a '+h.label+' standing on every one of the '+
+        h.panels+' panels. All is '+h.label+'.');
     return;
   }
 }
@@ -16593,7 +16595,7 @@ function showDeckInfo(key){
       ' If turn '+TURN_LIMIT+' ends first, the bigger field wins it.</span>'+
     (dk.swarmWin
       ? '<span class="rk">And one more</span><span>This deck adds a win of its own: the moment every panel on the '+
-        'board is holding one of your '+escHtml(dk.swarmWin)+'s, the game is yours. It is checked as a turn ends, '+
+        'board is holding one of your '+(dk.swarmWin==='any'?'Teece':escHtml(dk.swarmWin)+'s')+', the game is yours. It is checked as a turn ends, '+
         'so the board has to still be full when one closes \u2014 and a panel razed off the board puts it out of '+
         'reach for good, which is what Raze and the Curse of Razing are for.</span>'
       : '')+
@@ -17768,13 +17770,13 @@ function statusesFor(p){
     const h=swarmHold(b,teamOf(p));
     if(h&&h.razed)push('swarm','bad',h.label+' win is gone',
       (h.razed===1?'A panel has':h.razed+' panels have')+' been razed off the board, and nothing can ever stand '+
-      'on '+(h.razed===1?'it':'them')+' again \u2014 so every panel holding one of your '+h.label+'s can never come '+
+      'on '+(h.razed===1?'it':'them')+' again \u2014 so every panel holding one of your '+h.label+(h.kind==='any'?'':'s')+' can never come '+
       'true, and that way of winning is out of reach for the rest of the game. You still win by wiping them out, '+
       'or by holding the bigger field when a deck runs dry.');
     else if(h)push('swarm','good',
-      h.label+'s: '+h.held+' of '+h.panels+' panels',
+      h.label+(h.kind==='any'?'':'s')+': '+h.held+' of '+h.panels+' panels',
       'Your deck wins outright the moment every panel on the board is holding one of your '+
-      h.label+'s. '+h.held+' of the '+h.panels+' '+(h.held===1?'is':'are')+' yours now; the check is made '+
+      h.label+(h.kind==='any'?'':'s')+'. '+h.held+' of the '+h.panels+' '+(h.held===1?'is':'are')+' yours now; the check is made '+
       'at the end of a turn, so the board has to be full when one closes. '+
       'A razed panel would end that chance for good.');
   }
