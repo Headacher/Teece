@@ -1014,7 +1014,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:117,date:'2026-10-05'};
+const VERSION={build:118,date:'2026-10-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -7536,6 +7536,13 @@ async function runSteps(steps,ctx){
 async function FXRUN(st,ctx){
   const b=G.board,p=ctx.p;
   const pickCell=async(cands,msg,mut,skip,foot)=>{
+    /* A spell whose every possible target is warded would only feed the ward.
+       While it is still the first step nothing has happened, so ask before
+       spending the card; the computer declines. */
+    if(G.castingMagic&&ctx.first&&cands.length&&!G.blindCast&&
+       cands.every(c=>{const t=b[c].teece;return t&&DEF(t).magicWard&&!t.silenced;})){
+      if(!await confirmNoTarget(p,'Every possible target is warded and would turn the magic aside.'))return 'CANCEL';
+    }
     const r=await chooseCell(p,cands,msg,{cancel:!!ctx.first,skip:!!skip,mut,foot});
     return r;
   };
@@ -14201,6 +14208,13 @@ async function castCard(p,cid,opts){
   await fireMagic(p,cid);
   return true;
 }
+/* "Use it anyway?" for a spell with nothing real to hit. The computer and a
+   headless run keep the card; a human is asked. */
+async function confirmNoTarget(p,why){
+  if(isAIP(p)||!HAS_DOM)return false;
+  const v=await chooseOption(p,[{v:'go',lbl:'Use it anyway'},{v:'keep',lbl:'Keep the card'}],why+' Use it anyway?');
+  return v==='go';
+}
 async function playMagic(p,handIdx){
   const pl=G.players[p],id=pl.hand[handIdx],d=CARDS[id];
   if(d.onlyWhen&&!phaseIs(d.onlyWhen)){toast(d.name+' can only be played at '+(d.onlyWhen==='night'?'Night':'Day')+'.');return false;}
@@ -14223,10 +14237,17 @@ async function playMagic(p,handIdx){
   const wasCasting=G.castingMagic,wasConsumed=G.magicConsumed,wasFrom=G.castingFrom,wasReturn=G.magicReturn;
   G.castingMagic=true;G.magicConsumed=false;G.castingFrom={p,handIdx,cardId:id};G.magicReturn=false;
   let ok,consumed,back;
-  try{ ok=await runSteps(d.cast,{p,cell:null,t:null,first:true,cardId:id,handIdx}); }
+  const castCtx={p,cell:null,t:null,first:true,cardId:id,handIdx};
+  let noneMsg;
+  try{ ok=await runSteps(d.cast,castCtx);noneMsg=castCtx.noneMsg; }
   finally{ consumed=G.magicConsumed;back=G.magicReturn;G.castingMagic=wasCasting;G.magicConsumed=wasConsumed;
            G.castingFrom=wasFrom;G.magicReturn=wasReturn; }
   if(!ok)return false;
+  /* Nothing to aim at: the cast did nothing, so keep the card unless the player
+     says to burn it anyway. */
+  if(ok==='NONE'&&!consumed&&!await confirmNoTarget(p,(noneMsg||'There is nothing to target.'))){
+    toast((noneMsg||'Nothing to target')+' The card stays in your hand.');render();return false;
+  }
   /* The hand can have shifted under the cast -- a card drawn, a card thrown
      away, a Teece called out of it -- so the spell is found again by what it
      is rather than by where it was. Taking the old index took a bystander. */
