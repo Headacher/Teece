@@ -1019,7 +1019,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:124,date:'2026-10-05'};
+const VERSION={build:125,date:'2026-10-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1855,6 +1855,7 @@ const CARD_ART={
   489:["  ~ # ~ # ~  ", "  #~#~#~#~#  ", "  ~ # ~ # ~  ", "  #~#~#~#~#  ", "  ~ # ~ # ~  "],
   490:["  (*) . (*)  ", "  . (*) .    ", "  (*) . (*)  ", "   . (*) .   ", "  ^^^^^^^^^  "],
   510:["    . ^ .    ", "   ( o o )   ", "    \\_-_/    ", "   _/   \\_   ", "   '     '   "],
+  511:["   .-'''-.   ", "  / v   v \\  ", " (  \\_/  )   ", "  \\ /|||\\ /  ", "   '-^-^-'   "],
   491:["   .-----.   ", "  |  ? ?  |  ", "  |  ---  |  ", "   '-----'   ", "    . . .    "],
   492:["    \\ ~ /    ", "   ( o o )   ", "   [#####]   ", "    /\\ /\\    ", "    ^  ^     "],
   493:["   .-----.   ", "  |  --- |   ", "  |  X X  |  ", "   '-----'   ", "     sh!     "],
@@ -2701,6 +2702,9 @@ const CARDS = {
  510:{name:'Curse of Misstep',type:'magic',curse:true,token:true,deck:'witch',
     text:'Select a player: the next Teece they play gets -1.',
     cast:[{fx:'misstep'}]},
+ 511:{name:'Hag of the Hollow',type:'teece',sides:[3,6,6,3],
+    text:'When played: search your deck for a curse and add it to your hand. When destroyed: put a curse from your graveyard on top of your deck.',
+    onPlay:[{fx:'curseFromDeck'}],onDeath:[{fx:'curseToDeck'}]},
  /* ---- Bomb: area denial, mines, and turning the damage into a boost ---- */
  471:{name:'Blast Ward',type:'equip',mod:0,
     text:'When the equipped Teece would lose attributes, it gains that many instead.',
@@ -10574,6 +10578,40 @@ async function FXRUN(st,ctx){
     applyModT(t,st.n,'perm');
     log('Lightning strikes '+nm(t)+', the highest in its column: '+sgn(st.n)+'.');
     if(sameTeam(t.owner,p))noteSelfTarget(p);else noteTargeted(p);
+    return;}
+  case 'curseFromDeck':{
+    const pl=G.players[p];
+    const ids=[];
+    for(const cid of pl.deck)if(CARDS[cid].curse&&!CARDS[cid].token&&ids.indexOf(cid)<0)ids.push(cid);
+    if(!ids.length)return none('There is no curse left in the deck.');
+    let cid;
+    if(isAIP(p)||!HAS_DOM)cid=ids[Math.floor(Math.random()*ids.length)];
+    else{
+      const pick=await chooseOption(p,ids.map(c=>({v:String(c),lbl:CARDS[c].name,cid:c})),'Search the deck for which curse?');
+      if(pick==null)return;
+      cid=parseInt(pick,10);
+    }
+    pl.deck.splice(pl.deck.lastIndexOf(cid),1);
+    shuffle(pl.deck);
+    handPush(p,cid);
+    log(pname(p)+' search'+(pname(p)==='You'?'':'es')+' the deck and find'+(pname(p)==='You'?'':'s')+' '+CARDS[cid].name+'.');
+    return;}
+  case 'curseToDeck':{
+    const q=ctx.deadOwner!=null?ctx.deadOwner:p;
+    const pl=G.players[q];
+    const ids=[];
+    for(const cid of pl.grave)if(CARDS[cid].curse&&!CARDS[cid].token&&ids.indexOf(cid)<0)ids.push(cid);
+    if(!ids.length)return none('There is no curse in the graveyard.');
+    let cid;
+    if(isAIP(q)||!HAS_DOM)cid=ids[Math.floor(Math.random()*ids.length)];
+    else{
+      const pick=await chooseOption(q,ids.map(c=>({v:String(c),lbl:CARDS[c].name,cid:c})),'Put which curse on top of your deck?');
+      if(pick==null)return;
+      cid=parseInt(pick,10);
+    }
+    pl.grave.splice(pl.grave.lastIndexOf(cid),1);
+    pl.deck.push(cid);
+    log(CARDS[cid].name+' goes from '+pposs(q)+' graveyard to the top of '+pposs(q)+' deck.');
     return;}
   case 'misstep':{
     const who=await pickPlayer(p,'Whose next Teece takes a misstep?');

@@ -202,13 +202,15 @@
         506,
         507,
         508,
-        509
+        509,
+        511
       ],
       "blurb": "Eight Curses instead of equipment or ground. Witches are physically fragile, but a Curse can silence a player, freeze their Teece in hand, turn one against them, or raze a panel off the board for good.",
       "how": [
         "Curse of Freezing is the trump: they cannot play a Teece at all, and you cannot win the game until it lifts — it buys time, not the win.",
         "Most Witches trigger on you playing magic at all, so a cheap Curse is also a growth spurt.",
-        "Coven Matriarch turns every Curse of yours that picks one player into one that hits everybody — you included."
+        "Coven Matriarch turns every Curse of yours that picks one player into one that hits everybody — you included.",
+        "Hag of the Hollow fetches the curse you need when she lands, and when she falls she puts one back on top of your deck. Witch Queen and Witch Doctor want spells waiting in your graveyard and hand, so she keeps both of them fed."
       ]
     },
     "bomb": {
@@ -1566,6 +1568,7 @@
     1057,
     1058,
     1059,
-    1060
+    1060,
+    511
   ]
 }
