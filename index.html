@@ -1019,7 +1019,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:121,date:'2026-10-05'};
+const VERSION={build:122,date:'2026-10-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -2645,28 +2645,28 @@ const CARDS = {
  430:{name:'Landing Pad',type:'ground',gEndTurn:'TD',
     text:'At the end of your turn, if this panel is empty, a Drone is built on it.'},
 /* ---- Witch: eight curses, and the coven that casts them ---- */
- 491:{name:'Curse of Forgetting',type:'magic',
+ 491:{name:'Curse of Forgetting',type:'magic',curse:true,
     text:'Select a player: the next card they draw is discarded.',
     cast:[{fx:'forget',n:1,msg:'Whose next draw is forgotten?'}]},
- 492:{name:'Curse of Akathisia',type:'magic',mod:-3,grants:{mustMove:true},
+ 492:{name:'Curse of Akathisia',type:'magic',curse:true,mod:-3,grants:{mustMove:true},
     text:'Select a Teece and bind this to it. It gets -3, and you move it one space at the end of each turn.',
     cast:[{fx:'akathisia'}]},
- 493:{name:'Curse of Silence',type:'magic',
+ 493:{name:'Curse of Silence',type:'magic',curse:true,
     text:'Select a player: all their Teece are silenced and stripped of every positive and negative attribute effect. Until the end of your next turn they cannot cast magic or use the activated abilities of any of their cards.',
     cast:[{fx:'hexPlayer',kind:'silence',count:2,silenceAll:true,msg:'Silence which player?'}]},
- 494:{name:'Curse of Freezing',type:'magic',trump:true,
+ 494:{name:'Curse of Freezing',type:'magic',curse:true,trump:true,
     text:'Trump card. Select a player: until the end of your next turn they cannot play Teece — and you cannot win the game until after the end of your next turn either.',
     cast:[{fx:'hexPlayer',kind:'freeze',count:2,selfNoWin:true,msg:'Freeze which player?'}]},
- 495:{name:'Curse of Treachery',type:'magic',
+ 495:{name:'Curse of Treachery',type:'magic',curse:true,
     text:'Select a player: one of their non-Boss Teece, chosen at random, joins the enemy team for good. This ignores ward. Once a game, this returns to your hand.',
     cast:[{fx:'treachery'}]},
- 496:{name:'Curse of Razing',type:'magic',
+ 496:{name:'Curse of Razing',type:'magic',curse:true,
     text:'Select an unoccupied panel: no Teece may ever be played or moved onto it again.',
     cast:[{fx:'raze'}]},
- 497:{name:'Curse of Sacrifice',type:'magic',
+ 497:{name:'Curse of Sacrifice',type:'magic',curse:true,
     text:'Select a player; they sacrifice a Teece. The next Teece they play arrives with half of what was sacrificed as a bonus, side for side, rounded down.',
     cast:[{fx:'sacrificeCurse'}]},
- 498:{name:'Curse of Confusion',type:'magic',
+ 498:{name:'Curse of Confusion',type:'magic',curse:true,
     text:'Select a Teece and turn it clockwise or counter-clockwise. Then select a player: the next Teece they play is turned the same way once it arrives.',
     cast:[{fx:'confuse'}]},
  499:{name:'Hex Collector',type:'teece',sides:[0,0,0,0],
@@ -2676,8 +2676,8 @@ const CARDS = {
     onAnyMagic:{n:5,dur:'temp',kw:'flying'},
     text:'When played: conjure a Curse of Misstep. Whenever a magic card is played: +5 and Flying until the end of the turn. This triggers while the card is in your hand, too.',
     onPlay:[{fx:'conjureCard',id:510}]},
- 501:{name:'Self-Hexer',type:'teece',sides:[3,3,3,3],onSelfTarget:{n:8,dur:'perm'},
-    text:'Once a game: when you aim a magic card at your own side, this gets +8 permanently.'},
+ 501:{name:'Self-Hexer',type:'teece',sides:[3,3,3,3],onSelfTarget:{n:9,dur:'perm'},
+    text:'Once a game: +9 when you cast a curse against yourself.'},
  502:{name:'Whirling Adept',type:'teece',sides:[2,2,9,2],onMagic:[{fx:'rotMove'}],
     text:'When you play a magic card: this may rotate clockwise or counter-clockwise, and step one space in any direction. When destroyed: conjure a Curse of Misstep.',
     onDeath:[{fx:'conjureCard',id:510}]},
@@ -2698,7 +2698,7 @@ const CARDS = {
  509:{name:'Witch Queen',type:'teece',sides:[10,10,10,10],sac:2,onDiscardSummon:true,
     text:'Sacrifice two fielded Teece to play. When discarded: play this from the grave at once. When played: cast two magic cards from your grave.',
     onPlay:[{fx:'castFromGrave',n:2}]},
- 510:{name:'Curse of Misstep',type:'magic',token:true,deck:'witch',
+ 510:{name:'Curse of Misstep',type:'magic',curse:true,token:true,deck:'witch',
     text:'Select a player: the next Teece they play gets -1.',
     cast:[{fx:'misstep'}]},
  /* ---- Bomb: area denial, mines, and turning the damage into a boost ---- */
@@ -4803,6 +4803,7 @@ function hexTargets(p,chosen){
     const t=b[i].teece;
     if(t&&!t.silenced&&DEF(t).allPlayers&&sameTeam(t.owner,p)){
       log(nm(t)+' spreads it: the curse takes every player.');
+      noteSelfTarget(p);
       return G.players.map((_,x)=>x);
     }
   }
@@ -4832,7 +4833,9 @@ async function pickPlayer(p,msg,exclude){
   if(!opts.length)return null;
   if(opts.length===1)return parseInt(opts[0].v,10);
   const pick=await chooseOption(p,opts,msg);
-  return pick==null?null:parseInt(pick,10);
+  const who=pick==null?null:parseInt(pick,10);
+  if(who!=null&&sameTeam(who,p))noteSelfTarget(p);
+  return who;
 }
 /* A magic card is resolving. Warded Acolyte eats the effect and grows. */
 function wardMagic(b,i,p){
@@ -4860,6 +4863,9 @@ function tapeSave(b,i,by){
 /* Self-Hexer pays out the first time you aim magic at your own side. */
 function noteSelfTarget(p){
   if(!G.castingMagic)return;
+  /* Only a curse counts: the Witch's Curse cards carry curse:true. */
+  const src=G.castingFrom&&CARDS[G.castingFrom.cardId];
+  if(!src||!src.curse)return;
   const b=G.board;
   for(let i=0;i<BN;i++){
     const w=b[i].teece;
