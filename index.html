@@ -1014,7 +1014,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:116,date:'2026-10-03'};
+const VERSION={build:117,date:'2026-10-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4637,7 +4637,7 @@ function modalCtl(p,cell){
   const nx=G.modalNext;
   if(nx&&nx.p===p&&!off){
     if(nx.all)all=true;
-    if(nx.twice)times=2;
+    times*=nx.times||1;
     G.modalNext=null;
   }
   return {off,all,times};
@@ -4653,9 +4653,23 @@ function fireModal(p){
     log(nm(t)+' spins up: '+sgn(d.onModal.n)+(d.onModal.kw?' and '+d.onModal.kw:'')+' until end of turn.');
   }
 }
+function setTrap(by,n){
+  const was=G.trap&&G.trap.by===by?G.trap.n:0;
+  G.trap={by,n:was+(n||1)};
+  log('The trap is set: the next '+(G.trap.n>1?G.trap.n+' Teece':'Teece')+' played against '+pname(by)+(G.trap.n>1?' are':' is')+' destroyed as '+(G.trap.n>1?'they land.':'it lands.'));
+}
 function setModalNext(p,opt){
-  G.modalNext={p,all:!!opt.all,twice:!!opt.twice};
-  log(pname(p)+"'s next modality "+(opt.all?'fires every mode.':'fires its mode twice.'));
+  /* Two of these in a row stack rather than overwrite: each "twice" doubles
+     the one before, so two of them make the next modality fire four times. */
+  const was=G.modalNext&&G.modalNext.p===p?G.modalNext:null;
+  const nx=was||{p,all:false,times:1};
+  if(opt.all)nx.all=true;
+  if(opt.twice)nx.times=(nx.times||1)*2;
+  G.modalNext=nx;
+  const parts=[];
+  if(nx.all)parts.push('fires every mode');
+  if(nx.times>1)parts.push('fires its mode '+nx.times+' times');
+  log(pname(p)+"'s next modality "+parts.join(' and ')+'.');
 }
 function enemySeats(p){
   const o=[];
@@ -9384,7 +9398,7 @@ async function FXRUN(st,ctx){
     log(pname(p)+' sets the dial to '+x+'.');
     return;}
   case 'armTrap':{
-    if(ctx.t){ctx.t.trapArmed=true;log(nm(ctx.t)+' is armed: destroying it costs the next Teece played against it.');}
+    if(ctx.t){ctx.t.trapArmed=(ctx.t.trapArmed||0)+1;log(nm(ctx.t)+' is armed'+(ctx.t.trapArmed>1?' '+ctx.t.trapArmed+' times':'')+': destroying it costs the next '+(ctx.t.trapArmed>1?ctx.t.trapArmed+' Teece':'Teece')+' played against it.');}
     return;}
   case 'allMod':{
     let n=0;
@@ -9396,12 +9410,10 @@ async function FXRUN(st,ctx){
     return;}
   case 'trapCheck':{
     if(!ctx.t||!ctx.t.trapArmed)return;
-    G.trap={by:ctx.deadOwner!=null?ctx.deadOwner:p};
-    log('The trap is set: the next Teece played against '+pname(G.trap.by)+' is destroyed as it lands.');
+    setTrap(ctx.deadOwner!=null?ctx.deadOwner:p,ctx.t.trapArmed);
     return;}
   case 'springTrap':{
-    G.trap={by:ctx.deadOwner!=null?ctx.deadOwner:p};
-    log('The trap is set: the next Teece played against '+pname(G.trap.by)+' is destroyed as it lands.');
+    setTrap(ctx.deadOwner!=null?ctx.deadOwner:p,1);
     return;}
   case 'oppDraw':{
     const foes=enemySeats(p);
@@ -13648,7 +13660,8 @@ async function playTeece(p,handIdx){
      trade with a neighbour on its way out no matter what runs in between. */
   let trapped=false;
   if(G.trap&&!sameTeam(p,G.trap.by)){
-    G.trap=null;
+    G.trap.n=(G.trap.n||1)-1;
+    if(G.trap.n<=0)G.trap=null;
     trapped=true;
     queueFx({kill:t.uid,msg:nm(t)+' walks straight into the trap.'});
   }
@@ -17086,9 +17099,9 @@ function statusesFor(p){
   /* --- what is waiting for the next Teece you play --- */
   if(G.trap){
     if(!sameTeam(p,G.trap.by))
-      push('trap','bad','Next Teece dies','A trap is sprung against you. The next Teece you play is destroyed the moment it lands.');
+      push('trap','bad',G.trap.n>1?'Next '+G.trap.n+' Teece die':'Next Teece dies','A trap is sprung against you. The next '+(G.trap.n>1?G.trap.n+' Teece you play are':'Teece you play is')+' destroyed the moment '+(G.trap.n>1?'they land.':'it lands.'));
     else
-      push('trapset','good','Trap sprung','The next Teece played against you is destroyed the moment it lands.');
+      push('trapset','good','Trap sprung'+(G.trap.n>1?' x'+G.trap.n:''),'The next '+(G.trap.n>1?G.trap.n+' Teece':'Teece')+' played against you '+(G.trap.n>1?'are':'is')+' destroyed the moment '+(G.trap.n>1?'they land.':'it lands.'));
   }
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
@@ -17200,9 +17213,11 @@ function statusesFor(p){
     if(all)push('modalall','good','Modalities: every mode','Your modalities trigger every one of their modes.');
     if(twice)push('modaltwice','good','Modalities: twice','Each mode of your modalities triggers twice.');
     const nx=G.modalNext;
-    if(nx&&nx.p===p)push('modalnext','good','Next modality '+(nx.all?'fires every mode':'fires twice'),
-      nx.all?'The next modality you trigger fires every one of its modes.'
-            :'The next modality you trigger fires its chosen mode twice.');
+    if(nx&&nx.p===p){
+      const ts=nx.times>1?(nx.times===2?'twice':nx.times+' times'):'';
+      push('modalnext','good','Next modality '+(nx.all?'fires every mode':'fires '+ts)+(nx.all&&ts?', '+ts:''),
+        'The next modality you trigger fires '+(nx.all?'every one of its modes':'its chosen mode '+ts)+(nx.all&&ts?', '+ts:'')+'.');
+    }
   }
 
   /* Undying is worn on the card itself -- the badge under the name, and the
