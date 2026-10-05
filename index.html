@@ -1019,7 +1019,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:127,date:'2026-10-05'};
+const VERSION={build:128,date:'2026-10-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4297,7 +4297,7 @@ const CARDS = {
     text:'Select a column: give the highest Teece in it (the one nearest the top of the board) -6.',
     cast:[{fx:'thunderBolt',n:-6}]},
  1054:{name:'Zeus\u2019 Blessing',type:'magic',reactDeath:true,
-    text:'Teece you control cannot be destroyed until the end of your turn. When a Teece you control would be destroyed on your opponent\u2019s turn: you may play this immediately.',
+    text:'Teece you control cannot be destroyed until the end of your next turn. When a Teece you control would be destroyed on your opponent\u2019s turn: you may play this immediately.',
     cast:[{fx:'blessAll'}]},
  1055:{name:'Bolt Army',type:'magic',
     text:'Add three Bolt Tokens to your hand.',
@@ -10553,9 +10553,9 @@ async function FXRUN(st,ctx){
     log(CARDS[cid].name+' is drawn up out of '+pname(q)+"'s graveyard and into their hand.");
     return;}
   case 'blessAll':{
-    /* Cast on your own turn it lasts out this turn; played in answer on the
-       other side's turn it lasts through the end of your next one. */
-    const until=G.turn===p?G.turnNum:endOfNextTurn(p);
+    /* Through the other side's turn and on to the end of your own next one,
+       whether it was cast on your turn or played in answer on theirs. */
+    const until=endOfNextTurn(p);
     let n=0;
     for(let i=0;i<BN;i++){
       const t=b[i].teece;
@@ -10563,7 +10563,7 @@ async function FXRUN(st,ctx){
       t.immortalOwner=p;t.immortalUntil=until;n++;
     }
     log(n?'Every Teece '+pname(p)+' control'+(pname(p)==='You'?'':'s')+' is invulnerable until the end of '+
-         (G.turn===p?'this turn':pposs(p)+' next turn')+'.'
+         pposs(p)+' next turn.'
          :'There is no Teece to bless, but the sky holds for the turn.');
     return;}
   case 'thunderBolt':{
