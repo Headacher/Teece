@@ -881,6 +881,10 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 }
 #draftDeck{font-size:11.5px;color:var(--muted);line-height:1.5;max-height:110px;overflow:auto;margin-top:8px}
 
+#draftCards .dsort,#draftCards .dgroup{flex-basis:100%;display:flex;gap:8px;justify-content:center;align-items:baseline;flex-wrap:wrap}
+.dsort button{background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;font:inherit}
+.dsort button.on{border-color:var(--cream);font-weight:700}
+.dgroup{margin-top:6px}.dgroup span{opacity:.7;font-size:.85em}
 #hcapRow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:18px 0 6px}
 .hcap{min-width:84px;background:var(--panel2);color:var(--cream);border:1px solid var(--line);
   border-radius:9px;padding:11px 12px;cursor:pointer;font-family:var(--body);
@@ -1019,7 +1023,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:131,date:'2026-10-05'};
+const VERSION={build:132,date:'2026-10-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -16670,6 +16674,11 @@ function showDeckInfo(key){
   document.getElementById('infoClose').addEventListener('click',close);
   ov.onclick=e=>{if(e.target===ov)close();};
 }
+let DECK_SORT='all';
+const DECK_GROUPS={
+  level:[['beginner','Beginner','Few moving parts'],['intermediate','Intermediate','A mechanic to learn'],['advanced','Advanced','Rules of their own']],
+  kind:[['swarm','Swarm','Many small Teece'],['warrior','Warrior','Big Teece, direct fights'],['utility','Utility','Tricks, magic and tools']]
+};
 function pickDeck(who,opts){
   opts=opts||{};
   return new Promise(res=>{
@@ -16679,8 +16688,7 @@ function pickDeck(who,opts){
     document.getElementById('draftTitle').textContent=opts.title||(who+': choose a deck');
     document.getElementById('draftInfo').textContent=opts.info||'Each deck plays very differently.';
     const box=document.getElementById('draftCards');
-    box.innerHTML='';
-    for(const key of Object.keys(DECKS)){
+    const tile=key=>{
       const dk=DECKS[key];
       const el=document.createElement('div');
       el.className='dcard nostat dsym';
@@ -16697,8 +16705,37 @@ function pickDeck(who,opts){
       info.setAttribute('aria-label',dk.name+': what this deck does');
       info.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();showDeckInfo(key);});
       el.appendChild(info);
-      box.appendChild(el);
-    }
+      return el;
+    };
+    /* Sorting is data: each deck names its own level and kind in decks.json,
+       and the groups below are read off those fields in the order listed. */
+    const render=()=>{
+      box.innerHTML='';
+      const bar=document.createElement('div');
+      bar.className='dsort';
+      bar.innerHTML='<span>Sort by</span>';
+      for(const m of [['all','All'],['level','Complexity'],['kind','Type']]){
+        const b=document.createElement('button');
+        b.type='button';
+        b.textContent=m[1];
+        b.className=m[0]===DECK_SORT?'on':'';
+        b.addEventListener('click',()=>{DECK_SORT=m[0];render();});
+        bar.appendChild(b);
+      }
+      box.appendChild(bar);
+      const keys=Object.keys(DECKS);
+      if(DECK_SORT==='all'){for(const k of keys)box.appendChild(tile(k));return;}
+      for(const g of DECK_GROUPS[DECK_SORT]){
+        const inG=keys.filter(k=>DECKS[k][DECK_SORT]===g[0]);
+        if(!inG.length)continue;
+        const h=document.createElement('div');
+        h.className='dgroup';
+        h.innerHTML='<b>'+g[1]+'</b><span>'+g[2]+'</span>';
+        box.appendChild(h);
+        for(const k of inG)box.appendChild(tile(k));
+      }
+    };
+    render();
     document.getElementById('draftDeck').textContent='';
   });
 }

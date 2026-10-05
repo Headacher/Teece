@@ -21,7 +21,9 @@
         "Titan is 16 on every side and Skullsplitter is 15 on one — check which edge is facing you before you trade with either.",
         "Warcamp sends your dying cards back to your hand instead of the graveyard, and charges an opponent two cards to break it.",
         "Undying Axe comes back once a game: to your deck, or straight onto any panel you like."
-      ]
+      ],
+      "level": "beginner",
+      "kind": "warrior"
     },
     "rock": {
       "name": "Rock",
@@ -53,7 +55,9 @@
         "Master Rock Flinger pays every Teece on your side, itself included, +X where X is that Teece's own Defence, and gives it Flying.",
         "Rock Sergeant pays every other ally its own Defence, and Stoneheart pays its wearer +1 for each point it has — the deck stacks Defence, then spends it as attack.",
         "Muckraider and Bedrock are immune to stat reduction, and cannot be selected by enemy effects."
-      ]
+      ],
+      "level": "beginner",
+      "kind": "warrior"
     },
     "ogre": {
       "name": "Ogre",
@@ -86,7 +90,9 @@
         "Lumber is not March: ONCE while the body stands, not once a turn. The Chieftain and the Exploding Ogre each get one repositioning and then they are where they are.",
         "Ogre Hexer is the answer to something that has been built up rather than something in the way: -2, silenced, stripped of every bonus, every equip destroyed, the battleground under it destroyed, and stunned.",
         "Sinkhole destroys whatever moves onto it. Concussion Alley holds a stun on whatever stands there and lets go the instant it leaves — and anything that stuns a Teece already standing on it takes 4 off as well."
-      ]
+      ],
+      "level": "beginner",
+      "kind": "warrior"
     },
     "robot": {
       "name": "Robot",
@@ -117,7 +123,9 @@
         "Drones are 3/3/3/3 flying Tokens, and Tokens never count toward winning: they are board, not lead.",
         "Swarm Node, Hangar Guard and Drone Tether all pay the Drones; Overclocker and Signal Relay pay for movement instead.",
         "War Machine is 11 on every side and brings three more Drones down with it."
-      ]
+      ],
+      "level": "intermediate",
+      "kind": "swarm"
     },
     "gadget": {
       "name": "Gadget",
@@ -148,7 +156,9 @@
         "Null Module, Preset, Coupling Rig and Grand Apparatus all bend the next choice: every mode at once, or the chosen mode twice.",
         "Safety Interlock switches your OWN modalities off — while it stands, your cards that offer a choice simply do nothing.",
         "Modular Platform sells the same trick as ground, and the size you give it decides which trick you get."
-      ]
+      ],
+      "level": "intermediate",
+      "kind": "utility"
     },
     "time": {
       "name": "Time",
@@ -179,7 +189,9 @@
         "Acorn and Long Game are nearly worthless for two turns and then 10 and 12 on every side.",
         "Fast Forward, Timekeeper, Whetted Blade and Last Breath all push clocks forward — that is how you collect early.",
         "Chronoplate stops a clock dead, which is what saves a Fading Titan. Sundial doubles it, which is only ever good on something growing."
-      ]
+      ],
+      "level": "intermediate",
+      "kind": "utility"
     },
     "witch": {
       "name": "Witch",
@@ -211,7 +223,9 @@
         "Most Witches trigger on you playing magic at all, so a cheap Curse is also a growth spurt.",
         "Coven Matriarch turns every Curse of yours that picks one player into one that hits everybody — you included.",
         "Hag of the Hollow fetches the curse you need when she lands, and when she falls she puts one back on top of your deck. Witch Queen and Witch Doctor want spells waiting in your graveyard and hand, so she keeps both of them fed."
-      ]
+      ],
+      "level": "intermediate",
+      "kind": "utility"
     },
     "bomb": {
       "name": "Bomb",
@@ -242,7 +256,9 @@
         "Blast Ward inverts the whole deck: the Teece wearing it gains whatever it would have lost.",
         "Mines sit on empty panels for -2 as anything arrives, and Chain Charge, Minefield and Overcharged Warhead all make them bigger.",
         "Unstable Warhead destroys itself the moment anything targets it or takes a single point off it."
-      ]
+      ],
+      "level": "beginner",
+      "kind": "utility"
     },
     "nature": {
       "name": "Nature",
@@ -273,7 +289,9 @@
         "Nearly every plant is thin on its bottom edge — Sapling 1, Elder Willow 1, Mother Tree 1 — so the panel above it is where it dies.",
         "Hothouse Orchid and Sunlit Loam double every positive effect, and the bonuses here are permanent, so they compound all game.",
         "Plant Pot is +20 on the bottom side alone, which is exactly the edge the deck keeps leaving open."
-      ]
+      ],
+      "level": "intermediate",
+      "kind": "swarm"
     },
     "pixie": {
       "name": "Pixie",
@@ -304,7 +322,9 @@
         "Pixies are 0s, 1s and 2s. They are not meant to fight — they are meant to keep casting.",
         "Trickspinner, Wisp of Nothing and Enchantment conjure magic out of nothing; Thieving Sprite, Grave Pixie and Echo Pixie pull it back out of graveyards and decks.",
         "Pixie Queen gives every other pixie of yours +10, and is the one card that turns the swarm into a board."
-      ]
+      ],
+      "level": "intermediate",
+      "kind": "utility"
     },
     "spider": {
       "name": "Spider",
@@ -337,7 +357,9 @@
         "Spiderlings are Tokens, and Tokens never count toward winning: they are fuel and board, never a lead.",
         "The corners are never Web, which makes them the one place a Spiderling gets neither Skitter nor its extra Defence.",
         "Brood Mother reprints every Spiderling on the Web at 12/12/12/12 — either side's — and stops them being sacrificed at all."
-      ]
+      ],
+      "level": "intermediate",
+      "kind": "swarm"
     },
     "vampire": {
       "name": "Vampire",
@@ -368,7 +390,9 @@
         "Parasite has to bite twice on each of your turns, from your own side, or it withers and dies.",
         "Enhanced Fangs doubles what you take. Vampire Castle and Transfusion Catalyst double everything either way, up and down alike.",
         "Blood Bank stores every drain anything else makes, and spends the lot as one bite once a turn."
-      ]
+      ],
+      "level": "intermediate",
+      "kind": "warrior"
     },
     "zombie": {
       "name": "Zombie",
@@ -399,7 +423,9 @@
         "The return count belongs to the card, not the body, so bouncing a zombie back to hand does not launder it. Back Again and Death's Avatar are the two that wind it back.",
         "Silence stops it getting up. A silenced zombie stays down.",
         "Plague Winds hands every ally +1 and every enemy -1 at the end of every turn — both sides' turns, not just yours."
-      ]
+      ],
+      "level": "intermediate",
+      "kind": "swarm"
     },
     "tictactoe": {
       "name": "Tic Tac Toe",
@@ -431,7 +457,9 @@
         "A body covers the ground it stands on, so standing on their Toerrain blocks that line instead of joining it.",
         "The board lights up any line standing at two with its last panel still open, whoever holds it.",
         "bOX and XOD count as an X and an O at once, which is two lines from one body."
-      ]
+      ],
+      "level": "advanced",
+      "kind": "utility"
     },
     "solar": {
       "name": "Solar",
@@ -462,7 +490,9 @@
         "A card that only works in one half of the cycle tells you so when you play it in the other.",
         "Equips read the sky too: Twilight Cloak is +3 Defence by night, and +7 with Flying by day.",
         "Stopped Sundial stops the round turning the sky while it stands, though cards can still turn it. It never destroys anything itself."
-      ]
+      ],
+      "level": "intermediate",
+      "kind": "utility"
     },
     "army": {
       "name": "Army",
@@ -493,7 +523,9 @@
         "Beside means the four panels a side touches, never a diagonal. Line Formation is the only card here that counts diagonals, and it counts them as lines rather than as neighbours.",
         "Brigadeer Ryan and Brigadeer Bryan call each other up: play one and the other may go down the same turn without spending your Teece play. Side by side they are +10 each.",
         "Scout Stout is paid for having its back to the board — two sides on a corner, one side and Ranged on an edge, all four in the middle — so it wants the panel nobody else does."
-      ]
+      ],
+      "level": "beginner",
+      "kind": "swarm"
     },
     "garbage": {
       "name": "Garbage",
@@ -552,7 +584,9 @@
         "Two Teece a turn and two cards a turn are the deck's own rule, not a card's: they hold for as long as you are playing Garbage. Garbage Soul adds a third of each while it stands.",
         "The graveyard is a resource. Living Dump grows with it, Trash King eats it for attributes, Garbage Man and Racoon fish cards back out of it, and Banana Peel and the Dumpster spend it.",
         "Fire sits on a panel rather than on a Teece. Anything standing in one has -4 while it burns, and it burns until the start of the turn of whoever lit it."
-      ]
+      ],
+      "level": "intermediate",
+      "kind": "swarm"
     },
     "apocalypse": {
       "name": "Apocalypse",
@@ -578,7 +612,9 @@
         783,
         784
       ],
-      "blurb": "The end arrives on schedule. The four Horsemen are lifted back out of the shuffle and stacked on top of your deck, so they are your opening hand, and each one played drags a second out of it silenced. Everything after them is paid for in cards: the graveyard is this deck's second resource, and two of its three ways to clear the field are bought with discards."
+      "blurb": "The end arrives on schedule. The four Horsemen are lifted back out of the shuffle and stacked on top of your deck, so they are your opening hand, and each one played drags a second out of it silenced. Everything after them is paid for in cards: the graveyard is this deck's second resource, and two of its three ways to clear the field are bought with discards.",
+      "level": "advanced",
+      "kind": "warrior"
     },
     "madness": {
       "name": "Madness",
@@ -610,7 +646,9 @@
         "Discarding is free and unlimited on your turn. It is a rule of the deck, not of any card, so no card has to print it.",
         "An empty hand pays: Astral Mindwyrm is +10, Paranoid Schizophrenic is 11/12/13/14, and the Goggles of Truth add another +5 the moment anybody runs dry.",
         "The Eldritch Library shelves discards as a wall of Defence instead of burying them, and the Pocket Dimension takes back everything you threw away this turn."
-      ]
+      ],
+      "level": "advanced",
+      "kind": "utility"
     },
     "dimension": {
       "name": "Dimension",
@@ -642,7 +680,9 @@
         "Dimension of Dimensions is played ON another battleground: the two fold into one panel that cannot be replaced or destroyed, and it reaches one panel further out.",
         "Black Hole Dimension eats every equip and every non-Boss Teece beside it and hands the lot back when it goes — and it goes on its own, at the start of your turn, once it holds three.",
         "The Extradimensional Plane of Matter is played OUTSIDE the board, hanging off the left or right edge of a panel. It is a tenth panel from then on — a Teece stands on it and fights across the edge it hangs on — and it drifts round the board carrying whatever is standing on it."
-      ]
+      ],
+      "level": "advanced",
+      "kind": "utility"
     },
     "rats": {
       "name": "Rats",
@@ -676,7 +716,9 @@
         "Every Teece here reads the crowd: +1 for every other ally on the board, and the Rat King hands out another +2 on top of that. Swarmcloak pays +2 per ally to whoever wears it.",
         "You cannot win by domination, so being four Teece ahead does nothing. Cover every panel with your Teece and the game is yours at the end of the turn; a razed panel puts that out of reach for good. Otherwise fill the board, stay filled, and take it when a deck runs dry — Swarm digs two Rats back out of the graveyard to keep that going.",
         "The Rat King counts as two sacrifices, so it pays half of the Rat Queen on its own — and the Queen hands every Teece sacrificed for her straight back to your hand."
-      ]
+      ],
+      "level": "intermediate",
+      "kind": "swarm"
     },
     "locust": {
       "name": "Locust",
@@ -713,7 +755,9 @@
         "Everything flies, so the swarm can shuffle one space a turn to close the last gap, diagonals included.",
         "The two Bosses are what the swarm is for: Locust Locus costs two bodies and arms the next four Locusts with +6 Defence, and the Locust Hivemind costs four and pays every Teece you control +3 for the rest of the game, buried or not.",
         "A trodden Grasshopper leaves two 6/6/6/6 Tokens that can be sacrificed — the only spendable Tokens in the game, and half the price of the Hivemind on their own."
-      ]
+      ],
+      "level": "intermediate",
+      "kind": "swarm"
     },
     "devil": {
       "name": "Devils",
@@ -748,7 +792,9 @@
         "Soul Debtor’s Prison: with no SOUL left, any price can go on its tab instead. When the Prison is destroyed, every price on it is paid twice. Whoever controls a Teece standing on it can break it on their own turn — your opponent included, so do not let them stand there.",
         "The Infernal Contract lets a Devil offer its PACT again once a turn, and Devil Numbers renumbers any Teece to 6/6/6/6 with one side at 0 before letting an ally offer its PACT again.",
         "Beginner Devil’s PACT throws away your hand, your whole board and your whole deck for +1. Sorry, it’s new. Take it only when something else is paying."
-      ]
+      ],
+      "level": "intermediate",
+      "kind": "warrior"
     },
     "runeblade": {
       "name": "Runeblade",
@@ -786,7 +832,9 @@
         "Keep it alive: the Blade-Sworn Squire breaks the Runeblade to dodge its own death, the Decoy Runeblade dies in the real one's place, and The Runeblade’s Chosen makes its wielder invulnerable until the sword leaves the field.",
         "Make more: The Ancestor-Smith forges a second Runeblade onto itself, and the Barrow Forge makes another every third time a wielder falls on it. The Bladeless Exile is the price of all this — huge, but -5 while any Teece anywhere holds the sword.",
         "Ragnarok ends it: break a Runeblade for good, with its wielder, and two Teece of your choice go down with it. Or take Triumph, and the next Teece to take up the sword gets +5 and Flying for the turn."
-      ]
+      ],
+      "level": "advanced",
+      "kind": "warrior"
     },
     "wizard": {
       "name": "Wizard",
@@ -819,7 +867,9 @@
         "With a Grand Magus on the field, Fire, Water, Wind and Earth together combine into Holy: destroy a Teece and raise one of yours from the graveyard in its place.",
         "An Archmage on the field makes every element stronger. The Elementals grow each time you play magic of their own element.",
         "Elements count toward your hand limit of six, so spend or combine them before your turn ends."
-      ]
+      ],
+      "level": "advanced",
+      "kind": "utility"
     },
     "gun": {
       "name": "Gun",
@@ -853,7 +903,9 @@
         "Several Teece answer every shot: the Sharpshooter gets +1 for the turn, the Shock Trooper stuns the enemy that was hit, and the Executioner destroys an enemy shot five times in one turn. Headshot and Armor-Piercing Rounds make each shot at one Teece hurt more.",
         "Shoot your own Teece when it pays: the Bullet Sponge gets +1 instead of -1, the Kevlar Juggernaut cannot lose stats and takes Ranged and Flying for the turn, and a Gun Range battleground grows +1 every time you shoot it.",
         "The Gun Devil fires a bullet from your reserves in all eight directions when it is played, and whatever each one hits is destroyed, yours included. The Avatar of the Gun God takes your gun away and gives its wearer a -5 shot down its row and column instead."
-      ]
+      ],
+      "level": "beginner",
+      "kind": "warrior"
     },
     "fusion": {
       "name": "Fusion",
@@ -887,7 +939,9 @@
         "A fusion does not fuse again. Hyperfusion is the exception: it fuses two fusions from your hand, your side of the field, or one of each, and the result counts as a Boss.",
         "Contact Fusion fuses any two of your Teece anywhere on the board, with +2. Phase Drift teleports one of your Teece and gives it +5 for the turn, kept for good if it fuses that turn.",
         "It That Stands Alone gives +5 to a Teece that is not a fusion, and Fusion Core gives +4 to one that is. Unstable Catalyst breaks and draws you 2 cards when its wearer fuses. The Fusion Chamber draws you 2 when a fusion is made on it, and the Space Between Spaces gives a fusion standing there +6."
-      ]
+      ],
+      "level": "advanced",
+      "kind": "utility"
     },
     "lightning": {
       "name": "Lightning",
@@ -920,7 +974,9 @@
         "Thunder Twin and Spark Sprite chain into more Teece from your hand, and Last Light and Spark Sprite replace themselves when destroyed. Flashstrike is a plain 5 until it arrives by an effect, then it is a 9.",
         "Bolt Army puts three Bolt Tokens in your hand. They can be sacrificed to pay for the Lightning Queen or for Zeus, and each one lets you play another Bolt Token when it lands. Zeus calls a Lightning Bolt into your hand every turn, and the Bolt takes 6 off the highest Teece in whichever column you pick.",
         "Capacitor, Surge Coil and Thunderhead Rig are plated onto a Teece while it is still in your hand. Storm Landing and Static Field turn the panel itself into a trap."
-      ]
+      ],
+      "level": "intermediate",
+      "kind": "swarm"
     }
   },
   "formats": [
