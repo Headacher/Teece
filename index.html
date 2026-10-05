@@ -1019,7 +1019,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:120,date:'2026-10-05'};
+const VERSION={build:121,date:'2026-10-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -7651,6 +7651,10 @@ async function FXRUN(st,ctx){
       if(!await confirmNoTarget(p,'Every possible target is warded and would turn the magic aside.'))return 'CANCEL';
     }
     const r=await chooseCell(p,cands,msg,{cancel:!!ctx.first,skip:!!skip,mut,foot});
+    /* Aiming a spell at one of your own Teece is what the Self-Hexer waits for.
+       Read here, where every Teece prompt comes through, rather than in each
+       effect: most of them never remembered to call it. */
+    if(G.castingMagic&&typeof r==='number'&&G.board[r]&&G.board[r].teece&&sameTeam(G.board[r].teece.owner,p))noteSelfTarget(p);
     return r;
   };
   /* nothing to work with: say so and let the caller know none of it landed */
