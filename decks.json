@@ -885,6 +885,39 @@
         "Contact Fusion fuses any two of your Teece anywhere on the board, with +2. Phase Drift teleports one of your Teece and gives it +5 for the turn, kept for good if it fuses that turn.",
         "It That Stands Alone gives +5 to a Teece that is not a fusion, and Fusion Core gives +4 to one that is. Unstable Catalyst breaks and draws you 2 cards when its wearer fuses. The Fusion Chamber draws you 2 when a fusion is made on it, and the Space Between Spaces gives a fusion standing there +6."
       ]
+    },
+    "lightning": {
+      "name": "Lightning",
+      "cards": [
+        1041,
+        1042,
+        1043,
+        1044,
+        1045,
+        1046,
+        1047,
+        1048,
+        1049,
+        1050,
+        1051,
+        1052,
+        1053,
+        1054,
+        1055,
+        1056,
+        1057,
+        1058,
+        1059,
+        1060
+      ],
+      "blurb": "Lightning Teece flash onto the field at instant speed, triggered by your opponent's actions. Every card in hand is a trap. They are a swarm deck focused on winning quickly by board domination.",
+      "how": [
+        "Playing a card by an effect is called a summon. It never costs the turn's Teece play, and a Teece that arrives by an effect from this deck counts as a Thunder summon: it does not count towards board domination until it has started a turn under your control.",
+        "Counterstrike answers any enemy Teece being played, and Static Counter answers any magic card your opponent plays: either one can be played straight from your hand the moment it happens. Zeus' Blessing answers a Teece of yours about to be destroyed on your opponent's turn, and the Teece survives.",
+        "Thunder Twin and Spark Sprite chain into more Teece from your hand, and Last Light and Spark Sprite replace themselves when destroyed. Flashstrike is a plain 5 until it arrives by an effect, then it is a 9.",
+        "Bolt Army puts three Bolt Tokens in your hand. They can be sacrificed to pay for the Lightning Queen or for Zeus, and each one lets you play another Bolt Token when it lands. Zeus calls a Lightning Bolt into your hand every turn, and the Bolt takes 6 off the highest Teece in whichever column you pick.",
+        "Capacitor, Surge Coil and Thunderhead Rig are plated onto a Teece while it is still in your hand. Storm Landing and Static Field turn the panel itself into a trap."
+      ]
     }
   },
   "formats": [
@@ -1512,6 +1545,26 @@
     1037,
     1038,
     1039,
-    1040
+    1040,
+    1041,
+    1042,
+    1043,
+    1044,
+    1045,
+    1046,
+    1047,
+    1048,
+    1049,
+    1050,
+    1051,
+    1052,
+    1053,
+    1054,
+    1055,
+    1056,
+    1057,
+    1058,
+    1059,
+    1060
   ]
 }

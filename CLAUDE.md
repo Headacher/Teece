@@ -74,7 +74,7 @@ Every push carries a bump, in the same commit as the change: `build` up by one
 A deck is registered in seven places, and missing one of them fails quietly —
 the cards exist and simply never reach a player. Take the next free block of
 twenty ids (Wizard is 906–925, with its conjured tokens at 926–941, the
-tutorial's cards sit at 960–970, Gun is 1001–1020, and Fusion is 1021–1040),
+tutorial's cards sit at 960–970, Gun is 1001–1020, Fusion is 1021–1040, and Lightning is 1041–1060 with its Bolt Token at 1061),
 then:
 
 - `CARDS` in `index.html` — the twenty cards, plus any token cards they make.
@@ -351,6 +351,23 @@ casts the three spells through `aiFusionMagicPlan`. Fusing is the deck: a
 computer that never fused in hand won 24%; fusing every pair it can, up to two
 a turn, won 47.5% and 50.5% in two 1040-game AI-vs-AI soaks against every
 other deck (build 116).
+
+### Lightning summons out of the hand, and answers at instant speed
+
+A summon is a Teece played out of the hand by an effect (`summonFromHand`,
+which sets `G.viaEffect`): it spends no Teece play, only a non-Boss that costs
+no sacrifice can be summoned (`canSummon`), and the body that lands is marked
+`t.thunder`, which `realCount` ignores until `startTurn` clears it for its
+owner. On a step, `fromHand:true` means "except by an effect" and
+`viaEffect:true` means "only by one".
+
+A card with `handOnEnemyPlay` or `handOnEnemyMagic` is offered the moment the
+other side plays a Teece or casts magic (`reactHand`, from `playTeece` and
+`fireMagic`; the computer always says yes, and the depth is capped at 3).
+`reactDeath` (Zeus' Blessing) is offered from `processDeath` before the body
+leaves (`zeusReact`). `foeTurnEnd` steps run in `endTurn` for the Teece that are
+not on the side whose turn is ending. Plated equips read `freePlay` and
+`onPlayTemp` in `playTeece`.
 
 ### Games end at turn 100
 
