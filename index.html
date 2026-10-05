@@ -1019,7 +1019,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:122,date:'2026-10-05'};
+const VERSION={build:123,date:'2026-10-05'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -2658,7 +2658,7 @@ const CARDS = {
     text:'Trump card. Select a player: until the end of your next turn they cannot play Teece — and you cannot win the game until after the end of your next turn either.',
     cast:[{fx:'hexPlayer',kind:'freeze',count:2,selfNoWin:true,msg:'Freeze which player?'}]},
  495:{name:'Curse of Treachery',type:'magic',curse:true,
-    text:'Select a player: one of their non-Boss Teece, chosen at random, joins the enemy team for good. This ignores ward. Once a game, this returns to your hand.',
+    text:'Select a player: one of their non-Boss Teece, chosen at random, joins your team until the end of the turn. This ignores ward. Once a game, this returns to your hand.',
     cast:[{fx:'treachery'}]},
  496:{name:'Curse of Razing',type:'magic',curse:true,
     text:'Select an unoccupied panel: no Teece may ever be played or moved onto it again.',
@@ -10497,9 +10497,11 @@ async function FXRUN(st,ctx){
       if(!pool.length){log(pname(q)+' has no Teece to turn.');continue;}
       const c=pool[Math.floor(Math.random()*pool.length)];
       const t=b[c].teece;
-      t.owner=p;t.baseOwner=p;
+      t.owner=p;
+      G.tempControls=G.tempControls||[];
+      if(G.tempControls.indexOf(t.uid)<0)G.tempControls.push(t.uid);
       turned++;
-      log(nm(t)+' deserts '+pname(q)+' for '+pname(p)+', for good. No ward holds against it.');
+      log(nm(t)+' deserts '+pname(q)+' for '+pname(p)+' until the end of the turn. No ward holds against it.');
       noteTargeted(p);
       await anim([c],'zap');
     }
