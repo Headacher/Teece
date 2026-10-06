@@ -258,7 +258,7 @@
         "Unstable Warhead destroys itself the moment anything targets it or takes a single point off it."
       ],
       "level": "beginner",
-      "kind": "utility"
+      "kind": "warrior"
     },
     "nature": {
       "name": "Nature",
@@ -492,7 +492,7 @@
         "Stopped Sundial stops the round turning the sky while it stands, though cards can still turn it. It never destroys anything itself."
       ],
       "level": "intermediate",
-      "kind": "utility"
+      "kind": "warrior"
     },
     "army": {
       "name": "Army",

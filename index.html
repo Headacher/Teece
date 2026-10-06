@@ -884,7 +884,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 #draftCards .dsort,#draftCards .dgroup{flex-basis:100%;display:flex;gap:8px;justify-content:center;align-items:baseline;flex-wrap:wrap}
 .dsort button{background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;font:inherit}
 .dsort button.on{border-color:var(--cream);font-weight:700}
-.dgroup{margin-top:6px}.dgroup span{opacity:.7;font-size:.85em}
+.dgroup{margin-top:6px}
 #hcapRow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:18px 0 6px}
 .hcap{min-width:84px;background:var(--panel2);color:var(--cream);border:1px solid var(--line);
   border-radius:9px;padding:11px 12px;cursor:pointer;font-family:var(--body);
@@ -1023,7 +1023,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:134,date:'2026-10-06'};
+const VERSION={build:135,date:'2026-10-06'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -16676,8 +16676,8 @@ function showDeckInfo(key){
 }
 let DECK_SORT='level';
 const DECK_GROUPS={
-  level:[['beginner','Beginner','Few moving parts'],['intermediate','Intermediate','A mechanic to learn'],['advanced','Advanced','Rules of their own']],
-  kind:[['swarm','Swarm','Many small Teece'],['warrior','Warrior','Big Teece, direct fights'],['utility','Utility','Tricks, magic and tools']]
+  level:[['beginner','Beginner'],['intermediate','Intermediate'],['advanced','Advanced']],
+  kind:[['warrior','Warrior'],['swarm','Swarm'],['utility','Utility']]
 };
 function pickDeck(who,opts){
   opts=opts||{};
@@ -16730,7 +16730,7 @@ function pickDeck(who,opts){
         if(!inG.length)continue;
         const h=document.createElement('div');
         h.className='dgroup';
-        h.innerHTML='<b>'+g[1]+'</b><span>'+g[2]+'</span>';
+        h.innerHTML='<b>'+g[1]+'</b>';
         box.appendChild(h);
         for(const k of inG)box.appendChild(tile(k));
       }
