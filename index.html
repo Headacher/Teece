@@ -238,7 +238,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="locust"]::after,.dcard[data-card-deck="locust"]::after{content:'🦗'}
 .card[data-card-deck="devil"]::after,.dcard[data-card-deck="devil"]::after{content:'😈'}
 .card[data-card-deck="runeblade"]::after,.dcard[data-card-deck="runeblade"]::after{content:'🗡️'}
-.card[data-card-deck="wizard"]::after,.dcard[data-card-deck="wizard"]::after{content:'🔮'}
+.card[data-card-deck="wizard"]::after,.dcard[data-card-deck="wizard"]::after{content:'🧙‍♂️'}
 .card[data-card-deck="gun"]::after,.dcard[data-card-deck="gun"]::after{content:'🔫'}
 .card[data-card-deck="lightning"],.dcard[data-card-deck="lightning"]{--cardbg:#1b2a5e;--artink:#ffe94d;background:var(--cardbg);color:#eef2ff;border-color:#0b1230}
 .card[data-card-deck="lightning"] .kwl,.dcard[data-card-deck="lightning"] .dkw{color:#ffe94d}
@@ -1023,7 +1023,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:133,date:'2026-10-05'};
+const VERSION={build:134,date:'2026-10-06'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1146,7 +1146,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F52E}',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
