@@ -40,6 +40,9 @@ main{display:flex;flex-direction:column;gap:12px;align-items:center}
 .handrow{width:100%;min-height:108px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
   padding:8px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.18)}
 .handlbl{width:100%;text-align:center;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.oppbar{display:flex;align-items:center;justify-content:center;gap:10px;width:100%}
+.oppbar .handlbl{width:auto}
+.oppbar .btn{padding:2px 9px;font-size:10px;letter-spacing:.1em;text-transform:uppercase}
 
 .card{--cardbg:var(--cream);--artink:#6d5f45;position:relative;width:88px;min-height:84px;background:var(--cream);color:var(--ink);border-radius:7px;
   padding:6px;border:1px solid #cdbe9c;display:flex;flex-direction:column;gap:2px;
@@ -523,10 +526,13 @@ body.gunmode #board .cell.target{box-shadow:inset 0 0 0 2px #f0a04b}
 @keyframes bangPulse{0%,100%{box-shadow:0 0 0 0 rgba(184,65,47,.55)}50%{box-shadow:0 0 0 4px rgba(184,65,47,0)}}
 @media(prefers-reduced-motion:reduce){.stchip.s-bad .stbang{animation:none}}
 .btn{background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:6px;
-  padding:6px 12px;font-size:12px;letter-spacing:.06em}
-.btn:hover{background:#33291e}
-.btn.primary{background:var(--p0);border-color:var(--p0);color:#0d1815;font-weight:700}
-.btn.primary:hover{background:#4fb69e}
+  padding:6px 12px;font-size:12px;letter-spacing:.06em;
+  transition:background .15s,border-color .15s,transform .12s,box-shadow .15s}
+.btn:hover{background:#33291e;border-color:#5a4c38}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:linear-gradient(180deg,#4bb59e,var(--p0));border-color:var(--p0);color:#0d1815;font-weight:700;
+  box-shadow:0 1px 0 rgba(255,255,255,.22) inset,0 2px 8px -3px rgba(63,160,138,.6)}
+.btn.primary:hover{background:linear-gradient(180deg,#5cc7af,#4fb69e);border-color:#4fb69e}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 
 /* ---- domination meter. The bar beside the board is the field itself: each
@@ -644,10 +650,39 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 
 /* ---- start menu. A masthead, the rules in three lines, then one card per
        mode: its name, a single line saying what it is, and its buttons. ---- */
+/* The start menu and the picker are whole screens, not windows onto the game
+   behind them: at 94% black the empty board and its buttons still showed
+   through as grey smudges around the box. They get a table of their own. */
+#startOverlay,#draftOverlay{background:
+  radial-gradient(70% 55% at 50% 0%,rgba(201,162,39,.11),transparent 70%),
+  radial-gradient(55% 45% at 100% 100%,rgba(63,160,138,.07),transparent 70%),
+  repeating-linear-gradient(0deg,rgba(239,230,208,.018) 0 1px,transparent 1px 72px),
+  repeating-linear-gradient(90deg,rgba(239,230,208,.018) 0 1px,transparent 1px 72px),
+  #0d0a07}
+@keyframes boxIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#startOverlay .box,#draftOverlay .box{animation:boxIn .28s ease-out both;
+  background:linear-gradient(180deg,#221c15,var(--panel));
+  box-shadow:0 24px 60px -24px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.025) inset}
 #startOverlay .box{max-width:700px;width:100%}
 #startOverlay h2{margin:0}
-#startOverlay .sub{font-size:12px;letter-spacing:.05em;color:var(--muted);margin:2px 0 0;
+#startOverlay .sub{font-size:12px;letter-spacing:.05em;color:var(--muted);margin:14px 0 0;
   padding-bottom:13px;border-bottom:1px solid var(--line)}
+/* The wordmark: the title big, with a three-by-three of its own beside it --
+   one tile for each of the three seats, in the seat colours the board uses. */
+.logo{flex:none;display:grid;grid-template-columns:repeat(3,13px);grid-template-rows:repeat(3,13px);gap:3px}
+.logo i{border:1px solid #4a3e2e;border-radius:3px;background:rgba(0,0,0,.25)}
+.logo i:nth-child(1){background:var(--p0);border-color:var(--p0)}
+.logo i:nth-child(5){background:var(--p1);border-color:var(--p1)}
+.logo i:nth-child(9){background:var(--p2);border-color:var(--p2)}
+.mastt{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.mastt h2{font-size:46px;line-height:.95;letter-spacing:.005em}
+.mastt .ver{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.mastbtns{display:flex;gap:8px;flex:none}
+@media(max-width:480px){
+  .mast{flex-wrap:wrap}
+  .mastbtns{width:100%}
+  .mastbtns .btn{flex:1;padding:9px 12px}
+}
 .rules{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;align-items:start;
   background:rgba(201,162,39,.05);border:1px solid var(--line);border-radius:10px;
   padding:13px 15px;margin:16px 0 18px;font-size:12.5px;line-height:1.5;color:var(--muted)}
@@ -672,17 +707,23 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 #infoBox .cname{font-weight:600;font-size:11px;letter-spacing:.5px;text-transform:uppercase}
 #infoBox .ctext{font-size:11px;color:var(--muted);line-height:1.3}
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.mode{display:flex;flex-direction:column;background:var(--panel2);
-  border:1px solid var(--line);border-radius:10px;padding:13px 15px}
-.mode.feature{grid-column:1/-1;border-color:rgba(201,162,39,.4);
-  background:linear-gradient(180deg,rgba(201,162,39,.10),var(--panel2))}
-.overlay .mode h3{font-size:21px;margin:0}
+.mode{display:flex;flex-direction:column;background:linear-gradient(180deg,#2c241b,var(--panel2));
+  border:1px solid var(--line);border-radius:12px;padding:15px 17px;
+  transition:border-color .18s,transform .18s,box-shadow .18s}
+.mode:hover{border-color:#6a5a40;transform:translateY(-2px);box-shadow:0 10px 24px -14px rgba(0,0,0,.9)}
+.mode.feature{grid-column:1/-1;border-color:rgba(201,162,39,.45);
+  background:linear-gradient(180deg,rgba(201,162,39,.14),var(--panel2));
+  box-shadow:0 12px 30px -16px rgba(201,162,39,.4)}
+.mode.feature:hover{border-color:rgba(226,186,60,.8);box-shadow:0 14px 34px -14px rgba(201,162,39,.55)}
+.mode .kick{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.mode.feature .kick{color:var(--gold)}
+.overlay .mode h3{font-size:24px;margin:0;line-height:1.1}
 .overlay .mode p{font-size:12.5px;line-height:1.5;margin:5px 0 0}
-.overlay .mode .row{margin-top:auto;padding-top:12px}
+.overlay .mode .row{margin-top:auto;padding-top:14px}
+.mode .btn{padding:8px 16px;font-size:12.5px}
+@media(prefers-reduced-motion:reduce){.mode:hover{transform:none}}
 @media(max-width:560px){.modes{grid-template-columns:1fr}}
-.mast{display:flex;align-items:center;gap:12px}
-.mast h2{flex:1;min-width:0}
-.mast .btn{flex:none}
+.mast{display:flex;align-items:center;gap:14px}
 .overlay h2 .ver{white-space:nowrap;display:inline-block}
 #startOverlay .modes{margin-top:16px}
 
@@ -850,7 +891,18 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .dcard.perkcard .dnm{margin-top:8px;color:var(--cream)}
 .dcard.perkcard .dtx{margin-top:10px;padding-top:0;color:var(--cream2)}
 .dcard.perkcard .dkw{margin-top:auto;padding-top:10px;color:var(--gold)}
-.dcard.dsym{width:110px;min-height:110px;align-items:center;justify-content:center;gap:6px}
+/* A deck tile sits its symbol and name at the foot, so the "i" in the corner
+   has the top of the tile to itself and never covers the drawing. It wears
+   the deck's own palette; the corner emoji that palette prints on a card is
+   the symbol here, so it is switched off. */
+.dcard.dsym{width:110px;min-height:120px;align-items:center;justify-content:flex-end;gap:6px;padding:8px 6px 10px}
+.dcard.dsym[data-card-deck]::after{content:none}
+.dcard.dsym[data-card-deck]{background-image:linear-gradient(160deg,rgba(255,255,255,.16),rgba(0,0,0,.22));
+  box-shadow:0 2px 0 rgba(0,0,0,.35);
+  transition:transform .15s,box-shadow .15s}
+.dcard.dsym[data-card-deck]:hover{box-shadow:0 12px 22px -10px var(--cardbg),0 0 0 2px rgba(255,255,255,.3)}
+.dcard.dsym .dsymbol{filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+.dcard.dsym[data-card-deck] .dnm{text-shadow:0 1px 2px rgba(0,0,0,.4)}
 /* A draft card reads top to bottom: name, drawing, rules. The four numbers are
    tabs on the four edges they fight with -- top on the top, left on the left --
    so the middle of the card is left to the drawing instead of being crossed by
@@ -869,28 +921,57 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
    card that has one. */
 .dcard.arted .ascii{position:relative;inset:auto;order:2;flex:0 0 auto;margin:10px -6px 4px;font-size:15px;opacity:.72}
 .dcard.arted .dtx{order:3}
+/* The three-player formats are menu cards like the start screen's, not
+   playing cards: dark, with the sides drawn between the name and the rules. */
+.dcard.fmt{background:linear-gradient(180deg,#2c241b,var(--panel2));color:var(--cream);border:1px solid var(--line);
+  border-radius:12px;min-height:0;align-items:center;gap:8px;padding:18px 14px;
+  transition:border-color .15s,transform .15s,box-shadow .15s}
+.dcard.fmt:hover{border-color:var(--gold);box-shadow:0 12px 24px -14px rgba(0,0,0,.9)}
+.dcard.fmt .dnm{margin-top:0;font-size:23px;line-height:1.1}
+.dcard.fmt .dty{color:var(--gold)}
+.dcard.fmt .dtx{margin-top:0;padding-top:0;color:var(--muted)}
+.fdia{display:flex;align-items:center;gap:10px;margin:6px 0 4px}
+.fdia b{font-size:9px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fteam{display:flex;gap:6px;padding:6px 10px;border:1px dashed #5a4c38;border-radius:999px;background:rgba(0,0,0,.22)}
+.fdia .dot{width:13px;height:13px;margin:0}
+@media(max-width:480px){.dcard.fmt{width:100%}}
 .dcard.dsym .dsymbol{font-size:44px;line-height:1}
 .dcard.dsym .dnm{margin-top:0;font-size:15px}
 /* Thirteen decks at 110px go two to a row on a phone and run off the bottom.
    Three to a row puts the whole picker back on one screen. */
 @media(max-width:480px){
   #draftCards{gap:9px}
-  .dcard.dsym{width:90px;min-height:90px;gap:4px}
+  .dcard.dsym{width:90px;min-height:100px;gap:4px}
   .dcard.dsym .dsymbol{font-size:34px}
   .dcard.dsym .dnm{font-size:13px}
 }
 #draftDeck{font-size:11.5px;color:var(--muted);line-height:1.5;max-height:110px;overflow:auto;margin-top:8px}
 
 #draftCards .dsort,#draftCards .dgroup{flex-basis:100%;display:flex;gap:8px;justify-content:center;align-items:baseline;flex-wrap:wrap}
-.dsort button{background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;font:inherit}
-.dsort button.on{border-color:var(--cream);font-weight:700}
-.dgroup{margin-top:6px}
+/* Sort by: one segmented control rather than three loose buttons. */
+#draftCards .dsort{gap:0;align-items:center}
+.dsort span{margin-right:12px;color:var(--muted);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase}
+.dsort button{background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-left-width:0;border-radius:0;
+  padding:7px 14px;cursor:pointer;font:inherit;font-size:12.5px;transition:background .15s,color .15s}
+.dsort button:nth-of-type(1){border-left-width:1px;border-radius:8px 0 0 8px}
+.dsort button:last-of-type{border-radius:0 8px 8px 0}
+.dsort button:hover{background:#33291e}
+.dsort button.on{background:var(--cream);color:var(--ink);border-color:var(--cream);font-weight:700}
+/* A group heading is a rule with its name in the middle of it. */
+#draftCards .dgroup{flex-wrap:nowrap;align-items:center;gap:12px;margin-top:12px;
+  color:var(--gold);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase}
+.dgroup b{font-weight:600;white-space:nowrap}
+.dgroup::before,.dgroup::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,#4a3e2e)}
+.dgroup::after{background:linear-gradient(270deg,transparent,#4a3e2e)}
+#draftOverlay h2,#draftOverlay #draftInfo{text-align:center}
 #hcapRow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:18px 0 6px}
-.hcap{min-width:84px;background:var(--panel2);color:var(--cream);border:1px solid var(--line);
+.hcap{min-width:84px;background:linear-gradient(180deg,#2c241b,var(--panel2));color:var(--cream);border:1px solid var(--line);
   border-radius:9px;padding:11px 12px;cursor:pointer;font-family:var(--body);
   display:flex;flex-direction:column;align-items:center;gap:4px;
-  transition:border-color .15s,transform .15s}
-.hcap:hover{border-color:var(--gold);transform:translateY(-2px)}
+  transition:border-color .15s,transform .15s,box-shadow .15s}
+.hcap:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 10px 18px -12px rgba(0,0,0,.9)}
+.hcap.easy:hover{border-color:var(--up)}
+.hcap.hard:hover{border-color:var(--down)}
 .hcap .hn{font-family:var(--disp);font-size:23px;line-height:1;font-variant-numeric:tabular-nums}
 .hcap .hl{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .hcap.even{border-color:var(--gold)}
@@ -917,9 +998,9 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
     <span class="sub" id="modeLbl">three by three</span>
   </header>
   <main>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <h3 style="margin:0">Opponent Hands</h3>
-      <button class="btn" id="toggleOppHands" style="padding:4px 8px;font-size:12px">Show</button>
+    <div class="oppbar">
+      <span class="handlbl">Opponent hands</span>
+      <button class="btn" id="toggleOppHands">Show</button>
     </div>
     <div id="oppHands" class="collapsed"></div>
     <div id="promptBar"><span class="msg">&nbsp;</span></div>
@@ -952,14 +1033,21 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 <div class="overlay" id="startOverlay">
   <div class="box">
     <div class="mast">
-      <h2>Teece <span class="ver" id="verTag"></span></h2>
-      <button class="btn primary" id="tutBtn">Tutorial</button>
-      <button class="btn" id="rulesBtn">Rules</button>
+      <span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <div class="mastt">
+        <h2>Teece</h2>
+        <span class="ver" id="verTag"></span>
+      </div>
+      <div class="mastbtns">
+        <button class="btn primary" id="tutBtn">Tutorial</button>
+        <button class="btn" id="rulesBtn">Rules</button>
+      </div>
     </div>
     <p class="sub" id="startSub"></p>
 
     <div class="modes">
       <div class="mode feature">
+        <div class="kick">Solo run</div>
         <h3>Roguelike</h3>
         <p>Draft random cards from all decks and try to beat an increasingly powerful computer.
            Ten levels: every one you clear, take one of three perks and draft again. No perk twice.</p>
@@ -969,6 +1057,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
       </div>
 
       <div class="mode">
+        <div class="kick">One on one</div>
         <h3>Decks</h3>
         <p>Pick prebuilt decks to battle.</p>
         <div class="row">
@@ -978,6 +1067,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
       </div>
 
       <div class="mode">
+        <div class="kick">Three seats</div>
         <h3>Three players</h3>
         <p>Play 1v1v1 or 2v1.</p>
         <div class="row">
@@ -1023,7 +1113,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:136,date:'2026-10-06'};
+const VERSION={build:137,date:'2026-10-08'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -16692,6 +16782,8 @@ function pickDeck(who,opts){
       const dk=DECKS[key];
       const el=document.createElement('div');
       el.className='dcard nostat dsym';
+      /* The tile wears the deck's own palette, the same rules a card in hand uses. */
+      el.setAttribute('data-card-deck',key);
       el.title=dk.name+' — '+dk.cards.length+' cards\n'+dk.blurb;
       el.innerHTML='<div class="dsymbol">'+(DECK_SYM[key]||'❓')+'</div><div class="dnm">'+dk.name+'</div>';
       el.addEventListener('click',()=>{overlay.classList.add('hidden');res(key);});
@@ -16755,10 +16847,16 @@ function pickFormat(){
     document.getElementById('draftDeck').textContent='';
     for(const f of FORMATS){
       const el=document.createElement('div');
-      el.className='dcard nostat';
+      el.className='dcard nostat fmt';
+      /* The sides drawn as the seats they are: one dot per seat in that seat's
+         colour, ringed together with whoever it fights beside. */
+      const bySide={};
+      f.teams.forEach((t,i)=>{(bySide[t]=bySide[t]||[]).push(i);});
+      const dia='<div class="fdia">'+Object.keys(bySide).map(t=>'<span class="fteam">'+
+        bySide[t].map(i=>'<i class="dot d'+i+'"></i>').join('')+'</span>').join('<b>vs</b>')+'</div>';
       el.innerHTML='<div class="dnm">'+f.name+'</div><div class="dty">'+
         (f.teams[0]===f.teams[1]?'2 v 1':(f.teams[1]===f.teams[2]?'1 v 2':'every seat alone'))+
-        '</div><div class="dtx">'+f.blurb+'</div>';
+        '</div>'+dia+'<div class="dtx">'+f.blurb+'</div>';
       el.addEventListener('click',()=>{overlay.classList.add('hidden');res(f);});
       box.appendChild(el);
     }
