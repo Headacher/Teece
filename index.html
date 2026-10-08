@@ -329,8 +329,16 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .mineMark.m0{color:var(--p0)} .mineMark.m1{color:var(--p1)} .mineMark.m2{color:var(--p2)}
 .curseMark{position:absolute;bottom:3px;left:5px;font-size:13px;z-index:1}
 .curseMark.m0{color:var(--p0)} .curseMark.m1{color:var(--p1)} .curseMark.m2{color:var(--p2)}
-.mcurseMark{position:absolute;bottom:2px;right:5px;font-size:15px;z-index:1;color:#b98cff;text-shadow:0 0 3px #000;pointer-events:none}
-.rgd .mcursed{color:#c9a2ff}
+/* The Mummy curse, on a panel and on a body. The whole deck reads it, so it is
+   drawn to be read at a glance on any tile colour: heavy, bright violet, a
+   dark rim for pale faces and a violet glow for dark ones, breathing slowly. */
+.mcurseMark{position:absolute;bottom:1px;right:4px;font-size:24px;font-weight:900;line-height:1;z-index:1;
+  color:#e3c8ff;pointer-events:none;-webkit-text-stroke:.6px #2a0b4a;
+  text-shadow:0 0 2px #1a0630,0 0 6px #b45cff,0 0 12px #9b3dff,0 0 18px #9b3dff;animation:curseGlow 2.4s ease-in-out infinite}
+.teece .rgd .mcursed{font-size:17px;font-weight:900;line-height:1;color:#f0dcff;-webkit-text-stroke:.5px #2a0b4a;
+  text-shadow:0 0 2px #1a0630,0 0 5px #b45cff,0 0 10px #9b3dff,0 0 14px #9b3dff;animation:curseGlow 2.4s ease-in-out infinite}
+@keyframes curseGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35) drop-shadow(0 0 4px #b45cff)}}
+@media (prefers-reduced-motion:reduce){.mcurseMark,.teece .rgd .mcursed{animation:none}}
 .primeMark{position:absolute;top:3px;left:5px;font-size:11px;font-weight:700;color:var(--gold);z-index:1}
 .seedMark{position:absolute;top:3px;right:5px;font-size:10px;line-height:1;color:var(--up);z-index:1}
 /* The four corners are spoken for, so the enchantment takes the top edge. It
@@ -1120,7 +1128,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:143,date:'2026-10-08'};
+const VERSION={build:144,date:'2026-10-08'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
