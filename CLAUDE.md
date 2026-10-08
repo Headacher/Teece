@@ -244,6 +244,13 @@ the page, or it buries the content underneath. On a phone `aside` stacks below
   on, fusion-style. So read a card's effects through `DEF(t)`, never
   `CARDS[t.cardId]`, or silence and theft will both miss it. A new identity
   field that must survive silence (a tribe tag) belongs in `ID_KEYS`.
+- Steadfast (shown as "Immune to stat reduction") means nothing lowers its
+  numbers or its Defence, from anywhere. `applyModT`, `applyDef` and
+  `applySides` refuse a loss, and `effSides`/`defOf` drop every negative
+  layer: auras, equips, grounds, Shrink, and old penalties. An effect that
+  wipes or overwrites numbers directly must take `holdStats(t)` before it and
+  call the result after, or it will strip a steadfast Teece. Turning it round
+  is not a loss and still happens.
 - `effSides` is the single source of truth for a Teece's current numbers; auras,
   equips, grounds and doubling all compose there.
 - Effects that must land before combat go on the effect stack via `queueFx`;
