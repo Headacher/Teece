@@ -999,14 +999,15 @@
         1077,
         1078,
         1079,
-        1080
+        1080,
+        1081
       ],
       "blurb": "A beginner warrior deck built on one curse. If a panel is cursed, a non-Mummy Teece on that panel is cursed, and the curse is removed from the panel. If a cursed Teece would be cursed again, it gets -1 instead. A curse does nothing on its own: every Mummy card lays it, drags enemies onto it, or cashes it in.",
       "how": [
         "Curse the empty panels first, then pull. Tomb Stalker, Linen Mummy, Diseased Mummy, Cursed Bandages and Burial Wrappings all drag a Teece one space toward them, and Shifting Sands pushes one wherever you like. An enemy dragged onto a cursed panel picks up the curse, and Tomb Stalker charges it -3 for the trip.",
         "Plague Mummy, Cursed Bandages and the Scarab Amulet all pay against a cursed enemy beside them. Pharaoh’s Vengeance, Wrathful Mummy and Soul Steal cash a curse in, and both Vengeance and Wrathful Mummy lift it, so the same enemy can be cursed fresh again.",
         "The Pharaoh destroys a cursed Teece, and the next enemy to be cursed after that dies of it. With the Pharaoh’s order standing, any cheap curse is a kill.",
-        "Lift a curse from a Teece standing on the Accursed Sands and the Sands curse it again straight away, for another -5. Mummies are never cursed by a panel, so your own side can stand on every curse you lay."
+        "Accursed Sands curses any non-Mummy standing on it, and curses it again the moment that curse is lifted. The Cursed Tomb charges -5 for every fresh curse laid on it, so Pharaoh’s Vengeance and Wrathful Mummy, which lift a curse, set the next one up to cost -5 again. Mummies are never cursed by a panel, so your own side can stand on every curse you lay."
       ],
       "level": "beginner",
       "kind": "warrior"
@@ -1677,6 +1678,7 @@
     1077,
     1078,
     1079,
-    1080
+    1080,
+    1081
   ]
 }

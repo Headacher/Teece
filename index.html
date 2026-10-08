@@ -251,7 +251,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="mummy"],.dcard[data-card-deck="mummy"]{--cardbg:#d8c79a;--artink:#4a3a1c;background:var(--cardbg);color:#2a2112;border-color:#7a6232}
 .card[data-card-deck="mummy"] .kwl,.dcard[data-card-deck="mummy"] .dkw{color:#5b2a86}
 .card[data-card-deck="mummy"] .ct,.dcard[data-card-deck="mummy"] .dty{color:#5b2a86}
-.card[data-card-deck="mummy"]::after,.dcard[data-card-deck="mummy"]::after{content:'\26B1\FE0F'}
+.card[data-card-deck="mummy"]::after,.dcard[data-card-deck="mummy"]::after{content:'\2625'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -1120,7 +1120,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:140,date:'2026-10-08'};
+const VERSION={build:141,date:'2026-10-08'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1243,7 +1243,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u26B1\uFE0F'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -1452,6 +1452,7 @@ const CARD_ART={
   1078:["   _______   ", "  |=======|  ", "  |=|===|=|  ", "  |=======|  ", "   '-----'   "],
   1079:["    \\   /    ", "  -(o_O)-    ", "   /(_)\\     ", "   /   \\     ", "    \\ /      "],
   1080:[" .  .  .  .  ", "   . ☥ .     ", " .  .  .  .  ", ":::::::::::::", ":::::::::::::"],
+  1081:["   _______   ", "  /  ___  \\  ", " |  | ☥ |  | ", " |  |   |  | ", " |__|___|__| "],
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
   541:["  \\  .-.  /  ", "   \\( o )/   ", "    (/|\\)    ", "    _/ \\_    ", "   [$]  ...  "],
@@ -4497,8 +4498,10 @@ const CARDS = {
  1079:{name:'Scarab Amulet',type:'equip',mod:0,
     text:'The equipped Teece counts +3 in combat against a cursed enemy. Once per your turn: select a Teece or a panel; curse it.',
     grants:{cursedCombat:3,act:[{name:'Scarab Curse',once:'turn',steps:[{fx:'mCurseAny'}]}]}},
- 1080:{name:'Accursed Sands',type:'ground',gMCurseOn:true,gMCurseHit:-5,
-    text:'A non-Mummy Teece on this battleground is cursed. A Teece that becomes cursed on this battleground gets -5.'},
+ 1080:{name:'Accursed Sands',type:'ground',gMCurseOn:true,
+    text:'A non-Mummy Teece on this battleground is cursed.'},
+ 1081:{name:'Cursed Tomb',type:'ground',gMCurseHit:-5,
+    text:'If a Teece becomes cursed on this battleground, it gets -5.'},
  /* ---- the tutorial's cards. Nothing but their numbers, so a new player learns
         the rules rather than a card. The roguelike drafts from every card in
         CARDS, not from the pool, so tutorial:true is what keeps them out of it
@@ -16421,11 +16424,17 @@ function aiPlanFor(id){
     if(d.gFusionMod)bonus+=fusionsInPlay(p)?0.4:0.6;
     /* The Accursed Sands curse whatever stands on them, now or later. */
     if(d.gMCurseOn)bonus+=0.9;
+    /* The Cursed Tomb pays only when a curse lands, so it is worth most under
+       an uncursed enemy and something on an empty panel the curses will reach. */
+    if(d.gMCurseHit)bonus+=0.9;
     return {thr:0.8,bonus,cands,mut:(bb,i)=>{
       if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
       else bb[i].ground={cardId:id,owner:p};
       const o=bb[i].teece;
-      if(d.gMCurseOn&&o&&!isMummy(o)&&!o.mcursed)mCurseT(bb,i,false);}};
+      if(d.gMCurseOn&&o&&!isMummy(o)&&!o.mcursed)mCurseT(bb,i,false);
+      /* an uncursed enemy under the Tomb is a -5 the next curse cashes in;
+         priced at most of that, since the curse has not landed yet */
+      if(d.gMCurseHit&&o&&!o.mcursed&&!sameTeam(o.owner,p))applyModT(o,-3,'perm');}};
   }
   if(d.type!=='magic')return null;
   if(d.onlyWhen&&!phaseIs(d.onlyWhen))return null;
