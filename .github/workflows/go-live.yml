@@ -1,0 +1,38 @@
+# GitHub Pages serves claude/overclocker-fly-gadget-bugs-rvlhsg. Any push to a
+# task branch (claude/**) or main is merged into it here, then Pages is asked to
+# rebuild, so a change is live without anyone remembering the last step.
+name: go-live
+on:
+  push:
+    branches: ['claude/**', 'main']
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: go-live
+  cancel-in-progress: false
+env:
+  SHIP: claude/overclocker-fly-gadget-bugs-rvlhsg
+jobs:
+  promote:
+    if: github.ref_name != 'claude/overclocker-fly-gadget-bugs-rvlhsg'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Merge into the shipping branch
+        run: |
+          git config user.name "go-live"
+          git config user.email "go-live@users.noreply.github.com"
+          git checkout -B "$SHIP" "origin/$SHIP"
+          if git merge-base --is-ancestor "${{ github.sha }}" HEAD; then
+            echo "already live"; exit 0
+          fi
+          if ! git merge --no-edit "${{ github.sha }}"; then
+            echo "::error::Merge conflict - land this branch on $SHIP by hand (keep their VERSION and bump it)."
+            exit 1
+          fi
+          git push origin "$SHIP"
+      - name: Rebuild Pages
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || true
