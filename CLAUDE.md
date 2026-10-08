@@ -99,6 +99,30 @@ card the AI never plays is a card you never tested.
 And land it on the shipping branch. See the top of this file: a deck that stops
 at `main` is a deck nobody can play.
 
+### Designing a deck: a machine, not a pile of cards
+
+The point of designing a deck is a well-oiled machine. Every card synergizes
+with every other card, and the deck's own unique theme is what makes the combos
+possible. Read the existing decks before designing one, because they show the
+pattern.
+
+- **One mechanic, read in many ways.** Zombie has Undying, Spider has the Web
+  and Spiderlings, Vampire has Drain, Army has adjacency. Most cards either
+  produce the deck's resource or spend it.
+- **Every role through the theme.** Starters, payoffs, recovery, comebacks,
+  defence, mobility and silence/answers should all be reachable, and each one
+  should go through the mechanic rather than around it. Recovery in Zombie is
+  getting back up. Mobility in Spider is skittering on the Web.
+- **Combos emerge from overlap.** Two cards that each make sense alone should
+  make something new together: a puller plus a cursed panel, a reset plus a
+  trigger that fires once per application. If a card only works alone, it is
+  filler.
+- **Shape.** The deck has twenty different cards, one copy each. Most decks run
+  twelve Teece (usually one or two `sac:1` and one `sac:2` boss), three magic,
+  three equips and two grounds. The deck also needs a `blurb` that names the
+  mechanic and three or four `how` lines that teach its non-obvious
+  interactions.
+
 ## Testing
 
 The file exports its internals when `module` exists, so the game can be driven
