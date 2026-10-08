@@ -1120,7 +1120,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:142,date:'2026-10-08'};
+const VERSION={build:143,date:'2026-10-08'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3187,7 +3187,7 @@ const CARDS = {
     text:'Equip to a non-Boss Teece in your graveyard: it returns to the field with +2, wearing this. If this equip is destroyed or moved, the equipped Teece is destroyed.'},
  635:{name:'Mindless Hunger',type:'equip',mod:0,
     grants:{kw:['ward'],graft:true},
-    text:'The equipped Teece cannot be targeted by your opponents. When it destroys an enemy, it permanently gains that card\'s keywords, activated abilities and aura.'},
+    text:'The equipped Teece cannot be targeted by your opponents. When it destroys an enemy, it permanently gains every effect that card has, passives included.'},
  636:{name:'Infected Bite',type:'magic',
     text:'Select a non-Boss enemy. It can no longer be sacrificed by either player. After three of its controller\'s turns, you take control of it and it gets -2 permanently.',
     cast:[{fx:'infect',turns:3}]},
@@ -4520,7 +4520,82 @@ const CARDS = {
  969:{name:'Warlord',type:'teece',deck:'classic',tutorial:true,sides:[14,14,14,14],text:'No effect.'},
  970:{name:'Scout',type:'teece',deck:'classic',tutorial:true,sides:[4,4,4,4],text:'No effect.'},
 };
-const DEF=t=>CARDS[t.cardId];
+/* ============ what a body's card says right now ============
+   Every effect a Teece has -- triggers, abilities, auras, keywords AND the
+   passives that only scale its own numbers (+1 per ally, per grave card, by
+   day) -- is read through DEF(t). So DEF is where silence and theft live:
+
+   - A silenced body reads as its card stripped to what it IS: name, printed
+     sides and Defence, its sacrifice price, and the tribe tags other cards
+     count it by (a silenced Rat is still a Rat). Every effect is gone,
+     passives included. Effects that come from its equips and the ground under
+     it are not its card's, and stay.
+   - A body holding stolen effects (t.grafts: a Mindless Hunger's kills, a
+     Soul Steal) reads as its own card with every effect of each grafted card
+     merged on, the way a fusion merges its halves: lists joined, numbers
+     added, flags held, auras pooled, keywords unioned. Identity is never
+     stolen -- it keeps its own name, sides and tags.
+
+   Both views are cached; newState clears them, because fusion ids are reused. */
+const ID_KEYS={name:1,type:1,sides:1,text:1,flavor:1,def:1,sac:1,sacOK:1,token:1,deck:1,tutorial:1,perkOnly:1,
+  boss:1,fusion:1,forms:1,mark:1,runeCard:1,topDeck:1,
+  garbage:1,spider:1,vampire:1,solar:1,madness:1,rat:1,locust:1,pixie:1,zombie:1,army:1,apoc:1,devil:1,mummy:1,horseman:1};
+let DEF_SIL={},DEF_GRAFT={};
+function DEF(t){
+  const c=CARDS[t.cardId];
+  if(!c)return c;
+  if(t.silenced){
+    let v=DEF_SIL[t.cardId];
+    if(!v||v._src!==c){
+      v={_src:c};
+      for(const k in c)if(ID_KEYS[k])v[k]=c[k];
+      DEF_SIL[t.cardId]=v;
+    }
+    return v;
+  }
+  if(!t.grafts||!t.grafts.length)return c;
+  const key=t.cardId+'|'+t.grafts.join(',');
+  let v=DEF_GRAFT[key];
+  if(!v||v._src!==c){v=graftView(c,t.grafts);v._src=c;DEF_GRAFT[key]=v;}
+  return v;
+}
+/* Whether a card carries anything worth stealing at all. */
+function hasEffects(id){
+  const c=CARDS[id];
+  if(!c)return false;
+  for(const k in c)if(!ID_KEYS[k]&&!GRAFT_SKIP[k])return true;
+  return false;
+}
+/* What a body cannot take off another: who it is, and what only matters in a
+   hand or on the way in -- a stolen "when played" has already been and gone. */
+const GRAFT_SKIP={onPlay:1,handDiscard:1,onDiscard:1,onDiscardSummon:1,onDiscardBonus:1,
+  handOnEnemyPlay:1,handOnEnemyMagic:1,handMagic:1,revealPlay:1,sacHand:1,gunDiscard:1};
+function graftView(c,grafts){
+  const d=Object.assign({},c);
+  const kw=(c.kw||[]).slice();
+  const au=[].concat(c.aura?[c.aura]:[],c.auras||[]);
+  for(const gid of grafts){
+    const g=CARDS[gid];
+    if(!g)continue;
+    for(const k of (g.kw||[]))if(kw.indexOf(k)<0)kw.push(k);
+    if(g.aura)au.push(g.aura);
+    if(g.auras)au.push(...g.auras);
+    for(const k in g){
+      if(ID_KEYS[k]||GRAFT_SKIP[k]||k==='kw'||k==='aura'||k==='auras')continue;
+      const x=d[k],y=g[k];
+      if(x===undefined){d[k]=y;continue;}
+      if(Array.isArray(x)&&Array.isArray(y)){d[k]=x.concat(y);continue;}
+      if(typeof x==='number'&&typeof y==='number'){d[k]=x+y;continue;}
+      if(typeof x==='boolean'&&typeof y==='boolean'){d[k]=x||y;continue;}
+      if(x&&y&&typeof x==='object'&&typeof y==='object'&&typeof x.n==='number'&&typeof y.n==='number'){
+        d[k]=Object.assign({},x,{n:x.n+y.n});continue;}
+    }
+  }
+  if(kw.length)d.kw=kw;
+  delete d.aura;delete d.auras;
+  if(au.length){d.aura=au[0];if(au.length>1)d.auras=au.slice(1);}
+  return d;
+}
 /* What an equip actually grants, once the modality it was bolted on with is
    counted. An equip with modes carries the chosen one on the worn instance and
    the mode's grants are laid over the card's own, so everything that reads an
@@ -4644,7 +4719,7 @@ function undyUsedBy(p,cardId){
    computer's reading of a trade, and the two places the count is shown. */
 function undyLeft(t){
   if(!t||t.isToken||t.isCopy||t.silenced)return 0;
-  const u=undyOf(t.cardId);
+  const u=DEF(t).undying;
   if(!u)return 0;
   return Math.max(0,(u.x||1)-(t.undyUsed||0));
 }
@@ -5399,6 +5474,7 @@ function newState(mode,vsAI,decks,extra){
   const pk=Object.assign({},(extra&&extra.perks)||{});
   UID=1;extra=extra||{};
   forgetFusions();
+  DEF_SIL={};DEF_GRAFT={};
   const nP=extra.seats||2;
   const teams=extra.teams||Array.from({length:nP},(_,i)=>i);
   buildGeometry(extra.width||3);
@@ -6338,8 +6414,7 @@ function effSides(b,i,parts){
       const own=(od.aura?[od.aura]:[]).concat(od.auras||[]);
       for(let e=0;e<=(o.echo||0);e++)auras.push(...own);
     }
-    /* Everything a Mindless Hunger has eaten radiates from its wearer too. */
-    if(!o.silenced)for(const gid of (o.grafts||[])){const ga=CARDS[gid]&&CARDS[gid].aura;if(ga)auras.push(ga);}
+    /* What it has stolen radiates from it too: DEF(o) carries the grafts. */
     for(const e of o.equips){const g=eqG(e);if(g&&g.aura)auras.push(g.aura);}
     for(const a of auras){
       if(self&&!a.includeSelf)continue;
@@ -6459,7 +6534,6 @@ function auraGives(b,i,p){
     if(!o.silenced){
       const own=(od.aura?[od.aura]:[]).concat(od.auras||[]);
       for(let e=0;e<=(o.echo||0);e++)auras.push(...own);
-      for(const gid of (o.grafts||[])){const ga=CARDS[gid]&&CARDS[gid].aura;if(ga)auras.push(ga);}
     }
     for(const e of o.equips){const g=eqG(e);if(g&&g.aura)auras.push(g.aura);}
     for(const a of auras){
@@ -6612,7 +6686,6 @@ function kwOf(b,i,noGround){
   const fkw=formOf(t);
   if(fkw&&fkw.kw)ks.push(...fkw.kw);
   if((d.spider||t.cardId==='TSP')&&isWebbed(b,i))ks.push('skitter');
-  for(const gid of (t.grafts||[])){const gk=CARDS[gid]&&CARDS[gid].kw;if(gk)ks.push(...gk);}
   ks.push(...t.kwTemp);
   if(t.kwPerm)ks.push(...t.kwPerm);
   for(const e of t.equips){
@@ -6671,12 +6744,8 @@ function actsOf(b,i){
   });
   const fa=formOf(t);
   if(fa&&fa.act&&!t.silenced)fa.act.forEach((a,x)=>out.push({key:'f'+(t.form||0)+'_'+x,act:a}));
-  /* Abilities eaten off the things it has killed, each keyed by the card it
-     came from so two grafts of different cards never share a use counter. */
-  if(!t.silenced)for(const gid of (t.grafts||[])){
-    const ga=CARDS[gid]&&CARDS[gid].act;
-    if(ga)ga.forEach((a,x)=>{if(!a.needWeb||isWebbed(b,i))out.push({key:'x'+gid+'_'+x,act:a});});
-  }
+  /* Abilities taken off other cards arrive through DEF(t), appended after the
+     card's own, so the card's own keep their keys and use counters. */
   for(const e of t.equips){
     const g=eqG(e);
     if(g&&g.act)g.act.forEach((a,x)=>{if(phaseIs(a.when))out.push({key:'e'+e.cardId+'_'+x,act:a});});
@@ -6727,7 +6796,7 @@ function actBlockedReason(b,i,ent){
 function negatedActs(b,i){
   const t=b[i].teece;
   if(!t||!t.silenced)return [];
-  return (DEF(t).act||[]).map((a,x)=>({key:'c'+x,act:a}));
+  return (CARDS[t.cardId].act||[]).map((a,x)=>({key:'c'+x,act:a}));
 }
 /* Two different "once a game". once:'game' is once per BODY: it is kept on the
    Teece, and a Teece that dies and comes back is a new body with a clean sheet,
@@ -11381,11 +11450,15 @@ async function FXRUN(st,ctx){
     const allies=[];for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&sameTeam(o.owner,p))allies.push(i);}
     if(!allies.length){log('No ally is left to take what was stolen.');return;}
     const gid=t.cardId,d0=CARDS[gid];
-    const hasFx=!!(d0.kw||d0.act||d0.aura||d0.auras);
+    /* Everything it was: its own card's effects, passives included, and
+       anything it had already taken off somebody else. */
+    const hasFx=hasEffects(gid);
+    const extra=(t.grafts||[]).slice();
     const a=await pickCell(allies,'Choose an ally: it gains '+nm(t)+'’s effects and everything stripped from it.',
       (bb,i)=>{mGive(bb[i].teece,got,gid,hasFx);},false);
     if(a==null||a==='CANCEL')return;
     mGive(b[a].teece,got,gid,hasFx);
+    for(const x of extra){const A=b[a].teece;A.grafts=A.grafts||[];if(A.grafts.indexOf(x)<0)A.grafts.push(x);}
     log(nm(b[a].teece)+' takes '+(hasFx?'the effects of '+d0.name+' and ':'')+'everything stripped from it.');
     await anim([a],'zap');
     return;}
@@ -13413,7 +13486,7 @@ async function drainFx(){
    Equips go to the grave exactly as they do on a real death, except a Grave
    Shroud, which was built to ride the corpse down and come back up with it. */
 async function undyingReturn(t,cell){
-  const b=G.board,p=t.baseOwner,u=undyOf(t.cardId);
+  const b=G.board,p=t.baseOwner,u=DEF(t).undying||{};
   /* It comes back ANYWHERE there is room, not on the panel it fell on. That is
      the whole of the zombie's defence: nothing protects the body once it is up,
      so getting out of reach of whatever just killed it is the choice the player
@@ -13666,7 +13739,7 @@ async function processDeath(d){
        of everything it has eaten. */
     if(k.equips.some(e=>{const g=eqG(e);return g&&g.graft;})){
       k.grafts=k.grafts||[];
-      if(k.grafts.indexOf(t.cardId)<0&&(DEF(t).kw||DEF(t).act||DEF(t).aura)){
+      if(k.grafts.indexOf(t.cardId)<0&&hasEffects(t.cardId)){
         k.grafts.push(t.cardId);
         log(nm(k)+' gains the effects of '+DEF(t).name+'.');
       }
@@ -16141,7 +16214,7 @@ function simDeath(b,d){
   if(undyLeft(t)>0&&!b[cell].teece&&!b[cell].razed){
     const nt=makeTeece(t.cardId,t.baseOwner);
     nt.undyUsed=(t.undyUsed||0)+1;
-    const bonus=(undyOf(t.cardId).y||0)*nt.undyUsed;
+    const bonus=((DEF(t).undying||{}).y||0)*nt.undyUsed;
     if(bonus)for(let k=0;k<4;k++)nt.perm[k]+=bonus;
     putTeece(b,cell,nt,false);
   }
@@ -17914,7 +17987,7 @@ function showDetail(i){
     (t.mcursed?'<div class="dt" style="color:var(--bad);font-weight:bold">\u2625 Cursed. Cursed again, it gets -1 instead.</div>':'');
   const un=undyLeft(t);
   if(un>0){
-    const u=undyOf(t.cardId),next=(u.y||0)*((t.undyUsed||0)+1);
+    const u=DEF(t).undying||{},next=(u.y||0)*((t.undyUsed||0)+1);
     html+='<div class="dt" style="color:var(--gold)">Undying \u00d7'+un+
       ': it gets back up '+un+' more time'+(un===1?'':'s')+', on any free panel its controller '+
       'chooses and with no protection once it does. The next return comes back as '+

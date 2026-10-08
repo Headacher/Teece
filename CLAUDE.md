@@ -236,6 +236,14 @@ the page, or it buries the content underneath. On a phone `aside` stacks below
   one to the other (`steadfast` reads "Immune to stat reduction"), and the
   Detail panel and deck pages show keywords through `kwLabel`. Card text should
   use the player-facing words.
+- Silence and theft both go through `DEF(t)`, which is what a body's card says
+  right now. A silenced body reads as its card stripped to `ID_KEYS` (name,
+  printed sides and Defence, sacrifice price, tribe tags) so **every** effect is
+  gone, passives such as "+1 per ally" included. A body with `t.grafts` (Mindless
+  Hunger, Soul Steal) reads as its card with each grafted card's effects merged
+  on, fusion-style. So read a card's effects through `DEF(t)`, never
+  `CARDS[t.cardId]`, or silence and theft will both miss it. A new identity
+  field that must survive silence (a tribe tag) belongs in `ID_KEYS`.
 - `effSides` is the single source of truth for a Teece's current numbers; auras,
   equips, grounds and doubling all compose there.
 - Effects that must land before combat go on the effect stack via `queueFx`;
