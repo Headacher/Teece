@@ -74,14 +74,17 @@ Every push carries a bump, in the same commit as the change: `build` up by one
 A deck is registered in seven places, and missing one of them fails quietly —
 the cards exist and simply never reach a player. Take the next free block of
 twenty ids (Wizard is 906–925, with its conjured tokens at 926–941, the
-tutorial's cards sit at 960–970, Gun is 1001–1020, Fusion is 1021–1040, and Lightning is 1041–1060 with its Bolt Token at 1061),
+tutorial's cards sit at 960–970, Gun is 1001–1020, Fusion is 1021–1040, Lightning is 1041–1060 with its Bolt Token at 1061, and Mummy is 1062–1080),
 then:
 
 - `CARDS` in `index.html` — the twenty cards, plus any token cards they make.
   A token carries `token:true` and `deck:'<key>'`, which keeps it out of drafts
   while still colouring it as yours.
 - `decks.json` — a `decks.<key>` entry with `name`, `cards`, `blurb` and `how`,
-  and the twenty ids appended to `pool`. Edit it with a script rather than by
+  plus `level` (`beginner`/`intermediate`/`advanced`) and `kind`
+  (`warrior`/`swarm`/`utility`), and the twenty ids appended to `pool`. The
+  picker opens sorted by `level` and only lists decks that carry one, so a deck
+  without it is missing from the default view. Edit it with a script rather than by
   hand; it is long enough that a stray comma is hard to see.
 - `CARD_ART` — one 13-column drawing per card, tokens included. Anything not 13
   wide skews the face it sits behind.

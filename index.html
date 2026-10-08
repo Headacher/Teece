@@ -248,6 +248,10 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="lightning"] .ct,.dcard[data-card-deck="lightning"] .dty{color:#ffe94d}
 .card[data-card-deck="fusion"]::after,.dcard[data-card-deck="fusion"]::after{content:'⚛️'}
 .card[data-card-deck="lightning"]::after,.dcard[data-card-deck="lightning"]::after{content:'\26A1'}
+.card[data-card-deck="mummy"],.dcard[data-card-deck="mummy"]{--cardbg:#d8c79a;--artink:#4a3a1c;background:var(--cardbg);color:#2a2112;border-color:#7a6232}
+.card[data-card-deck="mummy"] .kwl,.dcard[data-card-deck="mummy"] .dkw{color:#5b2a86}
+.card[data-card-deck="mummy"] .ct,.dcard[data-card-deck="mummy"] .dty{color:#5b2a86}
+.card[data-card-deck="mummy"]::after,.dcard[data-card-deck="mummy"]::after{content:'\26B1\FE0F'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -278,6 +282,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .teece[data-card-deck="gun"]{--cardbg:#3b3f45;--artink:#f0c674;background:var(--cardbg);color:#eceae4;border-color:#1c1e21}
 .teece[data-card-deck="fusion"]{--cardbg:#2a2150;--artink:#7ff0e0;background:var(--cardbg);color:#ece6ff;border-color:#140f2e}
 .teece[data-card-deck="lightning"]{--cardbg:#1b2a5e;--artink:#ffe94d;background:var(--cardbg);color:#eef2ff;border-color:#0b1230}
+.teece[data-card-deck="mummy"]{--cardbg:#d8c79a;--artink:#4a3a1c;background:var(--cardbg);color:#2a2112;border-color:#7a6232}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -324,6 +329,8 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .mineMark.m0{color:var(--p0)} .mineMark.m1{color:var(--p1)} .mineMark.m2{color:var(--p2)}
 .curseMark{position:absolute;bottom:3px;left:5px;font-size:13px;z-index:1}
 .curseMark.m0{color:var(--p0)} .curseMark.m1{color:var(--p1)} .curseMark.m2{color:var(--p2)}
+.mcurseMark{position:absolute;bottom:2px;right:5px;font-size:15px;z-index:1;color:#b98cff;text-shadow:0 0 3px #000;pointer-events:none}
+.rgd .mcursed{color:#c9a2ff}
 .primeMark{position:absolute;top:3px;left:5px;font-size:11px;font-weight:700;color:var(--gold);z-index:1}
 .seedMark{position:absolute;top:3px;right:5px;font-size:10px;line-height:1;color:var(--up);z-index:1}
 /* The four corners are spoken for, so the enchantment takes the top edge. It
@@ -1113,7 +1120,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:139,date:'2026-10-08'};
+const VERSION={build:140,date:'2026-10-08'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1236,7 +1243,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u26B1\uFE0F'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -1426,6 +1433,25 @@ const CARD_ART={
   1059:["      *      ", "     /|\\     ", "    / | \\    ", " ===[###]=== ", "  ~~~~~~~~~  "],
   1060:["  .  *  .  * ", "  * -+-+- .  ", "  .  |#|  *  ", "  * -+-+- .  ", "  .  *  .  * "],
   1061:["    .---.    ", "   ( o o )   ", "   [ ### ]   ", "    /   \\    ", "    '   '    "],
+  1062:["  ~.=====.~  ", "  | x   x |  ", "  |=======|  ", " ~|==---==|~ ", "   '====='   "],
+  1063:["     _+_     ", "   .=====.   ", "  | ^   ^ |  ", "  |==\\=/==|  ", "   /=====\\   "],
+  1064:["   .=====.   ", "  | \\   / |  ", "  |=======|  ", "  |==/^\\==|  ", "  _'====='_  "],
+  1065:["    .---.    ", "   ( o o )   ", "   |=====|   ", "   |=====|   ", "   '-----'   "],
+  1066:[" . .=====. . ", "  | -   - |  ", ".:|=======|:.", "  |==ooo==|  ", " ..'====='.. "],
+  1067:["   .=====.   ", "  | @   @ |  ", " \\|=======|/ ", "  |==~~~==|  ", "  /'====='\\  "],
+  1068:["   .=====.   ", "  | o * o |  ", "  |=*===*=|  ", "  |==:::==|  ", "   '=*=*='   "],
+  1069:["  .=====.    ", " | >   < |   ", " |=======|==>", " |==vvv==|   ", " _/     \\_   "],
+  1070:["   .=====.   ", "  | -   - |  ", "  |=======|  ", "  |=======|  ", "   '====='   "],
+  1071:["   .=====.   ", "  | >   < |  ", "  |=======|  ", "  |==^^^==|  ", " <-'====='-> "],
+  1072:["   _/\\_/\\_   ", "   .=====.   ", "  | O   O |  ", "  |==[=]==|  ", "   '====='   "],
+  1073:["    /|||\\    ", "   /=====\\   ", "  | o   o |  ", "  |==\\_/==|  ", "  /|=====|\\  "],
+  1074:["     /\\      ", "    /  \\     ", "   / () \\    ", "  /______\\   ", "    -6       "],
+  1075:["  ~   ~   ~  ", " ~ ~ ~ ~ ~ ~ ", "  ..:::..    ", " .::::::::.  ", ".::::::::::. "],
+  1076:["    .-~-.    ", "   ( o o )   ", "    \\ ~ /    ", "  ~~~>~~~>   ", "     (+)     "],
+  1077:["  =========  ", "  =========  ", "  ==/   \\==  ", "  =========  ", "  =========  "],
+  1078:["   _______   ", "  |=======|  ", "  |=|===|=|  ", "  |=======|  ", "   '-----'   "],
+  1079:["    \\   /    ", "  -(o_O)-    ", "   /(_)\\     ", "   /   \\     ", "    \\ /      "],
+  1080:[" .  .  .  .  ", "   . ☥ .     ", " .  .  .  .  ", ":::::::::::::", ":::::::::::::"],
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
   541:["  \\  .-.  /  ", "   \\( o )/   ", "    (/|\\)    ", "    _/ \\_    ", "   [$]  ...  "],
@@ -4409,6 +4435,70 @@ const CARDS = {
  1061:{name:'Bolt Token',type:'teece',token:true,deck:'lightning',sacOK:true,sides:[2,2,2,2],def:3,
     text:'Can be sacrificed. When played: you may play another Bolt Token from your hand.',
     onPlay:[{fx:'summon',id:1061,may:true}]},
+ /* ---- Mummy: a beginner warrior deck built on one curse ----
+    A curse sits on a Teece (t.mcursed) or on a panel (cell.mcurse). A non-Mummy
+    Teece standing on a cursed panel takes the curse and the panel goes clean;
+    a Teece cursed while already cursed gets -1 instead. The curse does nothing
+    by itself -- every card here either lays it, drags enemies across it, or
+    cashes it in. See the Mummy block beside putTeece for the rules. ---- */
+ 1062:{name:'Plague Mummy',type:'teece',sides:[4,6,4,4],mummy:true,
+    aura:{who:'enemy',where:'adj',n:-2,cursedOnly:true},
+    text:'When played: curse every adjacent panel. Adjacent cursed enemies get -2.',
+    onPlay:[{fx:'mCurseAdjPanels'}]},
+ 1063:{name:'Mummy Priest',type:'teece',sides:[6,6,7,7],mummy:true,
+    text:'When played: select a Teece; curse it.',
+    onPlay:[{fx:'mCurseTeece'}]},
+ 1064:{name:'Vengeful Mummy',type:'teece',sides:[7,7,6,5],mummy:true,
+    text:'When destroyed: curse the Teece that destroyed it.',
+    onDeath:[{fx:'mCurseKillers'}]},
+ 1065:{name:'Canopic Mummy',type:'teece',sides:[6,6,7,6],mummy:true,
+    text:'When destroyed: curse this panel. Discard this from your hand: select a panel; curse it.',
+    onDeath:[{fx:'mCurseHere'}],onDiscard:[{fx:'mCurseAny',panelOnly:true}]},
+ 1066:{name:'Dust Mummy',type:'teece',sides:[6,6,6,5],mummy:true,
+    text:'When played: select up to three unoccupied panels; curse them.',
+    onPlay:[{fx:'mCursePanels',n:3}]},
+ 1067:{name:'Cursebearer',type:'teece',sides:[4,8,8,4],mummy:true,
+    text:'Once per your turn: select a Teece, or two unoccupied panels; curse them.',
+    act:[{name:'Lay the curse',once:'turn',steps:[{fx:'mCurseEither'}]}]},
+ 1068:{name:'Diseased Mummy',type:'teece',sides:[5,5,5,5],mummy:true,
+    text:'When played: select a Teece on the same row or column; move it one space toward Diseased Mummy. If that Teece destroys Diseased Mummy this turn while cursed, it is destroyed.',
+    onPlay:[{fx:'mPull',mark:true}],onDeath:[{fx:'mDiseaseKill'}]},
+ 1069:{name:'Tomb Stalker',type:'teece',sides:[2,7,9,7],mummy:true,mMovedOnCurse:-3,
+    text:'When an enemy Teece is moved onto a cursed panel, it gets -3. Once per your turn: select a Teece on the same row or column; move it one space toward this Teece.',
+    act:[{name:'Drag',once:'turn',steps:[{fx:'mPull'}]}]},
+ 1070:{name:'Linen Mummy',type:'teece',sides:[2,2,2,2],def:5,mummy:true,
+    text:'Defence 5. Mummy Wrap, once per your turn: select a Teece on the same row or column; move it one space toward this Teece.',
+    act:[{name:'Mummy Wrap',once:'turn',steps:[{fx:'mPull'}]}]},
+ 1071:{name:'Wrathful Mummy',type:'teece',sides:[9,9,3,3],mummy:true,
+    text:'When played: select a cursed enemy; remove its curse, give it -2 and rotate it.',
+    onPlay:[{fx:'mUncurseRot',n:-2}]},
+ 1072:{name:'Tomb Lord',type:'teece',sides:[8,8,8,8],sac:1,mummy:true,
+    text:'Sacrifice one fielded Teece to play. When played: the next three Teece your opponents play or summon arrive cursed.',
+    onPlay:[{fx:'mEnterCursed',n:3}]},
+ 1073:{name:'The Pharaoh',type:'teece',sides:[3,13,3,13],sac:2,mummy:true,
+    text:'Sacrifice two fielded Teece to play. When played: select a cursed Teece; destroy it. The next enemy Teece that gets cursed is destroyed.',
+    onPlay:[{fx:'mPharaoh'}]},
+ 1074:{name:'Pharaoh’s Vengeance',type:'magic',
+    text:'Select a cursed enemy; give it -6 and remove its curse.',
+    cast:[{fx:'mVengeance',n:-6}]},
+ 1075:{name:'Shifting Sands',type:'magic',
+    text:'Select an enemy Teece; move it one space. If it was cursed before it was selected, it gets -3. Then, if this moved it onto a cursed panel, it gets -3. Then, if it is adjacent to an allied Mummy, it gets -3.',
+    cast:[{fx:'mShift',n:-3}]},
+ 1076:{name:'Soul Steal',type:'magic',
+    text:'Select a cursed enemy; silence it and remove every positive stat effect from it. Then select an ally; it gains the cursed enemy’s effects and every positive stat effect removed.',
+    cast:[{fx:'mSoulSteal'}]},
+ 1077:{name:'Cursed Bandages',type:'equip',mod:0,
+    text:'Adjacent cursed enemies get -4. Bandage Wrap, once per your turn: select a Teece on the same row or column; move it one space toward the equipped Teece.',
+    grants:{aura:{who:'enemy',where:'adj',n:-4,cursedOnly:true},
+      act:[{name:'Bandage Wrap',once:'turn',steps:[{fx:'mPull'}]}]}},
+ 1078:{name:'Burial Wrappings',type:'equip',mod:0,def:3,
+    text:'Equipped Teece gets 3 Defence. Once per your turn: select a Teece on the same row or column; give it -2, curse it and move it one space toward the equipped Teece.',
+    grants:{def:3,act:[{name:'Bind',once:'turn',steps:[{fx:'mPull',n:-2,curse:true}]}]}},
+ 1079:{name:'Scarab Amulet',type:'equip',mod:0,
+    text:'The equipped Teece counts +3 in combat against a cursed enemy. Once per your turn: select a Teece or a panel; curse it.',
+    grants:{cursedCombat:3,act:[{name:'Scarab Curse',once:'turn',steps:[{fx:'mCurseAny'}]}]}},
+ 1080:{name:'Accursed Sands',type:'ground',gMCurseOn:true,gMCurseHit:-5,
+    text:'A non-Mummy Teece on this battleground is cursed. A Teece that becomes cursed on this battleground gets -5.'},
  /* ---- the tutorial's cards. Nothing but their numbers, so a new player learns
         the rules rather than a card. The roguelike drafts from every card in
         CARDS, not from the pool, so tutorial:true is what keeps them out of it
@@ -5323,12 +5413,13 @@ function newState(mode,vsAI,decks,extra){
     nextMod:0,nextSides:null,nextShield:false,noDeckOut:false,noDominate:false,coffined:{},teecePlayedLastTurn:false,teecePlayedThisTurn:0,turnsTaken:0,
     allFlying:false,swarmWin:null,swarmMind:0,turnCaps:{},
     souls:0,nextInvuln:0,skipTurns:0,hellfire:null,doomSelf:false,doomFoes:false,
-    hexes:[],forget:0,confuse:null,recall:null,bullets:0,hotBullets:0,shots:0,hasGun:false});
+    hexes:[],forget:0,confuse:null,recall:null,bullets:0,hotBullets:0,shots:0,hasGun:false,
+    mKillNext:0,mEnterCursed:0});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
     width:BW,
     web:Array.from({length:BN},(_,i)=>_spun&&!isCornerCell(i)),
-    board:Array.from({length:BN},()=>({teece:null,ground:null,mine:null,defMark:null,razed:false,curseP:null,seed:null,enchant:null,fire:null})),
+    board:Array.from({length:BN},()=>({teece:null,ground:null,mine:null,defMark:null,razed:false,curseP:null,mcurse:null,seed:null,enchant:null,fire:null})),
     turn:Math.floor(Math.random()*nP),turnNum:1,teecePlayed:false,over:false,winner:null,pending:null,
     phase:'day',
     detailLock:null,detailHover:null,panelTap:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],graveLastTurn:[],
@@ -6256,6 +6347,8 @@ function effSides(b,i,parts){
       if(!auraReaches(b,j,i,a))continue;
       if(a.tokenOnly&&!t.isToken)continue;
       if(a.pixieOnly&&!DEF(t).pixie)continue;
+      /* the Mummy auras reach only a body that carries the curse */
+      if(a.cursedOnly&&!t.mcursed)continue;
       if(a.markOnly&&markOfCard(DEF(t)).indexOf(a.markOnly)<0)continue;
       /* needRune is the source holding the sword; runeOnly is the receiver. */
       if(a.needRune&&!wieldsRune(o))continue;
@@ -6747,6 +6840,7 @@ function putTeece(b,i,t,live,how){
       if(live)log(nm(t)+' steps onto cursed ground: '+sgn(cp.n)+'.');
     }
   }
+  mArrive(b,i,t,live,how);
   /* The Breeding Pit feeds on every arrival anywhere on the board, this one
      included: whatever stands on the Pit grows by a point each time a body is
      summoned. Walking is not being born, so moveT is excluded -- otherwise a
@@ -6789,6 +6883,190 @@ function putTeece(b,i,t,live,how){
 }
 function moveT(b,from,to,live){
   const t=b[from].teece; b[from].teece=null; putTeece(b,to,t,live,'move');
+}
+/* ============ Mummy: the curse ============
+   Not the Witch's cursed panel (curseP, a -2 trap for the next enemy) and not
+   the Ogre Hexer's G.curses (a toll on every move): those are older and keep
+   their own fields. The Mummy curse is a state.
+
+   - A Teece is cursed or it is not: t.mcursed. A Teece cursed while already
+     cursed gets -1 permanently instead.
+   - A panel holds a curse (cell.mcurse) until a non-Mummy Teece stands on it.
+     That Teece takes the curse and the panel goes clean. A Mummy standing on a
+     cursed panel leaves the curse lying under it.
+
+   The curse does nothing by itself. Everything that reads it is a Mummy card:
+   cursedOnly auras, cursedCombat on an equip, the Accursed Sands, the
+   Pharaoh's standing order. Every function here takes a board and a live flag,
+   because putTeece runs them on the AI's simulated boards too: a simulated curse
+   must never spend a charge held on the real seat. */
+const isMummy=t=>!!(t&&DEF(t).mummy);
+function mCurseT(b,i,live){
+  const t=b[i]&&b[i].teece; if(!t)return false;
+  if(t.mcursed){
+    applyModT(t,-1,'perm');
+    if(live)log(nm(t)+' is already cursed: -1 instead.');
+    return false;
+  }
+  t.mcursed=true;
+  if(live)log(nm(t)+' is cursed.');
+  const hit=groundFlag(b[i].ground,'gMCurseHit')?groundNum(b[i].ground,'gMCurseHit'):0;
+  if(hit){applyModT(t,hit,'perm');if(live)log(nm(t)+' is cursed on '+CARDS[b[i].ground.cardId].name+': '+sgn(hit)+'.');}
+  /* The Pharaoh's order: the next enemy of that seat to be cursed dies of it. */
+  if(G&&G.players)for(let q=0;q<G.players.length;q++){
+    const pl=G.players[q];
+    if(!pl||!pl.mKillNext||sameTeam(q,t.owner))continue;
+    if(live){
+      pl.mKillNext--;
+      queueFx({kill:t.uid,msg:nm(t)+' is cursed under the Pharaoh’s order, and is destroyed.'});
+    }else forceDeath(t);
+    break;
+  }
+  return true;
+}
+/* Curse a panel. A non-Mummy already standing there takes it at once. */
+function mCursePanel(b,i,p,live){
+  if(i==null||!b[i]||b[i].razed)return false;
+  const t=b[i].teece;
+  if(t&&!isMummy(t)){
+    if(live)log('The '+CN[i]+' is cursed, and '+nm(t)+' takes the curse.');
+    mCurseT(b,i,live);
+    return true;
+  }
+  b[i].mcurse={owner:p};
+  if(live)log('The '+CN[i]+' is cursed.');
+  return true;
+}
+function mUncurse(t){if(t)t.mcursed=false;}
+/* A Teece arriving on a panel, by any route. Called from putTeece. */
+function mArrive(b,i,t,live,how){
+  const wasCursed=!!b[i].mcurse;
+  if(wasCursed&&!isMummy(t)){
+    b[i].mcurse=null;
+    if(live)log(nm(t)+' steps onto a cursed panel.');
+    mCurseT(b,i,live);
+  }
+  if(!isMummy(t)&&!t.mcursed&&groundFlag(b[i].ground,'gMCurseOn')){
+    if(live)log(nm(t)+' stands on '+CARDS[b[i].ground.cardId].name+'.');
+    mCurseT(b,i,live);
+  }
+  /* Tomb Stalker: an enemy MOVED onto a curse pays for it. */
+  if(how==='move'&&wasCursed){
+    for(let j=0;j<BN;j++){
+      const w=b[j].teece;
+      if(!w||w===t||w.silenced||sameTeam(w.owner,t.owner))continue;
+      const n=DEF(w).mMovedOnCurse;
+      if(!n)continue;
+      applyModT(t,n,'perm');
+      if(live)log(nm(w)+' punishes '+nm(t)+' for being moved onto a curse: '+sgn(n)+'.');
+    }
+  }
+  /* Tomb Lord: the next few bodies an opponent fields arrive cursed. */
+  if(how!=='move'&&G&&G.players){
+    for(let q=0;q<G.players.length;q++){
+      const pl=G.players[q];
+      if(!pl||!pl.mEnterCursed||sameTeam(q,t.owner))continue;
+      if(live){pl.mEnterCursed--;log(nm(t)+' arrives under the Tomb Lord’s curse.');}
+      mCurseT(b,i,live);
+      break;
+    }
+  }
+}
+/* What a curse can still do that it has not done yet: a non-Mummy standing on
+   a cursed panel, or on the Accursed Sands while uncursed. Run at the top of
+   every resolveCombat, so a curse laid under a body, a battleground laid under
+   one, or a curse lifted from a body still standing on the Sands all settle
+   without each effect having to remember. */
+function mSweep(){
+  const b=G.board;
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(!t||isMummy(t))continue;
+    if(b[i].mcurse){b[i].mcurse=null;log(nm(t)+' takes the curse off the '+CN[i]+'.');mCurseT(b,i,true);}
+    if(!t.mcursed&&groundFlag(b[i].ground,'gMCurseOn')){log(nm(t)+' stands on '+CARDS[b[i].ground.cardId].name+'.');mCurseT(b,i,true);}
+  }
+}
+/* One step from `from` toward `to` along their shared row or column. */
+function mStepToward(from,to){
+  if(isPlane(from)||isPlane(to))return -1;
+  if(sameRow(from,to))return from+(to>from?1:-1);
+  if(sameCol(from,to))return from+(to>from?BW:-BW);
+  return -1;
+}
+/* The Teece a pull may take: anything on the anchor's row or column other than
+   the anchor. A plain pull only offers what can actually come a step closer; a
+   pull that also hurts and curses offers everything in line, and moves it only
+   if it can. */
+function mPullCands(b,anchor,p,st){
+  const out=[];
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(!t||i===anchor||!canTarget(b,i,p))continue;
+    if(!(sameRow(i,anchor)||sameCol(i,anchor))||isPlane(i)||isPlane(anchor))continue;
+    const dst=mStepToward(i,anchor);
+    const canMove=dst>=0&&dst!==anchor&&openAt(b,dst)&&!hasKw(b,i,'immovable');
+    if(!canMove&&!(st&&(st.n||st.curse)))continue;
+    out.push(i);
+  }
+  return out;
+}
+function mBesideMummy(b,i,t,p){
+  return ADJ[i].some(k=>{const o=b[k].teece;return o&&o!==t&&sameTeam(o.owner,p)&&isMummy(o);});
+}
+/* Shifting Sands on a simulated board: the step it lands on is charged -3 for
+   a curse lying there and -3 again for a Mummy of p's beside it. */
+function mShiftMoveSim(bb,c,j,p,n){
+  const t=bb[c].teece;if(!t)return;
+  const onto=!!bb[j].mcurse;
+  moveT(bb,c,j,false);
+  if(onto)applyModT(t,n,'perm');
+  if(mBesideMummy(bb,j,t,p))applyModT(t,n,'perm');
+}
+function mShiftSim(bb,c,p,n){
+  const t=bb[c].teece;if(!t)return;
+  if(t.mcursed)applyModT(t,n,'perm');
+  if(hasKw(bb,c,'immovable'))return;
+  let best=-1,score=-1;
+  for(const j of ADJ[c]){
+    if(!openAt(bb,j))continue;
+    const s2=(bb[j].mcurse?1:0)+(mBesideMummy(bb,j,t,p)?1:0);
+    if(s2>score){score=s2;best=j;}
+  }
+  if(best>=0)mShiftMoveSim(bb,c,best,p,n);
+  else if(mBesideMummy(bb,c,t,p))applyModT(t,n,'perm');
+}
+/* Soul Steal: every positive stat effect lifted off a Teece, kept so it can be
+   handed on. Equips stay where they are: they are cards, not effects. */
+function mStrip(t){
+  const got={perm:[0,0,0,0],temp:[0,0,0,0],temp2:[0,0,0,0],def:0,defTemp:0};
+  for(let k=0;k<4;k++){
+    if(t.perm[k]>0){got.perm[k]=t.perm[k];t.perm[k]=0;}
+    if(t.temp[k]>0){got.temp[k]=t.temp[k];t.temp[k]=0;}
+    if(t.temp2&&t.temp2[k]>0){got.temp2[k]=t.temp2[k];t.temp2[k]=0;}
+  }
+  if(t.defPerm>0){got.def=t.defPerm;t.defPerm=0;}
+  if(t.defTemp2>0){got.defTemp=t.defTemp2;t.defTemp2=0;}
+  return got;
+}
+/* ...and handed on, with the card's own effects grafted on the way a Mindless
+   Hunger keeps what it kills: kwOf, actsOf and effSides all read grafts. */
+function mGive(a,got,gid,hasFx){
+  if(!a)return;
+  for(let k=0;k<4;k++){
+    a.perm[k]+=got.perm[k];a.temp[k]+=got.temp[k];
+    if(a.temp2)a.temp2[k]+=got.temp2[k];
+  }
+  a.defPerm=(a.defPerm||0)+got.def;
+  if(got.defTemp){a.defTemp2=(a.defTemp2||0)+got.defTemp;a.defTemp2Until=Math.max(a.defTemp2Until||0,nextTurnExpiry());}
+  if(hasFx){a.grafts=a.grafts||[];if(a.grafts.indexOf(gid)<0)a.grafts.push(gid);}
+}
+function mPullSim(b,c,anchor,p,st){
+  const t=b[c].teece;if(!t)return -1;
+  if(st.n)applyModT(t,st.n,'perm');
+  if(st.curse)mCurseT(b,c,false);
+  const dst=mStepToward(c,anchor);
+  if(dst>=0&&dst!==anchor&&openAt(b,dst)&&!hasKw(b,c,'immovable')){moveT(b,c,dst,false);return dst;}
+  return c;
 }
 function ageRateAt(b,i){
   const t=b[i].teece; if(!t)return 0;
@@ -6943,11 +7221,19 @@ function scanDeaths(b){
   const foes=(x,y)=>anarchy||!sameTeam(x,y);
   /* Carapace: its wearer swings two harder at anything standing on the Web. The
      bonus is on the pairing, not on the Teece, so it never shows in effSides. */
+  /* The Scarab Amulet does the same against a cursed enemy, on the pairing for
+     the same reason. */
   const webEdge=(ai,di)=>{
     const t=b[ai].teece;
-    if(!t||!t.equips.length||!isWebbed(b,di))return 0;
+    if(!t||!t.equips.length)return 0;
+    const web=isWebbed(b,di),cursed=!!(b[di].teece&&b[di].teece.mcursed);
+    if(!web&&!cursed)return 0;
     let n=0;
-    for(const e of t.equips){const g=eqG(e);if(g&&g.webCombat)n+=g.webCombat;}
+    for(const e of t.equips){
+      const g=eqG(e);if(!g)continue;
+      if(web&&g.webCombat)n+=g.webCombat;
+      if(cursed&&g.cursedCombat)n+=g.cursedCombat;
+    }
     return n;
   };
   for(let i=0;i<BN;i++){
@@ -10843,9 +11129,262 @@ async function FXRUN(st,ctx){
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     if(b[c].ground)await clearGroundAt(c,p);
-    b[c].razed=true;b[c].mine=null;b[c].curseP=null;
+    b[c].razed=true;b[c].mine=null;b[c].curseP=null;b[c].mcurse=null;
     log('The '+CN[c]+' is razed. No Teece may be played or moved onto it again.');
     await anim([c],'zap');
+    return;}
+  /* ---- Mummy: laying the curse, dragging bodies across it, cashing it in ---- */
+  case 'mCurseAdjPanels':{
+    if(ctx.cell==null)return none('Nothing to curse around.');
+    const hit=ADJ[ctx.cell].filter(j=>!b[j].razed);
+    if(!hit.length)return none('No panel beside it to curse.');
+    for(const j of hit)mCursePanel(b,j,p,true);
+    await anim(hit,'zap');
+    return;}
+  case 'mCurseTeece':{
+    const cands=[];for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return none('No Teece to curse.');
+    const c=await pickCell(cands,'Choose a Teece to curse.',(bb,i)=>{mCurseT(bb,i,false);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)||tapeSave(b,c,p)){await anim([c],'zap');return;}
+    mCurseT(b,c,true);
+    if(!sameTeam(b[c].teece.owner,p))noteTargeted(p);
+    await anim([c],'zap');
+    return;}
+  case 'mCurseKillers':{
+    let n=0;
+    for(const kuid of (ctx.killers||[]))for(let i=0;i<BN;i++){
+      const k=b[i].teece;
+      if(k&&k.uid===kuid){mCurseT(b,i,true);n++;}
+    }
+    if(!n)return none('Nothing that struck it down is left to curse.');
+    return;}
+  case 'mCurseHere':{
+    const c0=ctx.deadCell!=null?ctx.deadCell:ctx.cell;
+    if(c0==null||!mCursePanel(b,c0,p,true))return none('There is no panel left to curse.');
+    await anim([c0],'zap');
+    return;}
+  case 'mCursePanels':{
+    let done=0;
+    for(let k=0;k<(st.n||1);k++){
+      const cands=[];for(let i=0;i<BN;i++)if(!b[i].teece&&!b[i].razed&&!b[i].mcurse)cands.push(i);
+      if(!cands.length)break;
+      const c=await pickCell(cands,'Curse an unoccupied panel ('+(k+1)+' of '+(st.n||1)+'), or skip.',
+        (bb,i)=>{mCursePanel(bb,i,p,false);},true);
+      ctx.first=false;
+      if(c==='CANCEL')return done?undefined:'ABORT';
+      if(c==null)break;
+      mCursePanel(b,c,p,true);done++;
+      await anim([c],'zap');
+    }
+    if(!done)return none('No panel was cursed.');
+    return;}
+  case 'mCurseEither':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(t){if(canTarget(b,i,p))cands.push(i);}
+      else if(!b[i].razed&&!b[i].mcurse)cands.push(i);
+    }
+    if(!cands.length)return none('Nothing left to curse.');
+    const c=await pickCell(cands,'Curse a Teece, or choose the first of two unoccupied panels to curse.',
+      (bb,i)=>{if(bb[i].teece)mCurseT(bb,i,false);else mCursePanel(bb,i,p,false);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    ctx.first=false;
+    if(b[c].teece){
+      if(wardMagic(b,c,p)||tapeSave(b,c,p)){await anim([c],'zap');return;}
+      mCurseT(b,c,true);
+      if(!sameTeam(b[c].teece.owner,p))noteTargeted(p);
+      await anim([c],'zap');
+      return;
+    }
+    mCursePanel(b,c,p,true);
+    await anim([c],'zap');
+    const more=[];for(let i=0;i<BN;i++)if(!b[i].teece&&!b[i].razed&&!b[i].mcurse)more.push(i);
+    if(more.length){
+      const c2=await pickCell(more,'Curse a second unoccupied panel, or skip.',(bb,i)=>{mCursePanel(bb,i,p,false);},true);
+      if(c2!=null&&c2!=='CANCEL'){mCursePanel(b,c2,p,true);await anim([c2],'zap');}
+    }
+    return;}
+  case 'mCurseAny':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      if(b[i].razed)continue;
+      const t=b[i].teece;
+      if(t&&!st.panelOnly&&!canTarget(b,i,p))continue;
+      if(!t&&b[i].mcurse)continue;
+      cands.push(i);
+    }
+    if(!cands.length)return none('Nothing left to curse.');
+    const hitT=(bb,i)=>!!bb[i].teece&&!st.panelOnly;
+    const c=await pickCell(cands,st.panelOnly?'Choose a panel to curse.':'Choose a Teece or a panel to curse.',
+      (bb,i)=>{if(hitT(bb,i))mCurseT(bb,i,false);else mCursePanel(bb,i,p,false);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(hitT(b,c)){
+      if(wardMagic(b,c,p)||tapeSave(b,c,p)){await anim([c],'zap');return;}
+      mCurseT(b,c,true);
+    }else mCursePanel(b,c,p,true);
+    await anim([c],'zap');
+    return;}
+  case 'mPull':{
+    const anchor=ctx.cell;
+    if(anchor==null||!b[anchor].teece)return none('Nothing to pull toward.');
+    const cands=mPullCands(b,anchor,p,st);
+    if(!cands.length)return none('Nothing on its row or column can be '+((st.n||st.curse)?'reached.':'pulled any closer.'));
+    const what=[st.n?sgn(st.n):null,st.curse?'curse it':null,'pull it one space closer'].filter(Boolean).join(', ');
+    const c=await pickCell(cands,'Choose a Teece on the same row or column: '+what+'.',
+      (bb,i)=>{mPullSim(bb,i,anchor,p,st);},!!st.may);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece,foe=!sameTeam(t.owner,p);
+    if(foe&&(wardMagic(b,c,p)||tapeSave(b,c,p))){await anim([c],'zap');return;}
+    if(st.n){applyModT(t,st.n,'perm');log(nm(t)+' gets '+sgn(st.n)+'.');}
+    if(st.curse)mCurseT(b,c,true);
+    if(st.mark&&ctx.t)ctx.t.mDisease={uid:t.uid,turn:G.turnNum};
+    let at=c;
+    const dst=mStepToward(c,anchor);
+    if(b[c].teece===t&&dst>=0&&dst!==anchor&&openAt(b,dst)&&!hasKw(b,c,'immovable')){
+      moveT(b,c,dst,true);at=dst;
+      log(nm(t)+' is pulled to the '+CN[dst]+'.');
+      await fireMove(c,dst,p);
+    }
+    if(foe)noteTargeted(p);
+    await anim([at],'zap');
+    return;}
+  case 'mDiseaseKill':{
+    const dm=ctx.t&&ctx.t.mDisease;
+    if(!dm||dm.turn!==G.turnNum||(ctx.killers||[]).indexOf(dm.uid)<0)return 'NONE';
+    for(let i=0;i<BN;i++){
+      const k=b[i].teece;
+      if(k&&k.uid===dm.uid&&k.mcursed){
+        queueFx({kill:k.uid,msg:nm(k)+' caught the disease killing '+nm(ctx.t)+', and is destroyed.'});
+        return;
+      }
+    }
+    return 'NONE';}
+  case 'mUncurseRot':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.mcursed&&!sameTeam(t.owner,p)&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length)return none('No cursed enemy to turn.');
+    const hit=(bb,i,dir)=>{const t=bb[i].teece;mUncurse(t);applyModT(t,st.n,'perm');spinT(t,dir);};
+    const c=await pickCell(cands,'Choose a cursed enemy: its curse is lifted, it gets '+sgn(st.n)+', and it turns.',
+      (bb,i)=>hit(bb,i,'cw'),false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)||tapeSave(b,c,p)){await anim([c],'zap');return;}
+    const t=b[c].teece;
+    mUncurse(t);applyModT(t,st.n,'perm');
+    log('The curse on '+nm(t)+' is lifted, and it gets '+sgn(st.n)+'.');
+    let dir;
+    if(isAIP(p)||!HAS_DOM){
+      /* the computer turns it whichever way leaves it worse off */
+      const base=boardValue(b,p);let bv=-1e9;
+      for(const d2 of ['cw','ccw']){
+        const bb=cloneBoard(b);spinT(bb[c].teece,d2);simCombat(bb);
+        const v=boardValue(bb,p)-base;if(v>bv){bv=v;dir=d2;}
+      }
+    }else dir=await chooseOption(p,[{v:'cw',lbl:'Clockwise'},{v:'ccw',lbl:'Counter-clockwise'}],'Which way does '+nm(t)+' turn?');
+    if(dir){spinT(t,dir);log(nm(t)+' turns '+dirTxt(dir)+'.');}
+    noteTargeted(p);
+    await anim([c],'zap');
+    return;}
+  case 'mEnterCursed':{
+    const pl=G.players[p];
+    pl.mEnterCursed=(pl.mEnterCursed||0)+(st.n||3);
+    log('The next '+pl.mEnterCursed+' Teece '+pname(p)+'’s opponents field will arrive cursed.');
+    return;}
+  case 'mPharaoh':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(t&&t.mcursed&&t!==ctx.t&&canTarget(b,i,p)&&!isHeldSafe(t))cands.push(i);
+    }
+    if(cands.length){
+      const c=await pickCell(cands,'Choose a cursed Teece to destroy.',(bb,i)=>{bb[i].teece=null;},false);
+      if(c==='CANCEL')return 'ABORT';
+      if(c!=null&&!(wardMagic(b,c,p)||tapeSave(b,c,p))){
+        const vt=b[c].teece;
+        log(nm(vt)+' is destroyed by the Pharaoh.');
+        await anim([c],'dying',190);
+        await processDeath({cell:c,t:vt,killers:[]});
+      }
+    }else log('There is no cursed Teece for the Pharaoh to destroy.');
+    G.players[p].mKillNext=(G.players[p].mKillNext||0)+1;
+    log('The Pharaoh’s order stands: the next enemy Teece to be cursed is destroyed.');
+    return;}
+  case 'mVengeance':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.mcursed&&!sameTeam(t.owner,p)&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length)return none('No cursed enemy.');
+    const c=await pickCell(cands,'Choose a cursed enemy: '+sgn(st.n)+', and its curse is lifted.',
+      (bb,i)=>{applyModT(bb[i].teece,st.n,'perm');mUncurse(bb[i].teece);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)||tapeSave(b,c,p)){await anim([c],'zap');return;}
+    const t=b[c].teece;
+    applyModT(t,st.n,'perm');mUncurse(t);
+    log(nm(t)+' gets '+sgn(st.n)+', and its curse is lifted.');
+    noteTargeted(p);noteEnemyLoss(p,c,-st.n,false);
+    await anim([c],'zap');
+    return;}
+  case 'mShift':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length)return none('No enemy to shift.');
+    const c=await pickCell(cands,'Choose an enemy Teece to shift one space.',(bb,i)=>{mShiftSim(bb,i,p,st.n);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)||tapeSave(b,c,p)){await anim([c],'zap');return;}
+    const t=b[c].teece;
+    ctx.first=false;
+    if(t.mcursed){applyModT(t,st.n,'perm');log(nm(t)+' was already cursed: '+sgn(st.n)+'.');}
+    let at=c;
+    if(!hasKw(b,c,'immovable')){
+      const dsts=ADJ[c].filter(j=>openAt(b,j));
+      if(dsts.length){
+        const d=await chooseCell(p,dsts,'Move '+nm(t)+' one space.',{mut:(bb,j)=>{mShiftMoveSim(bb,c,j,p,st.n);}});
+        if(d!=null&&d!=='CANCEL'){
+          const onto=!!b[d].mcurse;
+          moveT(b,c,d,true);at=d;
+          log(nm(t)+' is shifted to the '+CN[d]+'.');
+          await fireMove(c,d,p);
+          if(onto&&b[d].teece===t){applyModT(t,st.n,'perm');log(nm(t)+' was moved onto a curse: '+sgn(st.n)+'.');}
+        }
+      }
+    }
+    if(b[at].teece===t&&mBesideMummy(b,at,t,p)){applyModT(t,st.n,'perm');log(nm(t)+' stands beside a Mummy: '+sgn(st.n)+'.');}
+    noteTargeted(p);
+    await anim([at],'zap');
+    return;}
+  case 'mSoulSteal':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.mcursed&&!sameTeam(t.owner,p)&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length)return none('No cursed enemy to rob.');
+    const c=await pickCell(cands,'Choose a cursed enemy: it is silenced and stripped of every positive stat effect.',
+      (bb,i)=>{bb[i].teece.silenced=true;mStrip(bb[i].teece);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)||tapeSave(b,c,p)){await anim([c],'zap');return;}
+    ctx.first=false;
+    const t=b[c].teece;
+    t.silenced=true;
+    const got=mStrip(t);
+    log(nm(t)+' is silenced, and stripped of every positive stat effect.');
+    noteTargeted(p);
+    await anim([c],'zap');
+    const allies=[];for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&sameTeam(o.owner,p))allies.push(i);}
+    if(!allies.length){log('No ally is left to take what was stolen.');return;}
+    const gid=t.cardId,d0=CARDS[gid];
+    const hasFx=!!(d0.kw||d0.act||d0.aura||d0.auras);
+    const a=await pickCell(allies,'Choose an ally: it gains '+nm(t)+'’s effects and everything stripped from it.',
+      (bb,i)=>{mGive(bb[i].teece,got,gid,hasFx);},false);
+    if(a==null||a==='CANCEL')return;
+    mGive(b[a].teece,got,gid,hasFx);
+    log(nm(b[a].teece)+' takes '+(hasFx?'the effects of '+d0.name+' and ':'')+'everything stripped from it.');
+    await anim([a],'zap');
     return;}
   case 'curseCell':{
     const cands=[];
@@ -13444,6 +13983,8 @@ async function resolveCombat(){
   let guard=0;
   while(G&&!G.over){
     if(stale(ep))return;
+    /* a curse lying under a body settles before anything else is read */
+    mSweep();
     /* stacked effects resolve first: nothing fights while a kill is pending */
     await drainFx();
     if(stale(ep)||G.over)return;
@@ -14536,7 +15077,7 @@ function hangPlane(spec,owner,cardId){
   G.plane=spec;
   setPlane(spec);
   if(first)G.board[GRID]={teece:null,ground:null,mine:null,defMark:null,razed:false,
-    curseP:null,seed:null,enchant:null,fire:null};
+    curseP:null,mcurse:null,seed:null,enchant:null,fire:null};
   if(cardId!=null)G.board[GRID].ground={cardId,owner,gid:G.groundSeq++};
 }
 async function playGround(p,handIdx){
@@ -15511,6 +16052,7 @@ function cloneBoard(b){
     fire:c.fire?Object.assign({},c.fire):null,
     razed:!!c.razed,
     curseP:c.curseP?Object.assign({},c.curseP):null,
+    mcurse:c.mcurse?Object.assign({},c.mcurse):null,
     prime:c.prime?Object.assign({},c.prime):null,
     defMark:c.defMark?Object.assign({},c.defMark):null,
     seed:c.seed?Object.assign({},c.seed):null
@@ -15677,8 +16219,17 @@ function boardValue(b,p){
     const lives=undyLeft(t);
     if(lives)w+=2.2*Math.min(3,lives);
     if(kwOf(b,i).indexOf('ranged')>=0)w+=1.2;
+    /* A Mummy's curse costs nothing by itself, but every Mummy card is waiting
+       to cash it in, so a cursed body is worth less to whoever owns it. */
+    if(t.mcursed)w-=1.0;
     if(w<1)w=1;
     v+=sameTeam(t.owner,p)?w:-w;
+  }
+  /* A curse lying on an empty panel is ground the Mummy side has laid for
+     whoever is dragged or walks across it. */
+  for(let i=0;i<BN;i++){
+    const mc=b[i].mcurse;
+    if(mc&&!b[i].teece)v+=sameTeam(mc.owner,p)?0.4:-0.4;
   }
   return v;
 }
@@ -15736,6 +16287,21 @@ function simOnPlay(b,cell,id,p){
          instead: it undercounts, because the Teece not yet played are paid too,
          and undercounting a Boss is the safe direction to be wrong in. */
       for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&o.owner===p)applyModT(o,st.n,'perm');}
+    }else if(st.fx==='mCurseAdjPanels'){
+      for(const j of ADJ[cell])if(!b[j].razed)mCursePanel(b,j,p,false);
+    }else if(st.fx==='mCurseTeece'||st.fx==='mUncurseRot'||st.fx==='mPharaoh'){
+      /* the strongest enemy, or the strongest cursed one for the two that need it */
+      let best=-1,bs=-1;
+      for(let i=0;i<BN;i++){
+        const o=b[i].teece;
+        if(!o||sameTeam(o.owner,p)||(st.fx!=='mCurseTeece'&&!o.mcursed))continue;
+        const tot=effSides(b,i).reduce((a,c)=>a+c,0);
+        if(tot>bs){bs=tot;best=i;}
+      }
+      if(best<0)continue;
+      if(st.fx==='mCurseTeece')mCurseT(b,best,false);
+      else if(st.fx==='mPharaoh')b[best].teece=null;
+      else{mUncurse(b[best].teece);applyModT(b[best].teece,st.n,'perm');}
     }else if(st.fx==='control'){
       let best=-1,bs=-1;
       for(let i=0;i<BN;i++){
@@ -15806,6 +16372,9 @@ function aiPlanFor(id){
       return {thr:0.8,bonus:0,cands:fc,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
     }
     if(eg.gunGod)ebonus+=bulletsOf(p)>1?2.0:0.3;
+    /* Defence and an ability with no number beside them -- Burial Wrappings --
+       move the simulated board by nothing, since the score reads no Defence. */
+    if(!d.mod&&eg.def&&eg.act)ebonus+=0.6+0.15*eg.def;
     return {thr:0.8,bonus:ebonus,cands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
   }
   if(d.type==='ground'){
@@ -15850,9 +16419,13 @@ function aiPlanFor(id){
     /* The Fusion pair pay a fusion, and a fusion made later. */
     if(d.gFuseDraw)bonus+=fusionsInPlay(p)?0.9:0.5;
     if(d.gFusionMod)bonus+=fusionsInPlay(p)?0.4:0.6;
+    /* The Accursed Sands curse whatever stands on them, now or later. */
+    if(d.gMCurseOn)bonus+=0.9;
     return {thr:0.8,bonus,cands,mut:(bb,i)=>{
       if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
-      else bb[i].ground={cardId:id,owner:p};}};
+      else bb[i].ground={cardId:id,owner:p};
+      const o=bb[i].teece;
+      if(d.gMCurseOn&&o&&!isMummy(o)&&!o.mcursed)mCurseT(bb,i,false);}};
   }
   if(d.type!=='magic')return null;
   if(d.onlyWhen&&!phaseIs(d.onlyWhen))return null;
@@ -15864,6 +16437,28 @@ function aiPlanFor(id){
      such spell was invisible here and never cast at all -- three of the Locust
      deck's twenty cards, and anything else written that way later. */
   const st=d.cast.find(s2=>s2.fx!=='price')||d.cast[0];
+  /* The Mummy's three spells, weighed on a clone the way the prompts resolve
+     them. Soul Steal's silence is worth something the board score cannot see,
+     so it names that itself. */
+  if(st.fx==='mVengeance'||st.fx==='mSoulSteal'||st.fx==='mShift'){
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(!t||sameTeam(t.owner,p)||!canTarget(b,i,p))continue;
+      if(st.fx!=='mShift'&&!t.mcursed)continue;
+      cands.push(i);
+    }
+    if(!cands.length)return null;
+    if(st.fx==='mVengeance')return {thr:1.5,cands,mut:(bb,i)=>{applyModT(bb[i].teece,st.n,'perm');mUncurse(bb[i].teece);}};
+    if(st.fx==='mShift')return {thr:1.4,cands,mut:(bb,i)=>{mShiftSim(bb,i,p,st.n);}};
+    return {thr:1.4,bonus:0.8,cands,mut:(bb,i)=>{
+      const t=bb[i].teece;t.silenced=true;
+      const got=mStrip(t);
+      let best=-1,bs=-1;
+      for(let j=0;j<BN;j++){const o=bb[j].teece;if(o&&sameTeam(o.owner,p)){const tot=effSides(bb,j).reduce((a,c)=>a+c,0);if(tot>bs){bs=tot;best=j;}}}
+      if(best>=0)mGive(bb[best].teece,got,t.cardId,false);
+    }};
+  }
   if(st.fx==='mod'){
     const cands=[];
     for(let i=0;i<BN;i++){
@@ -16466,6 +17061,14 @@ function aiActMuts(cell,ent){
           if(after&&bb[j].teece)applyModT(bb[j].teece,after.n,after.dur);
         });
       }
+    }
+  }else if(st.fx==='mPull'){
+    for(const c of mPullCands(b,cell,p,st))muts.push(bb=>{mPullSim(bb,c,cell,p,st);});
+  }else if(st.fx==='mCurseEither'||st.fx==='mCurseAny'){
+    for(let i=0;i<BN;i++){
+      if(b[i].razed)continue;
+      if(b[i].teece){if(canTarget(b,i,p))muts.push(bb=>{mCurseT(bb,i,false);});}
+      else if(!b[i].mcurse)muts.push(bb=>{mCursePanel(bb,i,p,false);});
     }
   }else if(st.fx==='push'){
     const away=(from,to)=>{const dst=to+(to-from);if(dst<0||dst>=BN)return -1;
@@ -17091,6 +17694,7 @@ function renderBoard(){
     if(mine)cell.innerHTML+='<div class="mineMark m'+mine.owner+'">⚠'+((mine.n||1)>1?'&#215;'+mine.n:'')+'</div>';
     const cp=G.board[i].curseP;
     if(cp)cell.innerHTML+='<div class="curseMark m'+cp.owner+'">&#10022;</div>';
+    if(G.board[i].mcurse)cell.innerHTML+='<div class="mcurseMark" title="A Mummy\u2019s curse lies on this panel">\u2625</div>';
     const prm=G.board[i].prime;
     if(prm)cell.innerHTML+='<div class="primeMark" title="Primed">'+sgn(prm.n)+'</div>';
     const sdm=G.board[i].seed;
@@ -17139,6 +17743,8 @@ function renderBoard(){
          it, and a chip under the board is three feet from the panel. */
       const stT=stunText(G.board,i);
       if(stT)badges.push('<span class="dfn stun" title="'+escHtml(stT)+'">\u{1F4A5}</span>');
+      /* Cursed by a Mummy: the one fact every Mummy card reads. */
+      if(t.mcursed)badges.push('<span class="dfn mcursed" title="Cursed. Cursed again, it gets -1 instead.">\u2625</span>');
       /* Long names step down a size rather than being cut off: the panel is the
          only place the name appears once a Teece is on the board. Name and
          badges are stacked and centred together, so a name that takes three
@@ -17266,6 +17872,7 @@ function panelHtml(i){
   if(c.mine)h+='<div class="dt">'+((c.mine.n||1)>1?c.mine.n+' Mines are buried here. The next Teece to enter gets -'+(2*c.mine.n)+'.':
     'A Mine is buried here. The next Teece to enter gets -2.')+'</div>';
   if(c.curseP)h+='<div class="dt">This panel is cursed. The next enemy of '+pposs(c.curseP.owner)+' to arrive here gets '+sgn(c.curseP.n)+'.</div>';
+  if(c.mcurse)h+='<div class="dt">A Mummy\u2019s curse lies on this panel. The next non-Mummy Teece to stand here takes it.</div>';
   if(c.razed)h+='<div class="dt">Razed. No Teece may be played or moved onto this panel.</div>';
   if(c.prime)h+='<div class="dt">This panel is primed. The next Teece to arrive here gets '+sgn(c.prime.n)+'.</div>';
   if(c.seed)h+='<div class="dt">'+pname(c.seed.owner)+' has a seed planted here, '+c.seed.turns+' turn'+(c.seed.turns===1?'':'s')+
@@ -17294,7 +17901,8 @@ function showDetail(i){
   let html=(locked?'<div class="dlock">Selected</div>':'')+detailArt(t.cardId)+
     '<div class="dn">'+nm(t)+'</div><div class="dt">'+cd.text+'</div>'+
     (cd.flavor?'<div class="dt" style="font-style:italic;opacity:.8">'+cd.flavor+'</div>':'')+
-    (t.silenced?'<div class="dt" style="color:var(--bad);font-weight:bold">⛔ Silenced</div>':'');
+    (t.silenced?'<div class="dt" style="color:var(--bad);font-weight:bold">⛔ Silenced</div>':'')+
+    (t.mcursed?'<div class="dt" style="color:var(--bad);font-weight:bold">\u2625 Cursed. Cursed again, it gets -1 instead.</div>':'');
   const un=undyLeft(t);
   if(un>0){
     const u=undyOf(t.cardId),next=(u.y||0)*((t.undyUsed||0)+1);
@@ -17769,6 +18377,18 @@ function statusesFor(p){
     push('cursep'+i,mine?'good':'bad',(mine?'Cursed panel: ':'Cursed against you: ')+CN[i],
       'The '+CN[i]+' is cursed. The next enemy of '+pname(cp.owner)+' to arrive there gets '+sgn(cp.n)+'.');
   }
+  /* The Mummy's two standing orders, read off the seat that holds them. */
+  for(let q=0;q<G.players.length;q++){
+    const pq=G.players[q],mine=sameTeam(p,q);
+    if(pq.mKillNext)push('mkill'+q,mine?'good':'bad','Pharaoh\u2019s order'+(pq.mKillNext>1?' \u00D7'+pq.mKillNext:''),
+      'The next '+(pq.mKillNext>1?pq.mKillNext+' enemy Teece of ':'enemy Teece of ')+pname(q)+' to be cursed '+(pq.mKillNext>1?'are':'is')+' destroyed.');
+    if(pq.mEnterCursed)push('menter'+q,mine?'good':'bad','Tomb Lord: '+pq.mEnterCursed+' to come',
+      'The next '+pq.mEnterCursed+' Teece '+pname(q)+'\u2019s opponents play or summon arrive cursed.');
+  }
+  {const n=[];for(let i=0;i<BN;i++)if(b[i].mcurse)n.push(CN[i]);
+   if(n.length)push('mcurseP','warn','\u2625 Cursed: '+n.join(', '),
+     (n.length===1?'A Mummy\u2019s curse lies on the '+n[0]:'A Mummy\u2019s curse lies on '+n.join(', '))+
+     '. The next non-Mummy Teece to stand there takes it.');}
   const shut=[];for(let i=0;i<BN;i++)if(!b[i].razed&&blockedGround(b,i))shut.push(CN[i]);
   if(shut.length)push('noentry','warn','Closed: '+shut.join(', '),
     (shut.length===1?'The '+shut[0]+' is a battleground':'These panels are battlegrounds')+
@@ -19975,7 +20595,8 @@ if(typeof module!=='undefined'){
     isStunned,applyStun,stunText,PLAYERS,nextTurnExpiry,actBlockedReason,LUMBER_ACT,
     payRecall,getLines:()=>LINES,
     RUNEBLADE,wieldsRune,isRuneForm,runeGuarded,runeSpots,takeRune,runRuneRecall,runeRecallReady,runForge,
-    sheathSpots,throwRune,bladerangPath,bestThrow,endOfNextTurn,aiRunes,isHeldSafe,isStunned,invulnText,applyDeckRules};
+    sheathSpots,throwRune,bladerangPath,bestThrow,endOfNextTurn,aiRunes,isHeldSafe,isStunned,invulnText,applyDeckRules,
+    isMummy,mCurseT,mCursePanel,mSweep,drainFx};
 }
 </script>
 </body>
