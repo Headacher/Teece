@@ -1128,7 +1128,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:145,date:'2026-10-08'};
+const VERSION={build:146,date:'2026-10-09'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1189,10 +1189,11 @@ function rebuildWebCards(){
 /* What a keyword is called where a player reads it. Steadfast is still the
    engine's name for it, and still what a card lists in kw, but a player reads
    what it does. */
-const KW_LABEL={steadfast:'Immune to stat reduction',defender:'Defender',fuse:'Fuse'};
+const KW_LABEL={steadfast:'Immune to stat reduction',defender:'Defender',fuse:'Fuse',mummywrap:'Mummy Wrap'};
 const kwLabel=k=>KW_LABEL[k]||k;
 const KEYWORDS={
   flying:'Once per your turn, move one space.',
+  mummywrap:'Once per your turn for each Mummy Wrap it has: fire a bandage up, right, down or left. If it hits a Teece, pull that Teece one space toward this one, and an enemy also gets -2. If it hits the wall, this Teece slides to the panel beside the wall. Every Mummy has one.',
   skitter:'Once per your turn, move one space up, down or sideways. Spiders and Spiderlings have it while they stand on the Web.',
   teleport:'Once per your turn, move to any empty panel on the board.',
   ranged:'Strikes the first enemy beyond the next panel, straight up, down or sideways. Nothing strikes back.',
@@ -1235,6 +1236,7 @@ function deckKeywords(key){
        the page -- it is one of the things the deck does */
     for(const w of [].concat(c.kwWhen||[]))add(w.kw);
     if(c.posture)add(c.posture.edgeKw);
+    if(c.mummyWrap||(c.grants&&c.grants.mummyWrap))add(['mummywrap']);
     if(c.aura)add(c.aura.kw);
     for(const a of c.auras||[])add(a.kw);
     for(const f of c.forms||[])add(f.kw);
@@ -4450,59 +4452,56 @@ const CARDS = {
     a Teece cursed while already cursed gets -1 instead. The curse does nothing
     by itself -- every card here either lays it, drags enemies across it, or
     cashes it in. See the Mummy block beside putTeece for the rules. ---- */
- 1062:{name:'Plague Mummy',type:'teece',sides:[4,6,4,4],mummy:true,
+ 1062:{name:'Plague Mummy',type:'teece',sides:[4,6,4,4],mummy:true,mummyWrap:1,
     aura:{who:'enemy',where:'adj',n:-2,cursedOnly:true},
-    text:'When played: curse every adjacent panel. Adjacent cursed enemies get -2.',
+    text:'Mummy Wrap. When played: curse every adjacent panel. Adjacent cursed enemies get -2.',
     onPlay:[{fx:'mCurseAdjPanels'}]},
- 1063:{name:'Mummy Priest',type:'teece',sides:[6,6,7,7],mummy:true,
-    text:'When played: select a Teece; curse it.',
-    onPlay:[{fx:'mCurseTeece'}]},
- 1064:{name:'Vengeful Mummy',type:'teece',sides:[7,7,6,5],mummy:true,
-    text:'When destroyed: curse the Teece that destroyed it.',
+ 1063:{name:'Mummy Priest',type:'teece',sides:[6,6,7,7],mummy:true,mummyWrap:1,
+    text:'Mummy Wrap. When played: select a Teece or an unoccupied panel; curse it.',
+    onPlay:[{fx:'mCurseAny'}]},
+ 1064:{name:'Vengeful Mummy',type:'teece',sides:[7,7,6,3],mummy:true,mummyWrap:1,
+    text:'Mummy Wrap. When destroyed: curse the Teece that destroyed it.',
     onDeath:[{fx:'mCurseKillers'}]},
- 1065:{name:'Canopic Mummy',type:'teece',sides:[6,6,7,6],mummy:true,
-    text:'When destroyed: curse this panel. Discard this from your hand: select a panel; curse it.',
+ 1065:{name:'Canopic Mummy',type:'teece',sides:[6,6,7,6],mummy:true,mummyWrap:1,
+    text:'Mummy Wrap. When destroyed: curse this panel. Discard this from your hand: select a panel; curse it.',
     onDeath:[{fx:'mCurseHere'}],handDiscard:[{fx:'mCurseAny',panelOnly:true}]},
- 1066:{name:'Dust Mummy',type:'teece',sides:[6,6,6,5],mummy:true,
-    text:'When played: select up to three unoccupied panels; curse them.',
+ 1066:{name:'Dust Mummy',type:'teece',sides:[6,5,6,5],mummy:true,mummyWrap:1,
+    text:'Mummy Wrap. When played: select up to three unoccupied panels; curse them.',
     onPlay:[{fx:'mCursePanels',n:3}]},
- 1067:{name:'Cursebearer',type:'teece',sides:[4,8,8,4],mummy:true,
-    text:'Once per your turn: select a Teece, or two unoccupied panels; curse them.',
+ 1067:{name:'Cursebearer',type:'teece',sides:[3,8,8,2],mummy:true,mummyWrap:1,
+    text:'Mummy Wrap. Once per your turn: select a Teece, or two unoccupied panels; curse them.',
     act:[{name:'Lay the curse',once:'turn',steps:[{fx:'mCurseEither'}]}]},
- 1068:{name:'Diseased Mummy',type:'teece',sides:[5,5,5,5],mummy:true,
-    text:'When played: select a Teece on the same row or column; move it one space toward Diseased Mummy. If that Teece destroys Diseased Mummy this turn while cursed, it is destroyed.',
-    onPlay:[{fx:'mPull',mark:true}],onDeath:[{fx:'mDiseaseKill'}]},
- 1069:{name:'Tomb Stalker',type:'teece',sides:[2,7,9,7],mummy:true,mMovedOnCurse:-3,
-    text:'When an enemy Teece is moved onto a cursed panel, it gets -3. Once per your turn: select a Teece on the same row or column; move it one space toward this Teece.',
-    act:[{name:'Drag',once:'turn',steps:[{fx:'mPull'}]}]},
- 1070:{name:'Linen Mummy',type:'teece',sides:[2,2,2,2],def:5,mummy:true,
-    text:'Defence 5. Mummy Wrap, once per your turn: select a Teece on the same row or column; move it one space toward this Teece.',
-    act:[{name:'Mummy Wrap',once:'turn',steps:[{fx:'mPull'}]}]},
- 1071:{name:'Wrathful Mummy',type:'teece',sides:[9,9,3,3],mummy:true,
-    text:'When played: select a cursed enemy; remove its curse, give it -2 and rotate it.',
+ 1068:{name:'Diseased Mummy',type:'teece',sides:[5,4,5,5],mummy:true,mummyWrap:1,
+    text:'Mummy Wrap. If destroyed by a cursed Teece: destroy the Teece that destroyed it.',
+    onDeath:[{fx:'mCursedKillerDies'}]},
+ 1069:{name:'Tomb Stalker',type:'teece',sides:[2,7,9,7],mummy:true,mummyWrap:2,mMovedOnCurse:-3,
+    text:'Mummy Wrap, one extra time per turn. When an enemy Teece is moved onto a cursed panel, it gets -3.'},
+ 1070:{name:'Linen Mummy',type:'teece',sides:[2,2,2,2],def:5,mummy:true,mummyWrap:1,wrapGain:3,
+    text:'Defence 5. Mummy Wrap. When this Mummy Wraps: +3 until the end of the turn.'},
+ 1071:{name:'Wrathful Mummy',type:'teece',sides:[9,9,3,3],mummy:true,mummyWrap:1,
+    text:'Mummy Wrap. When played: select a cursed enemy; remove its curse, give it -2 and rotate it.',
     onPlay:[{fx:'mUncurseRot',n:-2}]},
- 1072:{name:'Tomb Lord',type:'teece',sides:[8,8,8,8],sac:1,mummy:true,
-    text:'Sacrifice one fielded Teece to play. When played: the next three Teece your opponents play or summon arrive cursed.',
+ 1072:{name:'Tomb Lord',type:'teece',sides:[8,7,8,8],sac:1,mummy:true,mummyWrap:1,
+    text:'Sacrifice one fielded Teece to play. Mummy Wrap. When played: the next three Teece your opponents play or summon arrive cursed.',
     onPlay:[{fx:'mEnterCursed',n:3}]},
- 1073:{name:'The Pharaoh',type:'teece',sides:[3,13,3,13],sac:2,mummy:true,
-    text:'Sacrifice two fielded Teece to play. When played: select a cursed Teece; destroy it. The next enemy Teece that gets cursed is destroyed.',
+ 1073:{name:'The Pharaoh',type:'teece',sides:[3,13,3,13],sac:2,mummy:true,mummyWrap:1,
+    text:'Sacrifice two fielded Teece to play. Mummy Wrap. When played: select a cursed Teece; destroy it. The next enemy Teece that gets cursed is destroyed.',
     onPlay:[{fx:'mPharaoh'}]},
  1074:{name:'Pharaoh’s Vengeance',type:'magic',
     text:'Select a cursed enemy; give it -6 and remove its curse.',
     cast:[{fx:'mVengeance',n:-6}]},
  1075:{name:'Shifting Sands',type:'magic',
-    text:'Select an enemy Teece; move it one space. If it was cursed before it was selected, it gets -3. Then, if this moved it onto a cursed panel, it gets -3. Then, if it is adjacent to an allied Mummy, it gets -3.',
+    text:'Select an enemy Teece; move it one space. If it was cursed before it was selected, it gets -3 and its curse is removed. Then, if this moved it onto a cursed panel, it gets -3. Then, if it is adjacent to an allied Mummy, it gets -3.',
     cast:[{fx:'mShift',n:-3}]},
  1076:{name:'Soul Steal',type:'magic',
-    text:'Select a cursed enemy; silence it and remove every positive stat effect from it. Then select an ally; it gains the cursed enemy’s effects and every positive stat effect removed.',
+    text:'Select a cursed enemy; silence it, remove its curse, and remove every positive stat effect from it. Then select an ally; it gains the cursed enemy’s effects and every positive stat effect removed.',
     cast:[{fx:'mSoulSteal'}]},
  1077:{name:'Cursed Bandages',type:'equip',mod:0,
-    text:'Adjacent cursed enemies get -4. Bandage Wrap, once per your turn: select a Teece on the same row or column; move it one space toward the equipped Teece.',
-    grants:{aura:{who:'enemy',where:'adj',n:-4,cursedOnly:true},
-      act:[{name:'Bandage Wrap',once:'turn',steps:[{fx:'mPull'}]}]}},
+    text:'Adjacent cursed enemies get -4. When the equipped Teece Mummy Wraps: it gets +3 until the end of the turn.',
+    grants:{aura:{who:'enemy',where:'adj',n:-4,cursedOnly:true},wrapGain:3}},
  1078:{name:'Burial Wrappings',type:'equip',mod:0,def:3,
-    text:'Equipped Teece gets 3 Defence. Once per your turn: select a Teece on the same row or column; give it -2, curse it and move it one space toward the equipped Teece.',
-    grants:{def:3,act:[{name:'Bind',once:'turn',steps:[{fx:'mPull',n:-2,curse:true}]}]}},
+    text:'Equipped Teece gets 3 Defence, and can Mummy Wrap two extra times per turn.',
+    grants:{def:3,mummyWrap:2}},
  1079:{name:'Scarab Amulet',type:'equip',mod:0,
     text:'The equipped Teece counts +3 in combat against a cursed enemy. Once per your turn: select a Teece or a panel; curse it.',
     grants:{cursedCombat:3,act:[{name:'Scarab Curse',once:'turn',steps:[{fx:'mCurseAny'}]}]}},
@@ -6769,6 +6768,8 @@ function actsOf(b,i){
     if(g&&g.act)g.act.forEach((a,x)=>{if(phaseIs(a.when))out.push({key:'e'+e.cardId+'_'+x,act:a});});
   }
   if(hasKw(b,i,'flying'))out.push({key:'kfly',act:FLY_ACT});
+  {const wn=wrapCount(t);
+   if(wn>0)out.push({key:'kwrap',act:{name:'Mummy Wrap',once:'turn',times:wn,steps:[{fx:'mWrap'}]}});}
   if(hasKw(b,i,'skitter'))out.push({key:'kskit',act:SKITTER_ACT});
   if(hasKw(b,i,'march'))out.push({key:'kmarch',act:MARCH_ACT});
   if(hasKw(b,i,'lumber'))out.push({key:'klumber',act:LUMBER_ACT});
@@ -6807,6 +6808,7 @@ function actBlockedReason(b,i,ent){
     return godTargets(b,i,t.owner).length?null:'no enemy in line';
   }
   if(st&&st.fx==='fuseAdj')return fusePartners(b,i).length?null:'no ally beside it';
+  if(st&&st.fx==='mWrap')return mWrapOptions(b,i,t.owner).length?null:'nothing in reach';
   if(!st||st.fx!=='move')return null;
   if(hasKw(b,i,'immovable'))return 'held';
   return movePool(i,st.range).some(j=>openAt(b,j))?null:'nowhere to go';
@@ -7083,22 +7085,65 @@ function mStepToward(from,to){
   if(sameCol(from,to))return from+(to>from?BW:-BW);
   return -1;
 }
-/* The Teece a pull may take: anything on the anchor's row or column other than
-   the anchor. A plain pull only offers what can actually come a step closer; a
-   pull that also hurts and curses offers everything in line, and moves it only
-   if it can. */
-function mPullCands(b,anchor,p,st){
+/* ---- Mummy Wrap ----
+   Every Mummy fires a bandage up, right, down or left. It flies over empty
+   panels to the first Teece in that line: that Teece is pulled one space back
+   along the bandage, and an enemy also gets -2. If nothing is in the way it
+   reaches the wall, and the Mummy slides along to the last panel before it.
+
+   Each instance is once per turn. A Mummy prints one (`mummyWrap:1`), a card
+   may print more, and an equip may grant more (`grants.mummyWrap`); `wrapGain`
+   on the card or an equip pays the wrapper when it wraps. All of it is read
+   through DEF and eqG, so silence takes the card's wraps away (an equip's
+   stay) and a thief takes them with everything else. */
+function wrapCount(t){
+  if(!t)return 0;
+  let n=DEF(t).mummyWrap||0;
+  for(const e of t.equips){const g=eqG(e);if(g&&g.mummyWrap)n+=g.mummyWrap;}
+  return n;
+}
+function wrapGainOf(t){
+  let n=DEF(t).wrapGain||0;
+  for(const e of t.equips){const g=eqG(e);if(g&&g.wrapGain)n+=g.wrapGain;}
+  return n;
+}
+/* Where each of the four bandages would land. A pull names the Teece hit and
+   the panel it would be pulled to (-1 when it cannot come any closer); a slide
+   names the panel the Mummy would end on. A bandage that would do nothing at
+   all -- an ally already beside it, a wall it is already against -- is not
+   offered. */
+function mWrapOptions(b,i,p){
   const out=[];
-  for(let i=0;i<BN;i++){
-    const t=b[i].teece;
-    if(!t||i===anchor||!canTarget(b,i,p))continue;
-    if(!(sameRow(i,anchor)||sameCol(i,anchor))||isPlane(i)||isPlane(anchor))continue;
-    const dst=mStepToward(i,anchor);
-    const canMove=dst>=0&&dst!==anchor&&openAt(b,dst)&&!hasKw(b,i,'immovable');
-    if(!canMove&&!(st&&(st.n||st.curse)))continue;
-    out.push(i);
+  if(i==null||!b[i]||!b[i].teece)return out;
+  for(let k=0;k<4;k++){
+    const n=sideNbr(i,k);
+    if(n<0)continue;
+    let cur=n;
+    while(cur>=0&&!b[cur].teece)cur=sideNbr(cur,k);
+    if(cur>=0){
+      const t=b[cur].teece,foe=!sameTeam(t.owner,p);
+      if(!canTarget(b,cur,p))continue;
+      const back=sideNbr(cur,(k+2)%4);
+      const dst=(back>=0&&back!==i&&openAt(b,back)&&!hasKw(b,cur,'immovable'))?back:-1;
+      if(dst<0&&!foe)continue;
+      out.push({k,cell:cur,kind:'pull',dst});
+    }else{
+      let dst=-1,c=n;
+      while(c>=0&&openAt(b,c)){dst=c;c=sideNbr(c,k);}
+      if(dst<0||hasKw(b,i,'immovable'))continue;
+      out.push({k,cell:dst,kind:'slide',dst});
+    }
   }
   return out;
+}
+function mWrapSim(bb,i,o,p){
+  const me=bb[i]&&bb[i].teece;if(!me)return;
+  if(o.kind==='pull'){
+    const t=bb[o.cell].teece;if(!t)return;
+    if(!sameTeam(t.owner,p))applyModT(t,-2,'perm');
+    if(o.dst>=0&&openAt(bb,o.dst))moveT(bb,o.cell,o.dst,false);
+  }else if(openAt(bb,o.dst))moveT(bb,i,o.dst,false);
+  const g=wrapGainOf(me);if(g)applyModT(me,g,'temp');
 }
 function mBesideMummy(b,i,t,p){
   return ADJ[i].some(k=>{const o=b[k].teece;return o&&o!==t&&sameTeam(o.owner,p)&&isMummy(o);});
@@ -7114,7 +7159,7 @@ function mShiftMoveSim(bb,c,j,p,n){
 }
 function mShiftSim(bb,c,p,n){
   const t=bb[c].teece;if(!t)return;
-  if(t.mcursed)applyModT(t,n,'perm');
+  if(t.mcursed){applyModT(t,n,'perm');mUncurse(t);}
   if(hasKw(bb,c,'immovable'))return;
   let best=-1,score=-1;
   for(const j of ADJ[c]){
@@ -7150,14 +7195,6 @@ function mGive(a,got,gid,hasFx){
   a.defPerm=(a.defPerm||0)+got.def;
   if(got.defTemp){a.defTemp2=(a.defTemp2||0)+got.defTemp;a.defTemp2Until=Math.max(a.defTemp2Until||0,nextTurnExpiry());}
   if(hasFx){a.grafts=a.grafts||[];if(a.grafts.indexOf(gid)<0)a.grafts.push(gid);}
-}
-function mPullSim(b,c,anchor,p,st){
-  const t=b[c].teece;if(!t)return -1;
-  if(st.n)applyModT(t,st.n,'perm');
-  if(st.curse)mCurseT(b,c,false);
-  const dst=mStepToward(c,anchor);
-  if(dst>=0&&dst!==anchor&&openAt(b,dst)&&!hasKw(b,c,'immovable')){moveT(b,c,dst,false);return dst;}
-  return c;
 }
 function ageRateAt(b,i){
   const t=b[i].teece; if(!t)return 0;
@@ -11331,42 +11368,49 @@ async function FXRUN(st,ctx){
     }else mCursePanel(b,c,p,true);
     await anim([c],'zap');
     return;}
-  case 'mPull':{
-    const anchor=ctx.cell;
-    if(anchor==null||!b[anchor].teece)return none('Nothing to pull toward.');
-    const cands=mPullCands(b,anchor,p,st);
-    if(!cands.length)return none('Nothing on its row or column can be '+((st.n||st.curse)?'reached.':'pulled any closer.'));
-    const what=[st.n?sgn(st.n):null,st.curse?'curse it':null,'pull it one space closer'].filter(Boolean).join(', ');
-    const c=await pickCell(cands,'Choose a Teece on the same row or column: '+what+'.',
-      (bb,i)=>{mPullSim(bb,i,anchor,p,st);},!!st.may);
+  case 'mWrap':{
+    const i=ctx.cell,me=i!=null&&b[i]?b[i].teece:null;
+    if(!me)return none('Nothing to wrap from.');
+    const opts=mWrapOptions(b,i,p);
+    if(!opts.length)return none('The bandage has nothing to reach.');
+    const c=await pickCell(opts.map(o=>o.cell),'Mummy Wrap: tap the Teece to pull in, or the panel by the wall to slide to.',
+      (bb,x)=>{const o=opts.find(q=>q.cell===x);if(o)mWrapSim(bb,i,o,p);},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
-    const t=b[c].teece,foe=!sameTeam(t.owner,p);
-    if(foe&&(wardMagic(b,c,p)||tapeSave(b,c,p))){await anim([c],'zap');return;}
-    if(st.n){applyModT(t,st.n,'perm');log(nm(t)+' gets '+sgn(st.n)+'.');}
-    if(st.curse)mCurseT(b,c,true);
-    if(st.mark&&ctx.t)ctx.t.mDisease={uid:t.uid,turn:G.turnNum};
+    const o=opts.find(q=>q.cell===c);
+    if(!o)return;
     let at=c;
-    const dst=mStepToward(c,anchor);
-    if(b[c].teece===t&&dst>=0&&dst!==anchor&&openAt(b,dst)&&!hasKw(b,c,'immovable')){
-      moveT(b,c,dst,true);at=dst;
-      log(nm(t)+' is pulled to the '+CN[dst]+'.');
-      await fireMove(c,dst,p);
+    if(o.kind==='pull'){
+      const t=b[o.cell].teece,foe=!sameTeam(t.owner,p);
+      if(foe&&(wardMagic(b,o.cell,p)||tapeSave(b,o.cell,p))){await anim([o.cell],'zap');return;}
+      log(nm(me)+' fires a bandage and catches '+nm(t)+'.');
+      if(foe){applyModT(t,-2,'perm');log(nm(t)+' gets -2.');}
+      if(o.dst>=0&&b[o.cell].teece===t&&openAt(b,o.dst)){
+        moveT(b,o.cell,o.dst,true);at=o.dst;
+        log(nm(t)+' is pulled to the '+CN[o.dst]+'.');
+        await fireMove(o.cell,o.dst,p);
+      }
+      if(foe)noteTargeted(p);
+    }else{
+      moveT(b,i,o.dst,true);
+      log(nm(me)+' fires a bandage at the wall and swings to the '+CN[o.dst]+'.');
+      await fireMove(i,o.dst,p);
     }
-    if(foe)noteTargeted(p);
+    const g=wrapGainOf(me);
+    if(g){applyModT(me,g,'temp');log(nm(me)+' gets '+sgn(g)+' until the end of the turn for wrapping.');}
     await anim([at],'zap');
     return;}
-  case 'mDiseaseKill':{
-    const dm=ctx.t&&ctx.t.mDisease;
-    if(!dm||dm.turn!==G.turnNum||(ctx.killers||[]).indexOf(dm.uid)<0)return 'NONE';
-    for(let i=0;i<BN;i++){
+  case 'mCursedKillerDies':{
+    /* Diseased Mummy: whatever kills it while cursed goes down with it. */
+    let n=0;
+    for(const kuid of (ctx.killers||[]))for(let i=0;i<BN;i++){
       const k=b[i].teece;
-      if(k&&k.uid===dm.uid&&k.mcursed){
-        queueFx({kill:k.uid,msg:nm(k)+' caught the disease killing '+nm(ctx.t)+', and is destroyed.'});
-        return;
+      if(k&&k.uid===kuid&&k.mcursed){
+        queueFx({kill:k.uid,msg:nm(k)+' killed '+nm(ctx.t)+' while cursed, and catches the disease.'});n++;
       }
     }
-    return 'NONE';}
+    if(!n)return 'NONE';
+    return;}
   case 'mUncurseRot':{
     const cands=[];
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.mcursed&&!sameTeam(t.owner,p)&&canTarget(b,i,p))cands.push(i);}
@@ -11442,7 +11486,7 @@ async function FXRUN(st,ctx){
     if(wardMagic(b,c,p)||tapeSave(b,c,p)){await anim([c],'zap');return;}
     const t=b[c].teece;
     ctx.first=false;
-    if(t.mcursed){applyModT(t,st.n,'perm');log(nm(t)+' was already cursed: '+sgn(st.n)+'.');}
+    if(t.mcursed){applyModT(t,st.n,'perm');mUncurse(t);log(nm(t)+' was already cursed: '+sgn(st.n)+', and its curse is removed.');}
     let at=c;
     if(!hasKw(b,c,'immovable')){
       const dsts=ADJ[c].filter(j=>openAt(b,j));
@@ -11466,15 +11510,15 @@ async function FXRUN(st,ctx){
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.mcursed&&!sameTeam(t.owner,p)&&canTarget(b,i,p))cands.push(i);}
     if(!cands.length)return none('No cursed enemy to rob.');
     const c=await pickCell(cands,'Choose a cursed enemy: it is silenced and stripped of every positive stat effect.',
-      (bb,i)=>{mStrip(bb[i].teece);bb[i].teece.silenced=true;},false);
+      (bb,i)=>{mStrip(bb[i].teece);bb[i].teece.silenced=true;mUncurse(bb[i].teece);},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     if(wardMagic(b,c,p)||tapeSave(b,c,p)){await anim([c],'zap');return;}
     ctx.first=false;
     const t=b[c].teece;
     const got=mStrip(t);
-    t.silenced=true;
-    log(nm(t)+' is silenced, and stripped of every positive stat effect.');
+    t.silenced=true;mUncurse(t);
+    log(nm(t)+' is silenced, its curse is removed, and it is stripped of every positive stat effect.');
     noteTargeted(p);
     await anim([c],'zap');
     const allies=[];for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&sameTeam(o.owner,p))allies.push(i);}
@@ -16507,9 +16551,11 @@ function aiPlanFor(id){
       return {thr:0.8,bonus:0,cands:fc,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
     }
     if(eg.gunGod)ebonus+=bulletsOf(p)>1?2.0:0.3;
-    /* Defence and an ability with no number beside them -- Burial Wrappings --
-       move the simulated board by nothing, since the score reads no Defence. */
-    if(!d.mod&&eg.def&&eg.act)ebonus+=0.6+0.15*eg.def;
+    /* Extra Mummy Wraps and what a wrap pays are both worth something every
+       turn from now on, and nothing on the board the moment the equip goes on;
+       the score reads no Defence either. Burial Wrappings and Cursed Bandages. */
+    if(eg.mummyWrap)ebonus+=0.6*eg.mummyWrap+0.15*(eg.def||0);
+    if(eg.wrapGain)ebonus+=0.6;
     return {thr:0.8,bonus:ebonus,cands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
   }
   if(d.type==='ground'){
@@ -16594,7 +16640,7 @@ function aiPlanFor(id){
     if(st.fx==='mShift')return {thr:1.4,cands,mut:(bb,i)=>{mShiftSim(bb,i,p,st.n);}};
     return {thr:1.4,bonus:0.8,cands,mut:(bb,i)=>{
       const t=bb[i].teece;
-      const got=mStrip(t);t.silenced=true;
+      const got=mStrip(t);t.silenced=true;mUncurse(t);
       let best=-1,bs=-1;
       for(let j=0;j<BN;j++){const o=bb[j].teece;if(o&&sameTeam(o.owner,p)){const tot=effSides(bb,j).reduce((a,c)=>a+c,0);if(tot>bs){bs=tot;best=j;}}}
       if(best>=0)mGive(bb[best].teece,got,t.cardId,false);
@@ -17115,7 +17161,7 @@ async function aiPlayTeece(){
   return ok;
 }
 let AI_TEECE_PLAN=null;
-async function aiActs(){
+async function aiActs(depth){
   const p=G.turn,b=G.board;
   let used=false;
   for(let i=0;i<BN;i++){
@@ -17151,6 +17197,11 @@ async function aiActs(){
       }
     }
   }
+  /* An ability with more than one use a turn -- Mummy Wrap, two or three
+     times over -- gets another look once the board has moved under it. */
+  if(used&&(depth||0)<3&&b.some((c,x)=>c.teece&&c.teece.owner===p&&
+     actsOf(b,x).some(e=>e.key==='kwrap'&&actAvailable(c.teece,e))))
+    return (await aiActs((depth||0)+1))||used;
   return used;
 }
 function aiActMuts(cell,ent){
@@ -17203,8 +17254,8 @@ function aiActMuts(cell,ent){
         });
       }
     }
-  }else if(st.fx==='mPull'){
-    for(const c of mPullCands(b,cell,p,st))muts.push(bb=>{mPullSim(bb,c,cell,p,st);});
+  }else if(st.fx==='mWrap'){
+    for(const o of mWrapOptions(b,cell,p))muts.push(bb=>{mWrapSim(bb,cell,o,p);});
   }else if(st.fx==='mCurseEither'||st.fx==='mCurseAny'){
     for(let i=0;i<BN;i++){
       if(b[i].razed)continue;
