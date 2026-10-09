@@ -1137,7 +1137,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:148,date:'2026-10-09'};
+const VERSION={build:149,date:'2026-10-09'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -19083,7 +19083,7 @@ function render(){
         ' ends, whoever has more Teece on the field wins.">turn '+G.turnNum+' of '+TURN_LIMIT+'</span>':'')+
       (skyShowing()?'<span class="phase '+(isDay()?'day':'night')+'">'+
       (isDay()?'\u2600\uFE0F Day':'\u{1F319} Night')+(timePinned()?' \u00b7 held':'')+'</span>':'');
-    document.getElementById('endTurn').disabled=false;
+    document.getElementById('endTurn').disabled=!!G.spectate;
   }else{
     document.getElementById('endTurn').disabled=true;
   }
@@ -20681,6 +20681,9 @@ async function startInner(mode,vsAI){
     G=newState('deck',true,[DECKS[a].cards.slice(),DECKS[c].cards.slice()],{aiSeats:[0,1],seatNames:[na,nc]});
     G.spectate=true;
     G.deckNames=[DECKS[a].name,DECKS[c].name];
+    /* Nobody's hand is a secret here: open the second clanker's row too. */
+    {const oh=document.getElementById('oppHands'),btn=document.getElementById('toggleOppHands');
+     if(oh)oh.classList.remove('collapsed');if(btn)btn.textContent='Hide';}
     applyDeckRules(0,a);
     applyDeckRules(1,c);
     log('Clanker On Clanker: '+na+' faces '+nc+'. The computer plays both sides.');
