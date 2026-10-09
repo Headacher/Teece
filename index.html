@@ -1128,7 +1128,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:146,date:'2026-10-09'};
+const VERSION={build:147,date:'2026-10-09'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4452,39 +4452,39 @@ const CARDS = {
     a Teece cursed while already cursed gets -1 instead. The curse does nothing
     by itself -- every card here either lays it, drags enemies across it, or
     cashes it in. See the Mummy block beside putTeece for the rules. ---- */
- 1062:{name:'Plague Mummy',type:'teece',sides:[4,6,4,4],mummy:true,mummyWrap:1,
+ 1062:{name:'Plague Mummy',type:'teece',sides:[3,5,3,3],mummy:true,mummyWrap:1,
     aura:{who:'enemy',where:'adj',n:-2,cursedOnly:true},
     text:'Mummy Wrap. When played: curse every adjacent panel. Adjacent cursed enemies get -2.',
     onPlay:[{fx:'mCurseAdjPanels'}]},
- 1063:{name:'Mummy Priest',type:'teece',sides:[6,6,7,7],mummy:true,mummyWrap:1,
+ 1063:{name:'Mummy Priest',type:'teece',sides:[5,5,6,6],mummy:true,mummyWrap:1,
     text:'Mummy Wrap. When played: select a Teece or an unoccupied panel; curse it.',
     onPlay:[{fx:'mCurseAny'}]},
- 1064:{name:'Vengeful Mummy',type:'teece',sides:[7,7,6,3],mummy:true,mummyWrap:1,
+ 1064:{name:'Vengeful Mummy',type:'teece',sides:[6,6,5,2],mummy:true,mummyWrap:1,
     text:'Mummy Wrap. When destroyed: curse the Teece that destroyed it.',
     onDeath:[{fx:'mCurseKillers'}]},
- 1065:{name:'Canopic Mummy',type:'teece',sides:[6,6,7,6],mummy:true,mummyWrap:1,
+ 1065:{name:'Canopic Mummy',type:'teece',sides:[5,5,6,5],mummy:true,mummyWrap:1,
     text:'Mummy Wrap. When destroyed: curse this panel. Discard this from your hand: select a panel; curse it.',
     onDeath:[{fx:'mCurseHere'}],handDiscard:[{fx:'mCurseAny',panelOnly:true}]},
- 1066:{name:'Dust Mummy',type:'teece',sides:[6,5,6,5],mummy:true,mummyWrap:1,
+ 1066:{name:'Dust Mummy',type:'teece',sides:[5,4,5,4],mummy:true,mummyWrap:1,
     text:'Mummy Wrap. When played: select up to three unoccupied panels; curse them.',
     onPlay:[{fx:'mCursePanels',n:3}]},
- 1067:{name:'Cursebearer',type:'teece',sides:[3,8,8,2],mummy:true,mummyWrap:1,
+ 1067:{name:'Cursebearer',type:'teece',sides:[2,7,7,1],mummy:true,mummyWrap:1,
     text:'Mummy Wrap. Once per your turn: select a Teece, or two unoccupied panels; curse them.',
     act:[{name:'Lay the curse',once:'turn',steps:[{fx:'mCurseEither'}]}]},
- 1068:{name:'Diseased Mummy',type:'teece',sides:[5,4,5,5],mummy:true,mummyWrap:1,
+ 1068:{name:'Diseased Mummy',type:'teece',sides:[4,3,4,4],mummy:true,mummyWrap:1,
     text:'Mummy Wrap. If destroyed by a cursed Teece: destroy the Teece that destroyed it.',
     onDeath:[{fx:'mCursedKillerDies'}]},
- 1069:{name:'Tomb Stalker',type:'teece',sides:[2,7,9,7],mummy:true,mummyWrap:2,mMovedOnCurse:-3,
+ 1069:{name:'Tomb Stalker',type:'teece',sides:[1,6,8,6],mummy:true,mummyWrap:2,mMovedOnCurse:-3,
     text:'Mummy Wrap, one extra time per turn. When an enemy Teece is moved onto a cursed panel, it gets -3.'},
- 1070:{name:'Linen Mummy',type:'teece',sides:[2,2,2,2],def:5,mummy:true,mummyWrap:1,wrapGain:3,
+ 1070:{name:'Linen Mummy',type:'teece',sides:[1,1,1,1],def:5,mummy:true,mummyWrap:1,wrapGain:3,
     text:'Defence 5. Mummy Wrap. When this Mummy Wraps: +3 until the end of the turn.'},
- 1071:{name:'Wrathful Mummy',type:'teece',sides:[9,9,3,3],mummy:true,mummyWrap:1,
+ 1071:{name:'Wrathful Mummy',type:'teece',sides:[8,8,2,2],mummy:true,mummyWrap:1,
     text:'Mummy Wrap. When played: select a cursed enemy; remove its curse, give it -2 and rotate it.',
     onPlay:[{fx:'mUncurseRot',n:-2}]},
- 1072:{name:'Tomb Lord',type:'teece',sides:[8,7,8,8],sac:1,mummy:true,mummyWrap:1,
+ 1072:{name:'Tomb Lord',type:'teece',sides:[7,6,7,7],sac:1,mummy:true,mummyWrap:1,
     text:'Sacrifice one fielded Teece to play. Mummy Wrap. When played: the next three Teece your opponents play or summon arrive cursed.',
     onPlay:[{fx:'mEnterCursed',n:3}]},
- 1073:{name:'The Pharaoh',type:'teece',sides:[3,13,3,13],sac:2,mummy:true,mummyWrap:1,
+ 1073:{name:'The Pharaoh',type:'teece',sides:[2,12,2,12],sac:2,mummy:true,mummyWrap:1,
     text:'Sacrifice two fielded Teece to play. Mummy Wrap. When played: select a cursed Teece; destroy it. The next enemy Teece that gets cursed is destroyed.',
     onPlay:[{fx:'mPharaoh'}]},
  1074:{name:'Pharaoh’s Vengeance',type:'magic',
