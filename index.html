@@ -1090,6 +1090,15 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
           <button class="btn" id="p3Hot">Hotseat</button>
         </div>
       </div>
+
+      <div class="mode">
+        <div class="kick">Spectate</div>
+        <h3>Clanker On Clanker</h3>
+        <p>Pick two decks and watch the computer play both of them against each other.</p>
+        <div class="row">
+          <button class="btn primary" id="cAI">Watch</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1128,7 +1137,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:147,date:'2026-10-09'};
+const VERSION={build:148,date:'2026-10-09'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -18191,7 +18200,7 @@ function syncHandSlots(){
    able to answer it. The developer code shows everything. */
 let SHOW_ALL_HANDS=false;
 function handVisible(p){
-  if(SHOW_ALL_HANDS||!G)return true;
+  if(SHOW_ALL_HANDS||!G||G.spectate)return true;
   if(G.pending&&G.pending.p===p)return true;
   if(G.vsAI)return !isAIP(p);
   return p===G.turn;
@@ -20659,6 +20668,26 @@ async function startInner(mode,vsAI){
     await startTurn();
     return;
   }
+  /* Clanker On Clanker: two prebuilt decks, both seats the computer, and the
+     player only watching. It is a deck game in every other respect -- the
+     engine sees mode 'deck' -- so nothing downstream needs to know. G.spectate
+     shows both hands and turns every click that would play for a seat away. */
+  if(mode==='clank'){
+    const a=await pickDeck('Clanker 1',{title:'Choose the first clanker\u2019s deck',
+      info:'The computer plays this deck. You only watch.'});
+    const c=await pickDeck('Clanker 2',{title:'Choose the second clanker\u2019s deck',
+      info:'The computer plays this one too. Choosing the same deck for a mirror match is allowed.'});
+    const na=DECKS[a].name+(a===c?' (1)':''),nc=DECKS[c].name+(a===c?' (2)':'');
+    G=newState('deck',true,[DECKS[a].cards.slice(),DECKS[c].cards.slice()],{aiSeats:[0,1],seatNames:[na,nc]});
+    G.spectate=true;
+    G.deckNames=[DECKS[a].name,DECKS[c].name];
+    applyDeckRules(0,a);
+    applyDeckRules(1,c);
+    log('Clanker On Clanker: '+na+' faces '+nc+'. The computer plays both sides.');
+    render();
+    await startTurn();
+    return;
+  }
   if(mode==='deck'){
     const mine=await pickDeck(vsAI?'You':'Player 1');
     let theirs,hcap=0;
@@ -20712,6 +20741,16 @@ if(HAS_DOM){
   document.getElementById('p3AI').onclick=()=>start('three',true);
   document.getElementById('p3Hot').onclick=()=>start('three',false);
   document.getElementById('dHot').onclick=()=>start('deck',false);
+  document.getElementById('cAI').onclick=()=>start('clank',true);
+  /* Watching, not playing: a click that would play a card, fire an ability or
+     end a turn for either clanker is swallowed before it lands. Hovering still
+     reads every card. */
+  document.addEventListener('click',e=>{
+    if(!G||!G.spectate||G.over)return;
+    const hit=e.target&&e.target.closest&&e.target.closest(
+      '#myHand .card, #oppHands .card, .abtn, #actionBar button, #endTurn, .discardBtn');
+    if(hit){e.stopPropagation();e.preventDefault();}
+  },true);
   document.getElementById('endTurn').onclick=endTurn;
   document.getElementById('restart').onclick=restart;
   document.getElementById('endRestart').onclick=restart;

@@ -411,6 +411,17 @@ leaves (`zeusReact`). `foeTurnEnd` steps run in `endTurn` for the Teece that are
 not on the side whose turn is ending. Plated equips read `freePlay` and
 `onPlayTemp` in `playTeece`.
 
+### Clanker On Clanker is a deck game with nobody playing
+
+The start menu's Clanker On Clanker (`start('clank')`) picks two prebuilt
+decks and builds an ordinary `newState('deck', ...)` with `aiSeats:[0,1]` and
+the deck names as `seatNames`, so the engine never knows. `G.spectate` does the
+rest: `handVisible` shows both hands, and one capture-phase click listener
+swallows any click on a hand card, an ability button, Discard or End Turn
+while it is set. A page test that wants to freeze the computers must bump
+`G.epoch` (`G.epoch=++EPOCH`), not just `EPOCH`: `stale()` compares against
+`G.epoch`, and an AI turn already in flight keeps playing otherwise.
+
 ### Games end at turn 100
 
 `checkTurnLimit` runs at the end of every turn, after the other win checks:
