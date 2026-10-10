@@ -1137,7 +1137,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:149,date:'2026-10-09'};
+const VERSION={build:150,date:'2026-10-10'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -5505,7 +5505,7 @@ function newState(mode,vsAI,decks,extra){
   };
   const mk=p=>({deck:stack(shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice())),hand:[],plate:[],grave:[],onceUsed:{},pendingDraw:0,undying:{},riding:{},
     nextDefBonus:0,nextDefLeft:0,nextDefKind:null,
-    nextMod:0,nextSides:null,nextShield:false,noDeckOut:false,noDominate:false,coffined:{},teecePlayedLastTurn:false,teecePlayedThisTurn:0,turnsTaken:0,
+    nextMod:0,nextSides:null,nextShield:false,noDeckOut:false,noDominate:false,coffined:{},teecePlayedLastTurn:false,teecePlayedThisTurn:0,passStreak:0,turnsTaken:0,
     allFlying:false,swarmWin:null,swarmMind:0,turnCaps:{},
     souls:0,nextInvuln:0,skipTurns:0,hellfire:null,doomSelf:false,doomFoes:false,
     hexes:[],forget:0,confuse:null,recall:null,bullets:0,hotBullets:0,shots:0,hasGun:false,
@@ -15595,18 +15595,33 @@ async function runFreeGroundAct(p,cell,act){
   render();
   return true;
 }
-/* You are held to playing a Teece only when all of this is true: it is not
-   your first turn, you hold nothing on the field, you played no Teece last
-   turn and none this turn — and you actually have one you can put down. That
-   last clause matters: a card that cannot be played, or one already tried and
-   refused this turn, does not count, or the rule would wedge the turn shut. */
-function mustPlayTeece(p){
+/* Whether p holds a Teece it could put down right now. A card that cannot be
+   played, or one already tried and refused this turn, does not count, or the
+   rule below would wedge the turn shut. */
+function holdsPlayableTeece(p){
   const pl=G.players[p];
-  if(!pl||pl.turnsTaken<=1)return false;
-  if(pl.teecePlayedLastTurn||pl.teecePlayedThisTurn>0)return false;
-  if(G.board.some(c=>c.teece&&c.teece.owner===p))return false;
   const failed=pl.failedThisTurn||[];
   return pl.hand.some(id=>CARDS[id].type==='teece'&&canPlay(p,id)&&failed.indexOf(id)<0);
+}
+/* Holding back is allowed, but not for ever. A player with nothing on the field
+   who ends a turn holding a Teece they could have played has PASSED; passStreak
+   counts those passes in a row, and anything else -- playing a Teece, having a
+   Teece on the field, holding nothing playable -- clears it. Two passes in a
+   row and the third turn must put a Teece down. The streak is counted in
+   endTurn, after the turn's last chance to play. */
+const PASS_LIMIT=2;
+function mustPlayTeece(p){
+  const pl=G.players[p];
+  if(!pl||(pl.passStreak||0)<PASS_LIMIT)return false;
+  if(pl.teecePlayedThisTurn>0)return false;
+  if(G.board.some(c=>c.teece&&c.teece.owner===p))return false;
+  return holdsPlayableTeece(p);
+}
+/* Called once a turn, as it ends: did p just pass? */
+function notePass(p){
+  const pl=G.players[p];
+  const passed=pl.teecePlayedThisTurn===0&&!G.board.some(c=>c.teece&&c.teece.owner===p)&&holdsPlayableTeece(p);
+  pl.passStreak=passed?(pl.passStreak||0)+1:0;
 }
 /* ============ turn flow ============ */
 async function endTurn(){
@@ -15618,11 +15633,16 @@ async function endTurn(){
     /* said once a turn, however many times End Turn gets pressed */
     if(!pl.toldMustPlay){
       pl.toldMustPlay=true;
-      log('You hold no Teece on the field and played none last turn, so you must play one now.');
+      log(pname(G.turn)+' '+vb(G.turn,'has','have')+' no Teece on the field and passed up a playable one '+
+        PASS_LIMIT+' turns in a row, so '+(pname(G.turn)==='You'?'you':'they')+' must play one now.');
     }
-    toast('You must play a Teece: you hold none and played none last turn.');
+    toast('You must play a Teece: none on the field, and you passed '+PASS_LIMIT+' turns in a row.');
     return;
   }
+  /* Past the gate, so this turn is really ending: count it as a pass or not.
+     Read before the hand limit throws anything away -- what counts is what
+     they chose to hold, not what survived the discard. */
+  if(!skipping)notePass(G.turn);
   if(pl.hand.length>6){
     log('Hand limit: '+pname(G.turn)+' '+vb(G.turn,'discards','discard')+' down to six.');
     const dumped=[];
@@ -18381,6 +18401,16 @@ function statusesFor(p){
   if(G.turn===p){
     const why=teecePlayBlock(p);
     if(why)push('noteece','warn','No Teece play',why);
+    /* The pass count, said before it bites rather than only when End Turn
+       refuses: nothing on the field and a Teece in hand you are choosing to
+       hold. */
+    if(!why&&pl.teecePlayedThisTurn===0&&!G.board.some(c=>c.teece&&c.teece.owner===p)&&holdsPlayableTeece(p)){
+      const ps=pl.passStreak||0;
+      if(ps>=PASS_LIMIT)push('mustplay','bad','Must play a Teece',
+        'You have no Teece on the field and have passed up a playable one '+ps+' turns in a row. Play one before you end this turn.');
+      else if(ps===PASS_LIMIT-1)push('mustplay','warn','Last pass',
+        'You have no Teece on the field. Hold your Teece again this turn and next turn you must play one.');
+    }
   }
 
   /* --- and what is calling from the graveyard ---
@@ -20224,8 +20254,8 @@ const TUT_PAGES=[
        'appear as buttons just under the board.</span></li>'+
      '<li><span class="n">5</span><span>Press <b>End Turn</b>. You can keep six cards at most; anything over '+
        'that is thrown away at random.</span></li></ul>'+
-     '<p class="fine">If you have no Teece on the board and played none last turn, you must play one before '+
-     'you can end your turn.</p>'},
+     '<p class="fine">If you have no Teece on the board and hold one you could play, you may pass it up twice '+
+     'in a row. The third turn you must play one before you can end your turn.</p>'},
   {t:'Four kinds of card',
    art:()=>'<div class="tutart"><div class="thand">'+
        tutHandCard(1,'Teece')+tutHandCard(13,'Equip')+tutHandCard(16,'Magic')+tutHandCard(19,'Battleground')+
@@ -20805,7 +20835,7 @@ if(typeof module!=='undefined'){
     playHandDiscard,playFromHand,
     canPlay,hexOn,addHex,tickHexes,hexTargets,drawCards,openAt,discardCard,castCard,
     riseFromGrave,forcedMoves,fireMagic,flushDiscards,toGrave,isBossCard,playMagic,
-    mustPlayTeece,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
+    mustPlayTeece,holdsPlayableTeece,notePass,PASS_LIMIT,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
     groundCells,playGround,areaShapeCells,makeTeece,gcards,countGrounds,groundAnchored,
     groundGives,givesLabel,invulnText,blessedOn,sameRow,sameCol,oppositeCell,
     groundNum,groundOf,canHandDiscard,auraGives,panelGives,isSteadfast,

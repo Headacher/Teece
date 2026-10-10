@@ -422,6 +422,16 @@ while it is set. A page test that wants to freeze the computers must bump
 `G.epoch` (`G.epoch=++EPOCH`), not just `EPOCH`: `stale()` compares against
 `G.epoch`, and an AI turn already in flight keeps playing otherwise.
 
+### Holding a Teece back has a limit
+
+A player with no Teece on the field may pass up a playable Teece (`holdsPlayableTeece`)
+twice in a row; the third turn, End Turn refuses until one goes down
+(`mustPlayTeece`, `PASS_LIMIT`). `notePass` counts the streak in `endTurn`, once
+the turn has really ended, and anything else clears it: playing a Teece,
+having one on the field, holding nothing playable. The status chips say
+"Last pass" and "Must play a Teece" before End Turn does. The computer always
+plays a Teece when it can, so in practice this only ever binds a human.
+
 ### Games end at turn 100
 
 `checkTurnLimit` runs at the end of every turn, after the other win checks:
