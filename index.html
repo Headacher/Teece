@@ -252,6 +252,10 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="mummy"] .kwl,.dcard[data-card-deck="mummy"] .dkw{color:#5b2a86}
 .card[data-card-deck="mummy"] .ct,.dcard[data-card-deck="mummy"] .dty{color:#5b2a86}
 .card[data-card-deck="mummy"]::after,.dcard[data-card-deck="mummy"]::after{content:'\2625'}
+.card[data-card-deck="wolf"],.dcard[data-card-deck="wolf"]{--cardbg:#5d6670;--artink:#f1ece2;background:var(--cardbg);color:#f4f1ea;border-color:#2b3036}
+.card[data-card-deck="wolf"] .kwl,.dcard[data-card-deck="wolf"] .dkw{color:#ff8a80}
+.card[data-card-deck="wolf"] .ct,.dcard[data-card-deck="wolf"] .dty{color:#ff8a80}
+.card[data-card-deck="wolf"]::after,.dcard[data-card-deck="wolf"]::after{content:'\1F43A'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -283,6 +287,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .teece[data-card-deck="fusion"]{--cardbg:#2a2150;--artink:#7ff0e0;background:var(--cardbg);color:#ece6ff;border-color:#140f2e}
 .teece[data-card-deck="lightning"]{--cardbg:#1b2a5e;--artink:#ffe94d;background:var(--cardbg);color:#eef2ff;border-color:#0b1230}
 .teece[data-card-deck="mummy"]{--cardbg:#d8c79a;--artink:#4a3a1c;background:var(--cardbg);color:#2a2112;border-color:#7a6232}
+.teece[data-card-deck="wolf"]{--cardbg:#5d6670;--artink:#f1ece2;background:var(--cardbg);color:#f4f1ea;border-color:#2b3036}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -1137,7 +1142,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:153,date:'2026-10-10'};
+const VERSION={build:154,date:'2026-10-10'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1198,10 +1203,15 @@ function rebuildWebCards(){
 /* What a keyword is called where a player reads it. Steadfast is still the
    engine's name for it, and still what a card lists in kw, but a player reads
    what it does. */
-const KW_LABEL={steadfast:'Immune to stat reduction',defender:'Defender',fuse:'Fuse',mummywrap:'Mummy Wrap'};
+const KW_LABEL={steadfast:'Immune to stat reduction',defender:'Defender',fuse:'Fuse',mummywrap:'Mummy Wrap',
+  bloodlust:'Bloodlust',packleader:'Pack Leader',howl:'Howl',invincible:'Invincible'};
 const kwLabel=k=>KW_LABEL[k]||k;
 const KEYWORDS={
   flying:'Once per your turn, move one space.',
+  packleader:'When played: a Token copy of it appears on every free panel beside it. The copies carry everything printed on the card except Pack Leader, and they leave the field the moment the Pack Leader does.',
+  bloodlust:'Once per your turn, teleport to any free panel beside an enemy.',
+  howl:'Once per your turn, select an ally: it gets +3 and Bloodlust until the end of the turn.',
+  invincible:'It cannot be destroyed.',
   mummywrap:'Once per your turn for each Mummy Wrap it has: fire a bandage up, right, down or left. If it hits a Teece, pull that Teece one space toward this one, and an enemy also gets -2. If it hits the wall, this Teece slides to the panel beside the wall. Every Mummy has one.',
   skitter:'Once per your turn, move one space up, down or sideways. Spiders and Spiderlings have it while they stand on the Web.',
   teleport:'Once per your turn, move to any empty panel on the board.',
@@ -1246,6 +1256,10 @@ function deckKeywords(key){
     for(const w of [].concat(c.kwWhen||[]))add(w.kw);
     if(c.posture)add(c.posture.edgeKw);
     if(c.mummyWrap||(c.grants&&c.grants.mummyWrap))add(['mummywrap']);
+    if(c.packLeader||(c.cast||[]).some(st=>st.fx==='packPromote'))add(['packleader']);
+    if(c.packGuard)add(['invincible']);
+    if(c.howlAll||[].concat(c.act||[],(c.grants&&c.grants.act)||[]).some(a=>a.name==='Howl')||
+       (c.cast||[]).some(st=>st.kw==='bloodlust'))add(['howl','bloodlust']);
     if(c.aura)add(c.aura.kw);
     for(const a of c.auras||[])add(a.kw);
     for(const f of c.forms||[])add(f.kw);
@@ -1262,7 +1276,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -1472,6 +1486,26 @@ const CARD_ART={
   1079:["    \\   /    ", "  -(o_O)-    ", "   /(_)\\     ", "   /   \\     ", "    \\ /      "],
   1080:[" .  .  .  .  ", "   . ☥ .     ", " .  .  .  .  ", ":::::::::::::", ":::::::::::::"],
   1081:["   _______   ", "  /  ___  \\  ", " |  | ☥ |  | ", " |  |   |  | ", " |__|___|__| "],
+  1082:["      /\\     ", "     /  \\__  ", "    (  o  _> ", "    /  __/   ", "   /__/      "],
+  1083:["  /\\_/\\      ", "  ( ^.^)/\\/\\ ", "  /   \\(o.o) ", "  \\___/ \\_/  ", "   ~~~  ~~   "],
+  1084:["   /\\   /\\   ", "  /  \\_/  \\  ", "  | o   o |  ", "  |   Y   |  ", "   \\_vvv_/   "],
+  1085:["   /|   |\\   ", "  / |___| \\  ", "  | (o o) |  ", "   \\  w  /   ", "    '---'    "],
+  1086:["  /\\     /\\  ", "  ||\\___/||  ", "  | [o o] |  ", "  |  ===  |  ", "  \\_|###|_/  "],
+  1087:["    /\\ /\\    ", "   ( o.o )   ", "    > ^ <    ", "   (     )   ", "    ~   ~    "],
+  1088:["    \\ | /    ", "  /\\  ~  /\\  ", "  ( o\\ /o )  ", "   \\  O  /   ", "    \\___/    "],
+  1089:["   /\\___/\\   ", "  /  ~ ~  \\  ", "  | -   - |  ", "  |  ===  |  ", "   \\_/ \\_/   "],
+  1090:["  * /\\ /\\ *  ", "   ( o o )   ", " *  \\ v /  * ", "   /|   |\\   ", "  *  ~ ~  *  "],
+  1091:["  [/\\===/\\]  ", "  [|o   o|]  ", "  [|  Y  |]  ", "  [\\=====/]  ", "   '-----'   "],
+  1092:[" /\\       /\\ ", " | \\_____/ | ", " | (O) (O) | ", "  \\ VVVVV /  ", "   \\_____/   "],
+  1093:["  /\\/\\_/\\/\\  ", " / (@) (@) \\ ", "|    /^\\    |", " \\  VVVVV  / ", "  \\_=====_/  "],
+  1094:["   /\\   /\\   ", "  (oo)>(oo)  ", "   ||   ||   ", "  <==VS==>   ", "   ^^   ^^   "],
+  1095:["      _      ", "   .-' '-.   ", "  ( AWOOO )  ", "   '-._.-'   ", "    /\\ /\\    "],
+  1096:["  V V V V V  ", "  \\/\\/\\/\\/   ", "             ", "  /\\/\\/\\/\\   ", "  ^ ^ ^ ^ ^  "],
+  1097:["   .-----.   ", "  / o o o \\  ", " |  [ A ]  | ", "  \\ o o o /  ", "   '-----'   "],
+  1098:["    \\   /    ", "    |\\ /|    ", "    | V |    ", "    |   |    ", "    V   V    "],
+  1099:["         __  ", "  ______/  ) ", " (______   ) ", "        \\__) ", "   ~ ~ ~     "],
+  1100:["    _____    ", "   /     \\   ", "  /  ___  \\  ", " |  /   \\  | ", " |__|___|__| "],
+  1101:[" ^  ,  ^  ,  ", "  ,  ^  ,  ^ ", " . ,  .  , . ", "  >>> o o    ", " ,  ^  ,  ^  "],
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
   541:["  \\  .-.  /  ", "   \\( o )/   ", "    (/|\\)    ", "    _/ \\_    ", "   [$]  ...  "],
@@ -2108,7 +2142,7 @@ function canPlay(p,cardId){
     if(need&&sacPool(p,G.players[p].hand.indexOf(cardId),cardId).worth<need)return false;
     return true;
   }
-  if(cd.type==='magic')return !hexOn(p,'silence')&&!hexOn(p,'nomagic');
+  if(cd.type==='magic')return !hexOn(p,'silence')&&!hexOn(p,'nomagic')&&(!cd.onlyBehind||wolfBehind(p));
   if(cd.type==='equip'){
     /* Puppet Strings asks the grave, not the field: what makes it playable is a
        body lying in your own graveyard and a panel free to stand it up on. */
@@ -2120,8 +2154,10 @@ function canPlay(p,cardId){
     }
     for(let i=0;i<BN;i++){
       const t=G.board[i].teece;
-      if(t&&t.owner===p&&(!cd.onlyToken||t.isToken))return true;
+      if(t&&t.owner===p&&(!cd.onlyToken||t.isToken)&&(!cd.onlyPackLeader||isPackLeader(t)))return true;
     }
+    /* a Pack Leader still in hand will be one when it lands, so it can be plated */
+    if(cd.onlyPackLeader&&G.players[p].hand.some(h=>CARDS[h].packLeader))return true;
     if(cd.runeblade&&sheathSpots(p).length)return true;
     return false;
   }
@@ -4519,6 +4555,64 @@ const CARDS = {
     text:'A non-Mummy Teece on this battleground is cursed.'},
  1081:{name:'Cursed Tomb',type:'ground',gMCurseHit:-5,
     text:'If a Teece becomes cursed on this battleground, it gets -5.'},
+ /* ---- Wolves: 1082-1101, a beginner swarm deck built on the pack ----
+    Pack Leader (`packLeader`) is a when-played: a Token copy of the Teece
+    appears on every free panel beside it (`packCall`). Each copy is marked
+    t.packOf with its leader's uid, and packSweep takes every copy off the field
+    the moment no body with that uid is standing on it -- destroyed, bounced,
+    sacrificed, swallowed, whatever removed it. A copy is a Token, so it is not a
+    Pack Leader itself, but it carries everything else printed on the card: a Den
+    Mother's copies give +1 to what stands beside them too, which is the whole
+    swarm. Bloodlust is a keyword (`bloodlust`) that offers a once-a-turn
+    teleport onto a free panel beside an enemy; Howl is +3 for the turn and
+    Bloodlust handed to an ally. ---- */
+ 1082:{name:'Lone Wolf',type:'teece',sides:[9,9,10,9],
+    aura:{who:'ally',where:'global',n:-3,tokenOnly:true},
+    text:'Your Tokens have -3.'},
+ 1083:{name:'Den Mother',type:'teece',sides:[2,2,5,5],packLeader:true,
+    aura:{who:'ally',where:'adj',n:1},onPlay:[{fx:'packCall'}],
+    text:'Pack Leader. Adjacent allies have +1.'},
+ 1084:{name:'Timber Wolf',type:'teece',sides:[4,7,1,2],packLeader:true,onPlay:[{fx:'packCall'}],
+    text:'Pack Leader.'},
+ 1085:{name:'Grey Wolf',type:'teece',sides:[4,2,4,4],packLeader:true,onPlay:[{fx:'packCall'}],
+    text:'Pack Leader.'},
+ 1086:{name:'Pack Warden',type:'teece',sides:[3,2,2,3],packLeader:true,packGuard:true,onPlay:[{fx:'packCall'}],
+    text:'Pack Leader. Your other Pack Leaders are Invincible: they cannot be destroyed.'},
+ 1087:{name:'Wolf Pup',type:'teece',sides:[1,1,1,1],packLeader:true,
+    aura:{who:'ally',where:'adj',n:3,kw:['bloodlust']},onPlay:[{fx:'packCall'}],
+    text:'Pack Leader. Adjacent allies have +3 and Bloodlust.'},
+ 1088:{name:'Howler',type:'teece',sides:[5,5,5,5],
+    act:[{name:'Howl',once:'turn',steps:[{fx:'mod',who:'ally',notSelf:true,n:3,dur:'temp',kw:'bloodlust'}]}],
+    text:'Howl: once per your turn, select an ally; it gets +3 and Bloodlust until the end of the turn.'},
+ 1089:{name:'Elder Wolf',type:'teece',sides:[8,2,2,8],
+    aura:{who:'ally',where:'global',n:0,def:3,tokenOnly:true},
+    text:'Your Tokens have +3 Defence.'},
+ 1090:{name:'Tundra Wolf',type:'teece',sides:[0,9,0,9],packLeader:true,onPlay:[{fx:'packCall'}],
+    text:'Pack Leader.'},
+ 1091:{name:'Ironhide Wolf',type:'teece',sides:[2,2,2,2],def:5,packLeader:true,onPlay:[{fx:'packCall'}],
+    text:'Pack Leader. Defence 5.'},
+ 1092:{name:'Dire Wolf',type:'teece',sides:[8,8,8,8],sac:2,sacTokens:true,packLeader:true,onPlay:[{fx:'packCall'}],
+    text:'Sacrifice two fielded Teece to play; Tokens can pay for it. Pack Leader.'},
+ 1093:{name:'Fenrir',type:'teece',sides:[9,9,9,9],sac:4,def:3,sacTokens:true,howlAll:true,
+    text:'Sacrifice four fielded Teece to play; Tokens can pay for it. Defence 3. All your other Teece have Howl: once per your turn, select an ally; it gets +3 and Bloodlust until the end of the turn.'},
+ 1094:{name:'Power Struggle',type:'magic',cast:[{fx:'packPromote'}],
+    text:'Select one of your Tokens: it gains Pack Leader and is no longer a Token. A Token copy of it appears on every free panel beside it, and those copies leave the field when it does.'},
+ 1095:{name:'Howl',type:'magic',rebound:true,
+    cast:[{fx:'mod',who:'any',n:3,dur:'temp',kw:'bloodlust'}],
+    text:'Select a Teece; it gets +3 and Bloodlust until the end of the turn. The first time you cast this in a game, it returns to your hand.'},
+ 1096:{name:'Sharp Teeth',type:'magic',onlyBehind:true,cast:[{fx:'wolfTeeth',n:5,k:-3}],
+    text:'Play only while an opponent has more Teece on the field than you. The next 5 allies you play gain "When destroyed: the Teece that destroyed it gets -3."'},
+ 1097:{name:'Alpha’s Collar',type:'equip',mod:4,onlyPackLeader:true,
+    text:'Equip only to a Pack Leader. Equipped Teece gets +4.'},
+ 1098:{name:'Blood Fangs',type:'equip',mod:4,onlyToken:true,grants:{kw:['bloodlust']},
+    text:'Equip only to a Token. Equipped Teece gets +4 and Bloodlust.'},
+ 1099:{name:'Hunting Horn',type:'equip',mod:0,
+    grants:{act:[{name:'Howl',once:'turn',steps:[{fx:'mod',who:'ally',notSelf:true,n:3,dur:'temp',kw:'bloodlust'}]}]},
+    text:'Equipped Teece has Howl: once per your turn, select an ally; it gets +3 and Bloodlust until the end of the turn.'},
+ 1100:{name:'Wolf Den',type:'ground',gTokenMod:5,
+    text:'A Token on this battleground has +5.'},
+ 1101:{name:'Hunting Grounds',type:'ground',gPerAlly:1,
+    text:'A Teece on this battleground has +1 for each of its allies on the field.'},
  /* ---- the tutorial's cards. Nothing but their numbers, so a new player learns
         the rules rather than a card. The roguelike drafts from every card in
         CARDS, not from the pool, so tutorial:true is what keeps them out of it
@@ -4831,6 +4925,7 @@ function invulnText(b,i){
     return 'Cannot be destroyed until '+until+'.';
   }
   if(runeGuarded(t))return 'Cannot be destroyed: it holds the Runeblade\u2019s Chosen, for as long as that sword stays on the field.';
+  if(packGuarded(b,i))return 'Invincible: a Pack Warden stands with it, so this Pack Leader cannot be destroyed.';
   if(blessedOn(b,i))return 'Cannot be destroyed: it is blessed, standing with an ally, '+
     'and its side outnumbers every other. It becomes destructible again the moment any of that stops being true.';
   return '';
@@ -4888,11 +4983,23 @@ function movePool(i,range){
   /* One space, to an adjacent panel: up, down or sideways. Flying used to read
      DIAG, which holds all eight neighbours, so a flier could cross corners. */
   if(range==='step')return ADJ[i];
+  if(range==='lust'){
+    const me=G.board[i].teece,out=[];
+    if(!me)return out;
+    for(let j=0;j<BN;j++){
+      if(j===i)continue;
+      if(ADJ[j].some(k=>k!==i&&G.board[k].teece&&!sameTeam(G.board[k].teece.owner,me.owner)))out.push(j);
+    }
+    return out;
+  }
   const all=[];for(let j=0;j<BN;j++)if(j!==i)all.push(j);
   return all;
 }
 const FLY_ACT={name:'Fly',once:'turn',steps:[{fx:'move',range:'step'}]};
 const TELE_ACT={name:'Teleport',once:'turn',steps:[{fx:'move',range:'tele'}]};
+/* Bloodlust: a teleport that has to land beside an enemy. */
+const BLOODLUST_ACT={name:'Bloodlust',once:'turn',steps:[{fx:'move',range:'lust'}]};
+const HOWL_ACT={name:'Howl',once:'turn',steps:[{fx:'mod',who:'ally',notSelf:true,n:3,dur:'temp',kw:'bloodlust'}]};
 /* A Devil whose PACT was rejected keeps offering it, once a turn, until taken. */
 const PACT_ACT={name:'PACT',once:'turn',steps:[{fx:'pactLater'}]};
 /* Skitter is one orthogonal space, which is what keeps it distinct from Flying:
@@ -5507,7 +5614,7 @@ function newState(mode,vsAI,decks,extra){
     allFlying:false,swarmWin:null,swarmMind:0,turnCaps:{},
     souls:0,nextInvuln:0,skipTurns:0,hellfire:null,doomSelf:false,doomFoes:false,
     hexes:[],forget:0,confuse:null,recall:null,bullets:0,hotBullets:0,shots:0,hasGun:false,
-    mKillNext:0,mEnterCursed:0});
+    mKillNext:0,mEnterCursed:0,sharpTeeth:0,sharpTeethN:-3});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
     width:BW,
@@ -6367,6 +6474,11 @@ function effSides(b,i,parts){
       if(gd.gPlayHold&&t.standCell===gi)addGround(s,gd.gPlayHold,gd.name+', for the panel it was played onto');
       if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addGround(s,gd.gRangedPlus,gd.name+', for being Ranged');
       if(gd.gFusionMod&&DEF(t).fusion)addGround(s,gd.gFusionMod,gd.name+', for a fusion'+where);
+      if(gd.gTokenMod&&t.isToken)addGround(s,gd.gTokenMod,gd.name+', for a Token'+where);
+      if(gd.gPerAlly){
+        const na=allyCount(b,i,false);
+        if(na)addGround(s,gd.gPerAlly*na,gd.name+', one for each of its '+na+' all'+(na===1?'y':'ies'));
+      }
       /* The Runestone pays whoever stands on it, and charges them instead while
          the Runeblade is set in it. */
       if(gd.gRuneStone){
@@ -6670,7 +6782,7 @@ function defOf(b,i,raw){
     const o=b[j].teece;if(!o||o.silenced)continue;
     const a=DEF(o).aura;
     if(j===i&&!(a&&a.includeSelf))continue;
-    if(a&&a.def&&((a.who==='ally')===sameTeam(o.owner,t.owner))&&a.where==='global')d+=a.def;
+    if(a&&a.def&&((a.who==='ally')===sameTeam(o.owner,t.owner))&&a.where==='global'&&(!a.tokenOnly||t.isToken))d+=a.def;
   }
   return d;
 }
@@ -6784,6 +6896,8 @@ function actsOf(b,i){
   if(t.drainMove)out.push({key:'kdrainstep',act:DRAIN_STEP_ACT});
   if(t.stepOwed>0)out.push({key:'kowedstep',act:OWED_STEP_ACT});
   if(hasKw(b,i,'teleport'))out.push({key:'ktele',act:TELE_ACT});
+  if(hasKw(b,i,'bloodlust'))out.push({key:'klust',act:BLOODLUST_ACT});
+  if(howlGranted(b,i))out.push({key:'khowl',act:HOWL_ACT});
   /* Fuse is printed as a keyword, and only the card's OWN printing counts: a
      keyword lent by an aura or an equip does not make a body fusible. */
   if(!t.silenced&&canFuseOnBoard(t))out.push({key:'kfuse',act:FUSE_ACT});
@@ -7000,6 +7114,73 @@ function moveT(b,from,to,live){
    because putTeece runs them on the AI's simulated boards too: a simulated curse
    must never spend a charge held on the real seat. */
 const isMummy=t=>!!(t&&DEF(t).mummy);
+/* ---- the Wolf pack ----
+   A Pack Leader is a body that is not a Token and either prints packLeader
+   (silence takes that away) or was made one by Power Struggle (t.packLeader,
+   which nothing takes away). Its copies are Tokens tied to it by uid in
+   t.packOf, and packSweepB lifts every copy whose leader is no longer standing
+   anywhere on the board -- read off the board rather than hung on every way a
+   Teece can leave it, so a bounce, a sacrifice or a Black Hole all count. */
+const isPackLeader=t=>!!(t&&!t.isToken&&(t.packLeader||(!t.silenced&&DEF(t).packLeader)));
+function packCall(b,cell,live){
+  const t=b[cell]&&b[cell].teece;
+  if(!t)return [];
+  const spots=ADJ[cell].filter(j=>openAt(b,j));
+  for(const j of spots){
+    const cp=makeTeece(t.cardId,t.owner);
+    cp.isCopy=true;cp.isToken=true;cp.packOf=t.uid;
+    putTeece(b,j,cp,live);
+  }
+  if(live)log(spots.length
+    ?(nm(t)+' calls the pack: '+(spots.length===1?'a Token copy appears at the ':spots.length+' Token copies appear at the ')+
+      spots.map(j=>CN[j]).join(', ')+'.')
+    :(nm(t)+' calls the pack, but there is no free panel beside it.'));
+  return spots;
+}
+function packSweepB(b,live){
+  const gone=[];
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(!t||t.packOf==null)continue;
+    if(b.some(c=>c.teece&&c.teece.uid===t.packOf))continue;
+    b[i].teece=null;
+    gone.push(i);
+    if(!live)continue;
+    for(const e of t.equips)toGrave(e.owner,e.cardId);
+    log(nm(t)+' leaves the field with its Pack Leader'+
+      (t.equips.length?', and '+t.equips.map(e=>CARDS[e.cardId].name).join(', ')+' goes to the graveyard':'')+'.');
+  }
+  return gone;
+}
+/* "Your other Pack Leaders are Invincible": the Pack Warden's copies print it
+   too, which is how a Warden keeps the pack's spine standing. */
+function packGuarded(b,i){
+  const t=b[i]&&b[i].teece;
+  if(!isPackLeader(t))return false;
+  for(let j=0;j<BN;j++){
+    const o=b[j].teece;
+    if(!o||j===i||o.silenced||!DEF(o).packGuard)continue;
+    if(sameTeam(o.owner,t.owner))return true;
+  }
+  return false;
+}
+/* Fenrir hands Howl to every other Teece on its side. */
+function howlGranted(b,i){
+  const t=b[i]&&b[i].teece;
+  if(!t)return false;
+  for(let j=0;j<BN;j++){
+    const o=b[j].teece;
+    if(!o||j===i||o.silenced||!DEF(o).howlAll)continue;
+    if(sameTeam(o.owner,t.owner))return true;
+  }
+  return false;
+}
+/* Sharp Teeth is played from behind: some other side holds more of the field. */
+function wolfBehind(p){
+  const cnt=tm=>{let n=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&teamOf(t.owner)===tm)n++;}return n;};
+  const mine=cnt(teamOf(p));
+  return teamsInPlay().some(tm=>tm!==teamOf(p)&&cnt(tm)>mine);
+}
 function mCurseT(b,i,live){
   const t=b[i]&&b[i].teece; if(!t)return false;
   if(t.mcursed){
@@ -7349,7 +7530,7 @@ function scanDeaths(b){
   };
   const mark=(vi,ki)=>{const v=b[vi].teece;if(!dead[vi])dead[vi]={cell:vi,t:v,killers:[]};
     if(ki!=null&&dead[vi].killers.indexOf(b[ki].teece.uid)<0)dead[vi].killers.push(b[ki].teece.uid);};
-  const immune=i=>b[i].teece&&(b[i].teece.immortalOwner!=null||zeusSky(b[i].teece)||runeGuarded(b[i].teece)||blessedOn(b,i));
+  const immune=i=>b[i].teece&&(b[i].teece.immortalOwner!=null||zeusSky(b[i].teece)||runeGuarded(b[i].teece)||blessedOn(b,i)||packGuarded(b,i));
   /* Harbinger of War: while it stands, nobody has allies. Every pairing on the
      board is a fight, its own side included -- and it is standing in the middle
      of that board itself. */
@@ -8239,14 +8420,16 @@ async function FXRUN(st,ctx){
     }
     if(!cands.length)return none(st.where==='web'?'Nothing is standing on the Web.':'No valid target.');
     const c=await pickCell(cands,'Choose a Teece'+(st.where==='web'?' on the Web':'')+': '+sgn(st.n)+durTxt(dur)+'.',
-      (bb,i)=>{applyModT(bb[i].teece,st.n,dur);},!!st.may);
+      (bb,i)=>{applyModT(bb[i].teece,st.n,dur);if(st.kw)bb[i].teece.kwTemp=bb[i].teece.kwTemp.concat([st.kw]);},!!st.may);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     if(wardMagic(b,c,p)){ctx.last=c;await anim([c],'zap');return;}
     if(tapeSave(b,c,p)){ctx.last=c;await anim([c],'zap');return;}
     applyModT(b[c].teece,st.n,dur);
     ctx.last=c;
-    log(nm(b[c].teece)+' gets '+sgn(st.n)+durTxt(dur)+'.');
+    /* Howl: the number and a keyword for the turn, together. */
+    if(st.kw&&b[c].teece.kwTemp.indexOf(st.kw)<0)b[c].teece.kwTemp.push(st.kw);
+    log(nm(b[c].teece)+' gets '+sgn(st.n)+(st.kw?' and '+kwLabel(st.kw):'')+durTxt(dur)+'.');
     if(b[c].teece&&!sameTeam(b[c].teece.owner,p)){noteTargeted(p);if(st.n<0)noteEnemyLoss(p,c,-st.n,false);}
     else noteSelfTarget(p);
     await anim([c],'zap');
@@ -8288,6 +8471,33 @@ async function FXRUN(st,ctx){
     }
     log('All '+(st.who==='ally'?'allied':'enemy')+' Teece get '+sgn(st.n)+durTxt(st.dur)+'.');
     await anim(mhit,'zap');
+    return;}
+  case 'packCall':{
+    if(!ctx.t||ctx.cell==null||b[ctx.cell].teece!==ctx.t)return;
+    const sp=packCall(b,ctx.cell,true);
+    if(sp.length)await anim(sp,'placed',140);
+    return;}
+  case 'packPromote':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&t.isToken)cands.push(i);}
+    if(!cands.length)return none('You have no Token to promote.');
+    const promote=(bb,i,live)=>{
+      const t=bb[i].teece;
+      t.isToken=false;t.packLeader=true;delete t.packOf;
+      return packCall(bb,i,live);
+    };
+    const c=await pickCell(cands,'Choose a Token to lead the pack.',(bb,i)=>{promote(bb,i,false);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    log(nm(b[c].teece)+' seizes the pack: it is a Pack Leader now, and no longer a Token.');
+    const sp=promote(b,c,true);
+    await anim([c].concat(sp),'placed',140);
+    return;}
+  case 'wolfTeeth':{
+    const pl=G.players[p];
+    pl.sharpTeeth=(pl.sharpTeeth||0)+(st.n||5);
+    pl.sharpTeethN=st.k||-3;
+    log('The next '+pl.sharpTeeth+' allies '+pname(p)+' plays bare their teeth.');
     return;}
   case 'copy':{
     if(!ctx.t||ctx.cell==null)return none('There is nothing here to copy.');
@@ -13785,7 +13995,7 @@ const isHeldSafe=t=>{
      so it has to be worked out from where the Teece is standing right now. */
   if(G&&G.board){
     const i=G.board.findIndex(c=>c.teece===t);
-    if(i>=0)return blessedOn(G.board,i);
+    if(i>=0)return blessedOn(G.board,i)||packGuarded(G.board,i);
   }
   return false;
 };
@@ -14211,6 +14421,8 @@ async function resolveCombat(){
     if(stale(ep))return;
     /* a curse lying under a body settles before anything else is read */
     mSweep();
+    /* a pack whose leader is gone leaves with it */
+    if(packSweepB(G.board,true).length&&HAS_DOM)render();
     /* stacked effects resolve first: nothing fights while a kill is pending */
     await drainFx();
     if(stale(ep)||G.over)return;
@@ -14620,11 +14832,14 @@ function sacPool(p,skipHand,cardId){
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&canEatSpiderling(b,i))cells.push(i);}
     return {cells,hands,worth:cells.length};
   }
+  /* ...or where the card being paid for says Tokens may pay: the Wolves' two
+     Bosses eat their own pack. */
+  const sacTok=cardId!=null&&CARDS[cardId]&&!!CARDS[cardId].sacTokens;
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
     /* A Token is not a card and cannot pay for one -- except where its own card
        says otherwise, which is what sacOK marks. */
-    if(t&&t.owner===p&&(!t.isToken||DEF(t).sacOK)&&canSacrifice(b,i))cells.push(i);
+    if(t&&t.owner===p&&(!t.isToken||DEF(t).sacOK||sacTok)&&canSacrifice(b,i))cells.push(i);
   }
   const pl=G.players[p];
   for(let x=0;x<pl.hand.length;x++){
@@ -14962,6 +15177,14 @@ async function playTeece(p,handIdx){
     if(pl.nextDefLeft<=0){pl.nextDefBonus=0;pl.nextDefLeft=0;pl.nextDefKind=null;}
   }
   if(pl.nextMod){const nmd=pl.nextMod;pl.nextMod=0;applyModT(t,nmd,'perm');log(nm(t)+' arrives with '+sgn(nmd)+'.');}
+  /* Sharp Teeth: a charge spent on each ally played, hung on the body itself
+     as a when-destroyed so it travels with it. */
+  if(pl.sharpTeeth>0){
+    pl.sharpTeeth--;
+    const k=pl.sharpTeethN||-3;
+    t.deathFx=(t.deathFx||[]).concat([{fx:'killer',n:k,dur:'perm'}]);
+    log(nm(t)+' bares Sharp Teeth: whatever destroys it gets '+sgn(k)+'.'+(pl.sharpTeeth?' ('+pl.sharpTeeth+' more to come.)':''));
+  }
   if(d.handMagic&&pl.handMagic&&pl.handMagic.turn===G.turnNum&&pl.handMagic.ids.indexOf(id)>=0){
     pl.handMagic.ids.splice(pl.handMagic.ids.indexOf(id),1);
     applyModT(t,d.handMagic.n,'temp');
@@ -15099,6 +15322,7 @@ async function playEquip(p,handIdx){
     if(!t)continue;
     if(t.owner!==p&&!(ed.anyOwner&&canTarget(b,i,p)))continue;
     if(ed.onlyToken&&!t.isToken)continue;
+    if(ed.onlyPackLeader&&!isPackLeader(t))continue;
     if(ed.onlySpiderling&&!isSpiderling(t))continue;
     cands.push(i);
   }
@@ -15107,12 +15331,12 @@ async function playEquip(p,handIdx){
   const hands=[];
   if(!ed.onlyToken&&!ed.onlySpiderling)for(let h=0;h<pl.hand.length;h++){
     if(h===handIdx)continue;
-    if(CARDS[pl.hand[h]].type==='teece')hands.push(h);
+    if(CARDS[pl.hand[h]].type==='teece'&&(!ed.onlyPackLeader||CARDS[pl.hand[h]].packLeader))hands.push(h);
   }
   /* The Runeblade can be set in a Runestone instead of into a hand. */
   const sheaths=ed.runeblade?sheathSpots(p):[];
   if(!cands.length&&!hands.length&&!sheaths.length){toast(ed.onlySpiderling?'No Spiderling to equip.':
-    ed.onlyToken?'No Drone to equip.':'No Teece to equip, on the board or in hand.');return false;}
+    ed.onlyToken?'No Token to equip.':ed.onlyPackLeader?'No Pack Leader to equip, on the board or in hand.':'No Teece to equip, on the board or in hand.');return false;}
   const targets=cands.concat(sheaths.filter(i=>cands.indexOf(i)<0));
   const sheathe=(bb,i)=>{const g=bb[i].ground;if(g)bb[i].ground=Object.assign({},g,{sheath:(g.sheath||[]).concat([{cardId:id,owner:p}])});};
   const c=await chooseCell(p,targets,'Choose a Teece for '+CARDS[id].name+(ed.anyOwner?' \u2014 either side\u2019s':'')+
@@ -15501,6 +15725,7 @@ async function playMagic(p,handIdx){
   const pl=G.players[p],id=pl.hand[handIdx],d=CARDS[id];
   if(d.onlyWhen&&!phaseIs(d.onlyWhen)){toast(d.name+' can only be played at '+(d.onlyWhen==='night'?'Night':'Day')+'.');return false;}
   if(hexOn(p,'silence')){toast('Silenced: you cannot cast magic.');return false;}
+  if(d.onlyBehind&&!wolfBehind(p)){toast(d.name+' can only be played while an opponent has more Teece on the field than you.');return false;}
   if(hexOn(p,'nomagic')){toast('The Adversary\u2019s PACT holds: you cannot play magic yet.');return false;}
   /* A Dimension of Energy on the field eats the spell before it is cast. It
      takes everybody's, not only its owner's, and the card is not spent -- it
@@ -16400,10 +16625,12 @@ function simDeath(b,d){
 function simCombat(b){
   let guard=0;
   while(guard++<30){
+    packSweepB(b,false);
     const deaths=scanDeaths(b);
     if(!deaths.length)break;
     for(const d of deaths)simDeath(b,d);
   }
+  packSweepB(b,false);
 }
 /* Which side faces which panel is the whole of basic positioning. A side
    pressed against the rim of the board is never fought over, so it counts for
@@ -16514,6 +16741,8 @@ function simOnPlay(b,cell,id,p){
         if(st.who==='enemy'&&ally)continue;
         applyModT(o,st.n,st.dur);
       }
+    }else if(st.fx==='packCall'){
+      packCall(b,cell,false);
     }else if(st.fx==='copy'){
       const e=ADJ[cell].filter(j=>openAt(b,j));
       /* all: every one of them, which is the whole reason a Locust Brood is
@@ -16602,6 +16831,7 @@ function aiPlanFor(id){
       const t=b[i].teece;
       if(!t||t.owner!==p)continue;
       if(d.onlyToken&&!t.isToken)continue;
+      if(d.onlyPackLeader&&!isPackLeader(t))continue;
       if(d.onlySpiderling&&!isSpiderling(t))continue;
       cands.push(i);
     }
@@ -16680,6 +16910,8 @@ function aiPlanFor(id){
     /* The Cursed Tomb pays only when a curse lands, so it is worth most under
        an uncursed enemy and something on an empty panel the curses will reach. */
     if(d.gMCurseHit)bonus+=0.9;
+    /* The Wolf Den pays the pack copies that land on it later. */
+    if(d.gTokenMod)bonus+=0.8;
     return {thr:0.8,bonus,cands,mut:(bb,i)=>{
       if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
       else bb[i].ground={cardId:id,owner:p};
@@ -16740,6 +16972,18 @@ function aiPlanFor(id){
     const cands=[];for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
     if(!cands.length)return null;
     return {thr:2.2,cands,mut:(bb,i)=>{if(bb[i].teece)bb[i].teece.base=[6,6,6,6];}};
+  }
+  /* The Wolves' two spells that are not Howl. Sharp Teeth pays out later, on
+     five bodies not yet played, so it names its own worth. */
+  if(st.fx==='wolfTeeth'){
+    if(d.onlyBehind&&!wolfBehind(p))return null;
+    return {thr:0.8,bonus:1.2,cands:[0],mut:()=>{}};
+  }
+  if(st.fx==='packPromote'){
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&t.isToken)cands.push(i);}
+    if(!cands.length)return null;
+    return {thr:2.0,cands,mut:(bb,i)=>{const t=bb[i].teece;if(!t)return;t.isToken=false;t.packLeader=true;delete t.packOf;packCall(bb,i,false);}};
   }
   /* Soul Harvest puts nothing on the board, but a SOUL is a PACT paid. */
   if(st.fx==='soulGain')return {thr:0.8,bonus:1.0,cands:[0],mut:()=>{}};
@@ -17204,14 +17448,17 @@ async function aiPlayTeece(){
     /* A card paid for in Spiderlings reads its own pool; everything else
        keeps to real bodies, as it always has. */
     const sacables=d.sacSpiderling?sacPool(p,h,id).cells:[];
-    if(!d.sacSpiderling)for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken&&canSacrifice(b,i))sacables.push(i);}
+    if(!d.sacSpiderling)for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&(!t.isToken||d.sacTokens)&&canSacrifice(b,i))sacables.push(i);}
     if(sacables.length<need)continue;
-    if(need>0&&!d.sacSpiderling&&realCount(p)-need<1&&totalTeece(p)-need<2)continue;
     let sacP=[];
     if(need>0){
-      const scored=sacables.map(i=>({i,v:effSides(b,i).reduce((a,c)=>a+c,0)})).sort((a,c)=>a.v-c.v);
+      /* Tokens first where they may pay: they are not cards, so giving one up
+         costs nothing in the hand or the graveyard. */
+      const scored=sacables.map(i=>({i,v:effSides(b,i).reduce((a,c)=>a+c,0)-(b[i].teece.isToken?100:0)})).sort((a,c)=>a.v-c.v);
       sacP=scored.slice(0,need).map(x=>x.i);
     }
+    const realSac=sacP.filter(i=>!b[i].teece.isToken).length;
+    if(need>0&&!d.sacSpiderling&&realSac>0&&realCount(p)-realSac<1&&totalTeece(p)-realSac<2)continue;
     const rots=(d.onPlay||[]).some(s=>s.fx==='rot')?[0,1,-1]:[0];
     /* the panels a sacrifice is about to clear are landing spots too */
     const spots=empt.slice();
@@ -17247,6 +17494,10 @@ async function aiActs(depth){
     const t=b[i].teece;
     if(!t||t.owner!==p)continue;
     for(const ent of actsOf(b,i)){
+      /* An earlier ability may have moved it off this panel (a Bloodlust,
+         a Teleport) or taken it off the board: the rest of its list is
+         read again wherever it went, on a later pass, not here. */
+      if(b[i].teece!==t)break;
       if(!actAvailable(t,ent))continue;
       const st=ent.act.steps[0];
       let gain=-1;
@@ -18662,6 +18913,8 @@ function statusesFor(p){
     const pq=G.players[q],mine=sameTeam(p,q);
     if(pq.mKillNext)push('mkill'+q,mine?'good':'bad','Pharaoh\u2019s order'+(pq.mKillNext>1?' \u00D7'+pq.mKillNext:''),
       'The next '+(pq.mKillNext>1?pq.mKillNext+' enemy Teece of ':'enemy Teece of ')+pname(q)+' to be cursed '+(pq.mKillNext>1?'are':'is')+' destroyed.');
+    if(pq.sharpTeeth)push('teeth'+q,mine?'good':'bad','Sharp Teeth: '+pq.sharpTeeth+' to come',
+      'The next '+pq.sharpTeeth+' allies '+pname(q)+' plays gain “When destroyed: the Teece that destroyed it gets '+sgn(pq.sharpTeethN||-3)+'.”');
     if(pq.mEnterCursed)push('menter'+q,mine?'good':'bad','Tomb Lord: '+pq.mEnterCursed+' to come',
       'The next '+pq.mEnterCursed+' Teece '+pname(q)+'\u2019s opponents play or summon arrive cursed.');
   }
@@ -20875,6 +21128,7 @@ if(typeof module!=='undefined'){
     aiFuseHand,aiFusionMagicPlan,fusionsInPlay,forgetFusions,
     bulletsOf,shotsLeft,gainBullets,shootTeece,fireGunAt,canFireGun,gunTargets,gunGodFor,aiGun,aiGunPick,MAG_SIZE,
     newState,playFromHand,endTurn,runAct,CARDS,POOL,CLASSIC,DECKS,makeTeece,defOf,canTarget,processDeath,resolveCombat,
+    packCall,packSweepB,isPackLeader,packGuarded,howlGranted,wolfBehind,sacPool,invulnText,movePool,
     startTurn,getG:()=>G,setG:s=>{G=s;},actsOf,actAvailable,effSides,scanDeaths,render,
     aiDraftDeck,aiTurn,realCount,totalTeece,hcapLabel,HCAPS,
     getGeom:()=>({BW,BN,ADJ,DIAG,CN}),buildGeometry,
