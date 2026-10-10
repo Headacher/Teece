@@ -1137,7 +1137,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:150,date:'2026-10-10'};
+const VERSION={build:151,date:'2026-10-10'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4687,15 +4687,12 @@ function noteEnemyLoss(byPlayer,cell,amt,wasDrain,byTeece){
   if(byPlayer==null||!G||!G.board)return;
   const b=G.board,victim=b[cell]&&b[cell].teece;
   if(!victim||sameTeam(victim.owner,byPlayer))return;
+  bloodScent(byPlayer,victim);
   for(let j=0;j<BN;j++){
     const w=b[j].teece;
     if(!w||w.silenced||!sameTeam(w.owner,byPlayer))continue;
     const wd=DEF(w);
-    if(wd.onEnemyLoss){
-      for(const k of (wd.onEnemyLoss.kw||[]))if(w.kwTemp.indexOf(k)<0)w.kwTemp.push(k);
-      if(wd.onEnemyLoss.n)applyModT(w,wd.onEnemyLoss.n,wd.onEnemyLoss.dur||'temp');
-      log(nm(w)+' scents blood: '+(wd.onEnemyLoss.kw||[]).join(' and ')+' until the end of the turn.');
-    }
+    /* the Bloodfeaster is answered once, below, for the whole side */
     if(wasDrain&&wd.onDrain){
       applyModT(w,wd.onDrain.n,wd.onDrain.dur||'temp');
       if(wd.onDrain.move)w.drainMove=true;
@@ -6658,7 +6655,7 @@ function defOf(b,i,raw){
      is read outside the silence test rather than inside it. */
   if(b[i].ground&&DEF(t).defOnGround&&!t.silenced)d+=DEF(t).defOnGround;
   if(b[i].defMark&&b.some(c=>c.teece&&c.teece.uid===b[i].defMark.uid))d+=b[i].defMark.n;
-  if(sameTeam(t.owner,0))d+=perkN('armour');
+  if(sameTeam(t.owner,0))d+=2*perkN('armour');
   const fdf=formOf(t);
   if(fdf&&fdf.def)d+=fdf.def;
   if(isSpiderling(t)&&isWebbed(b,i)){
@@ -7555,6 +7552,27 @@ function applyModT(t,n,dur){
   const a=dur==='temp'?t.temp:t.perm;
   for(let k=0;k<4;k++)a[k]+=n;
   if(n<0&&DEF(t).dieOnLoss)forceDeath(t);
+  /* Any effect of one side costing the other side attributes -- a spell, an
+     aura-free trigger, an ability, whatever fx it was -- is what the
+     Bloodfeaster waits for. Only on the live board: the AI weighs moves on
+     cloned boards, and a clone's body is never on G.board. */
+  if(n<0&&FX_BY!=null&&G&&G.board&&!sameTeam(t.owner,FX_BY)&&G.board.some(c=>c.teece===t))bloodScent(FX_BY,t);
+}
+/* The Bloodfeaster's reaction, once per turn's worth of keywords: a second
+   loss in the same turn changes nothing and says nothing. */
+function bloodScent(byPlayer,victim){
+  if(byPlayer==null||!G||!G.board||!victim||sameTeam(victim.owner,byPlayer))return;
+  for(let j=0;j<BN;j++){
+    const w=G.board[j].teece;
+    if(!w||w.silenced||!sameTeam(w.owner,byPlayer))continue;
+    const el=DEF(w).onEnemyLoss;
+    if(!el)continue;
+    const fresh=(el.kw||[]).filter(k=>w.kwTemp.indexOf(k)<0);
+    if(!fresh.length&&!el.n)continue;
+    for(const k of fresh)w.kwTemp.push(k);
+    if(el.n)applyModT(w,el.n,el.dur||'temp');
+    log(nm(w)+' scents blood: '+(el.kw||[]).join(' and ')+' until the end of the turn.');
+  }
 }
 function applyDef(t,n){if(n<0&&isSteadfast(t))return;t.defPerm=(t.defPerm||0)+n;}
 const sgn=n=>(n>0?'+':'')+n;
@@ -8117,7 +8135,16 @@ async function aiRunes(){
     if(G.over)return;
   }
 }
+/* Whose effect is running right now. Set for the length of every runSteps --
+   a card played, cast, triggered or activated -- so applyModT can tell that a
+   loss it is applying was one side's effect landing on the other. */
+let FX_BY=null;
 async function runSteps(steps,ctx){
+  const prev=FX_BY;
+  FX_BY=ctx?(ctx.deadOwner!=null?ctx.deadOwner:ctx.p):null;
+  try{return await runStepsBody(steps,ctx);}finally{FX_BY=prev;}
+}
+async function runStepsBody(steps,ctx){
   const list=steps||[];
   let did=list.length===0,offPhase=0,ran=0;
   for(const st of list){
@@ -14334,7 +14361,7 @@ const PERKS=[
   {key:'foeMore',    name:'Dug In',        text:'The enemy needs one Teece more of a lead to win the field.'},
   {key:'vanguard',   name:'First Strike',  text:'You take the first turn of every level.'},
   {key:'draftMore',  name:'Quartermaster', text:'Draft one more card between levels.'},
-  {key:'armour',     name:'Reinforced',    text:'All your Teece have +1 Defence.'},
+  {key:'armour',     name:'Reinforced',    text:'All your Teece have +2 Defence.'},
   {key:'handMore',   name:'Well Supplied', text:'Start every level holding one more card.'},
   {key:'equipPlus',  name:'Whetted Gear',  text:'Every equip of yours gives +1 more.'},
   {key:'tokensCount',name:'Swarm Tactics', text:'Your Tokens count toward winning the field.'},
