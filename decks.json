@@ -392,7 +392,8 @@
       "how": [
         "Spiderlings are Tokens, and Tokens never count toward winning: they are fuel and board, never a lead.",
         "The corners are never Web, which makes them the one place a Spiderling gets neither Skitter nor its extra Defence.",
-        "Brood Mother reprints every Spiderling on the Web at 12/12/12/12 — either side's — and stops them being sacrificed at all."
+        "Brood Mother reprints every Spiderling on the Web at 12/12/12/12 — either side's — and stops them being sacrificed at all.",
+        "Spider is 10 on every side and costs one of your Spiderlings to play, and nothing else will pay for it. Broodfather and Brood Mother can be thrown away from your hand to summon a Spiderling, so a boss you cannot afford yet still feeds the swarm."
       ],
       "level": "intermediate",
       "kind": "swarm"

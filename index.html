@@ -1137,7 +1137,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:152,date:'2026-10-10'};
+const VERSION={build:153,date:'2026-10-10'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -2105,7 +2105,7 @@ function canPlay(p,cardId){
     /* Read through the one pool playTeece reads, or the forced-play rule and
        playTeece would disagree about whether a Boss can be afforded. The card
        being weighed is itself in hand, and cannot pay for its own play. */
-    if(need&&sacPool(p,G.players[p].hand.indexOf(cardId)).worth<need)return false;
+    if(need&&sacPool(p,G.players[p].hand.indexOf(cardId),cardId).worth<need)return false;
     return true;
   }
   if(cd.type==='magic')return !hexOn(p,'silence')&&!hexOn(p,'nomagic');
@@ -3035,9 +3035,8 @@ const CARDS = {
     onDeath:[{fx:'spiderling',where:'adjAll'}]},
  565:{name:'Spiderlingling',type:'teece',sides:[2,2,2,2],spider:true,onSpiderling:{n:1},
     text:'Whenever a Spiderling is summoned or destroyed anywhere, either side\u2019s: +1 permanently.'},
- 566:{name:'Spider',type:'teece',sides:[8,8,8,8],spider:true,
-    text:'When played: sacrifice a Spiderling, or this Teece gets -4.',
-    onPlay:[{fx:'sacSpiderling',elseMod:{n:-4,dur:'perm'}}]},
+ 566:{name:'Spider',type:'teece',sides:[10,10,10,10],spider:true,sac:1,sacSpiderling:true,
+    text:'Sacrifice a Spiderling to play.'},
  567:{name:'Web Crawler',type:'teece',sides:[5,4,5,4],spider:true,
     text:'When played: summon a 4/4/4/4 Spiderling that cannot be destroyed until the end of the turn. While it stands on the Web, once per your turn: sacrifice a Spiderling; an enemy on the Web gets -5.',
     onPlay:[{fx:'spiderling',count:1,shield:true}],
@@ -3054,10 +3053,12 @@ const CARDS = {
     text:'When played: sacrifice any number of Spiderlings, then return that many Teece to their owners\u2019 hands.',
     onPlay:[{fx:'sacSpiderling',any:true},{fx:'bounce',countFrom:'sac'}]},
  571:{name:'Broodfather',type:'teece',sides:[8,8,8,8],spider:true,sac:1,
-    text:'Sacrifice one fielded Teece to play. When played: a 4/4/4/4 Spiderling appears on every empty Web panel.',
+    handDiscard:[{fx:'spiderling',req:true}],
+    text:'Sacrifice one fielded Teece to play. When played: a 4/4/4/4 Spiderling appears on every empty Web panel. Discard this from your hand: summon a 4/4/4/4 Spiderling.',
     onPlay:[{fx:'spiderling',where:'webAll'}]},
  572:{name:'Brood Mother',type:'teece',sides:[8,8,8,8],spider:true,sac:2,webBrood:true,
-    text:'Sacrifice two fielded Teece to play. While she stands, every Spiderling on the Web \u2014 either side\u2019s \u2014 has base 12/12/12/12 and can no longer be sacrificed.'},
+    handDiscard:[{fx:'spiderling',req:true}],
+    text:'Sacrifice two fielded Teece to play. While she stands, every Spiderling on the Web \u2014 either side\u2019s \u2014 has base 12/12/12/12 and can no longer be sacrificed. Discard this from your hand: summon a 4/4/4/4 Spiderling.'},
  573:{name:'Burst',type:'magic',spider:true,
     text:'Select up to four empty Web panels; a 4/4/4/4 Spiderling appears on each.',
     cast:[{fx:'spiderling',where:'web',count:4,may:true}]},
@@ -14609,8 +14610,16 @@ function sacsNeeded(id,p){
    Cultist of Babble's Worthy. skipHand is the card being played: it is still
    sitting in the hand while its own price is counted, and it cannot pay for
    itself. */
-function sacPool(p,skipHand){
+function sacPool(p,skipHand,cardId){
   const b=G.board,cells=[],hands=[];
+  /* A card printed "sacrifice a Spiderling" is paid for in Spiderlings and in
+     nothing else: not other bodies, not a card out of the hand. The Spiderling
+     is a Token, which normally pays for nothing, so this is its own pool --
+     and canEatSpiderling still says no to one a Brood Mother is guarding. */
+  if(cardId!=null&&CARDS[cardId]&&CARDS[cardId].sacSpiderling){
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&canEatSpiderling(b,i))cells.push(i);}
+    return {cells,hands,worth:cells.length};
+  }
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
     /* A Token is not a card and cannot pay for one -- except where its own card
@@ -14789,14 +14798,14 @@ async function playTeece(p,handIdx){
   if(G.teecePlayed&&!free){toast(teeceCap(p)>1?'Every Teece for this turn is already played.':'Only one Teece per turn.');return false;}
   if(hexOn(p,'freeze')){toast('Frozen: you cannot play Teece.');return false;}
   const need=sacsNeeded(id,p);
-  const pool=sacPool(p,handIdx);
+  const pool=sacPool(p,handIdx,id);
   const sacables=pool.cells;
   /* The pool is measured in what it is WORTH rather than how many bodies are
      in it, and the asking stops as soon as the price is met. A Cultist of
      Babble in hand is one of those payments without ever reaching the field. */
   const worthAt=i=>{const t=b[i].teece;return (t&&DEF(t).sacWorth)||1;};
   if(pool.worth<need){
-    toast(pool.hands.length?'Not enough to sacrifice.':'Not enough Teece to sacrifice.');
+    toast(d.sacSpiderling?'You need a Spiderling of yours to sacrifice.':pool.hands.length?'Not enough to sacrifice.':'Not enough Teece to sacrifice.');
     return false;
   }
   const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
@@ -17192,9 +17201,12 @@ async function aiPlayTeece(){
     /* once the turn's play is spent, only a card called up free is still on */
     if(G.teecePlayed&&!freePlayFor(p,id))continue;
     const need=sacsNeeded(id,p);
-    const sacables=[];for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken&&canSacrifice(b,i))sacables.push(i);}
+    /* A card paid for in Spiderlings reads its own pool; everything else
+       keeps to real bodies, as it always has. */
+    const sacables=d.sacSpiderling?sacPool(p,h,id).cells:[];
+    if(!d.sacSpiderling)for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.isToken&&canSacrifice(b,i))sacables.push(i);}
     if(sacables.length<need)continue;
-    if(need>0&&realCount(p)-need<1&&totalTeece(p)-need<2)continue;
+    if(need>0&&!d.sacSpiderling&&realCount(p)-need<1&&totalTeece(p)-need<2)continue;
     let sacP=[];
     if(need>0){
       const scored=sacables.map(i=>({i,v:effSides(b,i).reduce((a,c)=>a+c,0)})).sort((a,c)=>a.v-c.v);
