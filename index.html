@@ -1142,7 +1142,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:164,date:'2026-10-11'};
+const VERSION={build:165,date:'2026-10-11'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -5885,7 +5885,7 @@ function teamName(tm){
 /* A woken battleground answers to its own name while it is on its feet. It is
    that card walking around, not a token standing in for it, and a player has to
    be able to see which battleground is loose on the board. */
-function nm(t){const d=DEF(t);return (t.animGround?CARDS[t.animGround.cardId].name:d.name)+(t.isCopy?' (copy)':'');}
+function nm(t){const d=DEF(t);return (t.animGround?CARDS[t.animGround.cardId].name:d.name)+(t.promoted?' (promoted)':t.isCopy?' (copy)':'');}
 /* pname() returns "You" for the human seat, so any verb after it has to agree. */
 const vb=(p,third,second)=>(G&&G.vsAI&&p===0)?second:third;
 function log(m){G.log.unshift(m);if(G.log.length>140)G.log.pop();if(HAS_DOM)renderLog();}
@@ -8514,7 +8514,7 @@ async function FXRUN(st,ctx){
     if(!cands.length)return none('You have no Token to promote.');
     const promote=(bb,i,live)=>{
       const t=bb[i].teece;
-      t.packLeader=true;delete t.packOf;
+      t.packLeader=true;t.promoted=true;delete t.packOf;
       return packCall(bb,i,live);
     };
     const c=await pickCell(cands,'Choose a Token to lead the pack.',(bb,i)=>{promote(bb,i,false);},false);
