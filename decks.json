@@ -1040,8 +1040,8 @@
       "blurb": "A beginner swarm deck that fills the board from one card. Pack Leader: when played, a Token copy of the Teece appears on every free panel beside it, and when the Pack Leader leaves the field, so do its copies. Howl gives an ally +3 for the turn and Bloodlust, which teleports it to a panel beside an enemy.",
       "how": [
         "Play Pack Leaders where the most panels around them are free: a Grey Wolf in the middle of an empty board is five bodies. The copies are Tokens, so they never count toward board domination, but they fight, they block, and they carry everything printed on the card except Pack Leader itself.",
-        "The copies keep their card’s text. A Den Mother’s copies give +1 to whatever stands beside them, a Wolf Pup’s give +3 and Bloodlust, and a Pack Warden’s copies make your Pack Leaders Invincible too, the Warden included.",
-        "Kill the leader and the pack goes with it. Pack Warden protects the leaders, Alpha’s Collar adds +4 to one, and Power Struggle turns a copy into a new leader with a pack of its own that no longer depends on the old one.",
+        "The copies keep their card’s text. A Den Mother’s copies give +1 to whatever stands beside them, a Wolf Pup’s give +3 and Bloodlust, and a Pack Warden’s copies count as a Warden too.",
+        "Kill the leader and the pack goes with it. With a Pack Warden out, a Pack Leader that has two or more of its own copies beside it cannot be destroyed, so thin the pack first; Alpha’s Collar adds +4 to one, and Power Struggle turns a copy into a new leader with a pack of its own that no longer depends on the old one.",
         "Dire Wolf and Fenrir can be paid for with Tokens, so a pack is a Boss waiting to happen. Fenrir gives every other Teece you have Howl. Lone Wolf is a big body that weakens your own Tokens."
       ],
       "level": "beginner",

@@ -1142,7 +1142,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:161,date:'2026-10-11'};
+const VERSION={build:162,date:'2026-10-11'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1214,7 +1214,7 @@ const KEYWORDS={
   packleader:'When played: a Token copy of it appears on every free panel beside it. The copies carry everything printed on the card except Pack Leader, and they leave the field the moment the Pack Leader does.',
   bloodlust:'Once per your turn, teleport to any free panel beside an enemy.',
   howl:'Once per your turn, select an ally: it gets +3 and Bloodlust until the end of the turn.',
-  invincible:'It cannot be destroyed.',
+  invincible:'Pack Warden: your Pack Leaders cannot be destroyed while two or more of their own copies stand beside them.',
   mummywrap:'Once per your turn for each Mummy Wrap it has: fire a bandage up, right, down or left. If it hits a Teece, pull that Teece one space toward this one, and an enemy also gets -2. If it hits the wall, this Teece slides to the panel beside the wall. Every Mummy has one.',
   skitter:'Once per your turn, move one space up, down or sideways. Spiders and Spiderlings have it while they stand on the Web.',
   teleport:'Once per your turn, move to any empty panel on the board.',
@@ -4580,7 +4580,7 @@ const CARDS = {
  1085:{name:'Grey Wolf',type:'teece',sides:[4,2,4,4],packLeader:true,onPlay:[{fx:'packCall'}],
     text:'Pack Leader.'},
  1086:{name:'Pack Warden',type:'teece',sides:[0,0,0,8],packLeader:true,packGuard:true,onPlay:[{fx:'packCall'}],
-    text:'Pack Leader. Your other Pack Leaders are Invincible: they cannot be destroyed.'},
+    text:'Pack Leader. Your Pack Leaders cannot be destroyed while two or more of their own copies stand beside them.'},
  1087:{name:'Wolf Pup',type:'teece',sides:[1,1,1,1],packLeader:true,
     aura:{who:'ally',where:'adj',n:3,kw:['bloodlust']},onPlay:[{fx:'packCall'}],
     text:'Pack Leader. Adjacent allies have +3 and Bloodlust.'},
@@ -4928,7 +4928,7 @@ function invulnText(b,i){
     return 'Cannot be destroyed until '+until+'.';
   }
   if(runeGuarded(t))return 'Cannot be destroyed: it holds the Runeblade\u2019s Chosen, for as long as that sword stays on the field.';
-  if(packGuarded(b,i))return 'Invincible: a Pack Warden stands with it, so this Pack Leader cannot be destroyed.';
+  if(packGuarded(b,i))return 'Cannot be destroyed: a Pack Warden stands with it, and '+packCopiesAdj(b,i)+' of its own copies are beside it. Bring that below two and it can be destroyed again.';
   if(blessedOn(b,i))return 'Cannot be destroyed: it is blessed, standing with an ally, '+
     'and its side outnumbers every other. It becomes destructible again the moment any of that stops being true.';
   return '';
@@ -7172,14 +7172,25 @@ function packSweepB(b,live){
   }
   return gone;
 }
-/* "Your other Pack Leaders are Invincible": the Pack Warden's copies print it
-   too, which is how a Warden keeps the pack's spine standing. */
+/* Pack Warden: "Your Pack Leaders can't be destroyed while adjacent to two or
+   more of their copies." Read while any Pack Warden (or a copy of one) of the
+   same side stands -- the Warden counts itself -- and only a leader's OWN
+   copies count, so killing copies off its flanks opens it back up. */
+const PACK_GUARD_N=2;
+function packCopiesAdj(b,i){
+  const t=b[i]&&b[i].teece;
+  if(!t)return 0;
+  let n=0;
+  for(const j of ADJ[i]){const o=b[j].teece;if(o&&o.packOf===t.uid)n++;}
+  return n;
+}
 function packGuarded(b,i){
   const t=b[i]&&b[i].teece;
   if(!isPackLeader(t))return false;
+  if(packCopiesAdj(b,i)<PACK_GUARD_N)return false;
   for(let j=0;j<BN;j++){
     const o=b[j].teece;
-    if(!o||j===i||o.silenced||!DEF(o).packGuard)continue;
+    if(!o||o.silenced||!DEF(o).packGuard)continue;
     if(sameTeam(o.owner,t.owner))return true;
   }
   return false;
