@@ -1142,7 +1142,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:162,date:'2026-10-11'};
+const VERSION={build:163,date:'2026-10-11'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4598,7 +4598,7 @@ const CARDS = {
     text:'Sacrifice two fielded Teece to play; Tokens can pay for it. Pack Leader.'},
  1093:{name:'Fenrir',type:'teece',sides:[9,9,9,9],sac:4,def:3,sacTokens:true,howlAll:true,
     text:'Sacrifice four fielded Teece to play; Tokens can pay for it. Defence 3. All your other Teece have Howl: once per your turn, select an ally; it gets +3 and Bloodlust until the end of the turn.'},
- 1094:{name:'Power Struggle',type:'magic',cast:[{fx:'packPromote'}],
+ 1094:{name:'Wolven Promotion',type:'magic',cast:[{fx:'packPromote'}],
     text:'Select one of your Tokens: it gains Pack Leader. It is still a Token. A Token copy of it appears on every free panel beside it, and those copies leave the field when it does.'},
  1095:{name:'Howl',type:'magic',rebound:true,
     cast:[{fx:'mod',who:'any',n:3,dur:'temp',kw:'bloodlust'}],
@@ -7119,7 +7119,7 @@ function moveT(b,from,to,live){
 const isMummy=t=>!!(t&&DEF(t).mummy);
 /* ---- the Wolf pack ----
    A Pack Leader is either a body that is not a Token and prints packLeader
-   (silence takes that away), or one Power Struggle made a leader
+   (silence takes that away), or one Wolven Promotion made a leader
    (t.packLeader, which nothing takes away) -- that one is still a Token and
    still holds no ground for domination. Its copies are Tokens tied to it by uid in
    t.packOf, and packSweepB lifts every copy whose leader is no longer standing
