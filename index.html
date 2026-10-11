@@ -1142,7 +1142,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:159,date:'2026-10-11'};
+const VERSION={build:160,date:'2026-10-11'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4294,7 +4294,7 @@ const CARDS = {
  923:{name:'Amulet of Power',type:'equip',mod:2,grants:{onDeath:[{fx:'conjureEl'}]},
     text:'Equipped Teece gets +2. When it is destroyed: conjure any element.'},
  924:{name:'Ley Line',type:'ground',gConjure:true,
-    text:'When a Teece is played or moved onto this panel: its controller conjures any element.'},
+    text:'When a Teece is played or moved onto this panel: that Teece conjures any element.'},
  925:{name:'Mana Font',type:'ground',gOnMagic:true,
     text:'When the controller of the Teece on this panel plays a magic card: that Teece gets +3 and Flying until the end of the turn.'},
  /* the four elements */
@@ -13209,8 +13209,8 @@ async function FXRUN(st,ctx){
   /* ---- Wizard ---- */
   /* An element into the hand. st.give hands over exactly those; st.opts (or
      all four) is a choice, made st.n times. A Teece wearing the Oakwood Staff
-     conjures twice as much, and a battleground conjuring for whoever stands on
-     it is not the Teece conjuring, so it passes noDouble. */
+     conjures twice as much -- including when a Ley Line makes it conjure. A
+     step that should never be doubled passes noDouble. */
   case 'conjureEl':{
     const own=ctx.deadOwner!=null?ctx.deadOwner:p;
     const staff=!st.noDouble&&ctx.t&&ctx.t.equips&&ctx.t.equips.some(e=>{const g=eqG(e);return g&&g.conjureTwice;});
@@ -19596,7 +19596,9 @@ async function groundArrive(cell){
   const b=G.board,t=b[cell]&&b[cell].teece,g=b[cell]&&b[cell].ground;
   if(!t||!g||g.gsil||!groundFlag(g,'gConjure'))return;
   log(nm(t)+' steps onto the Ley Line.');
-  await runSteps([{fx:'conjureEl',noDouble:true}],{p:t.owner,cell,t,first:false});
+  /* The Teece standing there is the one conjuring, so an Oakwood Staff on it
+     doubles what it brings up. */
+  await runSteps([{fx:'conjureEl'}],{p:t.owner,cell,t,first:false});
 }
 /* What the computer makes of a Wizard spell, weighed on a clone of the board
    the way every other plan is. Conjuring puts nothing on the board, so it is
