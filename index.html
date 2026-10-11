@@ -1142,7 +1142,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:166,date:'2026-10-11'};
+const VERSION={build:167,date:'2026-10-11'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -14287,8 +14287,9 @@ async function processDeath(d){
   }
   /* Undying: it never reaches the grave at all, so this stands ahead of every
      way a body is otherwise disposed of. A Teece already spent on a sacrifice
-     or eaten by an effect (ctx.consumed) is past getting up. */
-  if(!gone&&undyLeft(t)>0){
+     or eaten by an effect (ctx.consumed) is past getting up. Undying answers
+     being destroyed, so a body paid away as a cost (d.cost) stays down too. */
+  if(!gone&&!d.cost&&undyLeft(t)>0){
     if(await undyingReturn(t,cell))gone=true;
   }
   if(!gone){
