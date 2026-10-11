@@ -1142,7 +1142,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:163,date:'2026-10-11'};
+const VERSION={build:164,date:'2026-10-11'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4569,10 +4569,10 @@ const CARDS = {
     swarm. Bloodlust is a keyword (`bloodlust`) that offers a once-a-turn
     teleport onto a free panel beside an enemy; Howl is +3 for the turn and
     Bloodlust handed to an ally. ---- */
- 1082:{name:'Lone Wolf',type:'teece',sides:[9,9,10,9],
+ 1082:{name:'Lone Wolf',type:'teece',sides:[9,9,8,9],
     aura:{who:'ally',where:'global',n:-3,tokenOnly:true},
     text:'Your Tokens have -3.'},
- 1083:{name:'Den Mother',type:'teece',sides:[2,2,5,5],packLeader:true,
+ 1083:{name:'Den Mother',type:'teece',sides:[1,1,5,5],packLeader:true,
     aura:{who:'ally',where:'adj',n:1},onPlay:[{fx:'packCall'}],
     text:'Pack Leader. Adjacent allies have +1.'},
  1084:{name:'Timber Wolf',type:'teece',sides:[4,7,1,2],packLeader:true,onPlay:[{fx:'packCall'}],
@@ -4594,7 +4594,7 @@ const CARDS = {
     text:'Pack Leader.'},
  1091:{name:'Ironhide Wolf',type:'teece',sides:[2,2,2,2],def:5,packLeader:true,onPlay:[{fx:'packCall'}],
     text:'Pack Leader. Defence 5.'},
- 1092:{name:'Dire Wolf',type:'teece',sides:[8,8,8,8],sac:2,sacTokens:true,packLeader:true,onPlay:[{fx:'packCall'}],
+ 1092:{name:'Dire Wolf',type:'teece',sides:[7,7,7,7],sac:2,sacTokens:true,packLeader:true,onPlay:[{fx:'packCall'}],
     text:'Sacrifice two fielded Teece to play; Tokens can pay for it. Pack Leader.'},
  1093:{name:'Fenrir',type:'teece',sides:[9,9,9,9],sac:4,def:3,sacTokens:true,howlAll:true,
     text:'Sacrifice four fielded Teece to play; Tokens can pay for it. Defence 3. All your other Teece have Howl: once per your turn, select an ally; it gets +3 and Bloodlust until the end of the turn.'},
@@ -4603,8 +4603,8 @@ const CARDS = {
  1095:{name:'Howl',type:'magic',rebound:true,
     cast:[{fx:'mod',who:'any',n:3,dur:'temp',kw:'bloodlust'}],
     text:'Select a Teece; it gets +3 and Bloodlust until the end of the turn. The first time you cast this in a game, it returns to your hand.'},
- 1096:{name:'Sharp Teeth',type:'magic',onlyBehind:true,cast:[{fx:'wolfTeeth',n:5,k:-3}],
-    text:'Play only while an opponent has more Teece on the field than you. The next 5 of your allies that are destroyed give -3 to the Teece that destroyed them.'},
+ 1096:{name:'Sharp Teeth',type:'magic',onlyBehind:true,cast:[{fx:'wolfTeeth',n:5,k:-2}],
+    text:'Play only while an opponent has more Teece on the field than you. The next 5 of your allies that are destroyed give -2 to the Teece that destroyed them.'},
  1097:{name:'Alpha’s Collar',type:'equip',mod:4,onlyPackLeader:true,
     text:'Equip only to a Pack Leader. Equipped Teece gets +4.'},
  1098:{name:'Blood Fangs',type:'equip',mod:4,onlyToken:true,grants:{kw:['bloodlust']},
@@ -5617,7 +5617,7 @@ function newState(mode,vsAI,decks,extra){
     allFlying:false,swarmWin:null,swarmMind:0,turnCaps:{},
     souls:0,nextInvuln:0,skipTurns:0,hellfire:null,doomSelf:false,doomFoes:false,
     hexes:[],forget:0,confuse:null,recall:null,bullets:0,hotBullets:0,shots:0,hasGun:false,
-    mKillNext:0,mEnterCursed:0,sharpTeeth:0,sharpTeethN:-3});
+    mKillNext:0,mEnterCursed:0,sharpTeeth:0,sharpTeethN:-2});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
     width:BW,
@@ -7152,7 +7152,7 @@ function sharpTeethBite(t,killers){
   for(const kuid of killers)for(let i=0;i<BN;i++){const k=G.board[i].teece;if(k&&k.uid===kuid)ks.push(k);}
   if(!ks.length)return;
   pl.sharpTeeth--;
-  const n=pl.sharpTeethN||-3;
+  const n=pl.sharpTeethN||-2;
   for(const k of ks)applyModT(k,n,'perm');
   log('Sharp Teeth: '+ks.map(nm).join(' and ')+' '+(ks.length===1?'gets ':'get ')+sgn(n)+' for destroying '+nm(t)+'.'+
     (pl.sharpTeeth?' ('+pl.sharpTeeth+' more to come.)':''));
@@ -8527,7 +8527,7 @@ async function FXRUN(st,ctx){
   case 'wolfTeeth':{
     const pl=G.players[p];
     pl.sharpTeeth=(pl.sharpTeeth||0)+(st.n||5);
-    pl.sharpTeethN=st.k||-3;
+    pl.sharpTeethN=st.k||-2;
     log('Sharp Teeth: the next '+pl.sharpTeeth+' of '+pposs(p)+' allies to be destroyed give '+sgn(pl.sharpTeethN)+' to their killers.');
     return;}
   case 'copy':{
@@ -18938,7 +18938,7 @@ function statusesFor(p){
     if(pq.mKillNext)push('mkill'+q,mine?'good':'bad','Pharaoh\u2019s order'+(pq.mKillNext>1?' \u00D7'+pq.mKillNext:''),
       'The next '+(pq.mKillNext>1?pq.mKillNext+' enemy Teece of ':'enemy Teece of ')+pname(q)+' to be cursed '+(pq.mKillNext>1?'are':'is')+' destroyed.');
     if(pq.sharpTeeth)push('teeth'+q,mine?'good':'bad','Sharp Teeth: '+pq.sharpTeeth+' to come',
-      'The next '+pq.sharpTeeth+' of '+pposs(q)+' allies to be destroyed give '+sgn(pq.sharpTeethN||-3)+' to the Teece that destroyed them.');
+      'The next '+pq.sharpTeeth+' of '+pposs(q)+' allies to be destroyed give '+sgn(pq.sharpTeethN||-2)+' to the Teece that destroyed them.');
     if(pq.mEnterCursed)push('menter'+q,mine?'good':'bad','Tomb Lord: '+pq.mEnterCursed+' to come',
       'The next '+pq.mEnterCursed+' Teece '+pname(q)+'\u2019s opponents play or summon arrive cursed.');
   }
