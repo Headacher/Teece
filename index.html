@@ -1142,7 +1142,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:158,date:'2026-10-11'};
+const VERSION={build:159,date:'2026-10-11'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3145,8 +3145,8 @@ const CARDS = {
  607:{name:'Bloodfeaster',type:'teece',sides:[3,8,8,8],vampire:true,
     onEnemyLoss:{kw:['flying','ranged']},
     text:'When one of your effects costs an enemy attributes, this gains Flying and Ranged until the end of the turn.'},
- 608:{name:'Parasite',type:'teece',sides:[7,7,7,7],vampire:true,mustDrain:2,
-    text:'Twice per your turn: Drain 1, from an ally only. If it does not drain twice on your turn, by any means, it is destroyed.',
+ 608:{name:'Parasite',type:'teece',sides:[7,7,7,7],vampire:true,mustDrain:1,
+    text:'Twice per your turn: Drain 1, from an ally only. If it does not drain at least once on your turn, by any means, it is destroyed.',
     act:[{name:'Drain an ally',once:'turn',times:2,steps:[{fx:'drain',n:1,allyOnly:true}]}]},
  609:{name:'Puppeteer Lord',type:'teece',sides:[8,8,8,8],vampire:true,
     text:'When played: summon a 5/5/5/5 Meat Puppet Token that your opponent places.',
