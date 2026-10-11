@@ -1142,7 +1142,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:156,date:'2026-10-10'};
+const VERSION={build:157,date:'2026-10-11'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4604,7 +4604,7 @@ const CARDS = {
     cast:[{fx:'mod',who:'any',n:3,dur:'temp',kw:'bloodlust'}],
     text:'Select a Teece; it gets +3 and Bloodlust until the end of the turn. The first time you cast this in a game, it returns to your hand.'},
  1096:{name:'Sharp Teeth',type:'magic',onlyBehind:true,cast:[{fx:'wolfTeeth',n:5,k:-3}],
-    text:'Play only while an opponent has more Teece on the field than you. The next 5 allies you play or summon, Tokens included, gain "When destroyed: the Teece that destroyed it gets -3."'},
+    text:'Play only while an opponent has more Teece on the field than you. The next 5 of your allies that are destroyed give -3 to the Teece that destroyed them.'},
  1097:{name:'Alpha’s Collar',type:'equip',mod:4,onlyPackLeader:true,
     text:'Equip only to a Pack Leader. Equipped Teece gets +4.'},
  1098:{name:'Blood Fangs',type:'equip',mod:4,onlyToken:true,grants:{kw:['bloodlust']},
@@ -7062,9 +7062,6 @@ function putTeece(b,i,t,live,how){
      summoned. Walking is not being born, so moveT is excluded -- otherwise a
      Teece with Flying could pace back and forth and farm the panel. */
   if(how!=='move'){
-    /* Sharp Teeth arms a Token however it arrives -- a pack copy, a Swarm, a
-       Token out of a death -- the same as an ally played from hand. */
-    if(t.isToken)sharpTeethArm(t,live);
     /* The Locust Nest pays a body that ARRIVES on it, however it arrived:
        played from hand, copied onto the panel, summoned out of a graveyard or
        made as a Token. Walking on is still worth nothing, which is the whole
@@ -7143,19 +7140,21 @@ function packCall(b,cell,live){
     :(nm(t)+' calls the pack, but there is no free panel beside it.'));
   return spots;
 }
-/* Sharp Teeth: one charge per ally that arrives, hung on the body itself as a
-   when-destroyed so it travels with it. Read by playTeece for Teece played,
-   and by putTeece for Tokens however they arrive; t.teethed keeps a Token
-   played from hand from paying twice. A simulated board leaves the real
-   seat's charges alone. */
-function sharpTeethArm(t,live){
-  const pl=G&&G.players&&G.players[t.owner];
-  if(!live||!pl||!(pl.sharpTeeth>0)||t.teethed)return;
+/* Sharp Teeth: charges on the seat, one spent each time an ally of that seat
+   is destroyed by another Teece -- played, summoned or a Token, it makes no
+   difference. Every killer still on the board takes the bite. A death with no
+   killer to answer (a body worn below zero, a destroy effect) spends nothing. */
+function sharpTeethBite(t,killers){
+  const pl=G.players[t.owner];
+  if(!pl||!(pl.sharpTeeth>0)||!killers||!killers.length)return;
+  const ks=[];
+  for(const kuid of killers)for(let i=0;i<BN;i++){const k=G.board[i].teece;if(k&&k.uid===kuid)ks.push(k);}
+  if(!ks.length)return;
   pl.sharpTeeth--;
-  t.teethed=true;
-  const k=pl.sharpTeethN||-3;
-  t.deathFx=(t.deathFx||[]).concat([{fx:'killer',n:k,dur:'perm'}]);
-  log(nm(t)+' bares Sharp Teeth: whatever destroys it gets '+sgn(k)+'.'+(pl.sharpTeeth?' ('+pl.sharpTeeth+' more to come.)':''));
+  const n=pl.sharpTeethN||-3;
+  for(const k of ks)applyModT(k,n,'perm');
+  log('Sharp Teeth: '+ks.map(nm).join(' and ')+' '+(ks.length===1?'gets ':'get ')+sgn(n)+' for destroying '+nm(t)+'.'+
+    (pl.sharpTeeth?' ('+pl.sharpTeeth+' more to come.)':''));
 }
 function packSweepB(b,live){
   const gone=[];
@@ -8517,7 +8516,7 @@ async function FXRUN(st,ctx){
     const pl=G.players[p];
     pl.sharpTeeth=(pl.sharpTeeth||0)+(st.n||5);
     pl.sharpTeethN=st.k||-3;
-    log('The next '+pl.sharpTeeth+' allies '+pname(p)+' plays bare their teeth.');
+    log('Sharp Teeth: the next '+pl.sharpTeeth+' of '+pposs(p)+' allies to be destroyed give '+sgn(pl.sharpTeethN)+' to their killers.');
     return;}
   case 'copy':{
     if(!ctx.t||ctx.cell==null)return none('There is nothing here to copy.');
@@ -14116,6 +14115,7 @@ async function processDeath(d){
       }
     }
   }
+  if(!d.cost)sharpTeethBite(t,d.killers);
   /* victim's death effects, then anything laid on the body itself, then
      equip-granted ones. t.deathFx is what a card hangs on ANOTHER Teece --
      Pestilence sours an ally and the souring travels with the body, so it
@@ -15197,9 +15197,6 @@ async function playTeece(p,handIdx){
     if(pl.nextDefLeft<=0){pl.nextDefBonus=0;pl.nextDefLeft=0;pl.nextDefKind=null;}
   }
   if(pl.nextMod){const nmd=pl.nextMod;pl.nextMod=0;applyModT(t,nmd,'perm');log(nm(t)+' arrives with '+sgn(nmd)+'.');}
-  /* Sharp Teeth: a charge spent on each ally played, hung on the body itself
-     as a when-destroyed so it travels with it. */
-  sharpTeethArm(t,true);
   if(d.handMagic&&pl.handMagic&&pl.handMagic.turn===G.turnNum&&pl.handMagic.ids.indexOf(id)>=0){
     pl.handMagic.ids.splice(pl.handMagic.ids.indexOf(id),1);
     applyModT(t,d.handMagic.n,'temp');
@@ -16989,7 +16986,7 @@ function aiPlanFor(id){
     return {thr:2.2,cands,mut:(bb,i)=>{if(bb[i].teece)bb[i].teece.base=[6,6,6,6];}};
   }
   /* The Wolves' two spells that are not Howl. Sharp Teeth pays out later, on
-     five bodies not yet played, so it names its own worth. */
+     five deaths still to come, so it names its own worth. */
   if(st.fx==='wolfTeeth'){
     if(d.onlyBehind&&!wolfBehind(p))return null;
     return {thr:0.8,bonus:1.2,cands:[0],mut:()=>{}};
@@ -18929,7 +18926,7 @@ function statusesFor(p){
     if(pq.mKillNext)push('mkill'+q,mine?'good':'bad','Pharaoh\u2019s order'+(pq.mKillNext>1?' \u00D7'+pq.mKillNext:''),
       'The next '+(pq.mKillNext>1?pq.mKillNext+' enemy Teece of ':'enemy Teece of ')+pname(q)+' to be cursed '+(pq.mKillNext>1?'are':'is')+' destroyed.');
     if(pq.sharpTeeth)push('teeth'+q,mine?'good':'bad','Sharp Teeth: '+pq.sharpTeeth+' to come',
-      'The next '+pq.sharpTeeth+' allies '+pname(q)+' plays or summons, Tokens included, gain “When destroyed: the Teece that destroyed it gets '+sgn(pq.sharpTeethN||-3)+'.”');
+      'The next '+pq.sharpTeeth+' of '+pposs(q)+' allies to be destroyed give '+sgn(pq.sharpTeethN||-3)+' to the Teece that destroyed them.');
     if(pq.mEnterCursed)push('menter'+q,mine?'good':'bad','Tomb Lord: '+pq.mEnterCursed+' to come',
       'The next '+pq.mEnterCursed+' Teece '+pname(q)+'\u2019s opponents play or summon arrive cursed.');
   }
