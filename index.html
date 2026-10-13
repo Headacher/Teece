@@ -1147,7 +1147,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:176,date:'2026-10-13'};
+const VERSION={build:177,date:'2026-10-13'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -20080,13 +20080,34 @@ function godName(p){
   const g=GODS.find(x=>x.side===w);
   return g?g.name:null;
 }
-/* High Priest and Avatar are named for the god their controller worships. */
+/* High Priest and Avatar are named for the god their controller worships:
+   "Avatar of Bottomor". nm() and the hand ask for a particular seat's god.
+   Everywhere else reads CARDS[id].name -- the Detail panel, the log, the
+   prompts -- so that name is a getter: the god of the seat whose turn it is
+   if it worships, else of whichever seat does. Before any god is chosen it
+   is the plain printed name. */
 function cardTitle(id,p){
   const d=CARDS[id];
   if(!d)return '';
   if(!d.godTitle)return d.name;
   const g=p!=null?godName(p):null;
-  return d.name+' of '+(g||'your god');
+  return (d.baseName||d.name)+' of '+(g||'your god');
+}
+function godTitleName(d){
+  try{
+    if(G&&G.players){
+      let q=worshipOf(G.turn)!=null?G.turn:-1;
+      for(let x=0;q<0&&x<G.players.length;x++)if(worshipOf(x)!=null)q=x;
+      if(q>=0)return d.baseName+' of '+godName(q);
+    }
+  }catch(e){}
+  return d.baseName;
+}
+for(const id in CARDS){
+  const d=CARDS[id];
+  if(!d||!d.godTitle||d.baseName)continue;
+  d.baseName=d.name;
+  Object.defineProperty(d,'name',{get(){return godTitleName(this);},enumerable:true,configurable:true});
 }
 function seatHasPriest(p){
   const pl=G.players[p];

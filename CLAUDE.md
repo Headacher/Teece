@@ -403,7 +403,10 @@ playing the Priest deck starts a turn. It is a deck rule: `decks.json` sets
 refuses any other seat, so drafted priests and roguelike runs get no god.
 `effSides` gives every `priest` +3 on that side, read off the body's current
 controller, so a priest the other side steals gets nothing; `priest` and `godTitle` are in
-`ID_KEYS`, so silence keeps Worship. `worshipPlus` (Devotee) and the Icon of
+`ID_KEYS`, so silence keeps Worship. A `godTitle` card (High Priest, Avatar)
+is named for the god: `nm`/the hand use the owner's via `cardTitle`, and
+`CARDS[id].name` itself is a getter (`godTitleName`, printed name kept in
+`baseName`) so the Detail panel, log and prompts follow too. `worshipPlus` (Devotee) and the Icon of
 Devotion's `worshipTriple` (the finished side value, tripled) compose there too.
 A headless test built on `newState` must set `pl.worship` (or `pl.worshipper`) by hand.
 
