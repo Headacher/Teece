@@ -172,9 +172,9 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="tictactoe"],.dcard[data-card-deck="tictactoe"]{--cardbg:#26303a;--artink:#eaf2f8;background:var(--cardbg);color:#e9f1f7;border-color:#141b22}
 .card[data-card-deck="tictactoe"] .kwl,.dcard[data-card-deck="tictactoe"] .dkw{color:#9fc3dd}
 .card[data-card-deck="tictactoe"] .ct,.dcard[data-card-deck="tictactoe"] .dty{color:#9fc3dd}
-.card[data-card-deck="solar"],.dcard[data-card-deck="solar"]{--cardbg:#7d4a12;--artink:#ffeccc;background:var(--cardbg);color:#fdeed6;border-color:#4d2b06}
-.card[data-card-deck="solar"] .kwl,.dcard[data-card-deck="solar"] .dkw{color:#f0c076}
-.card[data-card-deck="solar"] .ct,.dcard[data-card-deck="solar"] .dty{color:#f0c076}
+.card[data-card-deck="solar"],.dcard[data-card-deck="solar"]{--cardbg:#f5a623;--artink:#5a2e00;background:var(--cardbg);color:#2b1600;border-color:#b86e00}
+.card[data-card-deck="solar"] .kwl,.dcard[data-card-deck="solar"] .dkw{color:#7a2e00}
+.card[data-card-deck="solar"] .ct,.dcard[data-card-deck="solar"] .dty{color:#7a2e00}
 .card[data-card-deck="nature"] .kwl,.dcard[data-card-deck="nature"] .dkw{color:#d5e8a4}
 .card[data-card-deck="nature"] .ct,.dcard[data-card-deck="nature"] .dty{color:#d5e8a4}
 .card[data-card-deck="army"],.dcard[data-card-deck="army"]{--cardbg:#4c5a33;--artink:#f1f5e2;background:var(--cardbg);color:#eef2e2;border-color:#2e3a1c}
@@ -276,7 +276,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .teece[data-card-deck="spider"]{--cardbg:#3b3350;--artink:#efe9ff;background:var(--cardbg);color:#e6e0f5;border-color:#241e33}
 .teece[data-card-deck="vampire"]{--cardbg:#5c1420;--artink:#ffe9ec;background:var(--cardbg);color:#f6dfe3;border-color:#360a12}
 .teece[data-card-deck="zombie"]{--cardbg:#3f4a2a;--artink:#eef7d9;background:var(--cardbg);color:#e6efd2;border-color:#242c17}
-.teece[data-card-deck="solar"]{--cardbg:#7d4a12;--artink:#ffeccc;background:var(--cardbg);color:#fdeed6;border-color:#4d2b06}
+.teece[data-card-deck="solar"]{--cardbg:#f5a623;--artink:#5a2e00;background:var(--cardbg);color:#2b1600;border-color:#b86e00}
 .teece[data-card-deck="army"]{--cardbg:#4c5a33;--artink:#f1f5e2;background:var(--cardbg);color:#eef2e2;border-color:#2e3a1c}
 .teece[data-card-deck="garbage"]{--cardbg:#5a4634;--artink:#f6ecdd;background:var(--cardbg);color:#f2e7d8;border-color:#36281c}
 .teece[data-card-deck="apocalypse"]{--cardbg:#2b2a2e;--artink:#f4eee8;background:var(--cardbg);color:#ece6df;border-color:#161519}
@@ -1147,7 +1147,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:172,date:'2026-10-13'};
+const VERSION={build:173,date:'2026-10-13'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
