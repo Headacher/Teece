@@ -74,7 +74,7 @@ Every push carries a bump, in the same commit as the change: `build` up by one
 A deck is registered in seven places, and missing one of them fails quietly —
 the cards exist and simply never reach a player. Take the next free block of
 twenty ids (Wizard is 906–925, with its conjured tokens at 926–941, the
-tutorial's cards sit at 960–970, Gun is 1001–1020, Fusion is 1021–1040, Lightning is 1041–1060 with its Bolt Token at 1061, Mummy is 1062–1081, and Wolf is 1082–1101),
+tutorial's cards sit at 960–970, Gun is 1001–1020, Fusion is 1021–1040, Lightning is 1041–1060 with its Bolt Token at 1061, Mummy is 1062–1081, Wolf is 1082–1101, and Priest is 1102–1121 with its Smites at 1122–1127),
 then:
 
 - `CARDS` in `index.html` — the twenty cards, plus any token cards they make.
@@ -393,6 +393,33 @@ casts the three spells through `aiFusionMagicPlan`. Fusing is the deck: a
 computer that never fused in hand won 24%; fusing every pair it can, up to two
 a turn, won 47.5% and 50.5% in two 1040-game AI-vs-AI soaks against every
 other deck (build 116).
+
+### The Priest worships, conjures Smites and combines them
+
+Worship is a seat value, `pl.worship` (a side index: Topus 0, Rightorious 1,
+Bottomor 2, Levt 3, in `GODS`), chosen in `startTurn` the first time a seat
+holding any `priest:true` card starts a turn (`seatHasPriest`), so it works in
+drafts and roguelike runs too. `effSides` gives every `priest` +3 on that side,
+read off the body's current controller; `priest` and `godTitle` are in
+`ID_KEYS`, so silence keeps Worship. `worshipPlus` (Devotee) and the Icon of
+Devotion's `worshipTriple` (the finished side value, tripled) compose there too.
+A headless test built on `newState` must set `pl.worship` by hand or call
+`startTurn` on the priest seat.
+
+Smites are token magic 1122–1125 with `smiteLvl` 1–4; Divine Retribution
+(1115) has `smiteLvl:2` so it combines as a Half, and is played only from
+`retributionReact` in `processDeath`. `combineOpts` hands any `smiteLvl` card to
+`smiteCombineOpts`, so the Wizard's Combine button and `combineAt` do the work;
+`onCombine` (Seraph) answers in `combineAt`. Every conjure goes through
+`conjureSmites`, where Prayer Beads' `onConjure` pays. `scanDeaths` now records
+the side each killer struck with in `dead.ksides`, and on-kill steps see it as
+`ctx.killSide` (the Zealot). High Priest and Avatar take Smites from the hand as
+sacrifice through `sacSmite` (worth per card id, read by `handSacWorth`).
+
+The computer folds Quarters and Halves always and Smites into a Divine only
+when it lacks discard fodder (`aiSmiteCombine`), and casts through
+`aiSmitePlan`. AI-vs-AI over 180 games against every other deck: 75% (build
+168), at the owner's printed numbers.
 
 ### Lightning summons out of the hand, and answers at instant speed
 

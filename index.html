@@ -256,6 +256,10 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="wolf"] .kwl,.dcard[data-card-deck="wolf"] .dkw{color:#ff8a80}
 .card[data-card-deck="wolf"] .ct,.dcard[data-card-deck="wolf"] .dty{color:#ff8a80}
 .card[data-card-deck="wolf"]::after,.dcard[data-card-deck="wolf"]::after{content:'\1F43A'}
+.card[data-card-deck="priest"],.dcard[data-card-deck="priest"]{--cardbg:#efe6cf;--artink:#8a6a1f;background:var(--cardbg);color:#3b2f17;border-color:#b8962e}
+.card[data-card-deck="priest"] .kwl,.dcard[data-card-deck="priest"] .dkw{color:#9a6b00}
+.card[data-card-deck="priest"] .ct,.dcard[data-card-deck="priest"] .dty{color:#9a6b00}
+.card[data-card-deck="priest"]::after,.dcard[data-card-deck="priest"]::after{content:'\1F64F'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -288,6 +292,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .teece[data-card-deck="lightning"]{--cardbg:#1b2a5e;--artink:#ffe94d;background:var(--cardbg);color:#eef2ff;border-color:#0b1230}
 .teece[data-card-deck="mummy"]{--cardbg:#d8c79a;--artink:#4a3a1c;background:var(--cardbg);color:#2a2112;border-color:#7a6232}
 .teece[data-card-deck="wolf"]{--cardbg:#5d6670;--artink:#f1ece2;background:var(--cardbg);color:#f4f1ea;border-color:#2b3036}
+.teece[data-card-deck="priest"]{--cardbg:#efe6cf;--artink:#8a6a1f;background:var(--cardbg);color:#3b2f17;border-color:#b8962e}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -1142,7 +1147,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:167,date:'2026-10-11'};
+const VERSION={build:168,date:'2026-10-13'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1279,7 +1284,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}',priest:'\u{1F64F}'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -1509,6 +1514,33 @@ const CARD_ART={
   1099:["         __  ", "  ______/  ) ", " (______   ) ", "        \\__) ", "   ~ ~ ~     "],
   1100:["    _____    ", "   /     \\   ", "  /  ___  \\  ", " |  /   \\  | ", " |__|___|__| "],
   1101:[" ^  ,  ^  ,  ", "  ,  ^  ,  ^ ", " . ,  .  , . ", "  >>> o o    ", " ,  ^  ,  ^  "],
+  /* ---- Priest ---- */
+  1102:["    _|_      ", "   ( o )     ", "    |=|  )   ", "   /| |\\ (   ", "   _|_|_ )   "],
+  1103:["     +       ", "    (o)      ", "   /|=|\\     ", "    | |      ", "   /___\\     "],
+  1104:["   \\ + /     ", "    (o)  /   ", "   /|=|\\/    ", "    | |      ", "   /   \\     "],
+  1105:["     |       ", "   --+--     ", "    (x)      ", "   /|=|\\     ", "   ~~~~~     "],
+  1106:["    ___      ", "   (o o) ?   ", "   /|=|\\     ", "   +| |      ", "   /___\\     "],
+  1107:[" \\\\  +  //   ", "  \\\\(o)//    ", "   =|=|=     ", "    | |      ", "   /   \\     "],
+  1108:["    \\o/      ", "     |   +   ", "    /=\\      ", "   _/ \\_     ", "   [___]     "],
+  1109:["   * + *     ", "    (O)      ", "   /|=|\\  |  ", "    | |   |  ", "   /___\\  |  "],
+  1110:["   .---.     ", "  | (+) |    ", "  | /|\\ |    ", "   \\ | /     ", "    '-'      "],
+  1111:["    ...      ", "   ( - )     ", "   _/=\\_     ", "  (_____)    ", "   ~~~~~     "],
+  1112:["    _+_      ", "   /(o)\\     ", "  / /=\\ \\    ", "    | |  +   ", "   /___\\ |   "],
+  1113:[" \\  _+_  /   ", "  \\(O_O)/    ", "  =/|=|\\=    ", "  / | | \\    ", " /__|_|__\\   "],
+  1114:["   .---.     ", "  / + + \\    ", "  | + + |    ", "  \\ + + /    ", "   '---'     "],
+  1115:["   \\ | /     ", "  -- + --    ", "   / | \\     ", "     !       ", "    /!\\      "],
+  1116:["   *  .  *   ", "  .  \\|/  .  ", "   -- + --   ", "  .  /|\\  .  ", "   *  '  *   "],
+  1117:["   .---.     ", "  /  +  \\    ", " |  -+-  |   ", "  \\  +  /    ", "   '---'     "],
+  1118:["    .+.      ", "   /|+|\\     ", "  ( |+| )    ", "   \\|+|/     ", "    '+'      "],
+  1119:["   o o o     ", "  o     o    ", "  o     o    ", "   o o o     ", "     +       "],
+  1120:["  +   +   +  ", "   .  |  .   ", "  ~~~~~~~~~  ", " ' . ' . ' . ", "  + ' + ' +  "],
+  1121:["    _/+\\_    ", "   /     \\   ", "  |  [+]  |  ", "  |   _   |  ", "  |__| |__|  "],
+  1122:["             ", "      .      ", "     /|      ", "      '      ", "             "],
+  1123:["             ", "     /\\      ", "    / |      ", "      /      ", "             "],
+  1124:["      /      ", "     /|      ", "    / |/     ", "      /      ", "     /       "],
+  1125:["  \\  /|  /   ", "   \\/ |/     ", "  --/ |/--   ", "    / |\\     ", "   /  | \\    "],
+  1126:["    .-.      ", "   ( + )     ", "  ~~~|~~~    ", "    / \\      ", "   ~~~~~     "],
+  1127:["  .  /  .    ", "    /| /     ", "   / |/| /   ", "     / |/    ", "    /  /     "],
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
   541:["  \\  .-.  /  ", "   \\( o )/   ", "    (/|\\)    ", "    _/ \\_    ", "   [$]  ...  "],
@@ -2145,7 +2177,7 @@ function canPlay(p,cardId){
     if(need&&sacPool(p,G.players[p].hand.indexOf(cardId),cardId).worth<need)return false;
     return true;
   }
-  if(cd.type==='magic')return !hexOn(p,'silence')&&!hexOn(p,'nomagic')&&(!cd.onlyBehind||wolfBehind(p));
+  if(cd.type==='magic')return !hexOn(p,'silence')&&!hexOn(p,'nomagic')&&(!cd.onlyBehind||wolfBehind(p))&&!magicLocked(p)&&!cd.retribution;
   if(cd.type==='equip'){
     /* Puppet Strings asks the grave, not the field: what makes it playable is a
        body lying in your own graveyard and a panel free to stand it up on. */
@@ -4621,6 +4653,72 @@ const CARDS = {
     text:'A Token on this battleground has +5.'},
  1101:{name:'Hunting Grounds',type:'ground',gPerAlly:1,
     text:'A Teece on this battleground has +1 for each of its allies on the field.'},
+ /* ---- Priest: 1102-1121, and the spells they conjure 1122-1127 ----
+        Worship: at the start of the game a Priest player picks a god, and
+        every priest of theirs gets +3 on that god's side (Levt the left, Topus
+        the top, Rightorious the right, Bottomor the bottom). Most priests
+        conjure a Quarter Smite into the hand; two of a kind combine in hand
+        (the Combine button) into the next Smite up: Quarter, Half, Smite,
+        Divine. Smites are tokens: in no deck and never drafted. ---- */
+ 1102:{name:'Vigil Keeper',type:'teece',sides:[7,7,0,2],priest:true,eachTurnEnd:[{fx:'conjureSmite'}],
+    text:'At the end of each turn: conjure a Quarter Smite.'},
+ 1103:{name:'Acolyte',type:'teece',sides:[4,4,4,4],priest:true,onPlay:[{fx:'conjureSmite'}],
+    text:'When played: conjure a Quarter Smite.'},
+ 1104:{name:'Zealot',type:'teece',sides:[5,5,5,5],priest:true,
+    onKill:{steps:[{fx:'conjureSmite',extraIfWorshipKill:1}],foeOnly:true},
+    text:'When this destroys an enemy: conjure a Quarter Smite. If it was destroyed with this Teece’s side empowered by Worship, conjure another.'},
+ 1105:{name:'Martyr',type:'teece',sides:[1,1,8,8],priest:true,onDeath:[{fx:'conjureSmite'}],
+    text:'When destroyed: conjure a Quarter Smite.'},
+ 1106:{name:'Inquisitor',type:'teece',sides:[2,7,7,2],priest:true,onFoePlay:[{fx:'conjureSmite'}],
+    text:'When an enemy Teece is played: conjure a Quarter Smite.'},
+ 1107:{name:'Seraph',type:'teece',sides:[6,6,6,6],priest:true,kw:['flying'],onCombine:{n:2},
+    text:'Flying. When you combine cards in your hand: +2 until the end of the turn.'},
+ 1108:{name:'Devotee',type:'teece',sides:[3,5,3,5],priest:true,worshipPlus:6,priestDiscard:true,
+    handDiscard:[{fx:'conjureSmite'}],
+    text:'+6 on its side empowered by Worship. Or discard this from your hand on your turn: conjure a Quarter Smite.'},
+ 1109:{name:'Prophet',type:'teece',sides:[7,7,7,7],priest:true,onPlay:[{fx:'worshipSwitch'}],
+    text:'When played: you can switch the god you Worship.'},
+ 1110:{name:'Templar',type:'teece',sides:[3,3,3,3],priest:true,def:3,onPlay:[{fx:'conjureSmite'}],
+    text:'Defence 3. When played: conjure a Quarter Smite.'},
+ 1111:{name:'Ascetic',type:'teece',sides:[9,9,9,9],priest:true,noOwnMagic:true,
+    text:'While it stands, you cannot play magic cards.'},
+ 1112:{name:'High Priest',type:'teece',sides:[7,7,7,7],priest:true,godTitle:true,sac:1,sacSmite:{1124:1},
+    kw:['flying','ranged'],def:2,priestDiscard:true,handDiscard:[{fx:'conjureSmite'}],
+    text:'Sacrifice one fielded Teece to play, or discard a Smite. Flying. Ranged. Defence 2. Or discard this from your hand on your turn: conjure a Quarter Smite.'},
+ 1113:{name:'Avatar',type:'teece',sides:[10,10,10,10],priest:true,godTitle:true,sac:2,sacSmite:{1124:1,1125:2},
+    kw:['flying','ranged'],def:3,priestDiscard:true,handDiscard:[{fx:'conjureSmite'}],
+    text:'Sacrifice two fielded Teece to play, or discard two Smites or a Divine Smite. Flying. Ranged. Defence 3. Or discard this from your hand on your turn: conjure a Quarter Smite.'},
+ 1114:{name:'Litany',type:'magic',smiteAi:'conjure',cast:[{fx:'conjureSmite',n:3}],
+    text:'Conjure 3 Quarter Smites.'},
+ 1115:{name:'Divine Retribution',type:'magic',smiteLvl:2,retribution:true,smiteAi:'never',
+    cast:[{fx:'retribution'}],
+    text:'When an enemy Teece destroys one of yours: select the non-Boss Teece that destroyed it; destroy it. Counts as a Half Smite for combining.'},
+ 1116:{name:'Miracle',type:'magic',smiteAi:'miracle',
+    cast:[{fx:'discardSmite',cost:true},{fx:'conjurePick',opts:[1125,1126,1127]}],
+    text:'Discard a Smite from your hand: conjure Divine Smite, Resurrection or Smite And A Half.'},
+ 1117:{name:'Votive Shield',type:'equip',grants:{smiteAbsorb:[2,4,6,8]},priestDiscard:true,handDiscard:[{fx:'conjureSmite'}],
+    text:'If you Smite the equipped Teece, the Smite does nothing and the Teece gets +2 to +8 permanently instead, by the Smite\u2019s power (Quarter +2, Half +4, Smite +6, Divine +8). Or discard this from your hand on your turn: conjure a Quarter Smite.'},
+ 1118:{name:'Icon of Devotion',type:'equip',grants:{worshipTriple:true},
+    text:'The equipped Teece’s side empowered by Worship is tripled.'},
+ 1119:{name:'Prayer Beads',type:'equip',grants:{kw:['teleport'],onMagic:[{fx:'mod',who:'self',n:3,dur:'temp'}],onConjure:3},
+    text:'The equipped Teece has Teleport. Whenever you play or conjure a magic card, it gets +3 until the end of the turn.'},
+ 1120:{name:'Hallowed Ground',type:'ground',gHallow:true,
+    text:'When a Teece is played or destroyed on this battleground, both players conjure a Quarter Smite.'},
+ 1121:{name:'Sanctuary',type:'ground',gdef:2,gSanctuary:true,
+    text:'A Teece on this battleground has +2 Defence, and conjures a Quarter Smite at the end of each of its controller’s turns.'},
+ /* the Smites, and what a Miracle makes */
+ 1122:{name:'Quarter Smite',type:'magic',token:true,deck:'priest',smiteLvl:1,smiteAi:'smite',
+    cast:[{fx:'smite',lvl:1}],text:'Select a Teece; give it -1 until the end of the turn.'},
+ 1123:{name:'Half Smite',type:'magic',token:true,deck:'priest',smiteLvl:2,smiteAi:'smite',
+    cast:[{fx:'smite',lvl:2}],text:'Select a Teece; give it -5 until the end of the turn.'},
+ 1124:{name:'Smite',type:'magic',token:true,deck:'priest',smiteLvl:3,smiteAi:'smite',
+    cast:[{fx:'smite',lvl:3}],text:'Discard a card to select a Teece; destroy it. If it was a Boss or Miniboss, discard an extra card.'},
+ 1125:{name:'Divine Smite',type:'magic',token:true,deck:'priest',smiteLvl:4,smiteAi:'smite',
+    cast:[{fx:'smite',lvl:4}],text:'Select a Teece; destroy it.'},
+ 1126:{name:'Resurrection',type:'magic',token:true,deck:'priest',smiteAi:'resurrect',
+    cast:[{fx:'resurrection'}],text:'Select a Teece in either graveyard; add it to your hand, or play it under your control.'},
+ 1127:{name:'Smite And A Half',type:'magic',token:true,deck:'priest',smiteAi:'conjure',
+    cast:[{fx:'conjureSmite',n:6}],text:'Conjure 6 Quarter Smites.'},
  /* ---- the tutorial's cards. Nothing but their numbers, so a new player learns
         the rules rather than a card. The roguelike drafts from every card in
         CARDS, not from the pool, so tutorial:true is what keeps them out of it
@@ -4657,7 +4755,7 @@ const CARDS = {
 
    Both views are cached; newState clears them, because fusion ids are reused. */
 const ID_KEYS={name:1,type:1,sides:1,text:1,flavor:1,def:1,sac:1,sacOK:1,token:1,deck:1,tutorial:1,perkOnly:1,
-  boss:1,fusion:1,forms:1,mark:1,runeCard:1,topDeck:1,
+  boss:1,fusion:1,forms:1,mark:1,runeCard:1,topDeck:1,priest:1,godTitle:1,
   garbage:1,spider:1,vampire:1,solar:1,madness:1,rat:1,locust:1,pixie:1,zombie:1,army:1,apoc:1,devil:1,mummy:1,horseman:1};
 let DEF_SIL={},DEF_GRAFT={};
 function DEF(t){
@@ -5890,7 +5988,7 @@ function teamName(tm){
 /* A woken battleground answers to its own name while it is on its feet. It is
    that card walking around, not a token standing in for it, and a player has to
    be able to see which battleground is loose on the board. */
-function nm(t){const d=DEF(t);return (t.animGround?CARDS[t.animGround.cardId].name:d.name)+(t.promoted?' (promoted)':t.isCopy?' (copy)':'');}
+function nm(t){const d=DEF(t);return (t.animGround?CARDS[t.animGround.cardId].name:d.godTitle?cardTitle(t.cardId,t.owner):d.name)+(t.promoted?' (promoted)':t.isCopy?' (copy)':'');}
 /* pname() returns "You" for the human seat, so any verb after it has to agree. */
 const vb=(p,third,second)=>(G&&G.vsAI&&p===0)?second:third;
 function log(m){G.log.unshift(m);if(G.log.length>140)G.log.pop();if(HAS_DOM)renderLog();}
@@ -6351,6 +6449,13 @@ function effSides(b,i,parts){
      PACT runs: every Teece that seat controls, until its next turn begins. */
   const hfire=G&&G.players&&G.players[t.owner]&&G.players[t.owner].hellfire;
   if(hfire&&hfire.n)addMod(s,hfire.n,'Infernal Bargain, until the start of '+ownOf(t.owner)+' next turn');
+  /* Worship is the controller's: +3 on the side their god rules, for every
+     priest they control, and a Devotee's own +6 on the same side. */
+  const wside=worshipOf(t.owner);
+  if(wside!=null){
+    if(DEF(t).priest){const wd=[0,0,0,0];wd[wside]=3;addMod(s,wd,'Worship of '+godName(t.owner));}
+    if(DEF(t).worshipPlus){const wd=[0,0,0,0];wd[wside]=DEF(t).worshipPlus;addMod(s,wd,DEF(t).name+', on the side '+godName(t.owner)+' empowers');}
+  }
   for(const bo of bonusesOn(b,i)){
     const n=formationCount(b,i,bo);
     if(n)addMod(s,bo.n*n,formationLabel(bo));
@@ -6594,6 +6699,12 @@ function effSides(b,i,parts){
   if(parts&&selfDbl)parts.push({label:DEF(t).selfDoublePos
     ?'Every positive effect on it counts double'
     :'The ground here doubles every positive effect',note:true});
+  /* The Icon of Devotion triples the finished number on the Worship side. */
+  if(wside!=null&&DEF(t).priest&&s[wside]>0&&t.equips.some(e=>{const g=eqG(e);return g&&g.worshipTriple;})){
+    const add=s[wside]*2;
+    s[wside]+=add;
+    if(parts){const wd=[0,0,0,0];wd[wside]=add;parts.push({label:'Icon of Devotion: the side '+godName(t.owner)+' empowers, tripled',amt:wd});}
+  }
   /* Last of all, because the Dimension of Change turns the finished numbers
      round rather than the printed ones: whatever the Teece ended up with on
      its top is what ends up on its bottom. */
@@ -7573,8 +7684,10 @@ function scanDeaths(b){
     if(kws[ki].indexOf('needsflinger')<0)return true;
     return b.some(c=>c.teece&&sameTeam(c.teece.owner,k.owner)&&DEF(c.teece).flinger);
   };
-  const mark=(vi,ki)=>{const v=b[vi].teece;if(!dead[vi])dead[vi]={cell:vi,t:v,killers:[]};
-    if(ki!=null&&dead[vi].killers.indexOf(b[ki].teece.uid)<0)dead[vi].killers.push(b[ki].teece.uid);};
+  /* ks is the side of the killer the blow landed with, kept per killer for
+     anything that cares how a kill was made (the Zealot). */
+  const mark=(vi,ki,ks)=>{const v=b[vi].teece;if(!dead[vi])dead[vi]={cell:vi,t:v,killers:[],ksides:{}};
+    if(ki!=null&&dead[vi].killers.indexOf(b[ki].teece.uid)<0){dead[vi].killers.push(b[ki].teece.uid);if(ks!=null)dead[vi].ksides[b[ki].teece.uid]=ks;}};
   const immune=i=>b[i].teece&&(b[i].teece.immortalOwner!=null||zeusSky(b[i].teece)||runeGuarded(b[i].teece)||blessedOn(b,i)||packGuarded(b,i));
   /* Harbinger of War: while it stands, nobody has allies. Every pairing on the
      board is a fight, its own side included -- and it is standing in the middle
@@ -7621,8 +7734,8 @@ function scanDeaths(b){
       else if(j===i+1){mi=1;oj=3;} else if(j===i-1){mi=3;oj=1;}
       else if(j===i+BW){mi=2;oj=0;} else {mi=0;oj=2;}
       const a=eff[i][mi]+webEdge(i,j), c=eff[j][oj]+webEdge(j,i);
-      if(a-c>dfn[j]&&canKill(i)&&!immune(j))mark(j,i);
-      else if(c-a>dfn[i]&&canKill(j)&&!immune(i))mark(i,j);
+      if(a-c>dfn[j]&&canKill(i)&&!immune(j))mark(j,i,mi);
+      else if(c-a>dfn[i]&&canKill(j)&&!immune(i))mark(i,j,oj);
     }
   }
   /* Ranged walks a straight line off one side of a panel until it meets
@@ -7650,7 +7763,7 @@ function scanDeaths(b){
         if(b[j].teece){
           if(d>1&&foes(b[j].teece.owner,t.owner)){
             const os=(ms+2)%4;
-            if(eff[i][ms]+webEdge(i,j)-eff[j][os]>dfn[j]&&canKill(i)&&!immune(j))mark(j,i);
+            if(eff[i][ms]+webEdge(i,j)-eff[j][os]>dfn[j]&&canKill(i)&&!immune(j))mark(j,i,ms);
           }
           break;
         }
@@ -13236,6 +13349,137 @@ async function FXRUN(st,ctx){
     log(CARDS[e.cardId].name+' is torn off '+nm(host)+' and destroyed.');
     await anim([i],'zap');
     return;}
+  /* ---- Priest ---- */
+  /* A Quarter Smite (or st.n of them) into the hand. A Zealot whose kill
+     landed on its Worship side conjures st.extraIfWorshipKill more. */
+  case 'conjureSmite':{
+    const q=ctx.deadOwner!=null?ctx.deadOwner:p;
+    let n=st.n||1;
+    if(st.extraIfWorshipKill&&ctx.killSide!=null&&ctx.killSide===worshipOf(q)){
+      n+=st.extraIfWorshipKill;
+      if(ctx.t)log(nm(ctx.t)+' struck with the side '+godName(q)+' empowers.');
+    }
+    conjureSmites(q,n);
+    return;}
+  case 'worshipSwitch':{
+    await chooseWorship(p,'Prophet: you can switch the god you Worship.',true);
+    return;}
+  case 'smite':{
+    const lvl=st.lvl,need=t=>1+(bigTeece(t)?1:0);
+    const others=handCount(p);
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(!t||!canTarget(b,i,p))continue;
+      if(lvl>=3&&isHeldSafe(t)&&!smiteAbsorb(t,p,lvl))continue;
+      if(lvl===3&&others<need(t))continue;
+      cands.push(i);
+    }
+    if(!cands.length)return none(lvl===3&&others<1?'A Smite needs a card in hand to discard.':'There is no Teece to smite.');
+    const what=lvl<=2?'give '+sgn(SMITE_TEMP[lvl])+' until the end of the turn':'destroy';
+    const c=await pickCell(cands,'Choose a Teece to smite: '+what+'.',(bb,i)=>{
+      const o=bb[i].teece;if(!o)return;
+      const ab=smiteAbsorb(o,p,lvl);
+      if(ab){applyModT(o,ab,'perm');return;}
+      if(lvl<=2)applyModT(o,SMITE_TEMP[lvl],'temp');else bb[i].teece=null;},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece;
+    if(!t)return;
+    /* The price comes first: what it is aimed at decides how much. */
+    if(lvl===3){
+      const n=need(t);
+      await smiteDiscard(p,n,n>1?'Smiting a '+(isBossCard(t.cardId)?'Boss':'Miniboss')+' costs two cards.':'A Smite costs a card.');
+      if(G.over||b[c].teece!==t)return;
+    }
+    const ab=smiteAbsorb(t,p,lvl);
+    if(ab){
+      applyModT(t,ab,'perm');
+      log(nm(t)+'’s Votive Shield drinks the '+CARDS[SMITE_CARD[lvl]].name+': '+sgn(ab)+' permanently.');
+      await anim([c],'zap');
+      return;}
+    if(wardMagic(b,c,p)){await anim([c],'zap');return;}
+    if(tapeSave(b,c,p)){await anim([c],'zap');return;}
+    if(lvl<=2){
+      applyModT(t,SMITE_TEMP[lvl],'temp');
+      log(nm(t)+' is smitten: '+sgn(SMITE_TEMP[lvl])+' until the end of the turn.');
+      if(!sameTeam(t.owner,p)){noteTargeted(p);noteEnemyLoss(p,c,-SMITE_TEMP[lvl],false);}
+      await anim([c],'zap');
+      return;}
+    log(nm(t)+' is smitten'+(lvl===4?' by divine light':'')+' and destroyed.');
+    await anim([c],'dying',190);
+    await processDeath({cell:c,t,killers:[]});
+    return;}
+  /* Miracle's price: a Smite out of the hand. */
+  case 'discardSmite':{
+    const o=handOpts(p).find(x=>x.cid===1124);
+    if(!o)return none('You hold no Smite to discard.');
+    const gone=takeForCast(p,parseInt(o.v,10));
+    if(!gone)return none('You hold no Smite to discard.');
+    log(pname(p)+' '+vb(p,'gives','give')+' up a Smite.');
+    await discardCard(p,gone.id);
+    return;}
+  case 'conjurePick':{
+    const q=p;
+    let id=st.opts[0];
+    if(isAIP(q)||!HAS_DOM){
+      const foe=b.some((c2,i)=>c2.teece&&!sameTeam(c2.teece.owner,q)&&canTarget(b,i,q));
+      const dead=G.players.some(x=>x.grave.some(g=>CARDS[g].type==='teece'&&isBossCard(g)));
+      id=foe?1125:dead?1126:1127;
+      if(st.opts.indexOf(id)<0)id=st.opts[0];
+    }else{
+      const pick=await chooseOption(q,st.opts.map(x=>({v:String(x),lbl:CARDS[x].name+' — '+CARDS[x].text,cid:x})),'Conjure which spell?');
+      if(pick!=null&&pick!=='CANCEL'&&st.opts.indexOf(parseInt(pick,10))>=0)id=parseInt(pick,10);
+    }
+    conjureSmites(q,1,id);
+    return;}
+  /* Resurrection: any Teece out of either graveyard, into the hand or onto
+     the field under the caster's control. Played by an effect, so it pays no
+     sacrifice and spends no Teece play. */
+  case 'resurrection':{
+    const pool=[];
+    for(let q=0;q<PLAYERS();q++){
+      const seen=[];
+      for(const id of G.players[q].grave){
+        if(CARDS[id].type!=='teece'||seen.indexOf(id)>=0)continue;
+        seen.push(id);pool.push({q,id});
+      }
+    }
+    if(!pool.length)return none('There is no Teece in either graveyard.');
+    let pk=pool[0];
+    if(isAIP(p)||!HAS_DOM){
+      let bv=-1e9;
+      for(const x of pool){const v=aiCardWorth(x.id)+Math.random()*0.1;if(v>bv){bv=v;pk=x;}}
+    }else{
+      const pick=await chooseOption(p,pool.map((x,k)=>({v:String(k),cid:x.id,
+        lbl:CARDS[x.id].name+' — from '+(x.q===p?pposs(p):pname(x.q)+'’s')+' graveyard'})),'Resurrect which Teece?',!!ctx.first);
+      if(pick==='CANCEL')return 'ABORT';
+      if(pick!=null&&pool[parseInt(pick,10)])pk=pool[parseInt(pick,10)];
+    }
+    const open=[];for(let i=0;i<BN;i++)if(openAt(b,i))open.push(i);
+    let mode='hand';
+    if(open.length){
+      if(isAIP(p)||!HAS_DOM)mode='play';
+      else mode=await chooseOption(p,[{v:'play',lbl:'Play it under your control'},{v:'hand',lbl:'Add it to your hand'}],
+        'Resurrection: '+CARDS[pk.id].name+'.')||'play';
+    }
+    const gr=G.players[pk.q].grave,gi=gr.lastIndexOf(pk.id);
+    if(gi<0)return none('It is no longer in the graveyard.');
+    gr.splice(gi,1);
+    if(mode!=='play'){
+      handPush(p,pk.id);
+      log(CARDS[pk.id].name+' is resurrected into '+pposs(p)+' hand.');
+      return;}
+    const c=await chooseCell(p,open,'Choose a space for '+CARDS[pk.id].name+'.',{mut:(bb,j)=>{putTeece(bb,j,makeTeece(pk.id,p),false);}});
+    const dst=(c==null||c==='CANCEL'||!openAt(b,c))?open[0]:c;
+    putTeece(b,dst,makeTeece(pk.id,p),true);
+    const nt=b[dst].teece;
+    attachRiders(pk.q,pk.id,nt,true);
+    log(CARDS[pk.id].name+' is resurrected at the '+CN[dst]+' under '+pposs(p)+' control.');
+    await anim([dst],'placed');
+    await fireRevivedOnPlay(pk.id,dst,p,nt.uid);
+    return;}
+  case 'retribution':return none('Divine Retribution is played when an enemy Teece destroys one of yours.');
   /* ---- Wizard ---- */
   /* An element into the hand. st.give hands over exactly those; st.opts (or
      all four) is a choice, made st.n times. A Teece wearing the Oakwood Staff
@@ -14139,7 +14383,8 @@ async function processDeath(d){
       else if(ok.steps){
         if(ok.foeOnly&&sameTeam(k.owner,t.owner))continue;
         const kc=b.findIndex(c=>c.teece===k);
-        await runSteps(ok.steps,{p:k.owner,cell:kc>=0?kc:null,t:k,first:false,noModal:true});
+        await runSteps(ok.steps,{p:k.owner,cell:kc>=0?kc:null,t:k,first:false,noModal:true,
+          killSide:d.ksides&&d.ksides[kuid]!=null?d.ksides[kuid]:null});
       }
       else{applyModT(k,ok.n,ok.dur);log(nm(k)+' gets '+sgn(ok.n)+durTxt(ok.dur)+' for the kill.');}
     }
@@ -14156,6 +14401,9 @@ async function processDeath(d){
     }
   }
   if(!d.cost)sharpTeethBite(t,d.killers);
+  /* Divine Retribution answers the killer; Hallowed Ground answers the fall. */
+  if(!d.cost&&d.killers&&d.killers.length){await retributionReact(t,d.killers);if(G.over)return;}
+  if(!d.cost)hallowConjure(cell,'the fall of '+nm(t));
   /* victim's death effects, then anything laid on the body itself, then
      equip-granted ones. t.deathFx is what a card hangs on ANOTHER Teece --
      Pestilence sours an ally and the souring travels with the body, so it
@@ -14910,9 +15158,17 @@ function sacPool(p,skipHand,cardId){
     if(x===skipHand)continue;
     const cd=CARDS[pl.hand[x]];
     if(cd&&cd.sacHand)hands.push(x);
+    /* High Priest and Avatar take Smites from the hand in place of bodies. */
+    else if(cardId!=null&&CARDS[cardId]&&CARDS[cardId].sacSmite&&CARDS[cardId].sacSmite[pl.hand[x]])hands.push(x);
   }
-  const worth=cells.reduce((a,i)=>a+sacWorthOf(b[i].teece,cardId),0)+hands.length;
+  const worth=cells.reduce((a,i)=>a+sacWorthOf(b[i].teece,cardId),0)+hands.reduce((a,x)=>a+handSacWorth(cardId,pl.hand[x]),0);
   return {cells,hands,worth};
+}
+/* What one card thrown from the hand pays toward cardId's sacrifice: a
+   Divine Smite pays an Avatar twice. */
+function handSacWorth(cardId,hid){
+  const ss=cardId!=null&&CARDS[cardId]&&CARDS[cardId].sacSmite;
+  return (ss&&ss[hid])||1;
 }
 /* What one body pays toward cardId's sacrifice. sacDrones:N means N Drones
    stand in for one Teece. */
@@ -15108,7 +15364,7 @@ async function playTeece(p,handIdx){
       pool.hands.filter(x=>sacH.indexOf(x)<0),
       'Choose a sacrifice ('+left+' more to pay).');
     if(c==null||c==='CANCEL')return false;
-    if(typeof c==='string'&&c.charAt(0)==='h'){sacH.push(parseInt(c.slice(1),10));paidW+=1;}
+    if(typeof c==='string'&&c.charAt(0)==='h'){const hx=parseInt(c.slice(1),10);sacH.push(hx);paidW+=handSacWorth(id,pl.hand[hx]);}
     else{sacP.push(c);paidW+=worthAt(c);}
     if(plan&&s+1>=plan.sacP.length)break;
   }
@@ -15314,6 +15570,14 @@ async function playTeece(p,handIdx){
       log(nm(w)+' is lit up by '+gp.name+': '+sgn(gp.gTeecePlayed.n)+' and '+gp.gTeecePlayed.kw+' until the end of the turn.');
     }
   }
+  /* Priests that answer an enemy landing, and Hallowed Ground under it. */
+  for(let i=0;i<BN;i++){
+    const w=b[i].teece;
+    if(!w||w.uid===t.uid||w.silenced||sameTeam(w.owner,p))continue;
+    const fp=DEF(w).onFoePlay;
+    if(fp){await runSteps(fp,{p:w.owner,cell:i,t:w,first:false});if(G.over)return true;}
+  }
+  if(b[spot].teece===t)hallowConjure(spot,nm(t)+' landing on it');
   /* Instant speed: whatever the other side is holding that answers a Teece
      landing gets its chance now, with the body on the board. */
   if(b.some(c=>c.teece===t))await reactHand('enemyPlay',p);
@@ -15790,6 +16054,8 @@ async function playMagic(p,handIdx){
   if(hexOn(p,'silence')){toast('Silenced: you cannot cast magic.');return false;}
   if(d.onlyBehind&&!wolfBehind(p)){toast(d.name+' can only be played while an opponent has more Teece on the field than you.');return false;}
   if(hexOn(p,'nomagic')){toast('The Adversary\u2019s PACT holds: you cannot play magic yet.');return false;}
+  if(magicLocked(p)){toast('Your Ascetic forbids it: you cannot play magic cards while it stands.');return false;}
+  if(d.retribution){toast(d.name+' is played when an enemy Teece destroys one of yours.');return false;}
   /* A Dimension of Energy on the field eats the spell before it is cast. It
      takes everybody's, not only its owner's, and the card is not spent -- it
      hangs on the battleground until something breaks the battleground open. */
@@ -16001,6 +16267,20 @@ async function endTurn(){
     if(!t||t.silenced||sameTeam(t.owner,p))continue;
     const fe=DEF(t).foeTurnEnd;
     if(fe)await runSteps(fe,{p:t.owner,cell:i,t,first:false});
+  }
+  /* "At the end of each turn", whosever it is, and a Sanctuary at the end of
+     its Teece's controller's own. */
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(!t||t.silenced)continue;
+    const ee=DEF(t).eachTurnEnd;
+    if(ee)await runSteps(ee,{p:t.owner,cell:i,t,first:false});
+  }
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece,g=G.board[i].ground;
+    if(!t||!g||t.owner!==p||!groundFlag(g,'gSanctuary'))continue;
+    log(nm(t)+' prays in the Sanctuary.');
+    conjureSmites(t.owner,1);
   }
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
@@ -16535,6 +16815,11 @@ async function startTurn(){
       if(n>0){drawCards(p,n);await flushDiscards();await offerReveal(p);}
     }
   }
+  /* Worship: a seat with priests picks its god before its first move. */
+  if(pl.worship==null&&seatHasPriest(p)){
+    await chooseWorship(p,'Worship: choose your god. Your priests get +3 on that god\u2019s side.');
+    if(stale(ep)||G.over)return;
+  }
   warnLastCard(p);
   log('--- Turn '+G.turnNum+': '+pname(p)+' ---');
   render();
@@ -16925,6 +17210,9 @@ function aiPlanFor(id){
        the score reads no Defence either. Burial Wrappings and Cursed Bandages. */
     if(eg.mummyWrap)ebonus+=0.6*eg.mummyWrap+0.15*(eg.def||0);
     if(eg.wrapGain)ebonus+=0.6;
+    /* The Priest's three pay out as Smites are conjured and cast, later. */
+    if(eg.smiteAbsorb)ebonus+=G.players[p].hand.some(h=>smiteLvl(h))?1.0:0.6;
+    if(eg.onConjure)ebonus+=0.9;
     return {thr:0.8,bonus:ebonus,cands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
   }
   if(d.type==='ground'){
@@ -16963,6 +17251,9 @@ function aiPlanFor(id){
     /* The Wizard's two pay whoever stands there later, not the board now. */
     if(d.gConjure)bonus+=1.0;
     if(d.gOnMagic)bonus+=0.6;
+    /* The Priest's two conjure later, for both sides or for whoever stands there. */
+    if(d.gHallow)bonus+=0.9;
+    if(d.gSanctuary)bonus+=1.2;
     /* The Gun's two pay out shot by shot. */
     if(d.gShotBullet)bonus+=1.0;
     if(d.gGunRange&&bulletsOf(p)>1)bonus+=0.9;
@@ -16988,6 +17279,8 @@ function aiPlanFor(id){
   if(d.type!=='magic')return null;
   if(d.onlyWhen&&!phaseIs(d.onlyWhen))return null;
   if(d.wiz)return aiWizPlan(d);
+  if(d.smiteAi)return aiSmitePlan(d);
+  if(magicLocked(p))return null;
   if(d.gunAi)return aiGunMagicPlan(d);
   if(d.fuAi)return aiFusionMagicPlan(d);
   /* Past the price gate. A spell that asks the whole price before it takes any
@@ -17513,10 +17806,20 @@ async function aiPlayTeece(){
        keeps to real bodies, as it always has. */
     const sacables=d.sacSpiderling?sacPool(p,h,id).cells:[];
     if(!d.sacSpiderling)for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&(!t.isToken||d.sacTokens)&&canSacrifice(b,i))sacables.push(i);}
-    let sacP=[];
+    let sacP=[],sacHx=[];
+    /* High Priest and Avatar: Smites in hand pay what the bodies cannot. */
+    if(d.sacSmite&&need>0){
+      const scored=sacables.map(i=>({i,v:effSides(b,i).reduce((a,c)=>a+c,0)-(b[i].teece.isToken?100:0)})).sort((a,c)=>a.v-c.v);
+      let paid=0;
+      const hs=[];for(let x=0;x<pl.hand.length;x++)if(x!==h&&d.sacSmite[pl.hand[x]])hs.push(x);
+      hs.sort((x,y)=>d.sacSmite[pl.hand[y]]-d.sacSmite[pl.hand[x]]);
+      for(const x of hs){if(paid>=need)break;sacHx.push(x);paid+=d.sacSmite[pl.hand[x]];}
+      for(const sc of scored){if(paid>=need)break;sacP.push(sc.i);paid+=1;}
+      if(paid<need)continue;
+    }
     /* Factory Line: the Drones are a whole second way to pay, taken only when
        there is no real body to give up. */
-    if(d.sacDrones&&sacables.length<need){
+    else if(d.sacDrones&&sacables.length<need){
       const dr=[];for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&t.cardId==='TD'&&canSacrifice(b,i))dr.push(i);}
       if(dr.length<need*d.sacDrones)continue;
       sacP=dr.slice(0,need*d.sacDrones);
@@ -17546,7 +17849,7 @@ async function aiPlayTeece(){
         if(rots.length===1)simOnPlay(bb,c,id,p);
         simCombat(bb);
         const g=boardValue(bb,p)-base+2.2;
-        if(g>bg){bg=g;best={h,c,rot,sacP};}
+        if(g>bg){bg=g;best={h,c,rot,sacP:sacP.concat(sacHx.map(x=>'h'+x))};}
       }
     }
   }
@@ -17760,6 +18063,8 @@ function aiActMuts(cell,ent){
 async function aiTurn(){
   if(!G||G.over)return;
   const ep=G.epoch, p=G.turn;
+  await aiSmiteCombine();
+  if(stale(ep)||G.over)return;
   await aiCombine();
   if(stale(ep)||G.over)return;
   await aiRunes();
@@ -17775,6 +18080,8 @@ async function aiTurn(){
     await aiPlayTeece();
     if(stale(ep)||G.over)return;
   }
+  await aiSmiteCombine();
+  if(stale(ep)||G.over)return;
   for(let k=0;k<2;k++){if(!await aiSupport())break;if(stale(ep)||G.over)return;}
   await aiGun();
   if(stale(ep)||G.over)return;
@@ -18650,7 +18957,7 @@ function renderHand(p){
         '<div class="'+sc(1)+'">'+ps[1]+'</div>'+
         '<div class="'+sc(2)+'">'+ps[2]+'</div>'+
         '<div class="'+sc(3)+'">'+ps[3]+'</div>'+
-        '<div class="hcn cn">'+cd.name+'</div>';
+        '<div class="hcn cn">'+cardTitle(id,p)+'</div>';
     }else{
       card.innerHTML=(art?'<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>':'')+
         '<div class="ct">'+cd.type+'</div><div class="cn">'+cd.name+'</div><div class="cs">'+cd.text.split('\n')[0]+'</div>';
@@ -18665,7 +18972,7 @@ function renderHand(p){
       cb.className='discardBtn combineBtn';
       cb.type='button';
       cb.textContent='Combine';
-      cb.title='Combine '+cd.name+' with another element in your hand into a stronger spell.';
+      cb.title=smiteLvl(id)?'Combine '+cd.name+' with another of the same power into a stronger Smite.':'Combine '+cd.name+' with another element in your hand into a stronger spell.';
       cb.disabled=(p!==G.turn||G.over||!!G.pending);
       cb.addEventListener('click',e=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)combineAt(p,i);});
       card.appendChild(cb);
@@ -18785,6 +19092,9 @@ function statusesFor(p){
     }
   }
 
+  /* --- the god this seat worships --- */
+  if(worshipOf(p)!=null)push('worship','good','Worship: '+godName(p),
+    'Your priests get +3 on their '+SIDE_NAMES[worshipOf(p)]+' side. A Prophet can switch it.');
   /* --- and what is calling from the graveyard ---
      The board has no panel to tap for a card that is in the ground, so the
      chip carries the ability itself. */
@@ -19560,6 +19870,7 @@ const archmageFor=p=>wizOnField(p,'archmage');
    spell they make, or the four for Holy. */
 function combineOpts(p,i){
   if(!G||!G.players[p])return [];
+  if(smiteLvl(G.players[p].hand[i]))return smiteCombineOpts(p,i);
   const hand=G.players[p].hand,a=elemOf(hand[i]),out=[];
   if(!a)return out;
   for(let j=0;j<hand.length;j++){
@@ -19612,6 +19923,13 @@ async function combineAt(p,i){
   for(const x of o.take.slice().sort((m,n)=>n-m)){const gone=handTake(p,x);if(gone)dumpPlate(gone.plate,'',gone.id);}
   handPush(p,o.res);
   log(pname(p)+' '+vb(p,'combines','combine')+' '+names.join(' and ')+' into '+CARDS[o.res].name+'.');
+  /* The Seraph rises with every combine. */
+  for(let k=0;k<BN;k++){
+    const t=G.board[k].teece;
+    if(!t||t.owner!==p||t.silenced)continue;
+    const oc=DEF(t).onCombine;
+    if(oc){applyModT(t,oc.n,'temp');log(nm(t)+' rises with the combining: '+sgn(oc.n)+' until the end of the turn.');}
+  }
   render();
   return true;
 }
@@ -19704,6 +20022,7 @@ async function aiCombine(){
     const hand=G.players[p].hand;
     let done=false;
     for(let i=0;i<hand.length&&!done;i++){
+      if(smiteLvl(hand[i]))continue;
       const opts=combineOpts(p,i);
       if(!opts.length)continue;
       if(!opts.some(o=>o.res===936)&&hand.length<5&&Math.random()<0.5)continue;
@@ -19712,6 +20031,280 @@ async function aiCombine(){
     }
     if(!done||G.over)return;
   }
+}
+
+/* ============ Priest: Worship, Smites, and combining them ============
+   Worship is the seat's, not the card's: a seat holding priests picks a god at
+   the start of its first turn, and every priest it controls gets +3 on that
+   god's side for as long as it worships there (Levt the left, Topus the top,
+   Rightorious the right, Bottomor the bottom). A Prophet may move it. The
+   +3 is read in effSides off whoever controls the body right now, so a stolen
+   priest serves its thief's god, and silence leaves it alone -- the god is the
+   player's, not something printed on the card.
+
+   A Smite is a token magic card conjured straight into the hand. Two of the
+   same power combine on your own turn, from the Combine button, into the next
+   one up: Quarter, Half, Smite, Divine. Divine Retribution counts as a Half
+   for that. Every conjure goes through conjureSmites, which is where Prayer
+   Beads answer. */
+const GODS=[{name:'Topus',side:0},{name:'Rightorious',side:1},{name:'Bottomor',side:2},{name:'Levt',side:3}];
+const SMITE_CARD={1:1122,2:1123,3:1124,4:1125};
+const SMITE_TEMP={1:-1,2:-5};
+const smiteLvl=id=>(CARDS[id]&&CARDS[id].smiteLvl)||0;
+function worshipOf(p){
+  const pl=G&&G.players&&G.players[p];
+  return pl&&pl.worship!=null?pl.worship:null;
+}
+function godName(p){
+  const w=worshipOf(p);
+  if(w==null)return null;
+  const g=GODS.find(x=>x.side===w);
+  return g?g.name:null;
+}
+/* High Priest and Avatar are named for the god their controller worships. */
+function cardTitle(id,p){
+  const d=CARDS[id];
+  if(!d)return '';
+  if(!d.godTitle)return d.name;
+  const g=p!=null?godName(p):null;
+  return d.name+' of '+(g||'your god');
+}
+function seatHasPriest(p){
+  const pl=G.players[p];
+  if(!pl)return false;
+  const has=id=>!!(CARDS[id]&&CARDS[id].priest);
+  return pl.hand.some(has)||(pl.deck||[]).some(has)||
+    G.board.some(c=>c.teece&&c.teece.owner===p&&DEF(c.teece).priest);
+}
+/* The computer's god. With priests on the field it weighs each one on a clone
+   of the board; at the start of the game, with nothing down yet, it backs
+   whichever side its priests are printed strongest on. */
+function aiWorshipPick(p,keep){
+  const pl=G.players[p],was=pl.worship;
+  const onField=G.board.some(c=>c.teece&&c.teece.owner===p&&DEF(c.teece).priest);
+  let best=keep&&was!=null?was:GODS[0].side,bv=-1e9;
+  if(onField){
+    for(const g of GODS){
+      pl.worship=g.side;
+      const bb=cloneBoard(G.board);
+      simCombat(bb);
+      const v=boardValue(bb,p)+(g.side===was?0.01:0);
+      if(v>bv){bv=v;best=g.side;}
+    }
+    pl.worship=was;
+    return best;
+  }
+  const tot=[0,0,0,0];
+  for(const id of pl.hand.concat(pl.deck||[])){
+    const d=CARDS[id];
+    if(!d||!d.priest||!d.sides)continue;
+    for(let k=0;k<4;k++)tot[k]+=d.sides[k];
+  }
+  for(const g of GODS){const v=tot[g.side]+Math.random()*0.5;if(v>bv){bv=v;best=g.side;}}
+  return best;
+}
+async function chooseWorship(p,msg,keep){
+  const pl=G.players[p];
+  let side;
+  if(isAIP(p)||!HAS_DOM)side=aiWorshipPick(p,keep);
+  else{
+    const opts=GODS.map(g=>({v:String(g.side),lbl:g.name+' — your priests get +3 on their '+SIDE_NAMES[g.side]+' side'}));
+    if(keep&&pl.worship!=null)opts.unshift({v:'keep',lbl:'Keep worshipping '+godName(p)});
+    const pick=await chooseOption(p,opts,msg);
+    side=(pick==null||pick==='CANCEL'||pick==='keep')?(pl.worship!=null?pl.worship:GODS[0].side):parseInt(pick,10);
+  }
+  const was=pl.worship;
+  pl.worship=side;
+  if(was===side)log(pname(p)+' '+vb(p,'keeps','keep')+' faith with '+godName(p)+'.');
+  else log(pname(p)+' '+vb(p,'worships','worship')+' '+godName(p)+': priests get +3 on their '+SIDE_NAMES[side]+' side.');
+  render();
+}
+/* Into the hand: n of one card, a Quarter Smite unless named. Prayer Beads pay
+   their wearer for every magic card that arrives this way. */
+function conjureSmites(q,n,id){
+  id=id||1122;n=n||1;
+  if(!G.players[q])return;
+  for(let k=0;k<n;k++)handPush(q,id);
+  log(pname(q)+' '+vb(q,'conjures','conjure')+' '+(n>1?n+' '+CARDS[id].name+'s':(/^[AEIOU]/.test(CARDS[id].name)?'an ':'a ')+CARDS[id].name)+'.');
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(!t||t.owner!==q)continue;
+    for(const e of t.equips){
+      const g=eqG(e);
+      if(!g||!g.onConjure)continue;
+      applyModT(t,g.onConjure*n,'temp');
+      log(nm(t)+' is lifted by '+CARDS[e.cardId].name+': '+sgn(g.onConjure*n)+' until the end of the turn.');
+    }
+  }
+}
+/* Hallowed Ground: every seat still in the game gets one. */
+function hallowConjure(cell,why){
+  const g=G.board[cell]&&G.board[cell].ground;
+  if(!g||!groundFlag(g,'gHallow'))return;
+  log('The Hallowed Ground answers '+why+'.');
+  for(let q=0;q<PLAYERS();q++)if(seatAlive(q))conjureSmites(q,1);
+}
+/* An Ascetic standing on your side keeps magic out of your hands. */
+function magicLocked(p){
+  if(!G||!G.board)return false;
+  return G.board.some(c=>c.teece&&c.teece.owner===p&&!c.teece.silenced&&DEF(c.teece).noOwnMagic);
+}
+const bigTeece=t=>!!t&&(isBossCard(t.cardId)||(CARDS[t.cardId].sac||0)>=1);
+/* A Votive Shield its own side smites drinks the Smite instead. */
+function smiteAbsorb(t,p,lvl){
+  if(!t)return 0;
+  for(const e of t.equips){
+    const g=eqG(e);
+    if(g&&g.smiteAbsorb&&e.owner===p)return g.smiteAbsorb[lvl-1]||0;
+  }
+  return 0;
+}
+/* What the computer would rather throw away: the cheapest card it holds. */
+function aiCardWorth(id){
+  const d=CARDS[id];
+  if(!d)return 0;
+  if(d.smiteLvl)return d.retribution?2.5:[0,0.4,1.2,3,4][d.smiteLvl];
+  if(d.type==='teece')return (d.sides||[0,0,0,0]).reduce((a,c)=>a+c,0)/8+(d.sac||0);
+  return 1.5;
+}
+/* The card a spell is resolving off sits in the hand while it resolves, and
+   handOpts skips it by index; anything taken from in front of it moves it. */
+function takeForCast(p,idx){
+  const cf=G.castingFrom;
+  const gone=handTake(p,idx);
+  if(gone&&cf&&cf.p===p&&idx<cf.handIdx)cf.handIdx--;
+  return gone;
+}
+async function smiteDiscard(p,n,why){
+  for(let k=0;k<n;k++){
+    const opts=handOpts(p);
+    if(!opts.length)return k;
+    let pick;
+    if(isAIP(p)||!HAS_DOM){
+      let lo=1e9;
+      for(const o of opts){const w=aiCardWorth(o.cid);if(w<lo){lo=w;pick=o.v;}}
+    }else pick=await chooseOption(p,opts,why+' Discard which card?'+(n>1?' ('+(k+1)+' of '+n+')':''));
+    const o=opts.find(x=>x.v===pick)||opts[0];
+    const idx=parseInt(o.v,10);
+    const gone=takeForCast(p,idx);
+    if(!gone)continue;
+    dumpPlate(gone.plate,'with the card it was bolted to',gone.id);
+    log(pname(p)+' '+vb(p,'discards','discard')+' '+CARDS[gone.id].name+' to pay for the Smite.');
+    await discardCard(p,gone.id);
+    if(G.over)return k+1;
+  }
+  return n;
+}
+/* Divine Retribution, played from the hand the moment an enemy Teece destroys
+   one of yours. Only the killer is a target, and only one that is not a Boss
+   and is still standing. */
+async function retributionReact(t,killers){
+  const q=t.owner,b=G.board;
+  if(!G.players[q]||hexOn(q,'silence')||hexOn(q,'nomagic')||magicLocked(q))return;
+  const pl=G.players[q];
+  const idx=pl.hand.findIndex(h=>CARDS[h]&&CARDS[h].retribution);
+  if(idx<0)return;
+  const cells=[];
+  for(let i=0;i<BN;i++){
+    const k=b[i].teece;
+    if(!k||killers.indexOf(k.uid)<0||sameTeam(k.owner,q))continue;
+    if(isBossCard(k.cardId)||isHeldSafe(k)||!canTarget(b,i,q))continue;
+    cells.push(i);
+  }
+  if(!cells.length)return;
+  const cid=pl.hand[idx];
+  const yes=(isAIP(q)||!HAS_DOM)?true:
+    (await chooseOption(q,[{v:'y',lbl:'Play '+CARDS[cid].name+' now'},{v:'n',lbl:'Keep it in hand'}],
+      nm(b[cells[0]].teece)+' destroyed '+nm(t)+'. Play '+CARDS[cid].name+' from your hand?'))==='y';
+  if(!yes)return;
+  let c=cells[0];
+  if(cells.length>1){
+    const r=await chooseCell(q,cells,'Divine Retribution: choose the Teece to destroy.',{mut:(bb,i)=>{bb[i].teece=null;}});
+    if(r!=null&&r!=='CANCEL'&&cells.indexOf(r)>=0)c=r;
+  }
+  const at=pl.hand.indexOf(cid);
+  if(at<0||!b[c].teece)return;
+  handTake(q,at);
+  toGrave(q,cid);
+  log(pname(q)+' '+vb(q,'answers','answer')+' with '+CARDS[cid].name+'.');
+  if(tapeSave(b,c,q)){await anim([c],'zap');return;}
+  const k=b[c].teece;
+  log(nm(k)+' is struck down in retribution.');
+  await anim([c],'dying',190);
+  await processDeath({cell:c,t:k,killers:[]});
+}
+/* Every way the card at hand index i combines right now: one partner of the
+   same power, and the Smite they make. */
+function smiteCombineOpts(p,i){
+  const hand=G.players[p].hand,a=smiteLvl(hand[i]),out=[];
+  if(!a||a>=4)return out;
+  let j=-1;
+  for(let x=0;x<hand.length;x++){
+    if(x===i||smiteLvl(hand[x])!==a)continue;
+    if(j<0||(CARDS[hand[j]].retribution&&!CARDS[hand[x]].retribution))j=x;
+  }
+  if(j<0)return out;
+  const res=SMITE_CARD[a+1];
+  out.push({v:'s'+a,res,take:[i,j],lbl:CARDS[hand[i]].name+' + '+CARDS[hand[j]].name+' → '+CARDS[res].name});
+  return out;
+}
+/* The computer always folds Quarters and Halves together -- the bigger Smite is
+   worth more than the two pieces -- leaving Divine Retribution alone, since it
+   is worth more held. Two Smites become a Divine when there is not enough in
+   hand to pay for both, or when a Seraph is waiting on the combine. */
+async function aiSmiteCombine(){
+  const p=G.turn,ep=G.epoch;
+  for(let guard=0;guard<8;guard++){
+    if(stale(ep)||G.over||G.pending)return;
+    const hand=G.players[p].hand;
+    const seraph=G.board.some(c=>c.teece&&c.teece.owner===p&&!c.teece.silenced&&DEF(c.teece).onCombine);
+    let at=-1;
+    for(const lvl of [1,2,3]){
+      const xs=[];
+      for(let x=0;x<hand.length;x++)if(smiteLvl(hand[x])===lvl&&!CARDS[hand[x]].retribution)xs.push(x);
+      if(xs.length<2)continue;
+      if(lvl===3){
+        const fodder=hand.length-xs.length;
+        if(fodder>=2&&!seraph)continue;
+      }
+      at=xs[0];break;
+    }
+    if(at<0)return;
+    const ok=await combineAt(p,at);
+    if(!ok)return;
+    await wait(250);
+  }
+}
+/* What the computer makes of a Priest spell. */
+function aiSmitePlan(d){
+  const b=G.board,p=G.turn,pl=G.players[p];
+  if(magicLocked(p))return null;
+  switch(d.smiteAi){
+    case 'conjure':return {thr:0.5,bonus:1.0,cands:[0],mut:()=>{}};
+    case 'miracle':
+      return pl.hand.some(h=>h===1124)?{thr:0.5,bonus:1.2,cands:[0],mut:()=>{}}:null;
+    case 'resurrect':{
+      const any=G.players.some(q=>q.grave.some(id=>CARDS[id].type==='teece'));
+      return any?{thr:0.5,bonus:1.4,cands:[0],mut:()=>{}}:null;}
+    case 'smite':{
+      const lvl=d.smiteLvl,others=pl.hand.length-1,c=[];
+      for(let i=0;i<BN;i++){
+        const t=b[i].teece;
+        if(!t||!canTarget(b,i,p))continue;
+        if(lvl>=3&&isHeldSafe(t)&&!smiteAbsorb(t,p,lvl))continue;
+        if(lvl===3&&others<1+(bigTeece(t)?1:0))continue;
+        c.push(i);
+      }
+      if(!c.length)return null;
+      return {thr:[0,0.6,0.9,2.2,1.4][lvl],cands:c,mut:(bb,i)=>{
+        const o=bb[i].teece;if(!o)return;
+        const ab=smiteAbsorb(o,p,lvl);
+        if(ab){applyModT(o,ab,'perm');return;}
+        if(lvl<=2)applyModT(o,SMITE_TEMP[lvl],'temp');
+        else bb[i].teece=null;}};
+    }
+  }
+  return null;
 }
 
 /* ============ Gun: bullets, the magazine, and shooting ============
@@ -19991,7 +20584,7 @@ async function aiGun(){
 async function aiGunDiscard(){
   const p=G.turn,pl=G.players[p];
   if(!G.teecePlayed||pl.hand.length<5)return;
-  const h=pl.hand.findIndex(id=>CARDS[id].gunDiscard);
+  const h=pl.hand.findIndex(id=>CARDS[id].gunDiscard||(CARDS[id].priestDiscard&&!(CARDS[id].type==='teece'&&canPlay(p,id)&&!G.teecePlayed)));
   if(h>=0)await playHandDiscard(p,h);
 }
 function aiGunMagicPlan(d){
@@ -21210,6 +21803,8 @@ if(typeof module!=='undefined'){
     runSteps,fireMove,moveT,applyModT,hasKw,putTeece,actsOf,boardValue,
     modalCtl,fireModal,setModalNext,kwOf,playTeece,offerReveal,groundFlag,enemySeats,
     playHandDiscard,playFromHand,
+    nm,combineAt,combineOpts,conjureSmites,worshipOf,godName,chooseWorship,cardTitle,magicLocked,
+    aiSmiteCombine,smiteLvl,GODS,
     canPlay,hexOn,addHex,tickHexes,hexTargets,drawCards,openAt,discardCard,castCard,
     riseFromGrave,forcedMoves,fireMagic,flushDiscards,toGrave,isBossCard,playMagic,
     mustPlayTeece,holdsPlayableTeece,notePass,PASS_LIMIT,facingDeckOut,deckOutWinner,spinT,checkTimer,ageTurn,
