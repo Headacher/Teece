@@ -1147,7 +1147,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:174,date:'2026-10-13'};
+const VERSION={build:175,date:'2026-10-13'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3763,9 +3763,9 @@ const CARDS = {
     text:'Whenever a card is discarded, either side’s: +8 to its top until the end of the turn. Wicked Dance Moves — once per your turn it may move up to two spaces at once. When discarded: You can select a Teece; give it +8 to its top attribute until the end of the turn.'},
  789:{name:'Psychopathic Killer',type:'teece',sides:[7,3,7,3],madness:true,
     onGrave:{sides:[0,2,0,2],sidesDur:'perm',step:1},
-    onDiscard:[{fx:'modSides',sides:[0,2,0,2],dur:'perm',may:true,
+    onDiscard:[{fx:'modSides',sides:[0,2,0,2],dur:'perm',may:true,thenMove:'orth',
       msg:'Which Teece gets +2 to its left and right?'}],
-    text:'Whenever a card is sent to a graveyard from anywhere, either side’s: +2 to its left and right permanently, and it may step one space. When discarded: You can select a Teece; give it +2 to its left and right.'},
+    text:'Whenever a card is sent to a graveyard from anywhere, either side’s: +2 to its left and right permanently, and it may step one space. When discarded: You can select a Teece; give it +2 to its left and right, and you may move it one space.'},
  790:{name:'Cultist of Babble',type:'teece',sides:[5,5,5,5],madness:true,sacHand:true,
     onDeath:[{fx:'choose',msg:'Willing Sacrifice:',opts:[
       {lbl:'Draw a card, then throw one away',steps:[{fx:'price',deck:1},{fx:'draw',n:1},{fx:'discard',n:1}]},
@@ -12799,6 +12799,20 @@ async function FXRUN(st,ctx){
     log(nm(tt)+' takes '+(st.sides?sidesLine(st.sides):sgn(st.n||0))+
       ((st.kw||[]).length?' and '+(st.kw||[]).join(', '):'')+durTxt(st.dur||'temp')+'.');
     await anim([c],'zap');
+    /* thenMove: the Teece just lifted may also be moved, by whoever lifted
+       it. Optional, so a skip leaves it where it stands. */
+    if(st.thenMove&&b[c].teece===tt&&!hasKw(b,c,'immovable')){
+      const d=movePool(c,st.thenMove).filter(j=>openAt(b,j));
+      if(d.length){
+        const m=await pickCell(d,'Move '+DEF(tt).name+'? Choose where, or skip.',
+          (bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);},true);
+        if(m!=null&&m!=='CANCEL'){
+          moveT(b,c,m,true);
+          log(nm(tt)+' moves to the '+CN[m]+'.');
+          await fireMove(c,m,p);
+        }
+      }
+    }
     return;}
   /* One hand emptied rather than every hand. Snapshotted first, for the same
      reason discardHands is: each card thrown away fires its own discard, and
