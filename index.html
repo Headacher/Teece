@@ -1147,7 +1147,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:170,date:'2026-10-13'};
+const VERSION={build:171,date:'2026-10-13'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4357,8 +4357,8 @@ const CARDS = {
     text:'Select a card on the field. A Teece is frozen: it can no longer destroy a Teece and its abilities are negated, but it has +2 Defence. An equip or a battleground is destroyed.'},
  934:{name:'Mud',type:'magic',token:true,deck:'wizard',elem:['water','earth'],wiz:'lay',lay:940,
     cast:[{fx:'layBG',bg:940}],text:'Select a panel with no battleground; lay Mud there. A Teece on it cannot move or be moved and has +5 Defence.'},
- 935:{name:'Mud Golem',type:'teece',token:true,deck:'wizard',sides:[7,7,7,7],kw:['flying'],def:2,
-    text:'Mud Golem Token. Defence 2. Flying: once per your turn, move one space. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
+ 935:{name:'Sand Golem',type:'teece',token:true,deck:'wizard',sides:[7,7,7,7],kw:['flying'],def:2,
+    text:'Sand Golem Token. Defence 2. Flying: once per your turn, move one space. Cannot be sacrificed to play a Teece or to a curse; never counts toward winning.'},
  936:{name:'Holy',type:'magic',token:true,deck:'wizard',elem:['fire','water','wind','earth'],wiz:'holy',
     cast:[{fx:'holy'}],text:'Select a Teece; destroy it. Then summon a non-Boss Teece from your graveyard onto the panel it stood on.'},
  /* the battlegrounds the elements lay */
