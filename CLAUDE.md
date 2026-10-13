@@ -398,13 +398,14 @@ other deck (build 116).
 
 Worship is a seat value, `pl.worship` (a side index: Topus 0, Rightorious 1,
 Bottomor 2, Levt 3, in `GODS`), chosen in `startTurn` the first time a seat
-holding any `priest:true` card starts a turn (`seatHasPriest`), so it works in
-drafts and roguelike runs too. `effSides` gives every `priest` +3 on that side,
-read off the body's current controller; `priest` and `godTitle` are in
+playing the Priest deck starts a turn. It is a deck rule: `decks.json` sets
+`worship`, `applyDeckRules` copies it to `pl.worshipper`, and `seatHasPriest`
+refuses any other seat, so drafted priests and roguelike runs get no god.
+`effSides` gives every `priest` +3 on that side, read off the body's current
+controller, so a priest the other side steals gets nothing; `priest` and `godTitle` are in
 `ID_KEYS`, so silence keeps Worship. `worshipPlus` (Devotee) and the Icon of
 Devotion's `worshipTriple` (the finished side value, tripled) compose there too.
-A headless test built on `newState` must set `pl.worship` by hand or call
-`startTurn` on the priest seat.
+A headless test built on `newState` must set `pl.worship` (or `pl.worshipper`) by hand.
 
 Smites are token magic 1122–1125 with `smiteLvl` 1–4; Divine Retribution
 (1115) has `smiteLvl:2` so it combines as a Half, and is played only from
@@ -418,8 +419,9 @@ sacrifice through `sacSmite` (worth per card id, read by `handSacWorth`).
 
 The computer folds Quarters and Halves always and Smites into a Divine only
 when it lacks discard fodder (`aiSmiteCombine`), and casts through
-`aiSmitePlan`. AI-vs-AI over 180 games against every other deck: 75% (build
-168), at the owner's printed numbers.
+`aiSmitePlan`. AI-vs-AI against every other deck, at the owner's printed numbers: 75% over
+180 games (build 168), 73% over 120 once Worship became deck-only and Vigil
+Keeper own-turn-only (build 169).
 
 ### Lightning summons out of the hand, and answers at instant speed
 

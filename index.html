@@ -1147,7 +1147,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:168,date:'2026-10-13'};
+const VERSION={build:169,date:'2026-10-13'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4660,8 +4660,8 @@ const CARDS = {
         conjure a Quarter Smite into the hand; two of a kind combine in hand
         (the Combine button) into the next Smite up: Quarter, Half, Smite,
         Divine. Smites are tokens: in no deck and never drafted. ---- */
- 1102:{name:'Vigil Keeper',type:'teece',sides:[7,7,0,2],priest:true,eachTurnEnd:[{fx:'conjureSmite'}],
-    text:'At the end of each turn: conjure a Quarter Smite.'},
+ 1102:{name:'Vigil Keeper',type:'teece',sides:[7,7,0,2],priest:true,ownTurnEnd:[{fx:'conjureSmite'}],
+    text:'At the end of each of your turns: conjure a Quarter Smite.'},
  1103:{name:'Acolyte',type:'teece',sides:[4,4,4,4],priest:true,onPlay:[{fx:'conjureSmite'}],
     text:'When played: conjure a Quarter Smite.'},
  1104:{name:'Zealot',type:'teece',sides:[5,5,5,5],priest:true,
@@ -16268,12 +16268,12 @@ async function endTurn(){
     const fe=DEF(t).foeTurnEnd;
     if(fe)await runSteps(fe,{p:t.owner,cell:i,t,first:false});
   }
-  /* "At the end of each turn", whosever it is, and a Sanctuary at the end of
-     its Teece's controller's own. */
+  /* "At the end of each of your turns", and a Sanctuary at the end of its
+     Teece's controller's own. */
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
-    if(!t||t.silenced)continue;
-    const ee=DEF(t).eachTurnEnd;
+    if(!t||t.silenced||t.owner!==p)continue;
+    const ee=DEF(t).ownTurnEnd;
     if(ee)await runSteps(ee,{p:t.owner,cell:i,t,first:false});
   }
   for(let i=0;i<BN;i++){
@@ -20071,7 +20071,7 @@ function cardTitle(id,p){
 }
 function seatHasPriest(p){
   const pl=G.players[p];
-  if(!pl)return false;
+  if(!pl||!pl.worshipper)return false;
   const has=id=>!!(CARDS[id]&&CARDS[id].priest);
   return pl.hand.some(has)||(pl.deck||[]).some(has)||
     G.board.some(c=>c.teece&&c.teece.owner===p&&DEF(c.teece).priest);
@@ -21633,6 +21633,9 @@ function applyDeckRules(p,key){
   pl.swarmWin=dk.swarmWin||null;
   /* The Devils start the game holding a SOUL. */
   pl.souls=dk.souls||0;
+  /* Worship is the Priest deck's passive: only a seat playing that deck has a
+     god, so a priest drafted elsewhere or stolen by the other side gets none. */
+  pl.worshipper=!!dk.worship;
   /* The Runeblade tribe starts the game holding the Runeblade, on top of the
      opening hand rather than instead of a card of it. */
   for(const id of (dk.startHand||[]))if(CARDS[id])handPush(p,id);

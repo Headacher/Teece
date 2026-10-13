@@ -1073,13 +1073,14 @@
       ],
       "blurb": "Priests are devotees to their god, imbued with its strength to smite their opponents down in an instant. They channel that power across many practitioners, conjuring Smites that grow stronger as they are gathered together. Worship a god at the start of the game and every priest you field fights harder on that god's side.",
       "how": [
-        "Worship: at the start of the game choose a god. Levt rules the left, Topus the top, Rightorious the right and Bottomor the bottom; all your priests get +3 on that side. A Prophet lets you switch.",
+        "Worship: at the start of the game choose a god. Levt rules the left, Topus the top, Rightorious the right and Bottomor the bottom; all your priests get +3 on that side. A Prophet lets you switch. Worship belongs to the Priest deck: a priest the other side steals, or one drafted into another deck, gets no god.",
         "Most priests conjure a Quarter Smite straight into your hand (a Teece gets -1 until the end of the turn). Two Quarters combine into a Half Smite (-5), two Halves into a Smite (discard a card: destroy a Teece), and two Smites into a Divine Smite (destroy a Teece, free). Combining uses the Combine button on the card and costs no play.",
         "Smites count toward your hand limit of six, so combine or cast them before your turn ends. Divine Retribution counts as a Half Smite for combining, but held, it destroys whatever kills one of yours.",
         "The High Priest and the Avatar can be paid for with Smites instead of bodies, and like the Devotee and the Votive Shield, they can be thrown away from your hand for one more Quarter Smite. Smite your own Teece through a Votive Shield to make it stronger."
       ],
       "level": "advanced",
-      "kind": "utility"
+      "kind": "utility",
+      "worship": true
     }
   },
   "formats": [
