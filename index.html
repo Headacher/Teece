@@ -260,6 +260,10 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="priest"] .kwl,.dcard[data-card-deck="priest"] .dkw{color:#9a6b00}
 .card[data-card-deck="priest"] .ct,.dcard[data-card-deck="priest"] .dty{color:#9a6b00}
 .card[data-card-deck="priest"]::after,.dcard[data-card-deck="priest"]::after{content:'\1F64F'}
+.card[data-card-deck="dwarves"],.dcard[data-card-deck="dwarves"]{--cardbg:#4b3a2c;--artink:#f2b45c;background:var(--cardbg);color:#f3e8d8;border-color:#2a1f16}
+.card[data-card-deck="dwarves"] .kwl,.dcard[data-card-deck="dwarves"] .dkw{color:#ffb85c}
+.card[data-card-deck="dwarves"] .ct,.dcard[data-card-deck="dwarves"] .dty{color:#ffb85c}
+.card[data-card-deck="dwarves"]::after,.dcard[data-card-deck="dwarves"]::after{content:'\26CF'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -293,6 +297,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .teece[data-card-deck="mummy"]{--cardbg:#d8c79a;--artink:#4a3a1c;background:var(--cardbg);color:#2a2112;border-color:#7a6232}
 .teece[data-card-deck="wolf"]{--cardbg:#5d6670;--artink:#f1ece2;background:var(--cardbg);color:#f4f1ea;border-color:#2b3036}
 .teece[data-card-deck="priest"]{--cardbg:#efe6cf;--artink:#8a6a1f;background:var(--cardbg);color:#3b2f17;border-color:#b8962e}
+.teece[data-card-deck="dwarves"]{--cardbg:#4b3a2c;--artink:#f2b45c;background:var(--cardbg);color:#f3e8d8;border-color:#2a1f16}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -1147,7 +1152,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:177,date:'2026-10-13'};
+const VERSION={build:178,date:'2026-10-13'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1284,7 +1289,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}',priest:'\u{1F64F}'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}',priest:'\u{1F64F}',dwarves:'\u26CF\uFE0F'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -1542,6 +1547,29 @@ const CARD_ART={
   1125:["  \\  /|  /   ", "   \\/ |/     ", "  --/ |/--   ", "    / |\\     ", "   /  | \\    "],
   1126:["    .-.      ", "   ( + )     ", "  ~~~|~~~    ", "    / \\      ", "   ~~~~~     "],
   1127:["  .  /  .    ", "    /| /     ", "   / |/| /   ", "     / |/    ", "    /  /     "],
+  /* ---- Dwarves ---- */
+  1128:["    _n_      ", "   (o_o)  ]  ", "   /|#|\\=]   ", "  [ |_| ]    ", "    d b      "],
+  1129:["   _____     ", "  /(o_o)\\    ", "  ||WWW|| *  ", "  || | ||/   ", "  ~~~~~~~    "],
+  1130:["    /^\\      ", "   (o_o)     ", "  /|WWW|\\    ", "  #|   |#    ", "   d   b     "],
+  1131:["    _n_      ", "   (o_o)  |  ", "  -+WWW+-->  ", "    | |   |  ", "    d b      "],
+  1132:["  ==\\|/==    ", "    (o_o)    ", "   /WWW\\     ", "  ~~ | ~~    ", "             "],
+  1133:["   [___]     ", "   (o_o)     ", "  [|WWW|]    ", "  [| | |]    ", "   d   b     "],
+  1134:["  _____      ", " |  _  |o_o  ", " | |#| |WW\\  ", " |_____| |   ", "        d b  "],
+  1135:["   * ' *     ", "   (o_o) *   ", "  /|WWW|\\    ", "  ' | | '    ", "   d * b     "],
+  1136:["   .-.  *    ", "  (o_o)/     ", "  /WWW/      ", "  | |\\       ", "  d  b       "],
+  1137:["    _n_   __ ", "   (o_o) |  |", "  /|WWW|\\ || ", "   _|_|_  || ", "  [_____]    "],
+  1138:["   \\^^^/     ", "   (o_o)     ", "  /|WWW|\\ |  ", "  || | ||-+- ", "   d   b  |  "],
+  1139:["  \\^/^\\^/    ", "  (O__O)     ", " /|WWWW|\\    ", " || || ||    ", "  d    b     "],
+  1140:["   .---.     ", "  /oooo\\     ", "  |oooo|     ", "  |oooo|     ", "   '--'      "],
+  1141:["  ___====__  ", " /  o  o   \\>", " \\_________/ ", "   |  |  |   ", "  ~~~~~~~~~  "],
+  1142:["     /\\      ", "    /  \\  /\\ ", "   / /\\ \\/  \\", "  /_/  \\_\\__\\", "  ^^^^^^^^^^ "],
+  1143:["    __       ", "   /  \\__    ", "   \\__/  |   ", "      |  |   ", "      |__|   "],
+  1144:["  ___   ___  ", " /   \\_/   \\ ", " | * |#| * | ", " \\___/ \\___/ ", "             "],
+  1145:["     ___     ", "    (   )    ", "     \\_/     ", "  o-o-o-o    ", "        []   "],
+  1146:["    _____    ", "   /  |  \\   ", "  | --+-- |  ", "   \\  |  /   ", "    '---'    "],
+  1147:["   ||  ( )   ", "   ||  ) (   ", "   ||  (*)   ", "  =##=  |    ", "   ||  /_\\   "],
+  1148:["   _____     ", "  |_____|    ", "     |       ", "     |       ", "     |       "],
+  1149:["    /\\  /\\   ", "  .'  \\/  '. ", " /  o  o  o \\", "  ^^^^^^^^^^ ", "  ~~~~~~~~~~ "],
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
   541:["  \\  .-.  /  ", "   \\( o )/   ", "    (/|\\)    ", "    _/ \\_    ", "   [$]  ...  "],
@@ -2188,6 +2216,10 @@ function canPlay(p,cardId){
       if(!room)return false;
       return G.players[p].grave.some(cid=>CARDS[cid].type==='teece'&&!isBossCard(cid));
     }
+    /* Gear that only goes onto a card in hand needs a Teece held, not one standing. */
+    if(cd.onlyHand)return G.players[p].hand.some(h=>CARDS[h].type==='teece');
+    /* Gear that can go on an enemy needs only an enemy it can reach. */
+    if(cd.anyOwner)for(let i=0;i<BN;i++){if(G.board[i].teece&&G.board[i].teece.owner!==p&&canTarget(G.board,i,p,'equip'))return true;}
     for(let i=0;i<BN;i++){
       const t=G.board[i].teece;
       if(t&&t.owner===p&&(!cd.onlyToken||t.isToken)&&(!cd.onlyPackLeader||isPackLeader(t)))return true;
@@ -4724,6 +4756,63 @@ const CARDS = {
     cast:[{fx:'resurrection'}],text:'Select a Teece in either graveyard; add it to your hand, or play it under your control.'},
  1127:{name:'Smite And A Half',type:'magic',token:true,deck:'priest',smiteAi:'conjure',
     cast:[{fx:'conjureSmite',n:6}],text:'Conjure 6 Quarter Smites.'},
+ /* ---- Dwarves: 1128-1147, the Common Hammer 1148 and the Avalanche 1149 ----
+        A beginner warrior deck with eight equips in place of magic and
+        battlegrounds. Most dwarves read their own gear: a number or a keyword
+        while equipped, or a count of the equips on them, and several pull an
+        equip back out of the graveyard. formationCount's 'equipped' and
+        'equips' are what they read; noteBuried and equipLanded are what the
+        Forge-Spark Tinker answers. ---- */
+ 1128:{name:'Gear-Laden Recruit',type:'teece',sides:[2,2,2,2],dwarf:true,bonus:{when:'equips',each:true,n:3},
+    text:'+3 for each equip card equipped to it.'},
+ 1129:{name:'Tunnel Scavenger',type:'teece',sides:[5,4,4,5],dwarf:true,onPlay:[{fx:'graveToHand',type:'equip'}],
+    text:'When played: add an equip card from your graveyard to your hand.'},
+ 1130:{name:'Deep Warden',type:'teece',sides:[7,7,2,2],dwarf:true,foeTurnEnd:[{fx:'graveToHand',type:'equip'}],
+    text:'At the end of your opponent’s turn: add an equip card from your graveyard to your hand.'},
+ 1131:{name:'Arbalest Dwarf',type:'teece',sides:[6,6,7,7],dwarf:true,kwWhen:{when:'equipped',kw:['ranged']},
+    text:'While equipped: Ranged.'},
+ 1132:{name:'Gyrocopter Pilot',type:'teece',sides:[5,6,5,6],dwarf:true,kwWhen:{when:'equipped',kw:['flying']},
+    text:'While equipped: Flying.'},
+ 1133:{name:'Ironclad Veteran',type:'teece',sides:[4,4,4,4],dwarf:true,bonus:{when:'equipped',n:4},
+    text:'While equipped: +4.'},
+ 1134:{name:'Shieldwall Dwarf',type:'teece',sides:[3,3,3,3],dwarf:true,defIf:{when:'equipped',n:5},
+    text:'While equipped: +5 Defence.'},
+ 1135:{name:'Forge-Spark Tinker',type:'teece',sides:[0,8,8,8],dwarf:true,onEquipEvent:{n:3,kw:'teleport'},
+    text:'Whenever an equip card is equipped or sent to a graveyard: +3 and Teleport until the end of the turn.'},
+ 1136:{name:'Delver',type:'teece',sides:[6,1,6,6],dwarf:true,deathLate:[{fx:'graveToHand',type:'equip'}],
+    text:'When destroyed: add an equip card from your graveyard to your hand. Whatever it was wearing is already there to pick.'},
+ 1137:{name:'Forgemaster',type:'teece',sides:[5,6,6,5],dwarf:true,onPlay:[{fx:'conjureCard',id:1148}],
+    text:'When played: add a Common Hammer to your hand (equip: the equipped Teece gets +1).'},
+ 1138:{name:'Dwarf Thane',type:'teece',sides:[2,9,10,9],dwarf:true,sac:1,equipsHome:'one',
+    text:'Sacrifice one fielded Teece to play. When destroyed: add one equip card equipped to it back to your hand.'},
+ 1139:{name:'Mountain King',type:'teece',sides:[9,9,9,9],dwarf:true,sac:2,equipsHome:'all',
+    onPlay:[{fx:'equipGraveSelf',n:2}],
+    text:'Sacrifice two fielded Teece to play. When played: equip up to two equip cards from your graveyard to it. When destroyed: every equip card on it goes back to hand.'},
+ /* ---- Dwarf equips ---- */
+ 1140:{name:'Mithril Mail',type:'equip',mod:1,grants:{def:1,shunTeece:true},
+    text:'The equipped Teece has +1 and Defence 1, and cannot be targeted by enemy Teece effects.'},
+ 1141:{name:'Antimagic Airship',type:'equip',mod:0,grants:{kw:['flying'],shunMagic:true,bgProof:true},
+    text:'The equipped Teece has Flying, cannot be targeted by enemy magic, and is not affected by battlegrounds.'},
+ 1142:{name:'Soul of the Mountains',type:'equip',mod:0,grants:{def:3,onDeath:[{fx:'toerrain',bg:1149}],becomesGround:true},
+    text:'The equipped Teece has +3 Defence. When it is destroyed: this equip becomes an Avalanche on its panel (+3 Defence, and +3 more while an ally is adjacent).'},
+ 1143:{name:'Fresh-Forged Axe',type:'equip',mod:0,onlyHand:true,
+    grants:{onPlayTemp:3,onDeath:[{fx:'killer',n:-3,dur:'perm'}]},
+    text:'Equip only to a Teece in your hand. It gets +3 until the end of the turn it is played. When it is destroyed: the Teece that destroyed it get -3.'},
+ 1144:{name:'Heirloom Pauldrons',type:'equip',mod:0,grants:{bonus:{when:'equips',each:true,n:2}},
+    text:'The equipped Teece has +2 for each equip card equipped to it, this one included.'},
+ 1145:{name:'Ball and Chain',type:'equip',mod:-4,anyOwner:true,
+    text:'You can equip this to an enemy. The equipped Teece gets -4.'},
+ 1146:{name:'Ancestor’s Aegis',type:'equip',mod:0,grants:{onEquip:[{fx:'shieldFor'}]},
+    text:'When you equip this to a Teece, it cannot be destroyed until the end of the next turn.'},
+ 1147:{name:'Steel and Flame',type:'equip',mod:0,
+    eModes:{steel:{def:6},flame:{eMod:3}},
+    grants:{onEquip:[{fx:'choose',msg:'Steel and Flame:',opts:[
+      {lbl:'Steel — +6 Defence',steps:[{fx:'eqMode',mode:'steel'}]},
+      {lbl:'Flame — +3',steps:[{fx:'eqMode',mode:'flame'}]}]}]},
+    text:'Choose a mode as it goes on. Steel: the equipped Teece has +6 Defence. Flame: the equipped Teece has +3.'},
+ 1148:{name:'Common Hammer',type:'equip',token:true,deck:'dwarves',mod:1,text:'The equipped Teece gets +1.'},
+ 1149:{name:'Avalanche',type:'ground',token:true,deck:'dwarves',gdef:3,gdefAdjAlly:3,
+    text:'A Teece on this panel has +3 Defence, and +3 more while one of its allies is adjacent.'},
  /* ---- the tutorial's cards. Nothing but their numbers, so a new player learns
         the rules rather than a card. The roguelike drafts from every card in
         CARDS, not from the pool, so tutorial:true is what keeps them out of it
@@ -4760,7 +4849,7 @@ const CARDS = {
 
    Both views are cached; newState clears them, because fusion ids are reused. */
 const ID_KEYS={name:1,type:1,sides:1,text:1,flavor:1,def:1,sac:1,sacOK:1,token:1,deck:1,tutorial:1,perkOnly:1,
-  boss:1,fusion:1,forms:1,mark:1,runeCard:1,topDeck:1,priest:1,godTitle:1,
+  boss:1,fusion:1,forms:1,mark:1,runeCard:1,topDeck:1,priest:1,godTitle:1,dwarf:1,
   garbage:1,spider:1,vampire:1,solar:1,madness:1,rat:1,locust:1,pixie:1,zombie:1,army:1,apoc:1,devil:1,mummy:1,horseman:1};
 let DEF_SIL={},DEF_GRAFT={};
 function DEF(t){
@@ -6320,6 +6409,12 @@ function formationCount(b,i,bo){
     for(let j=0;j<BN;j++)if(isRuneForm(b[j].teece)&&b[j].teece.baseOwner===t.owner)return 1;
     return 0;
   }
+  /* The Dwarves read their own gear: wearing anything at all, or how much. A
+     Shopping Cart rider is a Teece carried, not an equip worn. */
+  if(bo.when==='equipped'||bo.when==='equips'){
+    const n=t.equips.filter(e=>!e.rider&&CARDS[e.cardId]&&CARDS[e.cardId].type==='equip').length;
+    return bo.when==='equips'||bo.each?n:(n?1:0);
+  }
   if(bo.when==='runeAny'){
     for(let j=0;j<BN;j++){
       const o=b[j].teece;
@@ -6337,6 +6432,8 @@ function formationLabel(bo){
   if(bo.when==='soloMid')return 'Alone on the middle panel';
   if(bo.when==='rune')return 'Wielding the Runeblade';
   if(bo.when==='runeAny')return 'A Teece on the field holds the Runeblade';
+  if(bo.when==='equipped')return 'While equipped';
+  if(bo.when==='equips')return 'One for every equip card on it';
   return 'Formation';
 }
 /* The formation bonuses on the Teece at i: its own, and any an equip lends it.
@@ -6480,6 +6577,8 @@ function effSides(b,i,parts){
   for(const e of t.equips){
     const ed=CARDS[e.cardId];
     addMod(s,ed.mod,ed.name);
+    /* A number that belongs to the mode an equip went on in (Steel and Flame). */
+    {const eg=eqG(e);if(eg&&eg.eMod)addMod(s,eg.eMod,eqLabel(e));}
     /* The two Marks pay out extra on the Horseman they are named for, the way
        aXe and swOrd pay out on their letter. */
     if(ed.modIfApoc&&ed.modIfApoc.of.indexOf(DEF(t).apoc)>=0)
@@ -6581,10 +6680,13 @@ function effSides(b,i,parts){
      Usually only its own panel's -- but a Dimension of Dimensions beside it
      counts it as standing there too, so it takes the whole of that stack. */
   const gpans=[];
-  if(b[i].ground&&!b[i].ground.gsil)gpans.push(i);
+  /* The Antimagic Airship flies above every battleground: none of them pays it
+     or charges it, here or reaching out from next door. */
+  const aloft=bgProof(t);
+  if(b[i].ground&&!b[i].ground.gsil&&!aloft)gpans.push(i);
   for(const j of ADJ[i]){
     const og=b[j].ground;
-    if(!og||og.gsil||!groundFlag(og,'gReach'))continue;
+    if(aloft||!og||og.gsil||!groundFlag(og,'gReach'))continue;
     if(gpans.some(x=>b[x].ground&&(og.gid?b[x].ground.gid===og.gid:x===j)))continue;
     gpans.push(j);
   }
@@ -6644,7 +6746,7 @@ function effSides(b,i,parts){
   const seenAdjG=[];
   for(const j of ADJ[i]){
     const og=b[j].ground;
-    if(!og)continue;
+    if(!og||aloft)continue;
     const key=og.gid!=null?'g'+og.gid:'c'+j;
     if(seenAdjG.indexOf(key)>=0)continue;
     seenAdjG.push(key);
@@ -6747,6 +6849,7 @@ function countGrounds(b){
    so they are written to be read against each other. */
 function groundGives(b,i){
   const out=[0,0,0,0];
+  if(bgProof(b[i].teece))return out;
   const add=m=>{
     if(m==null)return;
     if(Array.isArray(m)){for(let k=0;k<4;k++)out[k]+=m[k];}
@@ -6876,6 +6979,8 @@ function defOf(b,i,raw){
   if(t.defGone&&!fastD)return 0;
   let d=(DEF(t).def||0)+(fastD?Math.max(0,t.defPerm||0):(t.defPerm||0))+(fastD?Math.max(0,t.defTemp2||0):(t.defTemp2||0));
   if(DEF(t).defPerAlly)d+=DEF(t).defPerAlly*allyCount(b,i,true);
+  /* Defence held only while a formation holds: the Shieldwall Dwarf, equipped. */
+  if(DEF(t).defIf&&formationCount(b,i,DEF(t).defIf))d+=DEF(t).defIf.n;
   for(const e of t.equips){
     const g=eqG(e);
     if(g&&g.def)d+=g.def;
@@ -6884,7 +6989,7 @@ function defOf(b,i,raw){
     if(g&&g.markDef)d+=g.markDef*(t.graveMarks||0);
     if(g&&g.defWhen){const dw=phasePick(g.defWhen);if(dw)d+=dw;}
   }
-  if(b[i].ground&&!b[i].ground.gsil){
+  if(b[i].ground&&!b[i].ground.gsil&&!bgProof(t)){
     for(const gd of gcards(b[i].ground)){
       if(gd.gdef)d+=gd.gdef;
       /* The Eldritch Library is a wall made of what you threw away. */
@@ -6936,11 +7041,41 @@ function isSteadfast(t){
   }
   return false;
 }
-function canTarget(b,i,byPlayer){
+/* kind says what is doing the targeting: 'magic', 'teece' (an ability on a
+   Teece), or 'equip' (an equip card being put on). Left out, it is read off
+   whether a magic card is resolving. The Dwarves' Mithril Mail turns aside
+   Teece effects and the Antimagic Airship magic; Ward turns aside both. */
+function canTarget(b,i,byPlayer,kind){
   const t=b[i].teece; if(!t)return false;
   if(byPlayer==null||t.owner===byPlayer)return true;
-  return kwOf(b,i).indexOf('ward')<0;
+  if(kwOf(b,i).indexOf('ward')>=0)return false;
+  const k=kind||(G&&G.castingMagic?'magic':'teece');
+  for(const e of t.equips){
+    const g=eqG(e);if(!g)continue;
+    if(k==='magic'&&g.shunMagic)return false;
+    if(k==='teece'&&g.shunTeece)return false;
+  }
+  return true;
 }
+/* Worn the Antimagic Airship: no battleground reaches it. */
+function bgProof(t){
+  return !!t&&t.equips.some(e=>{const g=eqG(e);return g&&g.bgProof;});
+}
+/* The Forge-Spark Tinker answers every equip card that is equipped or goes to
+   a graveyard, either side's. Kept synchronous so noteBuried can call it. */
+function equipEvent(why){
+  if(!G||!G.board)return;
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(!t||t.silenced)continue;
+    const ev=DEF(t).onEquipEvent;
+    if(!ev)continue;
+    if(ev.n)applyModT(t,ev.n,'temp');
+    if(ev.kw&&t.kwTemp.indexOf(ev.kw)<0)t.kwTemp.push(ev.kw);
+    log(nm(t)+' answers '+why+': '+(ev.n?sgn(ev.n):'')+(ev.kw?(ev.n?' and ':'')+ev.kw.charAt(0).toUpperCase()+ev.kw.slice(1):'')+' until the end of the turn.');
+  }
+}
+function equipLanded(cardId){equipEvent(CARDS[cardId].name+' being equipped');}
 function kwOf(b,i,noGround){
   const t=b[i].teece; if(!t)return[];
   const ks=[]; const d=DEF(t);
@@ -6963,7 +7098,7 @@ function kwOf(b,i,noGround){
     if(g&&g.kwWhen){const kw=phasePick(g.kwWhen);if(kw)ks.push(...kw);}
     if(e.chosen)ks.push('flying');
   }
-  if(b[i].ground&&!noGround&&!b[i].ground.gsil)
+  if(b[i].ground&&!noGround&&!b[i].ground.gsil&&!bgProof(t))
     for(const gd of gcards(b[i].ground))if(gd.gkw)ks.push(...gd.gkw);
   /* a keyword held only while the formation holds: Medic Cedric cannot be
      targeted for exactly as long as somebody is standing with it */
@@ -9721,8 +9856,9 @@ async function FXRUN(st,ctx){
     for(let x=0;x<gn;x++){
       const pool=[];
       const seats=st.any?Array.from({length:PLAYERS()},(_,q)=>q):[p];
-      for(const q of seats)G.players[q].grave.forEach((id,ix)=>pool.push({q,ix,id}));
-      if(!pool.length)return x?undefined:none(st.any?'Every graveyard is empty.':'The grave is empty.');
+      for(const q of seats)G.players[q].grave.forEach((id,ix)=>{if(!st.type||CARDS[id].type===st.type)pool.push({q,ix,id});});
+      if(!pool.length)return x?undefined:none(st.type?'There is no '+st.type+' card in '+(st.any?'any graveyard':'the grave')+'.':
+        st.any?'Every graveyard is empty.':'The grave is empty.');
       const pick=await chooseOption(p,pool.map((o,y)=>({v:String(y),
           lbl:CARDS[o.id].name+(o.q===p?'':' \u2014 '+graveName(o.q)),cid:o.id})),
         'Return which card to hand?'+(gn>1?' ('+(x+1)+' of '+gn+')':''),!!ctx.first&&x===0);
@@ -13081,8 +13217,51 @@ async function FXRUN(st,ctx){
     const worn={cardId:cid,owner:p};
     b[c].teece.equips.push(worn);
     log(CARDS[cid].name+' climbs back out and bolts itself onto '+nm(b[c].teece)+'.');
+    equipLanded(cid);
     const eg=eqG(worn);
     if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:c,t:b[c].teece,first:false,equip:worn});
+    return;}
+  /* The Mountain King arrives and calls its gear up out of the graveyard: up
+     to st.n equips, onto itself. An equip that only goes on a card in hand, or
+     one that would only hurt it, is not offered. */
+  case 'equipGraveSelf':{
+    const t=ctx.t,pl=G.players[p];
+    const i=t?b.findIndex(c=>c.teece===t):-1;
+    if(i<0)return none('There is nothing left to equip.');
+    for(let x=0;x<(st.n||1);x++){
+      const pool=[];
+      pl.grave.forEach((id,ix)=>{const d=CARDS[id];
+        if(d.type==='equip'&&!d.onlyHand&&!d.onlyToken&&!d.onlySpiderling&&!d.onlyPackLeader&&!d.graveEquip&&!d.runeblade&&!(typeof d.mod==='number'&&d.mod<0))
+          pool.push({ix,id});});
+      if(!pool.length){if(!x)log('There is no equip card in '+ownOf(p)+' graveyard to call up.');return;}
+      /* The computer takes the one that adds most to the body; a player picks. */
+      let pick;
+      if(G.aiSeats.indexOf(p)>=0||!HAS_DOM){
+        let best=0,bv=-1e9;
+        pool.forEach((o,y)=>{const bb=cloneBoard(b);bb[i].teece.equips.push({cardId:o.id,owner:p});
+          const v=effSides(bb,i).reduce((a,c)=>a+c,0)+2*defOf(bb,i)+(eqG({cardId:o.id})&&eqG({cardId:o.id}).onEquip?3:0);
+          if(v>bv){bv=v;best=y;}});
+        pick=String(best);
+      }else pick=await chooseOption(p,pool.map((o,y)=>({v:String(y),lbl:CARDS[o.id].name,cid:o.id})).concat([{v:'none',lbl:'Stop here'}]),
+        'Equip which card from your graveyard to '+nm(t)+'?'+((st.n||1)>1?' ('+(x+1)+' of '+st.n+')':''));
+      if(pick==null||pick==='none'||pick==='CANCEL')return;
+      const o=pool[parseInt(pick,10)];
+      pl.grave.splice(o.ix,1);
+      const worn={cardId:o.id,owner:p};
+      t.equips.push(worn);
+      log(CARDS[o.id].name+' comes up out of the graveyard and onto '+nm(t)+'.');
+      equipLanded(o.id);
+      const eg=eqG(worn);
+      if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:i,t,first:false,equip:worn});
+    }
+    return;}
+  /* Ancestor's Aegis: the Teece it goes onto cannot be destroyed until the end
+     of the next turn. */
+  case 'shieldFor':{
+    const t=ctx.t;
+    if(!t)return;
+    t.immortalOwner=p;t.immortalUntil=Math.max(t.immortalUntil||0,G.turnNum+(st.turns||1));
+    log(nm(t)+' cannot be destroyed until the end of the next turn.');
     return;}
   /* The Mindwyrm lets go, and takes its host with it. */
   case 'bounceSelfPair':{
@@ -13880,6 +14059,7 @@ function toGrave(owner,cardId){
 function noteBuried(cardId){
   if(!G||!G.board)return;
   const what=CARDS[cardId]?CARDS[cardId].name:'a card';
+  if(CARDS[cardId]&&CARDS[cardId].type==='equip')equipEvent(what+' going to the graveyard');
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
     if(!t)continue;
@@ -14602,8 +14782,51 @@ async function processDeath(d){
         log(nm(t)+' is sorted out of the Recycling Bins and back into '+pname(t.baseOwner)+"'s hand.");
       }
     }
+    /* Soul of the Mountains has already become the Avalanche on this panel (its
+       onDeath laid it), so it is not also buried. One Avalanche per panel: a
+       second Soul on the same body goes to the graveyard as usual. */
+    let soulGround=!d.cost&&!!(G.board[cell]&&G.board[cell].ground);
+    const intoGround=e=>{
+      const eg=eqG(e);
+      if(!soulGround||!eg||!eg.becomesGround)return false;
+      const bg=(eg.onDeath||[]).map(x=>x.bg).filter(Boolean)[0];
+      if(!G.board[cell].ground||G.board[cell].ground.cardId!==bg)return false;
+      soulGround=false;
+      return true;
+    };
+    /* The Dwarf Thane and the Mountain King take their gear home when they
+       fall: one equip of the Thane's choosing, or everything on the King, each
+       back to the hand of whoever owns it. */
+    const home=!d.cost&&!t.silenced&&DEF(t).equipsHome;
+    let homeSet=[];
+    if(home){
+      const gear=t.equips.filter(e=>{const g=eqG(e)||{};return !e.rider&&CARDS[e.cardId].type==='equip'&&!g.becomesGround&&!g.undyingRide;});
+      if(home==='all')homeSet=gear;
+      else{
+        const mine=gear.filter(e=>e.owner===t.owner);
+        if(mine.length===1)homeSet=mine;
+        else if(mine.length>1){
+          let pick;
+          if(G.aiSeats.indexOf(t.owner)>=0||!HAS_DOM){
+            const val=e=>{const m=CARDS[e.cardId].mod,g=eqG(e)||{};return (typeof m==='number'?m:0)+(g.def||0)+(g.onEquip||g.bonus||g.kw?2:0);};
+            pick=mine.reduce((a,e)=>val(e)>val(a)?e:a,mine[0]);
+          }else{
+            const v=await chooseOption(t.owner,mine.map((e,y)=>({v:String(y),lbl:eqLabel(e),cid:e.cardId})),
+              DEF(t).name+' falls. Which equip goes back to your hand?');
+            pick=mine[parseInt(v,10)]||mine[0];
+          }
+          homeSet=[pick];
+        }
+      }
+    }
     for(const e of t.equips){
       const eg=eqG(e);
+      if(intoGround(e))continue;
+      if(homeSet.indexOf(e)>=0){
+        handPush(e.owner,e.cardId);
+        log(CARDS[e.cardId].name+' goes back to '+ownOf(e.owner)+' hand as '+DEF(t).name+' falls.');
+        continue;
+      }
       if(eg&&eg.reequip&&!(eg.reequipOnce&&G.players[e.owner].onceUsed['req'+e.cardId])){
         if(eg.reequipOnce)G.players[e.owner].onceUsed['req'+e.cardId]=true;
         const hosts=[];
@@ -14668,6 +14891,12 @@ async function processDeath(d){
       }
       else bury(t.baseOwner,t.cardId);
     }
+  }
+  /* "When destroyed", run once its own gear is already in the graveyard, so the
+     Delver can pick out what it was wearing. */
+  if(!d.cost&&!t.silenced&&DEF(t).deathLate){
+    await runSteps(DEF(t).deathLate,{p:t.owner,deadOwner:t.owner,deadCell:cell,cell,t,killers:d.killers||[],first:false,noModal:true});
+    if(G.over)return;
   }
   /* A Bone Field counts every body that falls on it, whether or not the body
      stayed down. */
@@ -15622,6 +15851,7 @@ function plateHand(p,equipIdx,targetIdx){
   const ti=targetIdx>equipIdx?targetIdx-1:targetIdx;
   pl.plate[ti].push({cardId:gone.id,owner:p});
   log(pname(p)+' plates '+CARDS[gone.id].name+' onto '+CARDS[tid].name+' in hand.');
+  equipLanded(gone.id);
   return true;
 }
 async function playEquip(p,handIdx){
@@ -15666,7 +15896,8 @@ async function playEquip(p,handIdx){
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
     if(!t)continue;
-    if(t.owner!==p&&!(ed.anyOwner&&canTarget(b,i,p)))continue;
+    if(ed.onlyHand)break;
+    if(t.owner!==p&&!(ed.anyOwner&&canTarget(b,i,p,'equip')))continue;
     if(ed.onlyToken&&!t.isToken)continue;
     if(ed.onlyPackLeader&&!isPackLeader(t))continue;
     if(ed.onlySpiderling&&!isSpiderling(t))continue;
@@ -15681,7 +15912,7 @@ async function playEquip(p,handIdx){
   }
   /* The Runeblade can be set in a Runestone instead of into a hand. */
   const sheaths=ed.runeblade?sheathSpots(p):[];
-  if(!cands.length&&!hands.length&&!sheaths.length){toast(ed.onlySpiderling?'No Spiderling to equip.':
+  if(!cands.length&&!hands.length&&!sheaths.length){toast(ed.onlyHand?'No Teece in your hand to equip.':ed.onlySpiderling?'No Spiderling to equip.':
     ed.onlyToken?'No Token to equip.':ed.onlyPackLeader?'No Pack Leader to equip, on the board or in hand.':'No Teece to equip, on the board or in hand.');return false;}
   const targets=cands.concat(sheaths.filter(i=>cands.indexOf(i)<0));
   const sheathe=(bb,i)=>{const g=bb[i].ground;if(g)bb[i].ground=Object.assign({},g,{sheath:(g.sheath||[]).concat([{cardId:id,owner:p}])});};
@@ -15716,6 +15947,7 @@ async function playEquip(p,handIdx){
   const worn={cardId:id,owner:p};
   b[c].teece.equips.push(worn);
   log(pname(p)+' equips '+CARDS[id].name+' to '+nm(b[c].teece)+'.');
+  equipLanded(id);
   const eg=CARDS[id].grants;
   if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:c,t:b[c].teece,first:false,equip:worn});
   if(isRuneEq(worn)&&b[c].teece)runeTriumph(p,b[c].teece);
@@ -17194,9 +17426,14 @@ function aiPickOpt(opts){
 function aiPlanFor(id){
   const d=CARDS[id],b=G.board,p=G.turn;
   if(d.type==='equip'){
+    /* Hand-only gear is plated by aiSupport directly: there is no panel to weigh. */
+    if(d.onlyHand)return null;
     const cands=[];
+    /* Gear that only hurts (Ball and Chain) goes on an enemy, and only there. */
+    const curse=d.anyOwner&&typeof d.mod==='number'&&d.mod<0;
     for(let i=0;i<BN;i++){
       const t=b[i].teece;
+      if(curse){if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p,'equip'))cands.push(i);continue;}
       if(!t||t.owner!==p)continue;
       if(d.onlyToken&&!t.isToken)continue;
       if(d.onlyPackLeader&&!isPackLeader(t))continue;
@@ -17232,6 +17469,14 @@ function aiPlanFor(id){
     /* The Priest's three pay out as Smites are conjured and cast, later. */
     if(eg.smiteAbsorb)ebonus+=G.players[p].hand.some(h=>smiteLvl(h))?1.0:0.6;
     if(eg.onConjure)ebonus+=0.9;
+    /* The Dwarves' gear: Defence and protection the board score cannot see, a
+       mode chosen as it goes on, and a shield that lasts a turn. */
+    if(eg.def)ebonus+=0.3*eg.def;
+    if(eg.shunTeece||eg.shunMagic)ebonus+=0.3;
+    if(eg.bgProof)ebonus+=0.2;
+    if(eg.becomesGround)ebonus+=0.5;
+    if(d.eModes)ebonus+=1.1;
+    if(eg.onEquip&&eg.onEquip.some(x=>x.fx==='shieldFor'))ebonus+=0.9;
     return {thr:0.8,bonus:ebonus,cands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
   }
   if(d.type==='ground'){
@@ -17780,6 +18025,19 @@ async function aiSupport(){
     if(G.over)return acted;
     const id=pl.hand[h];
     if(CARDS[id].type==='teece')continue;
+    /* Gear that only goes onto a card in hand: bolt it to the biggest Teece
+       held, which is the one most likely to be played. */
+    if(CARDS[id].type==='equip'&&CARDS[id].onlyHand){
+      let ti=-1,tv=-1;
+      for(let x=0;x<pl.hand.length;x++){
+        const cd=CARDS[pl.hand[x]];
+        if(x===h||cd.type!=='teece')continue;
+        const v=(cd.sides||[0]).reduce((a,c)=>a+c,0)-(cd.sac||0)*6;
+        if(v>tv){tv=v;ti=x;}
+      }
+      if(ti>=0&&plateHand(p,h,ti)){acted=true;await wait(300);return true;}
+      continue;
+    }
     const plan=aiPlanFor(id);
     if(!plan)continue;
     const base=boardValue(G.board,p);
@@ -21876,7 +22134,7 @@ if(typeof module!=='undefined'){
     isStunned,applyStun,stunText,PLAYERS,nextTurnExpiry,actBlockedReason,LUMBER_ACT,
     payRecall,getLines:()=>LINES,
     RUNEBLADE,wieldsRune,isRuneForm,runeGuarded,runeSpots,takeRune,runRuneRecall,runeRecallReady,runForge,
-    sheathSpots,throwRune,bladerangPath,bestThrow,endOfNextTurn,aiRunes,isHeldSafe,isStunned,invulnText,applyDeckRules,
+    bgProof,equipEvent,equipLanded,sheathSpots,throwRune,bladerangPath,bestThrow,endOfNextTurn,aiRunes,isHeldSafe,isStunned,invulnText,applyDeckRules,
     isMummy,mCurseT,mCursePanel,mSweep,drainFx};
 }
 </script>

@@ -1081,6 +1081,40 @@
       "level": "advanced",
       "kind": "utility",
       "worship": true
+    },
+    "dwarves": {
+      "name": "Dwarves",
+      "cards": [
+        1128,
+        1129,
+        1130,
+        1131,
+        1132,
+        1133,
+        1134,
+        1135,
+        1136,
+        1137,
+        1138,
+        1139,
+        1140,
+        1141,
+        1142,
+        1143,
+        1144,
+        1145,
+        1146,
+        1147
+      ],
+      "blurb": "For countless millennia, the Dwarves have perfected their craftsmanship deep within caves and caverns. Forgoing other tactics, they invest heavily in powerful gear that lets them concentrate their power into singular juggernauts.",
+      "how": [
+        "Eight equips stand in for magic and battlegrounds. Most dwarves read their own gear: Ranged, Flying, +4 or +5 Defence while equipped, or +3 for every equip on the Gear-Laden Recruit.",
+        "Gear comes back. The Tunnel Scavenger, the Deep Warden and the Delver each pull an equip out of your graveyard into your hand, and the Mountain King equips two straight from the graveyard as it lands. The Thane and the King take their gear home to your hand when they fall.",
+        "Pile it onto one body. Heirloom Pauldrons pay +2 for every equip on their wearer, the Fresh-Forged Axe is plated onto a Teece still in your hand, and Ball and Chain goes on an enemy instead.",
+        "Protect the juggernaut: Mithril Mail turns aside enemy Teece effects, the Antimagic Airship enemy magic and every battleground, Ancestor’s Aegis keeps it alive through the next turn, and Soul of the Mountains leaves an Avalanche behind when it falls."
+      ],
+      "level": "beginner",
+      "kind": "warrior"
     }
   },
   "formats": [
