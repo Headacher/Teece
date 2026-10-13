@@ -1152,7 +1152,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:179,date:'2026-10-13'};
+const VERSION={build:180,date:'2026-10-13'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4085,8 +4085,8 @@ const CARDS = {
     onPlay:[{fx:'sacAlly'}],
     text:'When played: sacrifice an allied Teece \u2014 this one included, if it is the only one you have.'},
  855:{name:'Locust Locus',type:'teece',locust:true,sides:[1,4,2,2],sac:2,def:6,
-    onPlay:[{fx:'nextDef',n:6,count:4,kind:'locust'}],
-    text:'Sacrifice two fielded Teece to play. Defence 6. When played: the next four Locusts you play each arrive with +6 Defence.'},
+    onPlay:[{fx:'nextDef',n:6,count:4,kind:'locust',any:true}],
+    text:'Sacrifice two fielded Teece to play. Defence 6. When played: the next four Locusts to reach your side of the board \u2014 played, copied or summoned \u2014 each arrive with +6 Defence.'},
  856:{name:'The Locust Hivemind',type:'teece',locust:true,sides:[8,9,7,8],sac:4,
     onPlay:[{fx:'swarmMind',n:3}],
     text:'Sacrifice four fielded Teece to play. When played: every Teece you control gets +3 for the rest of the game, and goes on getting it long after the Hivemind itself is buried.'},
@@ -5809,7 +5809,7 @@ function newState(mode,vsAI,decks,extra){
     return top.length?rest.concat(top):list;
   };
   const mk=p=>({deck:stack(shuffle((decks&&decks[p]?decks[p]:CLASSIC).slice())),hand:[],plate:[],grave:[],onceUsed:{},pendingDraw:0,undying:{},riding:{},
-    nextDefBonus:0,nextDefLeft:0,nextDefKind:null,
+    nextDefBonus:0,nextDefLeft:0,nextDefKind:null,nextDefAny:false,
     nextMod:0,nextSides:null,nextShield:false,noDeckOut:false,noDominate:false,coffined:{},teecePlayedLastTurn:false,teecePlayedThisTurn:0,passStreak:0,turnsTaken:0,
     allFlying:false,swarmWin:null,swarmMind:0,turnCaps:{},
     souls:0,nextInvuln:0,skipTurns:0,hellfire:null,doomSelf:false,doomFoes:false,
@@ -7326,6 +7326,25 @@ function putTeece(b,i,t,live,how){
      included: whatever stands on the Pit grows by a point each time a body is
      summoned. Walking is not being born, so moveT is excluded -- otherwise a
      Teece with Flying could pace back and forth and farm the panel. */
+  /* A Defence charge waiting on the next arrival. Locust Locus arms four of
+     them and only for Locusts, so a body that does not match walks past without
+     spending one; a charge with no kind named is spent by whatever comes next.
+     It lives here rather than in playTeece so that a charge armed with `any`
+     (Locust Locus) is spent by a copy, a Token or a graveyard summon exactly as
+     by a body played from hand; a plain charge (Rubble) still says "the next
+     Teece you play" and waits for how==='play'. defSeen marks a
+     body that has already been looked at, so a swap or a shove that puts the
+     same Teece down again never takes a second charge. */
+  if(live&&how!=='move'&&!t.defSeen){
+    t.defSeen=true;
+    const dp=G.players[t.owner];
+    if(dp&&dp.nextDefBonus&&(how==='play'||dp.nextDefAny)&&(!dp.nextDefKind||CARDS[t.cardId][dp.nextDefKind])){
+      applyDef(t,dp.nextDefBonus);
+      log(nm(t)+' arrives with +'+dp.nextDefBonus+' Defence.');
+      dp.nextDefLeft=(dp.nextDefLeft||1)-1;
+      if(dp.nextDefLeft<=0){dp.nextDefBonus=0;dp.nextDefLeft=0;dp.nextDefKind=null;dp.nextDefAny=false;}
+    }
+  }
   if(how!=='move'){
     /* The Locust Nest pays a body that ARRIVES on it, however it arrived:
        played from hand, copied onto the panel, summoned out of a graveyard or
@@ -9921,6 +9940,7 @@ async function FXRUN(st,ctx){
        existing caller means by it. */
     dpl.nextDefLeft=(dpl.nextDefLeft||0)+(st.count||1);
     if(st.kind)dpl.nextDefKind=st.kind;
+    if(st.any)dpl.nextDefAny=true;
     const dwhat=st.kind?(st.kind.charAt(0).toUpperCase()+st.kind.slice(1)+'s'):'Teece';
     log((st.count||1)>1
       ?('The next '+st.count+' '+dwhat+' played get +'+st.n+' Defence.')
@@ -15700,7 +15720,7 @@ async function playTeece(p,handIdx){
      board sees the equipped stats from the first moment */
   for(const e of worn)t.equips.push(e);
   if(plan&&plan.rot)spinT(t,plan.rot===1?'cw':'ccw');
-  putTeece(b,spot,t,true);
+  putTeece(b,spot,t,true,'play');
   attachRiders(p,id,t,true);
   /* The trap catches it as it lands. The kill goes on the effect stack right
      here, and the stack drains ahead of every combat scan, so the Teece cannot
@@ -15742,15 +15762,8 @@ async function playTeece(p,handIdx){
     spinT(t,cf.dir);
     log(nm(t)+' arrives confused, turned '+dirTxt(cf.dir)+'.');
   }
-  /* A Defence charge waiting on the next arrival. Locust Locus arms four of
-     them and only for Locusts, so a body that does not match walks past without
-     spending one; a charge with no kind named is spent by whatever comes next. */
-  if(pl.nextDefBonus&&(!pl.nextDefKind||d[pl.nextDefKind])){
-    applyDef(t,pl.nextDefBonus);
-    log(nm(t)+' arrives with +'+pl.nextDefBonus+' Defence.');
-    pl.nextDefLeft=(pl.nextDefLeft||1)-1;
-    if(pl.nextDefLeft<=0){pl.nextDefBonus=0;pl.nextDefLeft=0;pl.nextDefKind=null;}
-  }
+  /* The Defence charge Locust Locus arms is spent in putTeece, on whatever
+     arrives -- this play included. */
   if(pl.nextMod){const nmd=pl.nextMod;pl.nextMod=0;applyModT(t,nmd,'perm');log(nm(t)+' arrives with '+sgn(nmd)+'.');}
   if(d.handMagic&&pl.handMagic&&pl.handMagic.turn===G.turnNum&&pl.handMagic.ids.indexOf(id)>=0){
     pl.handMagic.ids.splice(pl.handMagic.ids.indexOf(id),1);
@@ -19526,8 +19539,8 @@ function statusesFor(p){
     const dkind=pl.nextDefKind?pl.nextDefKind.charAt(0).toUpperCase()+pl.nextDefKind.slice(1):'Teece';
     const dwhat=dn>1?dn+' '+dkind+'s':dkind;
     push('nextdef','good','Next '+dwhat+': +'+pl.nextDefBonus+' Defence',
-      'The next '+dwhat+' you play '+(dn>1?'each arrive':'arrives')+' with +'+pl.nextDefBonus+' Defence.'+
-      (pl.nextDefKind?' Anything else you play walks past without spending a charge.':''));
+      'The next '+dwhat+(pl.nextDefAny?' to reach your side \u2014 played, copied or summoned \u2014 ':' you play ')+(dn>1?'each arrive':'arrives')+' with +'+pl.nextDefBonus+' Defence.'+
+      (pl.nextDefKind?' Anything else walks past without spending a charge.':''));
   }
   if(pl.nextSides)push('nextsides','good','Next Teece carries the altar',
     'The next Teece you play arrives with '+sidesLine(pl.nextSides)+', half of what was sacrificed to the Curse of Sacrifice.');
