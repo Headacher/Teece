@@ -1189,7 +1189,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:187,date:'2026-10-14'};
+const VERSION={build:188,date:'2026-10-14'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -3679,7 +3679,7 @@ const CARDS = {
     text:'Sacrifice three fielded Teece to play. Everything thrown away, standing up at once.'},
  /* ---- Garbage equips ---- */
  749:{name:'Duct Tape',type:'equip',mod:0,garbage:true,grants:{def:1,tape:true},
-    text:'Equipped Teece gets 1 Defence. When an effect would pick the equipped Teece out as a target, Duct Tape is destroyed instead and the effect is turned aside.'},
+    text:'Equipped Teece gets 1 Defence. When an effect would pick the equipped Teece out as a target, Duct Tape is destroyed instead and the effect is silenced.'},
  750:{name:'Trash Bag',type:'equip',mod:0,garbage:true,grants:{def:2,reequip:true,reequipOnce:true},
     text:'Stealth — equipped Teece gets 2 Defence. Blow In The Wind — once a game, when the equipped Teece is destroyed, you may blow this onto another ally instead of losing it.'},
  751:{name:'Blessing of the Dump',type:'equip',mod:0,garbage:true,grants:{blessGuard:true},
@@ -4830,7 +4830,7 @@ const CARDS = {
  1140:{name:'Mithril Mail',type:'equip',mod:2,grants:{def:2},
     text:'The equipped Teece has +2 and +2 Defence.'},
  1141:{name:'Antimagic Airship',type:'equip',mod:2,grants:{kw:['flying','floating'],tape:true,tapeMsg:'takes the hit for'},
-    text:'The equipped Teece has +2, Flying and Floating: unaffected by battlegrounds and by effects planted on the panel below it. The first time an enemy effect targets it, the Airship is destroyed instead and the effect is turned aside.'},
+    text:'The equipped Teece has +2, Flying and Floating: unaffected by battlegrounds and by effects planted on the panel below it. The first time an enemy effect targets it, the Airship is destroyed instead and the effect is silenced.'},
  1142:{name:'Soul of the Mountains',type:'equip',mod:0,grants:{def:3,onDeath:[{fx:'toerrain',bg:1149}],becomesGround:true},
     text:'The equipped Teece has +3 Defence. When it is destroyed: this equip becomes an Avalanche on its panel (+3 Defence, and +3 more while an ally is adjacent).'},
  1143:{name:'Fresh-Forged Axe',type:'equip',mod:0,onlyHand:true,
@@ -5485,12 +5485,12 @@ function wardMagic(b,i,p){
   if(!t||!G.castingMagic)return false;
   if(!DEF(t).magicWard||t.silenced)return false;
   applyModT(t,4,'perm');
-  log(nm(t)+' turns the magic aside and gets +4.');
+  log(nm(t)+' silences the magic and gets +4.');
   return true;
 }
 /* Duct Tape. The effect picked this Teece out, so the tape comes away instead
    of it -- wired into the effects that single a Teece out, the way wardMagic is
-   wired into the ones that can be turned aside. */
+   wired into the ones that can be silenced. */
 function tapeSave(b,i,by){
   const t=b[i]&&b[i].teece;
   if(!t||by==null||sameTeam(t.owner,by))return false;
@@ -5499,7 +5499,7 @@ function tapeSave(b,i,by){
   const e=t.equips.splice(ix,1)[0];
   toGrave(e.owner,e.cardId);
   const tm=(eqG(e)||{}).tapeMsg;
-  log(tm?CARDS[e.cardId].name+' '+tm+' '+nm(t)+' and is destroyed, and the effect is turned aside.'
+  log(tm?CARDS[e.cardId].name+' '+tm+' '+nm(t)+' and is destroyed, and the effect is silenced.'
     :CARDS[e.cardId].name+' tears off '+nm(t)+', and the effect comes away with it.');
   equipCameOff(t,e,true);
   return true;
@@ -7108,8 +7108,8 @@ function isSteadfast(t){
 }
 /* kind says what is doing the targeting: 'magic', 'teece' (an ability on a
    Teece), or 'equip' (an equip card being put on). Left out, it is read off
-   whether a magic card is resolving. The Dwarves' Mithril Mail turns aside
-   Teece effects and the Antimagic Airship magic; Ward turns aside both. */
+   whether a magic card is resolving. The Dwarves' Mithril Mail silences
+   Teece effects and the Antimagic Airship magic; Ward silences both. */
 function canTarget(b,i,byPlayer,kind){
   const t=b[i].teece; if(!t)return false;
   if(byPlayer==null||t.owner===byPlayer)return true;
@@ -8799,7 +8799,7 @@ async function FXRUN(st,ctx){
        spending the card; the computer declines. */
     if(G.castingMagic&&ctx.first&&cands.length&&!G.blindCast&&
        cands.every(c=>{const t=b[c].teece;return t&&DEF(t).magicWard&&!t.silenced;})){
-      if(!await confirmNoTarget(p,'Every possible target is warded and would turn the magic aside.'))return 'CANCEL';
+      if(!await confirmNoTarget(p,'Every possible target is warded and would silence the magic.'))return 'CANCEL';
     }
     const r=await chooseCell(p,cands,msg,{cancel:!!ctx.first,skip:!!skip,mut,foot});
     /* Aiming a spell at one of your own Teece is what the Self-Hexer waits for.
@@ -20759,7 +20759,7 @@ function aiSmitePlan(d){
    Every shot goes through shootTeece, which is what "when shot" means to the
    cards: the Bullet Sponge, the Juggernaut, the Sharpshooter, the Shock
    Trooper and the Executioner all answer there, and so does the Warzone.
-   A shot is not magic, so it is not turned aside the way a spell is; Ward
+   A shot is not magic, so it is not silenced the way a spell is; Ward
    still stops an enemy from picking the Teece out. */
 const MAG_SIZE=6;
 const GUN_DIRS=[[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1],[-1,-1]];
