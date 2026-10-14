@@ -1152,7 +1152,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:180,date:'2026-10-13'};
+const VERSION={build:181,date:'2026-10-14'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1216,7 +1216,7 @@ function rebuildWebCards(){
 /* What a keyword is called where a player reads it. Steadfast is still the
    engine's name for it, and still what a card lists in kw, but a player reads
    what it does. */
-const KW_LABEL={steadfast:'Immune to stat reduction',defender:'Defender',fuse:'Fuse',mummywrap:'Mummy Wrap',
+const KW_LABEL={floating:'Floating',steadfast:'Immune to stat reduction',defender:'Defender',fuse:'Fuse',mummywrap:'Mummy Wrap',
   bloodlust:'Bloodlust',packleader:'Pack Leader',howl:'Howl',invincible:'Invincible'};
 const kwLabel=k=>KW_LABEL[k]||k;
 const KEYWORDS={
@@ -1230,6 +1230,7 @@ const KEYWORDS={
   teleport:'Once per your turn, move to any empty panel on the board.',
   ranged:'Strikes the first enemy beyond the next panel, straight up, down or sideways. Nothing strikes back.',
   ward:'Your opponents cannot target it with anything.',
+  floating:'It is not touching the ground. Battlegrounds do nothing to it, and neither does anything planted on the panel under it: Mines, cursed and enchanted panels, fire, the Web.',
   steadfast:'Nothing can reduce its attributes or its Defence: every penalty, aura, equip, battleground, strip or shrink, from anywhere, is refused. It can still be turned, and it can still be destroyed in a fight.',
   defender:'It never destroys a Teece in combat. It can still be destroyed.',
   needsflinger:'It destroys nothing unless an allied Master Rock Flinger is standing on the board.',
@@ -2217,12 +2218,12 @@ function canPlay(p,cardId){
       return G.players[p].grave.some(cid=>CARDS[cid].type==='teece'&&!isBossCard(cid));
     }
     /* Gear that only goes onto a card in hand needs a Teece held, not one standing. */
-    if(cd.onlyHand)return G.players[p].hand.some(h=>CARDS[h].type==='teece');
+    if(cd.onlyHand)return G.players[p].hand.some((h,x)=>CARDS[h].type==='teece'&&plateRoom(h,plateOf(p,x)));
     /* Gear that can go on an enemy needs only an enemy it can reach. */
-    if(cd.anyOwner)for(let i=0;i<BN;i++){if(G.board[i].teece&&G.board[i].teece.owner!==p&&canTarget(G.board,i,p,'equip'))return true;}
+    if(cd.anyOwner)for(let i=0;i<BN;i++){if(G.board[i].teece&&G.board[i].teece.owner!==p&&equipRoom(G.board[i].teece)&&canTarget(G.board,i,p,'equip'))return true;}
     for(let i=0;i<BN;i++){
       const t=G.board[i].teece;
-      if(t&&t.owner===p&&(!cd.onlyToken||t.isToken)&&(!cd.onlyPackLeader||isPackLeader(t)))return true;
+      if(t&&t.owner===p&&equipRoom(t)&&(!cd.onlyToken||t.isToken)&&(!cd.onlyPackLeader||isPackLeader(t)))return true;
     }
     /* a Pack Leader still in hand will be one when it lands, so it can be plated */
     if(cd.onlyPackLeader&&G.players[p].hand.some(h=>CARDS[h].packLeader))return true;
@@ -2346,7 +2347,7 @@ const CARDS = {
     text:'Bat Token. Twice per your turn: fly one space. Once per your turn: Drain 2. Cannot be sacrificed to play a Teece; never counts toward winning.'},
  TSP:{name:'Spiderling',type:'teece',token:true,sides:[4,4,4,4],spider:true,
     text:'Spiderling Token. On the Web it has +1 Defence and Skitter \u2014 once per your turn, move one space. Bigger than most Tokens, and the currency the whole Spider deck spends. Cannot be sacrificed to play a Teece; never counts toward winning.'},
- TSOL:{name:'Solar Token',type:'teece',token:true,sides:[3,3,3,3],solar:true,
+ TSOL:{name:'Solar Token',type:'teece',token:true,deck:'solar',sides:[3,3,3,3],solar:true,
     text:'Solar Token. Cannot be sacrificed to play a Teece; never counts toward winning.'},
  TRAT:{name:'Rat',type:'teece',token:true,sides:[1,1,1,1],garbage:true,
     text:'Rat Token. Cannot be sacrificed to play a Teece; never counts toward winning.'},
@@ -4767,8 +4768,8 @@ const CARDS = {
     text:'+3 for each equip card equipped to it.'},
  1129:{name:'Tunnel Scavenger',type:'teece',sides:[5,4,4,5],dwarf:true,onPlay:[{fx:'graveToHand',type:'equip'}],
     text:'When played: add an equip card from your graveyard to your hand.'},
- 1130:{name:'Deep Warden',type:'teece',sides:[7,7,2,2],dwarf:true,foeTurnEnd:[{fx:'graveToHand',type:'equip'}],
-    text:'At the end of your opponent’s turn: add an equip card from your graveyard to your hand.'},
+ 1130:{name:'Deep Warden',type:'teece',sides:[7,7,2,2],dwarf:true,equipCap:1,equipDouble:true,
+    text:'Can only be equipped with one equip card. Double that equip card’s effect.'},
  1131:{name:'Arbalest Dwarf',type:'teece',sides:[6,6,7,7],dwarf:true,kwWhen:{when:'equipped',kw:['ranged']},
     text:'While equipped: Ranged.'},
  1132:{name:'Gyrocopter Pilot',type:'teece',sides:[5,6,5,6],dwarf:true,kwWhen:{when:'equipped',kw:['flying']},
@@ -4783,16 +4784,16 @@ const CARDS = {
     text:'When destroyed: add an equip card from your graveyard to your hand. Whatever it was wearing is already there to pick.'},
  1137:{name:'Forgemaster',type:'teece',sides:[5,6,6,5],dwarf:true,onPlay:[{fx:'conjureCard',id:1148}],
     text:'When played: add a Common Hammer to your hand (equip: the equipped Teece gets +1).'},
- 1138:{name:'Dwarf Thane',type:'teece',sides:[2,9,10,9],dwarf:true,sac:1,equipsHome:'one',
-    text:'Sacrifice one fielded Teece to play. When destroyed: add one equip card equipped to it back to your hand.'},
- 1139:{name:'Mountain King',type:'teece',sides:[9,9,9,9],dwarf:true,sac:2,equipsHome:'all',
+ 1138:{name:'Dwarf Thane',type:'teece',sides:[2,8,9,8],dwarf:true,sac:1,sacGearHome:true,equipsHome:'one',
+    text:'Sacrifice one fielded Teece to play. Every equip card on the Teece you sacrificed goes back to your hand. When destroyed: add one equip card equipped to it back to your hand.'},
+ 1139:{name:'Mountain King',type:'teece',sides:[9,9,9,9],dwarf:true,sac:2,sacGearHome:true,equipsHome:'all',
     onPlay:[{fx:'equipGraveSelf',n:2}],
-    text:'Sacrifice two fielded Teece to play. When played: equip up to two equip cards from your graveyard to it. When destroyed: every equip card on it goes back to hand.'},
+    text:'Sacrifice two fielded Teece to play. Every equip card on the Teece you sacrificed goes back to your hand. When played: equip up to two equip cards from your graveyard to it. When destroyed: every equip card on it goes back to hand.'},
  /* ---- Dwarf equips ---- */
- 1140:{name:'Mithril Mail',type:'equip',mod:1,grants:{def:1,shunTeece:true},
-    text:'The equipped Teece has +1 and Defence 1, and cannot be targeted by enemy Teece effects.'},
- 1141:{name:'Antimagic Airship',type:'equip',mod:0,grants:{kw:['flying'],shunMagic:true,bgProof:true},
-    text:'The equipped Teece has Flying, cannot be targeted by enemy magic, and is not affected by battlegrounds.'},
+ 1140:{name:'Mithril Mail',type:'equip',mod:2,grants:{def:2,shunTeece:true},
+    text:'The equipped Teece has +2 and +2 Defence, and cannot be targeted by enemy Teece effects.'},
+ 1141:{name:'Antimagic Airship',type:'equip',mod:0,grants:{kw:['flying','ward','floating']},
+    text:'The equipped Teece has Flying, cannot be targeted, and has Floating: unaffected by battlegrounds and by effects planted on the panel below it.'},
  1142:{name:'Soul of the Mountains',type:'equip',mod:0,grants:{def:3,onDeath:[{fx:'toerrain',bg:1149}],becomesGround:true},
     text:'The equipped Teece has +3 Defence. When it is destroyed: this equip becomes an Avalanche on its panel (+3 Defence, and +3 more while an ally is adjacent).'},
  1143:{name:'Fresh-Forged Axe',type:'equip',mod:0,onlyHand:true,
@@ -6100,6 +6101,7 @@ function addMod(sum,m){if(m==null)return;if(Array.isArray(m)){for(let k=0;k<4;k+
    with no card needed; Spun Nest adds to that rather than granting it. */
 function isWebbed(b,i){
   if(!G||!b||!b[i])return false;
+  if(floats(b[i].teece))return false;
   const g=b[i].ground;
   if(g)return groundFlag(g,'gWeb');
   if(G.web&&G.web[i])return true;
@@ -6442,7 +6444,8 @@ function bonusesOn(b,i){
   const t=b[i].teece,out=[];
   if(!t)return out;
   if(!t.silenced&&DEF(t).bonus)out.push(...[].concat(DEF(t).bonus));
-  for(const e of t.equips){const g=eqG(e);if(g&&g.bonus)out.push(...[].concat(g.bonus));}
+  const mul=equipMul(t);
+  for(const e of t.equips){const g=eqG(e);if(g&&g.bonus)for(let r=0;r<mul;r++)out.push(...[].concat(g.bonus));}
   return out;
 }
 /* Does the aura on the Teece at j reach the panel at i? effSides and kwOf both
@@ -6482,7 +6485,7 @@ function effSides(b,i,parts){
   /* The Dimension of Multiplicities doubles what the card was PRINTED with.
      Everything stacked on top of that is added afterwards at face value, so
      the ground pays a Boss far more than it pays a Grunt with three equips. */
-  const dblBase=groundFlag(b[i].ground,'gDoubleBase')?2:1;
+  const dblBase=groundFlag(gUnder(b,i),'gDoubleBase')?2:1;
   const up=v=>fast?Math.max(0,v):v;
   for(let k=0;k<4;k++)s[k]=Math.max(0,bs[k]*dblBase+swell)+up(t.perm[k])+up(t.temp[k])+up((t.temp2&&t.temp2[k])||0);
   if(parts){
@@ -6496,7 +6499,7 @@ function effSides(b,i,parts){
      already doubled as they were applied, so only the standing sources --
      equips, the battleground under it, auras -- are doubled here. Sunlit Loam
      hands the same rule to whatever is standing on it. */
-  const selfDbl=!!DEF(t).selfDoublePos||groundFlag(b[i].ground,'gDoublePosAll');
+  const selfDbl=!!DEF(t).selfDoublePos||groundFlag(gUnder(b,i),'gDoublePosAll');
   /* The Dark Wizard takes no bonus from anything: equips, grounds and auras
      are refused here, and every other bonus in applyModT. */
   const noGain=!!DEF(t).noGain&&!t.silenced;
@@ -6574,51 +6577,54 @@ function effSides(b,i,parts){
     }
     if(alone)addMod(s,lone,DEF(t).name+', the last one standing');
   }
+  /* The Deep Warden doubles whatever its one equip pays. */
+  const eqMul=equipMul(t);
+  const addE=(sum,m,label)=>{for(let r=0;r<eqMul;r++)addMod(sum,m,r?label+', doubled by '+DEF(t).name:label);};
   for(const e of t.equips){
     const ed=CARDS[e.cardId];
-    addMod(s,ed.mod,ed.name);
+    addE(s,ed.mod,ed.name);
     /* A number that belongs to the mode an equip went on in (Steel and Flame). */
-    {const eg=eqG(e);if(eg&&eg.eMod)addMod(s,eg.eMod,eqLabel(e));}
+    {const eg=eqG(e);if(eg&&eg.eMod)addE(s,eg.eMod,eqLabel(e));}
     /* The two Marks pay out extra on the Horseman they are named for, the way
        aXe and swOrd pay out on their letter. */
     if(ed.modIfApoc&&ed.modIfApoc.of.indexOf(DEF(t).apoc)>=0)
-      addMod(s,ed.modIfApoc.n,ed.name+', worn by a '+DEF(t).apoc.charAt(0).toUpperCase()+DEF(t).apoc.slice(1));
+      addE(s,ed.modIfApoc.n,ed.name+', worn by a '+DEF(t).apoc.charAt(0).toUpperCase()+DEF(t).apoc.slice(1));
     /* Moon Scythe by night, Sun Gun and Twilight Cloak by day. */
-    if(ed.modWhen){const mw=phasePick(ed.modWhen);if(mw)addMod(s,mw,ed.name+(isDay()?', by day':', by night'));}
-    if(perkN('equipPlus')&&sameTeam(t.owner,0))addMod(s,perkN('equipPlus'),ed.name+', honed over the run');
-    if(ed.modPerDef)addMod(s,ed.modPerDef*defOf(b,i),ed.name+', per point of Defence');
-    if(ed.defToOff){const dv=defOf(b,i,true);if(dv>0)addMod(s,dv,ed.name+', '+dv+' Defence turned into attack');}
+    if(ed.modWhen){const mw=phasePick(ed.modWhen);if(mw)addE(s,mw,ed.name+(isDay()?', by day':', by night'));}
+    if(perkN('equipPlus')&&sameTeam(t.owner,0))addE(s,perkN('equipPlus'),ed.name+', honed over the run');
+    if(ed.modPerDef)addE(s,ed.modPerDef*defOf(b,i),ed.name+', per point of Defence');
+    if(ed.defToOff){const dv=defOf(b,i,true);if(dv>0)addE(s,dv,ed.name+', '+dv+' Defence turned into attack');}
     /* An equip that reads the crowd the way modPerAlly does on a card. The
        Rat deck pays per ally from three directions at once -- the body, the
        King's aura and this -- and they all have to compose here. */
     if(ed.modPerAlly){
       const em=allyCount(b,i,false);
-      if(em)addMod(s,ed.modPerAlly*em,ed.name+', for each of the '+em+' allies beside its wearer');
+      if(em)addE(s,ed.modPerAlly*em,ed.name+', for each of the '+em+' allies beside its wearer');
     }
     /* Two narrower readings of the same crowd. Swarm Plating counts only the
        panels touching its wearer; the Hive Sigil counts every body its wearer's
        controller has anywhere, itself included. */
     if(ed.modPerAdjAlly){
       const en=adjAllyCount(b,i);
-      if(en)addMod(s,ed.modPerAdjAlly*en,ed.name+', for each of the '+en+' allies beside its wearer');
+      if(en)addE(s,ed.modPerAdjAlly*en,ed.name+', for each of the '+en+' allies beside its wearer');
     }
     if(ed.modPerOwn){
       const eo=ownedCount(b,t.owner);
-      if(eo)addMod(s,ed.modPerOwn*eo,ed.name+', for each of the '+eo+' Teece its wearer controls');
+      if(eo)addE(s,ed.modPerOwn*eo,ed.name+', for each of the '+eo+' Teece its wearer controls');
     }
-    if(ed.modPerAge)addMod(s,ed.modPerAge*(t.age||0),ed.name+', per turn stood');
+    if(ed.modPerAge)addE(s,ed.modPerAge*(t.age||0),ed.name+', per turn stood');
     /* Runebladeblade pays when the Teece holds the sword or the sword is on the field; the Chosen rides on the sword. */
     if(ed.modIfRune){
       const hasRune=wieldsRune(t)||b.some(c=>isRuneForm(c.teece)&&c.teece.baseOwner===t.owner);
-      if(hasRune)addMod(s,ed.modIfRune,ed.name+', worn with the Runeblade');
+      if(hasRune)addE(s,ed.modIfRune,ed.name+', worn with the Runeblade');
     }
-    if(e.chosen)addMod(s,2,'The Runeblade\u2019s Chosen');
+    if(e.chosen)addE(s,2,'The Runeblade\u2019s Chosen');
     /* aXe and swOrd are dead weight on the wrong letter. */
     if(ed.modIfMark&&markOfCard(DEF(t)).indexOf(ed.modIfMark.letter)>=0)
-      addMod(s,ed.modIfMark.n,ed.name+', in the hands of '+(ed.modIfMark.letter==='X'?'an X':'an O'));
+      addE(s,ed.modIfMark.n,ed.name+', in the hands of '+(ed.modIfMark.letter==='X'?'an X':'an O'));
     /* The Fusion deck's two halves of the same question. */
-    if(ed.modIfFusion&&DEF(t).fusion)addMod(s,ed.modIfFusion,ed.name+', worn by a fusion');
-    if(ed.modUnlessFusion&&!DEF(t).fusion)addMod(s,ed.modUnlessFusion,ed.name+', standing alone');
+    if(ed.modIfFusion&&DEF(t).fusion)addE(s,ed.modIfFusion,ed.name+', worn by a fusion');
+    if(ed.modUnlessFusion&&!DEF(t).fusion)addE(s,ed.modUnlessFusion,ed.name+', standing alone');
     /* The Goggles read the hand across the table, and both they and the
        Mindwyrm pay out the moment a hand runs dry. Counted off the LARGEST
        enemy hand rather than every enemy hand added together, so the number
@@ -6626,15 +6632,15 @@ function effSides(b,i,parts){
     if(ed.modPerFoeCard&&G&&G.players){
       let most=0;
       for(let q=0;q<PLAYERS();q++)if(!sameTeam(q,t.owner))most=Math.max(most,handCount(q));
-      if(most)addMod(s,ed.modPerFoeCard*most,ed.name+', per card held against it');
+      if(most)addE(s,ed.modPerFoeCard*most,ed.name+', per card held against it');
     }
     if(ed.modIfAnyEmptyHand&&G&&G.players){
       let dry=false;
       for(let q=0;q<PLAYERS();q++)if(handCount(q)===0){dry=true;break;}
-      if(dry)addMod(s,ed.modIfAnyEmptyHand,ed.name+', with a hand run dry');
+      if(dry)addE(s,ed.modIfAnyEmptyHand,ed.name+', with a hand run dry');
     }
     if(ed.modIfEmptyHand&&G&&G.players&&G.players[t.owner]&&handCount(t.owner)===0)
-      addMod(s,ed.modIfEmptyHand,ed.name+', holding no cards');
+      addE(s,ed.modIfEmptyHand,ed.name+', holding no cards');
   }
   /* A Teece that reads the crowd. Not an aura -- it is the card's own printed
      line scaling with the field, so silence does not touch it. */
@@ -6759,7 +6765,7 @@ function effSides(b,i,parts){
      the panel rather than the Teece -- but a Mine and a cursed panel are just
      as much the panel, and both go through applyModT, which has always turned
      a negative away. Fire landed only because it composes here instead. */
-  if(b[i].fire&&!b[i].fire.scorch)addGround(s,-FIRE_N,'The panel is on fire');
+  if(b[i].fire&&!b[i].fire.scorch&&!aloft)addGround(s,-FIRE_N,'The panel is on fire');
   for(let j=0;j<BN;j++){
     const o=b[j].teece; if(!o)continue;
     /* A Teece standing inside its own aura. Nearly every aura in the game pays
@@ -6815,7 +6821,7 @@ function effSides(b,i,parts){
   /* Last of all, because the Dimension of Change turns the finished numbers
      round rather than the printed ones: whatever the Teece ended up with on
      its top is what ends up on its bottom. */
-  if(groundFlag(b[i].ground,'gFlipSides')){
+  if(groundFlag(gUnder(b,i),'gFlipSides')){
     const f=[s[2],s[3],s[0],s[1]];
     for(let k=0;k<4;k++)s[k]=f[k];
     if(parts)parts.push({label:'The Dimension of Change swaps every side with the one opposite it',note:true});
@@ -6897,7 +6903,7 @@ function groundGives(b,i){
 function auraGives(b,i,p){
   const out=[0,0,0,0];
   if(p==null)return out;
-  const dbl=groundFlag(b[i].ground,'gDoublePosAll');
+  const dbl=groundFlag(gUnder(b,i),'gDoublePosAll');
   for(let j=0;j<BN;j++){
     if(j===i)continue;
     const o=b[j].teece;if(!o)continue;
@@ -6981,9 +6987,10 @@ function defOf(b,i,raw){
   if(DEF(t).defPerAlly)d+=DEF(t).defPerAlly*allyCount(b,i,true);
   /* Defence held only while a formation holds: the Shieldwall Dwarf, equipped. */
   if(DEF(t).defIf&&formationCount(b,i,DEF(t).defIf))d+=DEF(t).defIf.n;
+  const dMul=equipMul(t);
   for(const e of t.equips){
     const g=eqG(e);
-    if(g&&g.def)d+=g.def;
+    if(g&&g.def)d+=g.def*dMul;
     /* Chainmail of the End Times: a point of Defence for every card it has
        watched go into the ground. */
     if(g&&g.markDef)d+=g.markDef*(t.graveMarks||0);
@@ -7005,7 +7012,7 @@ function defOf(b,i,raw){
      The Dimensional Anchor earns this off the ground it is holding shut, so it
      is read outside the silence test rather than inside it. */
   if(b[i].ground&&DEF(t).defOnGround&&!t.silenced)d+=DEF(t).defOnGround;
-  if(b[i].defMark&&b.some(c=>c.teece&&c.teece.uid===b[i].defMark.uid))d+=b[i].defMark.n;
+  if(b[i].defMark&&!floats(t)&&b.some(c=>c.teece&&c.teece.uid===b[i].defMark.uid))d+=b[i].defMark.n;
   if(sameTeam(t.owner,0))d+=2*perkN('armour');
   const fdf=formOf(t);
   if(fdf&&fdf.def)d+=fdf.def;
@@ -7057,10 +7064,28 @@ function canTarget(b,i,byPlayer,kind){
   }
   return true;
 }
-/* Worn the Antimagic Airship: no battleground reaches it. */
-function bgProof(t){
-  return !!t&&t.equips.some(e=>{const g=eqG(e);return g&&g.bgProof;});
+/* Floating: not touching the ground. No battleground reaches it, and nothing
+   planted on the panel under it (a Mine, a cursed or enchanted panel, fire,
+   the Web) goes off under it. Read off the keyword's own sources rather than
+   kwOf, because kwOf asks this question itself before it adds the ground's
+   keywords. */
+function floats(t){
+  if(!t)return false;
+  const has=ks=>!!ks&&ks.indexOf('floating')>=0;
+  if(has(DEF(t).kw)||has(t.kwTemp)||has(t.kwPerm))return true;
+  return t.equips.some(e=>{const g=eqG(e);return g&&has(g.kw);});
 }
+const bgProof=floats;
+/* The Deep Warden takes one equip and no more. Riders in a Shopping Cart are
+   Teece carried, not equips worn, so they never count. */
+function equipCount(t){return t.equips.filter(e=>!e.rider&&CARDS[e.cardId]&&CARDS[e.cardId].type==='equip').length;}
+function equipRoom(t){const cap=t&&!t.silenced&&DEF(t).equipCap;return !cap||equipCount(t)<cap;}
+function plateRoom(cardId,plate){const cap=CARDS[cardId].equipCap;return !cap||(plate||[]).length<cap;}
+/* ...and doubles what that one equip does. */
+function equipMul(t){return (t&&!t.silenced&&DEF(t).equipDouble)?2:1;}
+/* The battleground a Teece standing at i is actually standing on: none at all
+   while it floats. */
+function gUnder(b,i){return (b[i]&&floats(b[i].teece))?null:b[i]&&b[i].ground;}
 /* The Forge-Spark Tinker answers every equip card that is equipped or goes to
    a graveyard, either side's. Kept synchronous so noteBuried can call it. */
 function equipEvent(why){
@@ -7277,9 +7302,12 @@ function actAvailable(t,ent){
    counts. moveT is the one caller that says otherwise. */
 function putTeece(b,i,t,live,how){
   b[i].teece=t;
+  /* A floating Teece comes down onto nothing: whatever is waiting on the
+     panel stays there for the next body that touches it. */
+  const fl=floats(t);
   /* A Fading Rift pays the first thing to arrive on it and then is gone. It is
      a made card, so nothing buries it -- it simply stops being there. */
-  if(groundFlag(b[i].ground,'gArrive')){
+  if(!fl&&groundFlag(b[i].ground,'gArrive')){
     const g=b[i].ground,n=groundNum(g,'gArrive');
     b[i].ground=null;
     for(let k=0;k<4;k++)t.temp[k]+=n;
@@ -7288,17 +7316,17 @@ function putTeece(b,i,t,live,how){
   /* The enchantment is spent by the first ally to arrive, however it arrives:
      played onto it or moved onto it. A straight bonus -- it does not silence
      what walks into it, so the Teece keeps everything it came with. */
-  if(b[i].enchant&&sameTeam(t.owner,b[i].enchant.owner)){
+  if(!fl&&b[i].enchant&&sameTeam(t.owner,b[i].enchant.owner)){
     b[i].enchant=null;
     for(let k=0;k<4;k++)t.perm[k]+=ENCHANT_N;
     if(live)log(nm(t)+' steps into the enchantment: '+sgn(ENCHANT_N)+'.');
   }
-  if(b[i].prime&&!(b[i].prime.allyOnly&&!sameTeam(t.owner,b[i].prime.owner))){
+  if(!fl&&b[i].prime&&!(b[i].prime.allyOnly&&!sameTeam(t.owner,b[i].prime.owner))){
     const pr=b[i].prime;b[i].prime=null;
     for(let k=0;k<4;k++)t.perm[k]+=pr.n;
     if(live)log(nm(t)+' arrives on a '+(pr.allyOnly?'marked':'primed')+' panel: '+sgn(pr.n)+'.');
   }
-  if(b[i].mine){
+  if(!fl&&b[i].mine){
     const cnt=b[i].mine.n||1;
     b[i].mine=null;
     const dbl=b.some(c=>c.teece&&DEF(c.teece).mineDoubleAll);
@@ -7313,7 +7341,7 @@ function putTeece(b,i,t,live,how){
     }
     if(b[i].ground&&groundFlag(b[i].ground,'gMineKill'))forceDeath(t);
   }
-  if(b[i].curseP){
+  if(!fl&&b[i].curseP){
     const cp=b[i].curseP;
     if(!sameTeam(t.owner,cp.owner)){
       b[i].curseP=null;
@@ -7321,7 +7349,7 @@ function putTeece(b,i,t,live,how){
       if(live)log(nm(t)+' steps onto cursed ground: '+sgn(cp.n)+'.');
     }
   }
-  mArrive(b,i,t,live,how);
+  if(!fl)mArrive(b,i,t,live,how);
   /* The Breeding Pit feeds on every arrival anywhere on the board, this one
      included: whatever stands on the Pit grows by a point each time a body is
      summoned. Walking is not being born, so moveT is excluded -- otherwise a
@@ -7352,11 +7380,11 @@ function putTeece(b,i,t,live,how){
        distinction the card draws -- and `how` is already the place the game
        knows the difference, so the Nest reads it here rather than only in
        playTeece, where a copy landing on it was paid nothing at all. */
-    {const ph=groundNum(b[i].ground,'gPlayHold');
+    {const ph=fl?0:groundNum(b[i].ground,'gPlayHold');
      if(ph){t.standCell=i;if(live)log(nm(t)+' settles into '+CARDS[b[i].ground.cardId].name+': '+sgn(ph)+' for as long as it stays.');}}
     for(let j=0;j<BN;j++){
       const g=b[j].ground;
-      if(!g||!groundFlag(g,'gGrowSummon'))continue;
+      if(!g||!groundFlag(g,'gGrowSummon')||floats(b[j].teece))continue;
       const o=b[j].teece;
       if(!o)continue;
       const gn=groundNum(g,'gGrowSummon');
@@ -7505,7 +7533,7 @@ function mCurseT(b,i,live){
   }
   t.mcursed=true;
   if(live)log(nm(t)+' is cursed.');
-  const hit=groundFlag(b[i].ground,'gMCurseHit')?groundNum(b[i].ground,'gMCurseHit'):0;
+  const hit=groundFlag(gUnder(b,i),'gMCurseHit')?groundNum(b[i].ground,'gMCurseHit'):0;
   if(hit){applyModT(t,hit,'perm');if(live)log(nm(t)+' is cursed on '+CARDS[b[i].ground.cardId].name+': '+sgn(hit)+'.');}
   /* The Pharaoh's order: the next enemy of that seat to be cursed dies of it. */
   if(G&&G.players)for(let q=0;q<G.players.length;q++){
@@ -7542,7 +7570,7 @@ function mArrive(b,i,t,live,how){
     if(live)log(nm(t)+' steps onto a cursed panel.');
     mCurseT(b,i,live);
   }
-  if(!isMummy(t)&&!t.mcursed&&groundFlag(b[i].ground,'gMCurseOn')){
+  if(!isMummy(t)&&!t.mcursed&&groundFlag(gUnder(b,i),'gMCurseOn')){
     if(live)log(nm(t)+' stands on '+CARDS[b[i].ground.cardId].name+'.');
     mCurseT(b,i,live);
   }
@@ -7577,7 +7605,7 @@ function mSweep(){
   const b=G.board;
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
-    if(!t||isMummy(t))continue;
+    if(!t||isMummy(t)||floats(t))continue;
     if(b[i].mcurse){b[i].mcurse=null;log(nm(t)+' takes the curse off the '+CN[i]+'.');mCurseT(b,i,true);}
     if(!t.mcursed&&groundFlag(b[i].ground,'gMCurseOn')){log(nm(t)+' stands on '+CARDS[b[i].ground.cardId].name+'.');mCurseT(b,i,true);}
   }
@@ -7702,9 +7730,9 @@ function mGive(a,got,gid,hasFx){
 }
 function ageRateAt(b,i){
   const t=b[i].teece; if(!t)return 0;
-  if(groundFlag(b[i].ground,'gAgeStop'))return 0;
+  if(groundFlag(gUnder(b,i),'gAgeStop'))return 0;
   let rate=1;
-  {const r=groundNum(b[i].ground,'gAgeRate');if(r)rate*=r;}
+  {const r=groundNum(gUnder(b,i),'gAgeRate');if(r)rate*=r;}
   for(const e of t.equips){
     const g=eqG(e);
     if(g&&g.ageStop)return 0;
@@ -7760,7 +7788,7 @@ async function fireMove(from,to,cause){
   const b=G.board,t=b[to].teece;
   if(!t)return;
   const gd=b[to].ground?CARDS[b[to].ground.cardId]:null;
-  if(groundFlag(b[to].ground,'gDestroyOnMove')&&t.immortalOwner==null){
+  if(groundFlag(gUnder(b,to),'gDestroyOnMove')&&t.immortalOwner==null){
     log(nm(t)+' steps into '+gd.name+' and is swallowed.');
     await anim([to],'dying',190);
     await processDeath({cell:to,t,killers:[]});
@@ -7781,7 +7809,7 @@ async function fireMove(from,to,cause){
       log(nm(t)+' catches the updraught from '+nm(w)+': '+sgn(pf.n)+durTxt(pf.dur||'temp')+'.');
     }
   }
-  const gst=groundNum(b[to].ground,'gStand');
+  const gst=groundNum(gUnder(b,to),'gStand');
   if(gst){t.standCell=to;log(nm(t)+' settles onto '+gd.name+': '+sgn(gst)+' while it stays.');}
   else if(t.standCell!=null)t.standCell=null;
   for(const c of G.curses){
@@ -8041,7 +8069,7 @@ function applyModT(t,n,dur){
   if(G&&G.castingMagic&&G.castingFrom&&wizOnField(G.castingFrom.p,'steamDouble')){dblPos=true;dblNeg=true;}
   if(G&&G.board){
     const ci=G.board.findIndex(c=>c.teece===t);
-    if(ci>=0&&G.board[ci].ground){
+    if(ci>=0&&G.board[ci].ground&&!floats(t)){
       const g=G.board[ci].ground;
       if(groundFlag(g,'gDoublePos')||groundFlag(g,'gDoublePosAll'))dblPos=true;
       if(groundFlag(g,'gDoubleNeg'))dblNeg=true;
@@ -8241,7 +8269,7 @@ async function altarOffers(p){
   const b=G.board,asks=[];
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
-    if(t&&t.owner===p&&groundFlag(b[i].ground,'gAltar'))asks.push({t,name:gcards(b[i].ground).find(gd=>gd.gAltar).name});
+    if(t&&t.owner===p&&groundFlag(gUnder(b,i),'gAltar'))asks.push({t,name:gcards(b[i].ground).find(gd=>gd.gAltar).name});
   }
   for(const a of asks){
     const i=b.findIndex(c=>c.teece===a.t);
@@ -10659,7 +10687,7 @@ async function FXRUN(st,ctx){
     let n=st.n;
     let dblPos=!!DEF(t).selfDoublePos,dblNeg=!!DEF(t).selfDoubleNeg;
     for(const e of t.equips){const g=eqG(e);if(!g)continue;if(g.doublePos)dblPos=true;if(g.doubleNeg)dblNeg=true;}
-    if(G&&G.board){const ci=G.board.findIndex(c=>c.teece===t);if(ci>=0&&G.board[ci].ground){const g=G.board[ci].ground;if(groundFlag(g,'gDoublePos')||groundFlag(g,'gDoublePosAll'))dblPos=true;if(groundFlag(g,'gDoubleNeg'))dblNeg=true;}}
+    if(G&&G.board){const ci=G.board.findIndex(c=>c.teece===t);if(ci>=0&&G.board[ci].ground&&!floats(t)){const g=G.board[ci].ground;if(groundFlag(g,'gDoublePos')||groundFlag(g,'gDoublePosAll'))dblPos=true;if(groundFlag(g,'gDoubleNeg'))dblNeg=true;}}
     if(n>0&&dblPos)n*=2;if(n<0&&dblNeg)n*=2;
     t.perm[k]+=n;
     log(nm(t)+' takes '+sgn(n)+' on its '+SIDE_NAMES[k]+' side.');
@@ -13215,7 +13243,7 @@ async function FXRUN(st,ctx){
   case 'equipFromGrave':{
     if(ctx.cardId==null)return;
     const cands=[];
-    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&sameTeam(t.owner,p))cands.push(i);}
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&sameTeam(t.owner,p)&&equipRoom(t))cands.push(i);}
     if(!cands.length)return none('You have no Teece to bolt it onto.');
     const cid=ctx.cardId;
     const c=await chooseCell(p,cands,'Bolt '+CARDS[cid].name+' onto which ally? Or let it lie.',
@@ -14448,7 +14476,7 @@ function isStunned(t,b,i){
      do the arithmetic -- and it now lasts what the cards say it lasts: the rest
      of this turn, the turn between, and all of the stunner's next turn. */
   if(t.stunUntil)return true;
-  if(b&&i!=null&&groundFlag(b[i].ground,'gStun'))return true;
+  if(b&&i!=null&&groundFlag(gUnder(b,i),'gStun'))return true;
   /* Made to carry somebody else's Runeblade by the Grudgebearer. */
   if(t.equips&&t.equips.some(e=>e.shackle))return true;
   return false;
@@ -14460,7 +14488,7 @@ function isStunned(t,b,i){
 function applyStun(b,i,live,by){
   const t=b[i].teece;
   if(!t)return false;
-  if(groundFlag(b[i].ground,'gStun')&&isStunned(t,b,i)){
+  if(groundFlag(gUnder(b,i),'gStun')&&isStunned(t,b,i)){
     applyModT(t,-4,'perm');
     if(live)log(nm(t)+' is rattled a second time in Concussion Alley: -4.');
   }
@@ -14488,7 +14516,7 @@ function stunText(b,i){
   if(!isStunned(t,b,i))return null;
   if(!t.stunUntil&&t.equips.some(e=>e.shackle))
     return nm(t)+' is bound by a Runeblade it was made to carry: it destroys nothing and activates nothing for as long as it wears it. It keeps every number it has, and can still be destroyed.';
-  return groundFlag(b[i].ground,'gStun')&&!(t.stunUntil&&G.turnNum<t.stunUntil)
+  return groundFlag(gUnder(b,i),'gStun')&&!(t.stunUntil&&G.turnNum<t.stunUntil)
     ? nm(t)+' is stunned by Concussion Alley: it destroys nothing and activates nothing while it stands there. Stepping off lifts it at once.'
     : nm(t)+' is stunned: it destroys nothing and activates nothing until the end of the stunning side\u2019s next turn. It keeps every number it has, and can still be destroyed.';
 }
@@ -14587,7 +14615,7 @@ async function processDeath(d){
        the same line effSides already draws, where a silenced Teece keeps the
        auras its equips radiate and loses the one printed on it. */
     const kd=DEF(k); if(kd.onKill&&!k.silenced)oks.push(kd.onKill);
-    for(const e of k.equips){const g=eqG(e);if(g&&g.onKill)oks.push(g.onKill);}
+    for(const e of k.equips){const g=eqG(e);if(g&&g.onKill)for(let r=0;r<equipMul(k);r++)oks.push(g.onKill);}
     /* An echoed killer collects every reward once more. Snapshotted first, or
        a second echo would square the list instead of doubling it. */
     if(k.echo){const base=oks.slice();for(let e=0;e<k.echo;e++)oks.push(...base);}
@@ -14622,7 +14650,7 @@ async function processDeath(d){
   if(!d.cost)sharpTeethBite(t,d.killers);
   /* Divine Retribution answers the killer; Hallowed Ground answers the fall. */
   if(!d.cost&&d.killers&&d.killers.length){await retributionReact(t,d.killers);if(G.over)return;}
-  if(!d.cost)hallowConjure(cell,'the fall of '+nm(t));
+  if(!d.cost&&!floats(t))hallowConjure(cell,'the fall of '+nm(t));
   /* victim's death effects, then anything laid on the body itself, then
      equip-granted ones. t.deathFx is what a card hangs on ANOTHER Teece --
      Pestilence sours an ally and the souring travels with the body, so it
@@ -14630,12 +14658,12 @@ async function processDeath(d){
      are not destroyed: they are removed as a cost and do not fire death effects. */
   let deathFx=d.cost?[]:(t.silenced?[]:(DEF(t).onDeath||[])).slice();
   if(!d.cost&&t.deathFx&&t.deathFx.length)deathFx.push(...t.deathFx);
-  if(!d.cost&&cell!=null&&G.board[cell]&&G.board[cell].ground&&groundFlag(G.board[cell].ground,'gDeathModal')){
+  if(!d.cost&&cell!=null&&!floats(t)&&G.board[cell]&&G.board[cell].ground&&groundFlag(G.board[cell].ground,'gDeathModal')){
     deathFx.push({fx:'choose',modal:true,msg:'The Platform gives out:',opts:[
       {lbl:'Every Teece gets +2',steps:[{fx:'allMod',n:2,dur:'perm'}]},
       {lbl:'Every Teece gets -2',steps:[{fx:'allMod',n:-2,dur:'perm'}]}]});
   }
-  for(const e of t.equips){const g=eqG(e);if(!d.cost&&g&&g.onDeath)deathFx.push(...g.onDeath);}
+  for(const e of t.equips){const g=eqG(e);if(!d.cost&&g&&g.onDeath)for(let r=0;r<(g.becomesGround?1:equipMul(t));r++)deathFx.push(...g.onDeath);}
   const groundCard=G.board[cell].ground&&CARDS[G.board[cell].ground.cardId];
   const dblG=groundCard&&groundCard.gDouble;
   const dblFx=groundCard&&groundCard.gDoubleEffects;
@@ -14781,7 +14809,8 @@ async function processDeath(d){
         handed=true;
       }
     }
-    const gr=G.board[cell].ground,grd=gr?CARDS[gr.cardId]:null;
+    /* A floating body falls clear of the battleground under it. */
+    const gr=floats(t)?null:G.board[cell].ground,grd=gr?CARDS[gr.cardId]:null;
     const salvage=groundFlag(gr,'gSalvage')&&gr.owner===t.baseOwner;
     /* Trash Heap: whatever is thrown away on this panel is yours, whoever it
        belonged to. Every burial from here goes through bury() so the body and
@@ -14817,10 +14846,10 @@ async function processDeath(d){
     /* The Dwarf Thane and the Mountain King take their gear home when they
        fall: one equip of the Thane's choosing, or everything on the King, each
        back to the hand of whoever owns it. */
-    const home=!d.cost&&!t.silenced&&DEF(t).equipsHome;
+    const home=(!d.cost&&!t.silenced&&DEF(t).equipsHome)||(d.gearHome&&'all');
     let homeSet=[];
     if(home){
-      const gear=t.equips.filter(e=>{const g=eqG(e)||{};return !e.rider&&CARDS[e.cardId].type==='equip'&&!g.becomesGround&&!g.undyingRide;});
+      const gear=t.equips.filter(e=>{const g=eqG(e)||{};return !e.rider&&CARDS[e.cardId].type==='equip'&&!(g.becomesGround&&!d.cost)&&!g.undyingRide;});
       if(home==='all')homeSet=gear;
       else{
         const mine=gear.filter(e=>e.owner===t.owner);
@@ -14920,7 +14949,7 @@ async function processDeath(d){
   }
   /* A Bone Field counts every body that falls on it, whether or not the body
      stayed down. */
-  const bg=G.board[cell]&&G.board[cell].ground;
+  const bg=!floats(t)&&G.board[cell]&&G.board[cell].ground;
   if(bg&&groundFlag(bg,'gBone')&&!t.isToken)addBone(bg,true,nm(t)+' was destroyed on it');
   /* The Barrow Forge counts every wielder that falls on it, either side's. */
   if(bg&&heldRune&&groundFlag(bg,'gRuneForge')){
@@ -14963,7 +14992,7 @@ async function syncGrounds(){
     /* The Goo takes a Teece's voice on arrival and never gives it back, the
        way every other silence in the game works. Walking out of it later does
        not undo it. */
-    if(!t.silenced&&groundFlag(b[i].ground,'gGoo')){
+    if(!t.silenced&&groundFlag(gUnder(b,i),'gGoo')){
       t.silenced=true;
       log(nm(t)+' sinks into the Goo and is silenced.');
     }
@@ -15681,7 +15710,11 @@ async function playTeece(p,handIdx){
     if(at<0)continue;
     const gone=handTake(p,at);
     if(!gone)continue;
-    dumpPlate(gone.plate,'with the card it was bolted to',gone.id);
+    /* The Thane and the King take the gear off whatever they were paid with. */
+    if(d.sacGearHome&&gone.plate.length){
+      for(const e of gone.plate)handPush(e.owner,e.cardId);
+      log(gone.plate.map(e=>CARDS[e.cardId].name).join(' and ')+' come'+(gone.plate.length===1?'s':'')+' off '+CARDS[gone.id].name+' and back to hand.');
+    }else dumpPlate(gone.plate,'with the card it was bolted to',gone.id);
     log(CARDS[gone.id].name+' is discarded from hand as a sacrifice.');
     await discardCard(p,gone.id);
     if(G.over)return true;
@@ -15693,7 +15726,7 @@ async function playTeece(p,handIdx){
        the next panel on the list. It is still a body paid. */
     if(!t){log('One of the Teece marked for sacrifice had already fallen with another.');continue;}
     if(!t.isToken&&!t.isCopy)sacked.push(t.cardId);
-    await processDeath({cell:c,t,killers:[],cost:true});
+    await processDeath({cell:c,t,killers:[],cost:true,gearHome:!!d.sacGearHome});
     log(nm(t)+' is sacrificed.');
   }
   /* A death can fill the very panel it emptied -- an Egg Sac boiling over, a
@@ -15732,7 +15765,7 @@ async function playTeece(p,handIdx){
     trapped=true;
     queueFx({kill:t.uid,msg:nm(t)+' walks straight into the trap.'});
   }
-  if(b[spot].ground){
+  if(b[spot].ground&&!floats(t)){
     const gd0=CARDS[b[spot].ground.cardId];
     {const pm=groundNum(b[spot].ground,'gPlayMod');
      if(pm){applyModT(t,pm,'perm');log(nm(t)+' is played onto '+gd0.name+': '+sgn(pm)+'.');}}
@@ -15753,7 +15786,7 @@ async function playTeece(p,handIdx){
     for(const e of worn){
       const eg=eqG(e);
       if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:spot,t,first:false,equip:e});
-      if(eg&&eg.onPlayTemp){applyModT(t,eg.onPlayTemp,'temp');log(nm(t)+' arrives charged by '+CARDS[e.cardId].name+': '+sgn(eg.onPlayTemp)+' until the end of the turn.');}
+      if(eg&&eg.onPlayTemp){const pt=eg.onPlayTemp*equipMul(t);applyModT(t,pt,'temp');log(nm(t)+' arrives charged by '+CARDS[e.cardId].name+': '+sgn(pt)+' until the end of the turn.');}
     }
     runeTriumph(p,t);
   }
@@ -15838,7 +15871,7 @@ async function playTeece(p,handIdx){
     const fp=DEF(w).onFoePlay;
     if(fp){await runSteps(fp,{p:w.owner,cell:i,t:w,first:false});if(G.over)return true;}
   }
-  if(b[spot].teece===t)hallowConjure(spot,nm(t)+' landing on it');
+  if(b[spot].teece===t&&!floats(t))hallowConjure(spot,nm(t)+' landing on it');
   /* Instant speed: whatever the other side is holding that answers a Teece
      landing gets its chance now, with the body on the board. */
   if(b.some(c=>c.teece===t))await reactHand('enemyPlay',p);
@@ -15858,6 +15891,7 @@ function plateHand(p,equipIdx,targetIdx){
   if(equipIdx===targetIdx)return false;
   const tid=pl.hand[targetIdx];
   if(!tid||CARDS[tid].type!=='teece')return false;
+  if(!plateRoom(tid,plateOf(p,targetIdx)))return false;
   const gone=handTake(p,equipIdx);
   if(!gone)return false;
   /* taking the equip out shifts everything after it down one */
@@ -15910,6 +15944,7 @@ async function playEquip(p,handIdx){
     const t=b[i].teece;
     if(!t)continue;
     if(ed.onlyHand)break;
+    if(!equipRoom(t))continue;
     if(t.owner!==p&&!(ed.anyOwner&&canTarget(b,i,p,'equip')))continue;
     if(ed.onlyToken&&!t.isToken)continue;
     if(ed.onlyPackLeader&&!isPackLeader(t))continue;
@@ -15921,7 +15956,7 @@ async function playEquip(p,handIdx){
   const hands=[];
   if(!ed.onlyToken&&!ed.onlySpiderling)for(let h=0;h<pl.hand.length;h++){
     if(h===handIdx)continue;
-    if(CARDS[pl.hand[h]].type==='teece'&&(!ed.onlyPackLeader||CARDS[pl.hand[h]].packLeader))hands.push(h);
+    if(CARDS[pl.hand[h]].type==='teece'&&plateRoom(pl.hand[h],plateOf(p,h))&&(!ed.onlyPackLeader||CARDS[pl.hand[h]].packLeader))hands.push(h);
   }
   /* The Runeblade can be set in a Runestone instead of into a hand. */
   const sheaths=ed.runeblade?sheathSpots(p):[];
@@ -16542,7 +16577,7 @@ async function endTurn(){
   }
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece,g=G.board[i].ground;
-    if(!t||!g||t.owner!==p||!groundFlag(g,'gSanctuary'))continue;
+    if(!t||!g||t.owner!==p||floats(t)||!groundFlag(g,'gSanctuary'))continue;
     log(nm(t)+' prays in the Sanctuary.');
     conjureSmites(t.owner,1);
   }
@@ -17030,7 +17065,7 @@ async function startTurn(){
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
     if(!t||t.owner!==p)continue;
-    if(!groundFlag(G.board[i].ground,'gStartMod'))continue;
+    if(!groundFlag(gUnder(G.board,i),'gStartMod'))continue;
     let n=0;
     for(const gd of gcards(G.board[i].ground))if(gd.gStartMod)n+=gd.gStartMod;
     if(!n)continue;
@@ -17169,7 +17204,7 @@ function simDeath(b,d){
       const k=b[i].teece;
       if(!k||k.uid!==kuid)continue;
       const oks=[];const kd=DEF(k);if(kd.onKill&&!k.silenced)oks.push(kd.onKill);
-      for(const e of k.equips){const g=eqG(e);if(g&&g.onKill)oks.push(g.onKill);}
+      for(const e of k.equips){const g=eqG(e);if(g&&g.onKill)for(let r=0;r<equipMul(k);r++)oks.push(g.onKill);}
       for(const ok of oks)if(!ok.draw&&!ok.steps&&!ok.burnOut&&phaseIs(ok.when))applyModT(k,ok.n,ok.dur);
     }
   }
@@ -17446,8 +17481,8 @@ function aiPlanFor(id){
     const curse=d.anyOwner&&typeof d.mod==='number'&&d.mod<0;
     for(let i=0;i<BN;i++){
       const t=b[i].teece;
-      if(curse){if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p,'equip'))cands.push(i);continue;}
-      if(!t||t.owner!==p)continue;
+      if(curse){if(t&&!sameTeam(t.owner,p)&&equipRoom(t)&&canTarget(b,i,p,'equip'))cands.push(i);continue;}
+      if(!t||t.owner!==p||!equipRoom(t))continue;
       if(d.onlyToken&&!t.isToken)continue;
       if(d.onlyPackLeader&&!isPackLeader(t))continue;
       if(d.onlySpiderling&&!isSpiderling(t))continue;
@@ -18044,7 +18079,7 @@ async function aiSupport(){
       let ti=-1,tv=-1;
       for(let x=0;x<pl.hand.length;x++){
         const cd=CARDS[pl.hand[x]];
-        if(x===h||cd.type!=='teece')continue;
+        if(x===h||cd.type!=='teece'||!plateRoom(pl.hand[x],plateOf(p,x)))continue;
         const v=(cd.sides||[0]).reduce((a,c)=>a+c,0)-(cd.sac||0)*6;
         if(v>tv){tv=v;ti=x;}
       }
@@ -20088,6 +20123,10 @@ function render(){
       (skyShowing()?'<span class="phase '+(isDay()?'day':'night')+'">'+
       (isDay()?'\u2600\uFE0F Day':'\u{1F319} Night')+(timePinned()?' \u00b7 held':'')+'</span>':'');
     document.getElementById('endTurn').disabled=!!G.spectate;
+    /* The sky turns at the start of the turn after this one when that turn
+       opens a new round, so say so on the button that starts it. */
+    const flips=skyShowing()&&!timePinned()&&G.turnNum%PLAYERS()===0;
+    document.getElementById('endTurn').textContent=flips?'End Turn: it becomes '+(isDay()?'Night':'Day'):'End Turn';
   }else{
     document.getElementById('endTurn').disabled=true;
   }
@@ -20231,7 +20270,7 @@ function scorchFires(){
   if(!G||!G.board)return;
   for(let i=0;i<BN;i++){
     const f=G.board[i].fire,t=G.board[i].teece;
-    if(!f||!f.scorch||!t)continue;
+    if(!f||!f.scorch||!t||floats(t))continue;
     G.board[i].fire=null;
     applyModT(t,-FIRE_N,'perm');
     log(nm(t)+' is caught in the fire: -'+FIRE_N+' permanently, and that fire goes out.');
@@ -20244,7 +20283,7 @@ async function sandstormTurn(){
   const b=G.board,done=[];
   for(let i=0;i<BN;i++){
     const g=b[i].ground,t=b[i].teece;
-    if(!g||!t||!groundFlag(g,'gSandstorm')||done.indexOf(t.uid)>=0)continue;
+    if(!g||!t||floats(t)||!groundFlag(g,'gSandstorm')||done.indexOf(t.uid)>=0)continue;
     if(hasKw(b,i,'immovable'))continue;
     const dests=ADJ[i].filter(j=>openAt(b,j));
     if(!dests.length)continue;
@@ -20261,7 +20300,7 @@ async function sandstormTurn(){
 /* A Ley Line pays whoever arrives on it, played or moved. */
 async function groundArrive(cell){
   const b=G.board,t=b[cell]&&b[cell].teece,g=b[cell]&&b[cell].ground;
-  if(!t||!g||g.gsil||!groundFlag(g,'gConjure'))return;
+  if(!t||!g||g.gsil||floats(t)||!groundFlag(g,'gConjure'))return;
   log(nm(t)+' steps onto the Ley Line.');
   /* The Teece standing there is the one conjuring, so an Oakwood Staff on it
      doubles what it brings up. */
