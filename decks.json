@@ -1172,7 +1172,7 @@
         1166,
         1167,
         1168,
-        1171
+        1193
       ],
       "blurb": "Warlocks borrow their power from a patron, and every Warlock you field carries the patron you are channelling: the Boon. Ten Warlocks each name a different god, and calling one up changes what all of them do.",
       "how": [
@@ -1913,6 +1913,7 @@
     1166,
     1167,
     1168,
-    1171
+    1171,
+    1193
   ]
 }

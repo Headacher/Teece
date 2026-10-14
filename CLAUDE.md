@@ -74,7 +74,7 @@ Every push carries a bump, in the same commit as the change: `build` up by one
 A deck is registered in seven places, and missing one of them fails quietly —
 the cards exist and simply never reach a player. Take the next free block of
 twenty ids (Wizard is 906–925, with its conjured tokens at 926–941, the
-tutorial's cards sit at 960–970, Gun is 1001–1020, Fusion is 1021–1040, Lightning is 1041–1060 with its Bolt Token at 1061, Mummy is 1062–1081, Wolf is 1082–1101, and Priest is 1102–1121 with its Smites at 1122–1127),
+tutorial's cards sit at 960–970, Gun is 1001–1020, Fusion is 1021–1040, Lightning is 1041–1060 with its Bolt Token at 1061, Mummy is 1062–1081, Wolf is 1082–1101, Priest is 1102–1121 with its Smites at 1122–1127, Warlock is 1150–1170 plus its Pact Talisman at 1193, and Basic is 1171–1192; grep `CARDS` for the highest id before you pick, because two decks landing at once have collided),
 then:
 
 - `CARDS` in `index.html` — the twenty cards, plus any token cards they make.

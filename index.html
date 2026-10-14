@@ -1205,7 +1205,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:195,date:'2026-10-14'};
+const VERSION={build:196,date:'2026-10-14'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 const TOKEN_SHAPE_SVG='<svg class="tokshape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M28,0H72A7,7 0 0 1 79,7V16A5,5 0 0 0 84,21H93A7,7 0 0 1 100,28V72A7,7 0 0 1 93,79H84A5,5 0 0 0 79,84V93A7,7 0 0 1 72,100H28A7,7 0 0 1 21,93V84A5,5 0 0 0 16,79H7A7,7 0 0 1 0,72V28A7,7 0 0 1 7,21H16A5,5 0 0 0 21,16V7A7,7 0 0 1 28,0Z"/></svg>';
@@ -1647,7 +1647,7 @@ const CARD_ART={
   1167:["     /\\      ", "    /  \\     ", "   | ** |    ", "   |____|    ", "  =========  "],
   1168:["   .-----.   ", "  /  * *  \\  ", " |  *   *  | ", "  \\  * *  /  ", "   '-----'   "],
   1169:["    .-.      ", "   ( o )     ", "   [###]     ", "    / \\      ", "    ' '      "],
-  1171:["     .-.     ", "    (   )    ", "     '|'     ", "    / | \\    ", "   *  *  *   "],
+  1193:["     .-.     ", "    (   )    ", "     '|'     ", "    / | \\    ", "   *  *  *   "],
   1170:["    .---.    ", "   / * * \\   ", "  |  * *  |  ", "   \\     /   ", "    '---'    "],
   1171:["    _n_      ", "   (o_o)  |  ", "   /|=|\\-+   ", "    | |   |  ", "    d b      "],
   1172:["    _n_  __  ", "   (o_o)|  | ", "   /|=|\\| + |", "    | | |__| ", "    d b      "],
@@ -4969,7 +4969,7 @@ const CARDS = {
     text:'A Warlock on this battleground has +3. When it is destroyed or replaced: you can lay a Lesser Circle (a Warlock on it has +3) on a panel with no battleground.'},
  1169:{name:'Warlock Minion',type:'teece',token:true,deck:'warlock',warlock:true,sides:[3,3,3,3],
     text:'Warlock Minion Token. It has your Boon.'},
- 1171:{name:'Pact Talisman',type:'equip',mod:0,grants:{onEquip:[{fx:'talisman',n:5,pick:2}]},
+ 1193:{name:'Pact Talisman',type:'equip',mod:0,grants:{onEquip:[{fx:'talisman',n:5,pick:2}]},
     text:'When equipped: five random Boons are offered and you choose two. The equipped Teece has both.'},
  1170:{name:'Lesser Circle',type:'ground',token:true,deck:'warlock',gWarlockMod:3,
     text:'A Warlock on this battleground has +3.'},
