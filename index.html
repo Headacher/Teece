@@ -268,6 +268,10 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="warlock"] .kwl,.dcard[data-card-deck="warlock"] .dkw{color:#d4b0ff}
 .card[data-card-deck="warlock"] .ct,.dcard[data-card-deck="warlock"] .dty{color:#d4b0ff}
 .card[data-card-deck="warlock"]::after,.dcard[data-card-deck="warlock"]::after{content:'\26E7'}
+.card[data-card-deck="basic"],.dcard[data-card-deck="basic"]{--cardbg:#dce6ee;--artink:#47637d;background:var(--cardbg);color:#1d2a36;border-color:#7d93a8}
+.card[data-card-deck="basic"] .kwl,.dcard[data-card-deck="basic"] .dkw{color:#1f5d96}
+.card[data-card-deck="basic"] .ct,.dcard[data-card-deck="basic"] .dty{color:#1f5d96}
+.card[data-card-deck="basic"]::after,.dcard[data-card-deck="basic"]::after{content:'\1F530'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -303,6 +307,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .teece[data-card-deck="priest"]{--cardbg:#efe6cf;--artink:#8a6a1f;background:var(--cardbg);color:#3b2f17;border-color:#b8962e}
 .teece[data-card-deck="dwarves"]{--cardbg:#4b3a2c;--artink:#f2b45c;background:var(--cardbg);color:#f3e8d8;border-color:#2a1f16}
 .teece[data-card-deck="warlock"]{--cardbg:#2b1838;--artink:#c39cff;background:var(--cardbg);color:#f0e6ff;border-color:#130a1a}
+.teece[data-card-deck="basic"]{--cardbg:#dce6ee;--artink:#47637d;background:var(--cardbg);color:#1d2a36;border-color:#7d93a8}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -359,6 +364,8 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
   text-shadow:0 0 2px #1a0630,0 0 5px #b45cff,0 0 10px #9b3dff,0 0 14px #9b3dff;animation:curseGlow 2.4s ease-in-out infinite}
 @keyframes curseGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35) drop-shadow(0 0 4px #b45cff)}}
 @media (prefers-reduced-motion:reduce){.mcurseMark,.teece .rgd .mcursed{animation:none}}
+.wayMark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22px;opacity:.8;z-index:1;pointer-events:none}
+.wayMark.m0{color:var(--p0)} .wayMark.m1{color:var(--p1)} .wayMark.m2{color:var(--p2)}
 .primeMark{position:absolute;top:3px;left:5px;font-size:11px;font-weight:700;color:var(--gold);z-index:1}
 .seedMark{position:absolute;top:3px;right:5px;font-size:10px;line-height:1;color:var(--up);z-index:1}
 /* The four corners are spoken for, so the enchantment takes the top edge. It
@@ -1198,7 +1205,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:194,date:'2026-10-14'};
+const VERSION={build:195,date:'2026-10-14'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 const TOKEN_SHAPE_SVG='<svg class="tokshape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M28,0H72A7,7 0 0 1 79,7V16A5,5 0 0 0 84,21H93A7,7 0 0 1 100,28V72A7,7 0 0 1 93,79H84A5,5 0 0 0 79,84V93A7,7 0 0 1 72,100H28A7,7 0 0 1 21,93V84A5,5 0 0 0 16,79H7A7,7 0 0 1 0,72V28A7,7 0 0 1 7,21H16A5,5 0 0 0 21,16V7A7,7 0 0 1 28,0Z"/></svg>';
@@ -1339,7 +1346,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}',priest:'\u{1F64F}',dwarves:'\u26CF\uFE0F',warlock:'\u26E7'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}',priest:'\u{1F64F}',dwarves:'\u26CF\uFE0F',warlock:'\u26E7',basic:'\u{1F530}'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -1641,6 +1648,29 @@ const CARD_ART={
   1168:["   .-----.   ", "  /  * *  \\  ", " |  *   *  | ", "  \\  * *  /  ", "   '-----'   "],
   1169:["    .-.      ", "   ( o )     ", "   [###]     ", "    / \\      ", "    ' '      "],
   1170:["    .---.    ", "   / * * \\   ", "  |  * *  |  ", "   \\     /   ", "    '---'    "],
+  1171:["    _n_      ", "   (o_o)  |  ", "   /|=|\\-+   ", "    | |   |  ", "    d b      "],
+  1172:["    _n_  __  ", "   (o_o)|  | ", "   /|=|\\| + |", "    | | |__| ", "    d b      "],
+  1173:["    _n_      ", "   (>_<)     ", "  @/|=|\\@    ", "    | |      ", "   d   b     "],
+  1174:["  |  _n_  |  ", "  | (o_o) |  ", "  |=/|=|\\=|  ", "  |  | |  |  ", "  |  d b  |  "],
+  1175:["    _n_      ", "   (o_o)     ", "   /|=|\\-----", "    | |    ->", "    d b      "],
+  1176:[" \\\\  _n_  // ", "  \\\\(o_o)//  ", "   \\/|=|\\/   ", "     | |     ", "     d b     "],
+  1177:["    _n_  )   ", "   (o_o) |)  ", "   /|=|\\-|>->", "    | |  |)  ", "    d b  )   "],
+  1178:["  _n_ _n_ _n_", " (o_o)o_o)o_o", " /|=|\\=|\\=|\\ ", "  | | | | |  ", "  d b d b d b"],
+  1179:["     *       ", "    _|_      ", "   (o_o)     ", "   [###]     ", "    d b      "],
+  1180:["  ~  _n_  ~  ", "   ~(o_o)~   ", "  ~~/|=|\\~~  ", "    ~| |~    ", "     d b     "],
+  1181:["    _^_      ", "   (o_o)  |> ", "   /|#|\\-|   ", "    | |   |  ", "    d b      "],
+  1182:["   \\^^^/     ", "   (o_o)  |>>", "  */|#|\\*|   ", "  * | | *|   ", "    d b      "],
+  1183:["      /\\     ", "     |  |    ", "     |  |    ", "   ==|  |==  ", "      ||     "],
+  1184:["   _______   ", "  /\\\\\\|///\\  ", " / \\\\\\|/// \\ ", "/___\\\\|//___\\", "    '---'    "],
+  1185:["    )        ", "    |)       ", "  --|-)--->  ", "    |)       ", "    )        "],
+  1186:["   *  .  *   ", "  .  ( )  .  ", "  * ( . ) *  ", "  .  ( )  .  ", "   *  .  *   "],
+  1187:["      +      ", "    __|__    ", "   /  |  \\   ", "  [+]   [-]  ", "      -      "],
+  1188:["    |\\       ", "    | \\      ", "    |_/      ", "    |        ", "  __|__      "],
+  1189:["      .      ", "     / \\     ", "    /   \\    ", "   /     \\   ", "  ^^^^^^^^^  "],
+  1190:["  ~ ~ ~ ~ ~  ", "   ~~~ ~~~   ", "  ~ o ~ ~ ~  ", "   ~~~ ~~~   ", "  ~ ~ ~ o ~  "],
+  1191:["    _n_      ", "   (o_o)     ", "   /|=|\\     ", "    | |      ", "    d b      "],
+  1192:["    _n_      ", "   (o_o)  |  ", "   /|=|\\-+   ", "    | |   |  ", "    d b      "],
+
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
   541:["  \\  .-.  /  ", "   \\( o )/   ", "    (/|\\)    ", "    _/ \\_    ", "   [$]  ...  "],
@@ -4940,6 +4970,47 @@ const CARDS = {
     text:'Warlock Minion Token. It has your Boon.'},
  1170:{name:'Lesser Circle',type:'ground',token:true,deck:'warlock',gWarlockMod:3,
     text:'A Warlock on this battleground has +3.'},
+ /* ---- Basic: the deck for a first game. Every card shows one of the base
+        rules on its own -- uneven sides, rotation, Flying, Ranged, Tokens,
+        sacrifice, equips, magic, battlegrounds -- and nothing else. ---- */
+ 1171:{name:'Footman',type:'teece',sides:[7,7,7,7],text:'No effect.'},
+ 1172:{name:'Shieldbearer',type:'teece',sides:[6,5,8,8],text:'No effect.'},
+ 1173:{name:'Brawler',type:'teece',sides:[9,9,4,4],text:'No effect.'},
+ 1174:{name:'Gatekeeper',type:'teece',sides:[10,0,10,0],text:'No effect.'},
+ 1175:{name:'Pikeman',type:'teece',sides:[0,11,0,0],text:'When played: you may rotate it.',
+    onPlay:[{fx:'rot',may:true}]},
+ 1176:{name:'Hawk Rider',type:'teece',sides:[6,6,6,6],kw:['flying'],text:'Flying.'},
+ 1177:{name:'Bowman',type:'teece',sides:[5,5,5,5],kw:['ranged'],text:'Ranged. When played: it gets +3 until the end of the turn.',
+    onPlay:[{fx:'mod',who:'self',n:3,dur:'temp'}]},
+ 1178:{name:'Conscript',type:'teece',sides:[4,4,4,4],text:'When played: summon 2 Conscript Tokens (4/4/4/4) beside it.',
+    onPlay:[{fx:'token',tok:1191,where:'adj',count:2}]},
+ 1179:{name:'Powder Carrier',type:'teece',sides:[2,2,2,2],text:'When destroyed: every adjacent enemy gets -8.',
+    onDeath:[{fx:'aoe',who:'enemy',n:-8,dur:'perm'}]},
+ 1180:{name:'Windcaller',type:'teece',sides:[7,4,4,7],text:'When played: a Teece gets Flying and +2 until the end of the turn.',
+    onPlay:[{fx:'mod',who:'any',where:'any',n:2,dur:'temp',kw:'flying',
+      msg:'Choose a Teece: it gets Flying and +2 until the end of the turn.'}]},
+ 1181:{name:'Captain',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice one fielded Teece to play. When played: a Teece gets +1.',
+    onPlay:[{fx:'mod',who:'any',where:'any',n:1,dur:'perm'}]},
+ 1182:{name:'General',type:'teece',sides:[12,12,12,12],sac:2,
+    text:'Sacrifice two fielded Teece to play. Once per your turn: summon a Soldier Token (5/5/5/5) on any empty panel.',
+    act:[{name:'Call a Soldier',once:'turn',steps:[{fx:'token',tok:1192,where:'any'}]}]},
+ 1183:{name:'Iron Sword',type:'equip',mod:3,text:'Equipped Teece gets +3.'},
+ 1184:{name:'Feathered Cloak',type:'equip',mod:2,grants:{kw:['flying']},text:'Equipped Teece gets +2 and Flying.'},
+ 1185:{name:'Longbow',type:'equip',mod:2,grants:{kw:['ranged']},text:'Equipped Teece gets +2 and Ranged.'},
+ 1186:{name:'Blink',type:'magic',rebound:true,
+    text:'Teleport a Teece to any empty panel. The first time you cast this each game, it comes back to your hand.',
+    cast:[{fx:'teleAny'}]},
+ 1187:{name:'Sway',type:'magic',text:'A Teece gets +3 or -3, your choice.',
+    cast:[{fx:'modPM',n:3}]},
+ 1188:{name:'Waymark',type:'magic',
+    text:'Mark an empty panel. The next Teece played or moved onto it removes the mark and gets +4 if it is your ally, or -4 if it is your enemy.',
+    cast:[{fx:'waymark',n:4}]},
+ 1189:{name:'Hilltop',type:'ground',gmod:3,text:'A Teece on this battleground gets +3.'},
+ 1190:{name:'Bog',type:'ground',gmod:-3,text:'A Teece on this battleground gets -3.'},
+ 1191:{name:'Conscript Token',type:'teece',token:true,deck:'basic',sides:[4,4,4,4],
+    text:'Token. Cannot be sacrificed to play a Teece; never counts toward winning.'},
+ 1192:{name:'Soldier Token',type:'teece',token:true,deck:'basic',sides:[5,5,5,5],
+    text:'Token. Cannot be sacrificed to play a Teece; never counts toward winning.'},
  /* ---- the tutorial's cards. Nothing but their numbers, so a new player learns
         the rules rather than a card. The roguelike drafts from every card in
         CARDS, not from the pool, so tutorial:true is what keeps them out of it
@@ -7509,6 +7580,18 @@ function putTeece(b,i,t,live,how){
       }
     }
     if(b[i].ground&&groundFlag(b[i].ground,'gMineKill'))forceDeath(t);
+  }
+  if(!fl&&b[i].waymark){
+    const wm=b[i].waymark;b[i].waymark=null;
+    if(sameTeam(t.owner,wm.owner)){
+      applyModT(t,wm.n,'perm');
+      if(live)log(nm(t)+' arrives on the Waymark: '+sgn(wm.n)+'.');
+    }else if(!canTarget(b,i,wm.owner,'magic')){
+      if(live)log(nm(t)+' arrives on the Waymark, and the effect is silenced.');
+    }else{
+      applyModT(t,-wm.n,'perm');
+      if(live)log(nm(t)+' arrives on an enemy Waymark: '+sgn(-wm.n)+'.');
+    }
   }
   if(!fl&&b[i].curseP){
     const cp=b[i].curseP;
@@ -10164,6 +10247,80 @@ async function FXRUN(st,ctx){
     const who=ctx.deadOwner!=null?ctx.deadOwner:p;
     G.players[who].nextMod+=st.n;
     log('The next Teece '+pname(who)+' plays arrives with '+sgn(st.n)+'.');
+    return;}
+  /* Blink: any Teece the caster can reach, to any empty panel. The AI weighs
+     the Teece by the best place it could send it, so the first prompt and the
+     second agree on what the move is for. */
+  case 'teleAny':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p)&&!hasKw(b,i,'immovable')&&ALL().some(j=>j!==i&&openAt(b,j)))cands.push(i);
+    if(!cands.length)return none('There is no Teece that can be teleported.');
+    const bestDst=(bb,i)=>{
+      let best=-1,bg=-1e9;
+      for(let j=0;j<BN;j++){
+        if(j===i||!openAt(bb,j))continue;
+        const cb=cloneBoard(bb);moveT(cb,i,j,false);simCombat(cb);
+        const g=boardValue(cb,p);
+        if(g>bg){bg=g;best=j;}
+      }
+      return best;
+    };
+    const c=await pickCell(cands,'Choose a Teece to teleport.',
+      (bb,i)=>{const j=bestDst(bb,i);if(j>=0)moveT(bb,i,j,false);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)){ctx.last=c;await anim([c],'zap');return;}
+    if(tapeSave(b,c,p)){ctx.last=c;await anim([c],'zap');return;}
+    const open=[];for(let j=0;j<BN;j++)if(j!==c&&openAt(b,j))open.push(j);
+    const t=b[c].teece;
+    if(!sameTeam(t.owner,p))noteTargeted(p);
+    const dst=await chooseCell(p,open,'Teleport '+nm(t)+' to which empty panel?',
+      {mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);}});
+    if(dst==null||dst==='CANCEL')return;
+    moveT(b,c,dst,true);
+    ctx.last=dst;
+    log(nm(t)+' teleports to the '+CN[dst]+'.');
+    await anim([dst],'placed',140);
+    await fireMove(c,dst,p);
+    return;}
+  /* Sway: one Teece, then the sign. The computer never asks itself the
+     question: an ally of its own gets the plus and anything else the minus. */
+  case 'modPM':{
+    const n=st.n||3;
+    const cands=[];for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return none('No valid target.');
+    const sgnFor=(bb,i)=>sameTeam(bb[i].teece.owner,p)?n:-n;
+    const c=await pickCell(cands,'Choose a Teece: it gets +'+n+' or -'+n+'.',
+      (bb,i)=>{applyModT(bb[i].teece,sgnFor(bb,i),'perm');},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)){ctx.last=c;await anim([c],'zap');return;}
+    if(tapeSave(b,c,p)){ctx.last=c;await anim([c],'zap');return;}
+    const t=b[c].teece;
+    let k=sgnFor(b,c);
+    if(!isAIP(p)&&HAS_DOM&&!G.blindCast){
+      const ally=k>0;
+      const opts=ally?[{v:'+',lbl:'+'+n},{v:'-',lbl:'-'+n}]:[{v:'-',lbl:'-'+n},{v:'+',lbl:'+'+n}];
+      const pick=await chooseOption(p,opts,nm(t)+' gets:',false);
+      if(pick==='+')k=n;else if(pick==='-')k=-n;
+    }
+    applyModT(t,k,'perm');
+    ctx.last=c;
+    log(nm(t)+' gets '+sgn(k)+'.');
+    if(!sameTeam(t.owner,p)){noteTargeted(p);if(k<0)noteEnemyLoss(p,c,-k,false);}
+    await anim([c],'zap');
+    return;}
+  /* Waymark: a promise kept on an empty panel. putTeece pays it out to the
+     next body that arrives, played or moved, whichever side it is on. */
+  case 'waymark':{
+    const cands=[];for(let i=0;i<BN;i++)if(openAt(b,i)&&!b[i].waymark)cands.push(i);
+    if(!cands.length)return none('There is no empty panel to mark.');
+    const c=await pickCell(cands,'Mark which empty panel? The next ally to arrive there gets +'+(st.n||4)+', the next enemy -'+(st.n||4)+'.',null,false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    b[c].waymark={owner:p,n:st.n||4};
+    log(pname(p)+' marks the '+CN[c]+': the next Teece to arrive there gets +'+(st.n||4)+' if it is an ally, -'+(st.n||4)+' if it is an enemy.');
+    await anim([c],'zap');
     return;}
   case 'teleLast':{
     const c=ctx.last;
@@ -17614,6 +17771,7 @@ function cloneBoard(b){
     curseP:c.curseP?Object.assign({},c.curseP):null,
     mcurse:c.mcurse?Object.assign({},c.mcurse):null,
     prime:c.prime?Object.assign({},c.prime):null,
+    waymark:c.waymark?Object.assign({},c.waymark):null,
     defMark:c.defMark?Object.assign({},c.defMark):null,
     seed:c.seed?Object.assign({},c.seed):null
   }));
@@ -18494,6 +18652,28 @@ function aiPlanFor(id){
   /* Paratroop buys a second Teece, which no board score can see until it is
      spent -- so it is priced flat, and only when there is a Teece in hand to
      spend it on, room to put one down, and no win being given up for it. */
+  /* Basic's three spells. Blink is weighed as every Teece it could move to
+     every panel it could land on; Sway as the plus on an ally and the minus on
+     anything else; a Waymark as a small promise the board cannot see yet. */
+  if(st.fx==='teleAny'){
+    const picks=[];
+    for(let i=0;i<BN;i++){
+      if(!b[i].teece||!canTarget(b,i,p)||hasKw(b,i,'immovable'))continue;
+      for(let j=0;j<BN;j++)if(j!==i&&openAt(b,j))picks.push([i,j]);
+    }
+    if(!picks.length)return null;
+    return {thr:1.2,cands:picks.map((x,n)=>n),mut:(bb,n)=>{const m=picks[n];moveT(bb,m[0],m[1],false);}};
+  }
+  if(st.fx==='modPM'){
+    const cands=[];for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return null;
+    return {thr:2.0,cands,mut:(bb,i)=>{applyModT(bb[i].teece,sameTeam(bb[i].teece.owner,p)?(st.n||3):-(st.n||3),'perm');}};
+  }
+  if(st.fx==='waymark'){
+    let room=0;for(let i=0;i<BN;i++)if(openAt(b,i)&&!b[i].waymark)room++;
+    if(room<2)return null;
+    return {thr:0.5,pseudo:0.7,cands:[0],mut:null};
+  }
   if(st.fx==='extraPlay'){
     if(G.teecePlayed&&!G.extraTeece)return null;
     if(!G.players[p].hand.some(cid=>CARDS[cid].type==='teece'&&cid!==id))return null;
@@ -19364,6 +19544,8 @@ function renderBoard(){
     const cp=G.board[i].curseP;
     if(cp)cell.innerHTML+='<div class="curseMark m'+cp.owner+'">&#10022;</div>';
     if(G.board[i].mcurse)cell.innerHTML+='<div class="mcurseMark" title="A Mummy\u2019s curse lies on this panel">\u2625</div>';
+    const wmk=G.board[i].waymark;
+    if(wmk)cell.innerHTML+='<div class="wayMark m'+wmk.owner+'" title="Waymark">\u2691</div>';
     const prm=G.board[i].prime;
     if(prm)cell.innerHTML+='<div class="primeMark" title="Primed">'+sgn(prm.n)+'</div>';
     const sdm=G.board[i].seed;
@@ -19545,6 +19727,7 @@ function panelHtml(i){
   if(c.curseP)h+='<div class="dt">This panel is cursed. The next enemy of '+pposs(c.curseP.owner)+' to arrive here gets '+sgn(c.curseP.n)+'.</div>';
   if(c.mcurse)h+='<div class="dt">A Mummy\u2019s curse lies on this panel. The next non-Mummy Teece to stand here takes it.</div>';
   if(c.razed)h+='<div class="dt">Razed. No Teece may be played or moved onto this panel.</div>';
+  if(c.waymark)h+='<div class="dt">'+pposs(c.waymark.owner).replace(/^./,x=>x.toUpperCase())+' Waymark. The next ally of '+pname(c.waymark.owner)+' to arrive here gets +'+c.waymark.n+'; the next enemy gets -'+c.waymark.n+'.</div>';
   if(c.prime)h+='<div class="dt">This panel is primed. The next Teece to arrive here gets '+sgn(c.prime.n)+'.</div>';
   if(c.seed)h+='<div class="dt">'+pname(c.seed.owner)+' has a seed planted here, '+c.seed.turns+' turn'+(c.seed.turns===1?'':'s')+
     ' from growing. If the panel is empty then, a Teece is raised from the graveyard with '+sgn(c.seed.n||1)+'.</div>';
@@ -20067,6 +20250,14 @@ function statusesFor(p){
     const pr=b[i].prime;
     if(!pr)continue;
     push('prime'+i,'good','Primed: '+CN[i],'The '+CN[i]+' is primed. The next Teece to arrive there, either side, gets '+sgn(pr.n)+'.');
+  }
+  for(let i=0;i<BN;i++){
+    const wm=b[i].waymark;
+    if(!wm)continue;
+    const mine=sameTeam(p,wm.owner);
+    push('waymark'+i,mine?'good':'warn',(mine?'Waymark: ':'Enemy Waymark: ')+CN[i],
+      'The '+CN[i]+' carries '+(mine?'your':pposs(wm.owner))+' Waymark. The next Teece to arrive there gets +'+wm.n+
+      ' if it is an ally of '+pname(wm.owner)+', or -'+wm.n+' if it is an enemy, and the mark is gone.');
   }
   for(let i=0;i<BN;i++){
     const sd=b[i].seed;

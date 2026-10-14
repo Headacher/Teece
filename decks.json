@@ -1,5 +1,39 @@
 {
   "decks": {
+    "basic": {
+      "name": "Basic",
+      "cards": [
+        1171,
+        1172,
+        1173,
+        1174,
+        1175,
+        1176,
+        1177,
+        1178,
+        1179,
+        1180,
+        1181,
+        1182,
+        1183,
+        1184,
+        1185,
+        1186,
+        1187,
+        1188,
+        1189,
+        1190
+      ],
+      "blurb": "The deck for a first game. Every card does one plain thing, so each one teaches a single rule of Teece and nothing gets in the way of learning to read the board.",
+      "how": [
+        "Point your strong edges. Only the two edges that touch are compared, and the smaller number is destroyed. The Footman is 7 all round; the Shieldbearer, the Brawler and the Gatekeeper are strong on some sides and weak on others, so where you put them matters. The Pikeman has 11 on one side only, and may be rotated as it lands so you can aim it.",
+        "Movement and reach. Flying moves one space once per your turn: the Hawk Rider has it, and the Windcaller lends it with +2 for a turn. Ranged strikes the first enemy beyond the next panel and nothing strikes back: the Bowman has it, and lands with +3 for the turn.",
+        "Bodies and Tokens. The Conscript brings two Tokens beside it. Tokens never count toward winning and cannot be sacrificed, but the Captain and the General can only be played by sacrificing one or two of your other Teece; the General then calls a Soldier Token every turn. The Powder Carrier is weak, but every enemy beside it when it falls gets -8.",
+        "Cards that are not Teece. Equips (Iron Sword, Feathered Cloak, Longbow) go onto one of your Teece and stay. Magic is used once: Blink teleports a Teece and comes back to your hand the first time, Sway gives +3 or -3, and Waymark leaves a mark that pays the next ally to arrive +4 or the next enemy -4. Battlegrounds stay on a panel: Hilltop gives +3, Bog -3."
+      ],
+      "level": "beginner",
+      "kind": "warrior"
+    },
     "rats": {
       "name": "Rats",
       "cards": [
