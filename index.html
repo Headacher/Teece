@@ -440,6 +440,30 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
   font-size:9px;font-size:calc(100cqw / 8.3);line-height:1.02;white-space:pre}
 .teece.arted .mid,.teece.arted .s{text-shadow:0 0 3px var(--cardbg),0 0 3px var(--cardbg),0 0 2px var(--cardbg)}
 .teece.arted .s{z-index:1}
+/* A Token is not a whole card: it stands on the panel as a cross, its four
+   corners cut away. The owner's colour is drawn as a 2px ring round the cross
+   (::before) under the card face (::after), since a plain border cannot follow
+   the notches. Whatever usually sits in a corner moves in past the notch. */
+.teece.token{--notch:21%;border:none;background:transparent;isolation:isolate}
+.teece.token::before,.teece.token::after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none}
+.teece.token::before{background:var(--p0);clip-path:polygon(var(--notch) 0,calc(100% - var(--notch)) 0,calc(100% - var(--notch)) var(--notch),100% var(--notch),100% calc(100% - var(--notch)),calc(100% - var(--notch)) calc(100% - var(--notch)),calc(100% - var(--notch)) 100%,var(--notch) 100%,var(--notch) calc(100% - var(--notch)),0 calc(100% - var(--notch)),0 var(--notch),var(--notch) var(--notch))}
+.teece.token.o1::before{background:var(--p1)}
+.teece.token.o2::before{background:var(--p2)}
+.teece.token::after{background:var(--cardbg);clip-path:polygon(calc(var(--notch) + 2px) 2px,calc(100% - var(--notch) - 2px) 2px,calc(100% - var(--notch) - 2px) calc(var(--notch) + 2px),calc(100% - 2px) calc(var(--notch) + 2px),calc(100% - 2px) calc(100% - var(--notch) - 2px),calc(100% - var(--notch) - 2px) calc(100% - var(--notch) - 2px),calc(100% - var(--notch) - 2px) calc(100% - 2px),calc(var(--notch) + 2px) calc(100% - 2px),calc(var(--notch) + 2px) calc(100% - var(--notch) - 2px),2px calc(100% - var(--notch) - 2px),2px calc(var(--notch) + 2px),calc(var(--notch) + 2px) calc(var(--notch) + 2px))}
+.teece.token .actdot{left:calc(var(--notch) + 4px);top:4px}
+.teece.token .eq{right:calc(var(--notch) + 4px);top:4px}
+/* Bosses carry a faint aura of drifting motes; minibosses a fainter one. The
+   motes are spans inside .aura, and their delays are set from the clock when
+   drawn so a re-render does not restart them. */
+.aura{position:absolute;inset:-6px;pointer-events:none;z-index:3;border-radius:10px}
+.aura.boss{box-shadow:0 0 10px 1px rgba(255,206,110,.35);animation:auraGlow 3.2s ease-in-out infinite}
+.aura.mini{box-shadow:0 0 7px rgba(255,190,80,.26)}
+.aura .pt{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(255,176,40,.95);
+  box-shadow:0 0 4px rgba(255,150,20,.8);opacity:0;animation:auraRise var(--dur,2.8s) linear infinite}
+.aura.mini .pt{width:2px;height:2px;background:rgba(255,176,40,.7);box-shadow:0 0 3px rgba(255,150,20,.55)}
+@keyframes auraRise{0%{opacity:0;transform:translateY(0)}20%{opacity:.85}100%{opacity:0;transform:translateY(-14px)}}
+@keyframes auraGlow{0%,100%{box-shadow:0 0 8px 0 rgba(255,206,110,.28)}50%{box-shadow:0 0 12px 2px rgba(255,206,110,.42)}}
+@media(prefers-reduced-motion:reduce){.aura,.aura .pt{animation:none}.aura .pt{display:none}}
 .teece .actdot{position:absolute;top:2px;left:4px;width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px var(--gold)}
 
 @keyframes dieShake{
@@ -1165,7 +1189,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:186,date:'2026-10-14'};
+const VERSION={build:187,date:'2026-10-14'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4941,6 +4965,22 @@ function eqLabel(e){
 /* A Hyperfusion counts as a Boss without costing two bodies to play: it was
    paid for with the four cards it is made of. */
 const isBossCard=id=>(CARDS[id].sac||0)>=2||!!CARDS[id].boss;
+/* The aura a Boss (or, fainter, a Miniboss) is drawn with, in hand and on the
+   board. Deterministic positions per card, delays read off the clock so the
+   motes keep drifting through a re-render instead of starting over. */
+function auraHtml(id){
+  const c=CARDS[id];if(!c||c.type!=='teece')return '';
+  const boss=isBossCard(id),mini=!boss&&(c.sac||0)===1;
+  if(!boss&&!mini)return '';
+  const n=boss?7:3,dur=boss?2800:3600,now=Date.now();
+  let h='<div class="aura '+(boss?'boss':'mini')+'" aria-hidden="true">';
+  for(let k=0;k<n;k++){
+    const x=((k*37+11)%90)+5,y=((k*53+29)%70)+20;
+    const off=-((now+k*Math.floor(dur/n))%dur);
+    h+='<span class="pt" style="left:'+x+'%;top:'+y+'%;--dur:'+dur+'ms;animation-delay:'+off+'ms"></span>';
+  }
+  return h+'</div>';
+}
 /* "Until the end of your next turn" outlives temp, which endTurn empties every
    turn. These carry the turn number they die at: your next turn is PLAYERS()
    turns away, so something laid on turn N clears at the end of turn N+PLAYERS().
@@ -18973,7 +19013,7 @@ function renderBoard(){
       const s=effSides(G.board,i),kws=kwOf(G.board,i),aul=actsOf(G.board,i);
       const tp=document.createElement('div');
       const bart=CARD_ART[t.cardId];
-      tp.className='teece o'+t.owner+(bart?' arted':'')+((an==='dying'||an==='placed'||an==='strike')?' '+an:'');
+      tp.className='teece o'+t.owner+(bart?' arted':'')+(t.isToken?' token':'')+((an==='dying'||an==='placed'||an==='strike')?' '+an:'');
       tp.setAttribute('data-card-deck',getCardDeck(t.cardId));
       /* One badge row under the name: a bow for Ranged, a shield and its number
          for Defence, a turning arrow and its number for how many more times an
@@ -19020,6 +19060,7 @@ function renderBoard(){
         '<div class="s s2">'+s[2]+'</div>'+
         '<div class="s s3">'+s[3]+'</div>';
       if(t.equips.length)tp.innerHTML+='<div class="eq">E'+t.equips.length+'</div>';
+      if(!t.isToken)tp.insertAdjacentHTML('afterbegin',auraHtml(t.cardId));
       const hasActs=ownTurn(t.owner)&&aul.some(e=>actAvailable(t,e));
       if(hasActs)tp.innerHTML+='<div class="actdot"></div>';
       const tmr=DEF(t).timer;
@@ -19364,6 +19405,7 @@ function renderHand(p){
       db.addEventListener('click',(e)=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)uiDo('discard',{i},()=>playHandDiscard(p,i));});
       card.appendChild(db);
     }
+    if(cd.type==='teece')card.insertAdjacentHTML('afterbegin',auraHtml(id));
     if(worn.length){
       const pb=document.createElement('div');
       pb.className='plated';
