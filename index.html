@@ -1152,7 +1152,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:181,date:'2026-10-14'};
+const VERSION={build:182,date:'2026-10-14'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4790,8 +4790,8 @@ const CARDS = {
     onPlay:[{fx:'equipGraveSelf',n:2}],
     text:'Sacrifice two fielded Teece to play. Every equip card on the Teece you sacrificed goes back to your hand. When played: equip up to two equip cards from your graveyard to it. When destroyed: every equip card on it goes back to hand.'},
  /* ---- Dwarf equips ---- */
- 1140:{name:'Mithril Mail',type:'equip',mod:2,grants:{def:2,shunTeece:true},
-    text:'The equipped Teece has +2 and +2 Defence, and cannot be targeted by enemy Teece effects.'},
+ 1140:{name:'Mithril Mail',type:'equip',mod:2,grants:{def:2},
+    text:'The equipped Teece has +2 and +2 Defence.'},
  1141:{name:'Antimagic Airship',type:'equip',mod:0,grants:{kw:['flying','ward','floating']},
     text:'The equipped Teece has Flying, cannot be targeted, and has Floating: unaffected by battlegrounds and by effects planted on the panel below it.'},
  1142:{name:'Soul of the Mountains',type:'equip',mod:0,grants:{def:3,onDeath:[{fx:'toerrain',bg:1149}],becomesGround:true},
