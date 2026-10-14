@@ -1196,7 +1196,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:192,date:'2026-10-14'};
+const VERSION={build:193,date:'2026-10-14'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 const TOKEN_SHAPE_SVG='<svg class="tokshape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M28,0H72A7,7 0 0 1 79,7V16A5,5 0 0 0 84,21H93A7,7 0 0 1 100,28V72A7,7 0 0 1 93,79H84A5,5 0 0 0 79,84V93A7,7 0 0 1 72,100H28A7,7 0 0 1 21,93V84A5,5 0 0 0 16,79H7A7,7 0 0 1 0,72V28A7,7 0 0 1 7,21H16A5,5 0 0 0 21,16V7A7,7 0 0 1 28,0Z"/></svg>';
@@ -19877,6 +19877,15 @@ function statusesFor(p){
       ' Every Warlock you control carries it. You can hold '+cap+' Boon'+(cap>1?'s':'')+' at once.'+
       (pl.wlShield?' The next Teece you play cannot be destroyed until the end of your next turn.':'')+
       (pl.wlDoom?' The next Teece you play is destroyed as it lands.':''));
+  }
+  /* --- and the Boon of any Warlock across the table, so you can see what
+     you are facing without opening their cards --- */
+  for(let q=0;q<PLAYERS();q++){
+    if(q===p||!wlSeat(q)||!seatAlive(q))continue;
+    const fa=channelsOn(b,q);
+    push('wlfoe'+q,'warn',pname(q)+(fa.length?"'s Boon: "+fa.map(k=>PATRONS[k].short).join(', '):': no Boon yet'),
+      fa.length?fa.map(k=>'Boon of '+patronName(k)+': '+PATRONS[k].boon).join(' ')+' Every Warlock '+pname(q)+' controls carries it.'
+        :pname(q)+' is not channelling a patron yet.');
   }
   /* --- and what is calling from the graveyard ---
      The board has no panel to tap for a card that is in the ground, so the
