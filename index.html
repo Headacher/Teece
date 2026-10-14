@@ -1198,7 +1198,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:194,date:'2026-10-14'};
+const VERSION={build:195,date:'2026-10-14'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 const TOKEN_SHAPE_SVG='<svg class="tokshape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M28,0H72A7,7 0 0 1 79,7V16A5,5 0 0 0 84,21H93A7,7 0 0 1 100,28V72A7,7 0 0 1 93,79H84A5,5 0 0 0 79,84V93A7,7 0 0 1 72,100H28A7,7 0 0 1 21,93V84A5,5 0 0 0 16,79H7A7,7 0 0 1 0,72V28A7,7 0 0 1 7,21H16A5,5 0 0 0 21,16V7A7,7 0 0 1 28,0Z"/></svg>';
@@ -1640,6 +1640,7 @@ const CARD_ART={
   1167:["     /\\      ", "    /  \\     ", "   | ** |    ", "   |____|    ", "  =========  "],
   1168:["   .-----.   ", "  /  * *  \\  ", " |  *   *  | ", "  \\  * *  /  ", "   '-----'   "],
   1169:["    .-.      ", "   ( o )     ", "   [###]     ", "    / \\      ", "    ' '      "],
+  1171:["     .-.     ", "    (   )    ", "     '|'     ", "    / | \\    ", "   *  *  *   "],
   1170:["    .---.    ", "   / * * \\   ", "  |  * *  |  ", "   \\     /   ", "    '---'    "],
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
@@ -4938,6 +4939,8 @@ const CARDS = {
     text:'A Warlock on this battleground has +3. When it is destroyed or replaced: you can lay a Lesser Circle (a Warlock on it has +3) on a panel with no battleground.'},
  1169:{name:'Warlock Minion',type:'teece',token:true,deck:'warlock',warlock:true,sides:[3,3,3,3],
     text:'Warlock Minion Token. It has your Boon.'},
+ 1171:{name:'Pact Talisman',type:'equip',mod:0,grants:{onEquip:[{fx:'talisman',n:5,pick:2}]},
+    text:'When equipped: five random Boons are offered and you choose two. The equipped Teece has both.'},
  1170:{name:'Lesser Circle',type:'ground',token:true,deck:'warlock',gWarlockMod:3,
     text:'A Warlock on this battleground has +3.'},
  /* ---- the tutorial's cards. Nothing but their numbers, so a new player learns
@@ -5049,7 +5052,7 @@ function eqG(e){
 function eqLabel(e){
   const n=CARDS[e.cardId].name;
   const l=e.mode?n+' \u2014 '+e.mode.charAt(0).toUpperCase()+e.mode.slice(1):n;
-  return l+(e.chosen?' (Chosen)':'')+(e.shackle?' (binding its wearer)':'');
+  return l+(e.boons?' ('+e.boons.map(k=>PATRONS[k].short).join(', ')+')':'')+(e.chosen?' (Chosen)':'')+(e.shackle?' (binding its wearer)':'');
 }
 /* A Hyperfusion counts as a Boss without costing two bodies to play: it was
    paid for with the four cards it is made of. */
@@ -13484,6 +13487,29 @@ async function FXRUN(st,ctx){
     return;}
   /* Ancestor's Aegis: the Teece it goes onto cannot be destroyed until the end
      of the next turn. */
+  /* The Pact Talisman: five Boons drawn at random, two kept on the equip. A
+     Boon that fires when played fires as it is bound, unless the Teece is
+     being played this moment and pactArrive is about to fire it anyway. */
+  case 'talisman':{
+    const t=ctx.t,e=ctx.equip;
+    if(!t||!e)return none('There is nothing to bind it to.');
+    const pool=shuffle(Object.keys(PATRONS).filter(k=>PATRONS[k].side==null)).slice(0,st.n||5);
+    const want=Math.min(st.pick||2,pool.length);
+    let picks=[];
+    if(isAIP(p)||!HAS_DOM)picks=talismanAiPick(p,t,e,pool,want,!ctx.plated);
+    else{
+      const left=pool.slice();
+      for(let r=0;r<want;r++){
+        const ans=await chooseOption(p,left.map(k=>{const n=patronName(k);return {v:k,lbl:n.charAt(0).toUpperCase()+n.slice(1)+' \u2014 '+PATRONS[k].boon};}),
+          'Pact Talisman: choose a Boon for '+nm(t)+' ('+(r+1)+' of '+want+').');
+        const k=left.indexOf(ans)>=0?ans:left[0];
+        picks.push(k);left.splice(left.indexOf(k),1);
+      }
+    }
+    e.boons=picks;
+    log('The Pact Talisman offers '+pool.map(patronName).join(', ')+'. '+nm(t)+' takes the Boons of '+picks.map(patronName).join(' and ')+'.');
+    if(!ctx.plated&&b.some(x=>x.teece===t))await pactArrive(p,t,picks);
+    return;}
   case 'shieldFor':{
     const t=ctx.t;
     if(!t)return;
@@ -13796,7 +13822,7 @@ async function FXRUN(st,ctx){
   case 'wlPactLater':{
     const t=ctx.t,c=t?b.findIndex(x=>x.teece===t):-1;
     if(c<0||!(t.wlPactOpen>0)||!pactN(b,c,'devils'))return none('There is no PACT left open here.');
-    const r=await offerPact(p,devilBoonPact(c),{t,src:nm(t)+', by the Boon of the Devils',later:true,keepOn:'the Warlock while the Devils are channelled'});
+    const r=await offerPact(p,devilBoonPact(c),{t,src:nm(t)+', by the Boon of the Devils',later:true,keepOn:wlPactKeep(t)});
     if(r!=='NONE')t.wlPactOpen--;
     return r;}
   case 'channelFill':{
@@ -16179,7 +16205,7 @@ async function playTeece(p,handIdx){
     log(nm(t)+' arrives already plated with '+worn.map(e=>CARDS[e.cardId].name).join(', ')+'.');
     for(const e of worn){
       const eg=eqG(e);
-      if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:spot,t,first:false,equip:e});
+      if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:spot,t,first:false,equip:e,plated:true});
       if(eg&&eg.onPlayTemp){const pt=eg.onPlayTemp*equipMul(t);applyModT(t,pt,'temp');log(nm(t)+' arrives charged by '+CARDS[e.cardId].name+': '+sgn(pt)+' until the end of the turn.');}
     }
     runeTriumph(p,t);
@@ -17953,6 +17979,7 @@ function aiPlanFor(id){
     if(eg.onConjure)ebonus+=0.9;
     /* Another copy of the Boon is worth what the Boon is worth, later. */
     if(eg.pactCopy)ebonus+=channelsOn(b,p).length?1.0:0.3;
+    if(eg.onEquip&&eg.onEquip.some(x=>x.fx==='talisman'))ebonus+=1.2;
     /* The Dwarves' gear: Defence and protection the board score cannot see, a
        mode chosen as it goes on, and a shield that lasts a turn. */
     if(eg.def)ebonus+=0.3*eg.def;
@@ -20961,6 +20988,8 @@ function pactMap(b,i){
     add(mine,n);
   }
   if(onG&&g.owner!==t.owner&&!sameTeam(g.owner,t.owner))add(channelsOn(b,g.owner),1);
+  /* A Pact Talisman carries the two Boons it was bound with, on any seat. */
+  for(const e of t.equips)if(e.boons)add(e.boons,1);
   return out;
 }
 const pactN=(b,i,k)=>{const m=pactMap(b,i);return (m&&m[k])||0;};
@@ -21012,6 +21041,20 @@ for(const id in CARDS){
    cannot see -- Defence it reads only through the fight, abilities it has not
    used yet, things that happen when somebody dies. */
 const PATRON_AI={rock:0.7,fey:0.8,devils:0.3,ogre:0.5,old:0.2,zeus:0.4,bomb:1.1,ankh:0.8,nagash:0,death:0.5,g0:0,g1:0,g2:0,g3:0};
+/* The computer's two Talisman Boons: each one scored alone on a copy of the
+   board, plus what it is worth later, plus the bump a when-played Boon gives
+   on the spot. */
+function talismanAiPick(p,t,e,pool,want,arriving){
+  const ARR={zeus:0.5,ogre:0.6,devils:0.3};
+  const sc=pool.map(k=>{
+    let v=0;e.boons=[k];
+    try{const bb=cloneBoard(G.board);simCombat(bb);v=boardValue(bb,p);}
+    finally{delete e.boons;}
+    return {k,v:v+(PATRON_AI[k]||0)+(arriving?(ARR[k]||0):0)};
+  });
+  sc.sort((x,y)=>y.v-x.v);
+  return sc.slice(0,want).map(x=>x.k);
+}
 function aiChannelValue(p,set){
   const pl=G.players[p],was=pl.channel;
   pl.channel=set;
@@ -21117,7 +21160,11 @@ async function channelBack(p,gods,why,must){
 const DEVIL_BOON={y:'this gets -4 on a side you pick',z:'+3 on another side',
   cost:[{fx:'wlSide',n:-4}],gain:[{fx:'wlSide',n:3,other:true}]};
 const devilBoonPact=c=>Object.assign({},DEVIL_BOON,{ai:rimSides(c).length?'take':'never'});
-async function pactArrive(p,t){
+/* Where a rejected Devils PACT stays open: on a Warlock while the seat
+   channels the Devils, or on whatever carries them through a Talisman. */
+const wlPactKeep=t=>DEF(t).warlock&&channelsOn(G.board,t.owner).indexOf('devils')>=0
+  ?'the Warlock while the Devils are channelled':nm(t)+' while it carries the Boon of the Devils';
+async function pactArrive(p,t,only){
   const b=G.board;
   const cellOf=()=>b.findIndex(c=>c.teece===t);
   let c=cellOf();
@@ -21125,7 +21172,8 @@ async function pactArrive(p,t){
   const m=pactMap(b,c);
   if(!m)return;
   for(const k of Object.keys(m)){
-    for(let r=0;r<m[k];r++){
+    if(only&&only.indexOf(k)<0)continue;
+    for(let r=0;r<(only?1:m[k]);r++){
       c=cellOf();
       if(c<0||G.over)return;
       if(k==='zeus'){applyModT(t,5,'temp');log(nm(t)+' is struck by the Boon of Zeus: +5 until the end of the turn.');}
@@ -21135,7 +21183,7 @@ async function pactArrive(p,t){
       }else if(k==='devils'){
         /* Rejected, it stays open on the Warlock as a once-per-turn PACT
            button for as long as the Devils are being channelled. */
-        const r=await offerPact(p,devilBoonPact(c),{t,src:nm(t)+', by the Boon of the Devils',later:true,keepOn:'the Warlock while the Devils are channelled'});
+        const r=await offerPact(p,devilBoonPact(c),{t,src:nm(t)+', by the Boon of the Devils',later:true,keepOn:wlPactKeep(t)});
         if(r==='NONE'&&!G.over&&b.some(x=>x.teece===t))t.wlPactOpen=(t.wlPactOpen||0)+1;
       }
     }
