@@ -1093,6 +1093,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
         <div class="row">
           <button class="btn primary" id="dAI">vs Computer</button>
           <button class="btn" id="dHot">Hotseat</button>
+          <button class="btn" id="dNet">Online</button>
         </div>
       </div>
 
@@ -1132,6 +1133,18 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   </div>
 </div>
 
+<div class="overlay hidden" id="netOverlay">
+  <div class="box">
+    <h2 id="netTitle">Play a friend online</h2>
+    <p id="netText"></p>
+    <div class="row hidden" id="netLinkRow" style="gap:8px;align-items:center">
+      <input id="netLink" readonly style="flex:1;min-width:0;padding:8px;border-radius:8px;border:1px solid var(--line,#444);background:transparent;color:inherit;font:inherit">
+      <button class="btn primary" id="netCopy">Copy link</button>
+    </div>
+    <div class="row" style="margin-top:12px"><button class="btn" id="netCancel">Cancel</button></div>
+  </div>
+</div>
+
 <div class="overlay hidden" id="endOverlay">
   <div class="box">
     <h2 id="endTitle">Game over</h2>
@@ -1152,7 +1165,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:185,date:'2026-10-14'};
+const VERSION={build:186,date:'2026-10-14'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -5561,6 +5574,7 @@ async function pickSide(p,msg){
 }
 /* ============ state ============ */
 let G=null, UID=1;
+let NET=null;               /* the online link, when this screen is one of two */
 /* ---- board geometry, rebuilt whenever the board size changes ---- */
 let BW=3;                 /* board width in panels  */
 let BN=9;                 /* total panels = BW*BW   */
@@ -6049,6 +6063,8 @@ function readsSky(cardId){
 }
 function skyShowing(){
   if(!G||!G.board)return false;
+  /* The guest's copy has the host's cards face down, so it takes the host's word. */
+  if(NET&&NET.role==='guest'&&G.sky!=null)return G.sky;
   for(let i=0;i<BN;i++){
     const c=G.board[i];
     if(c.ground&&readsSky(c.ground.cardId))return true;
@@ -6088,7 +6104,7 @@ function teamName(tm){
 function nm(t){const d=DEF(t);return (t.animGround?CARDS[t.animGround.cardId].name:d.godTitle?cardTitle(t.cardId,t.owner):d.name)+(t.promoted?' (promoted)':t.isCopy?' (copy)':'');}
 /* pname() returns "You" for the human seat, so any verb after it has to agree. */
 const vb=(p,third,second)=>(G&&G.vsAI&&p===0)?second:third;
-function log(m){G.log.unshift(m);if(G.log.length>140)G.log.pop();if(HAS_DOM)renderLog();}
+function log(m){G.log.unshift(m);if(G.log.length>140)G.log.pop();if(HAS_DOM){renderLog();if(NET&&NET.role==='host')netSync(false);}}
 
 /* ============ derived stats, keywords, acts ============ */
 function addMod(sum,m){if(m==null)return;if(Array.isArray(m)){for(let k=0;k<4;k++)sum[k]+=m[k];}else{for(let k=0;k<4;k++)sum[k]+=m;}}
@@ -8038,6 +8054,14 @@ function handOpts(p){
 }
 const handCount=p=>handOpts(p).length;
 function resolvePending(val){
+  const pd=G.pending; if(!pd)return;
+  if(NET){
+    if(pd.p!==NET.seat)return;
+    if(NET.role==='guest'){netSend({t:'ans',v:val===undefined?null:val,q:pd.q});G.pending=null;render();return;}
+  }
+  answerPending(val);
+}
+function answerPending(val){
   const pd=G.pending; if(!pd)return;
   G.pending=null; G.previewCell=null; G.previewTouch=false;
   pd.res(val); render();
@@ -15306,14 +15330,14 @@ function deckOut(p){
 }
 function endGame(winner,why){
   if(G.over)return;
-  G.over=true;G.winner=winner;G.pending=null;
+  G.over=true;G.winner=winner;G.pending=null;G.overWhy=why;
   log('GAME OVER: '+(winner==null?'Draw.':teamName(winner)+(teamName(winner)==='You'?' win.':' wins.'))+' '+why);
   if(HAS_DOM){
     const t=document.getElementById('endTitle'),x=document.getElementById('endText'),btn=document.getElementById('endRestart');
     if(G.mode==='rogue')rogueEnd(winner,why,t,x,btn);
     else if(G.tut&&winner===0)tutEnd(t,x,btn);
     else{
-      t.textContent=winner==null?'A draw':(teamName(winner)==='You'?'You win':teamName(winner)+' wins');
+      t.textContent=winner==null?'A draw':NET?(winner===teamOf(NET.seat)?'You win':'You lose'):(teamName(winner)==='You'?'You win':teamName(winner)+' wins');
       x.textContent=why;
       btn.textContent='New game';btn.onclick=restart;
     }
@@ -17133,7 +17157,7 @@ async function startTurn(){
   log('--- Turn '+G.turnNum+': '+pname(p)+' ---');
   render();
   if(stale(ep)||G.over)return;
-  if(!isAIP(p)&&!G.tut){await lastTurnNotice(p);if(stale(ep)||G.over)return;}
+  if(!isAIP(p)&&!G.tut&&(!NET||p===NET.seat)){await lastTurnNotice(p);if(stale(ep)||G.over)return;}
   if(isAIP(p)){await wait(420);if(stale(ep))return;if(G.tut)await tutOppTurn();else await aiTurn();}
 }
 const wait=ms=>HAS_DOM?new Promise(r=>setTimeout(r,ms)):Promise.resolve();
@@ -17154,6 +17178,9 @@ async function anim(cells,cls,ms){
 }
 function toast(m){
   if(!HAS_DOM)return;
+  /* Online, the engine runs on the host's screen; a toast about the guest's
+     turn is meant for the guest. */
+  if(NET&&NET.role==='host'&&G&&G.turn!==NET.seat){netSend({t:'toast',m});return;}
   const t=document.getElementById('toast');
   t.textContent=m;t.classList.add('show');
   clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),1600);
@@ -18875,7 +18902,7 @@ function renderBoard(){
   for(let i=0;i<BN;i++){
     const cell=document.createElement('div');
     cell.className='cell';
-    if(G.pending&&G.pending.kind==='cell'&&G.pending.cells.indexOf(i)>=0){
+    if(G.pending&&G.pending.kind==='cell'&&G.pending.cells.indexOf(i)>=0&&(!NET||G.pending.p===NET.seat)){
       cell.classList.add('target');
       const foot=G.pending.opt&&G.pending.opt.foot;
       if(foot){
@@ -18993,7 +19020,7 @@ function renderBoard(){
         '<div class="s s2">'+s[2]+'</div>'+
         '<div class="s s3">'+s[3]+'</div>';
       if(t.equips.length)tp.innerHTML+='<div class="eq">E'+t.equips.length+'</div>';
-      const hasActs=t.owner===G.turn&&aul.some(e=>actAvailable(t,e));
+      const hasActs=ownTurn(t.owner)&&aul.some(e=>actAvailable(t,e));
       if(hasActs)tp.innerHTML+='<div class="actdot"></div>';
       const tmr=DEF(t).timer;
       const left=tmr&&!t.transformed?Math.max(0,tmr.turns-(t.age||0)):0;
@@ -19026,7 +19053,7 @@ function renderBoard(){
       cell.appendChild(mk);
     }
     cell.addEventListener('click',async()=>{
-      if(G.pending&&G.pending.kind==='cell'&&G.pending.cells.indexOf(i)>=0){
+      if(G.pending&&G.pending.kind==='cell'&&G.pending.cells.indexOf(i)>=0&&(!NET||G.pending.p===NET.seat)){
         /* A finger dragged across the board fires its click on the panel it
            started from, not the one it ended on -- which would place the Teece
            somewhere other than the panel whose numbers you were reading. When
@@ -19042,7 +19069,8 @@ function renderBoard(){
          through to here, because that handler bows out before it stops the
          event. */
       if(G.pending){
-        toast(G.pending.msg||'Answer the question at the top of the screen first.');
+        uiToast(NET&&G.pending.p!==NET.seat?'Waiting for '+pname(G.pending.p)+'.':
+          (G.pending.msg||'Answer the question at the top of the screen first.'));
         return;
       }
       /* An empty panel is not nothing: it can be carrying an enchantment, a
@@ -19192,7 +19220,7 @@ function showDetail(i){
     un.addEventListener('click',()=>{G.detailLock=null;render();showDetail(null);});
     d.appendChild(un);
   }
-  const acts=t.owner===G.turn?actsOf(G.board,i):[];
+  const acts=ownTurn(t.owner)?actsOf(G.board,i):[];
   const gagged=hexOn(t.owner,'silence');
   for(const ent of acts){
     const blocked=gagged?null:actBlockedReason(G.board,i,ent);
@@ -19202,10 +19230,10 @@ function showDetail(i){
     btn.textContent=ent.act.name+(gagged?' (silenced)':!actAvailable(t,ent)?' (used)':blocked?' ('+blocked+')':'');
     if(blocked)btn.title=blocked==='no ally beside it'?nm(t)+' has none of your Teece beside it to fuse with.':nm(t)+' has no open panel to move to.';
     btn.disabled=!av;
-    btn.addEventListener('click',()=>{runAct(G.turn,i,ent);});
+    btn.addEventListener('click',()=>{uiAct(i,ent);});
     d.appendChild(btn);
   }
-  for(const ent of (t.owner===G.turn?negatedActs(G.board,i):[])){
+  for(const ent of (ownTurn(t.owner)?negatedActs(G.board,i):[])){
     const btn=document.createElement('button');
     btn.className='btn abtn silenced';
     btn.textContent=ent.act.name;
@@ -19215,7 +19243,7 @@ function showDetail(i){
   }
 }
 function handSlot(p){
-  if(p===0)return document.getElementById('myHand');
+  if(p===netSeat())return document.getElementById('myHand');
   const box=document.getElementById('oppHands');
   let el=document.getElementById('hand'+p);
   if(!el){el=document.createElement('div');el.className='handrow';el.id='hand'+p;box.appendChild(el);}
@@ -19224,9 +19252,9 @@ function handSlot(p){
 function syncHandSlots(){
   const box=document.getElementById('oppHands');
   if(!box)return;
-  const want=[];for(let p=1;p<PLAYERS();p++)want.push('hand'+p);
+  const want=[];for(let p=0;p<PLAYERS();p++)if(p!==netSeat())want.push('hand'+p);
   for(const child of Array.from(box.children))if(want.indexOf(child.id)<0)child.remove();
-  for(let p=1;p<PLAYERS();p++)handSlot(p);
+  for(let p=0;p<PLAYERS();p++)if(p!==netSeat())handSlot(p);
 }
 /* Whose cards this screen may show. Against the computer, only yours. At a
    hotseat everyone shares the screen, so only the hand whose turn it is -- and
@@ -19234,6 +19262,9 @@ function syncHandSlots(){
    able to answer it. The developer code shows everything. */
 let SHOW_ALL_HANDS=false;
 function handVisible(p){
+  /* Online, each screen is one seat, and only that seat's hand is dealt face
+     up -- the other one is not even in the state this screen was sent. */
+  if(NET&&G)return p===NET.seat;
   if(SHOW_ALL_HANDS||!G||G.spectate)return true;
   if(G.pending&&G.pending.p===p)return true;
   if(G.vsAI)return !isAIP(p);
@@ -19245,10 +19276,10 @@ function renderHand(p){
   h.innerHTML='';
   const lbl=document.createElement('div');
   lbl.className='handlbl';
-  lbl.textContent=(pname(p)==='You'?'Your':pname(p)+'’s')+' hand';
+  lbl.textContent=(pname(p)==='You'||(NET&&p===NET.seat)?'Your':pname(p)+'’s')+' hand';
   h.appendChild(lbl);
   /* The switch lives on your own hand only: the other seats' rows follow it. */
-  if(p===0){
+  if(p===netSeat()){
     applyHandView();
     const vb=document.createElement('button');
     vb.className='handview';
@@ -19309,7 +19340,7 @@ function renderHand(p){
       cb.textContent='Combine';
       cb.title=smiteLvl(id)?'Combine '+cd.name+' with another of the same power into a stronger Smite.':'Combine '+cd.name+' with another element in your hand into a stronger spell.';
       cb.disabled=(p!==G.turn||G.over||!!G.pending);
-      cb.addEventListener('click',e=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)combineAt(p,i);});
+      cb.addEventListener('click',e=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)uiDo('combine',{i},()=>combineAt(p,i));});
       card.appendChild(cb);
     }else if(canFuseHand(p,i)){
       /* A Fusion Teece with a partner in hand offers Fuse in the same place. */
@@ -19319,7 +19350,7 @@ function renderHand(p){
       fb.textContent='Fuse';
       fb.title='Fuse '+cd.name+' with another Teece in your hand into one card that is both of them.';
       fb.disabled=(p!==G.turn||G.over||!!G.pending);
-      fb.addEventListener('click',e=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)fuseHandAt(p,i);});
+      fb.addEventListener('click',e=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)uiDo('fuse',{i},()=>fuseHandAt(p,i));});
       card.appendChild(fb);
     }else if(canHandDiscard(p,id)){
       const db=document.createElement('button');
@@ -19330,7 +19361,7 @@ function renderHand(p){
         ?'Discard '+cd.name+' from hand for its effect, instead of playing it.'
         :'Throw '+cd.name+' away. This deck lets you discard freely, as often as you like on your turn.';
       db.disabled=(p!==G.turn||G.over||!!G.pending);
-      db.addEventListener('click',(e)=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)playHandDiscard(p,i);});
+      db.addEventListener('click',(e)=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)uiDo('discard',{i},()=>playHandDiscard(p,i));});
       card.appendChild(db);
     }
     if(worn.length){
@@ -19343,7 +19374,7 @@ function renderHand(p){
     card.addEventListener('click',async()=>{
       if(isTarget){resolvePending('h'+i);return;}
       if(G.pending)return;
-      if(p===G.turn&&!G.over)await playFromHand(p,i);
+      if(p===G.turn&&!G.over)await uiDo('play',{i},()=>playFromHand(p,i));
     });
     card.addEventListener('mouseenter',()=>{if(G.detailLock==null){G.detailHover='h'+p+i;showDetailCard(id,worn);}});
     card.addEventListener('mouseleave',()=>{if(G.detailLock==null&&G.detailHover==='h'+p+i){G.detailHover=null;showDetail(null);}});
@@ -19880,8 +19911,8 @@ function renderStatus(){
   if(!bar)return;
   bar.innerHTML='';
   const seats=[];
-  for(let p=0;p<PLAYERS();p++)if(!isAIP(p)&&seatAlive(p))seats.push(p);
-  if(!seats.length)seats.push(0);
+  for(let p=0;p<PLAYERS();p++)if(!isAIP(p)&&seatAlive(p)&&(!NET||p===NET.seat))seats.push(p);
+  if(!seats.length)seats.push(netSeat());
   const multi=seats.length>1;
   let any=false;
   for(const p of seats){
@@ -19903,7 +19934,7 @@ function renderStatus(){
       /* An actionable chip fires on the tap rather than only explaining itself:
          it is the whole control, and there is no second button behind it. */
       chip.addEventListener('click',st.run
-        ?e=>{e.stopPropagation();if(G.pending)return;showStatusDetail(st);st.run();}
+        ?e=>{e.stopPropagation();if(G.pending)return;showStatusDetail(st);uiDo('status',{sp:p,k:st.k},st.run);}
         :e=>{e.stopPropagation();show();});
       chip.addEventListener('mouseleave',()=>{
         if(G.detailLock==null&&G.detailHover===key){G.detailHover=null;showDetail(null);}
@@ -20022,6 +20053,12 @@ function renderPrompt(){
   /* With the gun out the pointer over the board is a crosshair. */
   document.body.classList.toggle('gunmode',!!(pd&&pd.kind==='cell'&&pd.opt&&pd.opt.gun));
   if(!pd){pb.classList.remove('haspv');pb.innerHTML='<span class="msg">&nbsp;</span>';return;}
+  if(NET&&pd.p!==NET.seat){
+    pb.classList.remove('haspv');pb.classList.remove('hot');
+    pb.innerHTML='<span class="msg"></span>';
+    pb.querySelector('.msg').textContent='Waiting for '+pname(pd.p)+' to choose\u2026';
+    return;
+  }
   const haspv=!!(pd.kind==='cell'&&pd.opt&&pd.opt.preview);
   pb.classList.toggle('haspv',haspv);
   pb.innerHTML=(haspv?'<span id="pvHost"></span>':'')+'<span class="msg"></span>';
@@ -20059,18 +20096,18 @@ function renderActionBar(){
   const who=document.createElement('span');
   who.className='who';who.textContent=nm(t);
   ab.appendChild(who);
-  const acts=t.owner===G.turn?actsOf(G.board,i):[];
+  const acts=ownTurn(t.owner)?actsOf(G.board,i):[];
   if(G.pending){
     const w=document.createElement('span');
     w.className='none';
     w.textContent='Answer the question above first.';
     ab.appendChild(w);
   }
-  const negated=t.owner===G.turn?negatedActs(G.board,i):[];
+  const negated=ownTurn(t.owner)?negatedActs(G.board,i):[];
   if(!acts.length&&!negated.length){
     const n=document.createElement('span');
     n.className='none';
-    n.textContent=t.owner===G.turn?'No abilities.':'Enemy Teece.';
+    n.textContent=ownTurn(t.owner)?'No abilities.':'Enemy Teece.';
     ab.appendChild(n);
   }
   const gagged=hexOn(t.owner,'silence');
@@ -20083,7 +20120,7 @@ function renderActionBar(){
     btn.textContent=ent.act.name+(gagged?' (silenced)':!actAvailable(t,ent)?' (used)':blocked?' ('+blocked+')':'');
     if(blocked)btn.title=blocked==='no ally beside it'?nm(t)+' has none of your Teece beside it to fuse with.':nm(t)+' has no open panel to move to.';
     btn.disabled=!av;
-    btn.addEventListener('click',()=>{runAct(G.turn,i,ent);});
+    btn.addEventListener('click',()=>{uiAct(i,ent);});
     ab.appendChild(btn);
   }
   for(const ent of negated){
@@ -20126,13 +20163,14 @@ function render(){
   if(!G.over){
     const t=G.turn,d=document.getElementById('turnInfo');
     const left=TURN_LIMIT-G.turnNum;
-    d.innerHTML='<span class="dot d'+t+'"></span><strong>'+(pname(t)==='You'?'Your':pname(t)+"'s")+' turn</strong>'+
+    d.innerHTML='<span class="dot d'+t+'"></span><strong>'+(pname(t)==='You'||(NET&&t===NET.seat)?'Your':pname(t)+"'s")+' turn</strong>'+
+      (NET?'<span class="teamtag" style="margin-left:6px">online \u00b7 you are '+escHtml(pname(NET.seat))+(NET.down?' \u00b7 <b style="color:var(--bad,#e66)">disconnected</b>':'')+'</span>':'')+
       /* Ten turns out, the clock shows itself: the field is about to be counted. */
       (left<10?'<span class="teamtag" style="color:var(--gold);margin-left:6px" title="When turn '+TURN_LIMIT+
         ' ends, whoever has more Teece on the field wins.">turn '+G.turnNum+' of '+TURN_LIMIT+'</span>':'')+
       (skyShowing()?'<span class="phase '+(isDay()?'day':'night')+'">'+
       (isDay()?'\u2600\uFE0F Day':'\u{1F319} Night')+(timePinned()?' \u00b7 held':'')+'</span>':'');
-    document.getElementById('endTurn').disabled=!!G.spectate;
+    document.getElementById('endTurn').disabled=!!G.spectate||!!(NET&&G.turn!==NET.seat);
     /* The sky turns at the start of the turn after this one when that turn
        opens a new round, so say so on the button that starts it. */
     const flips=skyShowing()&&!timePinned()&&G.turnNum%PLAYERS()===0;
@@ -20144,6 +20182,7 @@ function render(){
   if(G.detailLock!=null)showDetail(G.detailLock);
   else if(G.detailHover==null)showDetail(null);
   tutCoach();
+  if(NET&&NET.role==='host')netSync(false);
 }
 function draftName(p){
   if(!G_DRAFT)return 'Player '+(p+1);
@@ -22075,8 +22114,335 @@ async function startInner(mode,vsAI){
   render();
   await startTurn();
 }
+/* ============ online: two screens, one game ============
+   One player hosts and the other opens the link. The host's page runs the
+   whole game exactly as a hotseat would: the engine, every prompt, every die
+   roll. The guest's page runs no rules at all. It is sent a copy of the state
+   after every change, draws it, and turns each click into a short message --
+   "play hand card 2", "fire the second ability on panel 4", "the answer is
+   panel 7" -- that the host checks and carries out as if it had been clicked
+   there. So there is one game and nothing to fall out of step.
+
+   The copy the guest is sent has the host's hand, both decks and any question
+   the host is answering blanked out, so nothing secret ever reaches the other
+   browser to be found.
+
+   The two pages find each other through PeerJS's free public broker and then
+   talk directly over WebRTC; no server of ours is involved. */
+const PEERJS_URL='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
+const NET_PREFIX='teece-';
+const NET_HIDDEN=1;          /* what a face-down card is sent as */
+const netSeat=()=>NET?NET.seat:0;
+/* Whether this screen may act for seat p right now: p's turn, and p is the
+   seat this screen plays. Offline every seat is at this screen. */
+const ownTurn=p=>p===G.turn&&(!NET||p===NET.seat);
+/* Toasts from the engine go to whoever's turn it is; a toast a click on this
+   screen raised stays here. */
+function uiToast(m){
+  if(!HAS_DOM)return;
+  const t=document.getElementById('toast');
+  if(!t)return;
+  t.textContent=m;t.classList.add('show');
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),1600);
+}
+/* Every click that would change the game comes through here. Offline, and on
+   the host's own turn, it just runs. On the guest's screen it is sent. */
+async function uiDo(kind,args,run){
+  if(!NET)return run();
+  if(!G||G.over)return;
+  if(G.turn!==NET.seat){uiToast('It is '+pposs(G.turn)+' turn.');return;}
+  if(NET.role==='host')return run();
+  netSend(Object.assign({t:'do',kind},args));
+}
+function uiAct(i,ent){
+  if(!NET)return runAct(G.turn,i,ent);
+  const k=actsOf(G.board,i).indexOf(ent);
+  return uiDo('act',{cell:i,k,name:ent.act.name},()=>runAct(G.turn,i,ent));
+}
+function netSend(m){
+  if(!NET||!NET.conn||!NET.conn.open)return false;
+  try{NET.conn.send(m);return true;}catch(e){console.error(e);return false;}
+}
+function loadPeerJS(){
+  if(typeof Peer!=='undefined')return Promise.resolve();
+  return new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src=PEERJS_URL;s.onload=()=>res();
+    s.onerror=()=>rej(new Error('Could not load the online library.'));
+    document.head.appendChild(s);
+  });
+}
+/* A test can point both pages at a broker of its own with ?peerhost=. */
+function peerOpts(){
+  const q=new URLSearchParams(location.search),h=q.get('peerhost');
+  const o={debug:0};
+  if(h){const [host,port]=h.split(':');Object.assign(o,{host,port:+port||9000,path:'/',secure:false});}
+  return o;
+}
+function netShow(title,text,link){
+  const ov=document.getElementById('netOverlay');
+  ov.classList.remove('hidden');
+  document.getElementById('netTitle').textContent=title;
+  document.getElementById('netText').textContent=text;
+  const row=document.getElementById('netLinkRow');
+  row.classList.toggle('hidden',!link);
+  if(link)document.getElementById('netLink').value=link;
+}
+function netHide(){document.getElementById('netOverlay').classList.add('hidden');}
+function netClose(){
+  if(!NET)return;
+  const n=NET;NET=null;
+  try{if(n.conn)n.conn.close();}catch(e){}
+  try{if(n.peer)n.peer.destroy();}catch(e){}
+  clearInterval(n.beat);
+}
+function netLost(why){
+  if(!NET)return;
+  NET.down=true;
+  if(G){log(why);render();}
+  else netShow('Disconnected',why,null);
+}
+
+/* ---------- the host ---------- */
+async function netHost(){
+  hideOppHands();
+  EPOCH++;G=null;
+  document.getElementById('startOverlay').classList.add('hidden');
+  const mine=await pickDeck('You',{title:'Your deck',
+    info:'Pick yours, then send your friend the link. They pick their own deck when they open it.'});
+  const code=Math.random().toString(36).slice(2,8);
+  NET={role:'host',seat:0,peerSeat:1,mine,code,conn:null,peer:null,started:false,queue:Promise.resolve(),qseq:0,last:''};
+  const me=NET;
+  netShow('Play a friend online','Setting up a link…',null);
+  try{await loadPeerJS();}catch(e){if(NET===me)netShow('Could not go online',e.message+' Check your connection and try again.',null);return;}
+  if(NET!==me)return;
+  const peer=new Peer(NET_PREFIX+code,peerOpts());
+  me.peer=peer;
+  peer.on('open',()=>{
+    if(NET!==me)return;
+    const link=location.origin+location.pathname+'?join='+code;
+    netShow('Send this link to your friend',
+      'You play '+DECKS[mine].name+'. The game starts when they open the link and pick a deck. Keep this tab open.',link);
+  });
+  peer.on('error',e=>{
+    if(NET!==me)return;
+    if(!me.started)netShow('Could not go online',(e&&e.type==='unavailable-id')?'That link is taken. Cancel and try again.':
+      'The connection service did not answer ('+((e&&e.type)||'error')+'). Cancel and try again.',null);
+  });
+  peer.on('connection',conn=>{
+    if(NET!==me){conn.close();return;}
+    /* One opponent. A second visitor is turned away, but the same friend
+       coming back after their tab dropped takes the seat again. */
+    if(me.conn&&me.conn.open){conn.on('open',()=>{conn.send({t:'full'});setTimeout(()=>conn.close(),500);});return;}
+    me.conn=conn;
+    conn.on('open',()=>{
+      if(NET!==me)return;
+      me.down=false;
+      conn.send({t:'hello',build:VERSION.build,started:me.started,host:DECKS[mine].name});
+      if(me.started){netSync(true);log(pname(1)+' is back.');render();}
+      else netShow('Your friend is here','They are choosing a deck…',null);
+    });
+    conn.on('data',m=>netOnHost(m));
+    conn.on('close',()=>{if(NET===me&&me.conn===conn)netLost(pname(1)+' left the game. They can open the same link again to come back.');});
+  });
+}
+function netOnHost(m){
+  const me=NET;
+  if(!me||!m||typeof m!=='object')return;
+  if(m.t==='deck'&&!me.started&&DECKS[m.key]){netBegin(m.key);return;}
+  if(!me.started||!G||G.over)return;
+  if(m.t==='ans'){
+    const pd=G.pending;
+    if(!pd||pd.p!==me.peerSeat||pd.q!==m.q||!netAnswerOK(pd,m.v)){netSync(true);return;}
+    answerPending(m.v);
+    return;
+  }
+  if(m.t==='do'){
+    /* One at a time, the way one pair of hands clicks: a second order waits
+       for the first to finish rather than running through the middle of it. */
+    me.queue=me.queue.then(()=>netRun(m)).catch(e=>console.error(e)).then(()=>netSync(true));
+  }
+}
+/* An answer is only taken if it was one of the choices on offer. */
+function netAnswerOK(pd,v){
+  if(pd.kind==='cell'){
+    if(typeof v==='number')return pd.cells.indexOf(v)>=0;
+    if(typeof v==='string'&&/^h\d+$/.test(v))return !!(pd.hands&&pd.hands.indexOf(+v.slice(1))>=0);
+    if(v==='CANCEL')return !!(pd.opt&&pd.opt.cancel);
+    if(v==null)return !!(pd.opt&&pd.opt.skip);
+    return false;
+  }
+  if(v==='CANCEL')return !!pd.cancel;
+  return pd.opts.some(o=>o.v===v);
+}
+async function netRun(m){
+  NET.busy=m.kind;
+  try{await netRun1(m);}finally{if(NET)NET.busy=null;}
+}
+async function netRun1(m){
+  const p=NET.peerSeat;
+  if(!G||G.over||G.pending||G.turn!==p)return;
+  const i=m.i;
+  const okIdx=typeof i==='number'&&i>=0&&i<G.players[p].hand.length;
+  switch(m.kind){
+    case 'play':if(okIdx)await playFromHand(p,i);return;
+    case 'combine':if(okIdx)await combineAt(p,i);return;
+    case 'fuse':if(okIdx)await fuseHandAt(p,i);return;
+    case 'discard':if(okIdx)await playHandDiscard(p,i);return;
+    case 'end':await endTurn();return;
+    case 'act':{
+      const c=m.cell,t=typeof c==='number'&&G.board[c]?G.board[c].teece:null;
+      if(!t||t.owner!==p)return;
+      const ent=actsOf(G.board,c)[m.k];
+      if(!ent||ent.act.name!==m.name||!actAvailable(t,ent)||hexOn(p,'silence')||actBlockedReason(G.board,c,ent))return;
+      await runAct(p,c,ent);
+      return;}
+    case 'status':{
+      const st=statusesFor(p).find(s=>s.k===m.k);
+      if(st&&st.run)await st.run();
+      return;}
+  }
+}
+async function netBegin(theirs){
+  const me=NET,mine=me.mine;
+  me.started=true;
+  netHide();
+  G=newState('deck',false,[DECKS[mine].cards.slice(),DECKS[theirs].cards.slice()],
+    {aiSeats:[],seatNames:['Player 1','Player 2']});
+  G.deckNames=[DECKS[mine].name,DECKS[theirs].name];
+  applyDeckRules(0,mine);
+  applyDeckRules(1,theirs);
+  log('Online: '+DECKS[mine].name+' (Player 1) faces '+DECKS[theirs].name+' (Player 2).');
+  me.beat=setInterval(()=>netSync(false),1500);
+  render();
+  await startTurn();
+}
+/* A plain-data copy: functions dropped, and a loop (none is expected) cut
+   rather than allowed to throw in the middle of a render. */
+function netClone(v,stack){
+  if(v===null||typeof v!=='object')return typeof v==='function'||v===undefined?undefined:v;
+  if(stack.indexOf(v)>=0)return null;
+  stack.push(v);
+  let out;
+  if(Array.isArray(v))out=v.map(x=>{const y=netClone(x,stack);return y===undefined?null:y;});
+  else{out={};for(const k of Object.keys(v)){const y=netClone(v[k],stack);if(y!==undefined)out[k]=y;}}
+  stack.pop();
+  return out;
+}
+/* The state as the other screen may see it. */
+function netSnapshot(){
+  const me=NET;
+  if(G.pending&&!G.pending.q)G.pending.q=++me.qseq;
+  const s=netClone(G,[]);
+  s.players.forEach((pl,p)=>{
+    pl.deck=pl.deck.map(()=>NET_HIDDEN);
+    if(p!==me.peerSeat){pl.hand=pl.hand.map(()=>NET_HIDDEN);pl.plate=pl.plate.map(()=>[]);}
+  });
+  if(s.pending&&s.pending.p!==me.peerSeat)
+    s.pending={kind:s.pending.kind,p:s.pending.p,q:s.pending.q,msg:'',cells:[],opts:[],hands:null,opt:{}};
+  s.detailLock=s.detailHover=s.panelTap=s.previewCell=null;s.previewTouch=false;
+  s.sky=skyShowing();
+  /* Fused cards are made during the game, so the other screen has never heard
+     of them: send their faces along. */
+  const fus={};
+  for(const k of Object.keys(CARDS))if(CARDS[k].fusion)fus[k]={d:CARDS[k],art:CARD_ART[k]||null};
+  return {G:s,fus};
+}
+function netSync(force){
+  const me=NET;
+  if(!me||me.role!=='host'||!me.started||!G)return;
+  if(me.timer&&!force)return;
+  const go=()=>{
+    me.timer=null;
+    if(NET!==me||!G||!me.conn||!me.conn.open)return;
+    const snap=netSnapshot(),str=JSON.stringify(snap);
+    if(str===me.last&&!force)return;
+    me.last=str;
+    netSend({t:'state',s:snap});
+  };
+  if(force){clearTimeout(me.timer);go();}
+  else me.timer=setTimeout(go,40);
+}
+
+/* ---------- the guest ---------- */
+async function netJoin(code){
+  hideOppHands();
+  EPOCH++;G=null;
+  document.getElementById('startOverlay').classList.add('hidden');
+  NET={role:'guest',seat:1,peerSeat:0,code,conn:null,peer:null,started:false,picked:false,overShown:false};
+  const me=NET;
+  netShow('Joining your friend’s game','Connecting…',null);
+  try{await loadPeerJS();}catch(e){if(NET===me)netShow('Could not go online',e.message+' Check your connection and reload.',null);return;}
+  if(NET!==me)return;
+  const peer=new Peer(peerOpts());
+  me.peer=peer;
+  const dial=()=>{
+    if(NET!==me)return;
+    const conn=peer.connect(NET_PREFIX+code,{reliable:true,serialization:'json'});
+    me.conn=conn;
+    conn.on('open',()=>{me.down=false;me.tries=0;});
+    conn.on('data',m=>netOnGuest(m));
+    conn.on('close',()=>{
+      if(NET!==me||me.conn!==conn)return;
+      netLost('Lost the connection to '+pname(0)+'. Reload this page to rejoin.');
+    });
+  };
+  peer.on('open',dial);
+  peer.on('error',e=>{
+    if(NET!==me)return;
+    const t=e&&e.type;
+    if(t==='peer-unavailable')netShow('Game not found','That game is not open any more. Ask your friend for a new link.',null);
+    else if(!me.started)netShow('Could not connect','The connection failed ('+(t||'error')+'). Reload to try again.',null);
+  });
+}
+async function netOnGuest(m){
+  const me=NET;
+  if(!me||!m||typeof m!=='object')return;
+  if(m.t==='full'){netShow('Game is full','Someone else is already playing in that game.',null);return;}
+  if(m.t==='hello'){
+    if(m.build!==VERSION.build)console.warn('Teece: host build '+m.build+', this page '+VERSION.build);
+    if(m.started||me.picked){netShow('Joining','Waiting for the game…',null);return;}
+    netHide();
+    me.picked=true;
+    const key=await pickDeck('You',{title:'Your deck',info:'Your friend plays '+m.host+'. Pick yours and the game starts.'});
+    if(NET!==me)return;
+    netSend({t:'deck',key});
+    netShow('Joining','Starting the game…',null);
+    return;
+  }
+  if(m.t==='toast'){uiToast(m.m);return;}
+  if(m.t==='state')netApply(m.s);
+}
+function netApply(snap){
+  const me=NET;
+  for(const k of Object.keys(CARDS))if(CARDS[k].fusion&&!snap.fus[k]){delete CARDS[k];delete CARD_ART[k];}
+  for(const k of Object.keys(snap.fus)){CARDS[k]=snap.fus[k].d;if(snap.fus[k].art)CARD_ART[k]=snap.fus[k].art;}
+  const keep=G?{detailLock:G.detailLock,detailHover:G.detailHover,panelTap:G.panelTap,
+    previewCell:G.previewCell,previewTouch:G.previewTouch}:{};
+  G=Object.assign(snap.G,keep);
+  if(G.width!==BW)buildGeometry(G.width);
+  syncPlane();
+  if(!me.started){
+    me.started=true;
+    netHide();
+    document.getElementById('draftOverlay').classList.add('hidden');
+    document.getElementById('startOverlay').classList.add('hidden');
+  }
+  render();
+  if(G.over&&!me.overShown){
+    me.overShown=true;
+    const w=G.winner;
+    document.getElementById('endTitle').textContent=w==null?'A draw':(w===teamOf(me.seat)?'You win':'You lose');
+    document.getElementById('endText').textContent=G.overWhy||'';
+    const btn=document.getElementById('endRestart');
+    btn.textContent='New game';btn.onclick=restart;
+    document.getElementById('endOverlay').classList.remove('hidden');
+  }
+}
 function restart(){
   if(G&&!G.over&&!confirm('Really restart?'))return;
+  if(NET){netClose();if(location.search.indexOf('join=')>=0)history.replaceState(null,'',location.pathname);}
+  document.getElementById('netOverlay').classList.add('hidden');
   EPOCH++;                      /* orphan any AI turn still in flight */
   document.getElementById('endOverlay').classList.add('hidden');
   document.getElementById('draftOverlay').classList.add('hidden');
@@ -22106,6 +22472,14 @@ if(HAS_DOM){
   document.getElementById('p3AI').onclick=()=>start('three',true);
   document.getElementById('p3Hot').onclick=()=>start('three',false);
   document.getElementById('dHot').onclick=()=>start('deck',false);
+  document.getElementById('dNet').onclick=()=>netHost();
+  document.getElementById('netCancel').onclick=()=>{G=null;restart();};
+  document.getElementById('netCopy').onclick=()=>{
+    const inp=document.getElementById('netLink');
+    const done=()=>uiToast('Link copied.');
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(inp.value).then(done,()=>{inp.select();document.execCommand('copy');done();});
+    else{inp.select();document.execCommand('copy');done();}
+  };
   document.getElementById('cAI').onclick=()=>start('clank',true);
   /* Watching, not playing: a click that would play a card, fire an ability or
      end a turn for either clanker is swallowed before it lands. Hovering still
@@ -22116,7 +22490,7 @@ if(HAS_DOM){
       '#myHand .card, #oppHands .card, .abtn, #actionBar button, #endTurn, .discardBtn');
     if(hit){e.stopPropagation();e.preventDefault();}
   },true);
-  document.getElementById('endTurn').onclick=endTurn;
+  document.getElementById('endTurn').onclick=()=>uiDo('end',{},endTurn);
   document.getElementById('restart').onclick=restart;
   document.getElementById('endRestart').onclick=restart;
   document.getElementById('tutBtn').onclick=()=>startTutorial();
@@ -22150,7 +22524,10 @@ if(HAS_DOM){
   render();
   /* A first visit opens on the tutorial rather than on a menu of modes that
      mean nothing yet. */
-  if(!tutSeen(TUT_KEY))startTutorial();
+  /* Opened from a friend's link: straight into their game. */
+  const joinCode=new URLSearchParams(location.search).get('join');
+  if(joinCode)netJoin(joinCode);
+  else if(!tutSeen(TUT_KEY))startTutorial();
 }
 /* ============ exports for harness ============ */
 if(typeof module!=='undefined'){

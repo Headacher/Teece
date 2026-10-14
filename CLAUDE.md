@@ -218,6 +218,22 @@ Anything pinned to a viewport edge needs matching room held open at that end of
 the page, or it buries the content underneath. On a phone `aside` stacks below
 `main`, so the end of the page is the side panel — pad `#app`, not `main`.
 
+## Online play
+
+Decks → Online hosts a 1v1 and gives a `?join=<code>` link. The two pages meet
+through PeerJS's public broker (loaded from jsDelivr on demand) and then talk
+over WebRTC. The host's page runs the whole engine; the guest's page only draws
+the snapshots it is sent (`netSnapshot`, which blanks the host's hand, both
+decks and the host's questions) and sends its clicks back as small orders that
+`netRun` re-checks. So a click that changes the game must go through `uiDo` /
+`uiAct` / `resolvePending`, never straight to `playFromHand` and friends, or the
+guest's click will run on a copy that nobody else sees.
+
+To test it, run a local broker (`peer` npm package, `PeerServer({port:9000,
+host:'127.0.0.1',path:'/'})`), open both pages with `?peerhost=127.0.0.1:9000`,
+and route the jsDelivr PeerJS URL to a local copy, since the CDN and
+0.peerjs.com are not reachable from the sandbox.
+
 ## House rules for the game code
 
 - Cards are data in `CARDS`, keyed by id. Prefer adding a field the engine reads
