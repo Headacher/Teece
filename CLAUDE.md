@@ -229,6 +229,15 @@ decks and the host's questions) and sends its clicks back as small orders that
 `uiAct` / `resolvePending`, never straight to `playFromHand` and friends, or the
 guest's click will run on a copy that nobody else sees.
 
+Difficulty online is per seat: the host sets `G.seatBonus` (-3..+3 each) and
+`seatBonus(owner)` is what `makeTeece` and the other base-number sites read; vs
+the computer it falls back to `enemyBonus` on every enemy. The host runs one
+order at a time (`NET.localBusy` for its own clicks, `NET.queue` for the
+guest's): an End Turn landing mid-play used to start the guest's turn under a
+play whose next question then orphaned the guest's prompt and hung the game.
+`netTurnCheck` (end of `render`) fires the your-turn banner, chime, blinking
+title and system notification.
+
 To test it, run a local broker (`peer` npm package, `PeerServer({port:9000,
 host:'127.0.0.1',path:'/'})`), open both pages with `?peerhost=127.0.0.1:9000`,
 and route the jsDelivr PeerJS URL to a local copy, since the CDN and
