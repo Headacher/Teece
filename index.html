@@ -459,16 +459,18 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .teece.token.o2 .tokshape path{stroke:var(--p2)}
 .teece.token .actdot{left:calc(var(--notch) + 4px);top:4px}
 .teece.token .eq{right:calc(var(--notch) + 4px);top:4px}
-/* Bosses carry a faint aura of drifting motes; minibosses a fainter one. The
+/* Bosses on the board carry a faint aura of drifting motes; minibosses only a
+   thin dim rim and two slow, barely-there motes, so the two read differently. The
    motes are spans inside .aura, and their delays are set from the clock when
    drawn so a re-render does not restart them. */
 .aura{position:absolute;inset:-6px;pointer-events:none;z-index:3;border-radius:10px}
 .aura.boss{box-shadow:0 0 10px 1px rgba(255,206,110,.35);animation:auraGlow 3.2s ease-in-out infinite}
-.aura.mini{box-shadow:0 0 7px rgba(255,190,80,.26)}
+.aura.mini{inset:-3px;border-radius:8px;box-shadow:0 0 0 1px rgba(255,190,80,.3),0 0 5px rgba(255,190,80,.18)}
 .aura .pt{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(255,176,40,.95);
   box-shadow:0 0 4px rgba(255,150,20,.8);opacity:0;animation:auraRise var(--dur,2.8s) linear infinite}
-.aura.mini .pt{width:2px;height:2px;background:rgba(255,176,40,.7);box-shadow:0 0 3px rgba(255,150,20,.55)}
+.aura.mini .pt{width:2px;height:2px;background:rgba(255,176,40,.55);box-shadow:none;animation-name:auraRiseFaint}
 @keyframes auraRise{0%{opacity:0;transform:translateY(0)}20%{opacity:.85}100%{opacity:0;transform:translateY(-14px)}}
+@keyframes auraRiseFaint{0%{opacity:0;transform:translateY(0)}30%{opacity:.35}100%{opacity:0;transform:translateY(-8px)}}
 @keyframes auraGlow{0%,100%{box-shadow:0 0 8px 0 rgba(255,206,110,.28)}50%{box-shadow:0 0 12px 2px rgba(255,206,110,.42)}}
 @media(prefers-reduced-motion:reduce){.aura,.aura .pt{animation:none}.aura .pt{display:none}}
 .teece .actdot{position:absolute;top:2px;left:4px;width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px var(--gold)}
@@ -1196,7 +1198,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:193,date:'2026-10-14'};
+const VERSION={build:194,date:'2026-10-14'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 const TOKEN_SHAPE_SVG='<svg class="tokshape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M28,0H72A7,7 0 0 1 79,7V16A5,5 0 0 0 84,21H93A7,7 0 0 1 100,28V72A7,7 0 0 1 93,79H84A5,5 0 0 0 79,84V93A7,7 0 0 1 72,100H28A7,7 0 0 1 21,93V84A5,5 0 0 0 16,79H7A7,7 0 0 1 0,72V28A7,7 0 0 1 7,21H16A5,5 0 0 0 21,16V7A7,7 0 0 1 28,0Z"/></svg>';
@@ -5052,14 +5054,14 @@ function eqLabel(e){
 /* A Hyperfusion counts as a Boss without costing two bodies to play: it was
    paid for with the four cards it is made of. */
 const isBossCard=id=>(CARDS[id].sac||0)>=2||!!CARDS[id].boss;
-/* The aura a Boss (or, fainter, a Miniboss) is drawn with, in hand and on the
-   board. Deterministic positions per card, delays read off the clock so the
+/* The aura a Boss (or, fainter, a Miniboss) is drawn with on the board only;
+   a card in hand carries none. Deterministic positions per card, delays read off the clock so the
    motes keep drifting through a re-render instead of starting over. */
 function auraHtml(id){
   const c=CARDS[id];if(!c||c.type!=='teece')return '';
   const boss=isBossCard(id),mini=!boss&&(c.sac||0)===1;
   if(!boss&&!mini)return '';
-  const n=boss?7:3,dur=boss?2800:3600,now=Date.now();
+  const n=boss?7:2,dur=boss?2800:5200,now=Date.now();
   let h='<div class="aura '+(boss?'boss':'mini')+'" aria-hidden="true">';
   for(let k=0;k<n;k++){
     const x=((k*37+11)%90)+5,y=((k*53+29)%70)+20;
@@ -19771,7 +19773,6 @@ function renderHand(p){
       db.addEventListener('click',(e)=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)uiDo('discard',{i},()=>playHandDiscard(p,i));});
       card.appendChild(db);
     }
-    if(cd.type==='teece')card.insertAdjacentHTML('afterbegin',auraHtml(id));
     if(worn.length){
       const pb=document.createElement('div');
       pb.className='plated';
