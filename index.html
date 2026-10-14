@@ -1042,6 +1042,11 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .hcap:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 10px 18px -12px rgba(0,0,0,.9)}
 .hcap.easy:hover{border-color:var(--up)}
 .hcap.hard:hover{border-color:var(--down)}
+.nethc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) 92px;gap:10px;align-items:center;margin:8px 0}
+.nethc input{width:100%;accent-color:var(--gold)}
+.nethc .nhv{font-variant-numeric:tabular-nums;text-align:right}
+.nethc .nhv.easy{color:var(--up)}.nethc .nhv.hard{color:var(--down)}
+@media (max-width:520px){.nethc{grid-template-columns:1fr 92px}.nethc input{grid-column:1/-1;grid-row:2}}
 .hcap .hn{font-family:var(--disp);font-size:23px;line-height:1;font-variant-numeric:tabular-nums}
 .hcap .hl{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .hcap.even{border-color:var(--gold)}
@@ -1057,6 +1062,11 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   color:var(--cream);padding:8px 14px;border-radius:20px;font-size:12px;z-index:40;opacity:0;transition:opacity .18s;
   pointer-events:none}
 #toast.show{opacity:1}
+#turnPing{position:fixed;left:50%;top:14px;transform:translate(-50%,-140%);z-index:60;pointer-events:none;
+  background:linear-gradient(180deg,#3a2c14,#1e170c);border:1px solid var(--gold);color:var(--cream);
+  font-family:var(--disp);font-size:20px;padding:10px 22px;border-radius:12px;box-shadow:0 12px 30px -10px rgba(0,0,0,.9);
+  transition:transform .3s ease,opacity .3s ease;opacity:0}
+#turnPing.show{transform:translate(-50%,0);opacity:1}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}
   .card.playable:hover,.dcard:hover,.hcap:hover{transform:none}}
 </style>
@@ -1177,6 +1187,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   <div class="box">
     <h2 id="netTitle">Play a friend online</h2>
     <p id="netText"></p>
+    <div class="hidden" id="netHcap"></div>
     <div class="row hidden" id="netLinkRow" style="gap:8px;align-items:center">
       <input id="netLink" readonly style="flex:1;min-width:0;padding:8px;border-radius:8px;border:1px solid var(--line,#444);background:transparent;color:inherit;font:inherit">
       <button class="btn primary" id="netCopy">Copy link</button>
@@ -1200,12 +1211,13 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 <div id="coach" class="hidden" role="status" aria-live="polite"></div>
 
 <div id="toast"></div>
+<div id="turnPing" aria-live="assertive"></div>
 <script>
 /* ============ card registry ============ */
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:196,date:'2026-10-14'};
+const VERSION={build:197,date:'2026-10-14'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 const TOKEN_SHAPE_SVG='<svg class="tokshape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M28,0H72A7,7 0 0 1 79,7V16A5,5 0 0 0 84,21H93A7,7 0 0 1 100,28V72A7,7 0 0 1 93,79H84A5,5 0 0 0 79,84V93A7,7 0 0 1 72,100H28A7,7 0 0 1 21,93V84A5,5 0 0 0 16,79H7A7,7 0 0 1 0,72V28A7,7 0 0 1 7,21H16A5,5 0 0 0 21,16V7A7,7 0 0 1 28,0Z"/></svg>';
@@ -5971,7 +5983,7 @@ function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random
 function makeTeece(cardId,owner,opts){
   const d=CARDS[cardId];
   const base=d.sides.slice();
-  if(bonusApplies(owner))for(let k=0;k<4;k++)base[k]=Math.max(0,base[k]+G.enemyBonus);
+  {const sb=seatBonus(owner);if(sb)for(let k=0;k<4;k++)base[k]=Math.max(0,base[k]+sb);}
   const boon=perkBoon(d,owner);
   if(boon)for(let k=0;k<4;k++)base[k]=Math.max(0,base[k]+boon);
   /* Coffin brings a Teece back drained to nothing and free to play.
@@ -5999,7 +6011,7 @@ function makeTeece(cardId,owner,opts){
        times a Teece can still get up without touching the real game. */
     undyUsed:(pl0&&pl0.undying&&pl0.undying[cardId])||0,
     grafts:[],noSac:false,infect:null,dieEOT:false,graveMarks:0,stepOwed:0,
-    boon:(bonusApplies(owner)?G.enemyBonus:0)+boon,
+    boon:seatBonus(owner)+boon,
     silenced:false,magicUsedTurn:0,
     temp2:[0,0,0,0],temp2Until:0,defTemp2:0,defTemp2Until:0,baseTemp:null,flyExtra:0,immortalUntil:0,stunUntil:0,
     actUsedTurn:{},actUsedGame:{}};
@@ -6195,6 +6207,12 @@ const seatsOnTeam=tm=>{const o=[];for(let i=0;i<PLAYERS();i++)if(teamOf(i)===tm)
 const teamsInPlay=()=>{const o=[];for(let i=0;i<PLAYERS();i++)if(o.indexOf(teamOf(i))<0)o.push(teamOf(i));return o;};
 /* the difficulty rating hits anyone not on the human's team (seat 0) */
 const bonusApplies=o=>!!(G&&G.enemyBonus&&!sameTeam(o,0));
+/* What a seat's Teece carry on all four sides. Against the computer that is one
+   number on every enemy; online each seat has its own, set by the host. */
+function seatBonus(o){
+  if(G&&G.seatBonus)return G.seatBonus[o]||0;
+  return bonusApplies(o)?G.enemyBonus:0;
+}
 /* ---- Day and Night ----
    One counter for the whole board, drawn as a sun or a moon at the top right
    corner of it. The game opens on Day and the sky turns over once every full
@@ -8001,7 +8019,7 @@ function checkTimer(b,i){
   if(!d.timer||t.transformed||(t.age||0)<d.timer.turns)return false;
   t.transformed=true;
   t.base=d.timer.sides.slice();
-  if(bonusApplies(t.owner))for(let k=0;k<4;k++)t.base[k]=Math.max(0,t.base[k]+G.enemyBonus);
+  {const sb=seatBonus(t.owner);if(sb)for(let k=0;k<4;k++)t.base[k]=Math.max(0,t.base[k]+sb);}
   if(d.timer.defLoss&&!isSteadfast(t))t.defPerm=Math.max(0,(t.defPerm||0)-d.timer.defLoss);
   if(d.timer.defGain)applyModT(t,d.timer.defGain,'perm');
   if(d.timer.kw)t.kwPerm.push(...d.timer.kw);
@@ -12192,7 +12210,7 @@ async function FXRUN(st,ctx){
     const card=CARDS[target.cardId];
     ctx.t.cardId=target.cardId;
     ctx.t.base=card.sides.slice();
-    if(bonusApplies(ctx.t.owner))for(let k=0;k<4;k++)ctx.t.base[k]=Math.max(0,ctx.t.base[k]+G.enemyBonus);
+    {const sb=seatBonus(ctx.t.owner);if(sb)for(let k=0;k<4;k++)ctx.t.base[k]=Math.max(0,ctx.t.base[k]+sb);}
     const boon=perkBoon(card,ctx.t.owner);
     if(boon)for(let k=0;k<4;k++)ctx.t.base[k]=Math.max(0,ctx.t.base[k]+boon);
     ctx.t.temp=[0,0,0,0];
@@ -20803,6 +20821,7 @@ function render(){
     G.mode==='three'?((G.formatName||'three players')+' \u00b7 four by four'+
       (G.enemyBonus?' \u00b7 enemy '+hcapLabel(G.enemyBonus):'')):
     (G.mode==='deck'?(G.deckNames?G.deckNames[0]+' vs '+G.deckNames[1]+
+      (G.seatBonus&&G.seatBonus.some(x=>x)?' \u00b7 '+G.seatBonus.map((x,i)=>pname(i).replace('Player ','P')+' '+hcapLabel(x)).join(', '):'')+
       (G.enemyBonus?' \u00b7 enemy '+hcapLabel(G.enemyBonus):''):'deck mode'):
     'three by three');
   if(!G.over){
@@ -20828,6 +20847,7 @@ function render(){
   else if(G.detailHover==null)showDetail(null);
   tutCoach();
   if(NET&&NET.role==='host')netSync(false);
+  if(NET)netTurnCheck();
 }
 function draftName(p){
   if(!G_DRAFT)return 'Player '+(p+1);
@@ -23144,7 +23164,14 @@ async function uiDo(kind,args,run){
   if(!NET)return run();
   if(!G||G.over)return;
   if(G.turn!==NET.seat){uiToast('It is '+pposs(G.turn)+' turn.');return;}
-  if(NET.role==='host')return run();
+  if(NET.role==='host'){
+    /* One thing at a time. An End Turn pressed while a play is still landing
+       would start the guest's turn under it, and the play's next question
+       would then trample the guest's. */
+    if(NET.localBusy){uiToast('Wait for that to finish.');return;}
+    NET.localBusy=true;
+    try{return await run();}finally{if(NET)NET.localBusy=false;}
+  }
   netSend(Object.assign({t:'do',kind},args));
 }
 function uiAct(i,ent){
@@ -23174,6 +23201,7 @@ function peerOpts(){
 }
 function netShow(title,text,link){
   const ov=document.getElementById('netOverlay');
+  document.getElementById('netHcap').classList.add('hidden');
   ov.classList.remove('hidden');
   document.getElementById('netTitle').textContent=title;
   document.getElementById('netText').textContent=text;
@@ -23196,6 +23224,95 @@ function netLost(why){
   else netShow('Disconnected',why,null);
 }
 
+/* ---------- your turn ----------
+   Online the other player's turn can take a while, so the moment this screen
+   has something to do -- its turn starts, or a question is put to it on the
+   other turn -- it says so: a banner, a short chime, and, with the tab in the
+   background, a blinking title and a system notification if allowed. */
+let NET_AUDIO=null;
+function netArmAlerts(){
+  try{if(!NET_AUDIO){const C=window.AudioContext||window.webkitAudioContext;if(C)NET_AUDIO=new C();}
+    if(NET_AUDIO&&NET_AUDIO.state==='suspended')NET_AUDIO.resume();}catch(e){}
+  try{if(window.Notification&&Notification.permission==='default')Notification.requestPermission();}catch(e){}
+}
+function netChime(){
+  const a=NET_AUDIO;if(!a)return;
+  try{
+    const t=a.currentTime;
+    [[660,0],[880,0.14]].forEach(([f,d])=>{
+      const o=a.createOscillator(),g=a.createGain();
+      o.type='sine';o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,t+d);g.gain.exponentialRampToValueAtTime(0.18,t+d+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+d+0.25);
+      o.connect(g).connect(a.destination);o.start(t+d);o.stop(t+d+0.3);
+    });
+  }catch(e){}
+}
+let NET_BLINK=null,NET_TITLE=null;
+function netBlinkTitle(msg){
+  if(NET_BLINK||!HAS_DOM)return;
+  NET_TITLE=document.title;let on=false;
+  NET_BLINK=setInterval(()=>{
+    if(!document.hidden){clearInterval(NET_BLINK);NET_BLINK=null;document.title=NET_TITLE;return;}
+    on=!on;document.title=on?'\u25CF '+msg:NET_TITLE;
+  },900);
+}
+function netTurnCheck(){
+  const me=NET;
+  if(!me||!G||!me.started)return;
+  const turn=!G.over&&G.turn===me.seat;
+  const asked=!G.over&&!!(G.pending&&G.pending.p===me.seat);
+  const was=me.alertState||{turn:false,asked:false,n:-1};
+  const fresh=(turn&&(!was.turn||was.n!==G.turnNum))||(asked&&!turn&&!was.asked);
+  me.alertState={turn,asked,n:G.turnNum};
+  if(!fresh)return;
+  const msg=turn?'Your turn':pname(G.turn)+' needs your answer';
+  const el=document.getElementById('turnPing');
+  if(el){el.textContent=msg;el.classList.add('show');clearTimeout(el._h);el._h=setTimeout(()=>el.classList.remove('show'),2600);}
+  netChime();
+  if(document.hidden){
+    netBlinkTitle(msg);
+    try{if(window.Notification&&Notification.permission==='granted'){
+      const n=new Notification('Teece: '+msg,{tag:'teece-turn',body:G.deckNames?G.deckNames.join(' vs '):''});
+      n.onclick=()=>{window.focus();n.close();};
+    }}catch(e){}
+  }
+}
+/* ---------- difficulty ----------
+   The same -3..+3 scale the computer game uses, but one per seat: every Teece
+   that seat fields carries it on all four sides. The host sets both before the
+   link is made, and the guest is told before picking a deck. */
+function netHcapLine(h,a,b){
+  if(!h||!h.some(x=>x))return '';
+  const v=n=>hcapLabel(n)+' ('+HCAPS.find(x=>x.n===n).lbl+')';
+  return ' '+a+' Teece carry '+v(h[0])+', '+b+' '+v(h[1])+'.';
+}
+function pickNetHandicap(){
+  return new Promise(res=>{
+    netShow('Difficulty','Every Teece a player fields gets their number on all four sides. Minus weakens, plus strengthens; a side never falls below zero.',null);
+    const box=document.getElementById('netHcap');
+    box.classList.remove('hidden');
+    box.innerHTML='';
+    const vals=[0,0];
+    ['You (Player 1)','Your friend (Player 2)'].forEach((who,i)=>{
+      const row=document.createElement('label');
+      row.className='nethc';
+      row.innerHTML='<span class="nhw"></span><input type="range" min="-3" max="3" step="1" value="0"><b class="nhv"></b>';
+      row.querySelector('.nhw').textContent=who;
+      const inp=row.querySelector('input'),out=row.querySelector('.nhv');
+      const show=()=>{vals[i]=+inp.value;const h=HCAPS.find(x=>x.n===vals[i]);
+        out.textContent=hcapLabel(vals[i])+' '+h.lbl;out.className='nhv '+(vals[i]<0?'easy':vals[i]>0?'hard':'even');};
+      inp.addEventListener('input',show);show();
+      box.appendChild(row);
+    });
+    const go=document.createElement('button');
+    go.className='btn primary';go.id='netHcapGo';go.textContent='Make the link';
+    go.addEventListener('click',()=>{netArmAlerts();box.classList.add('hidden');box.innerHTML='';res(vals.slice());});
+    const r=document.createElement('div');r.className='row';r.style.marginTop='10px';r.appendChild(go);
+    box.appendChild(r);
+    /* Cancel closes the overlay through restart(); the promise is simply left. */
+  });
+}
 /* ---------- the host ---------- */
 async function netHost(){
   hideOppHands();
@@ -23203,8 +23320,10 @@ async function netHost(){
   document.getElementById('startOverlay').classList.add('hidden');
   const mine=await pickDeck('You',{title:'Your deck',
     info:'Pick yours, then send your friend the link. They pick their own deck when they open it.'});
+  const hcap=await pickNetHandicap();
+  if(!hcap)return;
   const code=Math.random().toString(36).slice(2,8);
-  NET={role:'host',seat:0,peerSeat:1,mine,code,conn:null,peer:null,started:false,queue:Promise.resolve(),qseq:0,last:''};
+  NET={role:'host',seat:0,peerSeat:1,mine,hcap,code,conn:null,peer:null,started:false,queue:Promise.resolve(),qseq:0,last:''};
   const me=NET;
   netShow('Play a friend online','Setting up a link…',null);
   try{await loadPeerJS();}catch(e){if(NET===me)netShow('Could not go online',e.message+' Check your connection and try again.',null);return;}
@@ -23231,7 +23350,7 @@ async function netHost(){
     conn.on('open',()=>{
       if(NET!==me)return;
       me.down=false;
-      conn.send({t:'hello',build:VERSION.build,started:me.started,host:DECKS[mine].name});
+      conn.send({t:'hello',build:VERSION.build,started:me.started,host:DECKS[mine].name,hcap:me.hcap});
       if(me.started){netSync(true);log(pname(1)+' is back.');render();}
       else netShow('Your friend is here','They are choosing a deck…',null);
     });
@@ -23302,10 +23421,11 @@ async function netBegin(theirs){
   netHide();
   G=newState('deck',false,[DECKS[mine].cards.slice(),DECKS[theirs].cards.slice()],
     {aiSeats:[],seatNames:['Player 1','Player 2']});
+  G.seatBonus=me.hcap.slice();
   G.deckNames=[DECKS[mine].name,DECKS[theirs].name];
   applyDeckRules(0,mine);
   applyDeckRules(1,theirs);
-  log('Online: '+DECKS[mine].name+' (Player 1) faces '+DECKS[theirs].name+' (Player 2).');
+  log('Online: '+DECKS[mine].name+' (Player 1) faces '+DECKS[theirs].name+' (Player 2).'+netHcapLine(me.hcap,'Player 1\u2019s','Player 2\u2019s'));
   me.beat=setInterval(()=>netSync(false),1500);
   render();
   await startTurn();
@@ -23397,8 +23517,10 @@ async function netOnGuest(m){
     if(m.started||me.picked){netShow('Joining','Waiting for the game…',null);return;}
     netHide();
     me.picked=true;
-    const key=await pickDeck('You',{title:'Your deck',info:'Your friend plays '+m.host+'. Pick yours and the game starts.'});
+    const key=await pickDeck('You',{title:'Your deck',info:'Your friend plays '+m.host+'.'+
+      (m.hcap?netHcapLine(m.hcap,'Your friend\u2019s','yours'):'')+' Pick yours and the game starts.'});
     if(NET!==me)return;
+    netArmAlerts();
     netSend({t:'deck',key});
     netShow('Joining','Starting the game…',null);
     return;
