@@ -1152,7 +1152,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:182,date:'2026-10-14'};
+const VERSION={build:183,date:'2026-10-14'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4792,8 +4792,8 @@ const CARDS = {
  /* ---- Dwarf equips ---- */
  1140:{name:'Mithril Mail',type:'equip',mod:2,grants:{def:2},
     text:'The equipped Teece has +2 and +2 Defence.'},
- 1141:{name:'Antimagic Airship',type:'equip',mod:0,grants:{kw:['flying','ward','floating']},
-    text:'The equipped Teece has Flying, cannot be targeted, and has Floating: unaffected by battlegrounds and by effects planted on the panel below it.'},
+ 1141:{name:'Antimagic Airship',type:'equip',mod:2,grants:{kw:['flying','floating'],tape:true,tapeMsg:'takes the hit for'},
+    text:'The equipped Teece has +2, Flying and Floating: unaffected by battlegrounds and by effects planted on the panel below it. The first time an enemy effect targets it, the Airship is destroyed instead and the effect is turned aside.'},
  1142:{name:'Soul of the Mountains',type:'equip',mod:0,grants:{def:3,onDeath:[{fx:'toerrain',bg:1149}],becomesGround:true},
     text:'The equipped Teece has +3 Defence. When it is destroyed: this equip becomes an Avalanche on its panel (+3 Defence, and +3 more while an ally is adjacent).'},
  1143:{name:'Fresh-Forged Axe',type:'equip',mod:0,onlyHand:true,
@@ -5445,7 +5445,9 @@ function tapeSave(b,i,by){
   if(ix<0)return false;
   const e=t.equips.splice(ix,1)[0];
   toGrave(e.owner,e.cardId);
-  log(CARDS[e.cardId].name+' tears off '+nm(t)+', and the effect comes away with it.');
+  const tm=(eqG(e)||{}).tapeMsg;
+  log(tm?CARDS[e.cardId].name+' '+tm+' '+nm(t)+' and is destroyed, and the effect is turned aside.'
+    :CARDS[e.cardId].name+' tears off '+nm(t)+', and the effect comes away with it.');
   equipCameOff(t,e,true);
   return true;
 }
