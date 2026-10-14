@@ -1217,7 +1217,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:198,date:'2026-10-14'};
+const VERSION={build:199,date:'2026-10-14'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 const TOKEN_SHAPE_SVG='<svg class="tokshape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M28,0H72A7,7 0 0 1 79,7V16A5,5 0 0 0 84,21H93A7,7 0 0 1 100,28V72A7,7 0 0 1 93,79H84A5,5 0 0 0 79,84V93A7,7 0 0 1 72,100H28A7,7 0 0 1 21,93V84A5,5 0 0 0 16,79H7A7,7 0 0 1 0,72V28A7,7 0 0 1 7,21H16A5,5 0 0 0 21,16V7A7,7 0 0 1 28,0Z"/></svg>';
@@ -23189,8 +23189,10 @@ async function uiDo(kind,args,run){
 }
 function uiAct(i,ent){
   if(!NET)return runAct(G.turn,i,ent);
-  const k=actsOf(G.board,i).indexOf(ent);
-  return uiDo('act',{cell:i,k,name:ent.act.name},()=>runAct(G.turn,i,ent));
+  /* actsOf builds fresh entries on every call, so an ability is named by its
+     key, never by object identity -- an indexOf here never matched, and every
+     ability the guest tapped (Fly included) was dropped by the host. */
+  return uiDo('act',{cell:i,key:ent.key,name:ent.act.name},()=>runAct(G.turn,i,ent));
 }
 function netSend(m){
   if(!NET||!NET.conn||!NET.conn.open)return false;
@@ -23418,7 +23420,7 @@ async function netRun1(m){
     case 'act':{
       const c=m.cell,t=typeof c==='number'&&G.board[c]?G.board[c].teece:null;
       if(!t||t.owner!==p)return;
-      const ent=actsOf(G.board,c)[m.k];
+      const ent=actsOf(G.board,c).find(e=>e.key===m.key);
       if(!ent||ent.act.name!==m.name||!actAvailable(t,ent)||hexOn(p,'silence')||actBlockedReason(G.board,c,ent))return;
       await runAct(p,c,ent);
       return;}
