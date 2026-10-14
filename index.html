@@ -1152,7 +1152,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:184,date:'2026-10-14'};
+const VERSION={build:185,date:'2026-10-14'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4784,11 +4784,11 @@ const CARDS = {
     text:'When destroyed: add an equip card from your graveyard to your hand. Whatever it was wearing is already there to pick.'},
  1137:{name:'Forgemaster',type:'teece',sides:[5,6,6,5],dwarf:true,onPlay:[{fx:'conjureCard',id:1148}],
     text:'When played: add a Common Hammer to your hand (equip: the equipped Teece gets +1).'},
- 1138:{name:'Dwarf Thane',type:'teece',sides:[2,8,9,8],dwarf:true,sac:1,sacGearHome:true,equipsHome:'one',
-    text:'Sacrifice one fielded Teece to play. Every equip card on the Teece you sacrificed goes back to your hand. When destroyed: add one equip card equipped to it back to your hand.'},
- 1139:{name:'Mountain King',type:'teece',sides:[9,9,9,9],dwarf:true,sac:2,sacGearHome:true,equipsHome:'all',
+ 1138:{name:'Dwarf Thane',type:'teece',sides:[2,8,9,8],dwarf:true,sac:1,sacGearTake:true,equipsHome:'one',
+    text:'Sacrifice one fielded Teece to play. Every equip card on the Teece you sacrificed is transferred to this. When destroyed: add one equip card equipped to it back to your hand.'},
+ 1139:{name:'Mountain King',type:'teece',sides:[9,9,9,9],dwarf:true,sac:2,sacGearTake:true,equipsHome:'all',
     onPlay:[{fx:'equipGraveSelf',n:2}],
-    text:'Sacrifice two fielded Teece to play. Every equip card on the Teece you sacrificed goes back to your hand. When played: equip up to two equip cards from your graveyard to it. When destroyed: every equip card on it goes back to hand.'},
+    text:'Sacrifice two fielded Teece to play. Every equip card on the Teece you sacrificed is transferred to this. When played: equip up to two equip cards from your graveyard to it. When destroyed: every equip card on it goes back to hand.'},
  /* ---- Dwarf equips ---- */
  1140:{name:'Mithril Mail',type:'equip',mod:2,grants:{def:2},
     text:'The equipped Teece has +2 and +2 Defence.'},
@@ -14874,6 +14874,8 @@ async function processDeath(d){
       const eg=eqG(e);
       if(intoGround(e))continue;
       if(homeSet.indexOf(e)>=0){
+        /* Paid to a Thane or a King: the gear is carried over onto it. */
+        if(d.gearTake){d.gearTake.push(e);continue;}
         handPush(e.owner,e.cardId);
         log(CARDS[e.cardId].name+' goes back to '+ownOf(e.owner)+' hand as '+DEF(t).name+' falls.');
         continue;
@@ -15707,16 +15709,16 @@ async function playTeece(p,handIdx){
   /* Paid out of the hand first: nothing on the board has moved yet, so a
      Willing Sacrifice that draws and discards cannot disturb a panel already
      marked for the next payment. */
+  /* What the Thane and the King strip off the bodies they are paid with. */
+  const gearTaken=[];
   for(const cid of sacHIds){
     const at=pl.hand.indexOf(cid);
     if(at<0)continue;
     const gone=handTake(p,at);
     if(!gone)continue;
     /* The Thane and the King take the gear off whatever they were paid with. */
-    if(d.sacGearHome&&gone.plate.length){
-      for(const e of gone.plate)handPush(e.owner,e.cardId);
-      log(gone.plate.map(e=>CARDS[e.cardId].name).join(' and ')+' come'+(gone.plate.length===1?'s':'')+' off '+CARDS[gone.id].name+' and back to hand.');
-    }else dumpPlate(gone.plate,'with the card it was bolted to',gone.id);
+    if(d.sacGearTake&&gone.plate.length)gearTaken.push(...gone.plate);
+    else dumpPlate(gone.plate,'with the card it was bolted to',gone.id);
     log(CARDS[gone.id].name+' is discarded from hand as a sacrifice.');
     await discardCard(p,gone.id);
     if(G.over)return true;
@@ -15728,7 +15730,7 @@ async function playTeece(p,handIdx){
        the next panel on the list. It is still a body paid. */
     if(!t){log('One of the Teece marked for sacrifice had already fallen with another.');continue;}
     if(!t.isToken&&!t.isCopy)sacked.push(t.cardId);
-    await processDeath({cell:c,t,killers:[],cost:true,gearHome:!!d.sacGearHome});
+    await processDeath({cell:c,t,killers:[],cost:true,gearHome:!!d.sacGearTake,gearTake:d.sacGearTake?gearTaken:null});
     log(nm(t)+' is sacrificed.');
   }
   /* A death can fill the very panel it emptied -- an Egg Sac boiling over, a
@@ -15739,6 +15741,7 @@ async function playTeece(p,handIdx){
     if(!open2.length){
       toGrave(p,id);
       dumpPlate(worn,'with the card it was bolted to',id);
+      for(const e of gearTaken)toGrave(e.owner,e.cardId);
       log(d.name+' has nowhere left to land, and is discarded.');
       spend();
       await resolveCombat();render();
@@ -15754,6 +15757,7 @@ async function playTeece(p,handIdx){
   /* anything plated onto it in hand is already bolted on when it lands, so the
      board sees the equipped stats from the first moment */
   for(const e of worn)t.equips.push(e);
+  for(const e of gearTaken)t.equips.push(e);
   if(plan&&plan.rot)spinT(t,plan.rot===1?'cw':'ccw');
   putTeece(b,spot,t,true,'play');
   attachRiders(p,id,t,true);
@@ -15791,6 +15795,10 @@ async function playTeece(p,handIdx){
       if(eg&&eg.onPlayTemp){const pt=eg.onPlayTemp*equipMul(t);applyModT(t,pt,'temp');log(nm(t)+' arrives charged by '+CARDS[e.cardId].name+': '+sgn(pt)+' until the end of the turn.');}
     }
     runeTriumph(p,t);
+  }
+  if(gearTaken.length){
+    log(gearTaken.map(e=>eqLabel(e)).join(', ')+' '+(gearTaken.length===1?'is':'are')+' transferred onto '+nm(t)+' from what it was paid with.');
+    for(const e of gearTaken)equipLanded(e.cardId);
   }
   if(pl.confuse){
     const cf=pl.confuse;pl.confuse=null;
