@@ -1152,7 +1152,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:183,date:'2026-10-14'};
+const VERSION={build:184,date:'2026-10-14'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -4561,8 +4561,8 @@ const CARDS = {
     text:'When the equipped Teece is played, it gets +6 until the end of the turn.'},
  1057:{name:'Surge Coil',type:'equip',mod:0,grants:{freePlay:true},
     text:'The equipped Teece can be played in addition to your normal Teece play this turn.'},
- 1058:{name:'Thunderhead Rig',type:'equip',mod:1,grants:{kw:['flying','ranged'],onTeecePlayed:{n:2,dur:'temp'}},
-    text:'Equipped Teece gets +1, Flying and Ranged. When a Teece is played: the equipped Teece gets +2 until the end of the turn.'},
+ 1058:{name:'Thunderhead Rig',type:'equip',mod:1,grants:{kw:['flying','ranged'],onTeecePlayed:{n:2,dur:'perm',ally:true}},
+    text:'Equipped Teece gets +1, Flying and Ranged. When an allied Teece is played: the equipped Teece gets +2 permanently.'},
  1059:{name:'Storm Landing',type:'ground',gPlayTemp:5,
     text:'A Teece played on this battleground gets +5 until the end of the turn.'},
  1060:{name:'Static Field',type:'ground',gTeecePlayed:{n:2,kw:'teleport'},
@@ -15856,7 +15856,7 @@ async function playTeece(p,handIdx){
     }
     for(const e of w.equips){
       const eg=eqG(e);
-      if(eg&&eg.onTeecePlayed){applyModT(w,eg.onTeecePlayed.n,eg.onTeecePlayed.dur||'temp');
+      if(eg&&eg.onTeecePlayed&&(!eg.onTeecePlayed.ally||sameTeam(w.owner,p))){applyModT(w,eg.onTeecePlayed.n,eg.onTeecePlayed.dur||'temp');
         log(nm(w)+' draws on '+CARDS[e.cardId].name+' as a Teece lands: '+sgn(eg.onTeecePlayed.n)+durTxt(eg.onTeecePlayed.dur||'temp')+'.');}
     }
     const gp=b[i].ground&&gcards(b[i].ground).find(gd=>gd.gTeecePlayed);
