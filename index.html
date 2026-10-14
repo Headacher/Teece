@@ -264,6 +264,10 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="dwarves"] .kwl,.dcard[data-card-deck="dwarves"] .dkw{color:#ffb85c}
 .card[data-card-deck="dwarves"] .ct,.dcard[data-card-deck="dwarves"] .dty{color:#ffb85c}
 .card[data-card-deck="dwarves"]::after,.dcard[data-card-deck="dwarves"]::after{content:'\26CF'}
+.card[data-card-deck="warlock"],.dcard[data-card-deck="warlock"]{--cardbg:#2b1838;--artink:#c39cff;background:var(--cardbg);color:#f0e6ff;border-color:#130a1a}
+.card[data-card-deck="warlock"] .kwl,.dcard[data-card-deck="warlock"] .dkw{color:#d4b0ff}
+.card[data-card-deck="warlock"] .ct,.dcard[data-card-deck="warlock"] .dty{color:#d4b0ff}
+.card[data-card-deck="warlock"]::after,.dcard[data-card-deck="warlock"]::after{content:'\1F52E'}
 
 /* Teece colors on the board */
 .teece[data-card-deck="berserker"]{--cardbg:#8a2a2a;--artink:#f2f7e6;background:var(--cardbg);color:#f5e6e6;border-color:#5a1a1a}
@@ -298,6 +302,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .teece[data-card-deck="wolf"]{--cardbg:#5d6670;--artink:#f1ece2;background:var(--cardbg);color:#f4f1ea;border-color:#2b3036}
 .teece[data-card-deck="priest"]{--cardbg:#efe6cf;--artink:#8a6a1f;background:var(--cardbg);color:#3b2f17;border-color:#b8962e}
 .teece[data-card-deck="dwarves"]{--cardbg:#4b3a2c;--artink:#f2b45c;background:var(--cardbg);color:#f3e8d8;border-color:#2a1f16}
+.teece[data-card-deck="warlock"]{--cardbg:#2b1838;--artink:#c39cff;background:var(--cardbg);color:#f0e6ff;border-color:#130a1a}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
@@ -1189,7 +1194,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:188,date:'2026-10-14'};
+const VERSION={build:189,date:'2026-10-14'};
 const versionLabel=()=>'build '+VERSION.build+' · '+VERSION.date;
 
 const HAS_DOM = typeof document !== 'undefined';
@@ -1327,7 +1332,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}',priest:'\u{1F64F}',dwarves:'\u26CF\uFE0F'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}',priest:'\u{1F64F}',dwarves:'\u26CF\uFE0F',warlock:'\u{1F52E}'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -1608,6 +1613,27 @@ const CARD_ART={
   1147:["   ||  ( )   ", "   ||  ) (   ", "   ||  (*)   ", "  =##=  |    ", "   ||  /_\\   "],
   1148:["   _____     ", "  |_____|    ", "     |       ", "     |       ", "     |       "],
   1149:["    /\\  /\\   ", "  .'  \\/  '. ", " /  o  o  o \\", "  ^^^^^^^^^^ ", "  ~~~~~~~~~~ "],
+  1150:["    .---.    ", "   ( o o )   ", "  /[#####]\\  ", " /_[#####]_\\ ", "   ROCK GOD  "],
+  1151:["  *  .-.  *  ", "   ( ^ ^ )   ", "  >\\ v v /<  ", "    /| |\\    ", "  *  ' '  *  "],
+  1152:["  )\\ .-. /(  ", "  \\( >v< )/  ", "    \\ w /    ", "    /| |\\    ", "   ~  Y  ~   "],
+  1153:["    .---.    ", "   ( O O )   ", "   [ www ]   ", "  _/|   |\\_  ", "  OGRE  GOD  "],
+  1154:["   ~~~~~~~   ", "  ( @ @ @ )  ", "   \\ ~~~ /   ", "  ~/|~|~|\\~  ", "  OLD   ONE  "],
+  1155:["     /\\      ", "    /  \\_    ", "   ( o o )   ", "    \\ ^ /    ", "   _/   \\_   "],
+  1156:["     ,*      ", "    (   )    ", "   ( o o )   ", "    \\ ~ /    ", "   BOOM BOOM "],
+  1157:["   .-----.   ", "  | = o = |  ", "  |  ===  |  ", "   '-=-=-'   ", "  ANKHTEPOT  "],
+  1158:["    .-.-.    ", "   ( x x )   ", "    \\ = /    ", "   _/|||\\_   ", "   NAGASH    "],
+  1159:["    .---.    ", "   ( x x )   ", "    \\ - /    ", "   --|+|--   ", "     ' '     "],
+  1160:["   * .-. *   ", "    ( o o )  ", "  --[ * ]--  ", "    /| |\\    ", "   *  '  *   "],
+  1161:["  \\ * .-. * /", "  -( O ^ O )-", "   \\[ *** ]/ ", "    /|   |\\  ", "  * '  *  ' *"],
+  1162:["    .---.    ", "   / \\ / \\   ", "  |   X   |  ", "   \\ / \\ /   ", "    '---'    "],
+  1163:["      /\\     ", "     /  \\    ", "     |##|    ", "   ==|##|==  ", "      ||     "],
+  1164:["   .-----.   ", "  |  ~~~  |  ", "  | ~ ? ~ |  ", "  |  ~~~  |  ", "   '-----'   "],
+  1165:["  .-.   .-.  ", " ( o ) ( o ) ", "  [#]   [#]  ", "  / \\   / \\  ", "  ' '   ' '  "],
+  1166:["    \\ | /    ", "   -- * --   ", "    / | \\    ", "   (     )   ", "    '---'    "],
+  1167:["     /\\      ", "    /  \\     ", "   | ** |    ", "   |____|    ", "  =========  "],
+  1168:["   .-----.   ", "  /  * *  \\  ", " |  *   *  | ", "  \\  * *  /  ", "   '-----'   "],
+  1169:["    .-.      ", "   ( o )     ", "   [###]     ", "    / \\      ", "    ' '      "],
+  1170:["    .---.    ", "   / * * \\   ", "  |  * *  |  ", "   \\     /   ", "    '---'    "],
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
   541:["  \\  .-.  /  ", "   \\( o )/   ", "    (/|\\)    ", "    _/ \\_    ", "   [$]  ...  "],
@@ -4851,6 +4877,62 @@ const CARDS = {
  1148:{name:'Common Hammer',type:'equip',token:true,deck:'dwarves',mod:1,text:'The equipped Teece gets +1.'},
  1149:{name:'Avalanche',type:'ground',token:true,deck:'dwarves',gdef:3,gdefAdjAlly:3,
     text:'A Teece on this panel has +3 Defence, and +3 more while one of its allies is adjacent.'},
+ /* ---- Warlock: 1150-1168, the Warlock Minion 1169 and the Lesser Circle 1170 ----
+        Every Warlock carries the BOON: the effect of whichever patron its
+        seat is channelling. A Warlock that names a patron offers to switch the
+        Boon to that patron as it lands -- always optional, and before its own
+        when-played boons fire, so it can use the patron it just called -- and
+        keeps a once-per-turn Channel button on the field for later, the way a
+        Devil keeps a rejected PACT. Warlock-ness is printed and survives
+        silence; the Boon is the seat's, and only a seat playing the Warlock
+        deck has one. The engine is under "Warlock: the BOON". ---- */
+ 1150:{name:'Warlock of the Rock God',type:'teece',sides:[4,6,8,7],warlock:true,channel:'rock',
+    text:'Channel the Rock God. Boon: +3 Defence.'},
+ 1151:{name:'Warlock of the Fey',type:'teece',sides:[1,2,9,1],warlock:true,channel:'fey',
+    text:'Channel the Fey. Boon: once a turn, when it is about to be destroyed, it can move one space.'},
+ 1152:{name:'Warlock of the Devils',type:'teece',sides:[6,7,6,8],warlock:true,channel:'devils',
+    text:'Channel the Devils. Boon: when played, PACT — -4 to one side ; +3 to another.'},
+ 1153:{name:'Warlock of the Ogre God',type:'teece',sides:[6,6,2,2],warlock:true,channel:'ogre',
+    text:'Channel the Ogre God. Boon: when played, select an adjacent Teece; give it -2 and stun it. Then you can move it one space.'},
+ 1154:{name:'Warlock of the Old One',type:'teece',sides:[4,4,4,4],warlock:true,channel:'old',
+    text:'Channel the Old One. Boon: when a card is discarded, +5 and Teleport until the end of the turn. It can be discarded from your hand.'},
+ 1155:{name:'Warlock of Zeus',type:'teece',sides:[3,7,3,7],warlock:true,channel:'zeus',
+    text:'Channel Zeus. Boon: when played, +5 until the end of the turn.'},
+ 1156:{name:'Warlock of the Bomb God',type:'teece',sides:[1,9,9,1],warlock:true,channel:'bomb',
+    text:'Channel the Bomb God. Boon: once per your turn, select a Teece on the same row or column; give it and all Teece adjacent to it -3.'},
+ 1157:{name:'Warlock of Ankhtepot',type:'teece',sides:[8,4,4,4],warlock:true,channel:'ankh',
+    text:'Channel Ankhtepot. Boon: once per your turn, Mummy Wrap (pull the first Teece in a line one space towards it; an enemy also gets -2).'},
+ 1158:{name:'Warlock of Nagash',type:'teece',sides:[5,6,5,2],warlock:true,channel:'nagash',
+    text:'Channel Nagash. Boon: adjacent enemies have -3.'},
+ 1159:{name:'Warlock of Death',type:'teece',sides:[1,1,1,1],warlock:true,channel:'death',
+    text:'Channel Death. Boon: when destroyed, the next Teece you play cannot be destroyed until the end of your next turn.'},
+ 1160:{name:'Adept',type:'teece',sides:[7,7,7,7],warlock:true,patronTitle:true,sac:1,def:3,channelCap:3,
+    onPlay:[{fx:'channelFill'}],
+    text:'Sacrifice one fielded Teece to play. Defence 3. You can channel up to three Boons while this Teece is on the field.'},
+ 1161:{name:'Avatar',type:'teece',sides:[7,7,7,7],warlock:true,patronTitle:true,sac:2,def:7,
+    onPlay:[{fx:'channelExtra'}],
+    text:'Sacrifice two fielded Teece to play. Defence 7. When played: you can permanently channel one extra Boon for the rest of the game.'},
+ 1162:{name:'Patron’s Mark',type:'equip',mod:0,grants:{kw:['flying'],pactCopy:1},
+    text:'The equipped Teece has another copy of your Boon, and Flying.'},
+ 1163:{name:'Pact Blade',type:'equip',mod:2,grants:{kw:['ranged'],onDeath:[{fx:'channelBack'}]},
+    text:'The equipped Teece has +2 and Ranged. When it is destroyed: you can change your Boon to any Boon you have channelled before.'},
+ 1164:{name:'Fickle Pact',type:'magic',wlAi:'fickle',cast:[{fx:'channelBack',gods:true}],
+    text:'Change your Boon to any Boon you have channelled before, or to one of the Priest’s gods: Topus (+3 on the top), Rightorious (+3 on the right), Bottomor (+3 on the bottom) or Levt (+3 on the left).'},
+ 1165:{name:'Summon Minions',type:'magic',wlAi:'minions',
+    cast:[{fx:'choose',msg:'Summon Minions:',opts:[
+      {lbl:'Play both Minions now',steps:[{fx:'token',tok:1169,count:2}]},
+      {lbl:'Add both Minions to your hand',steps:[{fx:'tokenToHand',tok:1169,count:2}]}]}],
+    text:'Play two 3/3/3/3 Warlock Minion Tokens, or add them to your hand. They have your Boon.'},
+ 1166:{name:'Blessing',type:'magic',patronTitle:true,wlAi:'blessing',cast:[{fx:'wlBlessing'}],
+    text:'Changes with the patron you channel. With several Boons, each fires in turn.'},
+ 1167:{name:'Patron’s Shrine',type:'ground',gPactCopy:true,
+    text:'A Teece on this battleground has another copy of your Boon. An enemy on it gets one copy of your Boon too.'},
+ 1168:{name:'Warlock’s Circle',type:'ground',gWarlockMod:3,gSpread:1170,
+    text:'A Warlock on this battleground has +3. When it is destroyed or replaced: you can lay a Lesser Circle (a Warlock on it has +3) on a panel with no battleground.'},
+ 1169:{name:'Warlock Minion',type:'teece',token:true,deck:'warlock',warlock:true,sides:[3,3,3,3],
+    text:'Warlock Minion Token. It has your Boon.'},
+ 1170:{name:'Lesser Circle',type:'ground',token:true,deck:'warlock',gWarlockMod:3,
+    text:'A Warlock on this battleground has +3.'},
  /* ---- the tutorial's cards. Nothing but their numbers, so a new player learns
         the rules rather than a card. The roguelike drafts from every card in
         CARDS, not from the pool, so tutorial:true is what keeps them out of it
@@ -4887,7 +4969,7 @@ const CARDS = {
 
    Both views are cached; newState clears them, because fusion ids are reused. */
 const ID_KEYS={name:1,type:1,sides:1,text:1,flavor:1,def:1,sac:1,sacOK:1,token:1,deck:1,tutorial:1,perkOnly:1,
-  boss:1,fusion:1,forms:1,mark:1,runeCard:1,topDeck:1,priest:1,godTitle:1,dwarf:1,
+  boss:1,fusion:1,forms:1,mark:1,runeCard:1,topDeck:1,priest:1,godTitle:1,dwarf:1,warlock:1,patronTitle:1,
   garbage:1,spider:1,vampire:1,solar:1,madness:1,rat:1,locust:1,pixie:1,zombie:1,army:1,apoc:1,devil:1,mummy:1,horseman:1};
 let DEF_SIL={},DEF_GRAFT={};
 function DEF(t){
@@ -6141,7 +6223,7 @@ function teamName(tm){
 /* A woken battleground answers to its own name while it is on its feet. It is
    that card walking around, not a token standing in for it, and a player has to
    be able to see which battleground is loose on the board. */
-function nm(t){const d=DEF(t);return (t.animGround?CARDS[t.animGround.cardId].name:d.godTitle?cardTitle(t.cardId,t.owner):d.name)+(t.promoted?' (promoted)':t.isCopy?' (copy)':'');}
+function nm(t){const d=DEF(t);return (t.animGround?CARDS[t.animGround.cardId].name:(d.godTitle||d.patronTitle)?cardTitle(t.cardId,t.owner):d.name)+(t.promoted?' (promoted)':t.isCopy?' (copy)':'');}
 /* pname() returns "You" for the human seat, so any verb after it has to agree. */
 const vb=(p,third,second)=>(G&&G.vsAI&&p===0)?second:third;
 function log(m){G.log.unshift(m);if(G.log.length>140)G.log.pop();if(HAS_DOM){renderLog();if(NET&&NET.role==='host')netSync(false);}}
@@ -6619,6 +6701,15 @@ function effSides(b,i,parts){
     if(DEF(t).priest){const wd=[0,0,0,0];wd[wside]=3;addMod(s,wd,'Worship of '+godName(t.owner));}
     if(DEF(t).worshipPlus){const wd=[0,0,0,0];wd[wside]=DEF(t).worshipPlus;addMod(s,wd,DEF(t).name+', on the side '+godName(t.owner)+' empowers');}
   }
+  /* The Warlock's Boon: a Priest's god channelled through Fickle Pact pays its
+     side, and Nagash takes 3 off every enemy beside a Warlock carrying him. */
+  {const pm=pactMap(b,i);
+   if(pm)for(const k in pm){const pt=PATRONS[k];if(pt&&pt.side!=null){const wd=[0,0,0,0];wd[pt.side]=3*pm[k];addMod(s,wd,'Boon of '+pt.name+(pm[k]>1?' \u00D7'+pm[k]:''));}}
+   for(const j of ADJ[i]){
+     const o=b[j]&&b[j].teece;if(!o||sameTeam(o.owner,t.owner))continue;
+     const nn=pactN(b,j,'nagash');
+     if(nn)addMod(s,-3*nn,'Boon of Nagash, from '+nm(o)+' at the '+CN[j]);
+   }}
   for(const bo of bonusesOn(b,i)){
     const n=formationCount(b,i,bo);
     if(n)addMod(s,bo.n*n,formationLabel(bo));
@@ -6768,6 +6859,7 @@ function effSides(b,i,parts){
       if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addGround(s,gd.gRangedPlus,gd.name+', for being Ranged');
       if(gd.gFusionMod&&DEF(t).fusion)addGround(s,gd.gFusionMod,gd.name+', for a fusion'+where);
       if(gd.gTokenMod&&t.isToken)addGround(s,gd.gTokenMod,gd.name+', for a Token'+where);
+      if(gd.gWarlockMod&&DEF(t).warlock)addGround(s,gd.gWarlockMod,gd.name+', for a Warlock'+where);
       if(gd.gPerAlly){
         const na=allyCount(b,i,false);
         if(na)addGround(s,gd.gPerAlly*na,gd.name+', one for each of its '+na+' all'+(na===1?'y':'ies'));
@@ -7072,6 +7164,8 @@ function defOf(b,i,raw){
   if(b[i].ground&&DEF(t).defOnGround&&!t.silenced)d+=DEF(t).defOnGround;
   if(b[i].defMark&&!floats(t)&&b.some(c=>c.teece&&c.teece.uid===b[i].defMark.uid))d+=b[i].defMark.n;
   if(sameTeam(t.owner,0))d+=2*perkN('armour');
+  /* The Boon of the Rock God: +3 Defence a copy. */
+  {const rn=pactN(b,i,'rock');if(rn)d+=3*rn;}
   const fdf=formOf(t);
   if(fdf&&fdf.def)d+=fdf.def;
   if(isSpiderling(t)&&isWebbed(b,i)){
@@ -7240,6 +7334,15 @@ function actsOf(b,i){
   if(hasKw(b,i,'flying'))out.push({key:'kfly',act:FLY_ACT});
   {const wn=wrapCount(t);
    if(wn>0)out.push({key:'kwrap',act:{name:'Mummy Wrap',once:'turn',times:wn,steps:[{fx:'mWrap'}]}});}
+  /* The Boon's abilities, one use a turn for every copy carried, and the
+     Channel button a Warlock that names a patron keeps while it is not the
+     one being channelled. */
+  {const pm=pactMap(b,i);
+   if(pm&&pm.bomb)out.push({key:'kwlbomb',act:{name:'Boon of the Bomb God',once:'turn',times:pm.bomb,
+     steps:[{fx:'modSplash',where:'rowcol',n:-3,dur:'perm'}]}});
+   if(pm&&pm.ankh)out.push({key:'kwlwrap',act:{name:'Mummy Wrap (Ankhtepot)',once:'turn',times:pm.ankh,steps:[{fx:'mWrap'}]}});
+   const ck=!t.silenced&&d.channel;
+   if(ck&&wlSeat(t.owner)&&channelsOn(b,t.owner).indexOf(ck)<0)out.push({key:'kwlchan',act:channelAct(ck)});}
   if(hasKw(b,i,'skitter'))out.push({key:'kskit',act:SKITTER_ACT});
   if(hasKw(b,i,'march'))out.push({key:'kmarch',act:MARCH_ACT});
   if(hasKw(b,i,'lumber'))out.push({key:'klumber',act:LUMBER_ACT});
@@ -8830,7 +8933,7 @@ async function FXRUN(st,ctx){
       cands.push(i);
     }
     if(!cands.length)return none(st.where==='web'?'Nothing is standing on the Web.':'No valid target.');
-    const c=await pickCell(cands,'Choose a Teece'+(st.where==='web'?' on the Web':'')+': '+sgn(st.n)+durTxt(dur)+'.',
+    const c=await pickCell(cands,st.msg||('Choose a Teece'+(st.where==='web'?' on the Web':'')+': '+sgn(st.n)+durTxt(dur)+(st.stun?' and a stun':'')+'.'),
       (bb,i)=>{applyModT(bb[i].teece,st.n,dur);if(st.kw)bb[i].teece.kwTemp=bb[i].teece.kwTemp.concat([st.kw]);},!!st.may);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -8841,6 +8944,8 @@ async function FXRUN(st,ctx){
     /* Howl: the number and a keyword for the turn, together. */
     if(st.kw&&b[c].teece.kwTemp.indexOf(st.kw)<0)b[c].teece.kwTemp.push(st.kw);
     log(nm(b[c].teece)+' gets '+sgn(st.n)+(st.kw?' and '+kwLabel(st.kw):'')+durTxt(dur)+'.');
+    /* The Ogre God's shove: the number, then the stun, then the step. */
+    if(st.stun)applyStun(b,c,true,p);
     if(b[c].teece&&!sameTeam(b[c].teece.owner,p)){noteTargeted(p);if(st.n<0)noteEnemyLoss(p,c,-st.n,false);}
     else noteSelfTarget(p);
     await anim([c],'zap');
@@ -13673,6 +13778,159 @@ async function FXRUN(st,ctx){
     }
     conjureSmites(q,n);
     return;}
+  /* ---- Warlock: switching the Boon, and the Blessing ---- */
+  case 'channelSelf':{
+    const t=ctx.t,key=t&&DEF(t).channel;
+    if(!key||!wlSeat(p))return none('There is no patron here to channel.');
+    if(channelsOn(b,p).indexOf(key)>=0)return none('You are already channelling '+patronName(key)+'.');
+    const ok=await channelIn(p,key,null,{forced:true});
+    return ok?undefined:'NONE';}
+  case 'channelFill':{
+    let any=false;
+    while(!G.over&&channelsOn(b,p).length<channelCapOn(b,p)&&channelBackPool(p,false).length){
+      const before=channelsOn(b,p).length;
+      await channelBack(p,false,'There is room for another Boon. Channel a patron you have called on before?');
+      if(channelsOn(b,p).length===before)break;
+      any=true;
+    }
+    if(!any)log(pname(p)+' '+vb(p,'has','have')+' room for '+channelCapOn(b,p)+' Boon'+(channelCapOn(b,p)>1?'s':'')+'.');
+    return;}
+  case 'channelExtra':{
+    const pl=G.players[p];
+    if(!pl.channeler)return none('Only a Warlock player channels a Boon.');
+    pl.channelExtra=(pl.channelExtra||0)+1;
+    log(pname(p)+' can channel one more Boon for the rest of the game ('+channelCapOn(b,p)+' at once).');
+    return await FXRUN({fx:'channelFill'},ctx);}
+  case 'channelBack':{
+    if(!wlSeat(p))return none('Only a Warlock player channels a Boon.');
+    const r=await channelBack(p,!!st.gods,st.gods
+      ?'Fickle Pact: change your Boon to a patron you have channelled before, or to one of the Priest’s gods.'
+      :'Pact Blade: you can change your Boon to a patron you have channelled before.',!!st.gods);
+    if(r==='NONE')return none('There is no other patron to change to.');
+    return;}
+  case 'wlSide':{
+    const t=ctx.t;
+    if(!t)return;
+    const i=b.findIndex(c=>c.teece===t);
+    const opts=[0,1,2,3].filter(k=>!(st.other&&k===ctx.wlSide));
+    let k;
+    if(isAIP(p)||!HAS_DOM){
+      let bv=-1e9;
+      for(const q of opts){
+        if(i<0){k=q;break;}
+        const bb=cloneBoard(b);bb[i].teece.perm[q]+=st.n;simCombat(bb);
+        const v=boardValue(bb,p);
+        if(v>bv){bv=v;k=q;}
+      }
+    }else{
+      const o=await chooseOption(p,opts.map(q=>({v:String(q),lbl:SIDE_NAMES[q]})),
+        'Which side of '+nm(t)+' gets '+sgn(st.n)+'?');
+      k=o==null?opts[0]:parseInt(o,10);
+    }
+    if(k==null)k=opts[0];
+    if(!st.other)ctx.wlSide=k;
+    const sd=[0,0,0,0];sd[k]=st.n;
+    applySides(t,sd,'perm');
+    log(nm(t)+' takes '+sgn(st.n)+' on its '+SIDE_NAMES[k]+' side.');
+    return;}
+  case 'wlBlessing':{
+    const act=channelsOn(b,p);
+    if(!act.length)return none('You are channelling no patron, so the Blessing has nothing to give.');
+    for(let x=0;x<act.length;x++){
+      const k=act[x];
+      log('Blessing of '+patronName(k)+'.');
+      const r=await runSteps(WL_BLESS[k],{p,cell:null,t:null,first:x===0&&!!ctx.first,cardId:ctx.cardId});
+      if(!r&&x===0&&act.length===1)return 'ABORT';
+      if(G.over)return;
+    }
+    return;}
+  case 'pickTele':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p)&&!hasKw(b,i,'immovable'))cands.push(i);
+    if(!cands.length)return none('Nothing can be teleported.');
+    const open=()=>{const o=[];for(let j=0;j<BN;j++)if(openAt(b,j))o.push(j);return o;};
+    if(!open().length)return none('There is nowhere to teleport anything to.');
+    /* The computer weighs each Teece by the best place it could send it. */
+    const c=await pickCell(cands,'Blessing of the Fey: choose a Teece to teleport.',(bb,i)=>{
+      let best=null,bv=-1e9;
+      for(const j of open()){const b2=cloneBoard(bb);if(!b2[i].teece)break;moveT(b2,i,j,false);simCombat(b2);const v=boardValue(b2,p);if(v>bv){bv=v;best=j;}}
+      if(best!=null&&bb[i].teece)moveT(bb,i,best,false);
+    },false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(!sameTeam(b[c].teece.owner,p)&&(wardMagic(b,c,p)||tapeSave(b,c,p))){await anim([c],'zap');return;}
+    ctx.last=c;
+    return await FXRUN({fx:'teleLast'},ctx);}
+  case 'wlDoomNext':{
+    const pl=G.players[p];
+    pl.wlDoom=(pl.wlDoom||0)+1;
+    log('The Devils take their price: the next Teece '+whoIn(p)+' '+vb(p,'plays','play')+' is destroyed as it lands.');
+    return;}
+  case 'zeusColumn':{
+    const cols=[];
+    for(let c=0;c<BW;c++){const i=zeusTarget(b,c);if(i>=0&&canTarget(b,i,p))cols.push(i);}
+    if(!cols.length)return none('No column has a Teece in it.');
+    const c=await pickCell(cols,'Blessing of Zeus: choose a column. The highest Teece in it gets '+sgn(st.n)+'.',
+      (bb,i)=>{if(bb[i].teece)applyModT(bb[i].teece,st.n,'perm');},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(!sameTeam(b[c].teece.owner,p)&&(wardMagic(b,c,p)||tapeSave(b,c,p))){await anim([c],'zap');return;}
+    applyModT(b[c].teece,st.n,'perm');
+    log('Lightning strikes the top of the column: '+nm(b[c].teece)+' gets '+sgn(st.n)+'.');
+    if(!sameTeam(b[c].teece.owner,p))noteTargeted(p);
+    await anim([c],'zap');
+    return;}
+  case 'ankhBless':{
+    /* An ally and an enemy in one line: the enemy is hauled one panel nearer. */
+    const pairs=[];
+    for(let a=0;a<BN;a++){
+      const al=b[a].teece;if(!al||!sameTeam(al.owner,p))continue;
+      for(let e=0;e<BN;e++){
+        const en=b[e].teece;if(!en||sameTeam(en.owner,p)||!canTarget(b,e,p))continue;
+        if(!(sameRow(a,e)||sameCol(a,e))||isPlane(a)||isPlane(e))continue;
+        pairs.push({a,e});
+      }
+    }
+    if(!pairs.length)return none('No ally and enemy share a row or column.');
+    const step=(a,e)=>sameRow(a,e)?e+(a<e?-1:1):e+(a<e?-BW:BW);
+    const sim=(bb,a,e)=>{const t=bb[e].teece;if(!t)return;applyModT(t,st.n,'perm');const d=step(a,e);if(d!==a&&openAt(bb,d)&&!hasKw(bb,e,'immovable'))moveT(bb,e,d,false);};
+    const ens=[...new Set(pairs.map(x=>x.e))];
+    const e=await pickCell(ens,'Blessing of Ankhtepot: choose the enemy to wrap.',
+      (bb,i)=>{const pr=pairs.find(x=>x.e===i);if(pr)sim(bb,pr.a,i);},false);
+    if(e==='CANCEL')return 'ABORT';
+    if(e==null)return;
+    const als=pairs.filter(x=>x.e===e).map(x=>x.a);
+    const a=als.length>1?await pickCell(als,'Choose the ally it is pulled towards.',(bb,i)=>sim(bb,i,e),false):als[0];
+    if(a==null||a==='CANCEL')return;
+    const t=b[e].teece;
+    if(wardMagic(b,e,p)||tapeSave(b,e,p)){await anim([e],'zap');return;}
+    applyModT(t,st.n,'perm');
+    log(nm(t)+' is bound by Ankhtepot’s bandage: '+sgn(st.n)+'.');
+    noteTargeted(p);
+    const d=step(a,e);
+    if(d!==a&&openAt(b,d)&&!hasKw(b,e,'immovable')){
+      moveT(b,e,d,true);
+      log(nm(t)+' is dragged to the '+CN[d]+'.');
+      await fireMove(e,d,p);
+    }
+    await anim([d],'zap');
+    return;}
+  case 'nagashBless':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;if(!t||!canTarget(b,i,p))continue;
+      if(ADJ[i].some(j=>b[j].teece&&sameTeam(b[j].teece.owner,t.owner)))cands.push(i);
+    }
+    if(!cands.length)return none('No Teece has an ally beside it.');
+    const hitOf=(bb,i)=>ADJ[i].filter(j=>bb[j].teece&&bb[i].teece&&sameTeam(bb[j].teece.owner,bb[i].teece.owner));
+    const c=await pickCell(cands,'Blessing of Nagash: choose a Teece. Its allies beside it get '+sgn(st.n)+'.',
+      (bb,i)=>{for(const j of hitOf(bb,i))applyModT(bb[j].teece,st.n,'perm');},false,i=>hitOf(b,i));
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const hit=hitOf(b,c);
+    for(const j of hit){applyModT(b[j].teece,st.n,'perm');log(nm(b[j].teece)+' withers beside '+nm(b[c].teece)+': '+sgn(st.n)+'.');}
+    await anim(hit,'zap');
+    return;}
   case 'worshipSwitch':{
     await chooseWorship(p,'Prophet: you can switch the god you Worship.',true);
     return;}
@@ -14257,6 +14515,14 @@ async function catchDiscard(owner,cardId){
 async function noteDiscard(owner,cardId){
   if(!G||!G.board)return;
   const what=CARDS[cardId]?CARDS[cardId].name:'a card';
+  /* The Boon of the Old One: every discard, anybody's, feeds it. */
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;if(!t)continue;
+    const on=pactN(G.board,i,'old');if(!on)continue;
+    applyModT(t,5*on,'temp');
+    if(t.kwTemp.indexOf('teleport')<0)t.kwTemp.push('teleport');
+    log(nm(t)+' answers the Old One as '+what+' is thrown away: '+sgn(5*on)+' and Teleport until the end of the turn.');
+  }
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
     if(!t||t.silenced)continue;
@@ -14723,6 +14989,19 @@ async function processDeath(d){
      survives being moved, stolen or handed around. Sacrifices (d.cost:true)
      are not destroyed: they are removed as a cost and do not fire death effects. */
   let deathFx=d.cost?[]:(t.silenced?[]:(DEF(t).onDeath||[])).slice();
+  /* The Boon of Death. Read off the panel it fell on, which still holds the
+     ground and the equips it carried. */
+  if(!d.cost){
+    const was=b[cell].teece;b[cell].teece=t;
+    const dn=pactN(b,cell,'death');
+    b[cell].teece=was;
+    if(dn){
+      const pl=G.players[t.owner];
+      pl.wlShield=(pl.wlShield||0)+dn;
+      log(nm(t)+' falls with Death’s Boon: the next Teece '+whoIn(t.owner)+' '+vb(t.owner,'plays','play')+
+        ' cannot be destroyed until the end of '+ownOf(t.owner)+' next turn.');
+    }
+  }
   if(!d.cost&&t.deathFx&&t.deathFx.length)deathFx.push(...t.deathFx);
   if(!d.cost&&cell!=null&&!floats(t)&&G.board[cell]&&G.board[cell].ground&&groundFlag(G.board[cell].ground,'gDeathModal')){
     deathFx.push({fx:'choose',modal:true,msg:'The Platform gives out:',opts:[
@@ -15100,11 +15379,40 @@ async function resolveCombat(){
     if(packSweepB(G.board,true).length&&HAS_DOM)render();
     /* stacked effects resolve first: nothing fights while a kill is pending */
     await drainFx();
+    channelSettle();
     if(stale(ep)||G.over)return;
     let deaths=scanDeaths(G.board);
     if(!deaths.length)break;
     let dodged=false;
     for(const d of deaths){
+      /* The Boon of the Fey: once a turn for each copy, a Warlock about to be
+         destroyed can step one space clear. Offered, not automatic. */
+      {const fn=G.board[d.cell].teece===d.t?pactN(G.board,d.cell,'fey'):0;
+       const used=(d.t.feyTurn===G.turnNum?d.t.feyUsed:0)||0;
+       const empt=fn>used&&!hasKw(G.board,d.cell,'immovable')?ADJ[d.cell].filter(j=>openAt(G.board,j)):[];
+       if(empt.length){
+         let c;
+         if(isAIP(d.t.owner)||!HAS_DOM){
+           c=empt.find(j=>{
+             const bb=cloneBoard(G.board);
+             if(!bb[d.cell].teece)return false;
+             moveT(bb,d.cell,j,false);simCombat(bb);
+             return !!(bb[j].teece&&bb[j].teece.uid===d.t.uid);
+           });
+           if(c==null)c=empt[0];
+         }else{
+           c=await chooseCell(d.t.owner,empt,'Boon of the Fey: '+nm(d.t)+' is about to be destroyed. Move it one space, or skip.',
+             {skip:true,mut:(bb,j)=>{if(bb[d.cell].teece)moveT(bb,d.cell,j,false);}});
+         }
+         if(c!=null&&c!=='CANCEL'){
+           d.t.feyTurn=G.turnNum;d.t.feyUsed=used+1;
+           moveT(G.board,d.cell,c,true);
+           log(nm(d.t)+' slips away on the Boon of the Fey, to the '+CN[c]+'.');
+           await fireMove(d.cell,c,d.t.owner);
+           dodged=true;
+           continue;
+         }
+       }}
       const gsv=G.board[d.cell].ground;
       if(gsv&&CARDS[gsv.cardId].gSave&&G.board[d.cell].teece===d.t&&G.players[d.t.owner].hand.length){
         const yes=await chooseOption(d.t.owner,[{v:'y',lbl:'Discard a card to save it'},{v:'n',lbl:'Let it die'}],
@@ -15560,6 +15868,8 @@ function canHandDiscard(p,id){
   if(CARDS[id].handDiscard)return true;
   const pl=G&&G.players[p];
   if(pl&&pl.freeDiscard)return true;
+  /* The Boon of the Old One lets a Warlock be thrown away from hand. */
+  if(CARDS[id].warlock&&pl&&channelsOn(G.board,p).indexOf('old')>=0)return true;
   /* A Madness card drafted into a mixed deck brings the rule with it. Without
      this the cards whose whole design is being thrown away would be unplayable
      outside their own deck, which is where they used to print it themselves. */
@@ -15895,6 +16205,21 @@ async function playTeece(p,handIdx){
     t.immortalOwner=p;t.immortalUntil=G.turnNum;
     log(nm(t)+' arrives under the bargain: it cannot be destroyed until the end of this turn.');
   }
+  /* Death's Boon: cover through the end of the player's next turn. */
+  if(pl.wlShield>0){
+    pl.wlShield--;
+    t.immortalOwner=p;t.immortalUntil=nextTurnExpiry();
+    log(nm(t)+' arrives under Death’s Boon: it cannot be destroyed until the end of '+ownOf(p)+' next turn.');
+  }
+  /* The Devils' Blessing is paid here: the next Teece is destroyed as it lands. */
+  if(pl.wlDoom>0&&b[spot].teece===t){
+    pl.wlDoom--;
+    log('The Devils collect: '+nm(t)+' is destroyed as it lands.');
+    await anim([spot],'dying',190);
+    await processDeath({cell:spot,t,killers:[]});
+    if(G.over)return true;
+    if(b[spot].teece!==t){await resolveCombat();render();return true;}
+  }
   if(pl.nextSides){
     const ns=pl.nextSides;pl.nextSides=null;
     for(let k=0;k<4;k++)t.perm[k]+=ns[k];
@@ -15910,6 +16235,9 @@ async function playTeece(p,handIdx){
   const dblFx=(groundCard&&groundCard.gDoubleEffects)?2:1;
   /* fromHand is the one thing every other way of putting a card down lacks, so
      a clause marked "except by effect" can tell them apart. */
+  /* A Warlock offers its patron, then its when-played Boons fire. */
+  if(DEF(t).warlock&&wlSeat(p)){await warlockArrive(p,spot,t);if(G.over)return true;}
+  else if(b[spot].teece===t&&pactMap(b,spot)){await pactArrive(p,t);if(G.over)return true;}
   if(d.onPlay)for(let k=0;k<dblFx;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked,fromHand:!G.viaEffect,viaEffect:!!G.viaEffect});
   if(b[spot].teece===t)await groundArrive(spot);
   for(let i=0;i<BN;i++){
@@ -16184,6 +16512,21 @@ async function clearGroundAt(i,breaker){
   }
   /* Soul Debtor's Prison: every price on the tab, paid twice. */
   if((g.debt||[]).length){await payDebt(g);if(G.over)return;}
+  /* The Warlock's Circle leaves a Lesser Circle behind, wherever its owner
+     likes, as long as no battleground is lying there already. */
+  const spread=groundNum(g,'gSpread');
+  if(spread&&CARDS[spread]&&!G.over){
+    const spots=[];for(let j=0;j<BN;j++)if(j!==i&&!b[j].ground&&!b[j].razed&&!isPlane(j))spots.push(j);
+    if(spots.length){
+      const c=await chooseCell(g.owner,spots,gd.name+' is gone. Lay a '+CARDS[spread].name+' (a Warlock on it has +3) on a panel with no battleground, or skip.',
+        {skip:!(isAIP(g.owner)||!HAS_DOM),mut:(bb,j)=>{bb[j].ground={cardId:spread,owner:g.owner};}});
+      if(c!=null&&c!=='CANCEL'&&!b[c].ground){
+        placeGround(b,c,spread,g.owner);
+        log('A '+CARDS[spread].name+' is drawn at the '+CN[c]+'.');
+        if(HAS_DOM)render();
+      }
+    }
+  }
   const dob=groundNum(g,'gDiscardOnBreak');
   if(dob&&breaker!=null&&breaker!==g.owner){
     log(pname(breaker)+' broke '+gd.name+' and must discard '+dob+'.');
@@ -17594,6 +17937,8 @@ function aiPlanFor(id){
     /* The Priest's three pay out as Smites are conjured and cast, later. */
     if(eg.smiteAbsorb)ebonus+=G.players[p].hand.some(h=>smiteLvl(h))?1.0:0.6;
     if(eg.onConjure)ebonus+=0.9;
+    /* Another copy of the Boon is worth what the Boon is worth, later. */
+    if(eg.pactCopy)ebonus+=channelsOn(b,p).length?1.0:0.3;
     /* The Dwarves' gear: Defence and protection the board score cannot see, a
        mode chosen as it goes on, and a shield that lasts a turn. */
     if(eg.def)ebonus+=0.3*eg.def;
@@ -17656,6 +18001,8 @@ function aiPlanFor(id){
     if(d.gMCurseHit)bonus+=0.9;
     /* The Wolf Den pays the pack copies that land on it later. */
     if(d.gTokenMod)bonus+=0.8;
+    /* The Patron's Shrine pays a copy of the Boon to whatever stands there later. */
+    if(d.gPactCopy)bonus+=channelsOn(b,p).length?0.9:0.2;
     return {thr:0.8,bonus,cands,mut:(bb,i)=>{
       if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
       else bb[i].ground={cardId:id,owner:p};
@@ -17670,6 +18017,7 @@ function aiPlanFor(id){
   if(d.wiz)return aiWizPlan(d);
   if(d.smiteAi)return aiSmitePlan(d);
   if(magicLocked(p))return null;
+  if(d.wlAi)return aiWarlockPlan(d);
   if(d.gunAi)return aiGunMagicPlan(d);
   if(d.fuAi)return aiFusionMagicPlan(d);
   /* Past the price gate. A spell that asks the whole price before it takes any
@@ -18283,6 +18631,10 @@ async function aiActs(depth){
         gain=(G.turnNum>=3&&anyEmpty)?0.75:-1;
       }else if(st.fx==='draw'){
         gain=G.players[p].hand.length<5?0.85:-1;
+      }else if(st.fx==='channelSelf'){
+        const ck=DEF(t).channel,ch=channelChoices(p,ck);
+        const now=aiChannelValue(p,channelsOn(b,p).slice());
+        for(const c of ch)gain=Math.max(gain,aiChannelValue(p,c.set)-now+0.4);
       }else if(st.fx==='runeRecall'){
         /* Worth it when a sword is lying idle, or an enemy holds one it is not bound by. */
         gain=runeSpots(p).some(sp=>sp.where!=='hand'&&runeSpotRank(p,sp)<=3)?0.9:-1;
@@ -18305,7 +18657,7 @@ async function aiActs(depth){
   /* An ability with more than one use a turn -- Mummy Wrap, two or three
      times over -- gets another look once the board has moved under it. */
   if(used&&(depth||0)<3&&b.some((c,x)=>c.teece&&c.teece.owner===p&&
-     actsOf(b,x).some(e=>e.key==='kwrap'&&actAvailable(c.teece,e))))
+     actsOf(b,x).some(e=>(e.key==='kwrap'||e.key==='kwlwrap'||e.key==='kwlbomb')&&actAvailable(c.teece,e))))
     return (await aiActs((depth||0)+1))||used;
   return used;
 }
@@ -19503,6 +19855,15 @@ function statusesFor(p){
   /* --- the god this seat worships --- */
   if(worshipOf(p)!=null)push('worship','good','Worship: '+godName(p),
     'Your priests get +3 on their '+SIDE_NAMES[worshipOf(p)]+' side. A Prophet can switch it.');
+  /* --- the Warlock's Boon --- */
+  if(wlSeat(p)){
+    const act=channelsOn(b,p),cap=channelCapOn(b,p);
+    push('wlboon',act.length?'good':'warn',act.length?'Boon: '+act.map(k=>PATRONS[k].short).join(', '):'No Boon yet',
+      (act.length?act.map(k=>'Boon of '+patronName(k)+': '+PATRONS[k].boon).join(' '):'You are not channelling a patron yet. Play a Warlock that names one, or tap a Channel button on one already on the field.')+
+      ' Every Warlock you control carries it. You can hold '+cap+' Boon'+(cap>1?'s':'')+' at once.'+
+      (pl.wlShield?' The next Teece you play cannot be destroyed until the end of your next turn.':'')+
+      (pl.wlDoom?' The next Teece you play is destroyed as it lands.':''));
+  }
   /* --- and what is calling from the graveyard ---
      The board has no panel to tap for a card that is in the ground, so the
      chip carries the ability itself. */
@@ -20490,6 +20851,7 @@ function godName(p){
 function cardTitle(id,p){
   const d=CARDS[id];
   if(!d)return '';
+  if(d.patronTitle){const k=p!=null?patronOf(p):null;return (d.baseName||d.name)+' of '+(k?patronName(k):'your patron');}
   if(!d.godTitle)return d.name;
   const g=p!=null?godName(p):null;
   return (d.baseName||d.name)+' of '+(g||'your god');
@@ -20509,6 +20871,326 @@ for(const id in CARDS){
   if(!d||!d.godTitle||d.baseName)continue;
   d.baseName=d.name;
   Object.defineProperty(d,'name',{get(){return godTitleName(this);},enumerable:true,configurable:true});
+}
+/* ============ Warlock: the BOON ============
+   The Boon is the seat's, like Worship: a seat playing the Warlock deck
+   channels a patron, and every Warlock it controls carries that patron's
+   effect for as long as it does. pl.channel is the list being channelled,
+   newest last; pl.channelHist every patron that seat has ever channelled,
+   which is what Fickle Pact and the Pact Blade reach back into. One at a
+   time, unless an Adept is on the field (three) or Avatars have been
+   played (one more each, for good) -- the newest ones are the ones that
+   count, so an Adept leaving simply lets the oldest lapse.
+
+   A Teece holds COPIES of the Boon: one for being a Warlock, one more for
+   each Patron's Mark it wears, one more for standing on its own side's
+   Patron's Shrine. An enemy on your Shrine holds one copy of YOUR Boon.
+   Every effect below is paid once per copy: two copies of the Rock God are
+   +6 Defence, two of the Bomb God two bombs a turn.
+
+   Read through pactMap(b,i), which works on any board, so the computer's
+   clones see the same numbers the game does. */
+const PATRONS={
+  rock:{name:'the Rock God',short:'Rock God',boon:'+3 Defence.'},
+  fey:{name:'the Fey',short:'Fey',boon:'once a turn, when about to be destroyed, it can move one space.'},
+  devils:{name:'the Devils',short:'Devils',boon:'when played, PACT — -4 to one side ; +3 to another.'},
+  ogre:{name:'the Ogre God',short:'Ogre God',boon:'when played, select an adjacent Teece; give it -2 and stun it, then you can move it one space.'},
+  old:{name:'the Old One',short:'Old One',boon:'when a card is discarded, +5 and Teleport until the end of the turn. Warlocks in your hand can be discarded.'},
+  zeus:{name:'Zeus',short:'Zeus',boon:'when played, +5 until the end of the turn.'},
+  bomb:{name:'the Bomb God',short:'Bomb God',boon:'once per your turn, a Teece on the same row or column and every Teece adjacent to it get -3.'},
+  ankh:{name:'Ankhtepot',short:'Ankhtepot',boon:'once per your turn, Mummy Wrap.'},
+  nagash:{name:'Nagash',short:'Nagash',boon:'adjacent enemies have -3.'},
+  death:{name:'Death',short:'Death',boon:'when destroyed, the next Teece you play cannot be destroyed until the end of your next turn.'},
+  g0:{name:'Topus',short:'Topus',side:0,boon:'+3 on its top side.'},
+  g1:{name:'Rightorious',short:'Rightorious',side:1,boon:'+3 on its right side.'},
+  g2:{name:'Bottomor',short:'Bottomor',side:2,boon:'+3 on its bottom side.'},
+  g3:{name:'Levt',short:'Levt',side:3,boon:'+3 on its left side.'}
+};
+const PATRON_GODS=['g0','g1','g2','g3'];
+const patronName=k=>PATRONS[k]?PATRONS[k].name:String(k);
+function wlSeat(p){const pl=G&&G.players&&G.players[p];return !!(pl&&pl.channeler);}
+function channelCapOn(b,p){
+  const pl=G.players[p];
+  let cap=1+(pl.channelExtra||0);
+  if(b&&b.some(c=>c.teece&&c.teece.owner===p&&DEF(c.teece).channelCap))cap+=2;
+  return cap;
+}
+function channelsOn(b,p){
+  const pl=G&&G.players&&G.players[p];
+  if(!pl||!pl.channeler||!pl.channel||!pl.channel.length)return [];
+  const cap=channelCapOn(b,p);
+  return pl.channel.length>cap?pl.channel.slice(pl.channel.length-cap):pl.channel;
+}
+/* The newest patron, for "Adept of Zeus". */
+function patronOf(p){const a=channelsOn(G.board,p);return a.length?a[a.length-1]:null;}
+function pactMap(b,i){
+  const t=b[i]&&b[i].teece;
+  if(!t||!G||!G.players)return null;
+  let out=null;
+  const add=(keys,n)=>{if(!n)return;for(const k of keys){out=out||{};out[k]=(out[k]||0)+n;}};
+  const g=b[i].ground,onG=g&&!bgProof(t)&&groundFlag(g,'gPactCopy');
+  const mine=channelsOn(b,t.owner);
+  if(mine.length){
+    let n=DEF(t).warlock?1:0;
+    for(const e of t.equips){const eg=eqG(e);if(eg&&eg.pactCopy)n+=eg.pactCopy;}
+    if(onG&&g.owner===t.owner)n++;
+    add(mine,n);
+  }
+  if(onG&&g.owner!==t.owner&&!sameTeam(g.owner,t.owner))add(channelsOn(b,g.owner),1);
+  return out;
+}
+const pactN=(b,i,k)=>{const m=pactMap(b,i);return (m&&m[k])||0;};
+/* The bottom line of the boon on a Teece, for the board's Detail panel. */
+function pactLine(b,i){
+  const m=pactMap(b,i);
+  if(!m)return '';
+  return Object.keys(m).map(k=>'Boon of '+patronName(k)+(m[k]>1?' ×'+m[k]:'')+': '+PATRONS[k].boon).join(' ');
+}
+/* Adept, Avatar and Blessing are named for the patron: "Avatar of Zeus". */
+function patronTitleName(d){
+  try{
+    if(G&&G.players){
+      let q=patronOf(G.turn)!=null?G.turn:-1;
+      for(let x=0;q<0&&x<G.players.length;x++)if(patronOf(x)!=null)q=x;
+      if(q>=0)return d.baseName+' of '+patronName(patronOf(q));
+    }
+  }catch(e){}
+  return d.baseName+' of your patron';
+}
+/* What the Blessing does under each patron, short enough for a card face.
+   The Blessing's text is a getter too, so it reads what it will do now. */
+const WL_BLESS_TXT={rock:'give a Teece Ward',fey:'teleport a Teece',devils:'a Teece gets +6, and the next Teece you play is destroyed as it lands',
+  ogre:'stun a Teece, give it -2 and move it one space',old:'discard a card, then add a card from your graveyard to your hand',
+  zeus:'select a column; its highest Teece gets -6',bomb:'a Teece and every Teece adjacent to it get -3',
+  ankh:'pull an enemy one space towards an ally in its row or column, and give it -6',nagash:'select a Teece; its allies beside it get -3',
+  death:'add a Teece from your graveyard to your hand',g0:'an ally gets +3 on its top side',g1:'an ally gets +3 on its right side',
+  g2:'an ally gets +3 on its bottom side',g3:'an ally gets +3 on its left side'};
+function blessingText(d){
+  try{
+    if(G&&G.players){
+      let q=patronOf(G.turn)!=null?G.turn:-1;
+      for(let x=0;q<0&&x<G.players.length;x++)if(patronOf(x)!=null)q=x;
+      if(q>=0){const act=channelsOn(G.board,q);
+        return act.map(k=>patronName(k).replace(/^the /,'The ')+': '+WL_BLESS_TXT[k]+'.').join(' ')+(act.length>1?' Each fires in turn.':'');}
+    }
+  }catch(e){}
+  return d.baseText;
+}
+{const d=CARDS[1166];d.baseText=d.text;Object.defineProperty(d,'text',{get(){return blessingText(this);},enumerable:true,configurable:true});}
+for(const id in CARDS){
+  const d=CARDS[id];
+  if(!d||!d.patronTitle||d.baseName)continue;
+  d.baseName=d.name;
+  Object.defineProperty(d,'name',{get(){return patronTitleName(this);},enumerable:true,configurable:true});
+}
+/* What switching to a set of patrons is worth to the computer: the board
+   after a fight on a clone, and a hand-set figure for what the board score
+   cannot see -- Defence it reads only through the fight, abilities it has not
+   used yet, things that happen when somebody dies. */
+const PATRON_AI={rock:0.7,fey:0.8,devils:0.3,ogre:0.5,old:0.2,zeus:0.4,bomb:1.1,ankh:0.8,nagash:0,death:0.5,g0:0,g1:0,g2:0,g3:0};
+function aiChannelValue(p,set){
+  const pl=G.players[p],was=pl.channel;
+  pl.channel=set;
+  let v=0;
+  try{
+    const bb=cloneBoard(G.board);
+    simCombat(bb);
+    v=boardValue(bb,p);
+    const act=channelsOn(G.board,p);
+    let wl=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p&&DEF(t).warlock)wl++;}
+    for(const k of act)v+=(PATRON_AI[k]||0)*Math.max(1,wl);
+  }finally{pl.channel=was;}
+  return v;
+}
+/* Every way of bringing key in: added beside what is held when there is room,
+   or in place of one of them. Each is the list it would leave. */
+function channelChoices(p,key){
+  const act=channelsOn(G.board,p).slice();
+  if(act.indexOf(key)>=0)return [];
+  const cap=channelCapOn(G.board,p);
+  if(act.length<cap)return [{set:act.concat([key]),drop:null}];
+  return act.map(k=>({set:act.filter(x=>x!==k).concat([key]),drop:k}));
+}
+/* Switch the seat's Boon to key. Optional unless forced; returns true when
+   it switched. o.bias weighs the computer toward the patron just played,
+   whose own when-played boon is about to fire. */
+async function channelIn(p,key,src,o){
+  o=o||{};
+  const pl=G.players[p];
+  if(!pl.channeler||!PATRONS[key])return false;
+  const ch=channelChoices(p,key);
+  if(!ch.length)return false;
+  const cur=channelsOn(G.board,p);
+  let pick=null;
+  if(o.forced&&ch.length===1)pick=ch[0];
+  else if(isAIP(p)||!HAS_DOM){
+    let best=null,bv=o.forced?-1e9:aiChannelValue(p,cur.slice())+0.15;
+    for(const c of ch){const v=aiChannelValue(p,c.set)+(o.bias||0);if(v>bv){bv=v;best=c;}}
+    pick=best;
+  }else{
+    const opts=ch.map((c,x)=>({v:String(x),lbl:c.drop
+      ?'Channel '+patronName(key)+' in place of '+patronName(c.drop)
+      :'Channel '+patronName(key)+(cur.length?' beside '+cur.map(patronName).join(' and '):'')+' — '+PATRONS[key].boon}));
+    if(!o.forced)opts.push({v:'keep',lbl:cur.length?'Keep channelling '+cur.map(patronName).join(' and '):'Channel nothing yet'});
+    const r=await chooseOption(p,opts,(src?src+': ':'')+'switch your Boon to '+patronName(key)+'?');
+    if(r!=null&&r!=='keep'&&r!=='CANCEL')pick=ch[parseInt(r,10)];
+  }
+  if(!pick){
+    if(src)log(pname(p)+' '+vb(p,'keeps','keep')+(cur.length?' channelling '+cur.map(patronName).join(' and '):' the Boon empty')+'.');
+    return false;
+  }
+  pl.channel=pick.set.slice();
+  pl.channelHist=pl.channelHist||[];
+  if(pl.channelHist.indexOf(key)<0)pl.channelHist.push(key);
+  log(pname(p)+' '+vb(p,'channels','channel')+' '+patronName(key)+(pick.drop?' in place of '+patronName(pick.drop):'')+
+    '. Boon: '+PATRONS[key].boon);
+  if(HAS_DOM)render();
+  return true;
+}
+/* Physically drop whatever an Adept leaving has let lapse, so a returning
+   Adept does not wake a patron nobody chose. Run between fights, on the real
+   board only. */
+function channelSettle(){
+  if(!G||!G.players)return;
+  for(let p=0;p<G.players.length;p++){
+    const pl=G.players[p];
+    if(!pl.channeler||!pl.channel)continue;
+    const act=channelsOn(G.board,p);
+    if(act.length<pl.channel.length){
+      const gone=pl.channel.slice(0,pl.channel.length-act.length);
+      pl.channel=act.slice();
+      log(pname(p)+' can no longer hold '+gone.map(patronName).join(' and ')+', and '+(gone.length>1?'they lapse':'it lapses')+'.');
+    }
+  }
+}
+/* The patrons you can reach back for: everything channelled before and not
+   held now, and with gods, the Priest's four as well. */
+function channelBackPool(p,gods){
+  const pl=G.players[p],act=channelsOn(G.board,p);
+  const out=(pl.channelHist||[]).filter(k=>act.indexOf(k)<0);
+  if(gods)for(const k of PATRON_GODS)if(out.indexOf(k)<0&&act.indexOf(k)<0)out.push(k);
+  return out;
+}
+async function channelBack(p,gods,why,must){
+  const pool=channelBackPool(p,gods);
+  if(!pool.length)return 'NONE';
+  let key=null;
+  if(isAIP(p)||!HAS_DOM){
+    let bv=must?-1e9:aiChannelValue(p,channelsOn(G.board,p).slice())+0.2;
+    for(const k of pool)for(const c of channelChoices(p,k)){const v=aiChannelValue(p,c.set);if(v>bv){bv=v;key=k;}}
+    if(key==null)return;
+  }else{
+    const r=await chooseOption(p,pool.map(k=>({v:k,lbl:patronName(k)+' — '+PATRONS[k].boon}))
+      .concat([{v:'keep',lbl:'Keep the Boon as it is'}]),why);
+    if(r==null||r==='keep'||r==='CANCEL')return;
+    key=r;
+  }
+  await channelIn(p,key,null,{forced:true});
+}
+/* When-played boons: the Devils' PACT, the Ogre God's shove and Zeus. Fired
+   for the Teece that just landed, after it has had its chance to switch the
+   Boon, so a Warlock of Zeus can call Zeus and take his +5 at once. */
+const DEVIL_BOON={y:'this gets -4 on a side you pick',z:'+3 on another side',
+  cost:[{fx:'wlSide',n:-4}],gain:[{fx:'wlSide',n:3,other:true}]};
+async function pactArrive(p,t){
+  const b=G.board;
+  const cellOf=()=>b.findIndex(c=>c.teece===t);
+  let c=cellOf();
+  if(c<0)return;
+  const m=pactMap(b,c);
+  if(!m)return;
+  for(const k of Object.keys(m)){
+    for(let r=0;r<m[k];r++){
+      c=cellOf();
+      if(c<0||G.over)return;
+      if(k==='zeus'){applyModT(t,5,'temp');log(nm(t)+' is struck by the Boon of Zeus: +5 until the end of the turn.');}
+      else if(k==='ogre'){
+        await runSteps([{fx:'mod',where:'adj',n:-2,dur:'perm',stun:true,move:true,may:true,
+          msg:'Boon of the Ogre God: select an adjacent Teece to give -2 and stun, or skip.'}],{p,cell:c,t,first:false});
+      }else if(k==='devils'){
+        const pk=Object.assign({},DEVIL_BOON,{ai:rimSides(c).length?'take':'never'});
+        await offerPact(p,pk,{t,src:nm(t)+', by the Boon of the Devils'});
+      }
+    }
+  }
+}
+/* Ogre God and Zeus and the Devils fire when played; a Warlock that names a
+   patron offers it first. */
+async function warlockArrive(p,cell,t){
+  const d=CARDS[t.cardId];
+  if(!wlSeat(p))return;
+  if(d.channel&&channelsOn(G.board,p).indexOf(d.channel)<0){
+    const onPlayKey=d.channel==='zeus'||d.channel==='ogre'||d.channel==='devils';
+    await channelIn(p,d.channel,nm(t),{bias:onPlayKey?0.6:0});
+    if(G.over)return;
+  }
+  await pactArrive(p,t);
+}
+/* The Channel button a Warlock that names a patron keeps on the field. */
+const channelAct=key=>({name:'Channel '+patronName(key),once:'turn',steps:[{fx:'channelSelf'}]});
+/* The Blessing, by patron. */
+const WL_BLESS={
+  rock:[{fx:'kwT',kw:'ward',perm:true,kwTxt:'Ward',msg:'Blessing of the Rock God: choose an ally; it gains Ward.'}],
+  fey:[{fx:'pickTele'}],
+  devils:[{fx:'mod',n:6,dur:'perm'},{fx:'wlDoomNext'}],
+  ogre:[{fx:'mod',n:-2,dur:'perm',stun:true,move:true}],
+  old:[{fx:'discard',n:1,cost:true},{fx:'graveToHand'}],
+  zeus:[{fx:'zeusColumn',n:-6}],
+  bomb:[{fx:'modSplash',n:-3,dur:'perm'}],
+  ankh:[{fx:'ankhBless',n:-6}],
+  nagash:[{fx:'nagashBless',n:-3}],
+  death:[{fx:'graveToHand',type:'teece'}],
+  g0:[{fx:'modSides',who:'ally',sides:[3,0,0,0],dur:'perm',msg:'Blessing of Topus: choose an ally; +3 on its top side.'}],
+  g1:[{fx:'modSides',who:'ally',sides:[0,3,0,0],dur:'perm',msg:'Blessing of Rightorious: choose an ally; +3 on its right side.'}],
+  g2:[{fx:'modSides',who:'ally',sides:[0,0,3,0],dur:'perm',msg:'Blessing of Bottomor: choose an ally; +3 on its bottom side.'}],
+  g3:[{fx:'modSides',who:'ally',sides:[0,0,0,3],dur:'perm',msg:'Blessing of Levt: choose an ally; +3 on its left side.'}]
+};
+/* Zeus' Blessing strikes the top of a column: the first Teece down from the
+   top edge. */
+function zeusTarget(b,c){
+  for(let r=0;r<BW;r++){const i=r*BW+c;if(i<BN&&b[i].teece)return i;}
+  return -1;
+}
+/* The computer's Blessing: what each patron's part is roughly worth on the
+   board as it stands. */
+function aiBlessWorth(p){
+  const b=G.board;
+  let allies=0,foes=0;
+  for(let i=0;i<BN;i++){const t=b[i].teece;if(!t)continue;if(sameTeam(t.owner,p))allies++;else foes++;}
+  const pl=G.players[p];
+  const graveT=pl.grave.some(id=>CARDS[id]&&CARDS[id].type==='teece');
+  let v=0;
+  for(const k of channelsOn(b,p)){
+    if(k==='rock')v+=allies?0.9:0;
+    else if(k==='fey')v+=allies?0.3:0;
+    else if(k==='devils')v+=allies?0.2:-1;
+    else if(k==='ogre'||k==='zeus'||k==='bomb'||k==='ankh'||k==='nagash')v+=foes?1.4:-0.5;
+    else if(k==='old')v+=(pl.hand.length>=2&&pl.grave.length)?0.6:-0.5;
+    else if(k==='death')v+=graveT?1.0:-0.5;
+    else if(PATRONS[k]&&PATRONS[k].side!=null)v+=allies?1.0:0;
+  }
+  return v;
+}
+function aiWarlockPlan(d){
+  const p=G.turn,pl=G.players[p];
+  if(!wlSeat(p))return null;
+  if(d.wlAi==='blessing'){
+    if(!channelsOn(G.board,p).length)return null;
+    return {thr:0.8,bonus:aiBlessWorth(p),cands:[0],mut:()=>{}};
+  }
+  if(d.wlAi==='fickle'){
+    const pool=channelBackPool(p,true);
+    if(!pool.length)return null;
+    const now=aiChannelValue(p,channelsOn(G.board,p).slice());
+    let best=-1e9;
+    for(const k of pool)for(const c of channelChoices(p,k))best=Math.max(best,aiChannelValue(p,c.set));
+    return {thr:0.8,bonus:best-now,cands:[0],mut:()=>{}};
+  }
+  if(d.wlAi==='minions'){
+    if(!G.board.some((c,i)=>openAt(G.board,i))&&pl.hand.length>4)return null;
+    return {thr:0.8,bonus:1.6,cands:[0],mut:()=>{}};
+  }
+  return null;
 }
 function seatHasPriest(p){
   const pl=G.players[p];
@@ -22077,6 +22759,9 @@ function applyDeckRules(p,key){
   /* Worship is the Priest deck's passive: only a seat playing that deck has a
      god, so a priest drafted elsewhere or stolen by the other side gets none. */
   pl.worshipper=!!dk.worship;
+  /* The Boon belongs to the Warlock deck the same way. */
+  pl.channeler=!!dk.warlock;
+  pl.channel=[];pl.channelHist=[];pl.channelExtra=0;pl.wlDoom=0;pl.wlShield=0;
   /* The Runeblade tribe starts the game holding the Runeblade, on top of the
      opening hand rather than instead of a card of it. */
   for(const id of (dk.startHand||[]))if(CARDS[id])handPush(p,id);
@@ -22616,7 +23301,8 @@ if(typeof module!=='undefined'){
     payRecall,getLines:()=>LINES,
     RUNEBLADE,wieldsRune,isRuneForm,runeGuarded,runeSpots,takeRune,runRuneRecall,runeRecallReady,runForge,
     bgProof,equipEvent,equipLanded,sheathSpots,throwRune,bladerangPath,bestThrow,endOfNextTurn,aiRunes,isHeldSafe,isStunned,invulnText,applyDeckRules,
-    isMummy,mCurseT,mCursePanel,mSweep,drainFx};
+    isMummy,mCurseT,mCursePanel,mSweep,drainFx,
+    PATRONS,channelsOn,channelCapOn,pactMap,pactN,channelIn,channelBack,warlockArrive,wlSeat,patronOf,canHandDiscard,playHandDiscard,noteDiscard};
 }
 </script>
 </body>
