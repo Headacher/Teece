@@ -264,6 +264,10 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="dwarves"] .kwl,.dcard[data-card-deck="dwarves"] .dkw{color:#ffb85c}
 .card[data-card-deck="dwarves"] .ct,.dcard[data-card-deck="dwarves"] .dty{color:#ffb85c}
 .card[data-card-deck="dwarves"]::after,.dcard[data-card-deck="dwarves"]::after{content:'\26CF'}
+.card[data-card-deck="cult"],.dcard[data-card-deck="cult"]{--cardbg:#2a0c10;--artink:#e0505a;background:var(--cardbg);color:#f6e2e2;border-color:#120305}
+.card[data-card-deck="cult"] .kwl,.dcard[data-card-deck="cult"] .dkw{color:#ff7a84}
+.card[data-card-deck="cult"] .ct,.dcard[data-card-deck="cult"] .dty{color:#ff7a84}
+.card[data-card-deck="cult"]::after,.dcard[data-card-deck="cult"]::after{content:'\26E4'}
 .card[data-card-deck="warlock"],.dcard[data-card-deck="warlock"]{--cardbg:#2b1838;--artink:#c39cff;background:var(--cardbg);color:#f0e6ff;border-color:#130a1a}
 .card[data-card-deck="warlock"] .kwl,.dcard[data-card-deck="warlock"] .dkw{color:#d4b0ff}
 .card[data-card-deck="warlock"] .ct,.dcard[data-card-deck="warlock"] .dty{color:#d4b0ff}
@@ -306,13 +310,22 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .teece[data-card-deck="wolf"]{--cardbg:#5d6670;--artink:#f1ece2;background:var(--cardbg);color:#f4f1ea;border-color:#2b3036}
 .teece[data-card-deck="priest"]{--cardbg:#efe6cf;--artink:#8a6a1f;background:var(--cardbg);color:#3b2f17;border-color:#b8962e}
 .teece[data-card-deck="dwarves"]{--cardbg:#4b3a2c;--artink:#f2b45c;background:var(--cardbg);color:#f3e8d8;border-color:#2a1f16}
+.teece[data-card-deck="cult"]{--cardbg:#2a0c10;--artink:#e0505a;background:var(--cardbg);color:#f6e2e2;border-color:#120305}
 .teece[data-card-deck="warlock"]{--cardbg:#2b1838;--artink:#c39cff;background:var(--cardbg);color:#f0e6ff;border-color:#130a1a}
 .teece[data-card-deck="basic"]{--cardbg:#dce6ee;--artink:#47637d;background:var(--cardbg);color:#1d2a36;border-color:#7d93a8}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
 #board{display:grid;grid-template-columns:repeat(var(--bw,3),minmax(0,var(--cs,110px)));
-  grid-auto-rows:var(--cs,110px);gap:8px}
+  grid-auto-rows:var(--cs,110px);gap:8px;position:relative}
+/* The Cult's Pentagram: over every panel, under no click. */
+#board svg.penta{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6;overflow:visible}
+#board svg.penta .pl{stroke:#a0303c;stroke-width:3;stroke-linecap:round;opacity:.5}
+#board svg.penta .pl.lit{stroke:#ff2a3a;stroke-width:4.5;opacity:.95;animation:pentaPulse 2.4s ease-in-out infinite}
+#board svg.penta .pp{fill:#1a0508;stroke:#d0404c;stroke-width:2;opacity:.85}
+#board svg.penta .pc{fill:none;stroke:#d0404c;stroke-width:2;stroke-dasharray:3 3;opacity:.7}
+@keyframes pentaPulse{0%,100%{opacity:.95}50%{opacity:.7}}
+@media(prefers-reduced-motion:reduce){#board svg.penta .pl.lit{animation:none}}
 @media(max-width:420px){#board{--cs:var(--cs-sm,96px)}}
 #oppHands{width:100%;display:flex;flex-direction:column;gap:8px}
 .cell{position:relative;border:1px solid var(--line);border-radius:8px;background:#191410;overflow:hidden;cursor:default}
@@ -1224,7 +1237,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:207,date:'2026-10-15'};
+const VERSION={build:208,date:'2026-10-15'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1371,7 +1384,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}',priest:'\u{1F64F}',dwarves:'\u26CF\uFE0F',warlock:'\u26E7',basic:'\u{1F530}'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}',priest:'\u{1F64F}',dwarves:'\u26CF\uFE0F',warlock:'\u26E7',basic:'\u{1F530}',cult:'\u26E4'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -1696,6 +1709,29 @@ const CARD_ART={
   1190:["  ~ ~ ~ ~ ~  ", "   ~~~ ~~~   ", "  ~ o ~ ~ ~  ", "   ~~~ ~~~   ", "  ~ ~ ~ o ~  "],
   1191:["    _n_      ", "   (o_o)     ", "   /|=|\\     ", "    | |      ", "    d b      "],
   1192:["    _n_      ", "   (o_o)  |  ", "   /|=|\\-+   ", "    | |   |  ", "    d b      "],
+  /* ---- Cult ---- */
+  1195:["      *      ", "     /|\\     ", "    ( o )    ", "    /| |\\    ", "  *  / \\  *  "],
+  1196:["    .---.    ", "   / .-. \\   ", "  | ( - ) |  ", "   \\ ''' /   ", "   /|   |\\   "],
+  1197:["    .---.    ", "   ( x x )   ", "    \\ ~ /    ", "  ~~/|#|\\~~  ", "    ' ' '    "],
+  1198:["   .-----.   ", "  (  ^ ^  )  ", "   \\  o  /   ", "    |***|    ", "    '---'    "],
+  1199:["    .---.  | ", "   ( o o ) | ", "    \\ - /  ) ", "   /|###|\\/  ", "    /   \\    "],
+  1200:["   *     *   ", "    \\ o /    ", "     /|\\     ", "    / | \\    ", "   *  *  *   "],
+  1201:["    .---.    ", "   ( @ @ )   ", "  \\/|!!!|\\/  ", "    |!!!|    ", "  ^^^/ \\^^^  "],
+  1202:["    .---.    ", "   ( - - )   ", "  ((  o  ))  ", "   /|~~~|\\   ", "    /   \\    "],
+  1203:["  <-.   .->  ", "   ( o o )   ", "    \\ ~ /    ", "  <-/| |\\->  ", "    /   \\    "],
+  1204:["  |   |   |  ", "  +   +   +  ", "   \\ .-. /   ", "    ( o )    ", "    /|#|\\    "],
+  1205:["  [=======]  ", "  | .---. |  ", "  |( o o )|  ", "  | \\ = / |  ", "  [=======]  "],
+  1206:["      *      ", "    .-^-.    ", "   ( o o )   ", "  /|#####|\\  ", "  ' |###| '  "],
+  1207:["  o-o-o-o-o  ", "  |       |  ", " (O)     (O) ", "  |       |  ", "  o-o-o-o-o  "],
+  1208:["    .-*-.    ", "   / * * \\   ", "  | * * * |  ", "  |  * *  |  ", "  '-------'  "],
+  1209:["     ___     ", "    / * \\    ", "   | *** |   ", "    \\ * /    ", "     '-'     "],
+  1210:["  \\\\  |  //  ", "   \\\\ | //   ", "  -( O O )-  ", "  //\\VVV/\\\\  ", " //  ~~~  \\\\ "],
+  1211:["    \\ * /    ", "   -( O )-   ", "    / * \\    ", "  ~ ~ ~ ~ ~  ", "   ~ ~ ~ ~   "],
+  1212:["   \\\\ | //   ", "  --( O )--  ", "   // | \\\\   ", "     /|\\     ", "    *###*    "],
+  1213:["      *      ", "   *-----*   ", "    \\ * /    ", "   * \\ / *   ", "      *      "],
+  1214:["   .-----.   ", "  /   *   \\  ", " |  *   *  | ", "  \\ *   * /  ", "   '-----'   "],
+  1215:["     .-.     ", "  --( > )--  ", "     '-'     ", "    / | \\    ", "   <--+-->   "],
+  1216:[" ~\\  ~~~  /~ ", "  ~\\(O O)/~  ", " ~~~|VVV|~~~ ", "  ~/|   |\\~  ", " ~/  ~~~  \\~ "],
 
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
@@ -5002,6 +5038,72 @@ const CARDS = {
     cast:[{fx:'blessAll',next:true,src:'Time Stop'}]},
  1170:{name:'Lesser Circle',type:'ground',token:true,deck:'warlock',gWarlockMod:2,
     text:'A Warlock on this battleground has +2.'},
+ /* ---- Cult: 1195-1214, Convert 1215 and the Tendril Of Gol'God'Oth 1216 ----
+        The deck's passive is the board itself: it is a pentagram, and only a
+        seat playing the Cult deck can walk it. Each of its allies can Traverse
+        The Pentagram once a turn, and every line an ally travels along lights
+        for the three missions. The engine is under "Cult: the Pentagram". ---- */
+ 1195:{name:'Star Walker',type:'teece',sides:[5,5,5,5],def:1,onTraverse:3,
+    text:'Defence 1. When it Traverses The Pentagram: +3 until the end of the turn.'},
+ 1196:{name:'Hooded Initiate',type:'teece',sides:[4,4,4,4],def:3,
+    text:'Defence 3.'},
+ 1197:{name:'Bloodletter',type:'teece',sides:[6,6,6,6],
+    onPlay:[{fx:'mod',who:'self',n:-2,dur:'temp'}],
+    text:'When played: -2 until the end of the turn.'},
+ 1198:{name:'Chosen Vessel',type:'teece',sides:[3,3,3,3],
+    onPlay:[{fx:'shieldFor',yourNext:true}],
+    text:'When played: it cannot be destroyed until the end of your next turn.'},
+ 1199:{name:'Cult Shepherd',type:'teece',sides:[3,6,6,6],
+    act:[{name:'Herd',once:'turn',steps:[{fx:'moveTarget',where:'any'}]}],
+    text:'Once per your turn: select a Teece; move it one space.'},
+ 1200:{name:'Star Dancer',type:'teece',sides:[4,5,5,3],traverseExtra:1,
+    text:'Can Traverse The Pentagram an additional time per turn.'},
+ 1201:{name:'Extremist Zealot',type:'teece',sides:[10,10,10,10],dieAtEndOfTurn:true,
+    onDeath:[{fx:'killer',n:-10,dur:'perm'}],
+    text:'Destroyed at the end of your turn. A Teece that destroys it gets -10.'},
+ 1202:{name:'Whispering Deacon',type:'teece',sides:[2,2,2,2],
+    onPlay:[{fx:'bounce',count:2,may:true,notSelf:true,anyBoss:true}],
+    onDeath:[{fx:'nextDef',n:3}],
+    text:'When played: select up to 2 other Teece; return them to their owners’ hands. When destroyed: the next Teece you play has +3 Defence.'},
+ 1203:{name:'Pentacle Trickster',type:'teece',sides:[1,1,1,1],
+    onPlay:[{fx:'swapTwo',selfMod:9}],
+    text:'When played: select 2 Teece; swap their positions. If you do, this gets +9 until the end of the turn.'},
+ 1204:{name:'Ritual Puppeteer',type:'teece',sides:[7,7,7,0],
+    onPlay:[{fx:'moveTarget',where:'any'}],
+    act:[{name:'Pull a string',once:'turn',steps:[{fx:'moveTarget',where:'any'}]}],
+    onDeath:[{fx:'moveTarget',where:'any'}],
+    text:'When played: select a Teece; move it one space. Once per your turn: select a Teece; move it one space. When destroyed: select a Teece; move it one space.'},
+ 1205:{name:'Cult Warden',type:'teece',sides:[3,7,7,3],aura:{who:'ally',where:'global',n:0,def:3,includeSelf:true},
+    text:'All your Teece have +3 Defence.'},
+ 1206:{name:'Hierophant',type:'teece',sides:[3,3,3,3],sac:1,def:7,
+    onPlay:[{fx:'sacToHand'}],
+    onDeath:[{fx:'nextDef',n:7}],
+    text:'Sacrifice one fielded Teece to play. Defence 7. When played: the sacrificed Teece goes to your hand. When destroyed: the next Teece you play has +7 Defence.'},
+ /* ---- Cult equips ---- */
+ 1207:{name:'Ritual Shackles',type:'equip',mod:5,grants:{kw:['immovable']},
+    text:'The equipped Teece gets +5 and cannot move or be moved.'},
+ 1208:{name:'Sigil Robes',type:'equip',mod:0,grants:{def:6},
+    text:'The equipped Teece has +6 Defence.'},
+ 1209:{name:'Pentacle Amulet',type:'equip',mod:0,grants:{traverseExtra:1,onTraverse:3},
+    text:'The equipped Teece can Traverse The Pentagram an additional time per turn, and gets +3 until the end of the turn each time it does.'},
+ /* ---- Cult magic ---- */
+ 1210:{name:'Gol’God’Oth Arrives',type:'magic',trump:true,cultAi:'arrive',cast:[{fx:'cultArrive'}],
+    text:'Trump card. Select a Teece. If it is a Tendril Of Gol’God’Oth, you win the game. Otherwise, return that Teece to its owner’s hand.'},
+ 1211:{name:'Gol’God’Oth’s Boon',type:'magic',cultAi:'boon',cast:[{fx:'cultBoon'}],
+    text:'Until the end of your turn, every card in your hand can be discarded. Each time you discard a card this turn, select a Teece: it gets +5 and Teleport until the end of the turn. A line of the Pentagram an ally teleports along is activated.'},
+ 1212:{name:'Gol’God’Oth’s Wrath',type:'magic',cultAi:'wrath',cast:[{fx:'destroy',nonBoss:true,center:true}],
+    text:'Select a non-Boss Teece in the middle of the Pentagram; destroy it.'},
+ /* ---- Cult battlegrounds ---- */
+ 1213:{name:'Ley Nexus',type:'ground',gCultTele:true,
+    gact:[{name:'Teleport to a point',once:'turn',steps:[{fx:'pentaTele'}]}],
+    text:'Once per turn, a Teece on this battleground can teleport to any point of the Pentagram. A line of the Pentagram it travels along is activated.'},
+ 1214:{name:'Sanctum of Lines',type:'ground',gCultGuard:true,
+    text:'A Teece on this battleground cannot be destroyed while it stands on an active line of the Pentagram.'},
+ /* ---- Cult: what the missions hand out ---- */
+ 1215:{name:'Convert',type:'magic',token:true,deck:'cult',cultAi:'convert',cast:[{fx:'convert'}],
+    text:'Select a Teece adjacent to one of your Teece; take control of it. If this leaves your hand any other way, it comes back.'},
+ 1216:{name:'Tendril Of Gol’God’Oth',type:'teece',token:true,deck:'cult',boss:true,sides:[20,20,20,20],
+    text:'Counts as a Boss. Summoned by the Sacrifice. While it stands, Gol’God’Oth Arrives wins the game.'},
  /* ---- Basic: the deck for a first game. Every card shows one of the base
         rules on its own -- uneven sides, rotation, Flying, Ranged, Tokens,
         sacrifice, equips, magic, battlegrounds -- and nothing else. ---- */
@@ -5372,6 +5474,7 @@ function invulnText(b,i){
   }
   if(runeGuarded(t))return 'Cannot be destroyed: it holds the Runeblade\u2019s Chosen, for as long as that sword stays on the field.';
   if(packGuarded(b,i))return 'Cannot be destroyed: a Pack Warden stands with it, and '+packCopiesAdj(b,i)+' of its own copies are beside it. Bring that below two and it can be destroyed again.';
+  if(cultGuarded(b,i))return 'Cannot be destroyed: it stands in the Sanctum of Lines on an active line of the Pentagram.';
   if(blessedOn(b,i))return 'Cannot be destroyed: it is blessed, standing with an ally, '+
     'and its side outnumbers every other. It becomes destructible again the moment any of that stops being true.';
   return '';
@@ -7462,6 +7565,10 @@ function actsOf(b,i){
    if(pm&&pm.ankh)out.push({key:'kwlwrap',act:{name:'Mummy Wrap (Ankhtepot)',once:'turn',times:pm.ankh,steps:[{fx:'mWrap'}]}});
    const ck=!t.silenced&&d.channel;
    if(ck&&wlSeat(t.owner)&&channelsOn(b,t.owner).indexOf(ck)<0)out.push({key:'kwlchan',act:channelAct(ck)});}
+  /* Traverse The Pentagram: the Cult seat's, for any Teece it controls that
+     stands on a point. Not the card's, so silence does not take it. */
+  if(b===G.board&&cultSeat(t.owner)&&isPentaPoint(i))
+    out.push({key:'kcult',act:{name:'Traverse The Pentagram',once:'turn',times:cultTraverseTimes(t),steps:[{fx:'traverse'}]}});
   if(hasKw(b,i,'skitter'))out.push({key:'kskit',act:SKITTER_ACT});
   if(hasKw(b,i,'march'))out.push({key:'kmarch',act:MARCH_ACT});
   if(hasKw(b,i,'lumber'))out.push({key:'klumber',act:LUMBER_ACT});
@@ -7503,6 +7610,10 @@ function actBlockedReason(b,i,ent){
   }
   if(st&&st.fx==='fuseAdj')return fusePartners(b,i).length?null:'no ally beside it';
   if(st&&st.fx==='mWrap')return mWrapOptions(b,i,t.owner).length?null:'nothing in reach';
+  if(st&&(st.fx==='traverse'||st.fx==='pentaTele')){
+    if(hasKw(b,i,'immovable'))return 'held';
+    return cultDests(b,i,st).length?null:'points taken';
+  }
   if(!st||st.fx!=='move')return null;
   if(hasKw(b,i,'immovable'))return 'held';
   return movePool(i,st.range).some(j=>openAt(b,j))?null:'nowhere to go';
@@ -7703,6 +7814,7 @@ function putTeece(b,i,t,live,how){
 }
 function moveT(b,from,to,live){
   const t=b[from].teece; b[from].teece=null; putTeece(b,to,t,live,'move');
+  if(live&&b===G.board)cultTravel(t,from,to);
 }
 /* ============ Mummy: the curse ============
    Not the Witch's cursed panel (curseP, a -2 trap for the next enemy) and not
@@ -8167,7 +8279,7 @@ function scanDeaths(b){
      anything that cares how a kill was made (the Zealot). */
   const mark=(vi,ki,ks)=>{const v=b[vi].teece;if(!dead[vi])dead[vi]={cell:vi,t:v,killers:[],ksides:{}};
     if(ki!=null&&dead[vi].killers.indexOf(b[ki].teece.uid)<0){dead[vi].killers.push(b[ki].teece.uid);if(ks!=null)dead[vi].ksides[b[ki].teece.uid]=ks;}};
-  const immune=i=>b[i].teece&&(b[i].teece.immortalOwner!=null||zeusSky(b[i].teece)||runeGuarded(b[i].teece)||blessedOn(b,i)||packGuarded(b,i));
+  const immune=i=>b[i].teece&&(b[i].teece.immortalOwner!=null||zeusSky(b[i].teece)||runeGuarded(b[i].teece)||blessedOn(b,i)||packGuarded(b,i)||cultGuarded(b,i));
   /* Harbinger of War: while it stands, nobody has allies. Every pairing on the
      board is a fight, its own side included -- and it is standing in the middle
      of that board itself. */
@@ -9604,11 +9716,15 @@ async function FXRUN(st,ctx){
     if(reps<1)return none('Nothing was fed to the swarm, so nothing is pulled back.');
     for(let r=0;r<reps;r++){
       const cands=[];
-      for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!isBossCard(t.cardId)&&canTarget(b,i,p))cands.push(i);}
+      for(let i=0;i<BN;i++){const t=b[i].teece;
+        if(!t||!canTarget(b,i,p))continue;
+        if(!st.anyBoss&&isBossCard(t.cardId))continue;
+        if(st.notSelf&&ctx.t&&t.uid===ctx.t.uid)continue;
+        cands.push(i);}
       if(!cands.length){if(r===0)return none('No legal target.');return;}
-      const c=await pickCell(cands,'Choose a non-Boss Teece to return to its owner hand'+
-        (reps>1?' ('+(r+1)+' of '+reps+')':'')+'.',
-        (bb,i)=>{bb[i].teece=null;},false);
+      const c=await pickCell(cands,'Choose '+(st.anyBoss?'a':'a non-Boss')+' Teece to return to its owner hand'+
+        (reps>1?' ('+(r+1)+' of '+reps+')':'')+(st.may?', or skip.':'.'),
+        (bb,i)=>{bb[i].teece=null;},!!st.may);
       if(c==='CANCEL')return 'ABORT';
       if(c==null)return;
       const t=b[c].teece;b[c].teece=null;
@@ -9966,12 +10082,13 @@ async function FXRUN(st,ctx){
       const t=b[i].teece;
       if(!t||!canTarget(b,i,p))continue;
       if(st.nonBoss&&isBossCard(t.cardId))continue;
+      if(st.center&&i!==pentaPts().center)continue;
       /* Not offered at all: picking one and watching nothing happen wastes the
          card and reads as a bug. */
       if(isHeldSafe(t))continue;
       cands.push(i);
     }
-    if(!cands.length)return none('Nothing can be destroyed.');
+    if(!cands.length)return none(st.center?'No non-Boss Teece in the middle of the Pentagram can be destroyed.':'Nothing can be destroyed.');
     const c=await pickCell(cands,'Choose a Teece to destroy.',(bb,i)=>{bb[i].teece=null;},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -10438,7 +10555,19 @@ async function FXRUN(st,ctx){
       return ADJ[j].some(k=>!b[k].teece)||true;
     });
     if(!cands.length)return none(st.web?'Nothing on the Web has anywhere to go.':'Nothing to move.');
-    const c=await pickCell(cands,'Choose a Teece to move'+(st.may?', or skip.':'.'),null,!!st.may);
+    /* A plain one-space shove: the computer weighs each Teece by the best step
+       it could be given, rather than picking one at random. */
+    const plainMut=(!st.dir&&!st.web&&!st.byController)?(bb,j)=>{
+      let best=null,bv=-1e9;
+      for(const k of ADJ[j]){
+        if(!openAt(bb,k)||!bb[j].teece)continue;
+        const cb=cloneBoard(bb);moveT(cb,j,k,false);simCombat(cb);
+        const v=boardValue(cb,p);
+        if(v>bv){bv=v;best=k;}
+      }
+      if(best!=null)moveT(bb,j,best,false);
+    }:null;
+    const c=await pickCell(cands,'Choose a Teece to move'+(st.may?', or skip.':'.'),plainMut,!!st.may);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const t=b[c].teece;
@@ -13736,8 +13865,8 @@ async function FXRUN(st,ctx){
   case 'shieldFor':{
     const t=ctx.t;
     if(!t)return;
-    t.immortalOwner=p;t.immortalUntil=Math.max(t.immortalUntil||0,G.turnNum+(st.turns||1));
-    log(nm(t)+' cannot be destroyed until the end of the next turn.');
+    t.immortalOwner=p;t.immortalUntil=Math.max(t.immortalUntil||0,st.yourNext?nextTurnExpiry():G.turnNum+(st.turns||1));
+    log(nm(t)+' cannot be destroyed until the end of '+(st.yourNext?ownOf(p)+' next turn.':'the next turn.'));
     return;}
   /* The Mindwyrm lets go, and takes its host with it. */
   case 'bounceSelfPair':{
@@ -14611,13 +14740,128 @@ async function FXRUN(st,ctx){
     spendBullet(p);G.players[p].shots=(G.players[p].shots||0)+1;
     await shootTeece(p,c,{dmg:5,by:ctx.t?nm(ctx.t):null});
     return;}
+  /* ---- Cult ---- */
+  case 'traverse':case 'pentaTele':{
+    const i=ctx.cell,t=b[i]&&b[i].teece;
+    if(!t)return;
+    if(hasKw(b,i,'immovable'))return none('It cannot move.');
+    const d=cultDests(b,i,st);
+    if(!d.length)return none(st.fx==='traverse'?'Both points its lines reach are taken.':'Every other point of the Pentagram is taken.');
+    let c;
+    if(isAIP(p))c=aiCultDest(p,i,d,st.fx==='traverse').dst;
+    else c=await pickCell(d,(st.fx==='traverse'?'Traverse The Pentagram: choose the point ':'Ley Nexus: choose the point of the Pentagram ')+DEF(t).name+' goes to.',
+      (bb,j)=>{if(bb[i].teece)moveT(bb,i,j,false);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    log(nm(t)+(st.fx==='traverse'?' traverses the Pentagram to the ':' teleports to the ')+CN[c]+'.');
+    moveT(b,i,c,true);
+    if(st.fx==='traverse')cultOnTraverse(t);
+    await anim([c],'zap');
+    await fireMove(i,c,p);
+    return;}
+  case 'convert':{
+    const cands=[];
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(!t||sameTeam(t.owner,p)||!canTarget(b,i,p))continue;
+      if(ADJ[i].some(j=>b[j].teece&&sameTeam(b[j].teece.owner,p)))cands.push(i);
+    }
+    if(!cands.length)return none('No enemy stands beside one of your Teece.');
+    const c=await pickCell(cands,'Convert: choose an enemy beside one of your Teece. You take control of it.',
+      (bb,i)=>{if(bb[i].teece)bb[i].teece.owner=p;},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    /* Cast is resolved, whether or not a ward silences it: the mission asks
+       for the card to be used, and a silenced one has been. */
+    cultConverted(p);
+    if(wardMagic(b,c,p)){await anim([c],'zap');return;}
+    if(tapeSave(b,c,p)){await anim([c],'zap');return;}
+    const t=b[c].teece;
+    t.owner=p;
+    G.tempControls=(G.tempControls||[]).filter(u=>u!==t.uid);
+    log(pname(p)+' '+vb(p,'converts','convert')+' '+nm(t)+', for good.');
+    noteTargeted(p);
+    await anim([c],'zap');
+    return;}
+  case 'cultArrive':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return none('There is no Teece to call Gol’God’Oth down on.');
+    const tend=cands.find(i=>b[i].teece.cardId===CULT_TENDRIL);
+    let c;
+    if(isAIP(p)&&tend!=null)c=tend;
+    else c=await pickCell(cands,'Gol’God’Oth Arrives: choose a Teece. A Tendril Of Gol’God’Oth wins you the game; anything else returns to its owner’s hand.',
+      (bb,i)=>{bb[i].teece=null;},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)){await anim([c],'zap');return;}
+    if(tapeSave(b,c,p)){await anim([c],'zap');return;}
+    const t=b[c].teece;
+    if(t.cardId===CULT_TENDRIL){
+      if(seatsOnTeam(teamOf(p)).some(s=>hexOn(s,'nowin'))){
+        log('Gol’God’Oth answers through the Tendril, and the Curse of Freezing holds the win back for now.');
+        return;
+      }
+      await anim([c],'zap',260);
+      endGame(teamOf(p),'Gol’God’Oth arrives through the Tendril. '+pname(p)+' '+vb(p,'has','have')+' summoned Gol\u2019God\u2019Oth.');
+      return;
+    }
+    b[c].teece=null;
+    for(const uid of t.links)for(let i=0;i<BN;i++){
+      const o=b[i].teece;if(o&&o.uid===uid){b[i].teece=null;log(nm(o)+' collapses with its summoner.');}
+    }
+    for(const uid of t.controls)revertControl(b,uid,true);
+    log('Gol’God’Oth reaches for '+nm(t)+' and casts it back.');
+    bounceToHand(t,true);
+    if(!sameTeam(t.owner,p))noteTargeted(p);
+    return;}
+  case 'cultBoon':{
+    G.players[p].cultBoon=G.turnNum;
+    log('Gol’God’Oth’s Boon: until the end of the turn every card in '+ownOf(p)+' hand can be discarded, and each discard lends a Teece +5 and Teleport.');
+    return;}
+  /* Two Teece trade panels, any two that can be moved. */
+  case 'swapTwo':{
+    const ok=i=>!!(b[i].teece&&!hasKw(b,i,'immovable')&&canTarget(b,i,p));
+    const cands=ALL().filter(ok);
+    if(cands.length<2)return none('There are not two Teece that can be moved.');
+    const self=ctx.t,sc=ctx.cell;
+    const swapSim=(bb,x,y)=>{const a=bb[x].teece;bb[x].teece=bb[y].teece;bb[y].teece=a;
+      if(st.selfMod&&self)for(let k=0;k<BN;k++)if(bb[k].teece&&bb[k].teece.uid===self.uid)applyModT(bb[k].teece,st.selfMod,'temp');};
+    const bestPartner=(bb,x)=>{
+      let best=null,bv=-1e9;
+      for(const y of cands){
+        if(y===x||!bb[y].teece)continue;
+        const cb=cloneBoard(bb);swapSim(cb,x,y);simCombat(cb);
+        const v=boardValue(cb,p);
+        if(v>bv){bv=v;best=y;}
+      }
+      return best;
+    };
+    const a=await pickCell(cands,'Choose the first Teece to swap.',
+      (bb,x)=>{const y=bestPartner(bb,x);if(y!=null)swapSim(bb,x,y);},false);
+    if(a==='CANCEL')return 'ABORT';
+    if(a==null)return;
+    const rest=cands.filter(i=>i!==a&&ok(i));
+    if(!rest.length)return none('Nothing is left to swap with.');
+    const c=await chooseCell(p,rest,'Choose the Teece it swaps places with.',{mut:(bb,y)=>swapSim(bb,a,y)});
+    if(c==null||c==='CANCEL')return;
+    const ta=b[a].teece,tc=b[c].teece;
+    b[a].teece=null;b[c].teece=null;
+    putTeece(b,c,ta,true);putTeece(b,a,tc,true);
+    cultTravel(ta,a,c);cultTravel(tc,c,a);
+    log(nm(ta)+' and '+nm(tc)+' swap places.');
+    if(!sameTeam(ta.owner,p)||!sameTeam(tc.owner,p))noteTargeted(p);
+    if(st.selfMod&&self){applyModT(self,st.selfMod,'temp');log(nm(self)+' gets '+sgn(st.selfMod)+' until the end of the turn.');}
+    await anim([a,c],'zap');
+    return;}
   case 'move':{
     const i=ctx.cell;
     if(hasKw(b,i,'immovable'))return none('It cannot move.');
     const d=movePool(i,st.range).filter(j=>openAt(b,j));
     if(!d.length)return none('Nowhere to move.');
     const t=b[i].teece;
-    const c=await pickCell(d,'Choose where '+DEF(t).name+' moves.',
+    /* A Cult seat's computer knows a Teleport down a line lights it. */
+    const c=(isAIP(p)&&cultSeat(p)&&st.range==='tele')?aiCultDest(p,i,d,false).dst:await pickCell(d,'Choose where '+DEF(t).name+' moves.',
       (bb,j)=>{if(bb[i].teece)moveT(bb,i,j,false);},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
@@ -14778,6 +15022,14 @@ async function catchDiscard(owner,cardId){
 async function noteDiscard(owner,cardId){
   if(!G||!G.board)return;
   const what=CARDS[cardId]?CARDS[cardId].name:'a card';
+  /* Gol'God'Oth's Boon: a discard of the caster's own, on the turn it was cast. */
+  {const cpl=G.players[owner];
+   if(cpl&&cpl.cultBoon&&cpl.cultBoon===G.turnNum&&G.turn===owner&&G.board.some(c=>c.teece)){
+     await runSteps([{fx:'mod',who:'any',where:'any',n:5,dur:'temp',kw:'teleport',
+       msg:'Gol\u2019God\u2019Oth\u2019s Boon: choose a Teece. It gets +5 and Teleport until the end of the turn.'}],
+       {p:owner,cell:null,t:null,first:false,noModal:true});
+     if(G.over)return;
+   }}
   /* The Boon of the Old One: every discard, anybody's, feeds it. */
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;if(!t)continue;
@@ -15131,7 +15383,7 @@ const isHeldSafe=t=>{
      so it has to be worked out from where the Teece is standing right now. */
   if(G&&G.board){
     const i=G.board.findIndex(c=>c.teece===t);
-    if(i>=0)return blessedOn(G.board,i)||packGuarded(G.board,i);
+    if(i>=0)return blessedOn(G.board,i)||packGuarded(G.board,i)||cultGuarded(G.board,i);
   }
   return false;
 };
@@ -15643,6 +15895,7 @@ async function resolveCombat(){
     /* stacked effects resolve first: nothing fights while a kill is pending */
     await drainFx();
     channelSettle();
+    cultSettle();
     if(stale(ep)||G.over)return;
     let deaths=scanDeaths(G.board);
     if(!deaths.length)break;
@@ -16109,6 +16362,9 @@ function canHandDiscard(p,id){
   if(pl&&pl.freeDiscard)return true;
   /* The Boon of the Old One lets a Warlock be thrown away from hand. */
   if(CARDS[id].warlock&&pl&&channelsOn(G.board,p).indexOf('old')>=0)return true;
+  /* Gol'God'Oth's Boon: every card, for the rest of the turn it was cast. Not
+     Convert, which would only come straight back and pay again. */
+  if(pl&&pl.cultBoon&&pl.cultBoon===G.turnNum&&G.turn===p&&id!==CULT_CONVERT)return true;
   /* A Madness card drafted into a mixed deck brings the rule with it. Without
      this the cards whose whole design is being thrown away would be unplayable
      outside their own deck, which is where they used to print it themselves. */
@@ -17240,6 +17496,9 @@ async function endTurn(){
     log(nm(t)+' prays in the Sanctuary.');
     conjureSmites(t.owner,1);
   }
+  /* The Cult's third mission: an ally ending the turn in the middle. */
+  await cultRitual(p);
+  if(stale(ep)||G.over)return;
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
     if(t){
@@ -18193,6 +18452,8 @@ function aiPlanFor(id){
     if(eg.becomesGround)ebonus+=0.5;
     if(d.eModes)ebonus+=1.1;
     if(eg.onEquip&&eg.onEquip.some(x=>x.fx==='shieldFor'))ebonus+=0.9;
+    /* The Pentacle Amulet: another walk down a line every turn. */
+    if(eg.traverseExtra)ebonus+=cultSeat(p)&&G.players[p].cult.stage===1?1.2:0.2;
     return {thr:0.8,bonus:ebonus,cands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
   }
   if(d.type==='ground'){
@@ -18249,6 +18510,14 @@ function aiPlanFor(id){
     if(d.gTokenMod)bonus+=0.8;
     /* The Patron's Shrine pays a copy of the Boon to whatever stands there later. */
     if(d.gPactCopy)bonus+=channelsOn(b,p).length?0.9:0.2;
+    /* The Cult's two belong on a point of the Pentagram, under one of its own. */
+    if(d.gCultTele||d.gCultGuard){
+      const pts=cands.filter(i=>isPentaPoint(i)&&b[i].teece&&b[i].teece.owner===p);
+      if(!pts.length)return null;
+      cands.length=0;cands.push(...pts);
+      if(d.gCultTele)bonus+=cultSeat(p)&&G.players[p].cult.stage===1?1.4:0.3;
+      if(d.gCultGuard)bonus+=pts.some(i=>onActiveLine(i))?1.2:0.2;
+    }
     return {thr:0.8,bonus,cands,mut:(bb,i)=>{
       if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
       else bb[i].ground={cardId:id,owner:p};
@@ -18264,6 +18533,7 @@ function aiPlanFor(id){
   if(d.smiteAi)return aiSmitePlan(d);
   if(magicLocked(p))return null;
   if(d.wlAi)return aiWarlockPlan(d);
+  if(d.cultAi)return aiCultPlan(d);
   if(d.gunAi)return aiGunMagicPlan(d);
   if(d.fuAi)return aiFusionMagicPlan(d);
   /* Past the price gate. A spell that asks the whole price before it takes any
@@ -18866,7 +19136,7 @@ async function aiPlayTeece(){
         putTeece(bb,c,t,false);
         if(rots.length===1)simOnPlay(bb,c,id,p);
         simCombat(bb);
-        const g=boardValue(bb,p)-base+2.2;
+        const g=boardValue(bb,p)-base+2.2+cultPlaceBonus(p,c);
         if(g>bg){bg=g;best={h,c,rot,sacP:sacP.concat(sacHx.map(x=>'h'+x))};}
       }
     }
@@ -18905,6 +19175,10 @@ async function aiActs(depth){
         const ck=DEF(t).channel,ch=channelChoices(p,ck);
         const now=aiChannelValue(p,channelsOn(b,p).slice());
         for(const c of ch)gain=Math.max(gain,aiChannelValue(p,c.set)-now+0.4);
+      }else if(st.fx==='traverse'||st.fx==='pentaTele'||(st.fx==='move'&&st.range==='tele'&&cultSeat(p))){
+        /* A line of the Pentagram the board score cannot see. */
+        const ds=cultDests(b,i,st);
+        if(ds.length)gain=aiCultDest(p,i,ds,st.fx==='traverse').gain;
       }else if(st.fx==='runeRecall'){
         /* Worth it when a sword is lying idle, or an enemy holds one it is not bound by. */
         gain=runeSpots(p).some(sp=>sp.where!=='hand'&&runeSpotRank(p,sp)<=3)?0.9:-1;
@@ -18927,7 +19201,7 @@ async function aiActs(depth){
   /* An ability with more than one use a turn -- Mummy Wrap, two or three
      times over -- gets another look once the board has moved under it. */
   if(used&&(depth||0)<3&&b.some((c,x)=>c.teece&&c.teece.owner===p&&
-     actsOf(b,x).some(e=>(e.key==='kwrap'||e.key==='kwlwrap'||e.key==='kwlbomb')&&actAvailable(c.teece,e))))
+     actsOf(b,x).some(e=>(e.key==='kwrap'||e.key==='kwlwrap'||e.key==='kwlbomb'||e.key==='kcult'||e.key==='ktele')&&actAvailable(c.teece,e))))
     return (await aiActs((depth||0)+1))||used;
   return used;
 }
@@ -18945,6 +19219,15 @@ function aiActMuts(cell,ent){
   if(st.fx==='move'){
     for(const j of movePool(cell,st.range))
       if(openAt(b,j))muts.push(bb=>{if(bb[cell].teece)moveT(bb,cell,j,false);});
+  }else if(st.fx==='moveTarget'&&!st.dir&&!st.web){
+    for(let j=0;j<BN;j++){
+      const o=b[j].teece;
+      if(!o||hasKw(b,j,'immovable')||!canTarget(b,j,p))continue;
+      if(st.who==='enemy'&&sameTeam(o.owner,p))continue;
+      if(st.who==='ally'&&!sameTeam(o.owner,p))continue;
+      if(st.where==='adj'&&ADJ[cell].indexOf(j)<0)continue;
+      for(const k of ADJ[j])if(openAt(b,k))muts.push(bb=>{if(bb[j].teece&&openAt(bb,k))moveT(bb,j,k,false);});
+    }
   }else if(st.fx==='sprint'){
     if(!hasKw(b,cell,'immovable')){
       const routes=sprintRoutes(b,cell,p);
@@ -19099,6 +19382,8 @@ async function aiTurn(){
   await aiRunes();
   if(stale(ep)||G.over)return;
   for(let k=0;k<3;k++){if(!await aiSupport())break;if(stale(ep)||G.over)return;}
+  await aiCultBoon();
+  if(stale(ep)||G.over)return;
   for(let k=0;k<2;k++){if(!await aiFuseHand())break;if(stale(ep)||G.over)return;}
   if(stale(ep)||G.over)return;
   await aiPlayTeece();
@@ -19694,7 +19979,7 @@ function renderBoard(){
         '<div class="s s2">'+s[2]+'</div>'+
         '<div class="s s3">'+s[3]+'</div>';
       if(t.equips.length)tp.innerHTML+='<div class="eq">E'+t.equips.length+'</div>';
-      if(!t.isToken)tp.insertAdjacentHTML('afterbegin',auraHtml(t.cardId));
+      if(!t.isToken||isBossCard(t.cardId))tp.insertAdjacentHTML('afterbegin',auraHtml(t.cardId));
       const hasActs=ownTurn(t.owner)&&aul.some(e=>actAvailable(t,e));
       if(hasActs)tp.innerHTML+='<div class="actdot"></div>';
       const tmr=DEF(t).timer;
@@ -19772,6 +20057,9 @@ function renderBoard(){
        strip beside the board, which is the whole point of it. */
     (isPlane(i)?planeHost():b).appendChild(cell);
   }
+  /* The Pentagram goes on last, over everything: it shines through the Web,
+     the battlegrounds and the Teece standing on it, and takes no clicks. */
+  if(cultInPlay())b.insertAdjacentHTML('beforeend',pentaSvg());
 }
 /* Everything on one panel besides the Teece: the battleground, Mines, a
    Curse, a razing, a priming, a seed. Hovering a panel should show the lot. */
@@ -19904,7 +20192,7 @@ function showDetail(i){
     const btn=document.createElement('button');
     btn.className='btn abtn'+(av?' primary':'');
     btn.textContent=ent.act.name+(gagged?' (silenced)':!actAvailable(t,ent)?' (used)':blocked?' ('+blocked+')':'');
-    if(blocked)btn.title=blocked==='no ally beside it'?nm(t)+' has none of your Teece beside it to fuse with.':nm(t)+' has no open panel to move to.';
+    if(blocked)btn.title=blocked==='points taken'?'Every point of the Pentagram it could reach has a Teece on it.':blocked==='no ally beside it'?nm(t)+' has none of your Teece beside it to fuse with.':nm(t)+' has no open panel to move to.';
     btn.disabled=!av;
     btn.addEventListener('click',()=>{uiAct(i,ent);});
     d.appendChild(btn);
@@ -20150,6 +20438,14 @@ function statusesFor(p){
       ' Every Teece you control carries it. You can hold '+cap+' Boon'+(cap>1?'s':'')+' at once.'+
       (pl.wlShield?' The next Teece you play cannot be destroyed until the end of your next turn.':'')+
       (pl.wlDoom?' The next Teece you play is destroyed as it lands.':''));
+  }
+  /* --- the Cult's missions, this seat's and any across the table --- */
+  for(let q=0;q<PLAYERS();q++){
+    if(!cultSeat(q)||!seatAlive(q))continue;
+    const cu=G.players[q].cult,mine=q===p;
+    const lbl=(mine?'':pname(q)+': ')+(cu.stage<4?'Mission '+cu.stage+': '+CULT_MISSION[cu.stage]+(cu.stage===1?' ('+cu.lines.filter(Boolean).length+'/5)':''):'Tendril summoned');
+    push('cult'+q,mine?(cu.stage>=4?'good':'warn'):'warn',lbl,cultStatusText(q)+
+      (mine&&pl.cultBoon===G.turnNum&&G.turn===p?' Gol\u2019God\u2019Oth\u2019s Boon is on you this turn: any card in your hand can be discarded, and each discard lends a Teece +5 and Teleport.':''));
   }
   /* --- and the Boon of any Warlock across the table, so you can see what
      you are facing without opening their cards --- */
@@ -20825,7 +21121,7 @@ function renderActionBar(){
     const btn=document.createElement('button');
     btn.className='btn'+(av?' primary':'');
     btn.textContent=ent.act.name+(gagged?' (silenced)':!actAvailable(t,ent)?' (used)':blocked?' ('+blocked+')':'');
-    if(blocked)btn.title=blocked==='no ally beside it'?nm(t)+' has none of your Teece beside it to fuse with.':nm(t)+' has no open panel to move to.';
+    if(blocked)btn.title=blocked==='points taken'?'Every point of the Pentagram it could reach has a Teece on it.':blocked==='no ally beside it'?nm(t)+' has none of your Teece beside it to fuse with.':nm(t)+' has no open panel to move to.';
     btn.disabled=!av;
     btn.addEventListener('click',()=>{uiAct(i,ent);});
     ab.appendChild(btn);
@@ -21138,6 +21434,268 @@ const GODS=[{name:'Topus',side:0},{name:'Rightorious',side:1},{name:'Bottomor',s
 const SMITE_CARD={1:1122,2:1123,3:1124,4:1125};
 const SMITE_TEMP={1:-1,2:-5};
 const smiteLvl=id=>(CARDS[id]&&CARDS[id].smiteLvl)||0;
+/* ============ Cult: the Pentagram ============
+   The Cult deck's passive is the board. Its five points are the top-middle,
+   the middle-left, the middle-right, the bottom-left and the bottom-right
+   panels, and its five lines join each point to the two it does not touch:
+   top to both bottom corners, each bottom corner to the far middle side, and
+   the two middle sides to each other, straight through the middle panel.
+
+   Only a seat playing the Cult deck walks it (pl.cultist), the way only a
+   Priest seat has a god: every Teece that seat controls can Traverse The
+   Pentagram once a turn, from the point it stands on to one of the two its
+   lines reach, onto an empty panel. Any move of an ally from one point to
+   another along a line -- a traverse, a Teleport, a Ley Nexus, a swap --
+   lights that line for the seat for good (pl.cult.lines), and the three
+   missions in pl.cult.stage follow in order:
+
+     1  light all five lines; the seat is handed Convert
+     2  resolve Convert; it keeps coming back to hand until it is
+     3  end a turn with an ally on the middle panel; it is sacrificed and a
+        Tendril Of Gol'God'Oth takes its place
+     4  done: Gol'God'Oth Arrives aimed at the Tendril wins the game
+
+   The drawing is an overlay over the whole board that nothing is laid on top
+   of: not the Web, not a battleground, not a Teece. */
+const CULT_CONVERT=1215,CULT_TENDRIL=1216;
+const cultSeat=p=>{const pl=G&&G.players&&G.players[p];return !!(pl&&pl.cultist&&pl.cult);};
+const cultInPlay=()=>!!(G&&G.players&&G.players.some(pl=>pl&&pl.cultist));
+const CULT_LINE_KEYS=[['top','bl'],['top','br'],['bl','mr'],['br','ml'],['ml','mr']];
+function pentaPts(){
+  const w=BW,m=Math.floor((w-1)/2);
+  return {top:m,ml:m*w,mr:m*w+w-1,bl:(w-1)*w,br:w*w-1,center:m*w+m};
+}
+function pentaLines(){const P=pentaPts();return CULT_LINE_KEYS.map(k=>[P[k[0]],P[k[1]]]);}
+function pentaPoints(){const P=pentaPts();return [P.top,P.mr,P.br,P.bl,P.ml];}
+const isPentaPoint=i=>pentaPoints().indexOf(i)>=0;
+function pentaLineOf(a,c){
+  return pentaLines().findIndex(l=>(l[0]===a&&l[1]===c)||(l[0]===c&&l[1]===a));
+}
+/* The two points a point's lines bring it to. */
+function pentaNext(i){
+  const out=[];
+  for(const l of pentaLines()){if(l[0]===i)out.push(l[1]);else if(l[1]===i)out.push(l[0]);}
+  return out;
+}
+const pentaLineName=k=>{const l=pentaLines()[k];return 'the line from the '+CN[l[0]]+' to the '+CN[l[1]];};
+/* Lit for anybody: a mirror match has two Cults and two sets of lines, and the
+   drawing and the Sanctum of Lines read the board, not a seat. */
+const cultLineLit=k=>!!(G&&G.players&&G.players.some(pl=>pl&&pl.cultist&&pl.cult&&pl.cult.lines[k]));
+function onActiveLine(i){
+  const P=pentaPts();
+  return pentaLines().some((l,k)=>cultLineLit(k)&&(l[0]===i||l[1]===i||(k===4&&i===P.center)));
+}
+function cultGuarded(b,i){
+  const t=b[i]&&b[i].teece;
+  if(!t||!groundFlag(gUnder(b,i),'gCultGuard'))return false;
+  return onActiveLine(i);
+}
+const CULT_MISSION=['','Activate The Pentagram','Convert The Enemy','Perform The Sacrifice','Gol’God’Oth waits'];
+/* Called by every live move on the real board (moveT, and the swaps that do
+   not go through it). A Teece of a Cult seat that went from one point to
+   another along a line lights it. */
+function cultTravel(t,from,to){
+  if(!t||from===to||!cultSeat(t.owner))return;
+  const k=pentaLineOf(from,to);
+  if(k<0)return;
+  const c=G.players[t.owner].cult;
+  if(c.lines[k])return;
+  c.lines[k]=1;
+  const n=c.lines.filter(Boolean).length;
+  log(nm(t)+' travels '+pentaLineName(k)+', and it glows red ('+n+' of 5).');
+  if(n>=5&&c.stage===1){
+    c.stage=2;
+    handPush(t.owner,CULT_CONVERT);
+    log('The Pentagram is active. '+pname(t.owner)+' '+vb(t.owner,'gains','gain')+' Convert. Next: Convert The Enemy.');
+  }
+}
+function cultTraverseTimes(t){
+  let n=1+(DEF(t).traverseExtra||0);
+  for(const e of t.equips){const g=eqG(e);if(g&&g.traverseExtra)n+=g.traverseExtra;}
+  return n;
+}
+function cultOnTraverse(t){
+  let n=DEF(t).onTraverse||0;
+  for(const e of t.equips){const g=eqG(e);if(g&&g.onTraverse)n+=g.onTraverse;}
+  if(!n)return;
+  applyModT(t,n,'temp');
+  log(nm(t)+' draws on the Pentagram: '+sgn(n)+' until the end of the turn.');
+}
+/* Where a traverse, a Ley Nexus or a Teleport can take the Teece on panel i. */
+function cultDests(b,i,st){
+  if(hasKw(b,i,'immovable'))return [];
+  let pool;
+  if(st.fx==='traverse')pool=pentaNext(i);
+  else if(st.fx==='pentaTele')pool=pentaPoints();
+  else pool=movePool(i,st.range);
+  return pool.filter(j=>j!==i&&openAt(b,j));
+}
+/* What a mission is worth to the computer on top of what the board says. */
+function cultMoveBonus(p,from,to){
+  if(!cultSeat(p))return 0;
+  const c=G.players[p].cult;
+  let v=0;
+  const k=pentaLineOf(from,to);
+  if(c.stage===1&&k>=0&&!c.lines[k])v+=1.6;
+  if(c.stage===3&&to===pentaPts().center)v+=3;
+  return v;
+}
+function aiCultDest(p,i,dests,trav){
+  const b=G.board,base=boardValue(b,p);
+  let dst=null,gain=-1e9;
+  for(const j of dests){
+    const bb=cloneBoard(b);
+    if(!bb[i].teece)continue;
+    moveT(bb,i,j,false);
+    if(trav){
+      const t=bb[j].teece;let n=DEF(t).onTraverse||0;
+      for(const e of t.equips){const g=eqG(e);if(g&&g.onTraverse)n+=g.onTraverse;}
+      if(n)applyModT(t,n,'temp');
+    }
+    simCombat(bb);
+    const g=boardValue(bb,p)-base+cultMoveBonus(p,i,j);
+    if(g>gain){gain=g;dst=j;}
+  }
+  return {dst,gain};
+}
+/* Convert has to be resolved. Anything that took it out of the hand without
+   casting it -- a discard, the hand limit, a burn with nothing to aim at, a
+   shuffle into the deck -- is undone here, and resolveCombat runs this after
+   every action. While it is being cast it is still in the hand, and the stage
+   has moved on before playMagic takes it out. */
+function cultSettle(){
+  if(!G||!G.players)return;
+  G.players.forEach((pl,p)=>{
+    if(!pl||!pl.cultist||!pl.cult||pl.cult.stage!==2)return;
+    if(pl.hand.indexOf(CULT_CONVERT)>=0)return;
+    let gi=pl.grave.lastIndexOf(CULT_CONVERT);
+    if(gi>=0)pl.grave.splice(gi,1);
+    else{gi=pl.deck.lastIndexOf(CULT_CONVERT);if(gi>=0)pl.deck.splice(gi,1);}
+    handPush(p,CULT_CONVERT);
+    log('Convert has not been resolved, so it returns to '+ownOf(p)+' hand.');
+  });
+}
+function cultConverted(p){
+  if(!cultSeat(p))return;
+  const c=G.players[p].cult;
+  if(c.stage!==2)return;
+  c.stage=3;
+  log(pname(p)+' '+vb(p,'has','have')+' converted the enemy. Next: Perform The Sacrifice — end a turn with an ally in the middle of the Pentagram.');
+}
+/* Mission 3, read at the end of the Cult seat's own turn. A sacrifice is a
+   price, not a death, so nothing protects the Teece and nothing it does when
+   destroyed fires. */
+async function cultRitual(p){
+  if(!cultSeat(p))return;
+  const c=G.players[p].cult;
+  if(c.stage!==3)return;
+  const b=G.board,mid=pentaPts().center,t=b[mid].teece;
+  if(!t||t.owner!==p)return;
+  log(nm(t)+' ends the turn in the middle of the Pentagram and is sacrificed to Gol’God’Oth.');
+  await anim([mid],'dying',190);
+  await processDeath({cell:mid,t,killers:[],cost:true});
+  if(G.over)return;
+  c.stage=4;
+  if(!openAt(b,mid)){log('Something already fills the middle of the Pentagram, and the Tendril finds no way through.');return;}
+  summonToken(b,mid,CULT_TENDRIL,p,true);
+  log('A Tendril Of Gol’God’Oth rises in its place. Gol’God’Oth Arrives aimed at it wins the game.');
+  await anim([mid],'placed');
+}
+/* The drawing. Coordinates are a 3x3 board at the desktop panel size and gap,
+   stretched to whatever the board really measures; the phone size keeps the
+   same proportions to within a pixel. */
+function pentaSvg(){
+  if(!cultInPlay())return '';
+  const w=BW,cs=110,gap=8,tot=w*cs+(w-1)*gap;
+  const at=i=>{const r=Math.floor(i/w),c=i%w;return [c*(cs+gap)+cs/2,r*(cs+gap)+cs/2];};
+  const P=pentaPts();
+  let h='<svg class="penta" viewBox="0 0 '+tot+' '+tot+'" preserveAspectRatio="none" aria-hidden="true">';
+  h+='<defs><filter id="pentaGlow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3" result="b"/>'+
+     '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+  pentaLines().forEach((l,k)=>{
+    const a=at(l[0]),c=at(l[1]),lit=cultLineLit(k);
+    h+='<line class="pl'+(lit?' lit':'')+'" x1="'+a[0]+'" y1="'+a[1]+'" x2="'+c[0]+'" y2="'+c[1]+'"'+(lit?' filter="url(#pentaGlow)"':'')+'/>';
+  });
+  for(const i of pentaPoints()){const a=at(i);h+='<circle class="pp" cx="'+a[0]+'" cy="'+a[1]+'" r="5"/>';}
+  {const a=at(P.center);h+='<circle class="pc" cx="'+a[0]+'" cy="'+a[1]+'" r="9"/>';}
+  return h+'</svg>';
+}
+function cultStatusText(q){
+  const c=G.players[q].cult,n=c.lines.filter(Boolean).length;
+  if(c.stage===1)return 'Mission 1 of 3, Activate The Pentagram: '+n+' of 5 lines lit. Every Teece '+pname(q)+' '+vb(q,'controls','control')+' can Traverse The Pentagram once a turn, from its point to one of the two its lines reach. Travelling a line lights it; all five hand over Convert.';
+  if(c.stage===2)return 'Mission 2 of 3, Convert The Enemy: cast Convert on a Teece beside one of '+ownOf(q)+' Teece. Until it is resolved it keeps coming back to hand.';
+  if(c.stage===3)return 'Mission 3 of 3, Perform The Sacrifice: end a turn of '+ownOf(q)+' with an ally in the middle of the Pentagram. It is sacrificed and a 20/20/20/20 Tendril Of Gol’God’Oth takes its place.';
+  return 'The Tendril has been summoned. Gol’God’Oth Arrives aimed at a Tendril Of Gol’God’Oth wins the game.';
+}
+/* Where the computer puts a Cult Teece down: on a point with an unlit line it
+   can walk next turn, and in the middle once the Sacrifice is all that is left. */
+function cultPlaceBonus(p,c){
+  if(!cultSeat(p))return 0;
+  const cu=G.players[p].cult;
+  if(cu.stage===3&&c===pentaPts().center)return 3;
+  if(cu.stage===1&&isPentaPoint(c)){
+    const open=pentaNext(c).filter(j=>!cu.lines[pentaLineOf(c,j)]);
+    return open.length?0.5+0.2*open.length:0;
+  }
+  return 0;
+}
+/* The computer's Cult spells. */
+function aiCultPlan(d){
+  const p=G.turn,b=G.board,pl=G.players[p];
+  const enemyAt=i=>{const t=b[i].teece;return !!(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p));};
+  if(d.cultAi==='convert'){
+    const cands=[];
+    for(let i=0;i<BN;i++)if(enemyAt(i)&&ADJ[i].some(j=>b[j].teece&&sameTeam(b[j].teece.owner,p)))cands.push(i);
+    if(!cands.length)return null;
+    return {thr:0.5,bonus:cultSeat(p)?1.5:0,cands,mut:(bb,i)=>{if(bb[i].teece)bb[i].teece.owner=p;}};
+  }
+  if(d.cultAi==='arrive'){
+    const tend=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.cardId===CULT_TENDRIL&&canTarget(b,i,p))tend.push(i);}
+    if(tend.length&&!seatsOnTeam(teamOf(p)).some(s=>hexOn(s,'nowin')))return {thr:0,bonus:100,cands:tend,mut:()=>{}};
+    /* A Cult seat holds it for the win; anyone else has a bounce. */
+    if(cultSeat(p))return null;
+    const cands=[];for(let i=0;i<BN;i++)if(enemyAt(i))cands.push(i);
+    if(!cands.length)return null;
+    return {thr:2.5,cands,mut:(bb,i)=>{bb[i].teece=null;}};
+  }
+  if(d.cultAi==='wrath'){
+    const mid=pentaPts().center,t=b[mid].teece;
+    if(!t||!enemyAt(mid)||isBossCard(t.cardId)||isHeldSafe(t))return null;
+    return {thr:1.0,cands:[mid],mut:(bb,i)=>{bb[i].teece=null;}};
+  }
+  if(d.cultAi==='boon'){
+    /* Worth casting only with cards to throw away and a Teece to send down a
+       line, or nothing better to do with a crowded hand. */
+    const spare=aiCultSpare(p,-1).length;
+    if(spare<2)return null;
+    const want=cultSeat(p)&&pl.cult.stage===1&&b.some(c=>c.teece&&c.teece.owner===p);
+    return {thr:0.8,bonus:want?0.6+0.5*Math.min(spare,3):0.3*spare,cands:[0],mut:()=>{}};
+  }
+  return null;
+}
+/* Hand positions the computer will throw away under the Boon: anything but
+   the Boon itself, the trump card and Convert, keeping two cards back. */
+function aiCultSpare(p,skip){
+  const pl=G.players[p],out=[];
+  for(let x=0;x<pl.hand.length;x++){
+    const id=pl.hand[x];
+    if(x===skip||id===1211||id===1210||id===CULT_CONVERT)continue;
+    out.push({x,v:(CARDS[id].sides||[0]).reduce((a,c)=>a+c,0)+(CARDS[id].type==='teece'?6:0)});
+  }
+  out.sort((a,c)=>a.v-c.v);
+  return out.slice(0,Math.max(0,pl.hand.length-2)).map(o=>o.x);
+}
+async function aiCultBoon(){
+  const p=G.turn,pl=G.players[p];
+  if(pl.cultBoon!==G.turnNum)return;
+  for(let k=0;k<3&&!G.over;k++){
+    const sp=aiCultSpare(p,-1);
+    if(!sp.length)break;
+    if(!await playHandDiscard(p,sp[0]))break;
+    await wait(200);
+  }
+}
 function worshipOf(p){
   const pl=G&&G.players&&G.players[p];
   return pl&&pl.worship!=null?pl.worship:null;
@@ -23111,6 +23669,11 @@ function applyDeckRules(p,key){
   /* The Boon belongs to the Warlock deck the same way. */
   pl.channeler=!!dk.warlock;
   pl.channel=[];pl.channelHist=[];pl.channelExtra=0;pl.wlDoom=0;pl.wlShield=0;
+  /* The Pentagram is the Cult deck's: only a seat playing it can traverse the
+     board, light its lines and run the three missions. */
+  pl.cultist=!!dk.cult;
+  pl.cult=dk.cult?{lines:[0,0,0,0,0],stage:1}:null;
+  pl.cultBoon=0;
   /* The Runeblade tribe starts the game holding the Runeblade, on top of the
      opening hand rather than instead of a card of it. */
   for(const id of (dk.startHand||[]))if(CARDS[id])handPush(p,id);
@@ -23757,7 +24320,9 @@ if(typeof module!=='undefined'){
     RUNEBLADE,wieldsRune,isRuneForm,runeGuarded,runeSpots,takeRune,runRuneRecall,runeRecallReady,runForge,
     bgProof,equipEvent,equipLanded,sheathSpots,throwRune,bladerangPath,bestThrow,endOfNextTurn,aiRunes,isHeldSafe,isStunned,invulnText,applyDeckRules,
     isMummy,mCurseT,mCursePanel,mSweep,drainFx,
-    PATRONS,channelsOn,channelCapOn,pactMap,pactN,channelIn,channelBack,warlockArrive,wlSeat,patronOf,canHandDiscard,playHandDiscard,noteDiscard};
+    PATRONS,channelsOn,channelCapOn,pactMap,pactN,channelIn,channelBack,warlockArrive,wlSeat,patronOf,canHandDiscard,playHandDiscard,noteDiscard,
+    cultSeat,cultInPlay,pentaPts,pentaLines,pentaPoints,pentaNext,pentaLineOf,cultGuarded,onActiveLine,cultSettle,cultRitual,pentaSvg,
+    aiCultPlan,aiCultDest,cultPlaceBonus,CULT_CONVERT,CULT_TENDRIL};
 }
 </script>
 </body>
