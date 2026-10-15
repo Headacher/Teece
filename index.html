@@ -1217,7 +1217,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:204,date:'2026-10-15'};
+const VERSION={build:205,date:'2026-10-15'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 const TOKEN_SHAPE_SVG='<svg class="tokshape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M28,0H72A7,7 0 0 1 79,7V16A5,5 0 0 0 84,21H93A7,7 0 0 1 100,28V72A7,7 0 0 1 93,79H84A5,5 0 0 0 79,84V93A7,7 0 0 1 72,100H28A7,7 0 0 1 21,93V84A5,5 0 0 0 16,79H7A7,7 0 0 1 0,72V28A7,7 0 0 1 7,21H16A5,5 0 0 0 21,16V7A7,7 0 0 1 28,0Z"/></svg>';
@@ -4940,8 +4940,8 @@ const CARDS = {
  1150:{name:'Warlock of the Rock God',type:'teece',sides:[4,6,8,7],warlock:true,channel:'rock',
     text:'Channel the Rock God. Boon: +3 Defence.'},
  1151:{name:'Warlock of the Fey',type:'teece',sides:[1,2,9,1],warlock:true,channel:'fey',
-    text:'Channel the Fey. Boon: once a turn, when it is about to be destroyed, it can move one space.'},
- 1152:{name:'Warlock of the Devils',type:'teece',sides:[6,7,6,8],warlock:true,channel:'devils',
+    text:'Channel the Fey. Boon: Flying.'},
+ 1152:{name:'Warlock of the Devils',type:'teece',sides:[4,7,6,8],warlock:true,channel:'devils',
     text:'Channel the Devils. Boon: when played, PACT — -4 to one side ; +3 to another.'},
  1153:{name:'Warlock of the Ogre God',type:'teece',sides:[6,6,2,2],warlock:true,channel:'ogre',
     text:'Channel the Ogre God. Boon: when played, select an adjacent Teece; give it -2 and stun it. Then you can move it one space.'},
@@ -4978,8 +4978,8 @@ const CARDS = {
     text:'Changes with the patron you channel. With several Boons, each fires in turn.'},
  1167:{name:'Patron’s Shrine',type:'ground',gPactCopy:true,
     text:'A Teece on this battleground has another copy of your Boon. An enemy on it gets one copy of your Boon too.'},
- 1168:{name:'Warlock’s Circle',type:'ground',gWarlockMod:3,gSpread:1170,
-    text:'A Warlock on this battleground has +3. When it is destroyed or replaced: you can lay a Lesser Circle (a Warlock on it has +3) on a panel with no battleground.'},
+ 1168:{name:'Warlock’s Circle',type:'ground',gWarlockMod:3,gCircleBoon:true,
+    text:'A Warlock on this battleground has +3. When it is destroyed or replaced: you are offered a BOON — Channel the Circle: when played, a Lesser Circle (a Warlock on it has +2) appears under it if its panel has no battleground.'},
  1169:{name:'Warlock Minion',type:'teece',token:true,deck:'warlock',warlock:true,sides:[3,3,3,3],
     text:'Warlock Minion Token. It has your Boon.'},
  1193:{name:'Pact Talisman',type:'equip',mod:0,grants:{onEquip:[{fx:'talisman',n:5,pick:2}]},
@@ -4987,8 +4987,8 @@ const CARDS = {
  1194:{name:'Time Stop',type:'magic',token:true,deck:'time',
     text:'Every Teece you control, now or played later, is invulnerable until the end of your next turn: it cannot be destroyed.',
     cast:[{fx:'blessAll',next:true,src:'Time Stop'}]},
- 1170:{name:'Lesser Circle',type:'ground',token:true,deck:'warlock',gWarlockMod:3,
-    text:'A Warlock on this battleground has +3.'},
+ 1170:{name:'Lesser Circle',type:'ground',token:true,deck:'warlock',gWarlockMod:2,
+    text:'A Warlock on this battleground has +2.'},
  /* ---- Basic: the deck for a first game. Every card shows one of the base
         rules on its own -- uneven sides, rotation, Flying, Ranged, Tokens,
         sacrifice, equips, magic, battlegrounds -- and nothing else. ---- */
@@ -7372,6 +7372,8 @@ function kwOf(b,i,noGround){
   if((d.spider||t.cardId==='TSP')&&isWebbed(b,i))ks.push('skitter');
   ks.push(...t.kwTemp);
   if(t.kwPerm)ks.push(...t.kwPerm);
+  /* The Boon of the Fey is Flying. */
+  if(ks.indexOf('flying')<0&&pactN(b,i,'fey'))ks.push('flying');
   for(const e of t.equips){
     const g=eqG(e);
     if(g&&g.kw)ks.push(...g.kw);
@@ -15610,34 +15612,6 @@ async function resolveCombat(){
     if(!deaths.length)break;
     let dodged=false;
     for(const d of deaths){
-      /* The Boon of the Fey: once a turn for each copy, a Warlock about to be
-         destroyed can step one space clear. Offered, not automatic. */
-      {const fn=G.board[d.cell].teece===d.t?pactN(G.board,d.cell,'fey'):0;
-       const used=(d.t.feyTurn===G.turnNum?d.t.feyUsed:0)||0;
-       const empt=fn>used&&!hasKw(G.board,d.cell,'immovable')?ADJ[d.cell].filter(j=>openAt(G.board,j)):[];
-       if(empt.length){
-         let c;
-         if(isAIP(d.t.owner)||!HAS_DOM){
-           c=empt.find(j=>{
-             const bb=cloneBoard(G.board);
-             if(!bb[d.cell].teece)return false;
-             moveT(bb,d.cell,j,false);simCombat(bb);
-             return !!(bb[j].teece&&bb[j].teece.uid===d.t.uid);
-           });
-           if(c==null)c=empt[0];
-         }else{
-           c=await chooseCell(d.t.owner,empt,'Boon of the Fey: '+nm(d.t)+' is about to be destroyed. Move it one space, or skip.',
-             {skip:true,mut:(bb,j)=>{if(bb[d.cell].teece)moveT(bb,d.cell,j,false);}});
-         }
-         if(c!=null&&c!=='CANCEL'){
-           d.t.feyTurn=G.turnNum;d.t.feyUsed=used+1;
-           moveT(G.board,d.cell,c,true);
-           log(nm(d.t)+' slips away on the Boon of the Fey, to the '+CN[c]+'.');
-           await fireMove(d.cell,c,d.t.owner);
-           dodged=true;
-           continue;
-         }
-       }}
       const gsv=G.board[d.cell].ground;
       if(gsv&&CARDS[gsv.cardId].gSave&&G.board[d.cell].teece===d.t&&G.players[d.t.owner].hand.length){
         const yes=await chooseOption(d.t.owner,[{v:'y',lbl:'Discard a card to save it'},{v:'n',lbl:'Let it die'}],
@@ -16743,6 +16717,9 @@ async function clearGroundAt(i,breaker){
   if((g.debt||[]).length){await payDebt(g);if(G.over)return;}
   /* The Warlock's Circle leaves a Lesser Circle behind, wherever its owner
      likes, as long as no battleground is lying there already. */
+  /* The Warlock's Circle, gone, offers its owner the Boon of the Circle. */
+  if(groundFlag(g,'gCircleBoon')&&!G.over&&G.players[g.owner]&&G.players[g.owner].channeler)
+    await channelIn(g.owner,'circle',gd.name+' is gone');
   const spread=groundNum(g,'gSpread');
   if(spread&&CARDS[spread]&&!G.over){
     const spots=[];for(let j=0;j<BN;j++)if(j!==i&&!b[j].ground&&!b[j].razed&&!isPlane(j))spots.push(j);
@@ -21170,7 +21147,8 @@ for(const id in CARDS){
    clones see the same numbers the game does. */
 const PATRONS={
   rock:{name:'the Rock God',short:'Rock God',boon:'+3 Defence.'},
-  fey:{name:'the Fey',short:'Fey',boon:'once a turn, when about to be destroyed, it can move one space.'},
+  fey:{name:'the Fey',short:'Fey',boon:'Flying.'},
+  circle:{name:'the Circle',short:'Circle',boon:'when played, a Lesser Circle (a Warlock on it has +2) appears under it if its panel has no battleground.'},
   devils:{name:'the Devils',short:'Devils',boon:'when played, PACT — -4 to one side ; +3 to another.'},
   ogre:{name:'the Ogre God',short:'Ogre God',boon:'when played, select an adjacent Teece; give it -2 and stun it, then you can move it one space.'},
   old:{name:'the Old One',short:'Old One',boon:'when a card is discarded, +5 and Teleport until the end of the turn. Warlocks in your hand can be discarded.'},
@@ -21241,7 +21219,7 @@ function patronTitleName(d){
 }
 /* What the Blessing does under each patron, short enough for a card face.
    The Blessing's text is a getter too, so it reads what it will do now. */
-const WL_BLESS_TXT={rock:'give a Teece Ward',fey:'teleport a Teece',devils:'a Teece gets +6, and the next Teece you play is destroyed as it lands',
+const WL_BLESS_TXT={rock:'give a Teece Ward',fey:'teleport a Teece',circle:'a Teece gets +3',devils:'a Teece gets +6, and the next Teece you play is destroyed as it lands',
   ogre:'stun a Teece, give it -2 and move it one space',old:'discard a card, then add a card from your graveyard to your hand',
   zeus:'select a column; its highest Teece gets -6',bomb:'a Teece and every Teece adjacent to it get -3',
   ankh:'pull an enemy one space towards an ally in its row or column, and give it -6',nagash:'select a Teece; its allies beside it get -3',
@@ -21269,7 +21247,7 @@ for(const id in CARDS){
    after a fight on a clone, and a hand-set figure for what the board score
    cannot see -- Defence it reads only through the fight, abilities it has not
    used yet, things that happen when somebody dies. */
-const PATRON_AI={rock:0.7,fey:0.8,devils:0.3,ogre:0.5,old:0.2,zeus:0.4,bomb:1.1,ankh:0.8,nagash:0,death:0.5,g0:0,g1:0,g2:0,g3:0};
+const PATRON_AI={rock:0.7,fey:0.8,devils:0.3,ogre:0.5,old:0.2,zeus:0.4,bomb:1.1,ankh:0.8,nagash:0,death:0.5,circle:0.4,g0:0,g1:0,g2:0,g3:0};
 /* The computer's two Talisman Boons: each one scored alone on a copy of the
    board, plus what it is worth later, plus the bump a when-played Boon gives
    on the spot. */
@@ -21405,7 +21383,13 @@ async function pactArrive(p,t,only){
     for(let r=0;r<(only?1:m[k]);r++){
       c=cellOf();
       if(c<0||G.over)return;
-      if(k==='zeus'){applyModT(t,5,'temp');log(nm(t)+' is struck by the Boon of Zeus: +5 until the end of the turn.');}
+      if(k==='circle'){
+        if(!b[c].ground&&!b[c].razed&&!isPlane(c)){
+          placeGround(b,c,1170,p);
+          log('A Lesser Circle is drawn under '+nm(t)+' by the Boon of the Circle.');
+        }
+      }
+      else if(k==='zeus'){applyModT(t,5,'temp');log(nm(t)+' is struck by the Boon of Zeus: +5 until the end of the turn.');}
       else if(k==='ogre'){
         await runSteps([{fx:'mod',where:'adj',n:-2,dur:'perm',stun:true,move:true,may:true,
           msg:'Boon of the Ogre God: select an adjacent Teece to give -2 and stun, or skip.'}],{p,cell:c,t,first:false});
@@ -21444,6 +21428,7 @@ const WL_BLESS={
   ankh:[{fx:'ankhBless',n:-6}],
   nagash:[{fx:'nagashBless',n:-3}],
   death:[{fx:'graveToHand',type:'teece'}],
+  circle:[{fx:'mod',n:3,dur:'perm'}],
   g0:[{fx:'modSides',who:'ally',sides:[3,0,0,0],dur:'perm',msg:'Blessing of Topus: choose an ally; +3 on its top side.'}],
   g1:[{fx:'modSides',who:'ally',sides:[0,3,0,0],dur:'perm',msg:'Blessing of Rightorious: choose an ally; +3 on its right side.'}],
   g2:[{fx:'modSides',who:'ally',sides:[0,0,3,0],dur:'perm',msg:'Blessing of Bottomor: choose an ally; +3 on its bottom side.'}],
@@ -21467,6 +21452,7 @@ function aiBlessWorth(p){
   for(const k of channelsOn(b,p)){
     if(k==='rock')v+=allies?0.9:0;
     else if(k==='fey')v+=allies?0.3:0;
+    else if(k==='circle')v+=allies?0.9:0;
     else if(k==='devils')v+=allies?0.2:-1;
     else if(k==='ogre'||k==='zeus'||k==='bomb'||k==='ankh'||k==='nagash')v+=foes?1.4:-0.5;
     else if(k==='old')v+=(pl.hand.length>=2&&pl.grave.length)?0.6:-0.5;
