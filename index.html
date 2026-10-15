@@ -1217,7 +1217,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:205,date:'2026-10-15'};
+const VERSION={build:206,date:'2026-10-15'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 const TOKEN_SHAPE_SVG='<svg class="tokshape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M28,0H72A7,7 0 0 1 79,7V16A5,5 0 0 0 84,21H93A7,7 0 0 1 100,28V72A7,7 0 0 1 93,79H84A5,5 0 0 0 79,84V93A7,7 0 0 1 72,100H28A7,7 0 0 1 21,93V84A5,5 0 0 0 16,79H7A7,7 0 0 1 0,72V28A7,7 0 0 1 7,21H16A5,5 0 0 0 21,16V7A7,7 0 0 1 28,0Z"/></svg>';
@@ -9012,6 +9012,40 @@ async function runStepsBody(steps,ctx){
   }
   return did||'NONE';
 }
+/* The Fast Zombie's routes: every panel up to two orthogonal steps away, and
+   for a two-step one the panel it passes through. When two routes reach the
+   same panel the one biting more enemies is kept. Shared by the effect, its
+   hover preview and the computer's planner, which had no branch for it and
+   so never sprinted at all. */
+function sprintRoutes(b,i,p){
+  const t=b[i].teece,routes={};
+  if(!t)return routes;
+  const biteCount=via=>{
+    let n=0;
+    for(const k of ADJ[via]){const o=b[k].teece;if(o&&!sameTeam(o.owner,t.owner)&&canTarget(b,k,p))n++;}
+    return n;
+  };
+  for(const j of ADJ[i]){
+    if(!openAt(b,j))continue;
+    if(routes[j]===undefined)routes[j]={via:null,n:0};
+    const bn=biteCount(j);
+    for(const k of ADJ[j]){
+      if(k===i||!openAt(b,k))continue;
+      if(routes[k]===undefined||bn>routes[k].n)routes[k]={via:j,n:bn};
+    }
+  }
+  return routes;
+}
+/* A sprint played out on a scratch board, for previews and planning. */
+function sprintOn(bb,i,j,via,p,n){
+  const t=bb[i].teece;if(!t)return;
+  moveT(bb,i,j,false);
+  if(via==null)return;
+  for(const k of ADJ[via]){
+    const o=bb[k].teece;
+    if(o&&!sameTeam(o.owner,t.owner)&&canTarget(bb,k,p))applyModT(o,n,'perm');
+  }
+}
 async function FXRUN(st,ctx){
   const b=G.board,p=ctx.p;
   const pickCell=async(cands,msg,mut,skip,foot)=>{
@@ -9956,25 +9990,14 @@ async function FXRUN(st,ctx){
     const i=ctx.cell;
     if(hasKw(b,i,'immovable'))return none('It cannot move.');
     const t=b[i].teece;
-    const biteCount=via=>{
-      let n=0;
-      for(const k of ADJ[via]){const o=b[k].teece;if(o&&!sameTeam(o.owner,t.owner)&&canTarget(b,k,p))n++;}
-      return n;
-    };
-    const routes={};
-    for(const j of ADJ[i]){
-      if(!openAt(b,j))continue;
-      if(routes[j]===undefined)routes[j]={via:null,n:0};
-      const bn=biteCount(j);
-      for(const k of ADJ[j]){
-        if(k===i||!openAt(b,k))continue;
-        if(routes[k]===undefined||bn>routes[k].n)routes[k]={via:j,n:bn};
-      }
-    }
+    const routes=sprintRoutes(b,i,p);
     const dests=Object.keys(routes).map(Number);
     if(!dests.length)return none('Nowhere to move.');
+    /* The mut the computer scores a panel with bites as well as moves. It
+       only ever moved the zombie, so the route it picked ignored the enemies
+       it would take -2 off. */
     const c=await pickCell(dests,'Move up to two spaces. Enemies beside the panel it moves through get '+sgn(st.n)+'.',
-      (bb,j)=>{if(bb[i].teece)moveT(bb,i,j,false);},false);
+      (bb,j)=>sprintOn(bb,i,j,routes[j].via,p,st.n),false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const via=routes[c].via;
@@ -18909,6 +18932,11 @@ function aiActMuts(cell,ent){
   if(st.fx==='move'){
     for(const j of movePool(cell,st.range))
       if(openAt(b,j))muts.push(bb=>{if(bb[cell].teece)moveT(bb,cell,j,false);});
+  }else if(st.fx==='sprint'){
+    if(!hasKw(b,cell,'immovable')){
+      const routes=sprintRoutes(b,cell,p);
+      for(const k in routes){const j=+k,via=routes[k].via;muts.push(bb=>sprintOn(bb,cell,j,via,p,st.n));}
+    }
   }else if(st.fx==='fuseAdj'){
     for(const j of fusePartners(b,cell))for(const dst of [cell,j])
       muts.push(bb=>{if(bb[cell].teece&&bb[j].teece)fuseOnBoard(bb,cell,j,dst,{live:false});});
