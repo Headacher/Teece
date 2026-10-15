@@ -1217,7 +1217,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:203,date:'2026-10-15'};
+const VERSION={build:204,date:'2026-10-15'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 const TOKEN_SHAPE_SVG='<svg class="tokshape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M28,0H72A7,7 0 0 1 79,7V16A5,5 0 0 0 84,21H93A7,7 0 0 1 100,28V72A7,7 0 0 1 93,79H84A5,5 0 0 0 79,84V93A7,7 0 0 1 72,100H28A7,7 0 0 1 21,93V84A5,5 0 0 0 16,79H7A7,7 0 0 1 0,72V28A7,7 0 0 1 7,21H16A5,5 0 0 0 21,16V7A7,7 0 0 1 28,0Z"/></svg>';
@@ -4973,7 +4973,7 @@ const CARDS = {
     cast:[{fx:'choose',msg:'Summon Minions:',opts:[
       {lbl:'Play both Minions now',steps:[{fx:'token',tok:1169,count:2}]},
       {lbl:'Add both Minions to your hand',steps:[{fx:'tokenToHand',tok:1169,count:2}]}]}],
-    text:'Play two 3/3/3/3 Warlock Minion Tokens, or add them to your hand. They have your Boon.'},
+    text:'Play two 3/3/3/3 Warlock Minion Tokens, or add them to your hand. They have your Boon, and its when-played effects fire as they land.'},
  1166:{name:'Blessing',type:'magic',patronTitle:true,wlAi:'blessing',cast:[{fx:'wlBlessing'}],
     text:'Changes with the patron you channel. With several Boons, each fires in turn.'},
  1167:{name:'Patron’s Shrine',type:'ground',gPactCopy:true,
@@ -9179,6 +9179,9 @@ async function FXRUN(st,ctx){
     const tokArrive=async(tk,cell)=>{
       const td=CARDS[tk.cardId];
       if(td.onPlay)await runSteps(td.onPlay,{p:tk.owner,cell,t:tk,first:false,noModal:true});
+      /* A summoned Warlock Minion fires the Boon's when-played effects, as
+         if it had been played (Greg, build 204). */
+      if(DEF(tk).warlock&&G.board[cell].teece===tk&&pactMap(G.board,cell))await pactArrive(tk.owner,tk);
     };
     const tokName=CARDS[st.tok].name+' ('+sidesLine(CARDS[st.tok].sides)+')';
     if(st.where==='here'){
