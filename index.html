@@ -1217,7 +1217,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:202,date:'2026-10-15'};
+const VERSION={build:203,date:'2026-10-15'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 const TOKEN_SHAPE_SVG='<svg class="tokshape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M28,0H72A7,7 0 0 1 79,7V16A5,5 0 0 0 84,21H93A7,7 0 0 1 100,28V72A7,7 0 0 1 93,79H84A5,5 0 0 0 79,84V93A7,7 0 0 1 72,100H28A7,7 0 0 1 21,93V84A5,5 0 0 0 16,79H7A7,7 0 0 1 0,72V28A7,7 0 0 1 7,21H16A5,5 0 0 0 21,16V7A7,7 0 0 1 28,0Z"/></svg>';
@@ -2440,31 +2440,31 @@ const CARDS = {
  TOGRE:{name:'Ogre Token',type:'teece',token:true,deck:'ogre',sides:[8,8,8,8],
     onDeath:[{fx:'stunKiller'}],
     text:'Ogre Token. 8 on every side, and whatever destroys it is stunned. Cannot be sacrificed to play a Teece; never counts toward winning.'},
- T6:{name:'Token',type:'teece',token:true,sides:[6,6,6,6],text:'Token. Cannot be sacrificed to play a Teece; never counts toward winning.'},
+ T6:{name:'Token',type:'teece',token:true,deck:'pixie',sides:[6,6,6,6],text:'Token. Cannot be sacrificed to play a Teece; never counts toward winning.'},
  T4:{name:'Token',type:'teece',token:true,sides:[4,4,4,4],text:'Token. Cannot be sacrificed to play a Teece; never counts toward winning.'},
- TR:{name:'Rock Token',type:'teece',token:true,sides:[0,0,0,0],def:6,text:'Token with Defence 6. Cannot be sacrificed to play a Teece; never counts toward winning.'},
- TD:{name:'Drone',type:'teece',token:true,sides:[3,3,3,3],kw:['flying'],text:'Drone Token. Flying: once per your turn, move one space. Never counts toward winning.'},
+ TR:{name:'Rock Token',type:'teece',token:true,deck:'rock',sides:[0,0,0,0],def:6,text:'Token with Defence 6. Cannot be sacrificed to play a Teece; never counts toward winning.'},
+ TD:{name:'Drone',type:'teece',token:true,deck:'robot',sides:[3,3,3,3],kw:['flying'],text:'Drone Token. Flying: once per your turn, move one space. Never counts toward winning.'},
  TSAND:{name:'Sandstorm Elemental',type:'teece',token:true,deck:'wizard',sides:[7,7,7,7],kw:['flying'],def:2,
     onDeath:[{fx:'toerrain',bg:941}],
     text:'Sandstorm Elemental Token. Defence 2. Flying: once per your turn, move one space. When destroyed: its panel becomes a Sandstorm. Cannot be sacrificed to play a Teece; never counts toward winning.'},
- TFAM:{name:'Familiar',type:'teece',token:true,sides:[4,4,4,4],kw:['flying'],onOwnerMagic:{n:2,dur:'temp'},
+ TFAM:{name:'Familiar',type:'teece',token:true,deck:'witch',sides:[4,4,4,4],kw:['flying'],onOwnerMagic:{n:2,dur:'temp'},
     text:'Familiar Token. Flies, and gets +2 until end of turn whenever its controller plays a magic card. Never counts toward winning.'},
- TB:{name:'Bomblet',type:'teece',token:true,sides:[3,3,3,3],
+ TB:{name:'Bomblet',type:'teece',token:true,deck:'bomb',sides:[3,3,3,3],
     text:'Token. When destroyed: adjacent Teece get -2. Cannot be sacrificed to play a Teece; never counts toward winning.',
     onDeath:[{fx:'aoe',n:-2,dur:'perm'}]},
- TMP:{name:'Meat Puppet',type:'teece',token:true,sides:[5,5,5,5],
+ TMP:{name:'Meat Puppet',type:'teece',token:true,deck:'vampire',sides:[5,5,5,5],
     text:'Meat Puppet Token, controlled by whoever it was handed to. Cannot be sacrificed to play a Teece; never counts toward winning.'},
- TBAT:{name:'Bat',type:'teece',token:true,sides:[3,3,3,3],vampire:true,
+ TBAT:{name:'Bat',type:'teece',token:true,deck:'vampire',sides:[3,3,3,3],vampire:true,
     act:[{name:'Fly',once:'turn',times:2,steps:[{fx:'move',range:'step'}]},
          {name:'Drain 2',once:'turn',steps:[{fx:'drain',n:2}]}],
     text:'Bat Token. Twice per your turn: fly one space. Once per your turn: Drain 2. Cannot be sacrificed to play a Teece; never counts toward winning.'},
- TSP:{name:'Spiderling',type:'teece',token:true,sides:[4,4,4,4],spider:true,
+ TSP:{name:'Spiderling',type:'teece',token:true,deck:'spider',sides:[4,4,4,4],spider:true,
     text:'Spiderling Token. On the Web it has +1 Defence and Skitter \u2014 once per your turn, move one space. Bigger than most Tokens, and the currency the whole Spider deck spends. Cannot be sacrificed to play a Teece; never counts toward winning.'},
  TSOL:{name:'Solar Token',type:'teece',token:true,deck:'solar',sides:[3,3,3,3],solar:true,
     text:'Solar Token. Cannot be sacrificed to play a Teece; never counts toward winning.'},
- TRAT:{name:'Rat',type:'teece',token:true,sides:[1,1,1,1],garbage:true,
+ TRAT:{name:'Rat',type:'teece',token:true,deck:'garbage',sides:[1,1,1,1],garbage:true,
     text:'Rat Token. Cannot be sacrificed to play a Teece; never counts toward winning.'},
- TSUP:{name:'Supply Drop',type:'teece',token:true,sides:[2,2,2,2],
+ TSUP:{name:'Supply Drop',type:'teece',token:true,deck:'army',sides:[2,2,2,2],
     text:'Supply Drop Token. When destroyed: select an adjacent Teece and give it +1 or -1. Cannot be sacrificed to play a Teece; never counts toward winning.',
     onDeath:[{fx:'choose',msg:'The crate splits open:',opts:[
       {lbl:'Give an adjacent Teece +1',steps:[{fx:'mod',who:'any',where:'adj',n:1,dur:'perm'}]},
@@ -2476,20 +2476,20 @@ const CARDS = {
       {lbl:'Give a Teece +1',steps:[{fx:'mod',who:'any',where:'any',n:1,dur:'perm'}]},
       {lbl:'Give a Teece -1',steps:[{fx:'mod',who:'any',where:'any',n:-1,dur:'perm'}]}]}],
     text:'Eager Acolyte Token. When discarded: Select a Teece; give it +1 or -1. Cannot be sacrificed to play a Teece; never counts toward winning.'},
- TS:{name:'Sprout',type:'teece',token:true,sides:[3,3,3,3],
+ TS:{name:'Sprout',type:'teece',token:true,deck:'nature',sides:[3,3,3,3],
     text:'Sprout Token. When destroyed: every other allied Teece gets +2. Cannot be sacrificed to play a Teece; never counts toward winning.',
     onDeath:[{fx:'mass',who:'ally',n:2,dur:'perm'}]},
  /* The four the Apocalypse deck fields. apoc names which of the four a card is,
     the way mark names a Tic Tac Toe letter, so the two Marks can pay out on the
     one they are tied to without checking ids. */
- TAF:{name:'Famine',type:'teece',token:true,sides:[0,0,7,7],apoc:'famine',onFoeDraw:true,
+ TAF:{name:'Famine',type:'teece',token:true,deck:'apocalypse',sides:[0,0,7,7],apoc:'famine',onFoeDraw:true,
     text:'Famine Token. Whenever an enemy draws a card, they must put a card from their hand on the bottom of their deck. Cannot be sacrificed to play a Teece; never counts toward winning.'},
- TAW:{name:'War',type:'teece',token:true,sides:[5,10,10,5],apoc:'war',
+ TAW:{name:'War',type:'teece',token:true,deck:'apocalypse',sides:[5,10,10,5],apoc:'war',
     text:'War Token. Cannot be sacrificed to play a Teece; never counts toward winning.'},
- TAD:{name:'Death',type:'teece',token:true,sides:[2,2,1,1],apoc:'death',
+ TAD:{name:'Death',type:'teece',token:true,deck:'apocalypse',sides:[2,2,1,1],apoc:'death',
     onPlay:[{fx:'destroy'}],
     text:'Death Token. When it arrives: select a Teece; destroy it. Cannot be sacrificed to play a Teece; never counts toward winning.'},
- TAP:{name:'Plague',type:'teece',token:true,sides:[7,2,2,7],apoc:'plague',
+ TAP:{name:'Plague',type:'teece',token:true,deck:'apocalypse',sides:[7,2,2,7],apoc:'plague',
     aura:{who:'enemy',where:'global',n:-2},
     text:'Plague Token. Every enemy Teece has -2. Cannot be sacrificed to play a Teece; never counts toward winning.'},
  /* ---- Teece 100 pool: the twenty-two you specified ---- */
@@ -15823,7 +15823,8 @@ function mixBonus(b,i){
     if(!o||o.isToken||!sameTeam(o.owner,0))continue;
     seen[getCardDeck(o.cardId)]=true;
   }
-  delete seen[getCardDeck(t.cardId)];
+  /* A Token's deck is only its colours: it neither adds a deck nor takes one away. */
+  if(!t.isToken)delete seen[getCardDeck(t.cardId)];
   return Object.keys(seen).length;
 }
 /* The lead a side needs to take the field. Four, moved by whichever of the two
