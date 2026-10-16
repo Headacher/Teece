@@ -1246,7 +1246,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:214,date:'2026-10-16'};
+const VERSION={build:215,date:'2026-10-16'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -4993,8 +4993,8 @@ const CARDS = {
         when-played boons fire, so it can use the patron it just called -- and
         keeps a once-per-turn Channel button on the field for later, the way a
         Devil keeps a rejected PACT. Warlock-ness is printed and survives
-        silence; the Boon is the seat's, and only a seat playing the Warlock
-        deck has one. The engine is under "Warlock: the BOON". ---- */
+        silence; the Boon is the seat's, and any seat that plays a Warlock
+        can channel one (build 215). The engine is under "Warlock: the BOON". ---- */
  1150:{name:'Warlock of the Rock God',type:'teece',sides:[4,6,8,7],warlock:true,channel:'rock',
     text:'Channel the Rock God. Boon: +3 Defence.'},
  1151:{name:'Warlock of the Fey',type:'teece',sides:[1,2,9,1],warlock:true,channel:'fey',
@@ -7584,7 +7584,7 @@ function actsOf(b,i){
    if(pm&&pm.devils&&t.wlPactOpen>0)out.push({key:'kwlpact',act:{name:'PACT (Boon of the Devils)',once:'turn',steps:[{fx:'wlPactLater'}]}});
    if(pm&&pm.ankh)out.push({key:'kwlwrap',act:{name:'Mummy Wrap (Ankhtepot)',once:'turn',times:pm.ankh,steps:[{fx:'mWrap'}]}});
    const ck=!t.silenced&&d.channel;
-   if(ck&&wlSeat(t.owner)&&channelsOn(b,t.owner).indexOf(ck)<0)out.push({key:'kwlchan',act:channelAct(ck)});}
+   if(ck&&channelsOn(b,t.owner).indexOf(ck)<0)out.push({key:'kwlchan',act:channelAct(ck)});}
   /* Traverse The Pentagram: the board's, for any Teece of either side that
      stands on a point while a Cult seat is in the game. Not the card's, so
      silence does not take it. Only the Cult's own travel lights a line. */
@@ -14210,7 +14210,7 @@ async function FXRUN(st,ctx){
   /* ---- Warlock: switching the Boon, and the Blessing ---- */
   case 'channelSelf':{
     const t=ctx.t,key=t&&DEF(t).channel;
-    if(!key||!wlSeat(p))return none('There is no patron here to channel.');
+    if(!key)return none('There is no patron here to channel.');
     if(channelsOn(b,p).indexOf(key)>=0)return none('You are already channelling '+patronName(key)+'.');
     const ok=await channelIn(p,key,null,{forced:true});
     return ok?undefined:'NONE';}
@@ -14232,12 +14232,10 @@ async function FXRUN(st,ctx){
     return;}
   case 'channelExtra':{
     const pl=G.players[p];
-    if(!pl.channeler)return none('Only a Warlock player channels a Boon.');
     pl.channelExtra=(pl.channelExtra||0)+1;
     log(pname(p)+' can channel one more Boon for the rest of the game ('+channelCapOn(b,p)+' at once).');
     return await FXRUN({fx:'channelFill'},ctx);}
   case 'channelBack':{
-    if(!wlSeat(p))return none('Only a Warlock player channels a Boon.');
     const r=await channelBack(p,!!st.gods,st.gods
       ?'Fickle Pact: change your Boon to a patron you have channelled before, or to one of the Priest’s gods.'
       :'Pact Blade: you can change your Boon to a patron you have channelled before.',!!st.gods);
@@ -16794,7 +16792,7 @@ async function playTeece(p,handIdx){
   /* fromHand is the one thing every other way of putting a card down lacks, so
      a clause marked "except by effect" can tell them apart. */
   /* A Warlock offers its patron, then its when-played Boons fire. */
-  if(DEF(t).warlock&&wlSeat(p)){await warlockArrive(p,spot,t);if(G.over)return true;}
+  if(DEF(t).warlock){await warlockArrive(p,spot,t);if(G.over)return true;}
   else if(b[spot].teece===t&&pactMap(b,spot)){await pactArrive(p,t);if(G.over)return true;}
   if(d.onPlay)for(let k=0;k<dblFx;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked,fromHand:!G.viaEffect,viaEffect:!!G.viaEffect});
   if(b[spot].teece===t)await groundArrive(spot);
@@ -17073,7 +17071,7 @@ async function clearGroundAt(i,breaker){
   /* The Warlock's Circle leaves a Lesser Circle behind, wherever its owner
      likes, as long as no battleground is lying there already. */
   /* The Warlock's Circle, gone, offers its owner the Boon of the Circle. */
-  if(groundFlag(g,'gCircleBoon')&&!G.over&&G.players[g.owner]&&G.players[g.owner].channeler)
+  if(groundFlag(g,'gCircleBoon')&&!G.over&&G.players[g.owner])
     await channelIn(g.owner,'circle',gd.name+' is gone');
   const spread=groundNum(g,'gSpread');
   if(spread&&CARDS[spread]&&!G.over){
@@ -21832,7 +21830,7 @@ for(const id in CARDS){
   Object.defineProperty(d,'name',{get(){return godTitleName(this);},enumerable:true,configurable:true});
 }
 /* ============ Warlock: the BOON ============
-   The Boon is the seat's, like Worship: a seat playing the Warlock deck
+   The Boon is the seat's: any seat that plays a Warlock card
    channels a patron, and every Teece it controls carries that patron's
    effect for as long as it does. pl.channel is the list being channelled,
    newest last; pl.channelHist every patron that seat has ever channelled,
@@ -21868,7 +21866,11 @@ const PATRONS={
 };
 const PATRON_GODS=['g0','g1','g2','g3'];
 const patronName=k=>PATRONS[k]?PATRONS[k].name:String(k);
-function wlSeat(p){const pl=G&&G.players&&G.players[p];return !!(pl&&pl.channeler);}
+/* Any player can channel a Boon now (Greg, build 215): a Warlock card in any
+   deck offers its patron, and the Boon is an aura on every Teece that player
+   controls. wlSeat only says whether there is a Boon to show: a Warlock deck
+   seat always, anybody else once they have channelled something. */
+function wlSeat(p){const pl=G&&G.players&&G.players[p];return !!(pl&&(pl.channeler||(pl.channelHist&&pl.channelHist.length)||(pl.channel&&pl.channel.length)));}
 function channelCapOn(b,p){
   const pl=G.players[p];
   let cap=1+(pl.channelExtra||0);
@@ -21877,7 +21879,7 @@ function channelCapOn(b,p){
 }
 function channelsOn(b,p){
   const pl=G&&G.players&&G.players[p];
-  if(!pl||!pl.channeler||!pl.channel||!pl.channel.length)return [];
+  if(!pl||!pl.channel||!pl.channel.length)return [];
   const cap=channelCapOn(b,p);
   return pl.channel.length>cap?pl.channel.slice(pl.channel.length-cap):pl.channel;
 }
@@ -21995,7 +21997,8 @@ function channelChoices(p,key){
 async function channelIn(p,key,src,o){
   o=o||{};
   const pl=G.players[p];
-  if(!pl.channeler||!PATRONS[key])return false;
+  if(!PATRONS[key])return false;
+  pl.channel=pl.channel||[];
   const ch=channelChoices(p,key);
   if(!ch.length)return false;
   const cur=channelsOn(G.board,p);
@@ -22032,7 +22035,7 @@ function channelSettle(){
   if(!G||!G.players)return;
   for(let p=0;p<G.players.length;p++){
     const pl=G.players[p];
-    if(!pl.channeler||!pl.channel)continue;
+    if(!pl.channel)continue;
     const act=channelsOn(G.board,p);
     if(act.length<pl.channel.length){
       const gone=pl.channel.slice(0,pl.channel.length-act.length);
@@ -22110,7 +22113,6 @@ async function pactArrive(p,t,only){
    patron offers it first. */
 async function warlockArrive(p,cell,t){
   const d=CARDS[t.cardId];
-  if(!wlSeat(p))return;
   if(d.channel&&channelsOn(G.board,p).indexOf(d.channel)<0){
     const onPlayKey=d.channel==='zeus'||d.channel==='ogre'||d.channel==='devils';
     await channelIn(p,d.channel,nm(t),{bias:onPlayKey?0.6:0});
@@ -22167,7 +22169,6 @@ function aiBlessWorth(p){
 }
 function aiWarlockPlan(d){
   const p=G.turn,pl=G.players[p];
-  if(!wlSeat(p))return null;
   if(d.wlAi==='blessing'){
     if(!channelsOn(G.board,p).length)return null;
     return {thr:0.8,bonus:aiBlessWorth(p),cands:[0],mut:()=>{}};
