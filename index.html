@@ -1257,7 +1257,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:218,date:'2026-10-16'};
+const VERSION={build:219,date:'2026-10-16'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1361,12 +1361,48 @@ const KW_RULES={
   undying:'When it is destroyed it gets back up, on any free panel its controller chooses, with no protection once it is back. "Undying +1" means each return comes back 1 higher on every side than the last time, "Undying -2" 2 lower. A number in front, as in "2 Undying +1", is how many returns it has; with none it has one. Tokens, copies and silenced Teece never return.',
   defence:'Defence soaks the difference in a fight: an attack has to beat the side it hits by MORE than the Defence to destroy it, so Defence 2 only falls to an attack that wins by three or more. It does nothing against a side dropping below zero.',
   sacrifice:'Giving up one of your own Teece as a price: it is destroyed and goes to the graveyard. "Sacrifice one fielded Teece to play" means one of your Teece on the board, not a Token, is given up as this one arrives.',
+  conjure:'Put a spell card straight into your hand. It comes from nowhere, not off your deck, and is played like any other magic card. The card that conjures names what you get: Wizards conjure elements (Fire, Water, Wind, Earth), Priests conjure Smites, and other decks conjure the spell their card names.',
+  combine:'On your turn, two cards in your hand that belong together become one stronger card, for free and as often as you like: two different Wizard elements make a new spell, and two Smites of the same size make the next size up. Tap Combine on either card. Alchemical Compounds counts as any element.',
+  element:'Fire, Water, Wind or Earth: the four spells a Wizard conjures. "Any element" means you pick which.',
   token:'Not a whole card. A Token cannot be sacrificed to play a Teece and never counts toward winning, and when it is destroyed it is simply gone: no graveyard, no return.',
   silenced:'A silenced Teece has its abilities negated for the rest of the game: nothing printed on it fires any more, its buttons are dead and its auras stop. Its numbers stay. A silenced battleground does nothing.',
   trump:'A game-changing card. The label carries no rule of its own: the card does exactly what its text says.'
 };
-const kwDesc=k=>KEYWORDS[k]||KW_RULES[k]||'';
-const KW_TITLE={packleader:'Pack Leader',mummywrap:'Mummy Wrap',steadfast:'Immune to stat reduction',trump:'Trump card'};
+/* The spells a Wizard conjures and a Priest folds together. Built from the
+   cards themselves at the moment of the tap, so the popup cannot drift from the
+   card it explains: the card's own text, plus what it combines into, read off
+   EL_COMBO and SMITE_CARD. */
+const KW_SPELL={fire:926,water:927,wind:928,earth:929,steam:930,fireball:931,lava:932,ice:933,mud:934,
+  sandstormelemental:935,holy:936,sandstorm:941,
+  quartersmite:1122,halfsmite:1123,smite:1124,divinesmite:1125};
+const KW_ARCH={fire:'gives -4 instead',water:'gives +4 instead',wind:'can move it to any empty panel on the board',
+  earth:'lays Deep Earth instead, +6 Defence'};
+function spellDesc(k){
+  const id=KW_SPELL[k],cd=CARDS[id];
+  if(!cd)return '';
+  if(k==='sandstorm')return 'The battleground a Sandstorm Elemental leaves where it is destroyed. '+cd.text;
+  const parts=[];
+  if(cd.baseElem){
+    parts.push('A Wizard element, conjured into your hand. '+cd.text);
+    if(KW_ARCH[k])parts.push('With an Archmage of yours on the field it '+KW_ARCH[k]+'.');
+    const with_=[];
+    for(const key in EL_COMBO){const els=key.split('+');const at=els.indexOf(cd.baseElem);
+      if(at>=0)with_.push(CARDS[EL_CARD[els[1-at]]].name+' into '+CARDS[EL_COMBO[key]].name);}
+    if(with_.length)parts.push('Combines with '+with_.join(', ')+'. All four together make Holy, while you have a Grand Magus.');
+  }else if(cd.smiteLvl){
+    parts.push('A Priest spell, conjured into your hand. '+cd.text);
+    const up=SMITE_CARD[cd.smiteLvl+1];
+    if(up&&CARDS[up])parts.push('Two of them combine into a '+CARDS[up].name+'.');
+  }else{
+    const els=(cd.elem||[]).map(e=>CARDS[EL_CARD[e]].name);
+    parts.push((k==='holy'?'Fire, Water, Wind and Earth combined, all four at once, while you have a Grand Magus. '
+      :'A Wizard spell, made by combining '+els.join(' and ')+' in your hand. ')+cd.text);
+  }
+  return parts.join(' ');
+}
+const kwDesc=k=>KEYWORDS[k]||KW_RULES[k]||(KW_SPELL[k]?spellDesc(k):'');
+const KW_TITLE={packleader:'Pack Leader',mummywrap:'Mummy Wrap',steadfast:'Immune to stat reduction',trump:'Trump card',
+  needsflinger:'Needs a Rock Flinger',sandstormelemental:'Sandstorm Elemental',quartersmite:'Quarter Smite',halfsmite:'Half Smite',divinesmite:'Divine Smite'};
 const kwTitle=k=>KW_TITLE[k]||k.charAt(0).toUpperCase()+k.slice(1);
 /* The forms each one is printed in. Capitalised only for the ones that are
    ordinary English in lower case ("fuse", "march", "ward" in "toward"). The
@@ -1380,18 +1416,26 @@ const KW_FORMS=[
   ['Defender','defender'],['Floating','floating'],['Howl','howl'],['Invincible','invincible'],
   ['[Ss]tun(?:ned|s)?','stun'],['Undying','undying'],['Defence','defence'],
   ['[Ss]acrific(?:e[sd]?|ing)','sacrifice'],['Tokens?','token'],
-  ['(?:effect (?:is|was) )?[Ss]ilenced','silenced'],['Silence','silenced']
+  ['[Ss]ilenced','silenced'],['Silence','silenced'],
+  ['Sandstorm Elementals?','sandstormelemental'],['Sandstorm','sandstorm'],
+  ['Quarter Smites?','quartersmite'],['Half Smites?','halfsmite'],['Divine Smites?','divinesmite'],['Smites?','smite'],
+  ['Fireball','fireball'],['Fire','fire'],['Water','water'],['Wind','wind'],['Earth','earth'],['Steam','steam'],
+  ['Lava','lava'],['Ice','ice'],['Mud','mud'],['Holy','holy'],
+  ['[Cc]onjur(?:e[sd]?|ing)','conjure'],['[Cc]ombin(?:e[sd]?|ing)','combine'],['[Ee]lements?','element']
 ];
-const KW_RE=new RegExp('\\b(?:'+KW_FORMS.map(f=>'('+f[0]+')').join('|')+')\\b','g');
+/* Phrases that read like a keyword and are not one: the effect-is-silenced
+   wording means the effect fizzled, Dumpster Fire is an ability's name, and so
+   on. Matched first and handed back untouched -- no lookbehind, which older
+   iPhones refuse to parse. */
+const KW_PLAIN=['effect (?:is|was) silenced','Dumpster Fire','Blow In The Wind','Fire Elemental','Water Elemental',
+  'Wind Elemental','Earth Elemental','Twin Conjuring','Deep Earth'];
+const KW_RE=new RegExp('\\b(?:(?:'+KW_PLAIN.join('|')+')|'+KW_FORMS.map(f=>'('+f[0]+')').join('|')+')\\b','g');
 const kwSpan=(k,txt)=>'<b class="kw" data-kw="'+k+'" role="button" tabindex="0">'+txt+'</b>';
 /* Bolds every keyword in a piece of inspector HTML. Only the text between
    tags is touched, so markup already in the string survives. */
 function kwify(h){
   return String(h).split(/(<[^>]*>)/).map(part=>part.charAt(0)==='<'?part:
     part.replace(KW_RE,(m,...g)=>{
-      /* No lookbehind (older iPhones refuse to parse one): the effect-is
-         prefix is matched and handed back untouched instead. */
-      if(/^effect /.test(m))return m;
       for(let j=0;j<KW_FORMS.length;j++)if(g[j]!==undefined)return kwSpan(KW_FORMS[j][1],m);return m;})).join('');
 }
 function kwPopClose(){const p=HAS_DOM&&document.getElementById('kwPop');if(p)p.hidden=true;}
@@ -24479,7 +24523,7 @@ if(typeof module!=='undefined'){
     groundGives,givesLabel,invulnText,blessedOn,sameRow,sameCol,oppositeCell,
     groundNum,groundOf,canHandDiscard,auraGives,panelGives,isSteadfast,
     isPlane,planeOn,PLANE,planeSpots,hangPlane,syncPlane,getGrid:()=>GRID,
-    statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,kwify,kwDesc,
+    statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,kwify,kwDesc,kwTitle,KW_RULES,KW_SPELL,
     graveActsFor,graveActAvailable,runGraveAct,dumpPlate,
     setHandView,applyHandView,getHandView:()=>SQHAND,applySides,handCount,afterDiscard,
     canHandDiscard,sacPool,chooseSacrifice,drawPerTurn,
