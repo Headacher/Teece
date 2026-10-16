@@ -1261,7 +1261,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:220,date:'2026-10-16'};
+const VERSION={build:221,date:'2026-10-16'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1355,7 +1355,7 @@ const KEYWORDS={
   immovable:'It cannot move, and nothing can move it.',
   march:'Once per your turn, move one space up, down or sideways. Everything standing beside where it lands may then be moved one space too, and its mover chooses where.',
   lumber:'Once each time it is on the field, move one space.',
-  fuse:'Fuse it with another Teece into one card that is both of them: every side added together, and every effect and every equip kept. Fuse two cards in your hand whenever you like on your turn, or, once per turn, two of your Teece standing side by side on the board. A fusion does not fuse again.',
+  fuse:'Fuse it with another Teece that also has Fuse, into one card that is both of them: every side added together, and every effect and every equip kept. Fuse two cards in your hand whenever you like on your turn, or, once per turn, two of your Teece standing side by side on the board. A fusion does not fuse again.',
   stun:'A stunned Teece destroys nothing and can activate no ability until the end of the stunning side’s next turn. It keeps every number it has and can still be destroyed itself.'
 };
 /* Words the inspector bolds that are not keywords a card lists in kw, but are
@@ -1404,10 +1404,10 @@ function spellDesc(k){
   }
   return parts.join(' ');
 }
-const kwDesc=k=>KEYWORDS[k]||KW_RULES[k]||(KW_SPELL[k]?spellDesc(k):'');
+const kwDesc=k=>(kwRe(),KEYWORDS[k])||KW_RULES[k]||(KW_SPELL[k]?spellDesc(k):'')||(KW_TOKEN[k]?tokenDesc(k):'');
 const KW_TITLE={packleader:'Pack Leader',mummywrap:'Mummy Wrap',steadfast:'Immune to stat reduction',trump:'Trump card',
   needsflinger:'Needs a Rock Flinger',sandstormelemental:'Sandstorm Elemental',quartersmite:'Quarter Smite',halfsmite:'Half Smite',divinesmite:'Divine Smite'};
-const kwTitle=k=>KW_TITLE[k]||k.charAt(0).toUpperCase()+k.slice(1);
+const kwTitle=k=>KW_TITLE[k]||(kwRe(),KW_TOKEN[k]?CARDS[KW_TOKEN[k][0]].name:k.charAt(0).toUpperCase()+k.slice(1));
 /* The forms each one is printed in. Capitalised only for the ones that are
    ordinary English in lower case ("fuse", "march", "ward" in "toward"). The
    effect-is-silenced wording means the effect fizzled, not a silenced Teece,
@@ -1433,13 +1433,53 @@ const KW_FORMS=[
    iPhones refuse to parse. */
 const KW_PLAIN=['effect (?:is|was) silenced','Dumpster Fire','Blow In The Wind','Fire Elemental','Water Elemental',
   'Wind Elemental','Earth Elemental','Twin Conjuring','Deep Earth'];
-const KW_RE=new RegExp('\\b(?:(?:'+KW_PLAIN.join('|')+')|'+KW_FORMS.map(f=>'('+f[0]+')').join('|')+')\\b','g');
+/* Named Tokens -- Drone, Spiderling, Bat -- read off CARDS, so a deck that
+   gains a token gets its popup without touching this. CARDS is defined further
+   down the file, so the pattern is built on first use. A name that is also an
+   ordinary word or another card's name (Death, War, Locust) only counts with
+   "Token" after it. */
+const KW_TOKEN={};
+const TOKEN_ONLY_WITH_WORD=['Famine','War','Death','Plague','Locust','Rat'];
+const reEsc=x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+let KW_RE_C=null;
+function kwRe(){
+  if(KW_RE_C)return KW_RE_C;
+  const forms=[],byName={};
+  for(const id in CARDS){
+    const c=CARDS[id];
+    if(!c.token||c.type!=='teece'||c.name==='Token'||c.runeCard||id==='TRUNEB')continue;
+    (byName[c.name]=byName[c.name]||[]).push(id);
+  }
+  for(const nmn of Object.keys(byName).sort((a,b)=>b.length-a.length)){
+    const k='tok_'+byName[nmn][0];
+    KW_TOKEN[k]=byName[nmn];
+    const base=reEsc(nmn);
+    if(/ Token$/.test(nmn))forms.push([base+'s?',k]);
+    else if(TOKEN_ONLY_WITH_WORD.indexOf(nmn)>=0)forms.push([base+' Tokens?',k]);
+    else forms.push([base+'(?: Tokens?|s)?',k]);
+  }
+  const at=KW_FORMS.findIndex(f=>f[1]==='token');
+  /* Sandstorm Elemental is already a spell entry; keep that one. */
+  KW_FORMS.splice(at,0,...forms.filter(f=>!/^Sandstorm/.test(f[0])));
+  KW_RE_C=new RegExp('\\b(?:(?:'+KW_PLAIN.join('|')+')|'+KW_FORMS.map(f=>'('+f[0]+')').join('|')+')\\b','g');
+  return KW_RE_C;
+}
+function tokenDesc(k){
+  const ids=KW_TOKEN[k];
+  if(!ids)return '';
+  return ids.map(id=>{
+    const c=CARDS[id];
+    const body=(c.text||'').replace(/^[^.]*?Token(?: with Defence \d+)?\.\s*/,'');
+    return 'A Token, '+c.sides.join('/')+(c.def&&body.indexOf('Defence '+c.def)<0?' with Defence '+c.def:'')+(c.kw||[]).filter(x=>body.indexOf(kwTitle(x))<0).map(x=>', '+kwTitle(x)).join('')+
+      (ids.length>1?' ('+((DECKS&&DECKS[c.deck]&&DECKS[c.deck].name)||c.deck)+')':'')+'. '+body;
+  }).join(' ');
+}
 const kwSpan=(k,txt)=>'<b class="kw" data-kw="'+k+'" role="button" tabindex="0">'+txt+'</b>';
 /* Bolds every keyword in a piece of inspector HTML. Only the text between
    tags is touched, so markup already in the string survives. */
 function kwify(h){
   return String(h).split(/(<[^>]*>)/).map(part=>part.charAt(0)==='<'?part:
-    part.replace(KW_RE,(m,...g)=>{
+    part.replace(kwRe(),(m,...g)=>{
       for(let j=0;j<KW_FORMS.length;j++)if(g[j]!==undefined)return kwSpan(KW_FORMS[j][1],m);return m;})).join('');
 }
 function kwPopClose(){const p=HAS_DOM&&document.getElementById('kwPop');if(p)p.hidden=true;}
@@ -7741,7 +7781,7 @@ function actBlockedReason(b,i,ent){
     if(shotsLeft(t.owner)<1)return 'magazine empty';
     return godTargets(b,i,t.owner).length?null:'no enemy in line';
   }
-  if(st&&st.fx==='fuseAdj')return fusePartners(b,i).length?null:'no ally beside it';
+  if(st&&st.fx==='fuseAdj')return fusePartners(b,i).length?null:'no Fuse ally beside it';
   if(st&&st.fx==='mWrap')return mWrapOptions(b,i,t.owner).length?null:'nothing in reach';
   if(st&&(st.fx==='traverse'||st.fx==='pentaTele')){
     if(hasKw(b,i,'immovable'))return 'held';
@@ -20400,7 +20440,7 @@ function showDetail(i){
     const btn=document.createElement('button');
     btn.className='btn abtn'+(av?' primary':'');
     btn.textContent=ent.act.name+(gagged?' (silenced)':!actAvailable(t,ent)?' (used)':blocked?' ('+blocked+')':'');
-    if(blocked)btn.title=blocked==='points taken'?'Every point of the Pentagram it could reach has a Teece on it.':blocked==='no ally beside it'?nm(t)+' has none of your Teece beside it to fuse with.':nm(t)+' has no open panel to move to.';
+    if(blocked)btn.title=blocked==='points taken'?'Every point of the Pentagram it could reach has a Teece on it.':blocked==='no Fuse ally beside it'?nm(t)+' has none of your Fuse Teece beside it to fuse with.':nm(t)+' has no open panel to move to.';
     btn.disabled=!av;
     btn.addEventListener('click',()=>{uiAct(i,ent);});
     d.appendChild(btn);
@@ -21329,7 +21369,7 @@ function renderActionBar(){
     const btn=document.createElement('button');
     btn.className='btn'+(av?' primary':'');
     btn.textContent=ent.act.name+(gagged?' (silenced)':!actAvailable(t,ent)?' (used)':blocked?' ('+blocked+')':'');
-    if(blocked)btn.title=blocked==='points taken'?'Every point of the Pentagram it could reach has a Teece on it.':blocked==='no ally beside it'?nm(t)+' has none of your Teece beside it to fuse with.':nm(t)+' has no open panel to move to.';
+    if(blocked)btn.title=blocked==='points taken'?'Every point of the Pentagram it could reach has a Teece on it.':blocked==='no Fuse ally beside it'?nm(t)+' has none of your Fuse Teece beside it to fuse with.':nm(t)+' has no open panel to move to.';
     btn.disabled=!av;
     btn.addEventListener('click',()=>{uiAct(i,ent);});
     ab.appendChild(btn);
@@ -22945,7 +22985,7 @@ function canFuseOnBoard(t){
 function fusePartners(b,i){
   const t=b[i]&&b[i].teece;
   if(!t)return [];
-  return ADJ[i].filter(j=>j!==i&&b[j]&&bodyFusible(b[j].teece,t.owner));
+  return ADJ[i].filter(j=>j!==i&&b[j]&&bodyFusible(b[j].teece,t.owner)&&isFuser(b[j].teece.cardId));
 }
 /* Two bodies made into one. The printed lines are not re-read: each body's
    own base is kept, turned and handicapped the way it already was, and added. */
@@ -23048,7 +23088,8 @@ function fuseHandOpts(p,i){
   for(let j=0;j<hand.length;j++){
     if(j===i)continue;
     const c=hand[j];
-    if(!fusibleCard(c)||CARDS[c].fusion)continue;
+    /* Both halves print Fuse: a Fusion Teece fuses only with another one. */
+    if(!fusibleCard(c)||CARDS[c].fusion||!isFuser(c))continue;
     const k=c+'/'+plateOf(p,j).length;
     if(seen[k])continue;
     seen[k]=1;
@@ -23125,7 +23166,7 @@ async function fusionFx(st,ctx,pickCell,none){
     const i=ctx.cell,t=ctx.t;
     if(i==null||!t||b[i].teece!==t)return none('Nothing to fuse.');
     const parts=fusePartners(b,i);
-    if(!parts.length)return none('No Teece of yours stands beside it to fuse with.');
+    if(!parts.length)return none('No Fuse Teece of yours stands beside it to fuse with.');
     const o={board:true};
     const j=await pickCell(parts,'Fuse '+nm(t)+' with which of your Teece beside it?',
       (bb,c)=>simBestFuse(bb,i,[c],p,o),false);
@@ -24531,7 +24572,7 @@ if(typeof module!=='undefined'){
     groundGives,givesLabel,invulnText,blessedOn,sameRow,sameCol,oppositeCell,
     groundNum,groundOf,canHandDiscard,auraGives,panelGives,isSteadfast,
     isPlane,planeOn,PLANE,planeSpots,hangPlane,syncPlane,getGrid:()=>GRID,
-    statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,kwify,kwDesc,kwTitle,KW_RULES,KW_SPELL,
+    statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,kwify,kwDesc,kwTitle,KW_RULES,KW_SPELL,KW_TOKEN,
     graveActsFor,graveActAvailable,runGraveAct,dumpPlate,
     setHandView,applyHandView,getHandView:()=>SQHAND,applySides,handCount,afterDiscard,
     canHandDiscard,sacPool,chooseSacrifice,drawPerTurn,
