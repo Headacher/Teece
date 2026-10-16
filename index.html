@@ -1237,7 +1237,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:209,date:'2026-10-16'};
+const VERSION={build:210,date:'2026-10-16'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -5058,9 +5058,9 @@ const CARDS = {
     text:'Once per your turn: select a Teece; move it one space.'},
  1200:{name:'Star Dancer',type:'teece',sides:[4,5,5,3],traverseExtra:1,
     text:'Can Traverse The Pentagram an additional time per turn.'},
- 1201:{name:'Extremist Zealot',type:'teece',sides:[10,10,10,10],dieAtEndOfTurn:true,
+ 1201:{name:'Extremist Zealot',type:'teece',sides:[10,10,10,10],sacAtEndOfTurn:true,
     onDeath:[{fx:'killer',n:-10,dur:'perm'}],
-    text:'Destroyed at the end of your turn. A Teece that destroys it gets -10.'},
+    text:'Sacrificed at the end of your turn. A Teece that destroys it gets -10.'},
  1202:{name:'Whispering Deacon',type:'teece',sides:[2,2,2,2],
     onPlay:[{fx:'bounce',count:2,may:true,notSelf:true,anyBoss:true}],
     onDeath:[{fx:'nextDef',n:3}],
@@ -7565,9 +7565,10 @@ function actsOf(b,i){
    if(pm&&pm.ankh)out.push({key:'kwlwrap',act:{name:'Mummy Wrap (Ankhtepot)',once:'turn',times:pm.ankh,steps:[{fx:'mWrap'}]}});
    const ck=!t.silenced&&d.channel;
    if(ck&&wlSeat(t.owner)&&channelsOn(b,t.owner).indexOf(ck)<0)out.push({key:'kwlchan',act:channelAct(ck)});}
-  /* Traverse The Pentagram: the Cult seat's, for any Teece it controls that
-     stands on a point. Not the card's, so silence does not take it. */
-  if(b===G.board&&cultSeat(t.owner)&&isPentaPoint(i))
+  /* Traverse The Pentagram: the board's, for any Teece of either side that
+     stands on a point while a Cult seat is in the game. Not the card's, so
+     silence does not take it. Only the Cult's own travel lights a line. */
+  if(b===G.board&&cultInPlay()&&isPentaPoint(i))
     out.push({key:'kcult',act:{name:'Traverse The Pentagram',once:'turn',times:cultTraverseTimes(t),steps:[{fx:'traverse'}]}});
   if(hasKw(b,i,'skitter'))out.push({key:'kskit',act:SKITTER_ACT});
   if(hasKw(b,i,'march'))out.push({key:'kmarch',act:MARCH_ACT});
@@ -17565,6 +17566,16 @@ async function endTurn(){
       forceDeath(t);
     }
   }
+  /* A sacrifice is a price, not a death: nothing that stops a Teece being
+     destroyed stops this, and there is no killer. */
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(t&&t.owner===p&&DEF(t).sacAtEndOfTurn){
+      await anim([i],'dying',190);
+      await processDeath({cell:i,t,killers:[],cost:true});
+      if(G.over)break;
+    }
+  }
   /* Infected Bite works on the victim's own clock, not the biter's: three of
      THEIR turns, counted as each of them ends, and then the body gets up on the
      other side for good. */
@@ -21622,7 +21633,7 @@ function pentaSvg(){
 }
 function cultStatusText(q){
   const c=G.players[q].cult,n=c.lines.filter(Boolean).length;
-  if(c.stage===1)return 'Mission 1 of 3, Activate The Pentagram: '+n+' of 5 lines lit. Every Teece '+pname(q)+' '+vb(q,'controls','control')+' can Traverse The Pentagram once a turn, from its point to one of the two its lines reach. Travelling a line lights it; all five hand over Convert.';
+  if(c.stage===1)return 'Mission 1 of 3, Activate The Pentagram: '+n+' of 5 lines lit. Any Teece on a point, either side’s, can Traverse The Pentagram once a turn, to one of the two points its lines reach. A line '+pname(q)+' '+vb(q,'travels','travel')+' lights up; all five hand over Convert.';
   if(c.stage===2)return 'Mission 2 of 3, Convert The Enemy: cast Convert on a Teece beside one of '+ownOf(q)+' Teece. Until it is resolved it keeps coming back to hand.';
   if(c.stage===3)return 'Mission 3 of 3, Perform The Sacrifice: end a turn of '+ownOf(q)+' with an ally in the middle of the Pentagram. It is sacrificed and a 20/20/20/20 Tendril Of Gol’God’Oth takes its place.';
   return 'The Tendril has been summoned. Gol’God’Oth Arrives aimed at a Tendril Of Gol’God’Oth wins the game.';
