@@ -1257,7 +1257,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:217,date:'2026-10-16'};
+const VERSION={build:218,date:'2026-10-16'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -5146,8 +5146,8 @@ const CARDS = {
     act:[{name:'Pull a string',once:'turn',steps:[{fx:'moveTarget',where:'any'}]}],
     onDeath:[{fx:'moveTarget',where:'any'}],
     text:'When played: select a Teece; move it one space. Once per your turn: select a Teece; move it one space. When destroyed: select a Teece; move it one space.'},
- 1205:{name:'Cult Warden',type:'teece',sides:[3,7,7,3],aura:{who:'ally',where:'global',n:0,def:3,includeSelf:true},
-    text:'All your Teece have +3 Defence.'},
+ 1205:{name:'Cult Warden',type:'teece',sides:[3,7,7,3],aura:{who:'ally',where:'global',n:0,def:3},
+    text:'All your other Teece have +3 Defence.'},
  1206:{name:'Hierophant',type:'teece',sides:[3,3,3,3],sac:1,def:7,
     onPlay:[{fx:'sacToHand'}],
     onDeath:[{fx:'nextDef',n:7}],
