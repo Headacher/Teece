@@ -490,6 +490,12 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
    thin dim rim and two slow, barely-there motes, so the two read differently. The
    motes are spans inside .aura, and their delays are set from the clock when
    drawn so a re-render does not restart them. */
+.rank{display:table;margin:2px auto 0;font-family:var(--body);font-size:7.5px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;line-height:1.3;padding:0 4px;border-radius:3px;
+  background:rgba(16,12,9,.85);color:#ffce6e;box-shadow:0 0 0 1px rgba(255,206,110,.5);white-space:nowrap;
+  text-shadow:none!important}
+.rank.mini{color:#f0dcb4;box-shadow:0 0 0 1px rgba(240,220,180,.3)}
+.dcard .rank{font-size:9px}
 .aura{position:absolute;inset:-6px;pointer-events:none;z-index:3;border-radius:10px}
 .aura.boss{box-shadow:0 0 10px 1px rgba(255,206,110,.35);animation:auraGlow 3.2s ease-in-out infinite}
 .aura.mini{inset:-3px;border-radius:8px;box-shadow:0 0 0 1px rgba(255,190,80,.3),0 0 5px rgba(255,190,80,.18)}
@@ -1237,7 +1243,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:211,date:'2026-10-16'};
+const VERSION={build:212,date:'2026-10-16'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -5259,6 +5265,15 @@ function eqLabel(e){
 /* A Hyperfusion counts as a Boss without costing two bodies to play: it was
    paid for with the four cards it is made of. */
 const isBossCard=id=>(CARDS[id].sac||0)>=2||!!CARDS[id].boss;
+/* What the card says it is, printed on its face wherever it is drawn: in hand,
+   on the board, in a draft and in the detail panel. A Megaboss is still a Boss
+   to every rule; the label only names which kind. */
+function rankOf(id){
+  const c=CARDS[id];if(!c||c.type!=='teece')return '';
+  if(isBossCard(id))return (c.sac||0)>=3?'Megaboss':'Boss';
+  return (c.sac||0)===1?'Miniboss':'';
+}
+const rankTag=id=>{const r=rankOf(id);return r?'<div class="rank'+(r==='Miniboss'?' mini':'')+'">'+r+'</div>':'';};
 /* The aura a Boss (or, fainter, a Miniboss) is drawn with on the board only;
    a card in hand carries none. Deterministic positions per card, delays read off the clock so the
    motes keep drifting through a re-render instead of starting over. */
@@ -20011,7 +20026,7 @@ function renderBoard(){
       const tnm=t.animGround?CARDS[t.animGround.cardId].name:DEF(t).name;
       const nmCls=tnm.length>15?'nm longer':(tnm.length>10?'nm long':'nm');
       tp.innerHTML=(t.isToken?TOKEN_SHAPE_SVG:'')+(bart?'<pre class="ascii" aria-hidden="true">'+bart.map(escHtml).join('\n')+'</pre>':'')+
-        '<div class="mid"><div class="'+nmCls+'">'+tnm+'</div>'+
+        '<div class="mid"><div class="'+nmCls+'">'+tnm+'</div>'+(t.animGround?'':rankTag(t.cardId))+
         (badges.length?'<div class="rgd">'+badges.join('')+'</div>':'')+'</div>'+
         '<div class="s s0">'+s[0]+'</div>'+
         '<div class="s s1">'+s[1]+'</div>'+
@@ -20326,7 +20341,7 @@ function renderHand(p){
         '<div class="'+sc(1)+'">'+ps[1]+'</div>'+
         '<div class="'+sc(2)+'">'+ps[2]+'</div>'+
         '<div class="'+sc(3)+'">'+ps[3]+'</div>'+
-        '<div class="hcn cn">'+cardTitle(id,p)+'</div>';
+        '<div class="hcn cn">'+cardTitle(id,p)+rankTag(id)+'</div>';
     }else{
       card.innerHTML=(art?'<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>':'')+
         '<div class="ct">'+cd.type+'</div><div class="cn">'+cd.name+'</div><div class="cs">'+cd.text.split('\n')[0]+'</div>';
@@ -20405,7 +20420,7 @@ function showDetailCard(id,worn){
   let html=detailArt(id)+'<div class="dn">'+cd.name+'</div>'+
     (cd.type==='teece'?'<div class="dstats" style="color:var(--gold)">'+sidesBlock(ps)+
       (worn&&worn.length&&ps.join()!==cd.sides.join()?' &nbsp;plated, from '+sidesBlock(cd.sides):'')+
-      (cd.sac?' \u00b7 sacrifice '+cd.sac:'')+(cd.def?' \u00b7 Defence '+cd.def:'')+'</div>':
+      (rankOf(id)?' \u00b7 '+rankOf(id):'')+(cd.sac?' \u00b7 sacrifice '+cd.sac:'')+(cd.def?' \u00b7 Defence '+cd.def:'')+'</div>':
       '<div class="dstats" style="color:var(--gold)">'+cd.type+'</div>')+
     '<div class="dt">'+cd.text+'</div>'+
     (cd.flavor?'<div class="dt" style="font-style:italic;opacity:.8">'+cd.flavor+'</div>':'');
@@ -21260,7 +21275,7 @@ function renderDraft(p,offer,k,res){
     /* No keyword line and no "teece" label: the rules text already says
        Ranged or Flying, and a card with four number tabs is plainly a Teece.
        The other three kinds still say what they are. */
-    dc.innerHTML+='<div class="dnm">'+cd.name+'</div>';
+    dc.innerHTML+='<div class="dnm">'+cd.name+rankTag(id)+'</div>';
     if(cd.type!=='teece')dc.innerHTML+='<div class="dty">'+cd.type+'</div>';
     dc.innerHTML+='<div class="dtx">'+cd.text.split('\n')[0]+'</div>';
     dc.addEventListener('click',()=>{if(!ready())return;res(id);overlay.classList.add('hidden');});
