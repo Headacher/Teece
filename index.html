@@ -1261,7 +1261,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:221,date:'2026-10-16'};
+const VERSION={build:222,date:'2026-10-16'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1364,7 +1364,7 @@ const KEYWORDS={
 const KW_RULES={
   undying:'When it is destroyed (not sacrificed), resummon it that number of times, with its respective bonus or penalty.',
   defence:'Defence soaks the difference in a fight: an attack has to beat the side it hits by MORE than the Defence to destroy it, so Defence 2 only falls to an attack that wins by three or more. It does nothing against a side dropping below zero.',
-  sacrifice:'Giving up one of your own Teece as a price: it is destroyed and goes to the graveyard. "Sacrifice a Teece to play" means one of your Teece on the board, not a Token, is given up as this one arrives.',
+  sacrifice:'Giving up one of your own Teece as a price: it is destroyed. "Sacrifice a Teece to play" means one of your Teece on the board is given up as this one arrives.',
   conjure:'Put a spell card straight into your hand. It comes from nowhere, not off your deck, and is played like any other magic card. The card that conjures names what you get: Wizards conjure elements (Fire, Water, Wind, Earth), Priests conjure Smites, and other decks conjure the spell their card names.',
   combine:'On your turn, two cards in your hand that belong together become one stronger card, for free and as often as you like: two different Wizard elements make a new spell, and two Smites of the same size make the next size up. Tap Combine on either card. Alchemical Compounds counts as any element.',
   element:'Fire, Water, Wind or Earth: the four spells a Wizard conjures. "Any element" means you pick which.',
