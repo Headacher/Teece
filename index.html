@@ -1243,7 +1243,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:212,date:'2026-10-16'};
+const VERSION={build:213,date:'2026-10-16'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -12116,9 +12116,26 @@ async function FXRUN(st,ctx){
       (entry.owner===p?'the grave':pname(entry.owner)+"'s grave")+' and into '+pname(p)+"'s hand.");
     return;}
   case 'sacToHand':{
-    if(ctx.sacked&&ctx.sacked.length){
-      for(const cid of ctx.sacked)handPush(p,cid);
-      log('The sacrificed Teece returns to '+pname(p)+"'s hand.");
+    /* The card is fetched from wherever the sacrifice left it. One a Warcamp
+       or a Blood Pact already handed back is in the hand and stays put; one
+       that went into a graveyard comes out of it. Taking it out also means a
+       doubled Warlord cannot fetch the same card twice. */
+    for(const s of (ctx.sacked||[])){
+      const to=s.to,name=CARDS[s.cardId].name;
+      if(s.done)continue;
+      if(to==='hand'){log(name+' is already back in '+pname(p)+"'s hand.");continue;}
+      let took=false;
+      if(to&&to.grave!=null){
+        const gv=G.players[to.grave].grave,at=gv.lastIndexOf(s.cardId);
+        if(at>=0){gv.splice(at,1);took=true;}
+      }else if(to&&to.held){
+        const h=to.held.held||[],at=h.findIndex(x=>x.cardId===s.cardId);
+        if(at>=0){h.splice(at,1);took=true;}
+      }
+      if(!took)continue;
+      s.done=true;
+      handPush(p,s.cardId);
+      log(name+', the sacrificed Teece, returns to '+pname(p)+"'s hand.");
     }
     return;}
   case 'swap':{
@@ -15294,12 +15311,9 @@ async function undyingReturn(t,cell){
         putTeece(bb,i,sim,false);}});
     if(pick!=null&&pick!=='CANCEL')c=pick;
   }
-  const riders=[];
-  for(const e of t.equips){
-    const g=eqG(e);
-    if(g&&g.undyingRide)riders.push(e);
-    else toGrave(e.owner,e.cardId);
-  }
+  const riders=t.equips.filter(e=>{const g=eqG(e);return g&&g.undyingRide;});
+  t.equips=t.equips.filter(e=>riders.indexOf(e)<0);
+  shedGear(t,cell);
   for(const e of riders)nt.equips.push(e);
   putTeece(b,c,nt,true);
   const left=undyLeft(nt);
@@ -15410,6 +15424,19 @@ const isHeldSafe=t=>{
   }
   return false;
 };
+/* Gear coming off a body that never reaches the grave itself -- it got back up,
+   or slipped into the deck. The gear still falls, and a Warcamp under the body
+   sends its owner's share back to hand the same as it would a buried body's. */
+function shedGear(t,cell){
+  const gr=(cell!=null&&!floats(t)&&G.board[cell])?G.board[cell].ground:null;
+  const salvage=groundFlag(gr,'gSalvage')&&gr.owner===t.baseOwner;
+  for(const e of t.equips){
+    if(e.rider)continue;
+    if(salvage&&e.owner===gr.owner){handPush(e.owner,e.cardId);log(CARDS[e.cardId].name+' is salvaged back to hand.');}
+    else toGrave(e.owner,e.cardId);
+  }
+  t.equips=t.equips.filter(e=>e.rider);
+}
 async function processDeath(d){
   const b=G.board,t=d.t,cell=d.cell;
   if(b[cell].teece!==t)return;
@@ -15654,7 +15681,7 @@ async function processDeath(d){
         {skip:true,mut:(bb,i)=>{const nt=makeTeece(t.cardId,t.baseOwner);nt.resummoned=true;
           if(resFx.bonus)for(let k=0;k<4;k++)nt.perm[k]+=resFx.bonus;putTeece(bb,i,nt,false);}});
       if(c!=null&&c!=='CANCEL'){
-        for(const e of t.equips)toGrave(e.owner,e.cardId);
+        shedGear(t,cell);
         const nt=makeTeece(t.cardId,t.baseOwner,{real:true});nt.resummoned=true;
         if(resFx.bonus)for(let k=0;k<4;k++)nt.perm[k]+=resFx.bonus;
         putTeece(G.board,c,nt,true);
@@ -15670,6 +15697,11 @@ async function processDeath(d){
   if(!gone&&!d.cost&&undyLeft(t)>0){
     if(await undyingReturn(t,cell))gone=true;
   }
+  /* Taken by its own death effect -- back into the deck, back up somewhere
+     else, back to hand. The body is accounted for; what it was wearing is not,
+     and used to vanish with it. */
+  if(ctx.consumed)shedGear(t,cell);
+  d.bodyTo=gone?'gone':null;
   if(!gone){
     let handed=false;
     /* Wake: the first of your own to fall each level. Tokens are not mourned. */
@@ -15812,19 +15844,21 @@ async function processDeath(d){
       log('The Runeblade falls, and lies in '+ownOf(t.baseOwner)+' graveyard.');
     }
     if(!handed&&!t.isToken&&!t.isCopy){
-      if(salvage){handPush(t.baseOwner,t.cardId);log(nm(t)+' is salvaged back to hand.');}
+      if(salvage){handPush(t.baseOwner,t.cardId);handed=true;log(nm(t)+' is salvaged back to hand.');}
       /* A Graveyard keeps what dies on it. The card is buckled onto the
          battleground rather than buried, and comes back to its owner's hand
          when the Graveyard itself is broken up. */
       else if(gr&&(groundFlag(gr,'gInter')||groundFlag(gr,'gDump')||groundFlag(gr,'gPin'))){
         gr.held=gr.held||[];
         gr.held.push({cardId:t.cardId,owner:t.baseOwner});
+        d.bodyTo={held:gr};
         log(nm(t)+(groundFlag(gr,'gPin')?' sinks into the River of Blood instead of going to a graveyard. '
           :groundFlag(gr,'gDump')?' is packed into the Dumpster instead of going to a graveyard. '
           :' is equipped to the Graveyard instead of going to a graveyard. ')+gr.held.length+' held.');
       }
-      else bury(t.baseOwner,t.cardId);
+      else{bury(t.baseOwner,t.cardId);d.bodyTo={grave:heapTo!=null?heapTo:t.baseOwner};}
     }
+    if(handed)d.bodyTo='hand';
   }
   /* "When destroyed", run once its own gear is already in the graveyard, so the
      Delver can pick out what it was wearing. */
@@ -16621,8 +16655,11 @@ async function playTeece(p,handIdx){
        sacrificed first drops the body it was holding up, and that body may be
        the next panel on the list. It is still a body paid. */
     if(!t){log('One of the Teece marked for sacrifice had already fallen with another.');continue;}
-    if(!t.isToken&&!t.isCopy)sacked.push(t.cardId);
-    await processDeath({cell:c,t,killers:[],cost:true,gearHome:!!d.sacGearTake,gearTake:d.sacGearTake?gearTaken:null});
+    const pd={cell:c,t,killers:[],cost:true,gearHome:!!d.sacGearTake,gearTake:d.sacGearTake?gearTaken:null};
+    await processDeath(pd);
+    /* Where the body actually went, so "the sacrificed Teece returns to your
+       hand" fetches that card rather than printing a second one. */
+    if(!t.isToken&&!t.isCopy)sacked.push({cardId:t.cardId,to:pd.bodyTo});
     log(nm(t)+' is sacrificed.');
   }
   /* A death can fill the very panel it emptied -- an Egg Sac boiling over, a
