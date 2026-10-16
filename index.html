@@ -709,6 +709,10 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   text-underline-offset:2px;text-decoration-color:rgba(255,255,255,.35)}
 #detail [style*="--gold"] .kw{color:inherit}
 #detail .kw:hover,#detail .kw:focus-visible{text-decoration-color:currentColor;outline:none}
+/* On a draft card the face is cream, so the word keeps the card's ink. A tap
+   on it explains it and does not pick the card. */
+.dcard .kw{font-weight:700;cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px;
+  text-decoration-color:rgba(127,127,127,.6)}
 #kwPop{position:fixed;z-index:60;max-width:min(300px,calc(100vw - 24px));background:#111;border:1px solid var(--gold);
   border-radius:8px;padding:8px 11px;font-size:12px;line-height:1.45;color:var(--cream2);box-shadow:0 6px 20px rgba(0,0,0,.55)}
 #kwPop[hidden]{display:none}
@@ -1257,7 +1261,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:219,date:'2026-10-16'};
+const VERSION={build:220,date:'2026-10-16'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1331,14 +1335,14 @@ function rebuildWebCards(){
    engine's name for it, and still what a card lists in kw, but a player reads
    what it does. */
 const KW_LABEL={floating:'Floating',steadfast:'Immune to stat reduction',defender:'Defender',fuse:'Fuse',mummywrap:'Mummy Wrap',
-  bloodlust:'Bloodlust',packleader:'Pack Leader',howl:'Howl',invincible:'Invincible'};
+  bloodlust:'Bloodlust',packleader:'Pack Leader',howl:'Howl',invulnerable:'Invulnerable'};
 const kwLabel=k=>KW_LABEL[k]||k;
 const KEYWORDS={
   flying:'Once per your turn, move one space.',
   packleader:'When played: a Token copy of it appears on every free panel beside it. The copies carry everything printed on the card except Pack Leader, and they leave the field the moment the Pack Leader does.',
   bloodlust:'Once per your turn, teleport to any free panel beside an enemy.',
   howl:'Once per your turn, select an ally: it gets +3 and Bloodlust until the end of the turn.',
-  invincible:'Pack Warden: your Pack Leaders cannot be destroyed while two or more of their own copies stand beside them.',
+  invulnerable:'It cannot be destroyed: not in a fight, not by its numbers dropping below zero, and not by an effect that destroys outright. It can still be sacrificed, silenced, moved, and have its numbers changed.',
   mummywrap:'Once per your turn for each Mummy Wrap it has: fire a bandage up, right, down or left. If it hits a Teece, pull that Teece one space toward this one, and an enemy also gets -2. If it hits the wall, this Teece slides to the panel beside the wall. Every Mummy has one.',
   skitter:'Once per your turn, move one space up, down or sideways. Spiders and Spiderlings have it while they stand on the Web.',
   teleport:'Once per your turn, move to any empty panel on the board.',
@@ -1350,7 +1354,7 @@ const KEYWORDS={
   needsflinger:'It destroys nothing unless an allied Master Rock Flinger is standing on the board.',
   immovable:'It cannot move, and nothing can move it.',
   march:'Once per your turn, move one space up, down or sideways. Everything standing beside where it lands may then be moved one space too, and its mover chooses where.',
-  lumber:'ONCE while it is on the field — not once a turn — move one space up, down or sideways. A body that leaves and comes back may lumber again.',
+  lumber:'Once each time it is on the field, move one space.',
   fuse:'Fuse it with another Teece into one card that is both of them: every side added together, and every effect and every equip kept. Fuse two cards in your hand whenever you like on your turn, or, once per turn, two of your Teece standing side by side on the board. A fusion does not fuse again.',
   stun:'A stunned Teece destroys nothing and can activate no ability until the end of the stunning side’s next turn. It keeps every number it has and can still be destroyed itself.'
 };
@@ -1358,15 +1362,15 @@ const KEYWORDS={
    rules a player meets on the card face all the same. Read off the engine:
    defOf/scanDeaths for Defence, undyLeft for Undying, isToken for Tokens. */
 const KW_RULES={
-  undying:'When it is destroyed it gets back up, on any free panel its controller chooses, with no protection once it is back. "Undying +1" means each return comes back 1 higher on every side than the last time, "Undying -2" 2 lower. A number in front, as in "2 Undying +1", is how many returns it has; with none it has one. Tokens, copies and silenced Teece never return.',
+  undying:'When it is destroyed (not sacrificed), resummon it that number of times, with its respective bonus or penalty.',
   defence:'Defence soaks the difference in a fight: an attack has to beat the side it hits by MORE than the Defence to destroy it, so Defence 2 only falls to an attack that wins by three or more. It does nothing against a side dropping below zero.',
-  sacrifice:'Giving up one of your own Teece as a price: it is destroyed and goes to the graveyard. "Sacrifice one fielded Teece to play" means one of your Teece on the board, not a Token, is given up as this one arrives.',
+  sacrifice:'Giving up one of your own Teece as a price: it is destroyed and goes to the graveyard. "Sacrifice a Teece to play" means one of your Teece on the board, not a Token, is given up as this one arrives.',
   conjure:'Put a spell card straight into your hand. It comes from nowhere, not off your deck, and is played like any other magic card. The card that conjures names what you get: Wizards conjure elements (Fire, Water, Wind, Earth), Priests conjure Smites, and other decks conjure the spell their card names.',
   combine:'On your turn, two cards in your hand that belong together become one stronger card, for free and as often as you like: two different Wizard elements make a new spell, and two Smites of the same size make the next size up. Tap Combine on either card. Alchemical Compounds counts as any element.',
   element:'Fire, Water, Wind or Earth: the four spells a Wizard conjures. "Any element" means you pick which.',
   token:'Not a whole card. A Token cannot be sacrificed to play a Teece and never counts toward winning, and when it is destroyed it is simply gone: no graveyard, no return.',
   silenced:'A silenced Teece has its abilities negated for the rest of the game: nothing printed on it fires any more, its buttons are dead and its auras stop. Its numbers stay. A silenced battleground does nothing.',
-  trump:'A game-changing card. The label carries no rule of its own: the card does exactly what its text says.'
+  trump:'The most powerful card in the deck. Each deck only gets one.'
 };
 /* The spells a Wizard conjures and a Priest folds together. Built from the
    cards themselves at the moment of the tap, so the popup cannot drift from the
@@ -1413,7 +1417,7 @@ const KW_FORMS=[
   ['Immune to stat reduction','steadfast'],['Steadfast','steadfast'],
   ['Flying','flying'],['Ranged','ranged'],['Ward','ward'],['Teleport','teleport'],['Immovable','immovable'],
   ['Fuse','fuse'],['Skitter','skitter'],['March','march'],['Lumber','lumber'],['Bloodlust','bloodlust'],
-  ['Defender','defender'],['Floating','floating'],['Howl','howl'],['Invincible','invincible'],
+  ['Defender','defender'],['Floating','floating'],['Howl','howl'],['[Ii]nvulnerable','invulnerable'],
   ['[Ss]tun(?:ned|s)?','stun'],['Undying','undying'],['Defence','defence'],
   ['[Ss]acrific(?:e[sd]?|ing)','sacrifice'],['Tokens?','token'],
   ['[Ss]ilenced','silenced'],['Silence','silenced'],
@@ -1482,7 +1486,7 @@ function deckKeywords(key){
     if(c.posture)add(c.posture.edgeKw);
     if(c.mummyWrap||(c.grants&&c.grants.mummyWrap))add(['mummywrap']);
     if(c.packLeader||(c.cast||[]).some(st=>st.fx==='packPromote'))add(['packleader']);
-    if(c.packGuard)add(['invincible']);
+    if(c.packGuard)add(['invulnerable']);
     if(c.howlAll||[].concat(c.act||[],(c.grants&&c.grants.act)||[]).some(a=>a.name==='Howl')||
        (c.cast||[]).some(st=>st.kw==='bloodlust'))add(['howl','bloodlust']);
     if(c.aura)add(c.aura.kw);
@@ -2579,9 +2583,9 @@ const CARDS = {
  9:{name:'Sensei',type:'teece',sides:[8,8,8,8],text:'When destroyed: its killer gets +1 permanently.',
     onDeath:[{fx:'killer',n:1,dur:'perm'}]},
  10:{name:'Southpaw',type:'teece',sides:[6,6,6,9],text:'No effect.'},
- 11:{name:'Miniboss',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice one fielded Teece to play. Adjacent allies get +1.',
+ 11:{name:'Miniboss',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice a Teece to play. Adjacent allies get +1.',
     aura:{who:'ally',where:'adj',n:1}},
- 12:{name:'Boss',type:'teece',sides:[12,12,12,12],sac:2,text:'Sacrifice two fielded Teece to play.'},
+ 12:{name:'Boss',type:'teece',sides:[12,12,12,12],sac:2,text:'Sacrifice two Teece to play.'},
  13:{name:'Whetstone',type:'equip',mod:2,text:'Equipped Teece gets +2.'},
  14:{name:'Boots',type:'equip',mod:1,text:'Equipped Teece gets +1 and may move one space once per your turn.',
     grants:{act:[{name:'Step',once:'turn',steps:[{fx:'move',range:'orth'}]}]}},
@@ -2659,7 +2663,7 @@ const CARDS = {
     aura:{who:'enemy',where:'global',n:-2},
     text:'Plague Token. Every enemy Teece has -2. Cannot be sacrificed to play a Teece; never counts toward winning.'},
  /* ---- Teece 100 pool: the twenty-two you specified ---- */
- 101:{name:'Enforcer',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice one fielded Teece to play.'},
+ 101:{name:'Enforcer',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice a Teece to play.'},
  102:{name:'Grudge',type:'teece',sides:[8,8,8,8],text:'When destroyed: all adjacent enemies get +1.',
     onDeath:[{fx:'aoe',who:'enemy',where:'adj',n:1,dur:'perm'}]},
  103:{name:'Regular',type:'teece',sides:[7,7,7,7],text:'No effect.'},
@@ -2677,9 +2681,9 @@ const CARDS = {
     onPlay:[{fx:'token',tok:'T8',where:'any',count:1,linked:true}]},
  110:{name:'Hypnotist',type:'teece',sides:[0,0,0,0],text:'When played: control an enemy Teece until this is destroyed.',
     onPlay:[{fx:'control'}]},
- 111:{name:'Miniboss',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice one fielded Teece to play. Adjacent allies get +1.',
+ 111:{name:'Miniboss',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice a Teece to play. Adjacent allies get +1.',
     aura:{who:'ally',where:'adj',n:1}},
- 112:{name:'Boss',type:'teece',sides:[12,12,12,12],sac:2,text:'Sacrifice two fielded Teece to play.'},
+ 112:{name:'Boss',type:'teece',sides:[12,12,12,12],sac:2,text:'Sacrifice two Teece to play.'},
  113:{name:'Greatblade',type:'equip',mod:3,text:'Equipped Teece gets +3.'},
  114:{name:'Warwings',type:'equip',mod:2,text:'Equipped Teece gets +2 and Flying (once per your turn, move one space).',
     grants:{kw:['flying']}},
@@ -2779,8 +2783,8 @@ const CARDS = {
  172:{name:'Bouncer',type:'teece',sides:[6,6,6,6],text:'Once per your turn: push an adjacent enemy one space directly away from this Teece, if that space is empty.',
     act:[{name:'Shove',once:'turn',steps:[{fx:'push'}]}]},
  /* ---- elites ---- */
- 173:{name:'Warden',type:'teece',sides:[10,10,10,10],sac:1,text:'Miniboss. Sacrifice one fielded Teece to play.'},
- 174:{name:'Roc',type:'teece',sides:[11,11,11,11],sac:2,kw:['flying'],text:'Boss. Sacrifice two fielded Teece to play. Flying: once per your turn, move one space.'},
+ 173:{name:'Warden',type:'teece',sides:[10,10,10,10],sac:1,text:'Miniboss. Sacrifice a Teece to play.'},
+ 174:{name:'Roc',type:'teece',sides:[11,11,11,11],sac:2,kw:['flying'],text:'Boss. Sacrifice two Teece to play. Flying: once per your turn, move one space.'},
  /* ---- equips ---- */
  175:{name:'Scope',type:'equip',mod:2,text:'Equipped Teece gets +2 and Ranged.',grants:{kw:['ranged']}},
  176:{name:'Boots',type:'equip',mod:2,text:'Equipped Teece gets +2 and may move one space once per your turn.',
@@ -2847,9 +2851,9 @@ const CARDS = {
  306:{name:'Skullsplitter',type:'teece',sides:[15,0,0,0],text:'When played: you may rotate it.',
     onPlay:[{fx:'rot',may:true}]},
  307:{name:'Warlord',type:'teece',sides:[9,9,9,9],sac:1,
-    text:'Sacrifice one fielded Teece to play. The sacrificed Teece returns to your hand.',
+    text:'Sacrifice a Teece to play. The sacrificed Teece returns to your hand.',
     onPlay:[{fx:'sacToHand'}]},
- 308:{name:'Titan',type:'teece',sides:[16,16,16,16],sac:2,text:'Sacrifice two fielded Teece to play.'},
+ 308:{name:'Titan',type:'teece',sides:[16,16,16,16],sac:2,text:'Sacrifice two Teece to play.'},
  309:{name:'Warcamp',type:'ground',gmod:0,gSalvage:true,gShape:true,gDiscardOnBreak:2,
     text:'Covers one, two or four panels. Your cards that would go to the grave from it return to your hand instead. If an opponent destroys or replaces it, they discard two cards.'},
  310:{name:'Pyre',type:'ground',gmod:4,gBurn:true,
@@ -2874,10 +2878,10 @@ const CARDS = {
     text:'Roll — move two spaces, once per turn. When it would be destroyed: it gets -3 and rolls one space instead, once per turn. When it moves: summon a Rock Token with 0 on every side with Defence 6 beside it.',
     act:[{name:'Roll',once:'turn',steps:[{fx:'move',range:2}]}],onMove:[{fx:'token',tok:'TR',where:'adj',count:1}]},
  328:{name:'Rock Sergeant',type:'teece',sides:[7,7,7,7],def:1,sac:1,
-    text:'Sacrifice one fielded Teece to play. Defence 1. When played: select an ally; give it +X, where X is its Defence.',
+    text:'Sacrifice a Teece to play. Defence 1. When played: select an ally; give it +X, where X is its Defence.',
     onPlay:[{fx:'modByDef',who:'ally',notSelf:true}]},
  329:{name:'Master Rock Flinger',type:'teece',sides:[8,8,8,8],def:2,sac:2,flinger:true,
-    text:'Sacrifice two fielded Teece to play. Defence 2. Every allied Teece, itself included, gets +X where X is its Defence, and Flying.',
+    text:'Sacrifice two Teece to play. Defence 2. Every allied Teece, itself included, gets +X where X is its Defence, and Flying.',
     aura:{who:'ally',where:'global',byDef:true,n:0,kw:['flying'],includeSelf:true}},
  330:{name:'Quarry Foreman',type:'teece',sides:[4,4,4,4],def:1,
     text:'Defence 1. Every other allied Teece gets +2 Defence.',aura:{who:'ally',where:'global',n:0,def:2}},
@@ -2930,10 +2934,10 @@ const CARDS = {
     text:'When played: choose an adjacent Teece. Its controller moves it one space and it is stunned; if it cannot move at all, it is destroyed instead.',
     onPlay:[{fx:'moveTarget',where:'adj',byController:true,mustMove:true,elseDestroy:true,thenStun:true}]},
  355:{name:'Ogre Chieftain',type:'teece',sides:[8,8,8,8],sac:1,kw:['lumber'],
-    text:'Sacrifice one fielded Teece to play. When played: move every adjacent Teece one space, give each -4 permanently and stun them. Lumber: once while it stands, it may move one space.',
+    text:'Sacrifice a Teece to play. When played: move every adjacent Teece one space, give each -4 permanently and stun them. Lumber: once while it stands, it may move one space.',
     onPlay:[{fx:'moveAllAdj',n:-4,dur:'perm',stun:true}]},
  356:{name:'Ogre Warlord',type:'teece',sides:[4,10,10,10],sac:2,
-    text:'Sacrifice two fielded Teece to play. When played: destroy every adjacent Teece. '+
+    text:'Sacrifice two Teece to play. When played: destroy every adjacent Teece. '+
       'March, once per your turn: move one space, then if it moved, shove every ENEMY beside where it landed one space and stun them.',
     onPlay:[{fx:'destroyAdj'}],
     act:[{name:'March',once:'turn',steps:[{fx:'march',who:'enemy',stun:true}]}]},
@@ -3028,12 +3032,12 @@ const CARDS = {
       {lbl:'Zero one of my own sides',steps:[{fx:'setSide',who:'self',v:0}]},
       {lbl:'An enemy gets +2',steps:[{fx:'mod',who:'enemy',where:'global',n:2,dur:'perm'}]}]}]},
  450:{name:'Overclocker',type:'teece',sides:[9,9,9,9],sac:1,
-    text:'Sacrifice one fielded Teece to play. Whenever one of your modalities resolves, this gets +1 and Flying until end of turn.',
+    text:'Sacrifice a Teece to play. Whenever one of your modalities resolves, this gets +1 and Flying until end of turn.',
     onModal:{n:1,dur:'temp',kw:'flying'}},
  451:{name:'Safety Interlock',type:'teece',sides:[10,10,10,10],modalNone:true,
     text:'While this stands, none of its owner’s modalities trigger. Cards of theirs that offer a choice simply do nothing. It has no effect on the opponent’s modalities.'},
  452:{name:'Grand Apparatus',type:'teece',sides:[11,11,11,11],sac:2,modalAll:true,modalTwice:true,
-    text:'Sacrifice two fielded Teece to play. While this stands, your modalities trigger every mode, and every mode triggers twice.'},
+    text:'Sacrifice two Teece to play. While this stands, your modalities trigger every mode, and every mode triggers twice.'},
  453:{name:'Preset',type:'magic',
     text:'Choose a modality: the next modality you trigger fires all of its modes, or the next modality you trigger fires its chosen mode twice.',
     cast:[{fx:'choose',modal:true,msg:'Preset:',opts:[
@@ -3097,9 +3101,9 @@ const CARDS = {
     text:"When played: advance an ally's clock by one turn. After two of your turns, it becomes ↑9 →9 ↓7 ←7.",
     onPlay:[{fx:'fastForward',n:1,who:'ally'}]},
  392:{name:'Heir Apparent',type:'teece',sides:[8,8,8,8],sac:1,timer:{turns:1,sides:[12,12,12,12]},
-    text:'Sacrifice one fielded Teece to play. It becomes 12 on every side at the start of your next turn.'},
+    text:'Sacrifice a Teece to play. It becomes 12 on every side at the start of your next turn.'},
  393:{name:'Fading Titan',type:'teece',sides:[30,30,30,30],sac:2,kw:['flying'],endMod:{n:-5,msg:' fades',clock:true},
-    text:'Sacrifice two fielded Teece to play. Flying. At the end of each turn, it gets -5. When destroyed: add Time Stop to your hand.',
+    text:'Sacrifice two Teece to play. Flying. At the end of each turn, it gets -5. When destroyed: add Time Stop to your hand.',
     onDeath:[{fx:'conjureCard',id:1194}]},
  394:{name:'Timekeeper',type:'teece',sides:[4,4,4,4],timer:{turns:1,sides:[7,7,7,7]},handDiscard:true,
     text:'Discard this: Select a Teece; advance its clock by one. When played: advance every other allied Teece by one turn.',
@@ -3110,14 +3114,14 @@ const CARDS = {
     onDeath:[{fx:'ageAll',who:'ally',n:2}]},
  396:{name:'Chronoplate',type:'equip',mod:3,grants:{ageStop:true},
     text:'Equipped Teece gets +3 and its clock stops: it never ages again.'},
- 397:{name:'Pause',type:'magic',text:'A Teece cannot be destroyed until the end of your next turn.',
+ 397:{name:'Pause',type:'magic',text:'A Teece is invulnerable until the end of your next turn.',
     cast:[{fx:'pause'}]},
  398:{name:'Sundial',type:'equip',mod:2,text:'Equipped Teece gets +2 and ages twice as fast.',
     grants:{ageRate:2}},
  399:{name:'Patina',type:'equip',mod:0,modPerAge:1,
     text:'Equipped Teece gets +1 for every turn it has been on the field.'},
  400:{name:'Stasis Field',type:'ground',gSave:true,
-    text:'When a Teece on this panel would be destroyed, its owner may discard a card instead. It survives and cannot be destroyed until the start of their next turn.'},
+    text:'When a Teece on this panel would be destroyed, its owner may discard a card instead. It survives and is invulnerable until the start of their next turn.'},
  /* ---- Robot: production and movement. Every Teece here Flies. ---- */
  411:{name:'Assembler',type:'teece',sides:[5,4,6,5],kw:['flying'],
     text:'Flying. When played: build two Drones on adjacent empty panels.',
@@ -3152,10 +3156,10 @@ const CARDS = {
  420:{name:'Swarm Node',type:'teece',sides:[5,5,5,5],kw:['flying'],
     text:'Flying. Every allied Drone gets +2.',aura:{who:'ally',where:'global',n:2,tokenOnly:true}},
  421:{name:'Factory Line',type:'teece',sides:[8,8,8,8],sac:1,sacDrones:2,kw:['flying'],
-    text:'Flying. Sacrifice one fielded Teece, or two Drones, to play. When played: build two Drones on any empty panels.',
+    text:'Flying. Sacrifice a Teece, or two Drones, to play. When played: build two Drones on any empty panels.',
     onPlay:[{fx:'token',tok:'TD',where:'any',count:2}]},
  422:{name:'War Machine',type:'teece',sides:[11,11,11,11],sac:2,kw:['flying'],
-    text:'Flying. Sacrifice two fielded Teece to play. When played: build three Drones on any empty panels. Or discard this from your hand on your turn to build a Drone on any empty panel.',
+    text:'Flying. Sacrifice two Teece to play. When played: build three Drones on any empty panels. Or discard this from your hand on your turn to build a Drone on any empty panel.',
     handDiscard:[{fx:'token',tok:'TD',where:'any',count:1}],
     onPlay:[{fx:'token',tok:'TD',where:'any',count:3}]},
  423:{name:'Mobile Frame',type:'teece',sides:[5,6,4,6],kw:['flying'],
@@ -3227,10 +3231,10 @@ const CARDS = {
  507:{name:'Groundcurser',type:'teece',sides:[7,4,5,6],onMagic:[{fx:'curseCell',n:-2}],handDiscard:[{fx:'conjureCard',id:510}],
     text:'When you play a magic card: select an unoccupied panel. The next enemy to play or move onto that panel gets -2 (this stacks). Discard this from your hand: conjure a Curse of Misstep.'},
  508:{name:'Witch Doctor',type:'teece',sides:[5,11,4,6],sac:1,
-    text:'Sacrifice one fielded Teece to play. When played: cast a magic card from your hand. It returns to your hand instead of the grave.',
+    text:'Sacrifice a Teece to play. When played: cast a magic card from your hand. It returns to your hand instead of the grave.',
     onPlay:[{fx:'castFromHand',keep:true}]},
  509:{name:'Witch Queen',type:'teece',sides:[10,10,10,10],sac:2,onDiscardSummon:true,
-    text:'Sacrifice two fielded Teece to play. When discarded: play this from the grave at once. When played: cast two magic cards from your grave.',
+    text:'Sacrifice two Teece to play. When discarded: play this from the grave at once. When played: cast two magic cards from your grave.',
     onPlay:[{fx:'castFromGrave',n:2}]},
  510:{name:'Curse of Misstep',type:'magic',curse:true,token:true,deck:'witch',
     text:'Select a player: the next Teece they play gets -1.',
@@ -3284,9 +3288,9 @@ const CARDS = {
     text:'When played: lay 2 Mines. While this stands, whenever a Mine goes off, it also gives -2 to all adjacent Teece. When destroyed: lay 2 Mines.',
     onPlay:[{fx:'mineAuto',count:2}],onDeath:[{fx:'mineAuto',count:2}]},
  487:{name:'Avatar of the Nuclear Apocalypse',type:'teece',sides:[20,20,20,20],sac:1,kw:['flying'],dieAtEndOfTurn:true,
-    text:'Sacrifice one fielded Teece to play. Flying. Destroy this at the end of the turn.'},
+    text:'Sacrifice a Teece to play. Flying. Destroy this at the end of the turn.'},
  488:{name:'Overcharged Warhead',type:'teece',sides:[10,15,10,5],sac:2,mineDoubleAll:true,
-    text:'Sacrifice two fielded Teece to play. When played: lay a Mine on every unoccupied panel. Doubles the negative attribute effects of all Mines. When another Teece is played: give it -2.',
+    text:'Sacrifice two Teece to play. When played: lay a Mine on every unoccupied panel. Doubles the negative attribute effects of all Mines. When another Teece is played: give it -2.',
     onPlay:[{fx:'mineAuto',count:99}],onAnyPlay:{n:-2,dur:'perm'}},
  489:{name:'Unstable Ground',type:'ground',gDoubleNeg:true,
     text:'A Teece on this panel that loses attributes loses double instead.'},
@@ -3323,10 +3327,10 @@ const CARDS = {
     handDiscard:[{fx:'token',tok:'TS',count:1}],
     onDeath:[{fx:'token',tok:'TS',count:1}]},
  531:{name:'Mother Tree',type:'teece',sides:[9,9,1,9],sac:1,
-    text:'Sacrifice one fielded Teece to play. Every other allied Teece gets +3.',
+    text:'Sacrifice a Teece to play. Every other allied Teece gets +3.',
     aura:{who:'ally',where:'global',n:3}},
  532:{name:'Ancient Redwood',type:'teece',sides:[10,10,10,10],sac:2,endAura:{who:'ally',n:1},
-    text:'Sacrifice two fielded Teece to play (or any Sprout Token). At the end of every turn, every allied Teece gets +1 permanently.'},
+    text:'Sacrifice two Teece to play (or any Sprout Token). At the end of every turn, every allied Teece gets +1 permanently.'},
  533:{name:'Quickening Sap',type:'magic',
     text:'Select a Teece; give it +3 until the end of the turn, and you may then move it to any empty panel.',
     cast:[{fx:'mod',where:'global',n:3,dur:'temp'},{fx:'teleLast'}]},
@@ -3379,11 +3383,11 @@ const CARDS = {
     text:'Flying. When played: conjure a random magic card. When this moves: conjure two.',
     onPlay:[{fx:'conjure',n:1}],onMove:[{fx:'conjure',n:2}]},
  551:{name:'Spellbound Pixie',type:'teece',sides:[3,1,4,1],sac:1,pixie:true,kw:['flying'],
-    text:'Flying. Sacrifice one fielded Teece to play. Whenever you play a magic card: this gets +5 until the end of the turn, +2 permanently, and may move one space.',
+    text:'Flying. Sacrifice a Teece to play. Whenever you play a magic card: this gets +5 until the end of the turn, +2 permanently, and may move one space.',
     onMagic:[{fx:'mod',who:'self',n:5,dur:'temp'},{fx:'mod',who:'self',n:2,dur:'perm'},{fx:'move',range:'orth',may:true}]},
  552:{name:'Pixie Queen',type:'teece',sides:[2,2,2,2],sac:2,pixie:true,kw:['flying'],
     act:[{name:'Conjure Enlarge',once:'turn',steps:[{fx:'enlargeExtended'}]}],
-    text:'Boss. Flying. Sacrifice two fielded Teece to play. Once per your turn: add an Enlarge to your hand (Enlarge lasts one extra turn).'},
+    text:'Boss. Flying. Sacrifice two Teece to play. Once per your turn: add an Enlarge to your hand (Enlarge lasts one extra turn).'},
  553:{name:'Mind Control',type:'magic',pixie:true,
     text:'Take control of a non-Boss enemy Teece until the end of the turn.',
     cast:[{fx:'controlTemp'}]},
@@ -3403,7 +3407,7 @@ const CARDS = {
     text:'Select a Teece; strip every bonus and penalty off it and negate its effects for the rest of the game. The next Teece your opponent plays arrives with -2.',
     cast:[{fx:'unmake'},{fx:'nextMod',n:-2,who:'enemy'}]},
  559:{name:'Invisibility',type:'magic',pixie:true,
-    text:'Select one of your Teece; it cannot be destroyed until the end of your next turn.',
+    text:'Select one of your Teece; it is invulnerable until the end of your next turn.',
     cast:[{fx:'invis'}]},
  560:{name:'Enchantment',type:'magic',pixie:true,
     text:'Conjure two random magic cards into your hand.',
@@ -3431,7 +3435,7 @@ const CARDS = {
  566:{name:'Spider',type:'teece',sides:[10,10,10,10],spider:true,sac:1,sacSpiderling:true,
     text:'Sacrifice a Spiderling to play.'},
  567:{name:'Web Crawler',type:'teece',sides:[5,4,5,4],spider:true,
-    text:'When played: summon a 4/4/4/4 Spiderling that cannot be destroyed until the end of the turn. While it stands on the Web, once per your turn: sacrifice a Spiderling; an enemy on the Web gets -5.',
+    text:'When played: summon a 4/4/4/4 Spiderling that is invulnerable until the end of the turn. While it stands on the Web, once per your turn: sacrifice a Spiderling; an enemy on the Web gets -5.',
     onPlay:[{fx:'spiderling',count:1,shield:true}],
     act:[{name:'Drag it under',once:'turn',needWeb:true,
       steps:[{fx:'sacSpiderling',req:true},{fx:'mod',who:'enemy',where:'web',n:-5,dur:'perm'}]}]},
@@ -3447,11 +3451,11 @@ const CARDS = {
     onPlay:[{fx:'sacSpiderling',any:true},{fx:'bounce',countFrom:'sac'}]},
  571:{name:'Broodfather',type:'teece',sides:[8,8,8,8],spider:true,sac:1,
     handDiscard:[{fx:'spiderling',req:true}],
-    text:'Sacrifice one fielded Teece to play. When played: a 4/4/4/4 Spiderling appears on every empty Web panel. Discard this from your hand: summon a 4/4/4/4 Spiderling.',
+    text:'Sacrifice a Teece to play. When played: a 4/4/4/4 Spiderling appears on every empty Web panel. Discard this from your hand: summon a 4/4/4/4 Spiderling.',
     onPlay:[{fx:'spiderling',where:'webAll'}]},
  572:{name:'Brood Mother',type:'teece',sides:[8,8,8,8],spider:true,sac:2,webBrood:true,
     handDiscard:[{fx:'spiderling',req:true}],
-    text:'Sacrifice two fielded Teece to play. While she stands, every Spiderling on the Web \u2014 either side\u2019s \u2014 has base 12/12/12/12 and can no longer be sacrificed. Discard this from your hand: summon a 4/4/4/4 Spiderling.'},
+    text:'Sacrifice two Teece to play. While she stands, every Spiderling on the Web \u2014 either side\u2019s \u2014 has base 12/12/12/12 and can no longer be sacrificed. Discard this from your hand: summon a 4/4/4/4 Spiderling.'},
  573:{name:'Burst',type:'magic',spider:true,
     text:'Select up to four empty Web panels; a 4/4/4/4 Spiderling appears on each.',
     cast:[{fx:'spiderling',where:'web',count:4,may:true}]},
@@ -3515,15 +3519,15 @@ const CARDS = {
     act:[{name:'Transform',once:'turn',steps:[{fx:'transform'}]}],
     text:'Arrives in either form, and once per your turn may switch. Humanoid 5/5/5/5 with Defence 1, once per your turn Drain 1. Bat 3/3/3/3, twice per your turn fly one space, once per your turn Drain 2.'},
  611:{name:'Elder',type:'teece',sides:[8,8,5,8],sac:1,vampire:true,endDrain:{n:1},
-    text:'Sacrifice one fielded Teece to play. At the end of every turn: Drain 1 from each enemy.'},
+    text:'Sacrifice a Teece to play. At the end of every turn: Drain 1 from each enemy.'},
  612:{name:'Blood Bank',type:'teece',sides:[3,3,3,3],def:9,sac:2,vampire:true,drainBank:true,
-    text:'Sacrifice two fielded Teece to play. Defence 9. Whenever anything else drains X, this stores X. Once per your turn: spend everything stored as one drain.',
+    text:'Sacrifice two Teece to play. Defence 9. Whenever anything else drains X, this stores X. Once per your turn: spend everything stored as one drain.',
     act:[{name:'Spend the bank',once:'turn',steps:[{fx:'drainBank'}]}]},
  613:{name:'Suck',type:'magic',vampire:true,rebound:true,
     text:'Select a Teece to drain 1, then select the Teece that drinks it. The first time you cast this each game, it returns to your hand.',
     cast:[{fx:'drain',n:1,pair:true}]},
  614:{name:'Mist Form',type:'magic',vampire:true,
-    text:'Select an ally; for three of your turns it cannot be destroyed, and it cannot destroy anything.',
+    text:'Select an ally; for three of your turns it is invulnerable, and it cannot destroy anything.',
     cast:[{fx:'mist',turns:3}]},
  615:{name:'Coffin',type:'magic',vampire:true,
     text:'Return a Teece from your graveyard to your hand. It comes back 0/0/0/0, and costs no sacrifices to play.',
@@ -3586,12 +3590,12 @@ const CARDS = {
     text:'Undying -1. Once per your turn: sacrifice an allied Teece, this one included; an enemy gets -3 permanently.'},
  630:{name:'Queen of Bones',type:'teece',sides:[4,4,4,4],def:4,sac:1,zombie:true,
     onAllyDeath:{n:4,dur:'temp',kw:['teleport']},
-    text:'Sacrifice one fielded Teece to play. Defence 4. When an allied Teece is destroyed: +4 and Teleport until the end of the turn.'},
+    text:'Sacrifice a Teece to play. Defence 4. When an allied Teece is destroyed: +4 and Teleport until the end of the turn.'},
  631:{name:'Undying Horror',type:'teece',sides:[7,7,7,7],sac:1,zombie:true,undying:{x:7,y:-1},
-    text:'Sacrifice one fielded Teece to play. 7 Undying -1.'},
+    text:'Sacrifice a Teece to play. 7 Undying -1.'},
  632:{name:"Death's Avatar",type:'teece',sides:[9,9,9,9],sac:2,zombie:true,
     onPlay:[{fx:'resurrect',count:2}],
-    text:'Sacrifice two fielded Teece to play. When played: summon two non-Boss Teece from your graveyard and reset their Undying counters.'},
+    text:'Sacrifice two Teece to play. When played: summon two non-Boss Teece from your graveyard and reset their Undying counters.'},
  633:{name:'Grave Shroud',type:'equip',mod:0,
     grants:{undyingRide:true,riseMod:5},
     text:'When the equipped Teece is destroyed, this goes with it instead of to the graveyard on its own. When that Teece returns to the field, this returns equipped to it and it gets +5 until the end of the turn.'},
@@ -3647,10 +3651,10 @@ const CARDS = {
     aura:{who:'any',where:'global',n:2,markOnly:'X',kw:['ranged','flying']},
     text:'Counts as an X. Every other X on the field, whoever controls it, gets +2 and is Ranged and Flying.'},
  651:{name:'bOX',type:'teece',sides:[8,8,8,8],sac:1,mark:'XO',
-    text:'Sacrifice one fielded Teece to play. Counts as an X and an O at once.'},
+    text:'Sacrifice a Teece to play. Counts as an X and an O at once.'},
  652:{name:'XOD',type:'teece',sides:[10,10,10,10],sac:2,mark:'XO',
     onDeath:[{fx:'toerrain',bg:661}],
-    text:'Sacrifice two fielded Teece to play. Counts as an X and an O at once. When destroyed: the panel it stood on becomes an XO Toerrain, which counts as both.'},
+    text:'Sacrifice two Teece to play. Counts as an X and an O at once. When destroyed: the panel it stood on becomes an XO Toerrain, which counts as both.'},
  653:{name:'aXe',type:'equip',mod:0,modIfMark:{letter:'X',n:4},
     text:'The equipped Teece gets +4 if it counts as an X. Nothing otherwise.'},
  654:{name:'swOrd',type:'equip',mod:0,modIfMark:{letter:'O',n:4},
@@ -3694,7 +3698,7 @@ const CARDS = {
  683:{name:'Sun Caller',type:'teece',sides:[3,3,3,3],solar:true,
     onPlay:[{fx:'token',tok:'TSOL',count:3,when:'day',safe:true},
             {fx:'token',tok:'TSOL',count:1,when:'night',safe:true}],
-    text:'When played: summon a 3/3/3/3 Solar Token — and two more of them if it is Day. They cannot be destroyed until the start of your next turn.'},
+    text:'When played: summon a 3/3/3/3 Solar Token — and two more of them if it is Day. They are invulnerable until the start of your next turn.'},
  684:{name:'Duskfall',type:'teece',sides:[2,7,7,7],solar:true,
     onDeath:[{fx:'killer',n:-4,dur:'perm',when:'night'}],
     handDiscard:[{fx:'setTime',to:'night'}],
@@ -3720,10 +3724,10 @@ const CARDS = {
     text:'Defence 3. Defender: it cannot destroy a Teece in combat. While this stands, the round does not turn the sky. Effects can still change it.'},
  691:{name:'Night Assassin',type:'teece',sides:[8,8,8,8],sac:1,solar:true,
     onPlay:[{fx:'destroy',when:'night'}],
-    text:'Sacrifice one fielded Teece to play. When played by night: select a Teece and destroy it.'},
+    text:'Sacrifice a Teece to play. When played by night: select a Teece and destroy it.'},
  692:{name:'Solar Tyrant',type:'teece',sides:[13,13,10,10],sac:2,solar:true,
     act:[{name:'Turn the sky',once:'turn',steps:[{fx:'flipTime'}]}],
-    text:'Sacrifice two fielded Teece to play. Once per your turn: turn Day to Night, or Night to Day.'},
+    text:'Sacrifice two Teece to play. Once per your turn: turn Day to Night, or Night to Day.'},
  693:{name:'Moon Scythe',type:'equip',mod:0,modWhen:{night:5},solar:true,
     text:'By night the equipped Teece gets +5. By day, nothing.'},
  694:{name:'Sun Gun',type:'equip',mod:0,modWhen:{day:4},grants:{kw:['ranged']},solar:true,
@@ -3791,16 +3795,16 @@ const CARDS = {
  709:{name:'Cadet Annette',type:'teece',sides:[4,3,5,2],army:true,
     onPlay:[{fx:'shieldSelf'}],
     onDeath:[{fx:'shieldNext'}],
-    text:'When played: she cannot be destroyed until the start of your next turn. When destroyed: the next Teece you play cannot be destroyed until the start of your next turn.'},
+    text:'When played: she is invulnerable until the start of your next turn. When destroyed: the next Teece you play is invulnerable until the start of your next turn.'},
  710:{name:'Grenadier Greg',type:'teece',sides:[6,5,4,5],def:1,army:true,
     act:[{name:'Lob a grenade',once:'turn',steps:[{fx:'moveAllAdj',pick:true,away:true,n:-2,dur:'perm'}]}],
     text:'Defence 1. Once per your turn: select a panel; every Teece standing beside it is knocked one space straight away from it and gets -2 permanently. Anything with nowhere to be blown stays where it is, and still takes the -2.'},
  711:{name:'Colonel Cornell',type:'teece',sides:[8,8,8,8],sac:1,army:true,
     bonus:{when:'adjAlly',n:2,each:true},
     aura:{who:'ally',where:'adj',n:2},
-    text:'Sacrifice one fielded Teece to play. +2 for every ally standing beside him, and each of those allies gets +2. It stacks.'},
+    text:'Sacrifice a Teece to play. +2 for every ally standing beside him, and each of those allies gets +2. It stacks.'},
  712:{name:'Field Marshal Marshall',type:'teece',sides:[10,10,10,10],sac:2,army:true,adjAllyAll:true,
-    text:'Sacrifice two fielded Teece to play. While he stands, every Teece on the field counts as adjacent to all of its allies, wherever they are standing — the enemy’s formations as well as yours.'},
+    text:'Sacrifice two Teece to play. While he stands, every Teece on the field counts as adjacent to all of its allies, wherever they are standing — the enemy’s formations as well as yours.'},
  713:{name:'Line Formation',type:'equip',mod:0,army:true,
     grants:{bonus:{when:'line',n:3},aura:{who:'ally',where:'line',n:3}},
     text:'While the equipped Teece shares a row, a column or a diagonal with an ally, it gets +3 — and so does every ally it shares one with.'},
@@ -3861,7 +3865,7 @@ const CARDS = {
     text:'The first time it is destroyed each game, it scuttles back to your hand instead of the grave.'},
  730:{name:'Landfill Tarp',type:'teece',sides:[1,2,1,2],garbage:true,
     onPlay:[{fx:'shieldNext',long:true}],
-    text:'When played: the next Teece you play cannot be destroyed until the end of your next turn.'},
+    text:'When played: the next Teece you play is invulnerable until the end of your next turn.'},
  731:{name:'Junkyard Dog',type:'teece',sides:[5,4,2,2],garbage:true,modPerAlly:1,
     text:'+1 for every other allied Teece on the field.'},
  732:{name:'Rusted Shopping Cart',type:'teece',sides:[3,2,3,2],garbage:true,cart:true,
@@ -3905,28 +3909,28 @@ const CARDS = {
     text:'When played: select a Teece and silence it. When destroyed: select an equip or a battleground; it is destroyed.'},
  /* ---- Garbage minibosses ---- */
  744:{name:'Living Dump',type:'teece',sides:[0,0,0,0],sac:1,garbage:true,modPerGrave:{n:1,per:2},
-    text:'Sacrifice one fielded Teece to play. +1 for every two cards in your graveyard.'},
+    text:'Sacrifice a Teece to play. +1 for every two cards in your graveyard.'},
  745:{name:'Rat King',type:'teece',sides:[6,6,6,6],sac:1,garbage:true,
     onPlay:[{fx:'choose',msg:'The Rat King holds court:',opts:[
       {lbl:'Give a Teece +2',steps:[{fx:'mod',n:2,dur:'perm'}]},
       {lbl:'Give a Teece -2',steps:[{fx:'mod',n:-2,dur:'perm'}]}]}],
-    text:'Sacrifice one fielded Teece to play. When played: select a Teece; give it +2 or -2.'},
+    text:'Sacrifice a Teece to play. When played: select a Teece; give it +2 or -2.'},
  /* ---- Garbage bosses ---- */
  746:{name:'Garbage Soul',type:'teece',sides:[5,5,5,5],sac:2,def:7,garbage:true,grantPlay:1,grantDraw:1,
-    text:'Sacrifice two fielded Teece to play. Defence 7. While it stands, you draw one extra card and may play one extra Teece every turn.'},
+    text:'Sacrifice two Teece to play. Defence 7. While it stands, you draw one extra card and may play one extra Teece every turn.'},
  747:{name:'Trash King',type:'teece',sides:[0,0,0,0],sac:2,garbage:true,
     onPlay:[{fx:'consumeGrave',n:1}],
-    text:'Sacrifice two fielded Teece to play. When played: destroy any number of cards in your graveyard; +1 for each one destroyed.'},
+    text:'Sacrifice two Teece to play. When played: destroy any number of cards in your graveyard; +1 for each one destroyed.'},
  /* ---- Garbage megaboss ---- */
  748:{name:'God of the Forgotten',type:'teece',sides:[12,12,12,12],sac:3,garbage:true,
-    text:'Sacrifice three fielded Teece to play. Everything thrown away, standing up at once.'},
+    text:'Sacrifice three Teece to play. Everything thrown away, standing up at once.'},
  /* ---- Garbage equips ---- */
  749:{name:'Duct Tape',type:'equip',mod:0,garbage:true,grants:{def:1,tape:true},
     text:'Equipped Teece gets 1 Defence. When an effect would pick the equipped Teece out as a target, Duct Tape is destroyed instead and the effect is silenced.'},
  750:{name:'Trash Bag',type:'equip',mod:0,garbage:true,grants:{def:2,reequip:true,reequipOnce:true},
     text:'Stealth — equipped Teece gets 2 Defence. Blow In The Wind — once a game, when the equipped Teece is destroyed, you may blow this onto another ally instead of losing it.'},
  751:{name:'Blessing of the Dump',type:'equip',mod:0,garbage:true,grants:{blessGuard:true},
-    text:'While the equipped Teece stands beside an ally and you hold more Teece on the field than your opponent, it cannot be destroyed.'},
+    text:'While the equipped Teece stands beside an ally and you hold more Teece on the field than your opponent, it is invulnerable.'},
  752:{name:'Broken Gun',type:'equip',mod:0,garbage:true,grants:{kw:['ranged']},
     text:'Equipped Teece is Ranged, and… that’s it.'},
  753:{name:'Banana Peel',type:'equip',mod:0,garbage:true,grants:{dodge:{grave:2,killer:-1}},
@@ -4004,10 +4008,10 @@ const CARDS = {
       {lbl:'Famine (0/0/7/7)',steps:[{fx:'token',tok:'TAF'}]},
       {lbl:'Plague (7/2/2/7)',steps:[{fx:'token',tok:'TAP'}]},
       {lbl:'Death (2/2/1/1)',steps:[{fx:'token',tok:'TAD'}]}]}],
-    text:'Sacrifice one fielded Teece to play. When played: summon War, Famine, Plague or Death.'},
+    text:'Sacrifice a Teece to play. When played: summon War, Famine, Plague or Death.'},
  776:{name:'Seal of Armageddon',type:'teece',sides:[0,0,0,0],def:5,sac:2,
     onDeath:[{fx:'token',tok:'TAF'},{fx:'token',tok:'TAP'},{fx:'token',tok:'TAW'},{fx:'token',tok:'TAD'}],
-    text:'Sacrifice two fielded Teece to play. Defence 5. When destroyed: summon Famine, Plague, Death and War.'},
+    text:'Sacrifice two Teece to play. Defence 5. When destroyed: summon Famine, Plague, Death and War.'},
  777:{name:'The End Draws Near',type:'magic',
     cast:[{fx:'mill',n:2}],
     text:'Every player buries the top two cards of their deck.'},
@@ -4071,7 +4075,7 @@ const CARDS = {
     text:'When played and when discarded: select a Teece; rotate it.'},
  787:{name:'Frenetic Researcher',type:'teece',sides:[1,8,8,0],madness:true,
     onPlay:[{fx:'shield'}],onDiscard:[{fx:'shield'}],
-    text:'When played and when discarded: Select a Teece; it cannot be destroyed until the end of your next turn.'},
+    text:'When played and when discarded: Select a Teece; it is invulnerable until the end of your next turn.'},
  788:{name:'Manic Raver',type:'teece',sides:[0,7,8,7],madness:true,
     onAnyDiscard:{sides:[8,0,0,0],dur:'temp'},
     act:[{name:'Wicked Dance Moves',once:'turn',times:2,steps:[{fx:'move',range:'orth'}]}],
@@ -4116,13 +4120,13 @@ const CARDS = {
     onDiscard:[{fx:'choose',msg:'That Which Should Not stirs:',opts:[
       {lbl:'Discard two and let it up',steps:[{fx:'price',hand:2},{fx:'discard',n:2,cost:true},{fx:'graveSelfPlay'}]},
       {lbl:'Leave it buried',steps:[]}]}],
-    text:'Sacrifice one fielded Teece to play. When discarded: you may discard two cards to put it straight onto the field out of the graveyard, paying no sacrifice for it.'},
+    text:'Sacrifice a Teece to play. When discarded: you may discard two cards to put it straight onto the field out of the graveyard, paying no sacrifice for it.'},
  796:{name:'Echo of Gol’god’oth',type:'teece',sides:[0,15,3,9],sac:2,madness:true,
     onPlay:[{fx:'discardHands'}],
     onDiscard:[{fx:'choose',msg:'Echo of Gol’god’oth is thrown away:',opts:[
       {lbl:'Throw your whole hand away',steps:[{fx:'discardOwnHand'}]},
       {lbl:'Hold onto them',steps:[]}]}],
-    text:'Sacrifice two fielded Teece to play. When played: every player throws away their whole hand. When discarded: You may discard your hand.'},
+    text:'Sacrifice two Teece to play. When played: every player throws away their whole hand. When discarded: You may discard your hand.'},
  797:{name:'Pocket Dimension',type:'magic',madness:true,
     cast:[{fx:'price',turnDiscard:1},{fx:'pocketReturn'}],
     onDiscard:[{fx:'pocketPlay'}],
@@ -4210,10 +4214,10 @@ const CARDS = {
     text:'Animate the terrain — once a game: select a battleground with nothing standing on it. It comes up off its panel and stands as a 9/9/9/9 Teece that flies, so the battleground itself is what moves. When Terrain Animator leaves the field, or when the animated battleground is destroyed, it lies back down as a battleground — on whatever panel it has reached by then.'},
  823:{name:'Worldshaper',type:'teece',sides:[8,8,8,8],sac:1,
     onPlay:[{fx:'seedPlanes'}],
-    text:'Sacrifice one fielded Teece to play. When played: every panel without a battleground gets one that gives a Teece standing on it +1 for every battleground on the field.'},
+    text:'Sacrifice a Teece to play. When played: every panel without a battleground gets one that gives a Teece standing on it +1 for every battleground on the field.'},
  824:{name:'That Which Unfolds',type:'teece',sides:[9,11,10,9],sac:2,
     onPlay:[{fx:'fuseGrounds'}],
-    text:'Sacrifice two fielded Teece to play. When played: every battleground on the field folds into one carrying all of their effects at once, laid under this Teece.'},
+    text:'Sacrifice two Teece to play. When played: every battleground on the field folds into one carrying all of their effects at once, laid under this Teece.'},
  /* Dimension's four made things: none of them is drafted, and none of them is
     drawn. Three are battlegrounds another card lays or hands over, and the
     fourth is a panel that stood up. */
@@ -4273,10 +4277,10 @@ const CARDS = {
     text:'+1 for every ally standing with it. When played: you may play another Rat this turn, free of the turn\u2019s Teece play.'},
  835:{name:'Rat King',type:'teece',rat:true,sides:[10,10,10,10],sac:2,sacWorth:2,modPerAlly:1,
     aura:{who:'ally',where:'global',n:2},
-    text:'Sacrifice two fielded Teece to play. +1 for every ally standing with it. Every other ally gets +2. Counts as two sacrifices when something is paid with it.'},
+    text:'Sacrifice two Teece to play. +1 for every ally standing with it. Every other ally gets +2. Counts as two sacrifices when something is paid with it.'},
  836:{name:'Rat Queen',type:'teece',rat:true,sides:[12,12,12,12],sac:4,modPerAlly:1,
     onPlay:[{fx:'sacToHand'}],
-    text:'Sacrifice four fielded Teece to play. When played: every Teece sacrificed for her goes back to your hand. +1 for every ally standing with her.'},
+    text:'Sacrifice four Teece to play. When played: every Teece sacrificed for her goes back to your hand. +1 for every ally standing with her.'},
  /* ---- Rat magic ---- */
  837:{name:'Swarm',type:'magic',
     cast:[{fx:'swarmBack',kind:'rat',n:2}],
@@ -4355,7 +4359,7 @@ const CARDS = {
  851:{name:'Chitin Shell',type:'teece',locust:true,sides:[1,1,4,2],
     handDiscard:[{fx:'shieldNext'}],
     onPlay:[{fx:'selfCopyToHand',fromHand:true}],
-    text:'Discard this from your hand: the next ally you play cannot be destroyed until the start of your next turn. When played from your hand, and only from your hand: another Chitin Shell goes into it.'},
+    text:'Discard this from your hand: the next ally you play is invulnerable until the start of your next turn. When played from your hand, and only from your hand: another Chitin Shell goes into it.'},
  852:{name:'Carrion Locust',type:'teece',locust:true,sides:[3,4,5,6],
     onPlay:[{fx:'graveSummon',kind:'locust',mod:2,silence:true}],
     text:'When played: summon a Locust out of your graveyard with +2. It comes up silenced, so whatever was printed on it stays buried.'},
@@ -4367,10 +4371,10 @@ const CARDS = {
     text:'When played: sacrifice an allied Teece \u2014 this one included, if it is the only one you have.'},
  855:{name:'Locust Locus',type:'teece',locust:true,sides:[1,4,2,2],sac:2,def:6,
     onPlay:[{fx:'nextDef',n:6,count:4,kind:'locust',any:true}],
-    text:'Sacrifice two fielded Teece to play. Defence 6. When played: the next four Locusts to reach your side of the board \u2014 played, copied or summoned \u2014 each arrive with +6 Defence.'},
+    text:'Sacrifice two Teece to play. Defence 6. When played: the next four Locusts to reach your side of the board \u2014 played, copied or summoned \u2014 each arrive with +6 Defence.'},
  856:{name:'The Locust Hivemind',type:'teece',locust:true,sides:[8,9,7,8],sac:4,
     onPlay:[{fx:'swarmMind',n:3}],
-    text:'Sacrifice four fielded Teece to play. When played: every Teece you control gets +3 for the rest of the game, and goes on getting it long after the Hivemind itself is buried.'},
+    text:'Sacrifice four Teece to play. When played: every Teece you control gets +3 for the rest of the game, and goes on getting it long after the Hivemind itself is buried.'},
  /* ---- Locust equips ---- */
  857:{name:'Swarm Plating',type:'equip',mod:0,modPerAdjAlly:3,
     text:'The equipped Teece gets +3 for every ally standing on a panel beside it.'},
@@ -4449,9 +4453,9 @@ const CARDS = {
     text:'+1 at the start of each of your turns. PACT — This gets -2 ; this gains an additional +2 at the start of each of your turns.'},
  871:{name:'Bargain Imp',type:'teece',devil:true,sides:[3,3,3,3],
     onPlay:[{fx:'shieldTurn'},{fx:'pact'}],
-    pact:{y:'sacrifice this',z:'the next two Teece you play cannot be destroyed until the end of the turn they are played',ai:'take',
+    pact:{y:'sacrifice this',z:'the next two Teece you play are invulnerable until the end of the turn they are played',ai:'take',
       cost:[{fx:'sacSelf'}],gain:[{fx:'nextInvuln',n:2}]},
-    text:'Cannot be destroyed until the end of the turn it is played. PACT — Sacrifice this ; the next two Teece you play cannot be destroyed until the end of the turn you play them.'},
+    text:'Invulnerable until the end of the turn it is played. PACT — Sacrifice this ; the next two Teece you play are invulnerable until the end of the turn you play them.'},
  872:{name:'Fair Dealer',type:'teece',devil:true,sides:[6,6,6,6],
     onPlay:[{fx:'pact'}],
     pact:{y:'every enemy Teece gets +3, and so does the next Teece each opponent plays',z:'every Teece you control gets +3',ai:'more',
@@ -4473,12 +4477,12 @@ const CARDS = {
     onPlay:[{fx:'pact'}],
     pact:{y:'every Teece you control loses all its Defence',z:'this gets +2',ai:'soul',
       cost:[{fx:'loseDef',who:'ally'}],gain:[{fx:'mod',who:'self',n:2,dur:'perm'}]},
-    text:'Sacrifice one fielded Teece to play. Defence 6. Whenever any PACT is accepted: this gets +1 permanently, and Flying until the end of the turn. PACT — All your Teece lose all their Defence ; this gets +2.'},
+    text:'Sacrifice a Teece to play. Defence 6. Whenever any PACT is accepted: this gets +1 permanently, and Flying until the end of the turn. PACT — All your Teece lose all their Defence ; this gets +2.'},
  876:{name:'Archdevil',type:'teece',devil:true,sides:[20,6,6,6],sac:2,
     onPlay:[{fx:'pact'}],
     pact:{y:'this loses 20 from its top',z:'it gains 20 on its left, right and bottom',ai:'take',
       cost:[{fx:'sidesSelf',sides:[-20,0,0,0]}],gain:[{fx:'sidesSelf',sides:[0,20,20,20]}]},
-    text:'Sacrifice two fielded Teece to play. PACT — This loses 20 from its top ; this gains 20 on its left, right and bottom.'},
+    text:'Sacrifice two Teece to play. PACT — This loses 20 from its top ; this gains 20 on its left, right and bottom.'},
  /* ---- Devil equips ---- */
  877:{name:'Infernal Contract',type:'equip',mod:2,
     grants:{act:[{name:'Renegotiate',once:'turn',steps:[{fx:'pactAgain'}]}]},
@@ -4561,13 +4565,13 @@ const CARDS = {
  894:{name:'Bladeless Exile',type:'teece',sides:[9,10,5,10],bonus:{when:'runeAny',n:-5},
     text:'While any Teece is equipped with the Runeblade: -5.'},
  895:{name:'Blade-Sworn Squire',type:'teece',sides:[3,3,3,3],runeGuard:true,
-    text:'If this is about to be destroyed while it is equipped with the Runeblade: destroy the Runeblade instead and move this one space. Then this cannot be destroyed until the end of your next turn.'},
+    text:'If this is about to be destroyed while it is equipped with the Runeblade: destroy the Runeblade instead and move this one space. Then this is invulnerable until the end of your next turn.'},
  896:{name:'Tribal Chieftain',type:'teece',sides:[7,7,7,7],sac:1,
     aura:{who:'ally',where:'global',n:2,runeOnly:true,includeSelf:true},
-    text:'Sacrifice one fielded Teece to play. The ally that wields the Runeblade has +2.'},
+    text:'Sacrifice a Teece to play. The ally that wields the Runeblade has +2.'},
  897:{name:'The Ancestor-Smith',type:'teece',sides:[11,11,11,11],sac:2,
     onPlay:[{fx:'runeCreate'}],
-    text:'Sacrifice two fielded Teece to play. When played: create a second Runeblade and equip it to this. It works exactly like the first.'},
+    text:'Sacrifice two Teece to play. When played: create a second Runeblade and equip it to this. It works exactly like the first.'},
  /* ---- Runeblade magic ---- */
  898:{name:'Bladerang',type:'magic',
     cast:[{fx:'bladerang'}],
@@ -4587,7 +4591,7 @@ const CARDS = {
     grants:{onKill:{steps:[{fx:'stunPick',stun:true}],foeOnly:true}},
     text:'Treat this as the Runeblade while it is on the field. When the equipped Teece destroys an enemy, you can select another enemy: stun it.'},
  903:{name:'Decoy Runeblade',type:'equip',mod:1,grants:{decoy:true},
-    text:'The equipped Teece has +1. If the Runeblade, or a Teece of yours equipped with the Runeblade, would be destroyed: you can destroy this instead, and the Runeblade and the Teece equipped with it cannot be destroyed until the end of your next turn.'},
+    text:'The equipped Teece has +1. If the Runeblade, or a Teece of yours equipped with the Runeblade, would be destroyed: you can destroy this instead, and the Runeblade and the Teece equipped with it are invulnerable until the end of your next turn.'},
  /* ---- Runeblade battlegrounds ---- */
  904:{name:'Runestone',type:'ground',gSheath:true,gRuneStone:{n:3,held:-3},
     text:'You can equip the Runeblade to this battleground: play it from your hand onto this panel. A Teece on this battleground has +3 — or -3 instead, while the Runeblade is set in it.'},
@@ -4628,9 +4632,9 @@ const CARDS = {
     onMove:[{fx:'mod',who:'self',n:2,dur:'temp'}],
     text:'When played: conjure Earth or Wind. +2 while it stands on a battleground. When it moves: +2 until the end of the turn.'},
  916:{name:'Archmage',type:'teece',sides:[8,8,8,8],sac:1,archmage:true,onPlay:[{fx:'conjureEl'}],
-    text:'Sacrifice one fielded Teece to play. When played: conjure any element. While it stands, your elements are stronger: Fire gives -4, Water gives +4, Wind moves a Teece to any empty panel, and Earth lays +6 Defence.'},
+    text:'Sacrifice a Teece to play. When played: conjure any element. While it stands, your elements are stronger: Fire gives -4, Water gives +4, Wind moves a Teece to any empty panel, and Earth lays +6 Defence.'},
  917:{name:'Grand Magus',type:'teece',sides:[11,11,11,11],sac:2,holyCombine:true,onPlay:[{fx:'conjureEl'}],
-    text:'Sacrifice two fielded Teece to play. When played: conjure any element. While it stands, Fire, Water, Wind and Earth in your hand can combine, all four at once, into Holy.'},
+    text:'Sacrifice two Teece to play. When played: conjure any element. While it stands, Fire, Water, Wind and Earth in your hand can combine, all four at once, into Holy.'},
  918:{name:'Twin Conjuring',type:'magic',wiz:'conjure',cast:[{fx:'conjureEl',n:2}],
     text:'Conjure any two elements.'},
  919:{name:'Alchemical Compounds',type:'magic',alchemy:true,wiz:'conjure',cast:[{fx:'conjureEl',opts:['water','wind']}],
@@ -4716,9 +4720,9 @@ const CARDS = {
     text:'When it is about to be destroyed: you may spend a bullet to shoot it and move it one space, and it is not destroyed. Once a turn.'},
  1011:{name:'Armored Ammo Truck',type:'teece',sides:[2,2,2,2],sac:1,def:8,
     onPlay:[{fx:'bullets',n:4,reload:true}],onDeath:[{fx:'bullets',n:2}],
-    text:'Sacrifice one fielded Teece to play. Defence 8. When played: gain 4 bullets and reload your magazine. When destroyed: gain 2 bullets.'},
+    text:'Sacrifice a Teece to play. Defence 8. When played: gain 4 bullets and reload your magazine. When destroyed: gain 2 bullets.'},
  1012:{name:'The Gun Devil',type:'teece',sides:[9,9,9,9],sac:2,def:2,kw:['ranged'],onPlay:[{fx:'gunDevil'}],
-    text:'Sacrifice two fielded Teece to play. Defence 2. Ranged. When played: fire a bullet from your reserves in every direction, starting at the top and going clockwise (top, top right, right, bottom right, and so on) until all eight have fired or you run out. Each bullet hits the first Teece in its line, and any Teece it hits is destroyed.'},
+    text:'Sacrifice two Teece to play. Defence 2. Ranged. When played: fire a bullet from your reserves in every direction, starting at the top and going clockwise (top, top right, right, bottom right, and so on) until all eight have fired or you run out. Each bullet hits the first Teece in its line, and any Teece it hits is destroyed.'},
  1013:{name:'Bandolier',type:'equip',mod:-1,grants:{endBullets:2},
     text:'Equipped Teece gets -1. At the end of every turn, yours or not: gain 2 bullets.'},
  1014:{name:'Kevlar Vest',type:'equip',mod:1,grants:{onDeath:[{fx:'bullets',n:4}]},
@@ -4765,7 +4769,7 @@ const CARDS = {
     text:'Fuse. Whenever it would lose attributes, it gains them instead.'},
  1029:{name:'Null Sphinx',type:'teece',sides:[2,2,2,2],kw:['fuse'],
     onPlay:[{fx:'fuNullify'}],onDeath:[{fx:'shieldNext',long:true}],
-    text:'Fuse. When played: silence a Teece and wipe away every positive and negative effect on its numbers. When destroyed: the next Teece you play cannot be destroyed until the end of your next turn.'},
+    text:'Fuse. When played: silence a Teece and wipe away every positive and negative effect on its numbers. When destroyed: the next Teece you play is invulnerable until the end of your next turn.'},
  1030:{name:'Bone Hermit',type:'teece',sides:[1,4,5,1],kw:['fuse'],onDeath:[{fx:'graveToHand'}],
     text:'Fuse. When destroyed: return a card from your graveyard to your hand.'},
  1031:{name:'Paradox Twins',type:'teece',sides:[1,1,1,1],kw:['fuse'],
@@ -4824,15 +4828,15 @@ const CARDS = {
  1050:{name:'Stormwing',type:'teece',sides:[1,3,6,7],kw:['flying'],onAllyPlay:{self:3,dur:'temp'},
     text:'Flying. When an allied Teece is played: +3 until the end of the turn.'},
  1051:{name:'Lightning Queen',type:'teece',sides:[10,10,10,10],sac:2,def:2,grantPlay:1,
-    text:'Sacrifice two fielded Teece to play. 2 Defence. While this stands, you gain an extra Teece play every turn.'},
+    text:'Sacrifice two Teece to play. 2 Defence. While this stands, you gain an extra Teece play every turn.'},
  1052:{name:'Zeus',type:'teece',sides:[20,20,20,20],sac:4,kw:['flying'],
-    text:'Sacrifice four fielded Teece to play. Flying. Once per your turn: add a Lightning Bolt to your hand.',
+    text:'Sacrifice four Teece to play. Flying. Once per your turn: add a Lightning Bolt to your hand.',
     act:[{name:'Call the storm',once:'turn',steps:[{fx:'conjureCard',id:1053}]}]},
  1053:{name:'Lightning Bolt',type:'magic',
     text:'Select a column: give the highest Teece in it (the one nearest the top of the board) -6.',
     cast:[{fx:'thunderBolt',n:-6}]},
  1054:{name:'Zeus\u2019 Blessing',type:'magic',reactDeath:true,
-    text:'Teece you control cannot be destroyed until the end of your turn, including any you play after. When a Teece you control would be destroyed on your opponent\u2019s turn: you may play this immediately.',
+    text:'Teece you control are invulnerable until the end of your turn, including any you play after. When a Teece you control would be destroyed on your opponent\u2019s turn: you may play this immediately.',
     cast:[{fx:'blessAll'}]},
  1055:{name:'Bolt Army',type:'magic',
     text:'Add three Bolt Tokens to your hand.',
@@ -4886,10 +4890,10 @@ const CARDS = {
     text:'Mummy Wrap. When played: select a cursed enemy; remove its curse, give it -2 and rotate it.',
     onPlay:[{fx:'mUncurseRot',n:-2}]},
  1072:{name:'Tomb Lord',type:'teece',sides:[7,6,7,7],sac:1,mummy:true,mummyWrap:1,
-    text:'Sacrifice one fielded Teece to play. Mummy Wrap. When played: the next three Teece your opponents play or summon arrive cursed.',
+    text:'Sacrifice a Teece to play. Mummy Wrap. When played: the next three Teece your opponents play or summon arrive cursed.',
     onPlay:[{fx:'mEnterCursed',n:3}]},
  1073:{name:'The Pharaoh',type:'teece',sides:[2,12,2,12],sac:2,mummy:true,mummyWrap:1,
-    text:'Sacrifice two fielded Teece to play. Mummy Wrap. When played: select a cursed Teece; destroy it. The next enemy Teece that gets cursed is destroyed.',
+    text:'Sacrifice two Teece to play. Mummy Wrap. When played: select a cursed Teece; destroy it. The next enemy Teece that gets cursed is destroyed.',
     onPlay:[{fx:'mPharaoh'}]},
  1074:{name:'Pharaoh’s Vengeance',type:'magic',
     text:'Select a cursed enemy; give it -6 and remove its curse.',
@@ -4935,7 +4939,7 @@ const CARDS = {
  1085:{name:'Grey Wolf',type:'teece',sides:[4,2,4,4],packLeader:true,onPlay:[{fx:'packCall'}],
     text:'Pack Leader.'},
  1086:{name:'Pack Warden',type:'teece',sides:[8,0,0,0],packLeader:true,packGuard:true,onPlay:[{fx:'packCall'}],
-    text:'Pack Leader. Your Pack Leaders cannot be destroyed while two or more of their own copies stand beside them.'},
+    text:'Pack Leader. Your Pack Leaders are invulnerable while two or more of their own copies stand beside them.'},
  1087:{name:'Wolf Pup',type:'teece',sides:[1,1,1,1],packLeader:true,
     aura:{who:'ally',where:'adj',n:3,kw:['bloodlust']},onPlay:[{fx:'packCall'}],
     text:'Pack Leader. Adjacent allies have +3 and Bloodlust.'},
@@ -4950,9 +4954,9 @@ const CARDS = {
  1091:{name:'Ironhide Wolf',type:'teece',sides:[2,2,2,2],def:5,packLeader:true,onPlay:[{fx:'packCall'}],
     text:'Pack Leader. Defence 5.'},
  1092:{name:'Dire Wolf',type:'teece',sides:[7,7,7,7],sac:2,sacTokens:true,packLeader:true,onPlay:[{fx:'packCall'}],
-    text:'Sacrifice two fielded Teece to play; Tokens can pay for it. Pack Leader.'},
+    text:'Sacrifice two Teece to play; Tokens can pay for it. Pack Leader.'},
  1093:{name:'Fenrir',type:'teece',sides:[9,9,9,9],sac:4,def:3,sacTokens:true,howlAll:true,
-    text:'Sacrifice four fielded Teece to play; Tokens can pay for it. Defence 3. All your other Teece have Howl: once per your turn, select an ally; it gets +3 and Bloodlust until the end of the turn.'},
+    text:'Sacrifice four Teece to play; Tokens can pay for it. Defence 3. All your other Teece have Howl: once per your turn, select an ally; it gets +3 and Bloodlust until the end of the turn.'},
  1094:{name:'Wolven Promotion',type:'magic',cast:[{fx:'packPromote'}],
     text:'Select one of your Tokens: it gains Pack Leader. It is still a Token. A Token copy of it appears on every free panel beside it, and those copies leave the field when it does.'},
  1095:{name:'Howl',type:'magic',rebound:true,
@@ -5002,10 +5006,10 @@ const CARDS = {
     text:'While it stands, you cannot play magic cards.'},
  1112:{name:'High Priest',type:'teece',sides:[7,7,7,7],priest:true,godTitle:true,sac:1,sacSmite:{1124:1},
     kw:['flying','ranged'],def:2,priestDiscard:true,handDiscard:[{fx:'conjureSmite'}],
-    text:'Sacrifice one fielded Teece to play, or discard a Smite. Flying. Ranged. Defence 2. Or discard this from your hand on your turn: conjure a Quarter Smite.'},
+    text:'Sacrifice a Teece to play, or discard a Smite. Flying. Ranged. Defence 2. Or discard this from your hand on your turn: conjure a Quarter Smite.'},
  1113:{name:'Avatar',type:'teece',sides:[10,10,10,10],priest:true,godTitle:true,sac:2,sacSmite:{1124:1,1125:2},
     kw:['flying','ranged'],def:3,priestDiscard:true,handDiscard:[{fx:'conjureSmite'}],
-    text:'Sacrifice two fielded Teece to play, or discard two Smites or a Divine Smite. Flying. Ranged. Defence 3. Or discard this from your hand on your turn: conjure a Quarter Smite.'},
+    text:'Sacrifice two Teece to play, or discard two Smites or a Divine Smite. Flying. Ranged. Defence 3. Or discard this from your hand on your turn: conjure a Quarter Smite.'},
  1114:{name:'Litany',type:'magic',smiteAi:'conjure',cast:[{fx:'conjureSmite',n:3}],
     text:'Conjure 3 Quarter Smites.'},
  1115:{name:'Divine Retribution',type:'magic',smiteLvl:2,retribution:true,smiteAi:'never',
@@ -5065,10 +5069,10 @@ const CARDS = {
  1137:{name:'Forgemaster',type:'teece',sides:[5,6,6,5],dwarf:true,onPlay:[{fx:'conjureCard',id:1148}],
     text:'When played: add a Common Hammer to your hand (equip: the equipped Teece gets +1).'},
  1138:{name:'Dwarf Thane',type:'teece',sides:[2,8,9,8],dwarf:true,sac:1,sacGearTake:true,equipsHome:'one',
-    text:'Sacrifice one fielded Teece to play. Every equip card on the Teece you sacrificed is transferred to this. When destroyed: add one equip card equipped to it back to your hand.'},
+    text:'Sacrifice a Teece to play. Every equip card on the Teece you sacrificed is transferred to this. When destroyed: add one equip card equipped to it back to your hand.'},
  1139:{name:'Mountain King',type:'teece',sides:[9,9,9,9],dwarf:true,sac:2,sacGearTake:true,equipsHome:'all',
     onPlay:[{fx:'equipGraveSelf',n:2}],
-    text:'Sacrifice two fielded Teece to play. Every equip card on the Teece you sacrificed is transferred to this. When played: equip up to two equip cards from your graveyard to it. When destroyed: every equip card on it goes back to hand.'},
+    text:'Sacrifice two Teece to play. Every equip card on the Teece you sacrificed is transferred to this. When played: equip up to two equip cards from your graveyard to it. When destroyed: every equip card on it goes back to hand.'},
  /* ---- Dwarf equips ---- */
  1140:{name:'Mithril Mail',type:'equip',mod:2,grants:{def:2},
     text:'The equipped Teece has +2 and +2 Defence.'},
@@ -5084,7 +5088,7 @@ const CARDS = {
  1145:{name:'Ball and Chain',type:'equip',mod:-4,anyOwner:true,
     text:'You can equip this to an enemy. The equipped Teece gets -4.'},
  1146:{name:'Ancestor’s Aegis',type:'equip',mod:0,grants:{onEquip:[{fx:'shieldFor'}]},
-    text:'When you equip this to a Teece, it cannot be destroyed until the end of the next turn.'},
+    text:'When you equip this to a Teece, it is invulnerable until the end of the next turn.'},
  1147:{name:'Steel and Flame',type:'equip',mod:0,
     eModes:{steel:{def:6},flame:{eMod:3}},
     grants:{onEquip:[{fx:'choose',msg:'Steel and Flame:',opts:[
@@ -5122,13 +5126,13 @@ const CARDS = {
  1158:{name:'Warlock of Nagash',type:'teece',sides:[5,6,5,2],warlock:true,channel:'nagash',
     text:'Channel Nagash. Boon: adjacent enemies have -3.'},
  1159:{name:'Warlock of Death',type:'teece',sides:[1,1,1,1],warlock:true,channel:'death',
-    text:'Channel Death. Boon: when destroyed, the next Teece you play cannot be destroyed until the end of your next turn.'},
+    text:'Channel Death. Boon: when destroyed, the next Teece you play is invulnerable until the end of your next turn.'},
  1160:{name:'Adept',type:'teece',sides:[7,7,7,7],warlock:true,patronTitle:true,sac:1,def:3,channelCap:3,
     onPlay:[{fx:'channelFill'}],
-    text:'Sacrifice one fielded Teece to play. Defence 3. You can channel up to three Boons while this Teece is on the field.'},
+    text:'Sacrifice a Teece to play. Defence 3. You can channel up to three Boons while this Teece is on the field.'},
  1161:{name:'Avatar',type:'teece',sides:[7,7,7,7],warlock:true,patronTitle:true,sac:2,def:7,
     onPlay:[{fx:'channelExtra'}],
-    text:'Sacrifice two fielded Teece to play. Defence 7. When played: you can permanently channel one extra Boon for the rest of the game.'},
+    text:'Sacrifice two Teece to play. Defence 7. When played: you can permanently channel one extra Boon for the rest of the game.'},
  1162:{name:'Patron’s Mark',type:'equip',mod:0,grants:{kw:['flying'],pactCopy:1},
     text:'The equipped Teece has another copy of your Boon, and Flying.'},
  1163:{name:'Pact Blade',type:'equip',mod:2,grants:{kw:['ranged'],onDeath:[{fx:'channelBack'}]},
@@ -5151,7 +5155,7 @@ const CARDS = {
  1193:{name:'Pact Talisman',type:'equip',mod:0,grants:{onEquip:[{fx:'talisman',n:5,pick:2}]},
     text:'When equipped: five random Boons are offered and you choose two. The equipped Teece has both.'},
  1194:{name:'Time Stop',type:'magic',token:true,deck:'time',
-    text:'Every Teece you control, now or played later, is invulnerable until the end of your next turn: it cannot be destroyed.',
+    text:'Every Teece you control, now or played later, is invulnerable until the end of your next turn.',
     cast:[{fx:'blessAll',next:true,src:'Time Stop'}]},
  1170:{name:'Lesser Circle',type:'ground',token:true,deck:'warlock',gWarlockMod:2,
     text:'A Warlock on this battleground has +2.'},
@@ -5169,7 +5173,7 @@ const CARDS = {
     text:'When played: -2 until the end of the turn.'},
  1198:{name:'Chosen Vessel',type:'teece',sides:[3,3,3,3],
     onPlay:[{fx:'shieldFor',yourNext:true}],
-    text:'When played: it cannot be destroyed until the end of your next turn.'},
+    text:'When played: it is invulnerable until the end of your next turn.'},
  1199:{name:'Cult Shepherd',type:'teece',sides:[3,6,6,6],
     act:[{name:'Herd',once:'turn',steps:[{fx:'moveTarget',where:'any'}]}],
     text:'Once per your turn: select a Teece; move it one space.'},
@@ -5195,7 +5199,7 @@ const CARDS = {
  1206:{name:'Hierophant',type:'teece',sides:[3,3,3,3],sac:1,def:7,
     onPlay:[{fx:'sacToHand'}],
     onDeath:[{fx:'nextDef',n:7}],
-    text:'Sacrifice one fielded Teece to play. Defence 7. When played: the sacrificed Teece goes to your hand. When destroyed: the next Teece you play has +7 Defence.'},
+    text:'Sacrifice a Teece to play. Defence 7. When played: the sacrificed Teece goes to your hand. When destroyed: the next Teece you play has +7 Defence.'},
  /* ---- Cult equips ---- */
  1207:{name:'Ritual Shackles',type:'equip',mod:5,grants:{kw:['immovable']},
     text:'The equipped Teece gets +5 and cannot move or be moved.'},
@@ -5215,7 +5219,7 @@ const CARDS = {
     gact:[{name:'Teleport to a point',once:'turn',steps:[{fx:'pentaTele'}]}],
     text:'Once per turn, a Teece on this battleground can teleport to any point of the Pentagram. A line of the Pentagram it travels along is activated.'},
  1214:{name:'Sanctum of Lines',type:'ground',gCultGuard:true,
-    text:'A Teece on this battleground cannot be destroyed while it stands on an active line of the Pentagram.'},
+    text:'A Teece on this battleground is invulnerable while it stands on an active line of the Pentagram.'},
  /* ---- Cult: what the missions hand out ---- */
  1215:{name:'Convert',type:'magic',token:true,deck:'cult',cultAi:'convert',cast:[{fx:'convert'}],
     text:'Select a Teece adjacent to one of your Teece; take control of it. If this leaves your hand any other way, it comes back.'},
@@ -5240,10 +5244,10 @@ const CARDS = {
  1180:{name:'Windcaller',type:'teece',sides:[7,4,4,7],text:'When played: a Teece gets Flying and +2 until the end of the turn.',
     onPlay:[{fx:'mod',who:'any',where:'any',n:2,dur:'temp',kw:'flying',
       msg:'Choose a Teece: it gets Flying and +2 until the end of the turn.'}]},
- 1181:{name:'Captain',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice one fielded Teece to play. When played: a Teece gets +1.',
+ 1181:{name:'Captain',type:'teece',sides:[9,9,9,9],sac:1,text:'Sacrifice a Teece to play. When played: a Teece gets +1.',
     onPlay:[{fx:'mod',who:'any',where:'any',n:1,dur:'perm'}]},
  1182:{name:'General',type:'teece',sides:[12,12,12,12],sac:2,
-    text:'Sacrifice two fielded Teece to play. Once per your turn: summon a Soldier Token (5/5/5/5) on any empty panel.',
+    text:'Sacrifice two Teece to play. Once per your turn: summon a Soldier Token (5/5/5/5) on any empty panel.',
     act:[{name:'Call a Soldier',once:'turn',steps:[{fx:'token',tok:1192,where:'any'}]}]},
  1183:{name:'Iron Sword',type:'equip',mod:3,text:'Equipped Teece gets +3.'},
  1184:{name:'Feathered Cloak',type:'equip',mod:2,grants:{kw:['flying']},text:'Equipped Teece gets +2 and Flying.'},
@@ -5269,7 +5273,7 @@ const CARDS = {
         the cream face. ---- */
  960:{name:'Recruit',type:'teece',deck:'classic',tutorial:true,sides:[6,6,6,6],text:'No effect.'},
  961:{name:'Squire',type:'teece',deck:'classic',tutorial:true,sides:[7,7,7,7],text:'No effect.'},
- 962:{name:'Champion',type:'teece',deck:'classic',tutorial:true,sides:[15,15,15,15],sac:1,text:'Sacrifice one fielded Teece to play.'},
+ 962:{name:'Champion',type:'teece',deck:'classic',tutorial:true,sides:[15,15,15,15],sac:1,text:'Sacrifice a Teece to play.'},
  963:{name:'Training Blade',type:'equip',deck:'classic',tutorial:true,mod:3,text:'Equipped Teece gets +3.'},
  964:{name:'Weaken',type:'magic',deck:'classic',tutorial:true,text:'An enemy Teece gets -2.',
     cast:[{fx:'mod',who:'enemy',where:'any',n:-2,dur:'perm'}]},
@@ -5589,20 +5593,20 @@ function invulnText(b,i){
   const t=b[i]&&b[i].teece;
   if(!t)return '';
   if(t.immortalOwner==null&&zeusSky(t))
-    return 'Cannot be destroyed: '+(G.players[t.owner].zeusSrc||'Zeus\u2019 Blessing')+' holds until the end of '+(G.players[t.owner].zeusUntil<=G.turnNum?'this turn':'turn '+G.players[t.owner].zeusUntil)+'.';
+    return 'Invulnerable: '+(G.players[t.owner].zeusSrc||'Zeus\u2019 Blessing')+' holds until the end of '+(G.players[t.owner].zeusUntil<=G.turnNum?'this turn':'turn '+G.players[t.owner].zeusUntil)+'.';
   if(t.immortalOwner!=null){
     const until=t.immortalUntil
       ? (t.immortalUntil<=G.turnNum?'the end of this turn':'the end of turn '+t.immortalUntil)
       /* pposs gives "yours", which is right after a noun and wrong before one:
          the chip this replaced read "the start of You's next turn". */
       : 'the start of '+(pname(t.immortalOwner)==='You'?'your':pname(t.immortalOwner)+"'s")+' next turn';
-    return 'Cannot be destroyed until '+until+'.';
+    return 'Invulnerable until '+until+'.';
   }
-  if(runeGuarded(t))return 'Cannot be destroyed: it holds the Runeblade\u2019s Chosen, for as long as that sword stays on the field.';
-  if(packGuarded(b,i))return 'Cannot be destroyed: a Pack Warden stands with it, and '+packCopiesAdj(b,i)+' of its own copies are beside it. Bring that below two and it can be destroyed again.';
-  if(cultGuarded(b,i))return 'Cannot be destroyed: it stands in the Sanctum of Lines on an active line of the Pentagram.';
-  if(blessedOn(b,i))return 'Cannot be destroyed: it is blessed, standing with an ally, '+
-    'and its side outnumbers every other. It becomes destructible again the moment any of that stops being true.';
+  if(runeGuarded(t))return 'Invulnerable: it holds the Runeblade\u2019s Chosen, for as long as that sword stays on the field.';
+  if(packGuarded(b,i))return 'Invulnerable: a Pack Warden stands with it, and '+packCopiesAdj(b,i)+' of its own copies are beside it. Bring that below two and it stops being invulnerable.';
+  if(cultGuarded(b,i))return 'Invulnerable: it stands in the Sanctum of Lines on an active line of the Pentagram.';
+  if(blessedOn(b,i))return 'Invulnerable: it is blessed, standing with an ally, '+
+    'and its side outnumbers every other. It stops being invulnerable the moment any of that stops being true.';
   return '';
 }
 function blessedOn(b,i){
@@ -9085,7 +9089,7 @@ async function runeSaves(d){
     toGrave(de.owner,de.cardId);
     t.immortalOwner=q;t.immortalUntil=endOfNextTurn(q);
     log('The Decoy Runeblade shatters in its place: '+nm(t)+(isRuneForm(t)?'':' and the Runeblade it holds')+
-      ' cannot be destroyed until the end of '+ownOf(q)+' next turn.');
+      ' '+(isRuneForm(t)?'is':'are')+' invulnerable until the end of '+ownOf(q)+' next turn.');
     await anim([cell],'zap');
     return true;
   }
@@ -9113,7 +9117,7 @@ async function runeSaves(d){
       }
       if(b[at]&&b[at].teece===t){
         t.immortalOwner=t.owner;t.immortalUntil=endOfNextTurn(t.owner);
-        log(nm(t)+' cannot be destroyed until the end of '+ownOf(t.owner)+' next turn.');
+        log(nm(t)+' is invulnerable until the end of '+ownOf(t.owner)+' next turn.');
         await anim([at],'zap');
       }
       return true;
@@ -9648,7 +9652,7 @@ async function FXRUN(st,ctx){
     t.immortalOwner=p;
     t.immortalUntil=turnsAhead(st.turns||3);
     t.harmless=true;
-    log(nm(t)+' thins into mist: it cannot be destroyed, and it cannot destroy, for '+(st.turns||3)+' of your turns.');
+    log(nm(t)+' thins into mist: it is invulnerable, and it cannot destroy, for '+(st.turns||3)+' of your turns.');
     await anim([c],'zap');
     return;}
   /* Coffin: any Teece in your graveyard comes back, with nothing left of it and
@@ -10728,7 +10732,7 @@ async function FXRUN(st,ctx){
            be destroyed, and the Warden simply fails to shift it. Checked here
            as well as in processDeath so it is not shown dying first. */
         if(isHeldSafe(t)){
-          log(nm(t)+' is pinned with nowhere to go, but is held outside time and cannot be destroyed.');
+          log(nm(t)+' is pinned with nowhere to go, but is held outside time and is invulnerable.');
           return;
         }
         log(nm(t)+' is pinned with nowhere to go and is destroyed.');
@@ -11034,12 +11038,12 @@ async function FXRUN(st,ctx){
   case 'shieldSelf':{
     if(!ctx.t)return;
     ctx.t.immortalOwner=p;ctx.t.immortalUntil=0;
-    log(nm(ctx.t)+' digs in: it cannot be destroyed until the start of '+pposs(p)+' next turn.');
+    log(nm(ctx.t)+' digs in: it is invulnerable until the start of '+pposs(p)+' next turn.');
     return;}
   case 'shieldNext':{
     const who=ctx.deadOwner!=null?ctx.deadOwner:p;
     G.players[who].nextShield=st.long?'long':true;
-    log('The next Teece '+pname(who)+' plays cannot be destroyed until the '+
+    log('The next Teece '+pname(who)+' plays is invulnerable until the '+
       (st.long?'end':'start')+' of their next turn.');
     return;}
   /* Aerial Support reads formations rather than sides: inside the area it
@@ -11453,7 +11457,7 @@ async function FXRUN(st,ctx){
   case 'shieldTurn':{
     if(!ctx.t)return;
     ctx.t.immortalOwner=p;ctx.t.immortalUntil=G.turnNum;
-    log(nm(ctx.t)+' cannot be destroyed until the end of this turn.');
+    log(nm(ctx.t)+' is invulnerable until the end of this turn.');
     return;}
   case 'sacSelf':{
     const t=ctx.t;
@@ -11466,7 +11470,7 @@ async function FXRUN(st,ctx){
     const pl=G.players[p];
     pl.nextInvuln=(pl.nextInvuln||0)+st.n;
     log('The next '+(pl.nextInvuln===1?'Teece':pl.nextInvuln+' Teece')+' '+whoIn(p)+' '+vb(p,'plays','play')+
-      ' cannot be destroyed until the end of the turn '+(pl.nextInvuln===1?'it is':'they are')+' played.');
+      ' '+(pl.nextInvuln===1?'is':'are')+' invulnerable until the end of the turn '+(pl.nextInvuln===1?'it is':'they are')+' played.');
     return;}
   case 'foeNextMod':{
     for(const q of enemySeats(p)){
@@ -12177,7 +12181,7 @@ async function FXRUN(st,ctx){
     const cands=[];
     for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
     if(!cands.length){log('No Teece to pause.');return 'ABORT';}
-    const c=await pickCell(cands,'Choose a Teece: it cannot be destroyed until the end of your next turn.',null,false);
+    const c=await pickCell(cands,'Choose a Teece: it is invulnerable until the end of your next turn.',null,false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     /* Held to the END of the next turn rather than its start. The mechanism was
@@ -12364,7 +12368,7 @@ async function FXRUN(st,ctx){
     const pl=G.players[p];
     if(until>=(pl.zeusUntil||0))pl.zeusSrc=st.src||'Zeus\u2019 Blessing';
     pl.zeusUntil=Math.max(pl.zeusUntil||0,until);
-    log('Every Teece '+pname(p)+' control'+(pname(p)==='You'?'':'s')+', now or played later, cannot be destroyed until the end of '+
+    log('Every Teece '+pname(p)+' control'+(pname(p)==='You'?'':'s')+', now or played later, is invulnerable until the end of '+
         ((G.turn===p&&!st.next)?'this turn':(pname(p)==='You'?'your':pname(p)+'\u2019s')+' next turn')+'.');
     return;}
   case 'thunderBolt':{
@@ -12949,7 +12953,7 @@ async function FXRUN(st,ctx){
     const tt=b[c].teece;
     tt.immortalOwner=p;
     tt.immortalUntil=nextTurnExpiry();
-    log(nm(tt)+' winks out of sight: it cannot be destroyed until the end of your next turn.');
+    log(nm(tt)+' winks out of sight: it is invulnerable until the end of your next turn.');
     await anim([c],'zap');
     return;}
   case 'unmake':{
@@ -13639,7 +13643,7 @@ async function FXRUN(st,ctx){
     const cands=[];
     for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
     if(!cands.length)return none('No Teece to shield.');
-    const c=await pickCell(cands,'Which Teece cannot be destroyed until the end of your next turn?',null,!!st.may);
+    const c=await pickCell(cands,'Which Teece is invulnerable until the end of your next turn?',null,!!st.may);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const tt=b[c].teece;
@@ -14017,7 +14021,7 @@ async function FXRUN(st,ctx){
     const t=ctx.t;
     if(!t)return;
     t.immortalOwner=p;t.immortalUntil=Math.max(t.immortalUntil||0,st.yourNext?nextTurnExpiry():G.turnNum+(st.turns||1));
-    log(nm(t)+' cannot be destroyed until the end of '+(st.yourNext?ownOf(p)+' next turn.':'the next turn.'));
+    log(nm(t)+' is invulnerable until the end of '+(st.yourNext?ownOf(p)+' next turn.':'the next turn.'));
     return;}
   /* The Mindwyrm lets go, and takes its host with it. */
   case 'bounceSelfPair':{
@@ -15561,7 +15565,7 @@ async function processDeath(d){
      feeding one to the swarm, or a card blowing itself up as its own price all
      go through regardless, and say so with cost:true. */
   if(!d.cost&&isHeldSafe(t)){
-    log(nm(t)+' is held outside time, and cannot be destroyed.');
+    log(nm(t)+' is held outside time, and is invulnerable.');
     return;
   }
   /* The Decoy Runeblade and the Blade-Sworn Squire. */
@@ -15673,7 +15677,7 @@ async function processDeath(d){
       const pl=G.players[t.owner];
       pl.wlShield=(pl.wlShield||0)+dn;
       log(nm(t)+' falls with Death’s Boon: the next Teece '+whoIn(t.owner)+' '+vb(t.owner,'plays','play')+
-        ' cannot be destroyed until the end of '+ownOf(t.owner)+' next turn.');
+        ' is invulnerable until the end of '+ownOf(t.owner)+' next turn.');
     }
   }
   if(!d.cost&&t.deathFx&&t.deathFx.length)deathFx.push(...t.deathFx);
@@ -16860,20 +16864,20 @@ async function playTeece(p,handIdx){
     const long=pl.nextShield==='long';
     pl.nextShield=false;
     t.immortalOwner=p;t.immortalUntil=long?nextTurnExpiry():0;
-    log(nm(t)+' arrives under cover: it cannot be destroyed until the '+
+    log(nm(t)+' arrives under cover: it is invulnerable until the '+
       (long?'end':'start')+' of '+pposs(p)+' next turn.');
   }
   /* The Bargain Imp's reward: cover that lasts out the turn it is played. */
   if(pl.nextInvuln>0){
     pl.nextInvuln--;
     t.immortalOwner=p;t.immortalUntil=G.turnNum;
-    log(nm(t)+' arrives under the bargain: it cannot be destroyed until the end of this turn.');
+    log(nm(t)+' arrives under the bargain: it is invulnerable until the end of this turn.');
   }
   /* Death's Boon: cover through the end of the player's next turn. */
   if(pl.wlShield>0){
     pl.wlShield--;
     t.immortalOwner=p;t.immortalUntil=nextTurnExpiry();
-    log(nm(t)+' arrives under Death’s Boon: it cannot be destroyed until the end of '+ownOf(p)+' next turn.');
+    log(nm(t)+' arrives under Death’s Boon: it is invulnerable until the end of '+ownOf(p)+' next turn.');
   }
   /* The Devils' Blessing is paid here: the next Teece is destroyed as it lands. */
   if(pl.wlDoom>0&&b[spot].teece===t){
@@ -20598,7 +20602,7 @@ function teecePlayBlock(p){
   let room=0;for(let i=0;i<BN;i++)if(openAt(G.board,i))room++;
   let own=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p&&!t.isToken)own++;}
   if(held.every(id=>(CARDS[id].sac||0)>own))
-    return 'Every Teece in your hand costs more sacrifices than you have Teece fielded to pay with.';
+    return 'Every Teece in your hand costs more sacrifices than you have Teece on the field to pay with.';
   /* A sacrifice clears the panel it stood on, so a full board only stops the
      Teece that pay nothing for one. */
   if(!room&&!held.some(id=>(CARDS[id].sac||0)>0&&(CARDS[id].sac||0)<=own))
@@ -20640,7 +20644,7 @@ function statusesFor(p){
     push('wlboon',act.length?'good':'warn',act.length?'Boon: '+act.map(k=>PATRONS[k].short).join(', '):'No Boon yet',
       (act.length?act.map(k=>'Boon of '+patronName(k)+': '+PATRONS[k].boon).join(' '):'You are not channelling a patron yet. Play a Warlock that names one, or tap a Channel button on one already on the field.')+
       ' Every Teece you control carries it. You can hold '+cap+' Boon'+(cap>1?'s':'')+' at once.'+
-      (pl.wlShield?' The next Teece you play cannot be destroyed until the end of your next turn.':'')+
+      (pl.wlShield?' The next Teece you play is invulnerable until the end of your next turn.':'')+
       (pl.wlDoom?' The next Teece you play is destroyed as it lands.':''));
   }
   /* --- the Cult's missions, this seat's and any across the table --- */
@@ -20745,7 +20749,7 @@ function statusesFor(p){
   if(pl.hellfire)push('hellfire','good','Hellfire '+sgn(pl.hellfire.n),
     'Infernal Bargain: every Teece you control has '+sgn(pl.hellfire.n)+(pl.hellfire.kw?' and '+pl.hellfire.kw:'')+' until the start of your next turn.');
   if(pl.nextInvuln)push('nextInvuln','good','Next '+(pl.nextInvuln===1?'Teece':pl.nextInvuln+' Teece')+' safe',
-    'The Bargain Imp\u2019s PACT: the next '+(pl.nextInvuln===1?'Teece':pl.nextInvuln+' Teece')+' you play cannot be destroyed until the end of the turn it is played.');
+    'The Bargain Imp\u2019s PACT: the next '+(pl.nextInvuln===1?'Teece':pl.nextInvuln+' Teece')+' you play '+(pl.nextInvuln===1?'is':'are')+' invulnerable until the end of the turn '+(pl.nextInvuln===1?'it is':'they are')+' played.');
   if(hexOn(p,'nomagic'))push('nomagic','bad','No magic','The Adversary\u2019s PACT: you cannot play magic until it lifts.');
 
   /* --- Curses sitting on the seat --- */
@@ -20821,8 +20825,8 @@ function statusesFor(p){
     'The next Teece you play arrives with '+sidesLine(pl.nextSides)+', half of what was sacrificed to the Curse of Sacrifice.');
   if(pl.nextMod)push('nextmod',pl.nextMod<0?'bad':'good','Next Teece '+sgn(pl.nextMod),
     'The next Teece you play arrives with '+sgn(pl.nextMod)+'.');
-  if(pl.nextShield)push('nextshield','good','Next Teece cannot be destroyed',
-    'The next Teece you play cannot be destroyed until the start of your next turn.');
+  if(pl.nextShield)push('nextshield','good','Next Teece is invulnerable',
+    'The next Teece you play is invulnerable until the start of your next turn.');
   if(G.turn===p&&G.freePlay&&G.freePlay.p===p)push('freeplay','good',freePlayName(G.freePlay)+' is free to play',
     freePlayName(G.freePlay)+' may be played this turn without spending your Teece play, whether or not you have already played one.');
   if(G.turn===p&&G.extraTeece)push('extraplay','good',
@@ -21427,7 +21431,7 @@ function renderDraft(p,offer,k,res){
        The other three kinds still say what they are. */
     dc.innerHTML+='<div class="dnm">'+cd.name+rankTag(id)+'</div>';
     if(cd.type!=='teece')dc.innerHTML+='<div class="dty">'+cd.type+'</div>';
-    dc.innerHTML+='<div class="dtx">'+cd.text.split('\n')[0]+'</div>';
+    dc.innerHTML+='<div class="dtx">'+kwify(cd.text.split('\n')[0])+'</div>';
     dc.addEventListener('click',()=>{if(!ready())return;res(id);overlay.classList.add('hidden');});
     cards.appendChild(dc);
   }
@@ -21969,7 +21973,7 @@ const PATRONS={
   bomb:{name:'the Bomb God',short:'Bomb God',boon:'once per your turn, a Teece on the same row or column and every Teece adjacent to it get -3.'},
   ankh:{name:'Ankhtepot',short:'Ankhtepot',boon:'once per your turn, Mummy Wrap.'},
   nagash:{name:'Nagash',short:'Nagash',boon:'adjacent enemies have -3.'},
-  death:{name:'Death',short:'Death',boon:'when destroyed, the next Teece you play cannot be destroyed until the end of your next turn.'},
+  death:{name:'Death',short:'Death',boon:'when destroyed, the next Teece you play is invulnerable until the end of your next turn.'},
   g0:{name:'Topus',short:'Topus',side:0,boon:'+3 on its top side.'},
   g1:{name:'Rightorious',short:'Rightorious',side:1,boon:'+3 on its right side.'},
   g2:{name:'Bottomor',short:'Bottomor',side:2,boon:'+3 on its bottom side.'},
@@ -24456,9 +24460,12 @@ if(HAS_DOM){
   /* Keyword popups. Capture phase, because a tap on a Teece stops its click
      from bubbling, and that tap still has to close an open popup. */
   document.addEventListener('click',e=>{
-    const k=e.target&&e.target.closest&&e.target.closest('#detail .kw[data-kw]');
+    const k=e.target&&e.target.closest&&e.target.closest('#detail .kw[data-kw], .dcard .kw[data-kw]');
     const pop=document.getElementById('kwPop');
     if(k){
+      /* Capture phase on document, so this lands before the draft card's own
+         click and keeps the tap from choosing the card. */
+      e.stopPropagation();
       const same=!pop.hidden&&pop.dataset.kw===k.dataset.kw&&pop._for===k;
       if(same)kwPopClose();else{kwPopOpen(k);pop.dataset.kw=k.dataset.kw;pop._for=k;}
       return;
@@ -24466,11 +24473,12 @@ if(HAS_DOM){
     if(!(e.target&&e.target.closest&&e.target.closest('#kwPop')))kwPopClose();
   },true);
   document.addEventListener('keydown',e=>{
-    const k=e.target&&e.target.closest&&e.target.closest('#detail .kw[data-kw]');
+    const k=e.target&&e.target.closest&&e.target.closest('#detail .kw[data-kw], .dcard .kw[data-kw]');
     if(k&&(e.key==='Enter'||e.key===' ')){e.preventDefault();kwPopOpen(k);}
     else if(e.key==='Escape')kwPopClose();
   });
   addEventListener('scroll',kwPopClose);
+  {const dov=document.getElementById('draftOverlay');if(dov)dov.addEventListener('scroll',kwPopClose);}
   addEventListener('resize',kwPopClose);
   document.getElementById('resetDetail').onclick=()=>{
     if(!G)return;
