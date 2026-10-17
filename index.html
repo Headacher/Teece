@@ -1261,7 +1261,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:223,date:'2026-10-16'};
+const VERSION={build:224,date:'2026-10-17'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -5261,7 +5261,7 @@ const CARDS = {
     text:'The equipped Teece can Traverse The Pentagram an additional time per turn, and gets +3 until the end of the turn each time it does.'},
  /* ---- Cult magic ---- */
  1210:{name:'Gol’God’Oth Arrives',type:'magic',trump:true,cultAi:'arrive',cast:[{fx:'cultArrive'}],
-    text:'Trump card. Select a Teece. If it is a Tendril Of Gol’God’Oth, you win the game. Otherwise, return that Teece to its owner’s hand.'},
+    text:'Trump card. Select a Teece. If it is a Tendril Of Gol’God’Oth, create a copy of it on every empty panel adjacent to it. Otherwise, return that Teece to its owner’s hand.'},
  1211:{name:'Gol’God’Oth’s Boon',type:'magic',cultAi:'boon',cast:[{fx:'cultBoon'}],
     text:'Until the end of your turn, every card in your hand can be discarded. Each time you discard a card this turn, select a Teece: it gets +5 and Teleport until the end of the turn. A line of the Pentagram an ally teleports along is activated.'},
  1212:{name:'Gol’God’Oth’s Wrath',type:'magic',cultAi:'wrath',cast:[{fx:'destroy',nonBoss:true,center:true}],
@@ -5276,7 +5276,7 @@ const CARDS = {
  1215:{name:'Convert',type:'magic',token:true,deck:'cult',cultAi:'convert',cast:[{fx:'convert'}],
     text:'Select a Teece adjacent to one of your Teece; take control of it. If this leaves your hand any other way, it comes back.'},
  1216:{name:'Tendril Of Gol’God’Oth',type:'teece',token:true,deck:'cult',boss:true,sides:[20,20,20,20],
-    text:'Counts as a Boss. Summoned by the Sacrifice. While it stands, Gol’God’Oth Arrives wins the game.'},
+    text:'Counts as a Boss. Summoned by the Sacrifice. Gol’God’Oth Arrives aimed at it creates a copy of it on every empty panel adjacent to it.'},
  /* ---- Basic: the deck for a first game. Every card shows one of the base
         rules on its own -- uneven sides, rotation, Flying, Ranged, Tokens,
         sacrifice, equips, magic, battlegrounds -- and nothing else. ---- */
@@ -15005,23 +15005,22 @@ async function FXRUN(st,ctx){
     const cands=[];
     for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
     if(!cands.length)return none('There is no Teece to call Gol’God’Oth down on.');
-    const tend=cands.find(i=>b[i].teece.cardId===CULT_TENDRIL);
+    const room=i=>ADJ[i].filter(j=>openAt(b,j)).length;
+    const tend=cands.filter(i=>b[i].teece.cardId===CULT_TENDRIL&&room(i)).sort((x,y)=>room(y)-room(x))[0];
     let c;
     if(isAIP(p)&&tend!=null)c=tend;
-    else c=await pickCell(cands,'Gol’God’Oth Arrives: choose a Teece. A Tendril Of Gol’God’Oth wins you the game; anything else returns to its owner’s hand.',
-      (bb,i)=>{bb[i].teece=null;},false);
+    else c=await pickCell(cands,'Gol’God’Oth Arrives: choose a Teece. A Tendril Of Gol’God’Oth spreads a copy onto every empty panel beside it; anything else returns to its owner’s hand.',
+      (bb,i)=>{if(bb[i].teece.cardId===CULT_TENDRIL)cultSpread(bb,i,p,false);else bb[i].teece=null;},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     if(wardMagic(b,c,p)){await anim([c],'zap');return;}
     if(tapeSave(b,c,p)){await anim([c],'zap');return;}
     const t=b[c].teece;
     if(t.cardId===CULT_TENDRIL){
-      if(seatsOnTeam(teamOf(p)).some(s=>hexOn(s,'nowin'))){
-        log('Gol’God’Oth answers through the Tendril, and the Curse of Freezing holds the win back for now.');
-        return;
-      }
-      await anim([c],'zap',260);
-      endGame(teamOf(p),'Gol’God’Oth arrives through the Tendril. '+pname(p)+' '+vb(p,'has','have')+' summoned Gol\u2019God\u2019Oth.');
+      const made=cultSpread(b,c,p,true);
+      if(!made.length){log('Gol’God’Oth answers through the Tendril, but there is no empty panel beside it to spread into.');return;}
+      log('Gol’God’Oth answers through the Tendril: '+made.length+' cop'+(made.length===1?'y':'ies')+' of it rise'+(made.length===1?'s':'')+' beside it.');
+      await anim(made,'placed');
       return;
     }
     b[c].teece=null;
@@ -21750,7 +21749,8 @@ const smiteLvl=id=>(CARDS[id]&&CARDS[id].smiteLvl)||0;
      2  resolve Convert; it keeps coming back to hand until it is
      3  end a turn with an ally on the middle panel; it is sacrificed and a
         Tendril Of Gol'God'Oth takes its place
-     4  done: Gol'God'Oth Arrives aimed at the Tendril wins the game
+     4  done: Gol'God'Oth Arrives aimed at a Tendril copies it onto every
+        empty panel beside it
 
    The drawing is an overlay over the whole board that nothing is laid on top
    of: not the Web, not a battleground, not a Teece. */
@@ -21879,6 +21879,14 @@ function cultConverted(p){
   c.stage=3;
   log(pname(p)+' '+vb(p,'has','have')+' converted the enemy. Next: Perform The Sacrifice — end a turn with an ally in the middle of the Pentagram.');
 }
+/* Gol'God'Oth Arrives aimed at a Tendril: a copy of it on every empty panel
+   orthogonally beside it, owned by the caster. The copies are plain summons, so
+   they do not spread again on their own. Returns the cells filled. */
+function cultSpread(b,i,p,live){
+  const made=[];
+  for(const j of ADJ[i])if(openAt(b,j)){summonToken(b,j,CULT_TENDRIL,p,live);made.push(j);}
+  return made;
+}
 /* Mission 3, read at the end of the Cult seat's own turn. A sacrifice is a
    price, not a death, so nothing protects the Teece and nothing it does when
    destroyed fires. */
@@ -21895,7 +21903,7 @@ async function cultRitual(p){
   c.stage=4;
   if(!openAt(b,mid)){log('Something already fills the middle of the Pentagram, and the Tendril finds no way through.');return;}
   summonToken(b,mid,CULT_TENDRIL,p,true);
-  log('A Tendril Of Gol’God’Oth rises in its place. Gol’God’Oth Arrives aimed at it wins the game.');
+  log('A Tendril Of Gol’God’Oth rises in its place. Gol’God’Oth Arrives aimed at it spreads a copy onto every empty panel beside it.');
   await anim([mid],'placed');
 }
 /* The drawing. Coordinates are a 3x3 board at the desktop panel size and gap,
@@ -21922,7 +21930,7 @@ function cultStatusText(q){
   if(c.stage===1)return 'Mission 1 of 3, Activate The Pentagram: '+n+' of 5 lines lit. Any Teece on a point, either side’s, can Traverse The Pentagram once a turn, to one of the two points its lines reach. A line '+pname(q)+' '+vb(q,'travels','travel')+' lights up; all five hand over Convert.';
   if(c.stage===2)return 'Mission 2 of 3, Convert The Enemy: cast Convert on a Teece beside one of '+ownOf(q)+' Teece. Until it is resolved it keeps coming back to hand.';
   if(c.stage===3)return 'Mission 3 of 3, Perform The Sacrifice: end a turn of '+ownOf(q)+' with an ally in the middle of the Pentagram. It is sacrificed and a 20/20/20/20 Tendril Of Gol’God’Oth takes its place.';
-  return 'The Tendril has been summoned. Gol’God’Oth Arrives aimed at a Tendril Of Gol’God’Oth wins the game.';
+  return 'The Tendril has been summoned. Gol’God’Oth Arrives aimed at a Tendril Of Gol’God’Oth creates a copy of it on every empty panel beside it.';
 }
 /* Where the computer puts a Cult Teece down: on a point with an unlit line it
    can walk next turn, and in the middle once the Sacrifice is all that is left. */
@@ -21947,9 +21955,10 @@ function aiCultPlan(d){
     return {thr:0.5,bonus:cultSeat(p)?1.5:0,cands,mut:(bb,i)=>{if(bb[i].teece)bb[i].teece.owner=p;}};
   }
   if(d.cultAi==='arrive'){
+    /* A Tendril with room beside it: the board eval weighs the 20/20/20/20 copies. */
     const tend=[];
-    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.cardId===CULT_TENDRIL&&canTarget(b,i,p))tend.push(i);}
-    if(tend.length&&!seatsOnTeam(teamOf(p)).some(s=>hexOn(s,'nowin')))return {thr:0,bonus:100,cands:tend,mut:()=>{}};
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.cardId===CULT_TENDRIL&&canTarget(b,i,p)&&ADJ[i].some(j=>openAt(b,j)))tend.push(i);}
+    if(tend.length)return {thr:0.5,bonus:1,cands:tend,mut:(bb,i)=>{cultSpread(bb,i,p,false);}};
     /* A Cult seat holds it for the win; anyone else has a bounce. */
     if(cultSeat(p))return null;
     const cands=[];for(let i=0;i<BN;i++)if(enemyAt(i))cands.push(i);
