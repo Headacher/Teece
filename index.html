@@ -268,6 +268,10 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="cult"] .kwl,.dcard[data-card-deck="cult"] .dkw{color:#ff7a84}
 .card[data-card-deck="cult"] .ct,.dcard[data-card-deck="cult"] .dty{color:#ff7a84}
 .card[data-card-deck="cult"]::after,.dcard[data-card-deck="cult"]::after{content:'\26E4'}
+.card[data-card-deck="paladin"],.dcard[data-card-deck="paladin"]{--cardbg:#1f3463;--artink:#f2d27a;background:var(--cardbg);color:#f5efdd;border-color:#0d1a36}
+.card[data-card-deck="paladin"] .kwl,.dcard[data-card-deck="paladin"] .dkw{color:#ffd86b}
+.card[data-card-deck="paladin"] .ct,.dcard[data-card-deck="paladin"] .dty{color:#ffd86b}
+.card[data-card-deck="paladin"]::after,.dcard[data-card-deck="paladin"]::after{content:'\269C'}
 .card[data-card-deck="warlock"],.dcard[data-card-deck="warlock"]{--cardbg:#2b1838;--artink:#c39cff;background:var(--cardbg);color:#f0e6ff;border-color:#130a1a}
 .card[data-card-deck="warlock"] .kwl,.dcard[data-card-deck="warlock"] .dkw{color:#d4b0ff}
 .card[data-card-deck="warlock"] .ct,.dcard[data-card-deck="warlock"] .dty{color:#d4b0ff}
@@ -311,6 +315,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .teece[data-card-deck="priest"]{--cardbg:#efe6cf;--artink:#8a6a1f;background:var(--cardbg);color:#3b2f17;border-color:#b8962e}
 .teece[data-card-deck="dwarves"]{--cardbg:#4b3a2c;--artink:#f2b45c;background:var(--cardbg);color:#f3e8d8;border-color:#2a1f16}
 .teece[data-card-deck="cult"]{--cardbg:#2a0c10;--artink:#e0505a;background:var(--cardbg);color:#f6e2e2;border-color:#120305}
+.teece[data-card-deck="paladin"]{--cardbg:#1f3463;--artink:#f2d27a;background:var(--cardbg);color:#f5efdd;border-color:#0d1a36}
 .teece[data-card-deck="warlock"]{--cardbg:#2b1838;--artink:#c39cff;background:var(--cardbg);color:#f0e6ff;border-color:#130a1a}
 .teece[data-card-deck="basic"]{--cardbg:#dce6ee;--artink:#47637d;background:var(--cardbg);color:#1d2a36;border-color:#7d93a8}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
@@ -329,6 +334,13 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 #board svg.penta .pc{fill:none;stroke:#d0404c;stroke-width:2;stroke-dasharray:3 3;opacity:.7}
 @keyframes pentaPulse{0%,100%{opacity:.95}50%{opacity:.7}}
 @media(prefers-reduced-motion:reduce){#board svg.penta .pl.lit{animation:none}}
+/* Sanctified Grounds: the 2x2 area glows gold until a Teece in it falls. */
+.cell.sanct{box-shadow:inset 0 0 0 2px #ffd86b,inset 0 0 18px rgba(255,216,107,.55)}
+.cell.sanct::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle,rgba(255,226,140,.18),transparent 70%);animation:sanctGlow 3s ease-in-out infinite}
+@keyframes sanctGlow{0%,100%{opacity:1}50%{opacity:.55}}
+@media(prefers-reduced-motion:reduce){.cell.sanct::before{animation:none}}
+.dfn.oath{color:#ffd86b}
+.dfn.oath.broke{color:#ff8a7a;text-decoration:line-through}
 @media(max-width:420px){#board{--cs:var(--cs-sm,96px)}}
 #oppHands{width:100%;display:flex;flex-direction:column;gap:8px}
 .cell{position:relative;border:1px solid var(--line);border-radius:8px;background:#191410;overflow:hidden;cursor:default}
@@ -1261,7 +1273,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:224,date:'2026-10-17'};
+const VERSION={build:225,date:'2026-10-17'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1370,7 +1382,16 @@ const KW_RULES={
   element:'Fire, Water, Wind or Earth: the four spells a Wizard conjures. "Any element" means you pick which.',
   token:'Not a whole card. A Token cannot be sacrificed to play a Teece and never counts toward winning, and when it is destroyed it is simply gone: no graveyard, no return.',
   silenced:'A silenced Teece has its abilities negated for the rest of the game: nothing printed on it fires any more, its buttons are dead and its auras stop. Its numbers stay. A silenced battleground does nothing.',
-  trump:'The most powerful card in the deck. Each deck only gets one.'
+  trump:'The most powerful card in the deck. Each deck only gets one.',
+  cleanse:'Select a Teece. An ally loses every negative effect on it: stun, silence, curses, blindness and every penalty to its numbers or its Defence. An enemy is silenced and loses every bonus to its numbers and its Defence.',
+  oath:'When played, it swears an Oath to one of the three Paladin gods: Solitarius, Protectius or Pacificius. The Oath pays out while it holds and breaks on its god\u2019s condition. A Teece that has sworn an Oath counts as a Paladin.',
+  oathbroken:'When an Oath breaks, the Paladin becomes Oathbroken: it loses that Oath\u2019s bonus and gets -2.',
+  solitarius:'Oath of Solitarius: +4. The Oath breaks when the Paladin becomes adjacent to one of its allies.',
+  protectius:'Oath of Protectius: adjacent allies have +4. The Oath breaks when an adjacent ally dies.',
+  pacificius:'Oath of Pacificius: +5 Defence. The Oath breaks when the Paladin destroys an enemy.',
+  holylight:'Once per your turn: Cleanse this Teece and every adjacent Teece, and destroy every enemy battleground or equip on or adjacent to this panel. Granted by the Holy Light spell.',
+  ram:'Once per your turn: select a Teece in the same row or column; stun it, give it -3, and move one space toward it if able.',
+  paladin:'A Teece from the Paladin deck, or any Teece that has sworn an Oath.'
 };
 /* The spells a Wizard conjures and a Priest folds together. Built from the
    cards themselves at the moment of the tap, so the popup cannot drift from the
@@ -1405,7 +1426,7 @@ function spellDesc(k){
   return parts.join(' ');
 }
 const kwDesc=k=>(kwRe(),KEYWORDS[k])||KW_RULES[k]||(KW_SPELL[k]?spellDesc(k):'')||(KW_TOKEN[k]?tokenDesc(k):'');
-const KW_TITLE={packleader:'Pack Leader',mummywrap:'Mummy Wrap',steadfast:'Immune to stat reduction',trump:'Trump card',
+const KW_TITLE={holylight:'Holy Light',packleader:'Pack Leader',mummywrap:'Mummy Wrap',steadfast:'Immune to stat reduction',trump:'Trump card',
   needsflinger:'Needs a Rock Flinger',sandstormelemental:'Sandstorm Elemental',quartersmite:'Quarter Smite',halfsmite:'Half Smite',divinesmite:'Divine Smite'};
 const kwTitle=k=>KW_TITLE[k]||(kwRe(),KW_TOKEN[k]?CARDS[KW_TOKEN[k][0]].name:k.charAt(0).toUpperCase()+k.slice(1));
 /* The forms each one is printed in. Capitalised only for the ones that are
@@ -1413,6 +1434,8 @@ const kwTitle=k=>KW_TITLE[k]||(kwRe(),KW_TOKEN[k]?CARDS[KW_TOKEN[k][0]].name:k.c
    effect-is-silenced wording means the effect fizzled, not a silenced Teece,
    so it is left plain. */
 const KW_FORMS=[
+  ['Holy Light','holylight'],['Oathbroken','oathbroken'],['Oaths?','oath'],['[Cc]leans(?:e[sd]?|ing)','cleanse'],
+  ['Solitarius','solitarius'],['Protectius','protectius'],['Pacificius','pacificius'],['Ram','ram'],
   ['Pack Leaders?','packleader'],['Mummy Wraps?','mummywrap'],['Trump card','trump'],
   ['Immune to stat reduction','steadfast'],['Steadfast','steadfast'],
   ['Flying','flying'],['Ranged','ranged'],['Ward','ward'],['Teleport','teleport'],['Immovable','immovable'],
@@ -1425,7 +1448,8 @@ const KW_FORMS=[
   ['Quarter Smites?','quartersmite'],['Half Smites?','halfsmite'],['Divine Smites?','divinesmite'],['Smites?','smite'],
   ['Fireball','fireball'],['Fire','fire'],['Water','water'],['Wind','wind'],['Earth','earth'],['Steam','steam'],
   ['Lava','lava'],['Ice','ice'],['Mud','mud'],['Holy','holy'],
-  ['[Cc]onjur(?:e[sd]?|ing)','conjure'],['[Cc]ombin(?:e[sd]?|ing)','combine'],['[Ee]lements?','element']
+  ['[Cc]onjur(?:e[sd]?|ing)','conjure'],['[Cc]ombin(?:e[sd]?|ing)','combine'],['[Ee]lements?','element'],
+  ['Paladins?','paladin']
 ];
 /* Phrases that read like a keyword and are not one: the effect-is-silenced
    wording means the effect fizzled, Dumpster Fire is an ability's name, and so
@@ -1545,7 +1569,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}',priest:'\u{1F64F}',dwarves:'\u26CF\uFE0F',warlock:'\u26E7',basic:'\u{1F530}',cult:'\u26E4'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}',priest:'\u{1F64F}',dwarves:'\u26CF\uFE0F',warlock:'\u26E7',basic:'\u{1F530}',cult:'\u26E4',paladin:'\u269C\uFE0F'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -1895,6 +1919,28 @@ const CARD_ART={
   1218:["  [=======]  ", "  [ o o o ]  ", "  [=======]  ", "  [ o o o ]  ", "  '-------'  "],
   1217:["   .:::::.   ", "  :: o o ::  ", " ::: ::: ::: ", "  ::.:::.::  ", "   ':::::'   "],
   1216:[" ~\\  ~~~  /~ ", "  ~\\(O O)/~  ", " ~~~|VVV|~~~ ", "  ~/|   |\\~  ", " ~/  ~~~  \\~ "],
+  /* ---- Paladin ---- */
+  1219:["    _/^\\_    ", "   | o o |   ", "   |  -  |   ", "  /|[+++]|\\  ", "   |_| |_|   "],
+  1220:["    _/^\\_    ", "   | o o | _ ", "   |  -  |[+]", "  /|=====|[+]", "   |_| |_|   "],
+  1221:["    .-+-.    ", "   ( o o )   ", "    \\ = /    ", "  ==|###|==  ", "     | |     "],
+  1222:["    _/^\\_  * ", "   | > < |/  ", "   |  ^  |   ", "  /|=====|   ", "   |_| |_|   "],
+  1223:["   \\  |  /   ", "    .---.    ", "   ( - - )   ", "    \\ o /    ", "   /|+++|\\   "],
+  1224:["     ___     ", "    (o o)    ", "     \\-/     ", "    /|+|\\    ", "     / \\     "],
+  1225:["   _/^\\_  |  ", "  | o o | |  ", "  |  -  |-+- ", "  /|+++|\\ |  ", "   |_|_|     "],
+  1226:["  ^ _/^\\_ ^  ", "   | o o |   ", "   |  =  |   ", "  /|*****|\\  ", "   |_| |_|   "],
+  1227:[" \\\\  _/^\\_ //", "  \\\\| o o |//", "    |  -  |  ", "   /|+++++|\\ ", "    ~~~~~~~  "],
+  1228:["    _/^\\_ )  ", "   | o o |\\  ", "   |  -  |->>", "  /|+++++|/  ", "   |_| |_|)  "],
+  1229:["  [=======]  ", "  |  _|_  |  ", "  | ( o ) |  ", "  |  /|\\  |  ", "  [=======]  "],
+  1230:[" * _/^^^\\_ * ", "  | O   O |  ", "  |   ^   |  ", " /|+++++++|\\ ", "  |__| |__|  "],
+  1231:["   \\  |  /   ", "  -- (*) --  ", "   /  |  \\   ", "     /|\\     ", "    / | \\    "],
+  1232:["  +---+---+  ", "  | * | * |  ", "  +---+---+  ", "  | * | * |  ", "  +---+---+  "],
+  1233:["    \\ | /    ", "   - .-. -   ", "    ( ^ )    ", "    /| |\\    ", "   ' / \\ '   "],
+  1234:["      |      ", "    \\ | /    ", "  --- O ---  ", "    / | \\    ", "      |      "],
+  1235:["    .---.    ", "   / ~ ~ \\   ", "  |  ( )  |  ", "   \\ ~ ~ /   ", "    '---'    "],
+  1236:["    _____    ", "   | +++ |   ", "   | +O+ |   ", "    \\+++/    ", "     \\_/     "],
+  1237:["    __/)     ", "   /   o\\    ", "  /~~~~ _)>  ", " //|  |  \\\\  ", "   *  *  *   "],
+  1238:["  @@     @@  ", "   @\\___/@   ", "    ( o o )  ", "    /\\_v_/\\  ", "   ~~~~~~~~  "],
+  1239:["     ___     ", "    (o_o)    ", "    /|+|\\    ", "     | |     ", "     d b     "],
 
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
@@ -2548,7 +2594,7 @@ function canPlay(p,cardId){
     if(cd.anyOwner)for(let i=0;i<BN;i++){if(G.board[i].teece&&G.board[i].teece.owner!==p&&equipRoom(G.board[i].teece)&&canTarget(G.board,i,p,'equip'))return true;}
     for(let i=0;i<BN;i++){
       const t=G.board[i].teece;
-      if(t&&t.owner===p&&equipRoom(t)&&(!cd.onlyToken||t.isToken)&&(!cd.onlyPackLeader||isPackLeader(t)))return true;
+      if(t&&t.owner===p&&equipRoom(t)&&(!cd.onlyToken||t.isToken)&&(!cd.onlyPackLeader||isPackLeader(t))&&(!cd.onlyOath||oathOn(t,cd.onlyOath)))return true;
     }
     /* a Pack Leader still in hand will be one when it lands, so it can be plated */
     if(cd.onlyPackLeader&&G.players[p].hand.some(h=>CARDS[h].packLeader))return true;
@@ -5277,6 +5323,61 @@ const CARDS = {
     text:'Select a Teece adjacent to one of your Teece; take control of it. If this leaves your hand any other way, it comes back.'},
  1216:{name:'Tendril Of Gol’God’Oth',type:'teece',token:true,deck:'cult',boss:true,sides:[20,20,20,20],
     text:'Counts as a Boss. Summoned by the Sacrifice. Gol’God’Oth Arrives aimed at it creates a copy of it on every empty panel adjacent to it.'},
+ /* ---- Paladin: 1219-1238, and the Paladin Squire Token 1239 ----
+        Two keywords. Oath (oath:N on the card) is sworn as the Teece is played,
+        to one of three gods in OATHS, and each god pays and breaks its own way;
+        Cleanse is the fx 'cleanse'. A Paladin is a card printed paladin:true or
+        any body that has sworn an Oath. The engine is under "Paladin: Oaths". ---- */
+ 1219:{name:'Oathsworn Knight',type:'teece',sides:[5,5,5,5],paladin:true,oath:1,
+    text:'Oath.'},
+ 1220:{name:'Bastion Paladin',type:'teece',sides:[4,4,4,4],def:2,paladin:true,oath:1,
+    text:'Defence 2. Oath.'},
+ 1221:{name:'Vowkeeper',type:'teece',sides:[3,3,3,3],paladin:true,oath:1,oathFixed:true,
+    text:'Oath. This Oath can’t break.'},
+ 1222:{name:'Inquisitor',type:'teece',sides:[4,4,2,2],paladin:true,oath:1,
+    onPlay:[{fx:'cleanse',equip:true}],
+    text:'Oath. When played: select a Teece; Cleanse it, and if it is an enemy, destroy an equip on it.'},
+ 1223:{name:'Martyr of the Light',type:'teece',sides:[2,7,7,2],paladin:true,oath:1,
+    onDeath:[{fx:'bounce',who:'ally',may:true,anyBoss:true}],
+    text:'Oath. When destroyed: you can return an ally to its owner’s hand.'},
+ 1224:{name:'Oath Novice',type:'teece',sides:[2,2,2,2],paladin:true,oath:1,
+    onDeath:[{fx:'oathExtra'}],
+    text:'Oath. When destroyed: the next Teece you play can swear one additional Oath.'},
+ 1225:{name:'Crusader',type:'teece',sides:[2,9,2,9],paladin:true,oath:1,
+    text:'Oath.'},
+ 1226:{name:'Knight Commander',type:'teece',sides:[6,2,2,6],paladin:true,oath:1,
+    onPlay:[{fx:'token',tok:1239,count:2}],
+    text:'Oath. When played: summon two Paladin Squires, 2/2/2/2 Tokens.'},
+ 1227:{name:'Pegasus Knight',type:'teece',sides:[5,4,3,5],paladin:true,oath:1,kw:['flying'],
+    text:'Oath. Flying.'},
+ 1228:{name:'Templar Archer',type:'teece',sides:[3,5,5,4],paladin:true,oath:1,kw:['ranged'],
+    text:'Oath. Ranged.'},
+ 1229:{name:'Sentinel of Vows',type:'teece',sides:[12,12,12,12],sac:1,paladin:true,onOathBreak:'destroy',
+    text:'Sacrifice a Teece to play. When an Oath is broken: destroy this.'},
+ 1230:{name:'Paragon of the Three',type:'teece',sides:[12,12,12,12],sac:2,paladin:true,oath:3,
+    text:'Sacrifice two Teece to play. Oath. Oath. Oath. (Swear up to three Oaths, each to a different god.)'},
+ /* ---- Paladin magic ---- */
+ 1231:{name:'Holy Light',type:'magic',trump:true,palAi:'holy',cast:[{fx:'holyBless'}],
+    text:'Trump card. Select a Paladin of yours with an active Oath, or bless the next one you play. It gets +3 and Ward (enemy effects can’t select it), and gains Holy Light: once per your turn, Cleanse this Teece and every adjacent Teece, and destroy every enemy battleground or equip on or adjacent to this panel.'},
+ 1232:{name:'Sanctified Grounds',type:'magic',palAi:'sanct',cast:[{fx:'sanctify',n:5}],
+    text:'Select an ally and a 2x2 area of the board it stands in. Those panels glow: your Teece in the glowing area have +5 Defence until a Teece in that area is destroyed.'},
+ 1233:{name:'Glorious Redemption',type:'magic',palAi:'redeem',cast:[{fx:'redeem',n:5}],
+    text:'Select an Oathbroken Paladin of yours: it gets +5, is Cleansed, and swears a new Oath.'},
+ /* ---- Paladin equips: each one shields one god's Oath ---- */
+ 1234:{name:'Light of Solitarius',type:'equip',mod:4,onlyOath:'sol',grants:{oathShield:'sol',shieldTele:true},
+    text:'Equip only to a Paladin sworn to Solitarius. It gets +4. When that Oath would break: destroy this equip instead, and you can teleport the equipped Teece.'},
+ 1235:{name:'Light of Pacificius',type:'equip',mod:0,onlyOath:'pac',grants:{def:5,oathShield:'pac'},
+    text:'Equip only to a Paladin sworn to Pacificius. It has +5 Defence. When that Oath would break: destroy this equip instead.'},
+ 1236:{name:'Light of Protectius',type:'equip',mod:0,onlyOath:'pro',grants:{aura:{who:'ally',where:'adj',n:4},oathShield:'pro'},
+    text:'Equip only to a Paladin sworn to Protectius. Adjacent allies have +4. When that Oath would break: destroy this equip instead.'},
+ /* ---- Paladin battlegrounds: mounts that carry their rider ---- */
+ 1237:{name:'Celestial Steed',type:'ground',gmod:3,gkw:['teleport'],gRideTele:true,gPalOnly:true,
+    text:'A Teece on this battleground has +3 and Teleport. When a Teece on it teleports, this battleground moves with it if there is no battleground there. At the end of each turn, if a non-Paladin is on it, this battleground is destroyed.'},
+ 1238:{name:'Celestial Ram',type:'ground',gdef:3,gRideMove:true,gPalOnly:true,
+    gact:[{name:'Ram',once:'turn',steps:[{fx:'ram',n:-3}]}],
+    text:'A Teece on this battleground has +3 Defence and Ram: once per your turn, select a Teece in the same row or column; stun it, give it -3, and move one space toward it if able. When a Teece on it moves, this battleground moves with it if there is no battleground there. At the end of each turn, if a non-Paladin is on it, this battleground is destroyed.'},
+ 1239:{name:'Paladin Squire',type:'teece',token:true,deck:'paladin',paladin:true,sides:[2,2,2,2],
+    text:'Token. Summoned by the Knight Commander. It counts as a Paladin, but swears no Oath.'},
  /* ---- Basic: the deck for a first game. Every card shows one of the base
         rules on its own -- uneven sides, rotation, Flying, Ranged, Tokens,
         sacrifice, equips, magic, battlegrounds -- and nothing else. ---- */
@@ -5355,7 +5456,7 @@ const CARDS = {
    Both views are cached; newState clears them, because fusion ids are reused. */
 const ID_KEYS={name:1,type:1,sides:1,text:1,flavor:1,def:1,sac:1,sacOK:1,token:1,deck:1,tutorial:1,perkOnly:1,
   boss:1,fusion:1,forms:1,mark:1,runeCard:1,topDeck:1,priest:1,godTitle:1,dwarf:1,warlock:1,patronTitle:1,
-  garbage:1,spider:1,vampire:1,solar:1,madness:1,rat:1,locust:1,pixie:1,zombie:1,army:1,apoc:1,devil:1,mummy:1,horseman:1};
+  garbage:1,spider:1,paladin:1,vampire:1,solar:1,madness:1,rat:1,locust:1,pixie:1,zombie:1,army:1,apoc:1,devil:1,mummy:1,horseman:1};
 let DEF_SIL={},DEF_GRAFT={};
 function DEF(t){
   const c=CARDS[t.cardId];
@@ -6316,7 +6417,7 @@ function makeTeece(cardId,owner,opts){
     undyUsed:(pl0&&pl0.undying&&pl0.undying[cardId])||0,
     grafts:[],noSac:false,infect:null,dieEOT:false,graveMarks:0,stepOwed:0,
     boon:seatBonus(owner)+boon,
-    silenced:false,magicUsedTurn:0,
+    silenced:false,magicUsedTurn:0,oaths:[],
     temp2:[0,0,0,0],temp2Until:0,defTemp2:0,defTemp2Until:0,baseTemp:null,flyExtra:0,immortalUntil:0,stunUntil:0,
     actUsedTurn:{},actUsedGame:{}};
 }
@@ -7115,6 +7216,8 @@ function effSides(b,i,parts){
     if(DEF(t).priest){const wd=[0,0,0,0];wd[wside]=3;addMod(s,wd,'Worship of '+godName(t.owner));}
     if(DEF(t).worshipPlus){const wd=[0,0,0,0];wd[wside]=DEF(t).worshipPlus;addMod(s,wd,DEF(t).name+', on the side '+godName(t.owner)+' empowers');}
   }
+  /* Paladin Oaths, this body's own and a Protectius beside it. */
+  for(const om of oathMods(b,i))addMod(s,om.n,om.label);
   /* The Warlock's Boon: a Priest's god channelled through Fickle Pact pays its
      side, and Nagash takes 3 off every enemy beside a Teece carrying him. */
   {const pm=pactMap(b,i);
@@ -7581,6 +7684,9 @@ function defOf(b,i,raw){
   if(sameTeam(t.owner,0))d+=2*perkN('armour');
   /* The Boon of the Rock God: +3 Defence a copy. */
   {const rn=pactN(b,i,'rock');if(rn)d+=3*rn;}
+  /* The Oath of Pacificius, and the glow of Sanctified Grounds for its caster's side. */
+  d+=5*oathOn(t,'pac');
+  if(b[i].sanct&&sameTeam(t.owner,b[i].sanct.owner))d+=b[i].sanct.n||5;
   const fdf=formOf(t);
   if(fdf&&fdf.def)d+=fdf.def;
   if(isSpiderling(t)&&isWebbed(b,i)){
@@ -7773,6 +7879,8 @@ function actsOf(b,i){
   if(t.drainMove)out.push({key:'kdrainstep',act:DRAIN_STEP_ACT});
   if(t.stepOwed>0)out.push({key:'kowedstep',act:OWED_STEP_ACT});
   if(hasKw(b,i,'teleport'))out.push({key:'ktele',act:TELE_ACT});
+  /* Granted by the Holy Light spell, so silence takes it. */
+  if(t.holyLight&&!t.silenced)out.push({key:'kholy',act:HOLY_ACT});
   if(hasKw(b,i,'bloodlust'))out.push({key:'klust',act:BLOODLUST_ACT});
   if(howlGranted(b,i))out.push({key:'khowl',act:HOWL_ACT});
   /* Fuse is printed as a keyword, and only the card's OWN printing counts: a
@@ -8010,7 +8118,16 @@ function putTeece(b,i,t,live,how){
   }
 }
 function moveT(b,from,to,live){
-  const t=b[from].teece; b[from].teece=null; putTeece(b,to,t,live,'move');
+  const t=b[from].teece; b[from].teece=null;
+  /* The Celestial mounts carry their rider: the Ram wherever it moves, the
+     Steed when it teleports, onto a panel with no battleground of its own. */
+  const rg=b[from].ground;
+  if(rg&&!rg.gid&&t&&!floats(t)&&!isPlane(from)&&!isPlane(to)&&!b[to].ground&&
+     (groundFlag(rg,'gRideMove')||(TELEPORTING&&groundFlag(rg,'gRideTele')))){
+    b[to].ground=rg;b[from].ground=null;
+    if(live&&b===G.board)log(CARDS[rg.cardId].name+' carries '+nm(t)+' to the '+CN[to]+'.');
+  }
+  putTeece(b,to,t,live,'move');
   if(live&&b===G.board)cultTravel(t,from,to);
 }
 /* ============ Mummy: the curse ============
@@ -9918,6 +10035,7 @@ async function FXRUN(st,ctx){
         if(!t||!canTarget(b,i,p))continue;
         if(!st.anyBoss&&isBossCard(t.cardId))continue;
         if(st.notSelf&&ctx.t&&t.uid===ctx.t.uid)continue;
+        if(st.who==='ally'&&!sameTeam(t.owner,p))continue;
         cands.push(i);}
       if(!cands.length){if(r===0)return none('No legal target.');return;}
       const c=await pickCell(cands,'Choose '+(st.anyBoss?'a':'a non-Boss')+' Teece to return to its owner hand'+
@@ -10658,7 +10776,7 @@ async function FXRUN(st,ctx){
     const dst=await chooseCell(p,open,'Teleport '+nm(t)+' to which empty panel?',
       {mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);}});
     if(dst==null||dst==='CANCEL')return;
-    moveT(b,c,dst,true);
+    teleT(b,c,dst,true);
     ctx.last=dst;
     log(nm(t)+' teleports to the '+CN[dst]+'.');
     await anim([dst],'placed',140);
@@ -10713,7 +10831,7 @@ async function FXRUN(st,ctx){
     const dst=await chooseCell(p,open,'Move '+nm(t)+' to any empty '+(st.web?'Web panel':'panel')+', or skip.',
       {skip:true,mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);}});
     if(dst==null||dst==='CANCEL')return;
-    moveT(b,c,dst,true);
+    teleT(b,c,dst,true);
     ctx.last=dst;
     log(nm(t)+(st.web?' runs across the Web to the ':' pulls up its roots and settles at the ')+CN[dst]+'.');
     await anim([dst],'placed',140);
@@ -14033,7 +14151,7 @@ async function FXRUN(st,ctx){
     for(let x=0;x<(st.n||1);x++){
       const pool=[];
       pl.grave.forEach((id,ix)=>{const d=CARDS[id];
-        if(d.type==='equip'&&!d.onlyHand&&!d.onlyToken&&!d.onlySpiderling&&!d.onlyPackLeader&&!d.graveEquip&&!d.runeblade&&!(typeof d.mod==='number'&&d.mod<0))
+        if(d.type==='equip'&&!d.onlyHand&&!d.onlyToken&&!d.onlySpiderling&&!d.onlyPackLeader&&!d.onlyOath&&!d.graveEquip&&!d.runeblade&&!(typeof d.mod==='number'&&d.mod<0))
           pool.push({ix,id});});
       if(!pool.length){if(!x)log('There is no equip card in '+ownOf(p)+' graveyard to call up.');return;}
       /* The computer takes the one that adds most to the body; a player picks. */
@@ -14959,6 +15077,125 @@ async function FXRUN(st,ctx){
     await shootTeece(p,c,{dmg:5,by:ctx.t?nm(ctx.t):null});
     return;}
   /* ---- Cult ---- */
+  /* ---- Paladin ---- */
+  case 'cleanse':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p))cands.push(i);
+    if(!cands.length)return none('There is no Teece to Cleanse.');
+    const c=await pickCell(cands,'Cleanse a Teece: an ally loses every negative effect; an enemy is silenced and loses every bonus'+
+      (st.equip?', and an equip on it is destroyed':'')+'.',(bb,i)=>cleanseSim(bb,i,p,st.equip),false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    ctx.last=c;
+    await cleanseAt(b,c,p,{equip:st.equip});
+    return;}
+  case 'holyBless':{
+    const pl=G.players[p];
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&hasActiveOath(t))cands.push(i);}
+    const later=()=>{pl.holyNext=(pl.holyNext||0)+1;
+      log('Holy Light waits: the next Paladin '+whoIn(p)+' '+vb(p,'plays','play')+' with an active Oath is blessed.');};
+    if(!cands.length){later();return;}
+    const c=await pickCell(cands,'Holy Light: choose a Paladin of yours with an active Oath, or skip to bless the next one you play.',
+      (bb,i)=>{if(bb[i].teece)holyApply(bb[i].teece,false);},true);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null){later();return;}
+    holyApply(b[c].teece,true);
+    await anim([c],'zap');
+    return;}
+  case 'holyLight':{
+    const i=ctx.cell;
+    if(i==null||!b[i].teece)return;
+    const area=[i].concat(ADJ[i]);
+    log(nm(b[i].teece)+' shines with Holy Light.');
+    for(const j of area)if(b[j].teece)await cleanseAt(b,j,p,{area:true});
+    let n=0;
+    for(const j of area){
+      const g=b[j].ground;
+      if(g&&!sameTeam(g.owner,p)){log(CARDS[g.cardId].name+' at the '+CN[j]+' is destroyed.');await clearGroundAt(j,p);n++;if(G.over)return;}
+      const o=b[j].teece;if(!o)continue;
+      for(let x=o.equips.length-1;x>=0;x--){
+        const e=o.equips[x];
+        if(e.rider||sameTeam(e.owner,p))continue;
+        o.equips.splice(x,1);
+        equipCameOff(o,e,true);
+        if(!CARDS[e.cardId].token)toGrave(e.owner,e.cardId);
+        log(CARDS[e.cardId].name+' is burned off '+nm(o)+' and destroyed.');
+        n++;
+      }
+    }
+    if(!n)log('There was no enemy battleground or equip in its light.');
+    return;}
+  case 'sanctify':{
+    const cands=[];
+    for(let i=0;i<GRID;i++){const t=b[i].teece;if(t&&sameTeam(t.owner,p)&&squaresWith(i).length)cands.push(i);}
+    if(!cands.length)return none('There is no ally to sanctify the ground around.');
+    const allies=sq=>sq.filter(j=>b[j].teece&&sameTeam(b[j].teece.owner,p)).length;
+    let sq=null;
+    if(isAIP(p)||!HAS_DOM){
+      for(const i of cands)for(const q of squaresWith(i))if(!sq||allies(q)>allies(sq))sq=q;
+    }else{
+      const c=await pickCell(cands,'Sanctified Grounds: choose an ally. A 2x2 area it stands in will glow.',null,false);
+      if(c==='CANCEL')return 'ABORT';
+      if(c==null)return;
+      const sqs=squaresWith(c);
+      if(sqs.length===1)sq=sqs[0];
+      else{
+        /* Each square named by its corner across from the ally. */
+        const far=sqs.map(q=>q.find(j=>j!==c&&!sameRow(j,c)&&!sameCol(j,c)));
+        const f=await chooseCell(p,far,'Choose the corner of the 2x2 area across from '+nm(b[c].teece)+'.',{});
+        sq=sqs[Math.max(0,far.indexOf(f))];
+      }
+    }
+    sanctLay(b,sq,p,st.n||5);
+    log('The ground glows at the '+sq.map(j=>CN[j]).join(', ')+': '+pposs(p)+' Teece there have +'+(st.n||5)+' Defence until a Teece in it is destroyed.');
+    await anim(sq,'zap');
+    return;}
+  case 'redeem':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&isOathbroken(t)&&canTarget(b,i,p))cands.push(i);}
+    if(!cands.length)return none('There is no Oathbroken Paladin of yours to redeem.');
+    const c=await pickCell(cands,'Glorious Redemption: choose an Oathbroken Paladin of yours.',(bb,i)=>redeemSim(bb,i,p,st.n||5),false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const t=b[c].teece;
+    applyModT(t,st.n||5,'perm');
+    cleanseAlly(t,true);
+    t.oaths=oathsOf(t).filter(x=>!x.broken);
+    log(nm(t)+' is redeemed: '+sgn(st.n||5)+', Cleansed, and no longer Oathbroken.');
+    await anim([c],'zap');
+    const g=await oathChoose(p,c,t,false,'Glorious Redemption: '+nm(t)+' swears a new Oath. To which god?');
+    if(g){swearOath(t,g);log(nm(t)+' swears an Oath to '+OATHS[g].name+': '+OATHS[g].pay+'.');}
+    return;}
+  case 'oathExtra':{
+    const q=ctx.deadOwner!=null?ctx.deadOwner:p;
+    G.players[q].oathExtra=(G.players[q].oathExtra||0)+1;
+    log('The next Teece '+whoIn(q)+' '+vb(q,'plays','play')+' can swear one additional Oath.');
+    return;}
+  case 'ram':{
+    const i=ctx.cell;
+    if(i==null||!b[i].teece)return;
+    const cands=[];
+    for(let j=0;j<GRID;j++)if(j!==i&&b[j].teece&&(sameRow(i,j)||sameCol(i,j))&&canTarget(b,j,p))cands.push(j);
+    if(!cands.length)return none('Nothing stands in its row or column.');
+    const c=await pickCell(cands,'Ram: choose a Teece in its row or column. It is stunned and gets '+(st.n||-3)+', and the rammer moves a space toward it.',
+      (bb,j)=>ramSim(bb,i,j,p,st.n||-3),false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const me=b[i].teece,t=b[c].teece;
+    if(tapeSave(b,c,p)){await anim([c],'zap');return;}
+    applyStun(b,c,true,p);
+    applyModT(t,st.n||-3,'perm');
+    log(nm(me)+' rams '+nm(t)+': '+(st.n||-3)+'.');
+    if(!sameTeam(t.owner,p))noteTargeted(p);
+    await anim([c],'zap');
+    const dst=ramStep(b,i,c);
+    if(dst>=0&&dst!==c&&b[i].teece===me&&openAt(b,dst)&&!hasKw(b,i,'immovable')){
+      moveT(b,i,dst,true);
+      log(nm(me)+' charges forward to the '+CN[dst]+'.');
+      await fireMove(i,dst,p);
+    }
+    return;}
   case 'traverse':case 'pentaTele':{
     const i=ctx.cell,t=b[i]&&b[i].teece;
     if(!t)return;
@@ -14972,7 +15209,7 @@ async function FXRUN(st,ctx){
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     log(nm(t)+(st.fx==='traverse'?' traverses the Pentagram to the ':' teleports to the ')+CN[c]+'.');
-    moveT(b,i,c,true);
+    teleT(b,i,c,true);
     if(st.fx==='traverse')cultOnTraverse(t);
     await anim([c],'zap');
     await fireMove(i,c,p);
@@ -15082,7 +15319,7 @@ async function FXRUN(st,ctx){
       (bb,j)=>{if(bb[i].teece)moveT(bb,i,j,false);},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
-    moveT(b,i,c,true);
+    if(st.range==='tele'||st.range==='lust')teleT(b,i,c,true);else moveT(b,i,c,true);
     log(nm(t)+' moves to the '+CN[c]+'.');
     await fireMove(i,c,p);
     return;}
@@ -15652,6 +15889,7 @@ async function processDeath(d){
   G.eventFlag=true;
   log(nm(t)+' is '+(d.cost?'sacrificed':'destroyed')+'.');
   if(t.cardId==='TD'&&!d.cost)noteDrone(b,true,'destroyed');
+  if(!d.cost&&b[cell].sanct)sanctFade(b,cell);
   if(!d.cost){
     for(let i=0;i<BN;i++){
       const w=b[i].teece;
@@ -15723,6 +15961,18 @@ async function processDeath(d){
     }
   }
   if(!d.cost)sharpTeethBite(t,d.killers);
+  /* Oaths this death breaks: a Protectius beside a fallen ally, and a
+     Pacificius that struck the blow on an enemy. */
+  {const hits=[];
+   for(const j of ADJ[cell]){
+     const w=b[j].teece;
+     if(w&&sameTeam(w.owner,t.owner)&&oathOn(w,'pro'))hits.push({w,g:'pro',why:nm(t)+' fell beside it'});
+   }
+   if(!d.cost)for(const kuid of (d.killers||[])){
+     let k=null;for(let j=0;j<BN;j++){const w=b[j].teece;if(w&&w.uid===kuid){k=w;break;}}
+     if(k&&!sameTeam(k.owner,t.owner)&&oathOn(k,'pac'))hits.push({w:k,g:'pac',why:'it destroyed '+nm(t)});
+   }
+   for(const h of hits){await oathBreak(h.w,h.g,h.why);if(G.over)return;}}
   /* Divine Retribution answers the killer; Hallowed Ground answers the fall. */
   if(!d.cost&&d.killers&&d.killers.length){await retributionReact(t,d.killers);if(G.over)return;}
   if(!d.cost&&!floats(t))hallowConjure(cell,'the fall of '+nm(t));
@@ -16131,6 +16381,7 @@ async function resolveCombat(){
     await drainFx();
     channelSettle();
     cultSettle();
+    await oathSweep();
     if(stale(ep)||G.over)return;
     let deaths=scanDeaths(G.board);
     if(!deaths.length)break;
@@ -16971,6 +17222,8 @@ async function playTeece(p,handIdx){
   /* A Warlock offers its patron, then its when-played Boons fire. */
   if(DEF(t).warlock){await warlockArrive(p,spot,t);if(G.over)return true;}
   else if(b[spot].teece===t&&pactMap(b,spot)){await pactArrive(p,t);if(G.over)return true;}
+  /* Oaths are sworn before anything the card does when played. */
+  if(b[spot].teece===t){await oathArrive(p,spot,t);if(G.over)return true;}
   if(d.onPlay)for(let k=0;k<dblFx;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked,fromHand:!G.viaEffect,viaEffect:!!G.viaEffect});
   if(b[spot].teece===t)await groundArrive(spot);
   for(let i=0;i<BN;i++){
@@ -17084,19 +17337,21 @@ async function playEquip(p,handIdx){
     if(ed.onlyToken&&!t.isToken)continue;
     if(ed.onlyPackLeader&&!isPackLeader(t))continue;
     if(ed.onlySpiderling&&!isSpiderling(t))continue;
+    if(ed.onlyOath&&!oathOn(t,ed.onlyOath))continue;
     cands.push(i);
   }
   /* Teece still in hand are targets too. Not for a Drone-only equip: no Drone
      is ever a card in hand, so there is nothing there for it to bolt onto. */
   const hands=[];
-  if(!ed.onlyToken&&!ed.onlySpiderling)for(let h=0;h<pl.hand.length;h++){
+  /* A Light needs an Oath already sworn, which no card in hand has. */
+  if(!ed.onlyToken&&!ed.onlySpiderling&&!ed.onlyOath)for(let h=0;h<pl.hand.length;h++){
     if(h===handIdx)continue;
     if(CARDS[pl.hand[h]].type==='teece'&&plateRoom(pl.hand[h],plateOf(p,h))&&(!ed.onlyPackLeader||CARDS[pl.hand[h]].packLeader))hands.push(h);
   }
   /* The Runeblade can be set in a Runestone instead of into a hand. */
   const sheaths=ed.runeblade?sheathSpots(p):[];
   if(!cands.length&&!hands.length&&!sheaths.length){toast(ed.onlyHand?'No Teece in your hand to equip.':ed.onlySpiderling?'No Spiderling to equip.':
-    ed.onlyToken?'No Token to equip.':ed.onlyPackLeader?'No Pack Leader to equip, on the board or in hand.':'No Teece to equip, on the board or in hand.');return false;}
+    ed.onlyToken?'No Token to equip.':ed.onlyOath?'No Paladin of yours is sworn to '+OATHS[ed.onlyOath].name+'.':ed.onlyPackLeader?'No Pack Leader to equip, on the board or in hand.':'No Teece to equip, on the board or in hand.');return false;}
   const targets=cands.concat(sheaths.filter(i=>cands.indexOf(i)<0));
   const sheathe=(bb,i)=>{const g=bb[i].ground;if(g)bb[i].ground=Object.assign({},g,{sheath:(g.sheath||[]).concat([{cardId:id,owner:p}])});};
   const c=await chooseCell(p,targets,'Choose a Teece for '+CARDS[id].name+(ed.anyOwner?' \u2014 either side\u2019s':'')+
@@ -17366,7 +17621,9 @@ async function playGround(p,handIdx){
   }
   if(!cands.length){toast('No room for it.');return false;}
   const c=await chooseCell(p,cands,'Choose where '+d.name+' goes.',
-    {cancel:true,mut:(bb,i)=>{for(const j of groundCells(i,shape))bb[j].ground=Object.assign({cardId:id,owner:p},gmode||{});},
+    {cancel:true,mut:(bb,i)=>{for(const j of groundCells(i,shape)){bb[j].ground=Object.assign({cardId:id,owner:p},gmode||{});
+       /* A Celestial mount under a non-Paladin is gone by the end of the turn. */
+       const o=bb[j].teece;if(d.gPalOnly&&o&&!isPaladin(o)&&!floats(o))bb[j].ground=null;}},
      foot:i=>groundCells(i,shape)});
   if(c==null||c==='CANCEL')return false;
   handTake(p,handIdx);
@@ -17862,6 +18119,15 @@ async function endTurn(){
       log(gd.name+' fields a '+CARDS[et].name+' at the '+CN[i]+'.');
     }
   }
+  /* A Celestial mount will not serve anything that is not a Paladin: with one
+     standing on it at the end of a turn, the mount is gone. */
+  for(let i=0;i<BN;i++){
+    const g=G.board[i].ground,t=G.board[i].teece;
+    if(!g||!t||floats(t)||!groundFlag(g,'gPalOnly')||isPaladin(t))continue;
+    log(CARDS[g.cardId].name+' will not bear '+nm(t)+', which is no Paladin: the battleground is destroyed.');
+    await clearGroundAt(i,null);
+    if(G.over)return;
+  }
   /* A Vampire that takes a little from everyone, every turn. */
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
@@ -18356,6 +18622,7 @@ function cloneBoard(b){
       baseTemp:c.teece.baseTemp?c.teece.baseTemp.slice():null,flyExtra:c.teece.flyExtra||0,
       immortalUntil:c.teece.immortalUntil||0,stunUntil:c.teece.stunUntil||0,
       animGround:c.teece.animGround?Object.assign({},c.teece.animGround):null,
+      oaths:(c.teece.oaths||[]).map(o=>Object.assign({},o)),
       actUsedTurn:Object.assign({},c.teece.actUsedTurn),actUsedGame:Object.assign({},c.teece.actUsedGame)}):null,
     /* the Graveyard's roll of interred cards is an array: copy it, or a
        simulated board and the real one share one list */
@@ -18369,6 +18636,7 @@ function cloneBoard(b){
     mcurse:c.mcurse?Object.assign({},c.mcurse):null,
     prime:c.prime?Object.assign({},c.prime):null,
     waymark:c.waymark?Object.assign({},c.waymark):null,
+    sanct:c.sanct?Object.assign({},c.sanct):null,
     defMark:c.defMark?Object.assign({},c.defMark):null,
     seed:c.seed?Object.assign({},c.seed):null
   }));
@@ -18563,6 +18831,9 @@ function boardValue(b,p){
 /* approximate on-play triggers when simming a placement */
 function simOnPlay(b,cell,id,p){
   const d=CARDS[id],t=b[cell].teece;
+  /* The Oaths it would swear on this panel. */
+  {const n=(d.oath||0)+((G.players[p]&&G.players[p].oathExtra)||0);
+   for(let k=0;k<n&&t;k++){const g=aiOathPick(b,cell,t,p,freeGods(t),k>=(d.oath===3?1:(d.oath||0)));if(!g)break;swearOath(t,g);}}
   for(const st of d.onPlay||[]){
     if(st.fx==='mod'){
       if(st.who==='self'){applyModT(t,st.n,st.dur);continue;}
@@ -18684,6 +18955,7 @@ function aiPlanFor(id){
       if(d.onlyToken&&!t.isToken)continue;
       if(d.onlyPackLeader&&!isPackLeader(t))continue;
       if(d.onlySpiderling&&!isSpiderling(t))continue;
+      if(d.onlyOath&&!oathOn(t,d.onlyOath))continue;
       cands.push(i);
     }
     if(!cands.length)return null;
@@ -18728,6 +19000,8 @@ function aiPlanFor(id){
     if(eg.onEquip&&eg.onEquip.some(x=>x.fx==='shieldFor'))ebonus+=0.9;
     /* The Pentacle Amulet: another walk down a line every turn. */
     if(eg.traverseExtra)ebonus+=cultSeat(p)&&G.players[p].cult.stage===1?1.2:0.2;
+    /* A Light is a broken Oath that never happens, which no board shows yet. */
+    if(eg.oathShield)ebonus+=0.9;
     return {thr:0.8,bonus:ebonus,cands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
   }
   if(d.type==='ground'){
@@ -18793,6 +19067,15 @@ function aiPlanFor(id){
       if(d.gCultTele)bonus+=cultSeat(p)&&G.players[p].cult.stage===1?1.4:0.3;
       if(d.gCultGuard)bonus+=pts.some(i=>onActiveLine(i))?1.2:0.2;
     }
+    /* The Celestial mounts pay a Paladin and are destroyed under anything else
+       at the end of the turn, so they go under a Paladin of ours or nowhere. */
+    if(d.gPalOnly){
+      const ok=cands.filter(i=>{const o=b[i].teece;return o&&o.owner===p&&isPaladin(o);});
+      if(!ok.length)return null;
+      cands.length=0;cands.push(...ok);
+      /* The Ram's Defence and its act are both invisible to the board score. */
+      bonus+=0.6+(d.gact?0.8:0)+0.3*(d.gdef||0);
+    }
     return {thr:0.8,bonus,cands,mut:(bb,i)=>{
       if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
       else bb[i].ground={cardId:id,owner:p};
@@ -18809,6 +19092,7 @@ function aiPlanFor(id){
   if(magicLocked(p))return null;
   if(d.wlAi)return aiWarlockPlan(d);
   if(d.cultAi)return aiCultPlan(d);
+  if(d.palAi)return aiPaladinPlan(d);
   if(d.gunAi)return aiGunMagicPlan(d);
   if(d.fuAi)return aiFusionMagicPlan(d);
   /* Past the price gate. A spell that asks the whole price before it takes any
@@ -19558,6 +19842,20 @@ function aiActMuts(cell,ent){
     }
   }else if(st.fx==='mWrap'){
     for(const o of mWrapOptions(b,cell,p))muts.push(bb=>{mWrapSim(bb,cell,o,p);});
+  }else if(st.fx==='ram'){
+    for(let j=0;j<GRID;j++){
+      const o=b[j].teece;
+      if(j===cell||!o||sameTeam(o.owner,p)||!(sameRow(cell,j)||sameCol(cell,j))||!canTarget(b,j,p))continue;
+      muts.push(bb=>ramSim(bb,cell,j,p,st.n||-3));
+    }
+  }else if(st.fx==='holyLight'){
+    muts.push(bb=>{
+      for(const j of [cell].concat(ADJ[cell])){
+        if(bb[j].teece)cleanseSim(bb,j,p,false);
+        if(bb[j].ground&&!sameTeam(bb[j].ground.owner,p))bb[j].ground=null;
+        const o=bb[j].teece;if(o)o.equips=o.equips.filter(e=>e.rider||sameTeam(e.owner,p));
+      }
+    });
   }else if(st.fx==='mCurseEither'||st.fx==='mCurseAny'){
     for(let i=0;i<BN;i++){
       if(b[i].razed)continue;
@@ -20212,6 +20510,7 @@ function renderBoard(){
       cell.innerHTML+='<div class="fireMark" title="'+escHtml(fireText(G.board[i].fire))+'">\u{1F525}-'+FIRE_N+'</div>';
     }
     if(G.board[i].razed)cell.classList.add('razed');
+    if(G.board[i].sanct)cell.classList.add('sanct');
     const t=G.board[i].teece;
     if(t){
       const s=effSides(G.board,i),kws=kwOf(G.board,i),aul=actsOf(G.board,i);
@@ -20253,6 +20552,9 @@ function renderBoard(){
          it, and a chip under the board is three feet from the panel. */
       const stT=stunText(G.board,i);
       if(stT)badges.push('<span class="dfn stun" title="'+escHtml(stT)+'">\u{1F4A5}</span>');
+      /* Each Oath: the god's initial, struck through once it has broken. */
+      for(const o of oathsOf(t))badges.push('<span class="dfn oath'+(o.broken?' broke':'')+'" title="'+
+        (o.broken?'Oathbroken ('+OATHS[o.god].name+'): -2':'Oath of '+OATHS[o.god].name+(t.silenced?' (silenced)':''))+'">\u269C'+OATHS[o.god].name.charAt(0)+'</span>');
       /* Cursed by a Mummy: the one fact every Mummy card reads. */
       if(t.mcursed)badges.push('<span class="dfn mcursed" title="Cursed. Cursed again, it gets -1 instead.">\u2625</span>');
       /* Long names step down a size rather than being cut off: the panel is the
@@ -20392,6 +20694,7 @@ function panelHtml(i){
   if(c.curseP)h+='<div class="dt">This panel is cursed. The next enemy of '+pposs(c.curseP.owner)+' to arrive here gets '+sgn(c.curseP.n)+'.</div>';
   if(c.mcurse)h+='<div class="dt">A Mummy\u2019s curse lies on this panel. The next non-Mummy Teece to stand here takes it.</div>';
   if(c.razed)h+='<div class="dt">Razed. No Teece may be played or moved onto this panel.</div>';
+  if(c.sanct)h+='<div class="dt" style="color:var(--gold)">Sanctified Grounds glow here: '+pposs(c.sanct.owner)+' Teece in the glowing area have +'+(c.sanct.n||5)+' Defence until a Teece in it is destroyed.</div>';
   if(c.waymark)h+='<div class="dt">'+pposs(c.waymark.owner).replace(/^./,x=>x.toUpperCase())+' Waymark. The next ally of '+pname(c.waymark.owner)+' to arrive here gets +'+c.waymark.n+'; the next enemy gets -'+c.waymark.n+'.</div>';
   if(c.prime)h+='<div class="dt">This panel is primed. The next Teece to arrive here gets '+sgn(c.prime.n)+'.</div>';
   if(c.seed)h+='<div class="dt">'+pname(c.seed.owner)+' has a seed planted here, '+c.seed.turns+' turn'+(c.seed.turns===1?'':'s')+
@@ -20431,6 +20734,14 @@ function showDetail(i){
       sidesLine(t.base.map(v=>Math.max(0,v)+next))+(next?' ('+sgn(next)+')':'')+
       ((u.y&&un>1)?', and each one after that is '+sgn(u.y)+' more.':'.')+'</div>';
   }
+  for(const o of oathsOf(t)){
+    const od=OATHS[o.god];
+    html+='<div class="dt" style="color:'+(o.broken?'var(--bad)':'var(--gold)')+'">\u269C '+(o.broken
+      ?kwSpan('oathbroken','Oathbroken')+' ('+kwSpan(o.god==='sol'?'solitarius':o.god==='pro'?'protectius':'pacificius',od.name)+'): -2.'
+      :'Sworn to '+kwSpan(o.god==='sol'?'solitarius':o.god==='pro'?'protectius':'pacificius',od.name)+': '+od.pay+'. '+
+        (t.silenced?'Silenced, so it pays nothing.':oathFixed(t)?'It can\u2019t break.':'Breaks when '+od.breaks+'.'))+'</div>';
+  }
+  if(t.holyLight)html+='<div class="dt" style="color:var(--gold)">\u2600 Blessed by '+kwSpan('holylight','Holy Light')+'.</div>';
   const pmk=panelMark(G.board,i);
   if(pmk)html+='<div class="dt" style="color:var(--gold)">Counts as '+
     (pmk.m==='XO'?'an X and an O':(pmk.m==='X'?'an X':'an O'))+' for '+teamName(pmk.team)+'.</div>';
@@ -20909,6 +21220,10 @@ function statusesFor(p){
       'The next '+dwhat+(pl.nextDefAny?' to reach your side \u2014 played, copied or summoned \u2014 ':' you play ')+(dn>1?'each arrive':'arrives')+' with +'+pl.nextDefBonus+' Defence.'+
       (pl.nextDefKind?' Anything else walks past without spending a charge.':''));
   }
+  if(pl.oathExtra)push('oathextra','good','Next Teece: +1 Oath',
+    'The next Teece you play can swear one additional Oath, from the Oath Novice.');
+  if(pl.holyNext)push('holynext','good','Holy Light waits',
+    'The next Paladin you play with an active Oath gets +3 and Ward, and gains Holy Light.');
   if(pl.nextSides)push('nextsides','good','Next Teece carries the altar',
     'The next Teece you play arrives with '+sidesLine(pl.nextSides)+', half of what was sacrificed to the Curse of Sacrifice.');
   if(pl.nextMod)push('nextmod',pl.nextMod<0?'bad':'good','Next Teece '+sgn(pl.nextMod),
@@ -21730,6 +22045,359 @@ const GODS=[{name:'Topus',side:0},{name:'Rightorious',side:1},{name:'Bottomor',s
 const SMITE_CARD={1:1122,2:1123,3:1124,4:1125};
 const SMITE_TEMP={1:-1,2:-5};
 const smiteLvl=id=>(CARDS[id]&&CARDS[id].smiteLvl)||0;
+/* ============ Paladin: Oaths ============
+   An Oath is sworn as a Teece is played (oathArrive, from playTeece) to one of
+   the three gods below, and lives on the body as t.oaths, a list of
+   {god,broken}. A body can hold one Oath to each god and no more. While an
+   Oath holds it pays: Solitarius +4 in effSides, Protectius +4 to every
+   adjacent ally in effSides, Pacificius +5 Defence in defOf. Silence negates
+   the Oath -- no payment and no breaking -- but an Oath already broken keeps
+   its -2, because Oathbroken is the Paladin's own state rather than an effect
+   anybody laid on it, and Cleanse does not lift it either.
+
+   Each god breaks its own way, and all three meet in oathBreak:
+   - Solitarius when the Paladin BECOMES adjacent to an ally. oathSweep, run in
+     resolveCombat, watches the transition with t.solNear, so a Light of
+     Solitarius that took the break is not asked to take it again every scan.
+     effSides reads the break that is about to happen (solPending), so a board
+     the computer simulates sees what laying a Teece beside it costs.
+   - Protectius when an adjacent ally dies, and Pacificius when the Paladin
+     destroys an enemy, both from processDeath.
+   A Light equip of that god is destroyed instead, and a Vowkeeper's Oath does
+   not break at all. A Sentinel of Vows is destroyed by any Oath that does. */
+const OATHS={
+  sol:{name:'Solitarius',pay:'+4',breaks:'it becomes adjacent to one of its allies'},
+  pro:{name:'Protectius',pay:'adjacent allies have +4',breaks:'an adjacent ally dies'},
+  pac:{name:'Pacificius',pay:'+5 Defence',breaks:'it destroys an enemy'}};
+const OATH_KEYS=['sol','pro','pac'];
+const oathsOf=t=>(t&&t.oaths)||[];
+/* How many unbroken Oaths to this god are actually paying: none while silenced. */
+function oathOn(t,g){
+  if(!t||t.silenced)return 0;
+  let n=0;for(const o of oathsOf(t))if(o.god===g&&!o.broken)n++;
+  return n;
+}
+const hasActiveOath=t=>!!t&&!t.silenced&&oathsOf(t).some(o=>!o.broken);
+const brokenOaths=t=>oathsOf(t).filter(o=>o.broken).length;
+const isOathbroken=t=>brokenOaths(t)>0;
+/* Printed on the card (silence keeps it: paladin is in ID_KEYS), or sworn. */
+const isPaladin=t=>!!t&&(!!(CARDS[t.cardId]&&CARDS[t.cardId].paladin)||oathsOf(t).length>0);
+const oathFixed=t=>!!(t&&DEF(t).oathFixed);
+/* The gods this body may still swear to: any it holds no unbroken Oath to. */
+const freeGods=t=>OATH_KEYS.filter(g=>!oathsOf(t).some(o=>o.god===g&&!o.broken));
+function oathShieldAt(t,g){
+  return t?t.equips.findIndex(e=>{const eg=eqG(e);return eg&&eg.oathShield===g;}):-1;
+}
+function swearOath(t,g){
+  t.oaths=oathsOf(t).concat([{god:g,broken:false}]);
+  if(g==='sol')t.solNear=false;
+}
+function solTouching(b,i){
+  const t=b[i]&&b[i].teece;if(!t)return false;
+  for(let j=0;j<BN;j++){
+    if(j===i)continue;
+    const o=b[j].teece;
+    if(o&&sameTeam(o.owner,t.owner)&&adjAlly(b,i,j))return true;
+  }
+  return false;
+}
+/* A Solitarius Oath an ally has just stepped up to: broken as soon as the
+   sweep sees it, so every number read before then says so already. */
+function solPending(b,i){
+  const t=b[i].teece;
+  return !!(oathOn(t,'sol')&&!oathFixed(t)&&!t.solNear&&oathShieldAt(t,'sol')<0&&solTouching(b,i));
+}
+/* What the Oaths add to the numbers at i, for effSides. */
+function oathMods(b,i){
+  const t=b[i].teece,out=[];
+  if(!t)return out;
+  const sol=oathOn(t,'sol');
+  if(sol){
+    if(solPending(b,i))out.push({n:-2*sol,label:'Oathbroken (Solitarius): an ally stands beside it'});
+    else out.push({n:4*sol,label:'Oath of Solitarius'});
+  }
+  const nb=brokenOaths(t);
+  if(nb)out.push({n:-2*nb,label:'Oathbroken'+(nb>1?' ×'+nb:'')});
+  for(let j=0;j<BN;j++){
+    if(j===i)continue;
+    const o=b[j].teece;if(!o)continue;
+    const n=oathOn(o,'pro');
+    if(n&&sameTeam(o.owner,t.owner)&&adjAlly(b,j,i))out.push({n:4*n,label:'Oath of Protectius, from '+nm(o)+' at the '+CN[j]});
+  }
+  return out;
+}
+/* The computer's Oath: weighed off the panel it is landing on. */
+function aiOathPick(b,cell,t,p,free,optional){
+  if(!free.length)return null;
+  const fixed=oathFixed(t);
+  let adjA=0,open=0;
+  for(const j of ADJ[cell]){
+    const o=b[j].teece;
+    if(o&&o.uid!==t.uid&&sameTeam(o.owner,p))adjA++;
+    else if(!o&&openAt(b,j))open++;
+  }
+  const hasSol=oathOn(t,'sol')>0,hasPro=oathOn(t,'pro')>0;
+  const score={
+    sol:(!fixed&&adjA>0)?-5:4.5-(fixed?0:0.6*open)-(hasPro&&!fixed?2:0),
+    pro:4*adjA+(open?0.8:0)-(hasSol&&!fixed?3:0),
+    pac:(kwOf(b,cell).indexOf('ranged')>=0?2.2:3.2)};
+  let best=null,bs=-1e9;
+  for(const g of free)if(score[g]>bs){bs=score[g];best=g;}
+  if(optional&&bs<1)return null;
+  return best;
+}
+/* One Oath, asked of whoever controls the Teece. Returns the god, or null. */
+async function oathChoose(p,cell,t,optional,msg){
+  const free=freeGods(t);
+  if(!free.length)return null;
+  if(isAIP(p)||!HAS_DOM)return aiOathPick(G.board,cell,t,p,free,optional);
+  const fixed=oathFixed(t),near=solTouching(G.board,cell);
+  const opts=free.map(g=>({v:g,lbl:OATHS[g].name+': '+OATHS[g].pay+'. '+
+    (fixed?'This Oath can’t break.':'Breaks when '+OATHS[g].breaks+'.'+
+      (g==='sol'&&near?' An ally is beside it now, so it would break at once.':''))}));
+  if(optional)opts.push({v:'none',lbl:'Swear no more Oaths'});
+  const g=await chooseOption(p,opts,msg);
+  return OATHS[g]?g:null;
+}
+async function oathArrive(p,cell,t){
+  const pl=G.players[p],d=CARDS[t.cardId];
+  const printed=d.oath||0,extra=pl.oathExtra||0;
+  if(extra){pl.oathExtra=0;}
+  const n=printed+extra;
+  if(n>0){
+    /* The Paragon swears "up to three", and an Oath Novice's gift is "can":
+       beyond the first Oath a card prints, every one is a choice. */
+    const must=printed===3?1:printed;
+    for(let k=0;k<n;k++){
+      if(G.board[cell].teece!==t)break;
+      const g=await oathChoose(p,cell,t,k>=must,
+        nm(t)+' swears an Oath'+(n>1?' ('+(k+1)+' of '+n+')':'')+'. To which god?');
+      if(!g)break;
+      swearOath(t,g);
+      log(nm(t)+' swears an Oath to '+OATHS[g].name+': '+OATHS[g].pay+'.'+(k>=printed?' (The Oath Novice’s gift.)':''));
+    }
+  }
+  if(pl.holyNext>0&&G.board[cell].teece===t&&hasActiveOath(t)){
+    pl.holyNext--;
+    holyApply(t,true);
+  }
+}
+async function oathBreak(t,g,why){
+  const b=G.board,i=b.findIndex(c=>c.teece===t);
+  if(i<0||t.silenced)return;
+  const o=oathsOf(t).find(x=>x.god===g&&!x.broken);
+  if(!o)return;
+  if(oathFixed(t)){log(nm(t)+'’s Oath of '+OATHS[g].name+' holds: it can’t break.');return;}
+  const ix=oathShieldAt(t,g);
+  if(ix>=0){
+    const e=t.equips.splice(ix,1)[0];
+    equipCameOff(t,e,true);
+    toGrave(e.owner,e.cardId);
+    log(nm(t)+'’s Oath of '+OATHS[g].name+' would break ('+why+'). '+CARDS[e.cardId].name+' is destroyed instead, and the Oath holds.');
+    await anim([i],'zap');
+    if((eqG(e)||{}).shieldTele&&b[i].teece===t&&!hasKw(b,i,'immovable')){
+      const open=[];for(let j=0;j<BN;j++)if(j!==i&&openAt(b,j))open.push(j);
+      if(open.length){
+        const c=await chooseCell(t.owner,open,'Light of Solitarius: teleport '+nm(t)+' to an empty panel, or skip.',
+          {skip:true,mut:(bb,j)=>{if(bb[i].teece)moveT(bb,i,j,false);}});
+        if(c!=null&&c!=='CANCEL'&&b[i].teece===t&&openAt(b,c)){
+          teleT(b,i,c,true);
+          log(nm(t)+' teleports to the '+CN[c]+'.');
+          await anim([c],'placed',140);
+          await fireMove(i,c,t.owner);
+        }
+      }
+    }
+    return;
+  }
+  o.broken=true;
+  log(nm(t)+' breaks its Oath of '+OATHS[g].name+' ('+why+') and is Oathbroken: it loses the Oath’s bonus and gets -2.');
+  await anim([i],'zap');
+  /* "When an Oath is broken: destroy this." Any Oath, either side's. */
+  for(let j=0;j<BN;j++){
+    const w=b[j].teece;
+    if(!w||w.silenced||DEF(w).onOathBreak!=='destroy')continue;
+    log(nm(w)+' answers the broken Oath: it is destroyed.');
+    await anim([j],'dying',190);
+    await processDeath({cell:j,t:w,killers:[]});
+    if(G.over)return;
+  }
+}
+/* Solitarius breaks on stepping up to an ally: the transition, not the state. */
+async function oathSweep(){
+  for(let guard=0;guard<20&&G&&!G.over;guard++){
+    let hit=null;
+    const b=G.board;
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;
+      if(!t||!oathOn(t,'sol')||oathFixed(t))continue;
+      const near=solTouching(b,i);
+      if(!near){t.solNear=false;continue;}
+      if(t.solNear)continue;
+      t.solNear=true;
+      hit=t;break;
+    }
+    if(!hit)return;
+    await oathBreak(hit,'sol','an ally stands beside it');
+  }
+}
+/* ---- Cleanse ----
+   An ally loses every negative effect, an enemy is silenced and loses every
+   bonus to its numbers. Both work on any board, so the computer can weigh a
+   Cleanse on a clone. Move curses are a list on the game rather than a mark on
+   the body, so they are lifted on the live board only. */
+function cleanseAlly(t,live){
+  let n=0;
+  const flag=(k,v)=>{if(t[k]){t[k]=v;n++;}};
+  flag('silenced',false);flag('stunUntil',0);flag('mcursed',false);flag('blinded',false);
+  flag('harmless',false);flag('infect',null);flag('dieEOT',false);flag('defGone',false);flag('headshot',null);
+  for(const key of ['perm','temp','temp2'])if(t[key])for(let k=0;k<4;k++)if(t[key][k]<0){t[key][k]=0;n++;}
+  if((t.defPerm||0)<0){t.defPerm=0;n++;}
+  if((t.defTemp2||0)<0){t.defTemp2=0;n++;}
+  if(t.baseTemp&&t.baseTemp.some((v,k)=>v<t.base[k])){t.baseTemp=null;n++;}
+  if(live&&G.curses){
+    const before=G.curses.length;
+    G.curses=G.curses.filter(c=>!(c.cardId===t.cardId&&c.owner===t.baseOwner));
+    n+=before-G.curses.length;
+  }
+  return n;
+}
+function cleanseEnemy(t,live){
+  const keep=holdStats(t);
+  t.silenced=true;
+  for(const key of ['perm','temp','temp2'])if(t[key])for(let k=0;k<4;k++)if(t[key][k]>0)t[key][k]=0;
+  if((t.defPerm||0)>0)t.defPerm=0;
+  if((t.defTemp2||0)>0)t.defTemp2=0;
+  keep(live);
+}
+async function cleanseAt(b,c,p,opt){
+  const t=b[c].teece;if(!t)return;
+  opt=opt||{};
+  if(sameTeam(t.owner,p)){
+    const n=cleanseAlly(t,true);
+    log(nm(t)+' is Cleansed: '+(n?'every negative effect on it is lifted.':'there was nothing on it to lift.'));
+    await anim([c],'zap');
+    return;
+  }
+  if(!opt.area&&(wardMagic(b,c,p)||tapeSave(b,c,p))){await anim([c],'zap');return;}
+  cleanseEnemy(t,true);
+  log(nm(t)+' is Cleansed: it is silenced and loses every bonus to its numbers.');
+  noteTargeted(p);
+  if(opt.equip){
+    const gear=t.equips.filter(e=>!e.rider);
+    if(gear.length){
+      let e=gear[0];
+      if(gear.length>1){
+        if(isAIP(p)||!HAS_DOM){
+          const val=x=>{const m=CARDS[x.cardId].mod,g=eqG(x)||{};return (typeof m==='number'?m:0)+(g.def||0)+(g.aura?4:0)+(g.kw?2:0);};
+          e=gear.reduce((a,x)=>val(x)>val(a)?x:a,gear[0]);
+        }else{
+          const v=await chooseOption(p,gear.map((x,y)=>({v:String(y),lbl:eqLabel(x),cid:x.cardId})),'Destroy which equip on '+nm(t)+'?');
+          e=gear[parseInt(v,10)]||gear[0];
+        }
+      }
+      t.equips.splice(t.equips.indexOf(e),1);
+      equipCameOff(t,e,true);
+      if(!CARDS[e.cardId].token)toGrave(e.owner,e.cardId);
+      log(CARDS[e.cardId].name+' is torn off '+nm(t)+' and destroyed.');
+    }
+  }
+  await anim([c],'zap');
+}
+/* Cleanse as the computer sees it: the same change, on a clone. */
+function cleanseSim(bb,i,p,equip){
+  const o=bb[i].teece;if(!o)return;
+  if(sameTeam(o.owner,p)){cleanseAlly(o,false);return;}
+  cleanseEnemy(o,false);
+  if(equip&&o.equips.length)o.equips=o.equips.slice(1);
+}
+const HOLY_ACT={name:'Holy Light',once:'turn',steps:[{fx:'holyLight'}]};
+function holyApply(t,live){
+  applyModT(t,3,'perm');
+  if((t.kwPerm||[]).indexOf('ward')<0)t.kwPerm=(t.kwPerm||[]).concat(['ward']);
+  t.holyLight=true;
+  if(live)log(nm(t)+' is bathed in Holy Light: +3 and Ward, and it gains Holy Light.');
+}
+/* The 2x2 squares of the board that hold panel i, each as its four panels. */
+function squaresWith(i){
+  if(isPlane(i))return [];
+  const r=row(i),c=col(i),out=[];
+  for(const dr of [-1,0])for(const dc of [-1,0]){
+    const r0=r+dr,c0=c+dc;
+    if(r0<0||c0<0||r0+1>=BW||c0+1>=BW)continue;
+    const tl=r0*BW+c0;
+    out.push([tl,tl+1,tl+BW,tl+BW+1]);
+  }
+  return out;
+}
+function sanctLay(b,cells,p,n){
+  G.sanctSeq=(G.sanctSeq||0)+1;
+  for(const j of cells)b[j].sanct={id:G.sanctSeq,owner:p,n};
+}
+/* A Teece in the glowing area has been destroyed: the whole area goes dark. */
+function sanctFade(b,cell){
+  const sc=b[cell]&&b[cell].sanct;
+  if(!sc)return;
+  for(let j=0;j<BN;j++)if(b[j].sanct&&b[j].sanct.id===sc.id)b[j].sanct=null;
+  if(b===G.board)log('The glow of Sanctified Grounds fades: a Teece in it has fallen.');
+}
+/* Ram on a clone: the stun, the -3, and the step toward it. */
+function ramStep(b,i,c){
+  if(sameRow(i,c))return i+(c>i?1:-1);
+  if(sameCol(i,c))return i+(c>i?BW:-BW);
+  return -1;
+}
+function ramSim(bb,i,c,p,n){
+  const o=bb[c].teece;if(!o)return;
+  o.stunUntil=nextTurnExpiry();
+  applyModT(o,n,'perm');
+  const dst=ramStep(bb,i,c);
+  if(dst>=0&&dst!==c&&openAt(bb,dst)&&bb[i].teece)moveT(bb,i,dst,false);
+}
+/* A teleport, said as one so a Celestial Steed knows to go along. */
+let TELEPORTING=false;
+function teleT(b,from,to,live){TELEPORTING=true;try{moveT(b,from,to,live);}finally{TELEPORTING=false;}}
+/* What the computer makes of the Paladin's three spells, weighed on a clone. */
+function aiPaladinPlan(d){
+  const b=G.board,p=G.turn,pl=G.players[p];
+  if(d.palAi==='holy'){
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&hasActiveOath(t)&&!t.holyLight)cands.push(i);}
+    if(!cands.length){
+      /* Saved for the next Paladin, when one is in hand to receive it. */
+      const held=pl.hand.some(h=>CARDS[h].type==='teece'&&CARDS[h].oath);
+      return held&&!(pl.holyNext>0)?{thr:0.8,bonus:0.9,cands:[0],mut:()=>{}}:null;
+    }
+    return {thr:1.0,bonus:1.2,cands,mut:(bb,i)=>{if(bb[i].teece)holyApply(bb[i].teece,false);}};
+  }
+  if(d.palAi==='sanct'){
+    let best=0;
+    for(let i=0;i<BN;i++){
+      const t=b[i].teece;if(!t||!sameTeam(t.owner,p))continue;
+      for(const sq of squaresWith(i)){
+        const n=sq.filter(j=>b[j].teece&&sameTeam(b[j].teece.owner,p)).length;
+        if(n>best)best=n;
+      }
+    }
+    if(best<2)return null;
+    return {thr:1.0,bonus:0.6*best,cands:[0],mut:()=>{}};
+  }
+  if(d.palAi==='redeem'){
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&isOathbroken(t)&&!t.silenced)cands.push(i);}
+    if(!cands.length)return null;
+    return {thr:1.0,cands,mut:(bb,i)=>redeemSim(bb,i,p,d.cast[0].n||5)};
+  }
+  return null;
+}
+function redeemSim(bb,i,p,n){
+  const o=bb[i].teece;if(!o)return;
+  applyModT(o,n,'perm');
+  cleanseAlly(o,false);
+  o.oaths=oathsOf(o).filter(x=>!x.broken);
+  const g=aiOathPick(bb,i,o,p,freeGods(o),false);
+  if(g)swearOath(o,g);
+}
 /* ============ Cult: the Pentagram ============
    The Cult deck's passive is the board. Its five points are the top-middle,
    the middle-left, the middle-right, the bottom-left and the bottom-right
@@ -24655,7 +25323,8 @@ if(typeof module!=='undefined'){
     isMummy,mCurseT,mCursePanel,mSweep,drainFx,
     PATRONS,channelsOn,channelCapOn,pactMap,pactN,channelIn,channelBack,warlockArrive,wlSeat,patronOf,canHandDiscard,playHandDiscard,noteDiscard,
     cultSeat,cultInPlay,pentaPts,pentaLines,pentaPoints,pentaNext,pentaLineOf,cultGuarded,onActiveLine,cultSettle,cultRitual,pentaSvg,
-    aiCultPlan,aiCultDest,cultPlaceBonus,CULT_CONVERT,CULT_TENDRIL};
+    aiCultPlan,aiCultDest,cultPlaceBonus,CULT_CONVERT,CULT_TENDRIL,
+    OATHS,oathsOf,oathOn,isPaladin,swearOath,oathBreak,oathSweep,cleanseAt,cleanseAlly,cleanseEnemy,aiOathPick,aiPaladinPlan,squaresWith};
 }
 </script>
 </body>

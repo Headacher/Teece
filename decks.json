@@ -1220,6 +1220,40 @@
       "level": "advanced",
       "kind": "utility",
       "cult": true
+    },
+    "paladin": {
+      "name": "Paladin",
+      "cards": [
+        1219,
+        1220,
+        1221,
+        1222,
+        1223,
+        1224,
+        1225,
+        1226,
+        1227,
+        1228,
+        1229,
+        1230,
+        1231,
+        1232,
+        1233,
+        1234,
+        1235,
+        1236,
+        1237,
+        1238
+      ],
+      "blurb": "Paladins swear Oaths to one of three gods and fight harder while they keep them. Each god asks something different of its knight, and an Oath broken costs the Paladin its blessing. Their Cleanse lifts every curse off an ally and strips an enemy bare.",
+      "how": [
+        "Oath: as a Paladin is played, swear it to a god. Solitarius gives it +4 but breaks when it becomes adjacent to an ally. Protectius gives every adjacent ally +4 and breaks when one of them dies. Pacificius gives it +5 Defence and breaks when it destroys an enemy. A broken Oath leaves the Paladin Oathbroken: no bonus, and -2.",
+        "Cleanse: on an ally it lifts every negative effect (stun, silence, curses, penalties); on an enemy it silences it and strips every bonus to its numbers. The Inquisitor Cleanses as it lands, and Holy Light's blessing Cleanses the whole cross around its Paladin each turn.",
+        "Keep Oaths whole: each Light equip is destroyed instead of its god's Oath breaking, the Vowkeeper's Oath never breaks, and Glorious Redemption swears a broken Paladin a new one. The Sentinel of Vows is destroyed by any Oath that does break, so play it where Oaths are safe.",
+        "The Celestial Steed and Ram carry their rider when it teleports or moves, and are destroyed at the end of a turn with a non-Paladin standing on them, so keep enemies off them. Sanctified Grounds gives your Teece in a 2x2 area +5 Defence until something in it falls."
+      ],
+      "level": "intermediate",
+      "kind": "warrior"
     }
   },
   "formats": [
@@ -1949,6 +1983,26 @@
     1167,
     1168,
     1171,
-    1193
+    1193,
+    1219,
+    1220,
+    1221,
+    1222,
+    1223,
+    1224,
+    1225,
+    1226,
+    1227,
+    1228,
+    1229,
+    1230,
+    1231,
+    1232,
+    1233,
+    1234,
+    1235,
+    1236,
+    1237,
+    1238
   ]
 }
