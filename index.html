@@ -1275,7 +1275,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:226,date:'2026-10-17'};
+const VERSION={build:227,date:'2026-10-17'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -8124,7 +8124,9 @@ function moveT(b,from,to,live){
   /* The Celestial mounts carry their rider: the Ram wherever it moves, the
      Steed when it teleports, onto a panel with no battleground of its own. */
   const rg=b[from].ground;
-  if(rg&&!rg.gid&&t&&!floats(t)&&!isPlane(from)&&!isPlane(to)&&!b[to].ground&&
+  /* A played ground carries a gid; only one that spans other panels stays put. */
+  const spans=rg&&rg.gid!=null&&b.some((c,j)=>j!==from&&c.ground&&c.ground.gid===rg.gid);
+  if(rg&&!spans&&t&&!floats(t)&&!isPlane(from)&&!isPlane(to)&&!b[to].ground&&
      (groundFlag(rg,'gRideMove')||(TELEPORTING&&groundFlag(rg,'gRideTele')))){
     b[to].ground=rg;b[from].ground=null;
     if(live&&b===G.board)log(CARDS[rg.cardId].name+' carries '+nm(t)+' to the '+CN[to]+'.');
