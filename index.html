@@ -1281,7 +1281,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:232,date:'2026-10-17'};
+const VERSION={build:233,date:'2026-10-17'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1949,6 +1949,7 @@ const CARD_ART={
   1237:["    __/)     ", "   /   o\\    ", "  /~~~~ _)>  ", " //|  |  \\\\  ", "   *  *  *   "],
   1238:["  @@     @@  ", "   @\\___/@   ", "    ( o o )  ", "    /\\_v_/\\  ", "   ~~~~~~~~  "],
   1239:["     ___     ", "    (o_o)    ", "    /|+|\\    ", "     | |     ", "     d b     "],
+  1240:["    _w_w_    ", "    /   \\    ", "   < BIG >   ", "    \\   /    ", "      v      "],
 
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
@@ -3492,8 +3493,8 @@ const CARDS = {
     text:'Flying. Sacrifice a Teece to play. Whenever you play a magic card: this gets +5 until the end of the turn, +2 permanently, and may move one space.',
     onMagic:[{fx:'mod',who:'self',n:5,dur:'temp'},{fx:'mod',who:'self',n:2,dur:'perm'},{fx:'move',range:'orth',may:true}]},
  552:{name:'Pixie Queen',type:'teece',sides:[2,2,2,2],sac:2,pixie:true,kw:['flying'],
-    act:[{name:'Conjure Enlarge',once:'turn',steps:[{fx:'enlargeExtended'}]}],
-    text:'Boss. Flying. Sacrifice two Teece to play. Once per your turn: add an Enlarge to your hand (Enlarge lasts one extra turn).'},
+    act:[{name:'Conjure Enlarge',once:'turn',steps:[{fx:'queenEnlarge'}]}],
+    text:'Boss. Flying. Sacrifice two Teece to play. Once per your turn: add a Queen’s Enlarge to your hand.'},
  553:{name:'Mind Control',type:'magic',pixie:true,
     text:'Take control of a non-Boss enemy Teece until the end of the turn.',
     cast:[{fx:'controlTemp'}]},
@@ -5384,6 +5385,9 @@ const CARDS = {
  1238:{name:'Celestial Ram',type:'ground',gdef:3,gRideMove:true,gPalOnly:true,
     gact:[{name:'Ram',once:'turn',steps:[{fx:'ram',n:-3}]}],
     text:'A Teece on this battleground has +3 Defence and Ram: once per your turn, select a Teece in the same row or column; stun it, give it -3, and move one space toward it if able. When a Teece on it moves, this battleground moves with it if there is no battleground there. At the end of each turn, if a non-Paladin is on it, this battleground is destroyed.'},
+ 1240:{name:'Queen’s Enlarge',type:'magic',token:true,deck:'pixie',pixie:true,
+    text:'Select a Teece; it gets +10 until the start of your next turn.',
+    cast:[{fx:'mod',where:'global',n:10,dur:'mine'}]},
  1239:{name:'Paladin Squire',type:'teece',token:true,deck:'paladin',paladin:true,sides:[2,2,2,2],
     text:'Token. Summoned by the Knight Commander. It counts as a Paladin, but swears no Oath.'},
  /* ---- Basic: the deck for a first game. Every card shows one of the base
@@ -6426,7 +6430,7 @@ function makeTeece(cardId,owner,opts){
     grafts:[],noSac:false,infect:null,dieEOT:false,graveMarks:0,stepOwed:0,
     boon:seatBonus(owner)+boon,
     silenced:false,magicUsedTurn:0,oaths:[],
-    temp2:[0,0,0,0],temp2Until:0,defTemp2:0,defTemp2Until:0,baseTemp:null,flyExtra:0,immortalUntil:0,stunUntil:0,
+    temp2:[0,0,0,0],temp2Until:0,tempMine:[0,0,0,0],tempMineUntil:0,defTemp2:0,defTemp2Until:0,baseTemp:null,flyExtra:0,immortalUntil:0,stunUntil:0,
     actUsedTurn:{},actUsedGame:{}};
 }
 function newState(mode,vsAI,decks,extra){
@@ -7150,13 +7154,14 @@ function effSides(b,i,parts){
      the ground pays a Boss far more than it pays a Grunt with three equips. */
   const dblBase=groundFlag(gUnder(b,i),'gDoubleBase')?2:1;
   const up=v=>fast?Math.max(0,v):v;
-  for(let k=0;k<4;k++)s[k]=Math.max(0,bs[k]*dblBase+swell)+up(t.perm[k])+up(t.temp[k])+up((t.temp2&&t.temp2[k])||0);
+  for(let k=0;k<4;k++)s[k]=Math.max(0,bs[k]*dblBase+swell)+up(t.perm[k])+up(t.temp[k])+up((t.temp2&&t.temp2[k])||0)+up((t.tempMine&&t.tempMine[k])||0);
   if(parts){
     parts.push({label:t.baseTemp?'Printed, replaced for the turn':dblBase>1?'Printed, doubled by the ground':'Printed',
       amt:bs.map(v=>v*dblBase),base:true});
     put('Permanent',t.perm);
     put('Until the end of this turn',t.temp);
     if(t.temp2)put('Until the end of your next turn',t.temp2);
+    if(t.tempMine)put('Until the start of your next turn',t.tempMine);
   }
   /* Hothouse Orchid doubles every positive effect on it. Perm and temp were
      already doubled as they were applied, so only the standing sources --
@@ -8433,12 +8438,13 @@ function mShiftSim(bb,c,p,n){
 /* Soul Steal: every positive stat effect lifted off a Teece, kept so it can be
    handed on. Equips stay where they are: they are cards, not effects. */
 function mStrip(t){
-  const got={perm:[0,0,0,0],temp:[0,0,0,0],temp2:[0,0,0,0],def:0,defTemp:0};
+  const got={perm:[0,0,0,0],temp:[0,0,0,0],temp2:[0,0,0,0],tempMine:[0,0,0,0],def:0,defTemp:0};
   if(isSteadfast(t))return got;
   for(let k=0;k<4;k++){
     if(t.perm[k]>0){got.perm[k]=t.perm[k];t.perm[k]=0;}
     if(t.temp[k]>0){got.temp[k]=t.temp[k];t.temp[k]=0;}
     if(t.temp2&&t.temp2[k]>0){got.temp2[k]=t.temp2[k];t.temp2[k]=0;}
+    if(t.tempMine&&t.tempMine[k]>0){got.tempMine[k]=t.tempMine[k];t.tempMine[k]=0;}
   }
   if(t.defPerm>0){got.def=t.defPerm;t.defPerm=0;}
   if(t.defTemp2>0){got.defTemp=t.defTemp2;t.defTemp2=0;}
@@ -8452,6 +8458,7 @@ function mGive(a,got,gid,hasFx){
     a.perm[k]+=got.perm[k];a.temp[k]+=got.temp[k];
     if(a.temp2)a.temp2[k]+=got.temp2[k];
   }
+  if(got.tempMine.some(v=>v)){a.tempMine=a.tempMine||[0,0,0,0];for(let k=0;k<4;k++)a.tempMine[k]+=got.tempMine[k];a.tempMineUntil=Math.max(a.tempMineUntil||0,endOfNextTurn(G.turn));}
   a.defPerm=(a.defPerm||0)+got.def;
   if(got.defTemp){a.defTemp2=(a.defTemp2||0)+got.defTemp;a.defTemp2Until=Math.max(a.defTemp2Until||0,nextTurnExpiry());}
   if(hasFx){a.grafts=a.grafts||[];if(a.grafts.indexOf(gid)<0)a.grafts.push(gid);}
@@ -8813,7 +8820,14 @@ function applyModT(t,n,dur){
   }
   if(n>0&&dblPos)n*=2;
   if(n<0&&dblNeg)n*=2;
-  const a=dur==='temp'?t.temp:t.perm;
+  /* 'mine' runs through the other side's turn and lifts at the start of the
+     caster's next one; it keeps its own bank so it never shares an expiry. */
+  if(dur==='mine'){
+    if(!t.tempMine)t.tempMine=[0,0,0,0];
+    const q=FX_BY!=null?FX_BY:(G&&G.turn!=null?G.turn:t.owner);
+    t.tempMineUntil=Math.max(t.tempMineUntil||0,G&&G.players?endOfNextTurn(q):0);
+  }
+  const a=dur==='temp'?t.temp:dur==='mine'?t.tempMine:t.perm;
   for(let k=0;k<4;k++)a[k]+=n;
   if(n<0&&DEF(t).dieOnLoss)forceDeath(t);
   /* Any effect of one side costing the other side attributes -- a spell, an
@@ -8841,7 +8855,7 @@ function bloodScent(byPlayer,victim){
 function applyDef(t,n){if(n<0&&isSteadfast(t))return;t.defPerm=(t.defPerm||0)+n;}
 const sgn=n=>(n>0?'+':'')+n;
 const escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-function durTxt(dur){return dur==='temp'?' until end of turn':' permanently';}
+function durTxt(dur){return dur==='temp'?' until end of turn':dur==='mine'?' until the start of your next turn':' permanently';}
 /* One quarter turn. Sides run top, right, bottom, left. */
 function spinT(t,dir){
   const s=t.base;
@@ -9517,7 +9531,6 @@ async function FXRUN(st,ctx){
   switch(st.fx){
   case 'mod':{
     let dur=st.dur;
-    if(ctx.cardId===555&&G.players[p].enlargeExtended){dur='temp2';G.players[p].enlargeExtended=false;}
     if(st.who==='self'){if(ctx.t)applyModT(ctx.t,st.n,dur);return;}
     if(st.who==='last'){if(ctx.last!=null&&b[ctx.last].teece){applyModT(b[ctx.last].teece,st.n,dur);
       log(nm(b[ctx.last].teece)+' gets '+sgn(st.n)+durTxt(dur)+'.');}return;}
@@ -10993,7 +11006,7 @@ async function FXRUN(st,ctx){
        charging leaves it where the card plainly means it to be -- printed line,
        minus two. */
     let stripped=0;
-    for(const bank of [t.perm,t.temp,t.temp2]){
+    for(const bank of [t.perm,t.temp,t.temp2,t.tempMine]){
       if(!bank)continue;
       for(let k=0;k<4;k++)if(bank[k]>0){stripped+=bank[k];bank[k]=0;}
     }
@@ -11721,7 +11734,7 @@ async function FXRUN(st,ctx){
       if(st.who==='ally'&&!ally)continue;
       if(st.who==='enemy'&&ally)continue;
       if(isSteadfast(o))continue;
-      for(const a of [o.perm,o.temp,o.temp2])if(a)for(let k=0;k<4;k++)if(a[k]>0){a[k]=0;n++;}
+      for(const a of [o.perm,o.temp,o.temp2,o.tempMine])if(a)for(let k=0;k<4;k++)if(a[k]>0){a[k]=0;n++;}
       if(o.defPerm>0){o.defPerm=0;n++;}
       if(o.defTemp2>0){o.defTemp2=0;n++;}
     }
@@ -12479,7 +12492,7 @@ async function FXRUN(st,ctx){
           if(!t||t.owner!==q)continue;
           const keepH=holdStats(t);
           t.silenced=true;
-          t.perm=[0,0,0,0];t.temp=[0,0,0,0];if(t.temp2)t.temp2=[0,0,0,0];t.defPerm=0;t.defTemp=0;
+          t.perm=[0,0,0,0];t.temp=[0,0,0,0];if(t.temp2)t.temp2=[0,0,0,0];t.tempMine=[0,0,0,0];t.defPerm=0;t.defTemp=0;
           keepH();
           log(nm(t)+' is silenced and stripped back to '+t.base.join('/')+'.');
         }
@@ -13046,10 +13059,9 @@ async function FXRUN(st,ctx){
     }
     log(pname(p)+' conjures '+got.join(' and ')+' out of the air.');
     return;}
-  case 'enlargeExtended':{
-    handPush(p,555);
-    G.players[p].enlargeExtended=true;
-    log(pname(p)+' conjures Enlarge (extended duration) into hand.');
+  case 'queenEnlarge':{
+    handPush(p,1240);
+    log(pname(p)+' conjures a Queen’s Enlarge into hand.');
     return;}
   case 'copyMagic':{
     /* A copy: the original stays where it lies. */
@@ -13168,7 +13180,7 @@ async function FXRUN(st,ctx){
       if(!b[c].teece||b[c].teece!==tt)return;
     }
     const keepT=holdStats(tt);
-    tt.perm=[0,0,0,0];tt.temp=[0,0,0,0];tt.temp2=[0,0,0,0];tt.temp2Until=0;
+    tt.perm=[0,0,0,0];tt.temp=[0,0,0,0];tt.temp2=[0,0,0,0];tt.temp2Until=0;tt.tempMine=[0,0,0,0];tt.tempMineUntil=0;
     tt.defPerm=0;tt.defTemp2=0;tt.defTemp2Until=0;tt.baseTemp=null;
     tt.kwTemp=[];tt.kwPerm=[];tt.silenced=true;
     keepT();
@@ -13249,6 +13261,7 @@ async function FXRUN(st,ctx){
         if(t.perm[k]>0)t.perm[k]=0;
         if(t.temp[k]>0)t.temp[k]=0;
         if(t.temp2&&t.temp2[k]>0)t.temp2[k]=0;
+        if(t.tempMine&&t.tempMine[k]>0)t.tempMine[k]=0;
       }
       if(t.defPerm>0)t.defPerm=0;
       if(t.defTemp>0)t.defTemp=0;
@@ -13982,7 +13995,7 @@ async function FXRUN(st,ctx){
       log(CARDS[e.cardId].name+' falls off '+nm(tt)+'.');
     }
     const keepT=holdStats(tt);
-    tt.perm=[0,0,0,0];tt.temp=[0,0,0,0];tt.temp2=[0,0,0,0];tt.temp2Until=0;
+    tt.perm=[0,0,0,0];tt.temp=[0,0,0,0];tt.temp2=[0,0,0,0];tt.temp2Until=0;tt.tempMine=[0,0,0,0];tt.tempMineUntil=0;
     tt.defPerm=0;tt.defTemp2=0;tt.defTemp2Until=0;tt.baseTemp=null;
     tt.kwTemp=[];tt.kwPerm=[];tt.silenced=true;
     keepT();
@@ -15539,10 +15552,10 @@ function applySides(t,sides,dur){
 function holdStats(t){
   if(!t||!isSteadfast(t))return ()=>false;
   const snap={base:t.base.slice(),perm:t.perm.slice(),temp:t.temp.slice(),
-    temp2:(t.temp2||[0,0,0,0]).slice(),defPerm:t.defPerm||0,defTemp2:t.defTemp2||0,defGone:!!t.defGone};
+    temp2:(t.temp2||[0,0,0,0]).slice(),tempMine:(t.tempMine||[0,0,0,0]).slice(),defPerm:t.defPerm||0,defTemp2:t.defTemp2||0,defGone:!!t.defGone};
   return (live)=>{
     let held=false;
-    for(const key of ['base','perm','temp','temp2']){
+    for(const key of ['base','perm','temp','temp2','tempMine']){
       if(!t[key])t[key]=[0,0,0,0];
       for(let k=0;k<4;k++)if(t[key][k]<snap[key][k]){t[key][k]=snap[key][k];held=true;}
     }
@@ -18466,6 +18479,12 @@ async function startTurn(){
   }
   pl.toldMustPlay=false;
   pl.turnsTaken=(pl.turnsTaken||0)+1;
+  /* "Until the start of your next turn" bonuses lift here, before anything
+     this turn can read them. */
+  for(let i=0;i<BN;i++){
+    const t=G.board[i].teece;
+    if(t&&t.tempMineUntil&&G.turnNum>=t.tempMineUntil){t.tempMine=[0,0,0,0];t.tempMineUntil=0;}
+  }
   /* A curse that reads "until the start of your next turn" -- the Paradox
      Twins' hold on their own side's win -- lifts here, not at a turn's end. */
   for(let q=0;q<PLAYERS();q++){
@@ -18626,6 +18645,7 @@ function cloneBoard(b){
       links:c.teece.links.slice(),controls:c.teece.controls.slice(),
       grafts:(c.teece.grafts||[]).slice(),infect:c.teece.infect?Object.assign({},c.teece.infect):null,
       temp2:(c.teece.temp2||[0,0,0,0]).slice(),temp2Until:c.teece.temp2Until||0,
+      tempMine:(c.teece.tempMine||[0,0,0,0]).slice(),tempMineUntil:c.teece.tempMineUntil||0,
       defTemp2:c.teece.defTemp2||0,defTemp2Until:c.teece.defTemp2Until||0,
       baseTemp:c.teece.baseTemp?c.teece.baseTemp.slice():null,flyExtra:c.teece.flyExtra||0,
       immortalUntil:c.teece.immortalUntil||0,stunUntil:c.teece.stunUntil||0,
@@ -19748,6 +19768,9 @@ async function aiActs(depth){
         gain=(G.turnNum>=3&&anyEmpty)?0.75:-1;
       }else if(st.fx==='draw'){
         gain=G.players[p].hand.length<5?0.85:-1;
+      }else if(st.fx==='queenEnlarge'){
+        /* A free +10 in hand: the board score cannot see a card in hand. */
+        gain=G.players[p].hand.length<7?0.8:-1;
       }else if(st.fx==='wlPactLater'){
         gain=rimSides(i).length?0.8:-1;
       }else if(st.fx==='channelSelf'){
@@ -22258,7 +22281,7 @@ function cleanseAlly(t,live){
   const flag=(k,v)=>{if(t[k]){t[k]=v;n++;}};
   flag('silenced',false);flag('stunUntil',0);flag('mcursed',false);flag('blinded',false);
   flag('harmless',false);flag('infect',null);flag('dieEOT',false);flag('defGone',false);flag('headshot',null);
-  for(const key of ['perm','temp','temp2'])if(t[key])for(let k=0;k<4;k++)if(t[key][k]<0){t[key][k]=0;n++;}
+  for(const key of ['perm','temp','temp2','tempMine'])if(t[key])for(let k=0;k<4;k++)if(t[key][k]<0){t[key][k]=0;n++;}
   if((t.defPerm||0)<0){t.defPerm=0;n++;}
   if((t.defTemp2||0)<0){t.defTemp2=0;n++;}
   if(t.baseTemp&&t.baseTemp.some((v,k)=>v<t.base[k])){t.baseTemp=null;n++;}
@@ -22272,7 +22295,7 @@ function cleanseAlly(t,live){
 function cleanseEnemy(t,live){
   const keep=holdStats(t);
   t.silenced=true;
-  for(const key of ['perm','temp','temp2'])if(t[key])for(let k=0;k<4;k++)if(t[key][k]>0)t[key][k]=0;
+  for(const key of ['perm','temp','temp2','tempMine'])if(t[key])for(let k=0;k<4;k++)if(t[key][k]>0)t[key][k]=0;
   if((t.defPerm||0)>0)t.defPerm=0;
   if((t.defTemp2||0)>0)t.defTemp2=0;
   keep(live);
@@ -23730,9 +23753,11 @@ function fuseBodies(ta,tc,fid,p){
     nt.perm[k]=ta.perm[k]+tc.perm[k];
     nt.temp[k]=ta.temp[k]+tc.temp[k];
     nt.temp2[k]=((ta.temp2&&ta.temp2[k])||0)+((tc.temp2&&tc.temp2[k])||0);
+    nt.tempMine[k]=((ta.tempMine&&ta.tempMine[k])||0)+((tc.tempMine&&tc.tempMine[k])||0);
   }
   nt.boon=(ta.boon||0)+(tc.boon||0);
   nt.temp2Until=Math.max(ta.temp2Until||0,tc.temp2Until||0);
+  nt.tempMineUntil=Math.max(ta.tempMineUntil||0,tc.tempMineUntil||0);
   nt.defPerm=(ta.defPerm||0)+(tc.defPerm||0);
   nt.defTemp2=(ta.defTemp2||0)+(tc.defTemp2||0);
   nt.defTemp2Until=Math.max(ta.defTemp2Until||0,tc.defTemp2Until||0);
@@ -24047,7 +24072,7 @@ async function fusionFx(st,ctx,pickCell,none){
     if(!cands.length)return none('There is nothing else to silence.');
     const wipe=o=>{
       const keep=holdStats(o);
-      o.silenced=true;o.perm=[0,0,0,0];o.temp=[0,0,0,0];o.temp2=[0,0,0,0];
+      o.silenced=true;o.perm=[0,0,0,0];o.temp=[0,0,0,0];o.temp2=[0,0,0,0];o.tempMine=[0,0,0,0];
       o.defPerm=0;o.defTemp2=0;o.kwPerm=[];o.kwTemp=[];
       keep(false);
     };
