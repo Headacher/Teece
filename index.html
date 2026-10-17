@@ -18422,14 +18422,20 @@ function placeGround(b,cell,cardId,owner){
   }
   b[cell].ground={cardId,owner,gid:G.groundSeq++};
 }
+/* One spread per network per turn, however many panels it already covers --
+   and a panel it reaches this turn does not spread again until the next. */
 async function expandGrounds(p){
+  const done=new Set();
   for(let i=0;i<BN;i++){
     const g=G.board[i].ground;
     if(!g||g.owner!==p||!CARDS[g.cardId]||!CARDS[g.cardId].expansive)continue;
-    const empt=ADJ[i].filter(j=>!G.board[j].ground);
+    const gid=g.gid;
+    if(done.has(gid))continue;
+    done.add(gid);
+    const net=findExpansiveNetwork(gid);
+    const empt=[...new Set(net.flatMap(k=>ADJ[k]))].filter(j=>!G.board[j].ground);
     if(!empt.length)continue;
     const c=empt[Math.floor(Math.random()*empt.length)];
-    const gid=g.gid;
     G.board[c].ground={cardId:g.cardId,owner:p,gid,expansive:true};
     log(CARDS[g.cardId].name+' spreads to the '+CN[c]+'.');
   }
