@@ -1275,7 +1275,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:229,date:'2026-10-17'};
+const VERSION={build:230,date:'2026-10-17'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -18427,14 +18427,20 @@ function placeGround(b,cell,cardId,owner){
   }
   b[cell].ground={cardId,owner,gid:G.groundSeq++};
 }
+/* One spread per network per turn, however many panels it already covers --
+   and a panel it reaches this turn does not spread again until the next. */
 async function expandGrounds(p){
+  const done=new Set();
   for(let i=0;i<BN;i++){
     const g=G.board[i].ground;
     if(!g||g.owner!==p||!CARDS[g.cardId]||!CARDS[g.cardId].expansive)continue;
-    const empt=ADJ[i].filter(j=>!G.board[j].ground);
+    const gid=g.gid;
+    if(done.has(gid))continue;
+    done.add(gid);
+    const net=findExpansiveNetwork(gid);
+    const empt=[...new Set(net.flatMap(k=>ADJ[k]))].filter(j=>!G.board[j].ground);
     if(!empt.length)continue;
     const c=empt[Math.floor(Math.random()*empt.length)];
-    const gid=g.gid;
     G.board[c].ground={cardId:g.cardId,owner:p,gid,expansive:true};
     log(CARDS[g.cardId].name+' spreads to the '+CN[c]+'.');
   }
