@@ -1295,7 +1295,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:237,date:'2026-10-18'};
+const VERSION={build:238,date:'2026-10-18'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1497,7 +1497,7 @@ function kwRe(){
   const forms=[],byName={};
   for(const id in CARDS){
     const c=CARDS[id];
-    if(!c.token||c.type!=='teece'||c.name==='Token'||c.runeCard||id==='TRUNEB')continue;
+    if(!c.token||c.type!=='teece'||c.name==='Token'||c.runeCard||id==='TRUNEB'||c.mount)continue;
     (byName[c.name]=byName[c.name]||[]).push(id);
   }
   for(const nmn of Object.keys(byName).sort((a,b)=>b.length-a.length)){
@@ -5460,30 +5460,30 @@ const CARDS = {
         standing on its own it is an ordinary Token. The engine is under
         "Knights: Mounts". ---- */
  1241:{name:'Lancer',type:'teece',sides:[4,4,2,4],def:1,knight:true,mountOf:1261,
-    text:'Armoured. Mount: Destrier.'},
+    text:'Armoured. {mount}'},
  1242:{name:'Sky Knight',type:'teece',sides:[3,3,3,3],def:1,knight:true,mountOf:1262,
-    text:'Armoured. Mount: Pegasus, which has Flying.'},
+    text:'Armoured. {mount}'},
  1243:{name:'Page',type:'teece',sides:[0,0,0,0],def:1,knight:true,mountOf:1263,
-    text:'Armoured. Mount: Charger.'},
+    text:'Armoured. {mount}'},
  1244:{name:'Desert Knight',type:'teece',sides:[5,5,5,5],def:1,knight:true,mountOf:1264,
-    text:'Armoured. Mount: Cud Spitter, which has Ranged.'},
+    text:'Armoured. {mount}'},
  1245:{name:'Rearguard',type:'teece',sides:[0,0,6,6],def:1,knight:true,mountOf:1265,
-    text:'Armoured. Mount: Courser.'},
+    text:'Armoured. {mount}'},
  1246:{name:'Outrider',type:'teece',sides:[4,4,2,2],def:1,knight:true,mountOf:1266,
-    text:'Armoured. Mount: Palfrey.'},
+    text:'Armoured. {mount}'},
  1247:{name:'Tilting Knight',type:'teece',sides:[0,0,0,9],def:1,knight:true,mountOf:1267,
-    text:'Armoured. Mount: Carousel Horse, which can rotate once per turn.'},
+    text:'Armoured. {mount}'},
  1248:{name:'Emu Knight',type:'teece',sides:[4,0,0,4],def:1,knight:true,mountOf:1268,
-    text:'Armoured. Mount: Emu, which can move twice per turn.'},
+    text:'Armoured. {mount}'},
  1249:{name:'Legaless',type:'teece',sides:[9,9,9,9],def:1,knight:true,mustMount:true,kw:['ranged'],
     text:'Armoured. Ranged. Must be played on one of your Mounts, which it rides.'},
  1250:{name:'Giraffe Knight',type:'teece',sides:[8,0,0,0],def:1,knight:true,mountOf:1269,
-    text:'Armoured. Mount: War Giraffe.'},
+    text:'Armoured. {mount}'},
  1251:{name:'Knight Captain',type:'teece',sides:[6,6,6,6],def:1,sac:1,knight:true,mountOf:1270,
     handDiscard:[{fx:'token',tok:1270,count:1}],
-    text:'Sacrifice a Teece to play. Armoured. Mount: Barded Charger. Discard this from your hand: play its Mount, a Barded Charger.'},
+    text:'Sacrifice a Teece to play. Armoured. {mount} Discard this from your hand: play its Mount, a Barded Charger.'},
  1252:{name:'Grand Marshal',type:'teece',sides:[5,5,5,5],def:1,sac:2,knight:true,mountOf:1271,
-    text:'Sacrifice two Teece to play. Armoured. Mount: Stallion, which has Flying, Ranged and Defence 5.'},
+    text:'Sacrifice two Teece to play. Armoured. {mount}'},
  /* ---- Knights equips ---- */
  1253:{name:'Herd Saddle',type:'equip',mod:0,grants:{mountCap:true},
     text:'The equipped Teece can have any number of Mounts.'},
@@ -5494,11 +5494,11 @@ const CARDS = {
     text:'The equipped Teece has +4 while it is mounted.'},
  /* ---- Knights magic ---- */
  1256:{name:'Remount',type:'magic',knightAi:'remount',cast:[{fx:'remount'}],
-    text:'Select a Knight; summon a copy of its Mount on an empty panel next to it. The copy is invulnerable until the end of the turn.'},
+    text:'Select a Knight; summon a copy of its Mount on any empty panel. The copy is invulnerable until the end of the turn.'},
  1257:{name:'Cavalry Muster',type:'magic',knightAi:'muster',cast:[{fx:'muster',n:2}],
-    text:'The next two Knights you play each also summon a copy of their Mount on an empty panel adjacent to them.'},
+    text:'The next two Knights you play each also summon a copy of their Mount on any empty panel.'},
  1258:{name:'Call the Warhorse',type:'magic',cast:[{fx:'token',tok:1272,count:1}],
-    text:'Summon a Warhorse on an empty panel: a Mount with Defence 3 and "When destroyed: give every adjacent Teece -3."'},
+    text:'Summon a Warhorse on any empty panel: a Mount (Top 3, Right 3, Bottom 3, Left 3; Defence 3) with "When destroyed: give every adjacent Teece -3."'},
  /* ---- Knights battlegrounds ---- */
  1259:{name:'Stables',type:'ground',gdefKind:{kind:'mount',n:7},
     text:'A Mount on this battleground has +7 Defence.'},
@@ -5508,29 +5508,29 @@ const CARDS = {
         Knight riding one adds to its own (mountGrants, below CARDS). ---- */
  1261:{name:'Destrier',type:'teece',token:true,deck:'knights',mount:true,sides:[3,3,3,3],
     text:'Mount.'},
- 1262:{name:'Pegasus',type:'teece',token:true,deck:'knights',mount:true,sides:[3,3,3,3],kw:['flying'],
+ 1262:{name:'Pegasus',type:'teece',token:true,deck:'knights',mount:true,ride:'Flying',sides:[3,3,3,3],kw:['flying'],
     text:'Mount. Flying.'},
  1263:{name:'Charger',type:'teece',token:true,deck:'knights',mount:true,sides:[6,6,6,6],
     text:'Mount.'},
- 1264:{name:'Cud Spitter',type:'teece',token:true,deck:'knights',mount:true,sides:[1,1,1,1],kw:['ranged'],
+ 1264:{name:'Cud Spitter',type:'teece',token:true,deck:'knights',mount:true,ride:'Ranged',sides:[1,1,1,1],kw:['ranged'],
     text:'Mount. Ranged.'},
  1265:{name:'Courser',type:'teece',token:true,deck:'knights',mount:true,sides:[6,6,0,0],
     text:'Mount.'},
  1266:{name:'Palfrey',type:'teece',token:true,deck:'knights',mount:true,sides:[2,2,4,4],
     text:'Mount.'},
- 1267:{name:'Carousel Horse',type:'teece',token:true,deck:'knights',mount:true,sides:[0,9,0,0],
+ 1267:{name:'Carousel Horse',type:'teece',token:true,deck:'knights',mount:true,ride:'once per your turn it can rotate, rider and all',sides:[0,9,0,0],
     act:[{name:'Rotate',once:'turn',steps:[{fx:'rot',may:true}]}],
     text:'Mount. Once per your turn: rotate this (a Knight riding it rotates with it).'},
- 1268:{name:'Emu',type:'teece',token:true,deck:'knights',mount:true,sides:[0,2,2,0],
+ 1268:{name:'Emu',type:'teece',token:true,deck:'knights',mount:true,ride:'twice per your turn it can move one space',sides:[0,2,2,0],
     act:[{name:'Scurry',once:'turn',times:2,steps:[{fx:'move',range:'orth'}]}],
     text:'Mount. Twice per your turn: move one space.'},
  1269:{name:'War Giraffe',type:'teece',token:true,deck:'knights',mount:true,sides:[2,0,0,0],
     text:'Mount.'},
  1270:{name:'Barded Charger',type:'teece',token:true,deck:'knights',mount:true,sides:[4,4,4,4],
     text:'Mount.'},
- 1271:{name:'Stallion',type:'teece',token:true,deck:'knights',mount:true,sides:[5,5,5,5],def:5,kw:['flying','ranged'],
+ 1271:{name:'Stallion',type:'teece',token:true,deck:'knights',mount:true,ride:'Flying, Ranged, Defence 5',sides:[5,5,5,5],def:5,kw:['flying','ranged'],
     text:'Mount. Flying. Ranged. Defence 5.'},
- 1272:{name:'Warhorse',type:'teece',token:true,deck:'knights',mount:true,sides:[3,3,3,3],def:3,
+ 1272:{name:'Warhorse',type:'teece',token:true,deck:'knights',mount:true,ride:'Defence 3',sides:[3,3,3,3],def:3,
     onDeath:[{fx:'aoe',n:-3,dur:'perm'}],
     text:'Mount. Defence 3. When destroyed: give every adjacent Teece -3.'},
  /* ---- Basic: the deck for a first game. Every card shows one of the base
@@ -6718,9 +6718,17 @@ function plateOf(p,idx){
    the card in your hand shows what it will actually arrive as. Only the
    standing mod is included: modPerDef and modPerAge depend on a board it has
    not reached yet. A card that doubles positive effects doubles these too. */
+/* What a card reads as before anything is plated on: a Knight shows itself
+   already riding its Mount. */
+function cardSides(cardId){
+  const cd=CARDS[cardId],s=cd.sides.slice();
+  const m=cd.mountOf&&CARDS[cd.mountOf];
+  if(m)for(let k=0;k<4;k++)s[k]+=m.sides[k];
+  return s;
+}
 function platedSides(cardId,worn){
   const cd=CARDS[cardId];
-  const s=cd.sides.slice();
+  const s=cardSides(cardId);
   if(!worn||!worn.length)return s;
   const selfDbl=!!cd.selfDoublePos;
   for(const e of worn){
@@ -15259,10 +15267,11 @@ async function FXRUN(st,ctx){
     return;}
   case 'remount':{
     const cands=[];
-    for(let i=0;i<BN;i++){const t=b[i].teece;if(isKnight(t)&&isMounted(t)&&(sameTeam(t.owner,p)||canTarget(b,i,p))&&ADJ[i].some(j=>openAt(b,j)))cands.push(i);}
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(isKnight(t)&&isMounted(t)&&(sameTeam(t.owner,p)||canTarget(b,i,p)))cands.push(i);}
+    if(cands.length&&!b.some((x,j)=>openAt(b,j)))return none('There is no empty panel for a Mount.');
     if(!cands.length)return none('There is no mounted Knight with room beside it.');
-    const c=await pickCell(cands,'Remount: choose a Knight. A copy of its Mount appears next to it.',
-      (bb,i)=>{const m=mountsOf(bb[i].teece)[0],j=ADJ[i].find(x=>openAt(bb,x));if(m&&j!=null)putTeece(bb,j,makeTeece(m.cardId,p),false);},false);
+    const c=await pickCell(cands,'Remount: choose a Knight. A copy of its Mount appears on any empty panel.',
+      (bb,i)=>{const m=mountsOf(bb[i].teece)[0],j=bb.findIndex((x,k)=>openAt(bb,k));if(m&&j>=0)putTeece(bb,j,makeTeece(m.cardId,p),false);},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     const ms=mountsOf(b[c].teece);
@@ -20397,8 +20406,9 @@ function showDeckInfo(key){
     if(!c)continue;
     h+='<div class="cardItem" data-type="'+c.type+'">';
     if(c.type==='teece'&&c.sides){
-      h+='<div class="cstats"><div class="stat">'+c.sides[0]+'</div><div class="stat">'+c.sides[1]+
-        '</div><div class="stat">'+c.sides[2]+'</div><div class="stat">'+c.sides[3]+'</div></div>';
+      const cs=cardSides(cid);
+      h+='<div class="cstats"><div class="stat">'+cs[0]+'</div><div class="stat">'+cs[1]+
+        '</div><div class="stat">'+cs[2]+'</div><div class="stat">'+cs[3]+'</div></div>';
     }
     h+='<div class="cname">'+escHtml(c.name)+'</div>';
     if(c.text)h+='<div class="ctext">'+escHtml(c.text)+'</div>';
@@ -21134,7 +21144,7 @@ function renderHand(p){
     if(art)card.classList.add('arted');
     if(cd.type==='teece'){
       const ps=platedSides(id,worn);
-      const sc=k=>'hs hs'+k+(ps[k]!==cd.sides[k]?' pl':'');
+      const cs=cardSides(id),sc=k=>'hs hs'+k+(ps[k]!==cs[k]?' pl':'');
       card.innerHTML=(art?'<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>':'')+
         '<div class="'+sc(0)+'">'+ps[0]+'</div>'+
         '<div class="'+sc(1)+'">'+ps[1]+'</div>'+
@@ -21218,7 +21228,7 @@ function showDetailCard(id,worn){
   const ps=cd.type==='teece'?platedSides(id,worn):null;
   let html=detailArt(id)+'<div class="dn">'+cd.name+'</div>'+
     (cd.type==='teece'?'<div class="dstats" style="color:var(--gold)">'+sidesBlock(ps)+
-      (worn&&worn.length&&ps.join()!==cd.sides.join()?' &nbsp;plated, from '+sidesBlock(cd.sides):'')+
+      (worn&&worn.length&&ps.join()!==cardSides(id).join()?' &nbsp;plated, from '+sidesBlock(cardSides(id)):'')+
       (rankOf(id)?' \u00b7 '+rankOf(id):'')+(cd.sac?' \u00b7 '+kwSpan('sacrifice','sacrifice')+' '+cd.sac:'')+(cd.def?' \u00b7 '+kwSpan('defence','Defence')+' '+cd.def:'')+'</div>':
       '<div class="dstats" style="color:var(--gold)">'+cd.type+'</div>')+
     '<div class="dt">'+kwify(cd.text)+'</div>'+
@@ -21841,7 +21851,7 @@ function showGrave(p){
     for(const cid of grave){
       const c=CARDS[cid];if(!c)continue;
       h+='<div class="cardItem" data-type="'+c.type+'">';
-      if(c.type==='teece'&&c.sides)h+='<div class="cstats">'+c.sides.map(n=>'<div class="stat">'+n+'</div>').join('')+'</div>';
+      if(c.type==='teece'&&c.sides)h+='<div class="cstats">'+cardSides(cid).map(n=>'<div class="stat">'+n+'</div>').join('')+'</div>';
       h+='<div class="cname">'+escHtml(c.name)+'</div><div class="ctext">'+escHtml(c.type)+(c.text?' \u2014 '+escHtml(c.text):'')+'</div></div>';
     }
     h+='</div>';
@@ -22070,10 +22080,11 @@ function renderDraft(p,offer,k,res){
     dc.setAttribute('data-card-deck',getCardDeck(id));
     if(art)dc.innerHTML='<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>';
     if(cd.type==='teece'){
-      dc.innerHTML+='<div class="ds ds0">'+cd.sides[0]+'</div>'+
-        '<div class="ds ds1">'+cd.sides[1]+'</div>'+
-        '<div class="ds ds2">'+cd.sides[2]+'</div>'+
-        '<div class="ds ds3">'+cd.sides[3]+'</div>';
+      const dsd=cardSides(id);
+      dc.innerHTML+='<div class="ds ds0">'+dsd[0]+'</div>'+
+        '<div class="ds ds1">'+dsd[1]+'</div>'+
+        '<div class="ds ds2">'+dsd[2]+'</div>'+
+        '<div class="ds ds3">'+dsd[3]+'</div>';
     }
     /* No keyword line and no "teece" label: the rules text already says
        Ranged or Flying, and a card with four number tabs is plainly a Teece.
@@ -22666,6 +22677,10 @@ for(const id in CARDS){
   c.grants=Object.assign({},c.kw?{kw:c.kw.slice()}:{},c.def?{def:c.def}:{},c.act?{act:c.act}:{},
     {onDeath:[{fx:'mountDrop',id:+id}]});
 }
+/* A Knight's text spells its Mount out, numbers by side, rather than naming a
+   Token to look up (Greg, build 238). */
+const mountText=id=>{const m=CARDS[id];return 'Mount: '+m.name+' ('+compassWords(m.sides)+(m.ride?'; '+m.ride:'')+').';};
+for(const id in CARDS){const c=CARDS[id];if(c.mountOf&&c.text)c.text=c.text.replace('{mount}',mountText(c.mountOf));}
 /* Herd Saddle and Mount Mount lift the one-Mount limit. */
 function mountCap(t){
   for(const e of t.equips){const g=eqG(e);if(g&&g.mountCap)return 99;}
@@ -22704,7 +22719,8 @@ function mountUp(t,m,live){
 /* A copy of a Mount, laid next to cell c if there is room, else anywhere. */
 async function summonMountCopy(p,c,id,why,safe){
   const b=G.board;
-  let pool=ADJ[c].filter(j=>openAt(b,j));
+  /* Anywhere on the board (Greg, build 238). */
+  const pool=[];for(let j=0;j<BN;j++)if(openAt(b,j))pool.push(j);
   if(!pool.length)return null;
   const at=pool.length===1?pool[0]:await chooseCell(p,pool,why+': choose where the '+CARDS[id].name+' stands.',
     {mut:(bb,j)=>{putTeece(bb,j,makeTeece(id,p),false);}});
@@ -22747,11 +22763,12 @@ function aiKnightPlan(d){
   const b=G.board,p=G.turn,pl=G.players[p];
   if(d.knightAi==='remount'){
     const cands=[];
-    for(let i=0;i<BN;i++){const t=b[i].teece;if(isKnight(t)&&isMounted(t)&&sameTeam(t.owner,p)&&ADJ[i].some(j=>openAt(b,j)))cands.push(i);}
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(isKnight(t)&&isMounted(t)&&sameTeam(t.owner,p))cands.push(i);}
+    if(!b.some((x,j)=>openAt(b,j)))return null;
     if(!cands.length)return null;
     return {thr:1.0,cands,mut:(bb,i)=>{
-      const m=mountsOf(bb[i].teece)[0],j=ADJ[i].find(x=>openAt(bb,x));
-      if(m&&j!=null)putTeece(bb,j,makeTeece(m.cardId,p),false);
+      const m=mountsOf(bb[i].teece)[0],j=bb.findIndex((x,k)=>openAt(bb,k));
+      if(m&&j>=0)putTeece(bb,j,makeTeece(m.cardId,p),false);
     }};
   }
   if(d.knightAi==='muster'){
