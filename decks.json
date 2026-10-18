@@ -1254,6 +1254,40 @@
       ],
       "level": "intermediate",
       "kind": "warrior"
+    },
+    "knights": {
+      "name": "Knights",
+      "cards": [
+        1241,
+        1242,
+        1243,
+        1244,
+        1245,
+        1246,
+        1247,
+        1248,
+        1249,
+        1250,
+        1251,
+        1252,
+        1253,
+        1254,
+        1255,
+        1256,
+        1257,
+        1258,
+        1259,
+        1260
+      ],
+      "blurb": "Knights ride into battle on Mounts that lend them their numbers, their wings and their tricks. Bring a Knight down and its Mount is still standing, ready for the next Knight to climb on.",
+      "how": [
+        "Armoured: every Knight has 1 Defence. Mounts do not.",
+        "Mount: a Knight is played already riding the Mount printed on it and has the Mount’s numbers, Defence and abilities on top of its own. When the Knight is destroyed, its Mount is played on that panel.",
+        "Play a Knight onto one of your Mounts on the board and it rides that Mount in place of its own. A Knight can have only one Mount, unless a Herd Saddle lets it keep both. Legaless can only be played onto a Mount.",
+        "Remount and Cavalry Muster put copies of Mounts on the board for the next Knights to ride; Stables makes a waiting Mount hard to kill, and the Armoury pays any equipped Teece, mounted Knights included."
+      ],
+      "level": "intermediate",
+      "kind": "warrior"
     }
   },
   "formats": [
@@ -2003,6 +2037,26 @@
     1235,
     1236,
     1237,
-    1238
+    1238,
+    1241,
+    1242,
+    1243,
+    1244,
+    1245,
+    1246,
+    1247,
+    1248,
+    1249,
+    1250,
+    1251,
+    1252,
+    1253,
+    1254,
+    1255,
+    1256,
+    1257,
+    1258,
+    1259,
+    1260
   ]
 }

@@ -272,6 +272,10 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .card[data-card-deck="paladin"] .kwl,.dcard[data-card-deck="paladin"] .dkw{color:#8a6400}
 .card[data-card-deck="paladin"] .ct,.dcard[data-card-deck="paladin"] .dty{color:#8a6400}
 .card[data-card-deck="paladin"]::after,.dcard[data-card-deck="paladin"]::after{content:'\269C'}
+.card[data-card-deck="knights"],.dcard[data-card-deck="knights"]{--cardbg:#3b4350;--artink:#cfd8e3;background:var(--cardbg);color:#eef2f7;border-color:#1c222b}
+.card[data-card-deck="knights"] .kwl,.dcard[data-card-deck="knights"] .dkw{color:#9fc3ff}
+.card[data-card-deck="knights"] .ct,.dcard[data-card-deck="knights"] .dty{color:#9fc3ff}
+.card[data-card-deck="knights"]::after,.dcard[data-card-deck="knights"]::after{content:'\265E'}
 .card[data-card-deck="warlock"],.dcard[data-card-deck="warlock"]{--cardbg:#2b1838;--artink:#c39cff;background:var(--cardbg);color:#f0e6ff;border-color:#130a1a}
 .card[data-card-deck="warlock"] .kwl,.dcard[data-card-deck="warlock"] .dkw{color:#d4b0ff}
 .card[data-card-deck="warlock"] .ct,.dcard[data-card-deck="warlock"] .dty{color:#d4b0ff}
@@ -316,6 +320,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .teece[data-card-deck="dwarves"]{--cardbg:#4b3a2c;--artink:#f2b45c;background:var(--cardbg);color:#f3e8d8;border-color:#2a1f16}
 .teece[data-card-deck="cult"]{--cardbg:#2a0c10;--artink:#e0505a;background:var(--cardbg);color:#f6e2e2;border-color:#120305}
 .teece[data-card-deck="paladin"]{--cardbg:#f8f8c1;--artink:#6e5c0e;background:#f8f8c1 linear-gradient(90deg,#f8f8c1 0 86%,#f8f8b9 90%,#f8f88d 93%);color:#3a3312;border-color:#c9c25a}
+.teece[data-card-deck="knights"]{--cardbg:#3b4350;--artink:#cfd8e3;background:var(--cardbg);color:#eef2f7;border-color:#1c222b}
 .teece[data-card-deck="warlock"]{--cardbg:#2b1838;--artink:#c39cff;background:var(--cardbg);color:#f0e6ff;border-color:#130a1a}
 .teece[data-card-deck="basic"]{--cardbg:#dce6ee;--artink:#47637d;background:var(--cardbg);color:#1d2a36;border-color:#7d93a8}
 .teece[data-card-deck="teece100"]{--cardbg:#7a4a4a;--artink:#f2f7e6;background:var(--cardbg);color:#f0e8e8;border-color:#5a2a2a}
@@ -730,6 +735,11 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 #kwPop{position:fixed;z-index:60;max-width:min(300px,calc(100vw - 24px));background:#111;border:1px solid var(--gold);
   border-radius:8px;padding:8px 11px;font-size:12px;line-height:1.45;color:var(--cream2);box-shadow:0 6px 20px rgba(0,0,0,.55)}
 #kwPop[hidden]{display:none}
+.compass{display:inline-grid;grid-template-columns:repeat(3,18px);grid-template-rows:repeat(3,18px);gap:1px;vertical-align:middle;margin:2px 6px 2px 0}
+#kwPop .compass{display:grid;margin:4px 0 6px}
+.compass i{font-style:normal;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;
+  border:1px solid var(--line);border-radius:3px;background:rgba(255,255,255,.06)}
+.compass .c0{grid-area:1/2}.compass .c1{grid-area:2/3}.compass .c2{grid-area:3/2}.compass .c3{grid-area:2/1}
 #kwPop b{display:block;color:var(--gold);font-size:13px;margin-bottom:2px}
 #detail .dstats{font-size:12px;margin-top:6px;font-variant-numeric:tabular-nums}
 /* One line per buff or debuff standing on a Teece: what did it, and by how
@@ -1281,7 +1291,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:234,date:'2026-10-17'};
+const VERSION={build:235,date:'2026-10-18'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1399,7 +1409,10 @@ const KW_RULES={
   pacificius:'Oath of Pacificius: +5 Defence. The Oath breaks when the Paladin destroys an enemy.',
   holylight:'Once per your turn: Cleanse this Teece and every adjacent Teece, and destroy every enemy battleground or equip on or adjacent to this panel. Granted by the Holy Light spell.',
   ram:'Once per your turn: select a Teece in the same row or column; stun it, give it -3, and move one space toward it if able.',
-  paladin:'A Teece from the Paladin deck, or any Teece that has sworn an Oath.'
+  paladin:'A Teece from the Paladin deck, or any Teece that has sworn an Oath.',
+  armoured:'Every Knight has 1 Defence. Mounts do not.',
+  knight:'A Teece from the Knights deck. Knights are Armoured and ride Mounts.',
+  mount:'A Token that a Knight rides as an equip. A Knight is played already riding the Mount printed on it, and has the Mount\u2019s numbers, Defence and abilities on top of its own. When the Knight is destroyed, its Mount is played on that panel. A Knight played onto one of your Mounts on the board rides that Mount instead of its own. A Knight can have only one Mount.'
 };
 /* The spells a Wizard conjures and a Priest folds together. Built from the
    cards themselves at the moment of the tap, so the popup cannot drift from the
@@ -1457,7 +1470,8 @@ const KW_FORMS=[
   ['Fireball','fireball'],['Fire','fire'],['Water','water'],['Wind','wind'],['Earth','earth'],['Steam','steam'],
   ['Lava','lava'],['Ice','ice'],['Mud','mud'],['Holy','holy'],
   ['[Cc]onjur(?:e[sd]?|ing)','conjure'],['[Cc]ombin(?:e[sd]?|ing)','combine'],['[Ee]lements?','element'],
-  ['Paladins?','paladin']
+  ['Paladins?','paladin'],
+  ['Armoured','armoured'],['Knights?(?! [A-Z])','knight'],['Mount(?:s|ed)?','mount']
 ];
 /* Phrases that read like a keyword and are not one: the effect-is-silenced
    wording means the effect fizzled, Dumpster Fire is an ability's name, and so
@@ -1502,6 +1516,9 @@ function tokenDesc(k){
   return ids.map(id=>{
     const c=CARDS[id];
     const body=(c.text||'').replace(/^[^.]*?Token(?: with Defence \d+)?\.\s*/,'');
+    /* A Mount's numbers are drawn as a compass beside this (kwPopOpen), never
+       written out as x/x/x/x. */
+    if(c.mount)return 'A Mount Token: '+compassWords(c.sides)+'. '+body.replace(/^Mount\.\s*/,'');
     return 'A Token, '+c.sides.join('/')+(c.def&&body.indexOf('Defence '+c.def)<0?' with Defence '+c.def:'')+(c.kw||[]).filter(x=>body.indexOf(kwTitle(x))<0).map(x=>', '+kwTitle(x)).join('')+
       (ids.length>1?' ('+((DECKS&&DECKS[c.deck]&&DECKS[c.deck].name)||c.deck)+')':'')+'. '+body;
   }).join(' ');
@@ -1515,10 +1532,17 @@ function kwify(h){
       for(let j=0;j<KW_FORMS.length;j++)if(g[j]!==undefined)return kwSpan(KW_FORMS[j][1],m);return m;})).join('');
 }
 function kwPopClose(){const p=HAS_DOM&&document.getElementById('kwPop');if(p)p.hidden=true;}
+/* A Teece's four numbers on the edges they defend, top/right/bottom/left, the
+   way the card and the deck page draw them. */
+function compassHtml(sd){
+  return '<span class="compass">'+sd.map((n,k)=>'<i class="c'+k+'">'+n+'</i>').join('')+'</span>';
+}
+const compassWords=sd=>['Top','Right','Bottom','Left'].map((w,k)=>w+' '+sd[k]).join(', ');
 function kwPopOpen(el){
   const p=document.getElementById('kwPop'),k=el.getAttribute('data-kw');
   if(!p||!kwDesc(k))return;
-  p.innerHTML='<b>'+escHtml(kwTitle(k))+'</b>'+escHtml(kwDesc(k));
+  const mid=KW_TOKEN[k]&&KW_TOKEN[k][0];
+  p.innerHTML='<b>'+escHtml(kwTitle(k))+'</b>'+(mid&&CARDS[mid].mount?compassHtml(CARDS[mid].sides):'')+escHtml(kwDesc(k));
   p.hidden=false;
   const r=el.getBoundingClientRect(),pw=p.offsetWidth,ph=p.offsetHeight,vw=innerWidth,vh=innerHeight;
   const x=Math.max(12,Math.min(r.left,vw-pw-12));
@@ -1577,7 +1601,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}',priest:'\u{1F64F}',dwarves:'\u26CF\uFE0F',warlock:'\u26E7',basic:'\u{1F530}',cult:'\u26E4',paladin:'\u269C\uFE0F'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}',priest:'\u{1F64F}',dwarves:'\u26CF\uFE0F',warlock:'\u26E7',basic:'\u{1F530}',cult:'\u26E4',paladin:'\u269C\uFE0F',knights:'\u265E'};
 /* ---- Card art. One small ASCII drawing per card, 13 columns wide, laid
        transparently behind the face in hand and behind the Teece on the
        board. Keyed by card id, tokens included. ---- */
@@ -1950,6 +1974,39 @@ const CARD_ART={
   1238:["  @@     @@  ", "   @\\___/@   ", "    ( o o )  ", "    /\\_v_/\\  ", "   ~~~~~~~~  "],
   1239:["     ___     ", "    (o_o)    ", "    /|+|\\    ", "     | |     ", "     d b     "],
   1240:["    _w_w_    ", "    /   \\    ", "   < BIG >   ", "    \\   /    ", "      v      "],
+  /* ---- Knights ---- */
+  1241:["    _[=]_    ", "    |o o|  / ", "    |_-_| /  ", "  /=|###|/   ", "  ~~^^^^^~~  "],
+  1242:[" \\\\ _[=]_ // ", "  \\\\|o o|//  ", "    |_-_|    ", "  /=|###|=\\  ", "   ~~~~~~~   "],
+  1243:["     ___     ", "    (o o)    ", "     \\_/     ", "  ___/|\\___  ", " /  HORSE  \\ "],
+  1244:["    _[=]_ ~  ", "    |o o|/   ", "    |_-_|    ", "  /=|###|=\\  ", "  (~~)~(~~)  "],
+  1245:["    _[=]_    ", "    |o o| [#]", "    |_-_| [#]", "  /=|###|=[#]", "   _|   |_   "],
+  1246:["    _[=]_    ", "    |o o|-=> ", "    |_-_|    ", "  /=|###|    ", "  //  ~~ \\\\  "],
+  1247:["    _[=]_    ", "    |o o|    ", "  <-|_-_|--> ", "  /=|###|=\\  ", "    (@ @)    "],
+  1248:["    _[=]_    ", "    |o o| __ ", "    |_-_|(o >", "  /=|###| \\/ ", "     /  \\    "],
+  1249:["    _[=]_    ", "    |o o|    ", "  ->|_-_|->> ", "  /=|###|=\\  ", "    \\___/    "],
+  1250:["       ||    ", "    _[=]_    ", "    |o o|    ", "  /=|###|=\\  ", "     |  |    "],
+  1251:["  * _[=]_ *  ", "    |O O|    ", "    |_=_|    ", "  /=|###|=\\  ", "  ~~^^^^^~~  "],
+  1252:[" * _[^=^]_ * ", "   | O O |   ", "   |_===_|   ", "  /=|#####|\\ ", " ~~~^^^^^~~~ "],
+  1253:["   _______   ", "  /=======\\  ", " |  o   o  | ", "  \\=======/  ", "    |   |    "],
+  1254:["   [=] [=]   ", "  /___X___\\  ", "  |  MOUNT|  ", "  |__MOUNT|  ", "   /     \\   "],
+  1255:["           / ", "          /  ", "  =======>   ", "        /    ", "       /     "],
+  1256:["    __/)     ", "   /   o\\ +  ", "  /~~~~ _)>+ ", " //|  |  \\\\  ", "   x2  x2    "],
+  1257:["  /) /) /)   ", " (o)(o)(o)>> ", "  |  |  |    ", "  ~~~~~~~~~  ", "   MUSTER    "],
+  1258:["    __/)     ", "   /  o \\    ", "  /==== _)>  ", " //|  |  \\\\  ", "   -3  -3    "],
+  1259:["   /\\___/\\   ", "  /_______\\  ", "  | |   | |  ", "  | | ~ | |  ", "  |_|___|_|  "],
+  1260:["  _________  ", " | /  |  \\ | ", " |[=] | [=]| ", " | \\  |  / | ", " |_________| "],
+  1261:["    __/)     ", "   /   o\\    ", "  /~~~~ _)>  ", " //|  |  \\\\  ", "   '  '      "],
+  1262:[" \\\\ __/) //  ", "  \\/   o\\/   ", "  /~~~~ _)>  ", " //|  |  \\\\  ", "   ~~~~~~    "],
+  1263:["    __/)     ", "   /  O \\    ", "  /#### _)>  ", " //|  |  \\\\  ", "   =  =      "],
+  1264:["      __     ", "     (o >~ ~ ", "     |  |    ", "   __/  |    ", "  /_ /_ /_   "],
+  1265:["    __/)  >> ", "   /   o\\ >> ", "  /~~~~ _)>  ", " //|  |  \\\\  ", "             "],
+  1266:["    __/)     ", "   /   o\\    ", "  /.... _)>  ", " //|  |  \\\\  ", "   ~  ~      "],
+  1267:["      |      ", "    __/)     ", "   /  @ \\    ", "  /~~~~ _)>  ", "   (  |  )   "],
+  1268:["       __    ", "      (o >   ", "     _/ /    ", "    (___)    ", "     /  \\    "],
+  1269:["       |>    ", "       ||    ", "       ||o   ", "   ____||    ", "  /|  |  |\\  "],
+  1270:["    __/)     ", "   /[#]o\\    ", "  /#### _)>  ", " //|##|  \\\\  ", "   #  #      "],
+  1271:[" \\\\ __/) //  ", "  \\/  O \\/   ", "  /==== _)>> ", " //|  |  \\\\  ", "   *  *      "],
+  1272:["    __/)     ", "   /  o \\    ", "  /==== _)>  ", " //|  |  \\\\  ", "  [3] [3]    "],
 
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
@@ -2578,7 +2635,9 @@ function canPlay(p,cardId){
   if(cd.type==='teece'){
     if((G.teecePlayed&&!freePlayFor(p,cardId))||hexOn(p,'freeze'))return false;
     let room=false;
-    for(let i=0;i<BN;i++)if(openAt(G.board,i)){room=true;break;}
+    if(!cd.mustMount)for(let i=0;i<BN;i++)if(openAt(G.board,i)){room=true;break;}
+    /* A Knight can also be played onto one of your Mounts; Legaless only there. */
+    if(!room&&cd.knight&&knightSpots(G.board,p,cardId).length)room=true;
     if(!room)return false;
     const need=sacsNeeded(cardId,p);
     /* Read through the one pool playTeece reads, or the forced-play rule and
@@ -2603,7 +2662,7 @@ function canPlay(p,cardId){
     if(cd.anyOwner)for(let i=0;i<BN;i++){if(G.board[i].teece&&G.board[i].teece.owner!==p&&equipRoom(G.board[i].teece)&&canTarget(G.board,i,p,'equip'))return true;}
     for(let i=0;i<BN;i++){
       const t=G.board[i].teece;
-      if(t&&t.owner===p&&equipRoom(t)&&(!cd.onlyToken||t.isToken)&&(!cd.onlyPackLeader||isPackLeader(t))&&(!cd.onlyOath||oathOn(t,cd.onlyOath)))return true;
+      if(t&&t.owner===p&&equipRoom(t)&&(!cd.onlyToken||t.isToken)&&(!cd.onlyPackLeader||isPackLeader(t))&&(!cd.onlyOath||oathOn(t,cd.onlyOath))&&(!cd.onlyMount||isMountBody(t)))return true;
     }
     /* a Pack Leader still in hand will be one when it lands, so it can be plated */
     if(cd.onlyPackLeader&&G.players[p].hand.some(h=>CARDS[h].packLeader))return true;
@@ -5390,6 +5449,86 @@ const CARDS = {
     cast:[{fx:'mod',where:'global',n:10,dur:'mine'}]},
  1239:{name:'Paladin Squire',type:'teece',token:true,deck:'paladin',paladin:true,sides:[2,2,2,2],
     text:'Token. Summoned by the Knight Commander. It counts as a Paladin, but swears no Oath.'},
+ /* ---- Knights: 1241-1260, and the Mount Tokens 1261-1272 ----
+        A Knight (knight:true) is Armoured -- printed Defence 1 -- and is played
+        already riding the Mount Token named by mountOf. A Mount rides as an
+        equip entry {mount:true,sides}, so everything that reads equips reads it;
+        standing on its own it is an ordinary Token. The engine is under
+        "Knights: Mounts". ---- */
+ 1241:{name:'Lancer',type:'teece',sides:[4,4,2,4],def:1,knight:true,mountOf:1261,
+    text:'Armoured. Mount: Destrier.'},
+ 1242:{name:'Sky Knight',type:'teece',sides:[3,3,3,3],def:1,knight:true,mountOf:1262,
+    text:'Armoured. Mount: Pegasus, which has Flying.'},
+ 1243:{name:'Page',type:'teece',sides:[0,0,0,0],def:1,knight:true,mountOf:1263,
+    text:'Armoured. Mount: Charger.'},
+ 1244:{name:'Desert Knight',type:'teece',sides:[5,5,5,5],def:1,knight:true,mountOf:1264,
+    text:'Armoured. Mount: Cud Spitter, which has Ranged.'},
+ 1245:{name:'Rearguard',type:'teece',sides:[0,0,6,6],def:1,knight:true,mountOf:1265,
+    text:'Armoured. Mount: Courser.'},
+ 1246:{name:'Outrider',type:'teece',sides:[4,4,2,2],def:1,knight:true,mountOf:1266,
+    text:'Armoured. Mount: Palfrey.'},
+ 1247:{name:'Tilting Knight',type:'teece',sides:[0,0,0,9],def:1,knight:true,mountOf:1267,
+    text:'Armoured. Mount: Carousel Horse, which can rotate once per turn.'},
+ 1248:{name:'Emu Knight',type:'teece',sides:[4,0,0,4],def:1,knight:true,mountOf:1268,
+    text:'Armoured. Mount: Emu, which can move twice per turn.'},
+ 1249:{name:'Legaless',type:'teece',sides:[9,9,9,9],def:1,knight:true,mustMount:true,kw:['ranged'],
+    text:'Armoured. Ranged. Must be played on one of your Mounts, which it rides.'},
+ 1250:{name:'Giraffe Knight',type:'teece',sides:[8,0,0,0],def:1,knight:true,mountOf:1269,
+    text:'Armoured. Mount: War Giraffe.'},
+ 1251:{name:'Knight Captain',type:'teece',sides:[6,6,6,6],def:1,sac:1,knight:true,mountOf:1270,
+    handDiscard:[{fx:'token',tok:1270,count:1}],
+    text:'Sacrifice a Teece to play. Armoured. Mount: Barded Charger. Discard this from your hand: play its Mount, a Barded Charger.'},
+ 1252:{name:'Grand Marshal',type:'teece',sides:[5,5,5,5],def:1,sac:2,knight:true,mountOf:1271,
+    text:'Sacrifice two Teece to play. Armoured. Mount: Stallion, which has Flying, Ranged and Defence 5.'},
+ /* ---- Knights equips ---- */
+ 1253:{name:'Herd Saddle',type:'equip',mod:0,grants:{mountCap:true},
+    text:'The equipped Teece can have any number of Mounts.'},
+ 1254:{name:'Mount Mount',type:'equip',mod:0,onlyMount:true,
+    grants:{mountCap:true,act:[{name:'Mount Up',once:'turn',steps:[{fx:'mountGrab'}]}]},
+    text:'Equip only to a Mount. Once per your turn: equip to it a Mount from anywhere on the board. This Mount can have any number of other Mounts.'},
+ 1255:{name:'Jousting Lance',type:'equip',mod:0,modIfMounted:4,
+    text:'The equipped Teece has +4 while it is mounted.'},
+ /* ---- Knights magic ---- */
+ 1256:{name:'Remount',type:'magic',knightAi:'remount',cast:[{fx:'remount'}],
+    text:'Select a Knight; summon a copy of its Mount on an empty panel next to it. The copy is invulnerable until the end of the turn.'},
+ 1257:{name:'Cavalry Muster',type:'magic',knightAi:'muster',cast:[{fx:'muster',n:2}],
+    text:'The next two Knights you play each also summon a copy of their Mount on an empty panel adjacent to them.'},
+ 1258:{name:'Call the Warhorse',type:'magic',cast:[{fx:'token',tok:1272,count:1}],
+    text:'Summon a Warhorse on an empty panel: a Mount with Defence 3 and "When destroyed: give every adjacent Teece -3."'},
+ /* ---- Knights battlegrounds ---- */
+ 1259:{name:'Stables',type:'ground',gdefKind:{kind:'mount',n:7},
+    text:'A Mount on this battleground has +7 Defence.'},
+ 1260:{name:'Armoury',type:'ground',gEquipMod:4,
+    text:'An equipped Teece on this battleground has +4. A Knight riding a Mount is equipped.'},
+ /* ---- Mount Tokens. Their numbers, keywords, Defence and abilities are what a
+        Knight riding one adds to its own (mountGrants, below CARDS). ---- */
+ 1261:{name:'Destrier',type:'teece',token:true,deck:'knights',mount:true,sides:[3,3,3,3],
+    text:'Mount.'},
+ 1262:{name:'Pegasus',type:'teece',token:true,deck:'knights',mount:true,sides:[3,3,3,3],kw:['flying'],
+    text:'Mount. Flying.'},
+ 1263:{name:'Charger',type:'teece',token:true,deck:'knights',mount:true,sides:[6,6,6,6],
+    text:'Mount.'},
+ 1264:{name:'Cud Spitter',type:'teece',token:true,deck:'knights',mount:true,sides:[1,1,1,1],kw:['ranged'],
+    text:'Mount. Ranged.'},
+ 1265:{name:'Courser',type:'teece',token:true,deck:'knights',mount:true,sides:[6,6,0,0],
+    text:'Mount.'},
+ 1266:{name:'Palfrey',type:'teece',token:true,deck:'knights',mount:true,sides:[2,2,4,4],
+    text:'Mount.'},
+ 1267:{name:'Carousel Horse',type:'teece',token:true,deck:'knights',mount:true,sides:[0,9,0,0],
+    act:[{name:'Rotate',once:'turn',steps:[{fx:'rot',may:true}]}],
+    text:'Mount. Once per your turn: rotate this (a Knight riding it rotates with it).'},
+ 1268:{name:'Emu',type:'teece',token:true,deck:'knights',mount:true,sides:[0,2,2,0],
+    act:[{name:'Scurry',once:'turn',times:2,steps:[{fx:'move',range:'orth'}]}],
+    text:'Mount. Twice per your turn: move one space.'},
+ 1269:{name:'War Giraffe',type:'teece',token:true,deck:'knights',mount:true,sides:[2,0,0,0],
+    text:'Mount.'},
+ 1270:{name:'Barded Charger',type:'teece',token:true,deck:'knights',mount:true,sides:[4,4,4,4],
+    text:'Mount.'},
+ 1271:{name:'Stallion',type:'teece',token:true,deck:'knights',mount:true,sides:[5,5,5,5],def:5,kw:['flying','ranged'],
+    text:'Mount. Flying. Ranged. Defence 5.'},
+ 1272:{name:'Warhorse',type:'teece',token:true,deck:'knights',mount:true,sides:[3,3,3,3],def:3,
+    onDeath:[{fx:'aoe',n:-3,dur:'perm'}],
+    text:'Mount. Defence 3. When destroyed: give every adjacent Teece -3.'},
  /* ---- Basic: the deck for a first game. Every card shows one of the base
         rules on its own -- uneven sides, rotation, Flying, Ranged, Tokens,
         sacrifice, equips, magic, battlegrounds -- and nothing else. ---- */
@@ -5468,7 +5607,7 @@ const CARDS = {
    Both views are cached; newState clears them, because fusion ids are reused. */
 const ID_KEYS={name:1,type:1,sides:1,text:1,flavor:1,def:1,sac:1,sacOK:1,token:1,deck:1,tutorial:1,perkOnly:1,
   boss:1,fusion:1,forms:1,mark:1,runeCard:1,topDeck:1,priest:1,godTitle:1,dwarf:1,warlock:1,patronTitle:1,
-  garbage:1,spider:1,paladin:1,vampire:1,solar:1,madness:1,rat:1,locust:1,pixie:1,zombie:1,army:1,apoc:1,devil:1,mummy:1,horseman:1};
+  garbage:1,spider:1,paladin:1,knight:1,mount:1,mountOf:1,mustMount:1,vampire:1,solar:1,madness:1,rat:1,locust:1,pixie:1,zombie:1,army:1,apoc:1,devil:1,mummy:1,horseman:1};
 let DEF_SIL={},DEF_GRAFT={};
 function DEF(t){
   const c=CARDS[t.cardId];
@@ -6418,7 +6557,8 @@ function makeTeece(cardId,owner,opts){
     if(opts&&opts.real)delete pl0.coffined[cardId];
   }
   return {uid:UID++,cardId,owner,baseOwner:owner,base,perm:[0,0,0,0],temp:[0,0,0,0],
-    equips:[],isToken:!!d.token,isCopy:false,resummoned:false,kwTemp:[],kwPerm:[],links:[],controls:[],
+    /* A Knight arrives riding the Mount printed on it. */
+    equips:d.mountOf?[mountEntry(d.mountOf,owner)]:[],isToken:!!d.token,isCopy:false,resummoned:false,kwTemp:[],kwPerm:[],links:[],controls:[],
     defPerm:0,dodged:false,age:0,standCell:null,transformed:false,tickTotal:0,immortalOwner:null,
     form:0,ctr:0,drainsThisTurn:0,harmless:false,drainMove:false,
     /* The tally of lives this CARD has already spent belongs to the player,
@@ -6498,6 +6638,8 @@ function newState(mode,vsAI,decks,extra){
    together. handPush and handTake are the only places allowed to touch either,
    which is what keeps them the same length. */
 function handPush(p,id,plate){
+  /* ...nor in a hand. */
+  if(isMountCard(id))return -1;
   const pl=G.players[p];
   if(!pl.plate)pl.plate=pl.hand.map(()=>[]);
   pl.hand.push(id);
@@ -7261,7 +7403,8 @@ function effSides(b,i,parts){
   const addE=(sum,m,label)=>{for(let r=0;r<eqMul;r++)addMod(sum,m,r?label+', doubled by '+DEF(t).name:label);};
   for(const e of t.equips){
     const ed=CARDS[e.cardId];
-    addE(s,ed.mod,ed.name);
+    addE(s,e.sides||ed.mod,e.mount?'Mount: '+ed.name:ed.name);
+    if(ed.modIfMounted&&isMounted(t))addE(s,ed.modIfMounted,ed.name+', while mounted');
     /* A number that belongs to the mode an equip went on in (Steel and Flame). */
     {const eg=eqG(e);if(eg&&eg.eMod)addE(s,eg.eMod,eqLabel(e));}
     /* The two Marks pay out extra on the Horseman they are named for, the way
@@ -7389,6 +7532,7 @@ function effSides(b,i,parts){
       if(gd.gRangedPlus&&kwOf(b,i,true).indexOf('ranged')>=0)addGround(s,gd.gRangedPlus,gd.name+', for being Ranged');
       if(gd.gFusionMod&&DEF(t).fusion)addGround(s,gd.gFusionMod,gd.name+', for a fusion'+where);
       if(gd.gTokenMod&&t.isToken)addGround(s,gd.gTokenMod,gd.name+', for a Token'+where);
+      if(gd.gEquipMod&&t.equips.some(e=>!e.rider))addGround(s,gd.gEquipMod,gd.name+', for an equipped Teece'+where);
       if(gd.gWarlockMod&&DEF(t).warlock)addGround(s,gd.gWarlockMod,gd.name+', for a Warlock'+where);
       if(gd.gPerAlly){
         const na=allyCount(b,i,false);
@@ -8858,8 +9002,11 @@ const escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 function durTxt(dur){return dur==='temp'?' until end of turn':dur==='mine'?' until the start of your next turn':' permanently';}
 /* One quarter turn. Sides run top, right, bottom, left. */
 function spinT(t,dir){
-  const s=t.base;
-  t.base=dir==='cw'?[s[3],s[0],s[1],s[2]]:[s[1],s[2],s[3],s[0]];
+  const turn=s=>dir==='cw'?[s[3],s[0],s[1],s[2]]:[s[1],s[2],s[3],s[0]];
+  t.base=turn(t.base);
+  /* A ridden Mount turns with its rider. New entries, so a simulated board
+     never turns the real one's. */
+  if(t.equips.some(e=>e.mount))t.equips=t.equips.map(e=>e.mount?Object.assign({},e,{sides:turn(e.sides)}):e);
 }
 const dirTxt=d=>d==='cw'?'clockwise':'counter-clockwise';
 
@@ -9997,9 +10144,8 @@ async function FXRUN(st,ctx){
       const base=boardValue(G.board,p);
       for(const o of opts){
         const bb=cloneBoard(G.board);
-        const tt=bb[ctx.cell].teece,bs=tt.base;
-        if(o.v==='cw')tt.base=[bs[3],bs[0],bs[1],bs[2]];
-        else if(o.v==='ccw')tt.base=[bs[1],bs[2],bs[3],bs[0]];
+        const tt=bb[ctx.cell].teece;
+        if(o.v==='cw'||o.v==='ccw')spinT(tt,o.v);
         simCombat(bb);
         const g=boardValue(bb,p)-base+(o.v==='no'?0.01:0);
         if(g>bv){bv=g;ch=o.v;}
@@ -14173,7 +14319,7 @@ async function FXRUN(st,ctx){
     for(let x=0;x<(st.n||1);x++){
       const pool=[];
       pl.grave.forEach((id,ix)=>{const d=CARDS[id];
-        if(d.type==='equip'&&!d.onlyHand&&!d.onlyToken&&!d.onlySpiderling&&!d.onlyPackLeader&&!d.onlyOath&&!d.graveEquip&&!d.runeblade&&!(typeof d.mod==='number'&&d.mod<0))
+        if(d.type==='equip'&&!d.onlyHand&&!d.onlyToken&&!d.onlySpiderling&&!d.onlyPackLeader&&!d.onlyOath&&!d.onlyMount&&!d.graveEquip&&!d.runeblade&&!(typeof d.mod==='number'&&d.mod<0))
           pool.push({ix,id});});
       if(!pool.length){if(!x)log('There is no equip card in '+ownOf(p)+' graveyard to call up.');return;}
       /* The computer takes the one that adds most to the body; a player picks. */
@@ -15095,6 +15241,57 @@ async function FXRUN(st,ctx){
     await shootTeece(p,c,{dmg:5,by:ctx.t?nm(ctx.t):null});
     return;}
   /* ---- Cult ---- */
+  /* ---- Knights ---- */
+  case 'mountDrop':{
+    /* A Knight is destroyed: the Mount it rode is played where it fell, or
+       beside it when that panel is taken. */
+    const i=ctx.deadCell,owner=ctx.deadOwner!=null?ctx.deadOwner:p;
+    if(i==null||!CARDS[st.id])return;
+    let at=openAt(b,i)?i:null;
+    if(at==null){const near=ADJ[i].filter(j=>openAt(b,j));if(near.length)at=near[Math.floor(Math.random()*near.length)];}
+    if(at==null){log(CARDS[st.id].name+' has nowhere to stand, and is gone.');return;}
+    summonToken(b,at,st.id,owner,true);
+    log(CARDS[st.id].name+' is left standing at the '+CN[at]+'.');
+    return;}
+  case 'remount':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(isKnight(t)&&isMounted(t)&&(sameTeam(t.owner,p)||canTarget(b,i,p))&&ADJ[i].some(j=>openAt(b,j)))cands.push(i);}
+    if(!cands.length)return none('There is no mounted Knight with room beside it.');
+    const c=await pickCell(cands,'Remount: choose a Knight. A copy of its Mount appears next to it.',
+      (bb,i)=>{const m=mountsOf(bb[i].teece)[0],j=ADJ[i].find(x=>openAt(bb,x));if(m&&j!=null)putTeece(bb,j,makeTeece(m.cardId,p),false);},false);
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    const ms=mountsOf(b[c].teece);
+    let id=ms[0].cardId;
+    if(ms.length>1){
+      const ids=[...new Set(ms.map(e=>e.cardId))];
+      if(ids.length>1){
+        const v=isAIP(p)||!HAS_DOM?String(ids.reduce((a,x)=>CARDS[x].sides.reduce((u,w)=>u+w,0)>CARDS[a].sides.reduce((u,w)=>u+w,0)?x:a,ids[0]))
+          :await chooseOption(p,ids.map(x=>({v:String(x),lbl:CARDS[x].name,cid:x})),'Copy which Mount?');
+        if(v&&CARDS[+v])id=+v;
+      }
+    }
+    ctx.last=c;
+    await summonMountCopy(p,c,id,'Remount',true);
+    return;}
+  case 'muster':{
+    const pl=G.players[p];
+    pl.muster=(pl.muster||0)+(st.n||2);
+    log('Cavalry Muster: the next '+pl.muster+' Knights '+whoIn(p)+' '+vb(p,'plays','play')+' each bring a copy of their Mount.');
+    return;}
+  case 'mountGrab':{
+    const c=ctx.cell;
+    if(c==null||!b[c].teece)return;
+    const cands=grabTargets(b,c,p);
+    if(!cands.length)return none('There is no other Mount on the board.');
+    const j=await pickCell(cands,'Mount Up: choose a Mount to equip to '+nm(b[c].teece)+'.',(bb,x)=>grabSim(bb,c,x),true);
+    if(j==='CANCEL')return 'ABORT';
+    if(j==null)return 'NONE';
+    const m=b[j].teece;
+    b[j].teece=null;
+    mountUp(b[c].teece,m,true);
+    await anim([c,j],'zap');
+    return;}
   /* ---- Paladin ---- */
   case 'cleanse':{
     const cands=[];
@@ -15390,6 +15587,8 @@ function bounceToHand(t,keepEquips){
   log(nm(t)+' returns to '+pname(t.baseOwner)+"'s hand.");
 }
 function toGrave(owner,cardId){
+  /* A Mount is a Token: it never lies in a graveyard. */
+  if(isMountCard(cardId))return;
   /* A fusion is not a card anybody printed. It goes into the ground as the
      cards it was made of, each one counted as buried in its own right. */
   const fu=CARDS[cardId]&&CARDS[cardId].fusion;
@@ -17021,11 +17220,14 @@ async function playTeece(p,handIdx){
     toast(d.sacSpiderling?'You need a Spiderling of yours to sacrifice.':pool.hands.length?'Not enough to sacrifice.':'Not enough Teece to sacrifice.');
     return false;
   }
-  const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
+  const empt=[];if(!d.mustMount)for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
+  /* A Knight can land on one of your Mounts and ride it; Legaless only there. */
+  const mspots=knightSpots(b,p,id);
+  if(d.mustMount&&!mspots.length){toast(d.name+' must be played on one of your Mounts.');return false;}
   /* A sacrifice empties the panel it was standing on, and that panel is a place
      the new Teece may land. So a full board is only a wall when the card pays
      for nothing. */
-  if(!empt.length&&!need){toast('No empty space.');return false;}
+  if(!empt.length&&!mspots.length&&!need){toast('No empty space.');return false;}
   const plan=(isAIP(p)&&AI_TEECE_PLAN)?AI_TEECE_PLAN:null;
   const sacP=[],sacH=[];
   for(let paidW=0,s=0;paidW<need;s++){
@@ -17042,8 +17244,8 @@ async function playTeece(p,handIdx){
   /* Resolved to card ids while the indices still mean something: handTake for
      the card being played is about to shift everything after it. */
   const sacHIds=sacH.map(x=>pl.hand[x]);
-  const spots=empt.slice();
-  for(const c of sacP)if(!b[c].razed&&!blockedGround(b,c)&&spots.indexOf(c)<0)spots.push(c);
+  const spots=empt.concat(mspots);
+  if(!d.mustMount)for(const c of sacP)if(!b[c].razed&&!blockedGround(b,c)&&spots.indexOf(c)<0)spots.push(c);
   spots.sort((x,y)=>x-y);
   /* What the Teece would actually arrive as, panel by panel. Every other prompt
      in the game previews its own consequence and this one previewed nothing, so
@@ -17058,9 +17260,12 @@ async function playTeece(p,handIdx){
      without {real:true}, so weighing a panel never spends the coffin. */
   const previewPlace=(bb,c)=>{
     for(const q of sacP)if(bb[q].teece)bb[q].teece=null;
+    const rm=mspots.indexOf(c)>=0&&isMountBody(bb[c].teece)?bb[c].teece:null;
+    if(rm)bb[c].teece=null;
     if(!openAt(bb,c))return;
     const gt=makeTeece(id,p);
     for(const e of plateOf(p,handIdx))gt.equips.push(e);
+    if(rm)mountUp(gt,rm,false);
     putTeece(bb,c,gt,false);
   };
   let spot=plan?plan.c:await chooseCell(p,spots,'Choose a space for '+d.name+'.',
@@ -17106,6 +17311,9 @@ async function playTeece(p,handIdx){
     if(!t.isToken&&!t.isCopy)sacked.push({cardId:t.cardId,to:pd.bodyTo});
     log(nm(t)+' is sacrificed.');
   }
+  /* The Mount it is landing on leaves the board without dying, to be ridden. */
+  let ridden=null;
+  if(mspots.indexOf(spot)>=0&&isMountBody(b[spot].teece)&&b[spot].teece.owner===p){ridden=b[spot].teece;b[spot].teece=null;}
   /* A death can fill the very panel it emptied -- an Egg Sac boiling over, a
      resummon, a Token that arrives where its summoner fell. Ask again rather
      than dropping the new Teece on top of whatever moved in. */
@@ -17131,6 +17339,7 @@ async function playTeece(p,handIdx){
      board sees the equipped stats from the first moment */
   for(const e of worn)t.equips.push(e);
   for(const e of gearTaken)t.equips.push(e);
+  if(ridden)mountUp(t,ridden,true);
   if(plan&&plan.rot)spinT(t,plan.rot===1?'cw':'ccw');
   putTeece(b,spot,t,true,'play');
   attachRiders(p,id,t,true);
@@ -17239,6 +17448,8 @@ async function playTeece(p,handIdx){
   else if(b[spot].teece===t&&pactMap(b,spot)){await pactArrive(p,t);if(G.over)return true;}
   /* Oaths are sworn before anything the card does when played. */
   if(b[spot].teece===t){await oathArrive(p,spot,t);if(G.over)return true;}
+  /* Cavalry Muster brings a second Mount along. */
+  if(b[spot].teece===t){await knightArrive(p,spot,t);if(G.over)return true;}
   if(d.onPlay)for(let k=0;k<dblFx;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked,fromHand:!G.viaEffect,viaEffect:!!G.viaEffect});
   if(b[spot].teece===t)await groundArrive(spot);
   for(let i=0;i<BN;i++){
@@ -17353,20 +17564,21 @@ async function playEquip(p,handIdx){
     if(ed.onlyPackLeader&&!isPackLeader(t))continue;
     if(ed.onlySpiderling&&!isSpiderling(t))continue;
     if(ed.onlyOath&&!oathOn(t,ed.onlyOath))continue;
+    if(ed.onlyMount&&!isMountBody(t))continue;
     cands.push(i);
   }
   /* Teece still in hand are targets too. Not for a Drone-only equip: no Drone
      is ever a card in hand, so there is nothing there for it to bolt onto. */
   const hands=[];
   /* A Light needs an Oath already sworn, which no card in hand has. */
-  if(!ed.onlyToken&&!ed.onlySpiderling&&!ed.onlyOath)for(let h=0;h<pl.hand.length;h++){
+  if(!ed.onlyToken&&!ed.onlySpiderling&&!ed.onlyOath&&!ed.onlyMount)for(let h=0;h<pl.hand.length;h++){
     if(h===handIdx)continue;
     if(CARDS[pl.hand[h]].type==='teece'&&plateRoom(pl.hand[h],plateOf(p,h))&&(!ed.onlyPackLeader||CARDS[pl.hand[h]].packLeader))hands.push(h);
   }
   /* The Runeblade can be set in a Runestone instead of into a hand. */
   const sheaths=ed.runeblade?sheathSpots(p):[];
   if(!cands.length&&!hands.length&&!sheaths.length){toast(ed.onlyHand?'No Teece in your hand to equip.':ed.onlySpiderling?'No Spiderling to equip.':
-    ed.onlyToken?'No Token to equip.':ed.onlyOath?'No Paladin of yours is sworn to '+OATHS[ed.onlyOath].name+'.':ed.onlyPackLeader?'No Pack Leader to equip, on the board or in hand.':'No Teece to equip, on the board or in hand.');return false;}
+    ed.onlyToken?'No Token to equip.':ed.onlyOath?'No Paladin of yours is sworn to '+OATHS[ed.onlyOath].name+'.':ed.onlyMount?'No Mount of yours on the board.':ed.onlyPackLeader?'No Pack Leader to equip, on the board or in hand.':'No Teece to equip, on the board or in hand.');return false;}
   const targets=cands.concat(sheaths.filter(i=>cands.indexOf(i)<0));
   const sheathe=(bb,i)=>{const g=bb[i].ground;if(g)bb[i].ground=Object.assign({},g,{sheath:(g.sheath||[]).concat([{cardId:id,owner:p}])});};
   const c=await chooseCell(p,targets,'Choose a Teece for '+CARDS[id].name+(ed.anyOwner?' \u2014 either side\u2019s':'')+
@@ -18984,6 +19196,7 @@ function aiPlanFor(id){
       if(d.onlyPackLeader&&!isPackLeader(t))continue;
       if(d.onlySpiderling&&!isSpiderling(t))continue;
       if(d.onlyOath&&!oathOn(t,d.onlyOath))continue;
+      if(d.onlyMount&&!isMountBody(t))continue;
       cands.push(i);
     }
     if(!cands.length)return null;
@@ -19121,6 +19334,7 @@ function aiPlanFor(id){
   if(d.wlAi)return aiWarlockPlan(d);
   if(d.cultAi)return aiCultPlan(d);
   if(d.palAi)return aiPaladinPlan(d);
+  if(d.knightAi)return aiKnightPlan(d);
   if(d.gunAi)return aiGunMagicPlan(d);
   if(d.fuAi)return aiFusionMagicPlan(d);
   /* Past the price gate. A spell that asks the whole price before it takes any
@@ -19680,7 +19894,7 @@ async function aiPlayTeece(){
   if(G.teecePlayed&&!(G.freePlay&&G.freePlay.p===p))return false;
   const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
   const anySac=b.some(c=>c.teece&&c.teece.owner===p&&!c.teece.isToken);
-  if(!empt.length&&!anySac)return false;
+  if(!empt.length&&!anySac&&!mountSpots(b,p).length)return false;
   const base=boardValue(b,p);
   let best=null,bg=-1e9;
   for(let h=0;h<pl.hand.length;h++){
@@ -19721,15 +19935,20 @@ async function aiPlayTeece(){
     const realSac=sacP.filter(i=>!b[i].teece.isToken).length;
     if(need>0&&!d.sacSpiderling&&realSac>0&&realCount(p)-realSac<1&&totalTeece(p)-realSac<2)continue;
     const rots=(d.onPlay||[]).some(s=>s.fx==='rot')?[0,1,-1]:[0];
-    /* the panels a sacrifice is about to clear are landing spots too */
-    const spots=empt.slice();
-    for(const sc of sacP)if(!b[sc].razed&&spots.indexOf(sc)<0)spots.push(sc);
+    /* the panels a sacrifice is about to clear are landing spots too, and a
+       Knight's are your Mounts as well */
+    const ms=knightSpots(b,p,id);
+    const spots=d.mustMount?ms.slice():empt.concat(ms);
+    if(!d.mustMount)for(const sc of sacP)if(!b[sc].razed&&spots.indexOf(sc)<0)spots.push(sc);
     for(const c of spots){
       for(const rot of rots){
         const bb=cloneBoard(b);
         for(const sc of sacP)simDeath(bb,{cell:sc,t:bb[sc].teece,killers:[]});
+        const rm=ms.indexOf(c)>=0&&isMountBody(bb[c].teece)?bb[c].teece:null;
+        if(rm)bb[c].teece=null;
         if(bb[c].teece)continue;
         const t=makeTeece(id,p);
+        if(rm)mountUp(t,rm,false);
         if(rot===1){const s=t.base;t.base=[s[3],s[0],s[1],s[2]];}
         if(rot===-1){const s=t.base;t.base=[s[1],s[2],s[3],s[0]];}
         putTeece(bb,c,t,false);
@@ -19873,6 +20092,8 @@ function aiActMuts(cell,ent){
     }
   }else if(st.fx==='mWrap'){
     for(const o of mWrapOptions(b,cell,p))muts.push(bb=>{mWrapSim(bb,cell,o,p);});
+  }else if(st.fx==='mountGrab'){
+    for(const j of grabTargets(b,cell,p))muts.push(bb=>grabSim(bb,cell,j));
   }else if(st.fx==='ram'){
     for(let j=0;j<GRID;j++){
       const o=b[j].teece;
@@ -19928,8 +20149,8 @@ function aiActMuts(cell,ent){
       else for(const j of spots)muts.push(bb=>lay(bb,[j].concat(spots.filter(x=>x!==j)).slice(0,n)));
     }
   }else if(st.fx==='rot'){
-    muts.push(bb=>{const t=bb[cell].teece,s=t.base;t.base=[s[3],s[0],s[1],s[2]];});
-    muts.push(bb=>{const t=bb[cell].teece,s=t.base;t.base=[s[1],s[2],s[3],s[0]];});
+    muts.push(bb=>{spinT(bb[cell].teece,'cw');});
+    muts.push(bb=>{spinT(bb[cell].teece,'ccw');});
   }else if(st.fx==='mod'){
     for(let j=0;j<BN;j++){
       const o=b[j].teece;if(!o)continue;
@@ -20004,6 +20225,7 @@ async function aiTurn(){
   if(stale(ep)||G.over)return;
   for(let k=0;k<2;k++){if(!await aiFuseHand())break;if(stale(ep)||G.over)return;}
   if(stale(ep)||G.over)return;
+  await aiKnightSaddle();
   await aiPlayTeece();
   if(stale(ep)||G.over)return;
   /* a second Teece is on the table when something bought one: a Brigadeer
@@ -20018,6 +20240,8 @@ async function aiTurn(){
   await aiGun();
   if(stale(ep)||G.over)return;
   await aiGunDiscard();
+  if(stale(ep)||G.over)return;
+  await aiKnightDiscard();
   if(stale(ep)||G.over)return;
   await aiActs();
   if(stale(ep)||G.over)return;
@@ -20795,8 +21019,10 @@ function showDetail(i){
   if(t.graveMarks)html+='<div class="dt" style="color:var(--gold)">'+t.graveMarks+' mark'+(t.graveMarks===1?'':'s')+'</div>';
   if(t.equips.length){
     html+='<div class="dstats" style="color:var(--gold)">Equips:</div>';
-    for(const e of t.equips)html+='<div class="dstats" style="font-size:11px">'+eqLabel(e)+
-      ' &mdash; '+kwify(CARDS[e.cardId].text)+'</div>';
+    for(const e of t.equips)html+='<div class="dstats" style="font-size:11px">'+(e.mount
+      /* A ridden Mount is drawn as a compass, never as x/x/x/x. */
+      ?kwify('Mount: '+CARDS[e.cardId].name)+' '+compassHtml(e.sides)+kwify(CARDS[e.cardId].text.replace(/^Mount\.\s*/,''))
+      :eqLabel(e)+' &mdash; '+kwify(CARDS[e.cardId].text))+'</div>';
   }
   /* How it came to be showing the numbers it is showing: every buff and debuff
      standing on it, named, in the order the engine applies them. Straight out
@@ -22427,6 +22653,143 @@ function redeemSim(bb,i,p,n){
   o.oaths=oathsOf(o).filter(x=>!x.broken);
   const g=aiOathPick(bb,i,o,p,freeGods(o),false);
   if(g)swearOath(o,g);
+}
+/* ============ Knights: Mounts ============
+   A Mount is a Token card (mount:true). Standing on its own it is an ordinary
+   Token. Ridden, it is an equip entry {cardId,owner,mount:true,sides} on the
+   Knight, so every rule that reads equips reads it: effSides adds the entry's
+   sides (kept on the entry so a Carousel Horse turns with its rider), and the
+   card's grants -- built below from its own keywords, Defence and abilities --
+   lend the rest. A Knight card names the Mount it is played riding (mountOf).
+   When the Knight is destroyed, the Mount's grants.onDeath plays it on that
+   panel. A Mount never goes to a graveyard or a hand: toGrave and handPush
+   refuse it, so it simply stops existing anywhere else it would have gone. */
+const isMountCard=id=>!!(CARDS[id]&&CARDS[id].mount);
+const isMountBody=t=>!!(t&&isMountCard(t.cardId));
+const isKnight=t=>!!(t&&DEF(t).knight);
+const mountsOf=t=>t?t.equips.filter(e=>e.mount):[];
+const isMounted=t=>mountsOf(t).length>0;
+function mountEntry(id,owner,sides){return {cardId:id,owner,mount:true,sides:(sides||CARDS[id].sides).slice()};}
+for(const id in CARDS){
+  const c=CARDS[id];
+  if(!c.mount)continue;
+  c.grants=Object.assign({},c.kw?{kw:c.kw.slice()}:{},c.def?{def:c.def}:{},c.act?{act:c.act}:{},
+    {onDeath:[{fx:'mountDrop',id:+id}]});
+}
+/* Herd Saddle and Mount Mount lift the one-Mount limit. */
+function mountCap(t){
+  for(const e of t.equips){const g=eqG(e);if(g&&g.mountCap)return 99;}
+  return 1;
+}
+/* Your own Mounts standing on the board: where a Knight can be played. */
+function mountSpots(b,p){
+  const out=[];
+  for(let i=0;i<BN;i++){const t=b[i].teece;if(isMountBody(t)&&t.owner===p&&!b[i].razed)out.push(i);}
+  return out;
+}
+/* Where a Teece card can land: empty panels, and for a Knight one of your
+   Mounts as well. Legaless lands only on a Mount. */
+function knightSpots(b,p,id){
+  const d=CARDS[id];
+  if(!d||!d.knight)return [];
+  return mountSpots(b,p);
+}
+/* The Teece t climbs onto the Mount body m, which leaves the board without
+   dying. Whatever m was carrying -- other Mounts, a Mount Mount -- goes along.
+   With room for one Mount, the new one replaces whatever it was riding. */
+function mountUp(t,m,live){
+  const add=[mountEntry(m.cardId,t.owner,m.base)].concat(m.equips.map(e=>e.mount?Object.assign({},e,{owner:t.owner}):e));
+  for(const e of add)if(e.mount)e.owner=t.owner;
+  t.equips=t.equips.concat(add.filter(e=>!e.mount));
+  for(const e of add.filter(e=>e.mount)){
+    if(mountsOf(t).length>=mountCap(t)){
+      const old=mountsOf(t);
+      t.equips=t.equips.filter(x=>!x.mount);
+      if(live)log(old.map(x=>CARDS[x.cardId].name).join(', ')+' is replaced by '+CARDS[e.cardId].name+'.');
+    }
+    t.equips.push(e);
+  }
+  if(live)log(nm(t)+' mounts '+CARDS[m.cardId].name+'.');
+}
+/* A copy of a Mount, laid next to cell c if there is room, else anywhere. */
+async function summonMountCopy(p,c,id,why,safe){
+  const b=G.board;
+  let pool=ADJ[c].filter(j=>openAt(b,j));
+  if(!pool.length)return null;
+  const at=pool.length===1?pool[0]:await chooseCell(p,pool,why+': choose where the '+CARDS[id].name+' stands.',
+    {mut:(bb,j)=>{putTeece(bb,j,makeTeece(id,p),false);}});
+  const j=(at==null||at==='CANCEL'||pool.indexOf(at)<0)?pool[0]:at;
+  const tk=summonToken(b,j,id,p,true);
+  if(safe){tk.immortalOwner=p;tk.immortalUntil=G.turnNum;}
+  log('A copy of '+CARDS[id].name+' appears at the '+CN[j]+(safe?', invulnerable until the end of the turn':'')+'.');
+  await anim([j],'placed',140);
+  return tk;
+}
+/* Cavalry Muster's charge, spent on the next Knights its caster plays. */
+async function knightArrive(p,spot,t){
+  const pl=G.players[p];
+  if(!(pl.muster>0)||!isKnight(t))return;
+  pl.muster--;
+  const m=mountsOf(t)[0];
+  if(!m){log(nm(t)+' answers the muster with no Mount to bring.');return;}
+  await summonMountCopy(p,spot,m.cardId,'Cavalry Muster',false);
+}
+/* Mounts a Mount Mount could pull onto the Mount at cell c. */
+function grabTargets(b,c,p){
+  const out=[];
+  for(let j=0;j<BN;j++){
+    const o=b[j].teece;
+    if(j===c||!isMountBody(o))continue;
+    if(!sameTeam(o.owner,p)&&!canTarget(b,j,p))continue;
+    out.push(j);
+  }
+  return out;
+}
+function grabSim(bb,c,j){
+  const t=bb[c].teece,m=bb[j].teece;
+  if(!t||!m)return;
+  bb[j].teece=null;
+  t.equips=t.equips.slice();
+  mountUp(t,m,false);
+}
+/* What the computer makes of the Knights' two spells. */
+function aiKnightPlan(d){
+  const b=G.board,p=G.turn,pl=G.players[p];
+  if(d.knightAi==='remount'){
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(isKnight(t)&&isMounted(t)&&sameTeam(t.owner,p)&&ADJ[i].some(j=>openAt(b,j)))cands.push(i);}
+    if(!cands.length)return null;
+    return {thr:1.0,cands,mut:(bb,i)=>{
+      const m=mountsOf(bb[i].teece)[0],j=ADJ[i].find(x=>openAt(bb,x));
+      if(m&&j!=null)putTeece(bb,j,makeTeece(m.cardId,p),false);
+    }};
+  }
+  if(d.knightAi==='muster'){
+    if(pl.muster>0)return null;
+    const n=pl.hand.filter(h=>CARDS[h].knight&&CARDS[h].mountOf).length;
+    if(!n)return null;
+    return {thr:0.5,pseudo:0.6+0.3*Math.min(2,n),cands:[0],mut:null};
+  }
+  return null;
+}
+/* The Knight Captain thrown away for its Barded Charger once the turn's Teece
+   is down and it cannot be paid for. */
+/* A Herd Saddle is worth plating onto a Knight in hand when there is a Mount of
+   ours on the board for it to land on: it keeps its own Mount and gains that one. */
+async function aiKnightSaddle(){
+  const p=G.turn,pl=G.players[p];
+  if(G.teecePlayed||!mountSpots(G.board,p).length)return;
+  const h=pl.hand.findIndex(id=>CARDS[id].grants&&CARDS[id].grants.mountCap&&!CARDS[id].onlyMount);
+  if(h<0)return;
+  const k=pl.hand.findIndex((id,x)=>CARDS[id].knight&&CARDS[id].mountOf&&canPlay(p,id)&&!plateOf(p,x).some(e=>CARDS[e.cardId].grants&&CARDS[e.cardId].grants.mountCap));
+  if(k>=0)plateHand(p,h,k);
+}
+async function aiKnightDiscard(){
+  const p=G.turn,pl=G.players[p];
+  if(!G.board.some((c,i)=>openAt(G.board,i)))return;
+  const h=pl.hand.findIndex((id,x)=>CARDS[id].knight&&Array.isArray(CARDS[id].handDiscard)&&
+    sacPool(p,x,id).worth<sacsNeeded(id,p));
+  if(h>=0)await playHandDiscard(p,h);
 }
 /* ============ Cult: the Pentagram ============
    The Cult deck's passive is the board. Its five points are the top-middle,
@@ -25356,7 +25719,8 @@ if(typeof module!=='undefined'){
     PATRONS,channelsOn,channelCapOn,pactMap,pactN,channelIn,channelBack,warlockArrive,wlSeat,patronOf,canHandDiscard,playHandDiscard,noteDiscard,
     cultSeat,cultInPlay,pentaPts,pentaLines,pentaPoints,pentaNext,pentaLineOf,cultGuarded,onActiveLine,cultSettle,cultRitual,pentaSvg,
     aiCultPlan,aiCultDest,cultPlaceBonus,CULT_CONVERT,CULT_TENDRIL,
-    OATHS,oathsOf,oathOn,isPaladin,swearOath,oathBreak,oathSweep,cleanseAt,cleanseAlly,cleanseEnemy,aiOathPick,aiPaladinPlan,squaresWith};
+    OATHS,oathsOf,oathOn,isPaladin,swearOath,oathBreak,oathSweep,cleanseAt,cleanseAlly,cleanseEnemy,aiOathPick,aiPaladinPlan,squaresWith,
+    isMountCard,isMountBody,isKnight,mountsOf,isMounted,mountEntry,mountCap,mountSpots,knightSpots,mountUp,summonMountCopy,grabTargets,aiKnightPlan,compassHtml};
 }
 </script>
 </body>
