@@ -191,7 +191,7 @@
       "blurb": "Every Robot Flies, and Drones roll off the line all game. Drones are Tokens with 3 on every side that also Fly — they block, they kill, and several Robots pay you for keeping them moving.",
       "how": [
         "Drones are flying Tokens with 3 on every side, and Tokens never count toward winning: they are board, not lead.",
-        "Swarm Node and Drone Tether pay the Drones, Grey Goo builds one that copies itself at the end of the turn; Overclocker pays for movement instead, and Signal Relay wires the next three Drones to explode.",
+        "Swarm Node and Drone Tether pay the Drones, Grey Goo builds one that copies itself at the start of each of your turns, and every copy does the same; Overclocker pays for movement instead, and Signal Relay wires the next three Drones to explode.",
         "Factory Line can be paid with two Drones instead of a Teece, and a War Machine you cannot afford can be discarded for a Drone."
       ],
       "level": "intermediate",

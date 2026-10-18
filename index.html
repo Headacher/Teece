@@ -1184,7 +1184,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
       <div id="warnBar" class="hidden"></div>
       <div style="display:flex;gap:8px;margin-top:10px">
         <button class="btn primary" id="endTurn">End Turn</button>
-        <button class="btn" id="restart">Restart</button>
+        <button class="btn" id="restart">Forfeit</button>
       </div>
     </div>
     <div class="panel" id="detail"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Detail</h2><button class="btn" id="resetDetail" style="padding:4px 8px;font-size:12px" title="Unstick the inspector: clears the selected Teece and lets hovering work again.">Reset</button></div><div id="detailBody"><div class="dt">Hover or tap a card. Click one of your Teece to use its abilities.</div></div></div>
@@ -1282,7 +1282,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   <div class="box">
     <h2 id="endTitle">Game over</h2>
     <p id="endText"></p>
-    <div class="row"><button class="btn primary" id="endRestart">New game</button><button class="btn hidden" id="endAlt"></button></div>
+    <div class="row"><button class="btn primary" id="endRestart">New game</button><button class="btn hidden" id="endAlt"></button><button class="btn hidden" id="endLeave">Leave</button></div>
   </div>
 </div>
 
@@ -1300,7 +1300,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:243,date:'2026-10-18'};
+const VERSION={build:244,date:'2026-10-18'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -3358,9 +3358,10 @@ const CARDS = {
     cast:[{fx:'moveTarget',where:'any',who:'ally',thenMod:{n:3,dur:'temp'}}]},
  /* Grey Goo replaced Hangar Guard (424) in the deck and the pool (Greg,
     build 223). The mark rides the Drone's body, so it follows it if it moves
-    and dies with it; the copy carries no mark, so it never chains. */
+    and dies with it. Since build 244 every copy carries the mark too, and the
+    copying happens at the start of each of its controller's turns. */
  1217:{name:'Grey Goo',type:'magic',
-    text:'Build a Drone on an empty panel. At the end of this turn, build a copy of that Drone on an adjacent empty panel.',
+    text:'Build a Drone on an empty panel. It is Grey Goo: at the start of each of your turns it builds a copy of itself on an adjacent empty panel, and every copy does the same.',
     cast:[{fx:'token',tok:'TD',where:'any',count:1,replicate:true}]},
  /* Data Centre replaced Drone Foundry (418) in the deck and the pool (Greg,
     build 223). It counts every Drone built or destroyed, either side's. */
@@ -3695,15 +3696,19 @@ const CARDS = {
  609:{name:'Puppeteer Lord',type:'teece',sides:[9,9,9,9],vampire:true,
     text:'When played: summon a Meat Puppet Token with 5 on every side, which your opponent places.',
     onPlay:[{fx:'token',tok:'TMP',count:1,foe:true}]},
- 610:{name:'Transmogrifying Vampire',type:'teece',sides:[7,7,7,7],vampire:true,
+ /* Greg, build 244: it arrives as the Humanoid, and each way of changing
+    shape is its own once-a-turn ability, so it can go to Bat and back in the
+    same turn. Each form's abilities are keyed by form, so their uses never
+    share a counter with the other form's. */
+ 610:{name:'Transmogrifying Vampire',type:'teece',sides:[5,5,5,5],vampire:true,
     forms:[{name:'Humanoid',sides:[5,5,5,5],def:1,
-            act:[{name:'Drain 1',once:'turn',steps:[{fx:'drain',n:1}]}]},
+            act:[{name:'Drain 1',once:'turn',steps:[{fx:'drain',n:1}]},
+                 {name:'Transform into a Bat',once:'turn',steps:[{fx:'transform',to:1}]}]},
            {name:'Bat',sides:[3,3,3,3],
             act:[{name:'Fly',once:'turn',times:2,steps:[{fx:'move',range:'step'}]},
-                 {name:'Drain 2',once:'turn',steps:[{fx:'drain',n:2}]}]}],
-    onPlay:[{fx:'chooseForm'}],
-    act:[{name:'Transform',once:'turn',steps:[{fx:'transform'}]}],
-    text:'Arrives in either form, and once per your turn may switch. Humanoid: 5 on every side and Defence 1, once per your turn Drain 1. Bat: 3 on every side, twice per your turn fly one space, once per your turn Drain 2.'},
+                 {name:'Drain 2',once:'turn',steps:[{fx:'drain',n:2}]},
+                 {name:'Transform into a Humanoid',once:'turn',steps:[{fx:'transform',to:0}]}]}],
+    text:'Defence 1. Arrives as a Humanoid. Once per your turn: Drain 1. Once per your turn: transform into a Bat, with 3 on every side, which flies one space twice per your turn and once per your turn Drains 2. Once per your turn: transform back into a Humanoid.'},
  611:{name:'Elder',type:'teece',sides:[9,9,6,9],sac:1,vampire:true,endDrain:{n:1},
     text:'Sacrifice a Teece to play. At the end of every turn: Drain 1 from each enemy.'},
  612:{name:'Blood Bank',type:'teece',sides:[4,4,4,4],def:9,sac:2,vampire:true,drainBank:true,
@@ -3712,8 +3717,8 @@ const CARDS = {
  613:{name:'Suck',type:'magic',vampire:true,rebound:true,
     text:'Select a Teece to drain 1, then select the Teece that drinks it. The first time you cast this each game, it returns to your hand.',
     cast:[{fx:'drain',n:1,pair:true}]},
- 614:{name:'Mist Form',type:'magic',vampire:true,
-    text:'Select an ally; for three of your turns it is invulnerable, and it cannot destroy anything.',
+ 614:{name:'Mist Form',type:'magic',vampire:true,trump:true,
+    text:'Trump card. Select an ally; for three of your turns it is invulnerable, and it cannot destroy anything.',
     cast:[{fx:'mist',turns:3}]},
  615:{name:'Coffin',type:'magic',vampire:true,
     text:'Return a Teece from your graveyard to your hand. It comes back with 0 on every side, and costs no sacrifices to play.',
@@ -6748,15 +6753,22 @@ function plateOf(p,idx){
    not reached yet. A card that doubles positive effects doubles these too. */
 /* What a card reads as before anything is plated on: a Knight shows itself
    already riding its Mount. */
+function isCoffined(p,cardId){
+  const pl=G&&G.players&&G.players[p];
+  return !!(pl&&pl.coffined&&pl.coffined[cardId]);
+}
 function cardSides(cardId){
   const cd=CARDS[cardId],s=cd.sides.slice();
   const m=cd.mountOf&&CARDS[cd.mountOf];
   if(m)for(let k=0;k<4;k++)s[k]+=m.sides[k];
   return s;
 }
-function platedSides(cardId,worn){
+/* owner, when given, is whose hand the card sits in: a card Coffin brought
+   back is drawn with its printed numbers gone, because that is how it lands. */
+function platedSides(cardId,worn,owner){
   const cd=CARDS[cardId];
   const s=cardSides(cardId);
+  if(owner!=null&&isCoffined(owner,cardId))for(let k=0;k<4;k++)s[k]-=cd.sides[k];
   if(!worn||!worn.length)return s;
   const selfDbl=!!cd.selfDoublePos;
   for(const e of worn){
@@ -6907,11 +6919,12 @@ function pname(p){
   if(G&&G.vsAI)return p===0?'You':(PLAYERS()>2?'Computer '+p:'Computer');
   return 'Player '+(p+1);
 }
-/* The possessive of pname(). "an ally of You" is not English, and the human
-   seat is the one that reads wrong, so it becomes "yours". */
+/* The possessive of pname(), as it stands before a noun: "Computer's hand",
+   "your hand". Every caller puts a noun after it, so the human seat reads
+   "your", never "yours" ("yours next turn" was the bug). */
 function pposs(p){
   const n=pname(p);
-  return n==='You'?'yours':n+"'s";
+  return n==='You'?'your':n+"'s";
 }
 function teamName(tm){
   const seats=seatsOnTeam(tm);
@@ -6930,7 +6943,11 @@ const vb=(p,third,second)=>(G&&G.vsAI&&p===0)?second:third;
    sentence opens on "You". */
 const YOU_IRREG={has:'have',is:'are',was:'were',does:'do',goes:'go',dies:'die',lies:'lie',ties:'tie'};
 function youVerb(m){
-  if(typeof m!=='string'||m.indexOf('You ')<0)return m;
+  if(typeof m!=='string')return m;
+  /* "returns to You's hand": the possessive of You is your. */
+  m=m.replace(/(^|[.:!?\u2014] )You\u2019s /g,'$1Your ').replace(/(^|[.:!?\u2014] )You's /g,'$1Your ')
+     .replace(/\bYou(?:'|\u2019)s /g,'your ');
+  if(m.indexOf('You ')<0)return m;
   return m.replace(/(^|[.:!?\u2014] )You ([a-z]+)\b/g,(all,pre,w)=>{
     let v=YOU_IRREG[w];
     if(!v){
@@ -9913,12 +9930,12 @@ async function FXRUN(st,ctx){
         continue;
       }
       /* A Token handed to the enemy is a cost, not an offer, so there is no
-         skip on it -- but the caster still chooses where it stands. The board
-         preview carries the Token's real owner, so what is being weighed is a
-         panel filling up with somebody else's body. */
+         skip on it, and the side that gets it chooses where it stands (Greg,
+         build 244). The question goes to that seat, and the board preview
+         carries its real owner, so the computer weighs it for itself. */
       const c=st.foe
-        ? await pickCell(pool,'Place a Meat Puppet your opponent will control ('+(n+1)+' of '+(st.count||1)+').',
-            (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,owner),false);},false)
+        ? await chooseCell(owner,pool,'Place the '+tokName+' you are given'+((st.count||1)>1?' ('+(n+1)+' of '+(st.count||1)+')':'')+'.',
+            {mut:(bb,i)=>{putTeece(bb,i,makeTeece(st.tok,owner),false);},skip:false})
         : await pickCell(pool,'Choose a space for a '+tokName+((st.count||1)>1?' ('+(n+1)+' of '+(st.count||1)+')':'')+', or skip.',
             (bb,i)=>{putTeece(bb,i,makeTeece(st.tok,p),false);},true);
       if(c==='CANCEL')return 'ABORT';
@@ -9926,7 +9943,7 @@ async function FXRUN(st,ctx){
       const tk=summonToken(b,c,st.tok,owner,true);
       holdSafe(tk);
       if(st.linked&&ctx.t){ctx.t.links.push(tk.uid);}
-      if(st.replicate)tk.replicateBy=p;
+      if(st.replicate)tk.goo=true;
       log('A '+tokName+' appears at the '+CN[c]+
         (st.safe?', held outside time until '+pposs(owner)+' next turn':'')+'.');
       await tokArrive(tk,c);
@@ -9939,7 +9956,9 @@ async function FXRUN(st,ctx){
      then the drinker separately, for a drain that has no Teece behind it. */
   case 'drain':{
     const self=st.pair?null:ctx.t;
-    const amt=st.n*drainMult(self);
+    /* Suck picks its drinker second, and Enhanced Fangs doubles what the
+       drinker takes, so a paired drain only knows its amount once both are in. */
+    let amt=st.n*drainMult(self);
     const cands=[];
     for(let i=0;i<BN;i++){
       const o=b[i].teece;
@@ -9964,6 +9983,7 @@ async function FXRUN(st,ctx){
       if(d2==='CANCEL')return 'ABORT';
       if(d2==null)return;
       drinker=b[d2].teece;
+      amt=st.n*drainMult(drinker);
     }
     const lost=applyDrain(b,c,amt,p,drinker);
     log(nm(victim)+' is drained of '+lost+'.');
@@ -9984,11 +10004,11 @@ async function FXRUN(st,ctx){
     for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&o.uid!==self.uid&&canTarget(b,i,p))cands.push(i);}
     if(!cands.length)return none('There is nobody to drain.');
     const c=await pickCell(cands,'Spend '+held+' stored: drain which Teece?',
-      (bb,i)=>{applyModT(bb[i].teece,-held,'perm');},false);
+      (bb,i)=>{applyModT(bb[i].teece,-held*drainMult(self),'perm');},false);
     if(c==='CANCEL')return 'ABORT';
     if(c==null)return;
     self.ctr=0;
-    const lost=applyDrain(b,c,held,p,self);
+    const lost=applyDrain(b,c,held*drainMult(self),p,self);
     log(nm(b[c].teece)+' is drained of '+lost+' from the bank.');
     if(lost>0)applyModT(self,lost,'perm');
     noteFed(self);
@@ -10042,7 +10062,7 @@ async function FXRUN(st,ctx){
   case 'transform':{
     const t=ctx.t,fs=t&&DEF(t).forms;
     if(!fs)return;
-    setForm(t,((t.form||0)+1)%fs.length,true);
+    setForm(t,st.to!=null?st.to:((t.form||0)+1)%fs.length,true);
     await anim([ctx.cell],'zap');
     return;}
   case 'chooseForm':{
@@ -10068,7 +10088,7 @@ async function FXRUN(st,ctx){
     await anim([c],'zap');
     return;}
   /* Coffin: any Teece in your graveyard comes back, with nothing left of it and
-     costing nothing. The 0/0/0/0 is the price, which is what lets it reach a
+     costing nothing. The zeroes are the price, which is what lets it reach a
      Boss without the card having to name one. */
   case 'coffin':{
     const pl=G.players[p];
@@ -16981,12 +17001,15 @@ function endGame(winner,why){
     /* A second answer, offered only by an ending that asks a question. */
     const alt=document.getElementById('endAlt');
     if(alt){alt.classList.add('hidden');alt.onclick=null;}
+    {const lv=document.getElementById('endLeave');if(lv)lv.classList.add('hidden');}
+    {const en=document.getElementById('endNote');if(en)en.textContent='';}
     if(G.mode==='rogue')rogueEnd(winner,why,t,x,btn);
     else if(G.tut&&winner===0)tutEnd(t,x,btn);
     else{
       t.textContent=winner==null?'A draw':NET?(winner===teamOf(NET.seat)?'You win':'You lose'):(teamName(winner)==='You'?'You win':teamName(winner)+' wins');
       x.textContent=why;
       btn.textContent='New game';btn.onclick=restart;
+      if(NET)netEndButtons();
     }
     document.getElementById('endOverlay').classList.remove('hidden');
     render();
@@ -18425,23 +18448,6 @@ async function endTurn(){
     applyModT(t,-2,'perm');
     log(pname(by)+' takes control of '+nm(t)+': -2.');
   }
-  /* Grey Goo: each Drone it built this turn lays one copy beside itself,
-     wherever it stands now. Bodies are gathered first so a copy placed this
-     loop is never visited, and the mark is spent whether or not there is room. */
-  const goo=[];
-  for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.replicateBy===p)goo.push(t);}
-  for(const t of goo){
-    t.replicateBy=null;
-    const i=G.board.findIndex(c=>c.teece===t);
-    if(i<0)continue;
-    const pool=ADJ[i].filter(j=>openAt(G.board,j));
-    if(!pool.length){log('Grey Goo: no room beside the '+nm(t)+' at the '+CN[i]+' to copy it.');continue;}
-    const c=pool.length===1?pool[0]:await chooseCell(p,pool,'Grey Goo: choose a space for the copy of the '+nm(t)+'.',
-      {cancel:false,skip:false,mut:(bb,j)=>{putTeece(bb,j,makeTeece(t.cardId,t.owner),false);}});
-    if(c==null||c==='CANCEL'||!openAt(G.board,c))continue;
-    summonToken(G.board,c,t.cardId,t.owner,true);
-    log('Grey Goo copies the '+nm(t)+' onto the '+CN[c]+'.');
-  }
   for(let i=0;i<BN;i++){
     const g=G.board[i].ground;
     if(!g)continue;
@@ -18781,6 +18787,30 @@ async function expandGrounds(p){
     log(CARDS[g.cardId].name+' spreads to the '+CN[c]+'.');
   }
 }
+/* Grey Goo (Greg, build 244): a Drone it built carries the goo on its body,
+   and at the start of each of its controller's turns lays a copy of itself on
+   an empty panel beside it, and the copy carries the goo too, so it never
+   stops. Bodies are gathered first so a copy laid this turn waits for the
+   next one. A silenced Drone does not replicate. */
+async function gooReplicate(p){
+  const goo=[];
+  for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.goo&&!t.silenced&&t.owner===p)goo.push(t);}
+  let laid=0;
+  for(const t of goo){
+    const i=G.board.findIndex(c=>c.teece===t);
+    if(i<0)continue;
+    const pool=ADJ[i].filter(j=>openAt(G.board,j));
+    if(!pool.length){log('Grey Goo: no room beside the '+nm(t)+' at the '+CN[i]+' to copy it.');continue;}
+    const c=pool.length===1?pool[0]:await chooseCell(p,pool,'Grey Goo: choose a space for the copy of the '+nm(t)+'.',
+      {cancel:false,skip:false,mut:(bb,j)=>{putTeece(bb,j,makeTeece(t.cardId,t.owner),false);}});
+    if(c==null||c==='CANCEL'||!openAt(G.board,c))continue;
+    const tk=summonToken(G.board,c,t.cardId,t.owner,true);
+    if(tk)tk.goo=true;
+    laid++;
+    log('Grey Goo copies the '+nm(t)+' onto the '+CN[c]+'.');
+  }
+  if(laid){render();await resolveCombat();}
+}
 async function startTurn(){
   if(!G)return;
   G._endingTurn=false;
@@ -18895,6 +18925,8 @@ async function startTurn(){
   await expandGrounds(p);
   if(stale(ep)||G.over)return;
   await sandstormTurn();
+  if(stale(ep)||G.over)return;
+  await gooReplicate(p);
   if(stale(ep)||G.over)return;
   await payRecall(p);
   if(stale(ep)||G.over)return;
@@ -20290,8 +20322,8 @@ function aiActMuts(cell,ent){
   }else if(st.fx==='token'){
     for(let j=0;j<BN;j++){
       if(b[j].teece)continue;
-      /* Grey Goo's copy lands at the end of the turn; count it now so the
-         sim values the panel that leaves room beside it. */
+      /* Grey Goo's first copy lands at the start of the next turn; count it
+         now so the sim values the panel that leaves room beside it. */
       muts.push(bb=>{if(!bb[j].teece){putTeece(bb,j,makeTeece(st.tok,p),false);
         if(st.replicate){const k=ADJ[j].find(x=>openAt(bb,x));if(k!=null)putTeece(bb,k,makeTeece(st.tok,p),false);}}});
     }
@@ -20693,7 +20725,7 @@ function previewTileHtml(i){
   }else{
     if(!spec||!spec.cardId)return '';
     cardId=spec.cardId;
-    sides=platedSides(cardId,spec.plate||[]);
+    sides=platedSides(cardId,spec.plate||[],owner);
     tag='in hand';
   }
   const num=k=>'<div class="s s'+k+'">'+sides[k]+'</div>';
@@ -21242,7 +21274,7 @@ function renderHand(p){
     const art=CARD_ART[id];
     if(art)card.classList.add('arted');
     if(cd.type==='teece'){
-      const ps=platedSides(id,worn);
+      const ps=platedSides(id,worn,p);
       const cs=cardSides(id),sc=k=>'hs hs'+k+(ps[k]!==cs[k]?' pl':'');
       card.innerHTML=(art?'<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>':'')+
         '<div class="'+sc(0)+'">'+ps[0]+'</div>'+
@@ -21307,7 +21339,7 @@ function renderHand(p){
       if(G.pending)return;
       if(p===G.turn&&!G.over)await uiDo('play',{i},()=>playFromHand(p,i));
     });
-    card.addEventListener('mouseenter',()=>{if(G.detailLock==null){G.detailHover='h'+p+i;showDetailCard(id,worn);}});
+    card.addEventListener('mouseenter',()=>{if(G.detailLock==null){G.detailHover='h'+p+i;showDetailCard(id,worn,p);}});
     card.addEventListener('mouseleave',()=>{if(G.detailLock==null&&G.detailHover==='h'+p+i){G.detailHover=null;showDetail(null);}});
     h.appendChild(card);
   }
@@ -21321,15 +21353,16 @@ function detailArt(id){
   return '<div class="card arted dart" data-card-deck="'+getCardDeck(id)+'" aria-hidden="true">'+
     '<pre class="ascii">'+art.map(escHtml).join('\n')+'</pre></div>';
 }
-function showDetailCard(id,worn){
+function showDetailCard(id,worn,owner){
   const cd=CARDS[id],d=document.getElementById('detailBody');
   if(!d)return;
-  const ps=cd.type==='teece'?platedSides(id,worn):null;
+  const ps=cd.type==='teece'?platedSides(id,worn,owner):null;
   let html=detailArt(id)+'<div class="dn">'+cd.name+'</div>'+
     (cd.type==='teece'?'<div class="dstats" style="color:var(--gold)">'+sidesBlock(ps)+
       (worn&&worn.length&&ps.join()!==cardSides(id).join()?' &nbsp;plated, from '+sidesBlock(cardSides(id)):'')+
       (rankOf(id)?' \u00b7 '+rankOf(id):'')+(cd.sac?' \u00b7 '+kwSpan('sacrifice','sacrifice')+' '+cd.sac:'')+(cd.def?' \u00b7 '+kwSpan('defence','Defence')+' '+cd.def:'')+'</div>':
       '<div class="dstats" style="color:var(--gold)">'+cd.type+'</div>')+
+    (owner!=null&&cd.type==='teece'&&isCoffined(owner,id)?'<div class="dstats">Back from a Coffin: its printed numbers are gone, and it costs no sacrifice.</div>':'')+
     '<div class="dt">'+kwify(cd.text)+'</div>'+
     (cd.flavor?'<div class="dt" style="font-style:italic;opacity:.8">'+cd.flavor+'</div>':'');
   if(worn&&worn.length){
@@ -21710,6 +21743,14 @@ function statusesFor(p){
       nm(t)+' is infected. It can never be sacrificed again by anybody, and after '+
       t.infect.turns+' more of '+pname(t.owner)+"'s turns it goes over to "+pname(t.infect.by)+' for good, with -2.');
   }
+  {const gooBy={};
+   for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.goo&&!t.silenced)gooBy[t.owner]=(gooBy[t.owner]||0)+1;}
+   for(const o in gooBy){
+     const n=gooBy[o],ally=sameTeam(+o,p);
+     push('goo'+o,ally?'good':'bad','Grey Goo: '+n+' Drone'+(n===1?'':'s')+(ally?'':' ('+pname(+o)+')'),
+       n+' of '+pposs(+o)+' Drones '+(n===1?'is':'are')+' Grey Goo. At the start of each of '+pposs(+o)+
+       ' turns, each one builds a copy of itself on an empty panel beside it, and the copies do the same.');
+   }}
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
     if(!t||!t.noSac||t.infect)continue;
@@ -22160,6 +22201,8 @@ function render(){
   else if(G.detailHover==null)showDetail(null);
   tutCoach();
   if(NET&&NET.role==='host')netSync(false);
+  {const fb=document.getElementById('restart');
+   if(fb)fb.textContent=forfeitLabel();}
   if(NET)netTurnCheck();
 }
 function draftName(p){
@@ -25501,7 +25544,12 @@ async function netHost(){
 function netOnHost(m){
   const me=NET;
   if(!me||!m||typeof m!=='object')return;
-  if(m.t==='deck'&&!me.started&&DECKS[m.key]){netBegin(m.key);return;}
+  if(m.t==='deck'&&!me.started&&DECKS[m.key]){
+    /* A rematch with new decks waits for both picks, whichever lands first. */
+    if(me.mine)netBegin(m.key);else me.theirsNext=m.key;
+    return;}
+  if(m.t==='rematch'){netRematchWish('guest',m.k);return;}
+  if(m.t==='forfeit'){if(me.started&&G&&!G.over){forfeit(me.peerSeat);netSync(true);}return;}
   if(!me.started||!G||G.over)return;
   if(m.t==='ans'){
     const pd=G.pending;
@@ -25557,7 +25605,12 @@ async function netRun1(m){
 }
 async function netBegin(theirs){
   const me=NET,mine=me.mine;
-  me.started=true;
+  me.started=true;me.theirs=theirs;me.theirsNext=null;
+  me.rematch={host:null,guest:null};
+  clearInterval(me.beat);
+  EPOCH++;
+  document.getElementById('endOverlay').classList.add('hidden');
+  document.getElementById('draftOverlay').classList.add('hidden');
   netHide();
   G=newState('deck',false,[DECKS[mine].cards.slice(),DECKS[theirs].cards.slice()],
     {aiSeats:[],seatNames:['Player 1','Player 2']});
@@ -25565,7 +25618,8 @@ async function netBegin(theirs){
   G.deckNames=[DECKS[mine].name,DECKS[theirs].name];
   applyDeckRules(0,mine);
   applyDeckRules(1,theirs);
-  log('Online: '+DECKS[mine].name+' (Player 1) faces '+DECKS[theirs].name+' (Player 2).'+netHcapLine(me.hcap,'Player 1\u2019s','Player 2\u2019s'));
+  me.games=(me.games||0)+1;
+  log('Online'+(me.games>1?', game '+me.games:'')+': '+DECKS[mine].name+' (Player 1) faces '+DECKS[theirs].name+' (Player 2).'+netHcapLine(me.hcap,'Player 1\u2019s','Player 2\u2019s'));
   me.beat=setInterval(()=>netSync(false),1500);
   render();
   await startTurn();
@@ -25666,6 +25720,16 @@ async function netOnGuest(m){
     return;
   }
   if(m.t==='toast'){uiToast(m.m);return;}
+  if(m.t==='rematch'){me.rematch=m.r;netEndButtons();return;}
+  if(m.t==='repick'){
+    me.rematch={host:null,guest:null};
+    document.getElementById('endOverlay').classList.add('hidden');
+    const key=await pickDeck('You',{title:'Rematch: your deck',info:'Your friend is picking a new deck too.'});
+    if(NET!==me)return;
+    netSend({t:'deck',key});
+    netShow('Rematch','Starting the game…',null);
+    return;
+  }
   if(m.t==='state')netApply(m.s);
 }
 function netApply(snap){
@@ -25683,6 +25747,13 @@ function netApply(snap){
     document.getElementById('draftOverlay').classList.add('hidden');
     document.getElementById('startOverlay').classList.add('hidden');
   }
+  /* A rematch has begun: the last game's end screen goes. */
+  if(!G.over&&me.overShown){
+    me.overShown=false;me.rematch={host:null,guest:null};
+    netHide();
+    document.getElementById('endOverlay').classList.add('hidden');
+    document.getElementById('draftOverlay').classList.add('hidden');
+  }
   render();
   if(G.over&&!me.overShown){
     me.overShown=true;
@@ -25691,11 +25762,109 @@ function netApply(snap){
     document.getElementById('endText').textContent=G.overWhy||'';
     const btn=document.getElementById('endRestart');
     btn.textContent='New game';btn.onclick=restart;
+    netEndButtons();
     document.getElementById('endOverlay').classList.remove('hidden');
   }
 }
+/* ---------- rematch ----------
+   Either screen can ask for another game when one ends: the same decks again,
+   or both players picking new ones. Each screen's wish travels to the host,
+   which starts the game once both want the same thing; until then the other
+   screen's buttons say what was asked for. Handicaps carry over. */
+function netEndButtons(){
+  const me=NET;if(!me)return;
+  const r=me.rematch||{host:null,guest:null};
+  const mineK=me.role==='host'?r.host:r.guest,theirK=me.role==='host'?r.guest:r.host;
+  const btn=document.getElementById('endRestart'),alt=document.getElementById('endAlt'),lv=document.getElementById('endLeave');
+  const x=document.getElementById('endText');
+  const lbl={same:'Rematch, same decks',fresh:'Rematch, new decks'};
+  const mk=(el,k)=>{
+    el.classList.remove('hidden');
+    el.textContent=(mineK===k?'\u2713 ':'')+lbl[k]+(theirK===k&&mineK!==k?' (asked for)':'');
+    el.onclick=()=>netRematchAsk(k);
+  };
+  mk(btn,'same');mk(alt,'fresh');
+  if(lv){lv.classList.remove('hidden');lv.onclick=restart;}
+  let note=document.getElementById('endNote');
+  if(!note&&x){note=document.createElement('p');note.id='endNote';note.className='fine';x.insertAdjacentElement('afterend',note);}
+  if(note)note.textContent=me.down?'Your friend has left, so there is nobody to play again.':
+    theirK&&mineK!==theirK?'Your friend wants a '+(theirK==='same'?'rematch with the same decks':'rematch with new decks')+'.':
+    mineK?'Waiting for your friend to say yes\u2026':'';
+}
+function netRematchAsk(k){
+  const me=NET;if(!me)return;
+  if(me.down){uiToast('Your friend has left.');return;}
+  if(me.role==='host')netRematchWish('host',k);
+  else{me.rematch=me.rematch||{host:null,guest:null};me.rematch.guest=k;netSend({t:'rematch',k});netEndButtons();}
+}
+function netRematchWish(who,k){
+  const me=NET;
+  if(!me||me.role!=='host'||!G||!G.over||(k!=='same'&&k!=='fresh'))return;
+  me.rematch=me.rematch||{host:null,guest:null};
+  me.rematch[who]=k;
+  netSend({t:'rematch',r:me.rematch});
+  netEndButtons();
+  if(me.rematch.host&&me.rematch.host===me.rematch.guest)netRematchGo(k);
+}
+async function netRematchGo(k){
+  const me=NET;
+  if(k==='same'){await netBegin(me.theirs);return;}
+  /* New decks: both pick, and the game starts on whichever pick lands last. */
+  me.started=false;me.mine=null;me.theirsNext=null;
+  clearInterval(me.beat);
+  document.getElementById('endOverlay').classList.add('hidden');
+  netSend({t:'repick'});
+  const mine=await pickDeck('You',{title:'Rematch: your deck',info:'Your friend is picking a new deck too.'});
+  if(NET!==me)return;
+  me.mine=mine;
+  if(me.theirsNext)await netBegin(me.theirsNext);
+  else netShow('Rematch','Waiting for your friend to pick a deck…',null);
+}
+/* ---------- forfeit ----------
+   The button beside End Turn (Greg, build 244: Forfeit in place of Restart).
+   Mid-game it concedes for the seat at this screen and ends the game in the
+   usual way, so the end screen, the roguelike's run-over and the online
+   rematch all follow from it. With no game to concede -- over, being watched,
+   or the tutorial -- it simply leaves. */
+function forfeitLabel(){
+  if(!G||G.over)return 'New game';
+  if(G.spectate||G.tut)return 'Leave';
+  return 'Forfeit';
+}
+/* Whose game it is to give up: online the seat at this screen, against the
+   computer the human seat, at a hotseat whoever's turn it is. */
+function forfeitSeat(){
+  if(NET)return NET.seat;
+  if(G.vsAI){
+    for(let p=0;p<PLAYERS();p++)if(!isAIP(p))return p;
+  }
+  return G.turn;
+}
+function forfeitBtn(){
+  if(!G||G.over||G.spectate){restart();return;}
+  if(G.tut){if(confirm('Leave the tutorial?')){G.over=true;restart();}return;}
+  const p=forfeitSeat();
+  if(!confirm(NET||G.vsAI?'Forfeit this game?':'Forfeit this game for '+pname(p)+'?'))return;
+  if(NET&&NET.role==='guest'){
+    if(!netSend({t:'forfeit'}))uiToast('Not connected to your friend.');
+    return;
+  }
+  forfeit(p);
+  if(NET)netSync(true);
+}
+function forfeit(p){
+  if(!G||G.over)return;
+  /* Orphan any computer turn still running, the way Clanker On Clanker
+     freezes its two: stale() reads G.epoch. */
+  G.epoch=++EPOCH;
+  const mine=teamOf(p);
+  const rest=teamsInPlay().filter(tm=>tm!==mine).map(tm=>({tm,n:teamReal(tm)}));
+  rest.sort((x,y)=>y.n-x.n);
+  const winner=!rest.length?null:(rest.length>1&&rest[0].n===rest[1].n)?null:rest[0].tm;
+  endGame(winner,pname(p)+' forfeited.');
+}
 function restart(){
-  if(G&&!G.over&&!confirm('Really restart?'))return;
+  if(G&&!G.over&&!confirm('Really leave this game?'))return;
   if(NET){netClose();if(location.search.indexOf('join=')>=0)history.replaceState(null,'',location.pathname);}
   document.getElementById('netOverlay').classList.add('hidden');
   EPOCH++;                      /* orphan any AI turn still in flight */
@@ -25746,7 +25915,7 @@ if(HAS_DOM){
     if(hit){e.stopPropagation();e.preventDefault();}
   },true);
   document.getElementById('endTurn').onclick=()=>uiDo('end',{},endTurn);
-  document.getElementById('restart').onclick=restart;
+  document.getElementById('restart').onclick=forfeitBtn;
   document.getElementById('endRestart').onclick=restart;
   document.getElementById('tutBtn').onclick=()=>startTutorial();
   document.getElementById('rulesBtn').onclick=()=>openRules();
