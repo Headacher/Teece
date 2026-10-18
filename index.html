@@ -1300,7 +1300,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:240,date:'2026-10-18'};
+const VERSION={build:241,date:'2026-10-18'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1421,7 +1421,7 @@ const KW_RULES={
   paladin:'A Teece from the Paladin deck, or any Teece that has sworn an Oath.',
   armoured:'Every Knight has 1 Defence. Mounts do not.',
   knight:'A Teece from the Knights deck. Knights are Armoured and ride Mounts.',
-  mount:'A Token that a Knight rides as an equip. A Knight is played already riding the Mount printed on it, and has the Mount\u2019s numbers, Defence and abilities on top of its own. When the Knight is destroyed, its Mount is played on that panel. A Knight played onto one of your Mounts on the board rides that Mount instead of its own. A Knight can have only one Mount.'
+  mount:'A Token that a Knight rides as an equip. A Knight is played already riding the Mount printed on it, and has the Mount\u2019s numbers, Defence and abilities on top of its own. When the Knight is destroyed, its Mount is played on that panel or one next to it. A Knight played onto one of your Mounts on the board rides that Mount instead of its own. A Knight can have only one Mount.'
 };
 /* The spells a Wizard conjures and a Priest folds together. Built from the
    cards themselves at the moment of the tap, so the popup cannot drift from the
@@ -5464,13 +5464,13 @@ const CARDS = {
         equip entry {mount:true,sides}, so everything that reads equips reads it;
         standing on its own it is an ordinary Token. The engine is under
         "Knights: Mounts". ---- */
- 1241:{name:'Lancer',type:'teece',sides:[4,4,2,4],def:1,knight:true,mountOf:1261,
+ 1241:{name:'Lancer',type:'teece',sides:[4,4,0,4],def:1,knight:true,mountOf:1261,
     text:'Armoured. {mount}'},
- 1242:{name:'Sky Knight',type:'teece',sides:[3,3,3,3],def:1,knight:true,mountOf:1262,
+ 1242:{name:'Sky Knight',type:'teece',sides:[3,1,3,3],def:1,knight:true,mountOf:1262,
     text:'Armoured. {mount}'},
  1243:{name:'Page',type:'teece',sides:[0,0,0,0],def:1,knight:true,mountOf:1263,
     text:'Armoured. {mount}'},
- 1244:{name:'Desert Knight',type:'teece',sides:[5,5,5,5],def:1,knight:true,mountOf:1264,
+ 1244:{name:'Desert Knight',type:'teece',sides:[5,5,9,5],def:1,knight:true,mountOf:1264,
     text:'Armoured. {mount}'},
  1245:{name:'Rearguard',type:'teece',sides:[0,0,6,6],def:1,knight:true,mountOf:1265,
     text:'Armoured. {mount}'},
@@ -5478,7 +5478,7 @@ const CARDS = {
     text:'Armoured. {mount}'},
  1247:{name:'Tilting Knight',type:'teece',sides:[0,0,0,9],def:1,knight:true,mountOf:1267,
     text:'Armoured. {mount}'},
- 1248:{name:'Emu Knight',type:'teece',sides:[4,0,0,4],def:1,knight:true,mountOf:1268,
+ 1248:{name:'Emu Knight',type:'teece',sides:[4,2,2,4],def:1,knight:true,mountOf:1268,
     text:'Armoured. {mount}'},
  1249:{name:'Legaless',type:'teece',sides:[9,9,9,9],def:1,knight:true,mustMount:true,kw:['ranged'],
     text:'Armoured. Ranged. Must be played on one of your Mounts, which it rides.'},
@@ -5511,17 +5511,17 @@ const CARDS = {
     text:'An equipped Teece on this battleground has +4. A Knight riding a Mount is equipped.'},
  /* ---- Mount Tokens. Their numbers, keywords, Defence and abilities are what a
         Knight riding one adds to its own (mountGrants, below CARDS). ---- */
- 1261:{name:'Destrier',type:'teece',token:true,deck:'knights',mount:true,sides:[3,3,3,3],
+ 1261:{name:'Destrier',type:'teece',token:true,deck:'knights',mount:true,sides:[2,2,2,2],
     text:'Mount.'},
- 1262:{name:'Pegasus',type:'teece',token:true,deck:'knights',mount:true,ride:'Flying',sides:[3,3,3,3],kw:['flying'],
+ 1262:{name:'Pegasus',type:'teece',token:true,deck:'knights',mount:true,ride:'Flying',sides:[3,1,3,3],kw:['flying'],
     text:'Mount. Flying.'},
  1263:{name:'Charger',type:'teece',token:true,deck:'knights',mount:true,sides:[6,6,6,6],
     text:'Mount.'},
  1264:{name:'Cud Spitter',type:'teece',token:true,deck:'knights',mount:true,ride:'Ranged',sides:[1,1,1,1],kw:['ranged'],
     text:'Mount. Ranged.'},
- 1265:{name:'Courser',type:'teece',token:true,deck:'knights',mount:true,sides:[6,6,0,0],
+ 1265:{name:'Courser',type:'teece',token:true,deck:'knights',mount:true,sides:[3,3,0,0],
     text:'Mount.'},
- 1266:{name:'Palfrey',type:'teece',token:true,deck:'knights',mount:true,sides:[2,2,4,4],
+ 1266:{name:'Palfrey',type:'teece',token:true,deck:'knights',mount:true,sides:[1,1,3,3],
     text:'Mount.'},
  1267:{name:'Carousel Horse',type:'teece',token:true,deck:'knights',mount:true,ride:'once per your turn it can rotate, rider and all',sides:[0,9,0,0],
     act:[{name:'Rotate',once:'turn',steps:[{fx:'rot',may:true}]}],
@@ -15264,9 +15264,13 @@ async function FXRUN(st,ctx){
        beside it when that panel is taken. */
     const i=ctx.deadCell,owner=ctx.deadOwner!=null?ctx.deadOwner:p;
     if(i==null||!CARDS[st.id])return;
-    let at=openAt(b,i)?i:null;
-    if(at==null){const near=ADJ[i].filter(j=>openAt(b,j));if(near.length)at=near[Math.floor(Math.random()*near.length)];}
-    if(at==null){log(CARDS[st.id].name+' has nowhere to stand, and is gone.');return;}
+    /* On the panel it fell on or any panel touching it, its owner's pick
+       (Greg, build 240). */
+    const pool=[i].concat(ADJ[i]).filter(j=>openAt(b,j));
+    if(!pool.length){log(CARDS[st.id].name+' has nowhere to stand, and is gone.');return;}
+    let at=pool.length===1?pool[0]:await chooseCell(owner,pool,'Your '+CARDS[st.id].name+' is left riderless: choose where it stands.',
+      {mut:(bb,j)=>{putTeece(bb,j,makeTeece(st.id,owner),false);}});
+    if(at==null||at==='CANCEL'||pool.indexOf(at)<0)at=pool[0];
     summonToken(b,at,st.id,owner,true);
     log(CARDS[st.id].name+' is left standing at the '+CN[at]+'.');
     return;}
