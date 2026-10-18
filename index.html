@@ -1416,7 +1416,7 @@ const KW_RULES={
   solitarius:'Oath of Solitarius: +4. The Oath breaks when the Paladin becomes adjacent to one of its allies.',
   protectius:'Oath of Protectius: adjacent allies have +4. The Oath breaks when an adjacent ally dies.',
   pacificius:'Oath of Pacificius: +5 Defence. The Oath breaks when the Paladin destroys an enemy.',
-  holylight:'Once per your turn: Cleanse this Teece and every adjacent Teece, and destroy every enemy battleground or equip on or adjacent to this panel. Granted by the Holy Light spell.',
+  holylight:'Once per your turn, even while it is stunned: Cleanse this Teece and every adjacent Teece, and destroy every enemy battleground or equip on or adjacent to this panel. Granted by the Holy Light spell.',
   ram:'Once per your turn: select a Teece in the same row or column; stun it, give it -3, and move one space toward it if able.',
   paladin:'A Teece from the Paladin deck, or any Teece that has sworn an Oath.',
   armoured:'Every Knight has 1 Defence. Mounts do not.',
@@ -3167,7 +3167,7 @@ const CARDS = {
     text:'When played: choose a number X from zero to eight. The next Teece you play whose four sides all equal X arrives with plus nine minus X.',
     onPlay:[{fx:'calibrate'}]},
  443:{name:'Pocket Multitool',type:'teece',sides:[2,2,2,2],
-    text:'When played, choose a modality: return a non-Boss Teece to its owner hand and send its equips with it, or arm this so that when it is destroyed the next Teece your opponent plays is destroyed.',
+    text:'When played, choose a modality: return a non-Boss Teece to its owner hand and send its equips with it, or arm this so that when it is destroyed the next Teece your opponent plays gets -5.',
     onPlay:[{fx:'choose',modal:true,msg:'Pocket Multitool:',opts:[
       {lbl:'Return a non-Boss Teece to hand',steps:[{fx:'bounce'}]},
       {lbl:'Arm the trap',steps:[{fx:'armTrap'}]}]}],
@@ -3207,8 +3207,11 @@ const CARDS = {
  450:{name:'Overdrive Engine',type:'teece',sides:[10,10,10,10],sac:1,
     text:'Sacrifice a Teece to play. Whenever one of your modalities resolves, this gets +1 and Flying until end of turn.',
     onModal:{n:1,dur:'temp',kw:'flying'}},
- 451:{name:'Safety Interlock',type:'teece',sides:[8,8,8,8],modalNone:true,
-    text:'While this stands, none of its owner’s modalities trigger. Cards of theirs that offer a choice simply do nothing. It has no effect on the opponent’s modalities.'},
+ 451:{name:'Safety Interlock',type:'teece',sides:[8,8,8,8],interlock:true,
+    text:'When played, choose a modality. While this is on the field, whenever you activate a modality: 1) its first choice is always picked, or 2) its last choice is always picked.',
+    onPlay:[{fx:'choose',modal:true,msg:'Safety Interlock:',opts:[
+      {lbl:'Always pick the first choice',steps:[{fx:'interlockSet',k:'first'}]},
+      {lbl:'Always pick the last choice',steps:[{fx:'interlockSet',k:'last'}]}]}]},
  452:{name:'Grand Apparatus',type:'teece',sides:[12,12,12,12],sac:2,modalAll:true,modalTwice:true,
     text:'Sacrifice two Teece to play. While this stands, your modalities trigger every mode, and every mode triggers twice.'},
  453:{name:'Preset',type:'magic',
@@ -5443,7 +5446,7 @@ const CARDS = {
     text:'Sacrifice two Teece to play. Oath. Oath. Oath. (Swear up to three Oaths, each to a different god.)'},
  /* ---- Paladin magic ---- */
  1231:{name:'Holy Light',type:'magic',trump:true,palAi:'holy',cast:[{fx:'holyBless'}],
-    text:'Trump card. Select a Paladin of yours with an active Oath, or bless the next one you play. It gets +3 and Ward (enemy effects can’t select it), and gains Holy Light: once per your turn, Cleanse this Teece and every adjacent Teece, and destroy every enemy battleground or equip on or adjacent to this panel.'},
+    text:'Trump card. Select a Paladin of yours with an active Oath, or bless the next one you play. It gets +3 and Ward (enemy effects can’t select it), and gains Holy Light: once per your turn, even while it is stunned, Cleanse this Teece and every adjacent Teece, and destroy every enemy battleground or equip on or adjacent to this panel.'},
  1232:{name:'Sanctified Grounds',type:'magic',palAi:'sanct',cast:[{fx:'sanctify',n:5}],
     text:'Select a 2x2 area of the board with an ally of yours in it. Those panels glow: your Teece in the glowing area have +5 Defence until a Teece in that area is destroyed.'},
  1233:{name:'Glorious Redemption',type:'magic',palAi:'redeem',cast:[{fx:'redeem',n:5}],
@@ -6100,13 +6103,20 @@ function groundAnchored(b,i){
   }
   return false;
 }
+/* A Safety Interlock locks its owner's modalities to a choice: every lock it
+   was given ('first' or 'last', once per time its own modality fired) picks
+   that end of the list, so one locked both ways fires the first and the last
+   choice, and one locked 'first' twice fires the first choice twice. A
+   modality that fires every mode is not picking, so a lock changes nothing
+   there. */
 function modalCtl(p,cell){
   let all=false,times=1,off=false;
-  const b=G.board;
+  const b=G.board,forced=[];
   for(let i=0;i<BN;i++){
     const t=b[i].teece;if(!t)continue;
     const d=DEF(t);
     if(d.modalNone&&t.owner===p)off=true;
+    if(d.interlock&&t.owner===p&&t.interlock)forced.push(...t.interlock);
     if(sameTeam(t.owner,p)){
       if(d.modalAll)all=true;
       if(d.modalTwice)times=2;
@@ -6123,8 +6133,10 @@ function modalCtl(p,cell){
     times*=nx.times||1;
     G.modalNext=null;
   }
-  return {off,all,times};
+  return {off,all,times,forced};
 }
+/* The choices a locked modality fires, as indexes into its list. */
+const interlockPicks=(forced,n)=>forced.map(k=>k==='last'?n-1:0);
 function fireModal(p){
   const b=G.board;
   for(let i=0;i<BN;i++){
@@ -6136,10 +6148,13 @@ function fireModal(p){
     log(nm(t)+' spins up: '+sgn(d.onModal.n)+(d.onModal.kw?' and '+d.onModal.kw:'')+' until end of turn.');
   }
 }
+/* The Pocket Multitool's trap. It used to destroy the Teece that walked into it;
+   since build 242 it takes TRAP_MOD off it for good instead (Greg). */
+const TRAP_MOD=-5;
 function setTrap(by,n){
   const was=G.trap&&G.trap.by===by?G.trap.n:0;
   G.trap={by,n:was+(n||1)};
-  log('The trap is set: the next '+(G.trap.n>1?G.trap.n+' Teece':'Teece')+' played against '+pname(by)+(G.trap.n>1?' are':' is')+' destroyed as '+(G.trap.n>1?'they land.':'it lands.'));
+  log('The trap is set: the next '+(G.trap.n>1?G.trap.n+' Teece':'Teece')+' played against '+pname(by)+(G.trap.n>1?' each get ':' gets ')+sgn(TRAP_MOD)+' as '+(G.trap.n>1?'they land.':'it lands.'));
 }
 function setModalNext(p,opt){
   /* Two of these in a row stack rather than overwrite: each "twice" doubles
@@ -6909,7 +6924,25 @@ function teamName(tm){
 function nm(t){const d=DEF(t);return (t.animGround?CARDS[t.animGround.cardId].name:(d.godTitle||d.patronTitle)?cardTitle(t.cardId,t.owner):d.name)+(t.promoted?' (promoted)':t.isCopy?' (copy)':'');}
 /* pname() returns "You" for the human seat, so any verb after it has to agree. */
 const vb=(p,third,second)=>(G&&G.vsAI&&p===0)?second:third;
-function log(m){G.log.unshift(m);if(G.log.length>140)G.log.pop();if(HAS_DOM){renderLog();if(NET&&NET.role==='host')netSync(false);}}
+/* Log lines are written about a seat in the third person ("Computer plays ..."),
+   and pname turns the human's seat into "You", which then reads "You plays".
+   A handful of lines pick the verb with vb(); this mends the rest wherever a
+   sentence opens on "You". */
+const YOU_IRREG={has:'have',is:'are',was:'were',does:'do',goes:'go',dies:'die',lies:'lie',ties:'tie'};
+function youVerb(m){
+  if(typeof m!=='string'||m.indexOf('You ')<0)return m;
+  return m.replace(/(^|[.:!?\u2014] )You ([a-z]+)\b/g,(all,pre,w)=>{
+    let v=YOU_IRREG[w];
+    if(!v){
+      if(/(ss|us|is)$/.test(w)||!/s$/.test(w))return all;
+      if(/ies$/.test(w))v=w.slice(0,-3)+'y';
+      else if(/(ss|sh|ch|x|z)es$/.test(w))v=w.slice(0,-2);
+      else v=w.slice(0,-1);
+    }
+    return pre+'You '+v;
+  });
+}
+function log(m){m=youVerb(m);G.log.unshift(m);if(G.log.length>140)G.log.pop();if(HAS_DOM){renderLog();if(NET&&NET.role==='host')netSync(false);}}
 
 /* ============ derived stats, keywords, acts ============ */
 function addMod(sum,m){if(m==null)return;if(Array.isArray(m)){for(let k=0;k<4;k++)sum[k]+=m[k];}else{for(let k=0;k<4;k++)sum[k]+=m;}}
@@ -8088,7 +8121,7 @@ function actBlockedReason(b,i,ent){
   if(!t)return null;
   /* A stun stops every ability, not just the ones that move, so it is answered
      before the movement cases and the button says why rather than doing nothing. */
-  if(isStunned(t,b,i))return 'stunned';
+  if(isStunned(t,b,i)&&!ent.act.stunOk)return 'stunned';
   const st=ent.act.steps&&ent.act.steps[0];
   if(st&&st.fx==='gunGodShot'){
     if(bulletsOf(t.owner)<1)return 'no bullets';
@@ -11678,8 +11711,13 @@ async function FXRUN(st,ctx){
     G.players[p].calib={x,n:9-x};
     log(pname(p)+' sets the dial to '+x+'.');
     return;}
+  case 'interlockSet':{
+    const t=ctx.t;if(!t)return;
+    t.interlock=(t.interlock||[]).concat([st.k]);
+    log(nm(t)+' locks your modalities: the '+st.k+' choice is always picked.');
+    return;}
   case 'armTrap':{
-    if(ctx.t){ctx.t.trapArmed=(ctx.t.trapArmed||0)+1;log(nm(ctx.t)+' is armed'+(ctx.t.trapArmed>1?' '+ctx.t.trapArmed+' times':'')+': destroying it costs the next '+(ctx.t.trapArmed>1?ctx.t.trapArmed+' Teece':'Teece')+' played against it.');}
+    if(ctx.t){ctx.t.trapArmed=(ctx.t.trapArmed||0)+1;log(nm(ctx.t)+' is armed'+(ctx.t.trapArmed>1?' '+ctx.t.trapArmed+' times':'')+': when it is destroyed, the next '+(ctx.t.trapArmed>1?ctx.t.trapArmed+' Teece':'Teece')+' played against it '+(ctx.t.trapArmed>1?'each get ':'gets ')+sgn(TRAP_MOD)+'.');}
     return;}
   case 'allMod':{
     let n=0;
@@ -12088,7 +12126,7 @@ async function FXRUN(st,ctx){
     if(hit.length)await anim(hit,'zap');
     return;}
   /* Ragnarok is a modality, so it answers to everything that bends one -- a
-     Coupling Rig fires both, a Safety Interlock neither. Written out rather
+     Coupling Rig fires both, a Safety Interlock the end it is locked to. Written out rather
      than as a plain choose so the computer picks the mode on purpose instead
      of at random. st.mode forces one, which is how a test asks for it. */
   case 'ragnarok':{
@@ -12148,6 +12186,17 @@ async function FXRUN(st,ctx){
         if(ra==='ABORT'&&r===0)return 'ABORT';
         if(G.over)return;
         triumph();
+      }
+      fireModal(p);
+      return;
+    }
+    if(ctl.forced&&ctl.forced.length){
+      for(const x of interlockPicks(ctl.forced,2)){
+        log('Safety Interlock picks: '+(x?'Triumph':'Apocalypse')+(ctl.times>1?', twice.':'.'));
+        for(let r=0;r<ctl.times;r++){
+          if(x)triumph();
+          else{await apocalypse();if(G.over)return;}
+        }
       }
       fireModal(p);
       return;
@@ -12317,6 +12366,19 @@ async function FXRUN(st,ctx){
         for(const o of st.opts){
           const ok=await runSteps(o.steps,ctx);
           if(!ok&&r===0)return 'ABORT';
+          if(G.over)break;
+        }
+        if(G.over)break;
+      }
+      fireModal(p);
+      return;
+    }
+    if(ctl.forced&&ctl.forced.length){
+      for(const x of interlockPicks(ctl.forced,st.opts.length)){
+        const chosen=st.opts[x];
+        log('Safety Interlock picks: '+chosen.lbl+(ctl.times>1?', twice.':'.'));
+        for(let r=0;r<ctl.times;r++){
+          await runSteps(chosen.steps,ctx);
           if(G.over)break;
         }
         if(G.over)break;
@@ -17373,15 +17435,13 @@ async function playTeece(p,handIdx){
   if(plan&&plan.rot)spinT(t,plan.rot===1?'cw':'ccw');
   putTeece(b,spot,t,true,'play');
   attachRiders(p,id,t,true);
-  /* The trap catches it as it lands. The kill goes on the effect stack right
-     here, and the stack drains ahead of every combat scan, so the Teece cannot
-     trade with a neighbour on its way out no matter what runs in between. */
+  /* The trap catches it as it lands: -5 for good, before any fight it could
+     start, so it arrives already weakened. */
   let trapped=false;
   if(G.trap&&!sameTeam(p,G.trap.by)){
     G.trap.n=(G.trap.n||1)-1;
     if(G.trap.n<=0)G.trap=null;
     trapped=true;
-    queueFx({kill:t.uid,msg:nm(t)+' walks straight into the trap.'});
   }
   if(b[spot].ground&&!floats(t)){
     const gd0=CARDS[b[spot].ground.cardId];
@@ -17398,6 +17458,7 @@ async function playTeece(p,handIdx){
      :G.viaEffect?' — summoned by an effect, so it doesn’t use a Teece play.'
      :platedFree?' — its Surge Coil lets it go down alongside the turn’s play.'
      :called?' — called up alongside its counterpart, so it doesn’t use this turn’s Teece play.':'.'));
+  if(trapped){applyModT(t,TRAP_MOD,'perm');log(nm(t)+' walks straight into the trap: '+sgn(TRAP_MOD)+'.');}
   await anim([spot],'placed',140);
   if(worn.length){
     log(nm(t)+' arrives already plated with '+worn.map(e=>CARDS[e.cardId].name).join(', ')+'.');
@@ -17520,10 +17581,6 @@ async function playTeece(p,handIdx){
      landing gets its chance now, with the body on the board. */
   if(b.some(c=>c.teece===t))await reactHand('enemyPlay',p);
   if(G.over)return true;
-  if(trapped){
-    await resolveCombat();render();
-    return true;
-  }
   await resolveCombat();
   render();
   return true;
@@ -17852,6 +17909,14 @@ async function playGround(p,handIdx){
     if(ctl.off){log('Safety Interlock holds: '+d.name+' is laid inert.');gmode={};}
     else if(ctl.all){gmode=Object.assign({},...d.gModal.map(m=>{const o=Object.assign({},m);delete o.lbl;delete o.gmod;return o;}));
       gmode.gmod=0;log('Every mode of '+d.name+' fires: it doubles bonuses and penalties alike.');}
+    else if(ctl.forced&&ctl.forced.length&&new Set(interlockPicks(ctl.forced,d.gModal.length)).size>1){
+      gmode=Object.assign({},...d.gModal.map(m=>{const o=Object.assign({},m);delete o.lbl;delete o.gmod;return o;}));
+      gmode.gmod=0;log('Safety Interlock picks both modes of '+d.name+': it doubles bonuses and penalties alike.');}
+    else if(ctl.forced&&ctl.forced.length){
+      const m=d.gModal[interlockPicks(ctl.forced,d.gModal.length)[0]];
+      gmode=Object.assign({},m);delete gmode.lbl;
+      log('Safety Interlock picks: '+m.lbl+'.');
+    }
     else{
       const pick=await chooseOption(p,d.gModal.map((m,x)=>({v:String(x),lbl:m.lbl})),d.name+':');
       if(pick==null)return false;
@@ -18075,7 +18140,7 @@ async function runAct(p,cell,ent){
   const b=G.board,t=b[cell].teece;
   if(!t||t.owner!==p)return false;
   if(hexOn(p,'silence')){toast('Silenced: no abilities may be activated.');return false;}
-  if(isStunned(t,b,cell)){toast(nm(t)+' is stunned: it cannot activate anything.');return false;}
+  if(isStunned(t,b,cell)&&!ent.act.stunOk){toast(nm(t)+' is stunned: it cannot activate anything.');return false;}
   if(!actAvailable(t,ent))return false;
   const ctx={p,cell,t,first:true,ent};
   const ok=await runSteps(ent.act.steps,ctx);
@@ -21462,17 +21527,24 @@ function statusesFor(p){
   /* --- what is waiting for the next Teece you play --- */
   if(G.trap){
     if(!sameTeam(p,G.trap.by))
-      push('trap','bad',G.trap.n>1?'Next '+G.trap.n+' Teece die':'Next Teece dies','A trap is sprung against you. The next '+(G.trap.n>1?G.trap.n+' Teece you play are':'Teece you play is')+' destroyed the moment '+(G.trap.n>1?'they land.':'it lands.'));
+      push('trap','bad',(G.trap.n>1?'Next '+G.trap.n+' Teece get ':'Next Teece gets ')+sgn(TRAP_MOD),'A trap is sprung against you. The next '+(G.trap.n>1?G.trap.n+' Teece you play each get ':'Teece you play gets ')+sgn(TRAP_MOD)+' for good the moment '+(G.trap.n>1?'they land.':'it lands.'));
     else
-      push('trapset','good','Trap sprung'+(G.trap.n>1?' x'+G.trap.n:''),'The next '+(G.trap.n>1?G.trap.n+' Teece':'Teece')+' played against you '+(G.trap.n>1?'are':'is')+' destroyed the moment '+(G.trap.n>1?'they land.':'it lands.'));
+      push('trapset','good','Trap sprung'+(G.trap.n>1?' x'+G.trap.n:''),'The next '+(G.trap.n>1?G.trap.n+' Teece':'Teece')+' played against you '+(G.trap.n>1?'each get ':'gets ')+sgn(TRAP_MOD)+' for good the moment '+(G.trap.n>1?'they land.':'it lands.'));
+  }
+  for(let i=0;i<BN;i++){
+    const t=b[i].teece;
+    if(!t||!t.interlock||!t.interlock.length||!DEF(t).interlock)continue;
+    const lk=t.interlock.map(k=>k==='last'?'last':'first').join(' and ');
+    push('ilock'+t.uid,sameTeam(t.owner,p)?'good':'warn','Interlock: '+lk,
+      nm(t)+' locks '+pposs(t.owner)+' modalities: whenever '+pname(t.owner)+' '+vb(t.owner,'activates','activate')+' one, the '+lk+' choice '+(t.interlock.length>1?'are':'is')+' always picked.');
   }
   for(let i=0;i<BN;i++){
     const t=b[i].teece;
     if(!t||!t.trapArmed)continue;
     if(sameTeam(t.owner,p))
-      push('armed'+t.uid,'good','Trap armed: '+nm(t),nm(t)+' is armed. If it is destroyed, the next Teece played against you is destroyed.');
+      push('armed'+t.uid,'good','Trap armed: '+nm(t),nm(t)+' is armed. If it is destroyed, the next Teece played against you gets '+sgn(TRAP_MOD)+'.');
     else
-      push('armed'+t.uid,'bad','Trap armed: '+nm(t),nm(t)+' is armed. If it is destroyed, the next Teece you play is destroyed.');
+      push('armed'+t.uid,'bad','Trap armed: '+nm(t),nm(t)+' is armed. If it is destroyed, the next Teece you play gets '+sgn(TRAP_MOD)+'.');
   }
   let arrive=0;const src=[];
   for(let i=0;i<BN;i++){
@@ -22585,7 +22657,9 @@ function cleanseSim(bb,i,p,equip){
   cleanseEnemy(o,false);
   if(equip&&o.equips.length)o.equips=o.equips.slice(1);
 }
-const HOLY_ACT={name:'Holy Light',once:'turn',steps:[{fx:'holyLight'}]};
+/* Holy Light is the one ability a stun does not stop: it Cleanses its own bearer
+   first, so a stunned Paladin can still lift its own stun with it. */
+const HOLY_ACT={name:'Holy Light',once:'turn',stunOk:true,steps:[{fx:'holyLight'}]};
 function holyApply(t,live){
   applyModT(t,3,'perm');
   if((t.kwPerm||[]).indexOf('ward')<0)t.kwPerm=(t.kwPerm||[]).concat(['ward']);
