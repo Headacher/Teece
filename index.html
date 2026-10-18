@@ -2589,6 +2589,14 @@ const CARD_ART={
   "TD":["  \\   _   /  ", "   \\ (o) /   ", "  ==[###]==  ", "   / | | \\   ", "   '  '  '   "],
   "TR":["    .---.    ", "  ,'#####',  ", " /#########\\ ", " \\#########/ ", "  `-------'  "],
   "TS":["    \\ | /    ", "     \\|/     ", "   .--+--.   ", "      |      ", " ~~~~~~~~~~~ "]};
+/* ---- Battleground art. A ground on the board is drawn as a frame around the
+       Teece standing on it, so its art is a ring, not a picture: 9 rows of
+       exactly 17 characters, with only row 0, row 8 and the two outer columns
+       on each side (0-1 and 15-16) drawn on; everything inside that ring is
+       spaces, because the Teece covers it. Keyed by ground card id. A ground
+       with no entry here is drawn as a plain tinted panel. ---- */
+const GROUND_ART={
+};
 /* Roguelike drafts from the whole card list rather than the curated POOL: any
    card in the game that is not a Token can turn up.
 
@@ -25709,7 +25717,7 @@ if(typeof module!=='undefined'){
     groundGives,givesLabel,invulnText,blessedOn,sameRow,sameCol,oppositeCell,
     groundNum,groundOf,canHandDiscard,auraGives,panelGives,isSteadfast,
     isPlane,planeOn,PLANE,planeSpots,hangPlane,syncPlane,getGrid:()=>GRID,
-    statusesFor,teecePlayBlock,growSeeds,CARD_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,kwify,kwDesc,kwTitle,KW_RULES,KW_SPELL,KW_TOKEN,
+    statusesFor,teecePlayBlock,growSeeds,CARD_ART,GROUND_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,kwify,kwDesc,kwTitle,KW_RULES,KW_SPELL,KW_TOKEN,
     graveActsFor,graveActAvailable,runGraveAct,dumpPlate,
     setHandView,applyHandView,getHandView:()=>SQHAND,applySides,handCount,afterDiscard,
     canHandDiscard,sacPool,chooseSacrifice,drawPerTurn,
