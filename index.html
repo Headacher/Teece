@@ -1291,7 +1291,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:235,date:'2026-10-18'};
+const VERSION={build:236,date:'2026-10-18'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -20338,9 +20338,7 @@ function hideHcapRow(){
 /* One page per deck, opened from the "i" in the corner of its tile and closed
    without picking anything. It carries what the start screen used to spell out
    in a wall of text: the deck's own gimmick, the keywords its cards actually
-   print, and the handful of rules that are true of every game -- which have to
-   live somewhere now that the menu no longer says them, and are never more than
-   one tap from the moment you are choosing. */
+   print, and any rule the deck itself changes. */
 function showDeckInfo(key){
   const dk=DECKS[key]; if(!dk)return;
   const box=document.getElementById('infoBox'),ov=document.getElementById('infoOverlay');
@@ -20359,21 +20357,15 @@ function showDeckInfo(key){
     for(const k of kws)h+='<span class="rk">'+escHtml(kwLabel(k))+'</span><span>'+escHtml(KEYWORDS[k])+'</span>';
     h+='</div>';
   }
-  h+='<h3>True of every game</h3><div class="rules">'+
-    '<span class="rk">Combat</span><span>Adjacent enemies compare the edge numbers that touch; the smaller one dies and ties do nothing. '+
-      'Any Teece whose attributes fall below zero dies on the spot, and every change anywhere re-checks the whole board.</span>'+
-    '<span class="rk">Defence</span><span>Defence soaks the difference: a Teece with Defence 2 only dies to an attack that beats it by three or more.</span>'+
-    /* "One Teece" is the rule for every deck but one, and a deck that prints
-       its own turn has to say so here or its own page contradicts it. */
-    '<span class="rk">Each turn</span><span>'+
-      (dk.perTurn
-        ? (dk.perTurn.play||1)+' Teece, and '+(dk.perTurn.draw||1)+
-          ' cards drawn at the top of it: this deck plays a bigger turn than the others. '
-        : 'One Teece. ')+
-      'Equips, magic and battlegrounds are unlimited.</span>'+
+  /* Only rules this deck changes. The rules every game shares are not repeated
+     on every deck's page. */
+  const own=
+    (dk.perTurn
+      ? '<span class="rk">Each turn</span><span>'+(dk.perTurn.play||1)+' Teece, and '+(dk.perTurn.draw||1)+
+        ' cards drawn at the top of it: this deck plays a bigger turn than the others.</span>'
+      : '')+
     (dk.freeDiscard
-      ? '<span class="rk">Discarding</span><span>On your turn you may throw away any card in your hand, as often as you like. '+
-        'A rule of this deck rather than of any card in it, which is why none of them print it.</span>'
+      ? '<span class="rk">Discarding</span><span>On your turn you may throw away any card in your hand, as often as you like.</span>'
       : '')+
     /* A card the deck hands you before the game starts is not one of its
        twenty, so nothing else on this page would ever show it. */
@@ -20382,25 +20374,19 @@ function showDeckInfo(key){
         dk.startHand.map(id=>escHtml(CARDS[id].name)).join(' and ')+' on top of your opening hand. '+
         dk.startHand.map(id=>escHtml(CARDS[id].name)+': '+escHtml(CARDS[id].text)).join(' ')+'</span>'
       : '')+
-    '<span class="rk">Reviving</span><span>A Teece brought back from a graveyard is played: its when-played effect triggers, controlled by whoever revived it.</span>'+
-    '<span class="rk">Winning</span><span>Wipe out every enemy Teece, '+
-      (dk.noDominate
-        ? 'or hold the bigger field when a player must draw from an empty deck. '+
-          'This deck can NEVER take the game by ending a turn four Teece ahead, however far ahead it gets.'
-        : 'end a turn four Teece ahead (Tokens never count), '+
-          'or hold the bigger field when a player must draw from an empty deck.')+
-      ' If turn '+TURN_LIMIT+' ends first, the bigger field wins it.</span>'+
+    (dk.noDominate
+      ? '<span class="rk">Winning</span><span>This deck can never win by ending a turn four Teece ahead.</span>'
+      : '')+
     (dk.swarmWin
       ? '<span class="rk">And one more</span><span>This deck adds a win of its own: the moment every panel on the '+
         'board is holding one of your '+(dk.swarmWin==='any'?'Teece':escHtml(dk.swarmWin)+'s')+', the game is yours. It is checked as a turn ends, '+
-        'so the board has to still be full when one closes \u2014 and a panel razed off the board puts it out of '+
-        'reach for good, which is what Raze and the Curse of Razing are for.</span>'
+        'so the board has to still be full when one closes, and a razed panel puts it out of reach for good.</span>'
       : '')+
     (dk.allFlying
-      ? '<span class="rk">Winged</span><span>Every Teece this deck fields has Flying, printed on the deck rather than '+
-        'on the cards \u2014 so anything it steals flies too.</span>'
-      : '')+
-    '</div>'+
+      ? '<span class="rk">Winged</span><span>Every Teece this deck fields has Flying, so anything it steals flies too.</span>'
+      : '');
+  if(own)h+='<h3>Deck rules</h3><div class="rules">'+own+'</div>';
+  h+=
     '<h3>The '+dk.cards.length+' cards</h3><div class="cardList">';
   for(const cid of dk.cards){
     const c=CARDS[cid];
