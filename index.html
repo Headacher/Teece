@@ -1300,7 +1300,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:239,date:'2026-10-18'};
+const VERSION={build:240,date:'2026-10-18'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -5173,7 +5173,7 @@ const CARDS = {
  1108:{name:'Devotee',type:'teece',sides:[3,5,3,5],priest:true,worshipPlus:6,priestDiscard:true,
     handDiscard:[{fx:'conjureSmite'}],
     text:'+6 on its side empowered by Worship. Or discard this from your hand on your turn: conjure a Quarter Smite.'},
- 1109:{name:'Prophet',type:'teece',sides:[7,7,7,7],priest:true,onPlay:[{fx:'worshipSwitch'}],
+ 1109:{name:'Prophet',type:'teece',sides:[5,6,7,5],priest:true,onPlay:[{fx:'worshipSwitch'}],
     text:'When played: you can switch the god you Worship.'},
  1110:{name:'Templar',type:'teece',sides:[3,3,3,3],priest:true,def:3,onPlay:[{fx:'conjureSmite'}],
     text:'Defence 3. When played: conjure a Quarter Smite.'},
