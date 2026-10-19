@@ -298,7 +298,14 @@ where they fall short.
 - **Apocalypse.** The Horsemen ride, and that is good. The rest is mixed:
   River of Blood, Wastes and Chainmail are texture.
 - **Madness.** Faces with `@` and `?` eyes, but no shared construction.
-- **Dimension.** Nested `+--+` boxes. It is abstract, and most cards look alike.
+- **Dimension.** Redrawn in single strokes as Planewalkers and the planes they
+  carry. Every Planewalker is the same hooded figure: a pointed hood `/^\`,
+  star eyes `(* *)`, a robe `/|~|\` and feet `_/ \_`; the bosses add a third
+  eye or a world in their hands. A battleground held as an object is a slab in
+  perspective `/____/` with a `*` on it, a rift is a zigzag tear `/\ < > \/`,
+  and the Black Hole pulls everything into an `@`. The back is a starfield, so
+  the drawings leave open space for its stars instead of drawing their own; a
+  `.` or `:` fades into it, which is how the Fading Rift fades.
 - **Locust.** Insect heads `\\ ^ //` with feelers. Consistent, but it leans on one
   template.
 - **Devil.** Horned faces `/\ /\` and contracts. Consistent.
