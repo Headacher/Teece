@@ -1462,7 +1462,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:254,date:'2026-10-19'};
+const VERSION={build:255,date:'2026-10-19'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1573,7 +1573,7 @@ const KW_RULES={
   element:'Fire, Water, Wind or Earth: the four spells a Wizard conjures. "Any element" means you pick which.',
   token:'Not a whole card. A Token cannot be sacrificed to play a Teece and never counts toward winning, and when it is destroyed it is simply gone: no graveyard, no return.',
   silenced:'A silenced Teece has its abilities negated for the rest of the game: nothing printed on it fires any more, its buttons are dead and its auras stop. Its numbers stay. A silenced battleground does nothing.',
-  trump:'The most powerful card in the deck. Each deck only gets one.',
+  trump:'This card is overpowered and unbalanced. Each deck gets one.',
   cleanse:'Select a Teece. An ally loses every negative effect on it: stun, silence, curses, blindness and every penalty to its numbers or its Defence. An enemy is silenced and loses every bonus to its numbers and its Defence.',
   oath:'When played, it swears an Oath to one of the three Paladin gods: Solitarius, Protectius or Pacificius. The Oath pays out while it holds and breaks on its god\u2019s condition. A Teece that has sworn an Oath counts as a Paladin.',
   oathbroken:'When an Oath breaks, the Paladin becomes Oathbroken: it loses that Oath\u2019s bonus and gets -2.',
@@ -2920,7 +2920,7 @@ function canPlay(p,cardId){
   if(cd.type==='teece'){
     if((G.teecePlayed&&!freePlayFor(p,cardId))||hexOn(p,'freeze'))return false;
     let room=false;
-    if(!mustRide(p,G.players[p].hand.indexOf(cardId),cardId))for(let i=0;i<BN;i++)if(openAt(G.board,i)){room=true;break;}
+    if(!mustRide(p,G.players[p].hand.indexOf(cardId),cardId))for(let i=0;i<BN;i++)if(playAt(G.board,i)){room=true;break;}
     /* A Knight can also be played onto one of your Mounts; Legaless only there. */
     if(!room&&cd.knight&&knightSpots(G.board,p,cardId).length)room=true;
     if(!room)return false;
@@ -3790,12 +3790,12 @@ const CARDS = {
     text:'Select a Teece; give it +3 until the end of the turn, and you may then move it to any empty panel.',
     cast:[{fx:'mod',where:'global',n:3,dur:'temp'},{fx:'teleLast'}]},
  534:{name:'Sow a Seed',type:'magic',
-    text:'Select a panel and plant a seed there. It grows after three of your turns: if the panel is empty then, you may raise one Teece out of your graveyard onto it with +1.',
+    text:'Select a panel and plant a seed there. No Teece can be played onto that panel, though one can still be moved onto it. It grows after three of your turns: if the panel is empty then, you may raise one Teece out of your graveyard onto it with +1.',
     cast:[{fx:'plantSeed',turns:3,n:1}]},
  535:{name:'Rain of Spring',type:'magic',text:'Every allied Teece gets +2.',
     cast:[{fx:'mass',who:'ally',n:2,dur:'perm'}]},
- 536:{name:'Plant Pot',type:'equip',mod:[0,0,20,0],
-    text:'The equipped Teece gets +20 on its bottom side alone.'},
+ 536:{name:'Plant Pot',type:'equip',trump:true,mod:[0,0,20,0],
+    text:'Trump card. The equipped Teece gets +20 on its bottom side alone.'},
  537:{name:'Fertile Soil',type:'equip',mod:3,
     text:'The equipped Teece gets +3.'},
  538:{name:'Moving Roots',type:'equip',mod:0,
@@ -8470,6 +8470,9 @@ const hasKw=(b,i,k)=>kwOf(b,i).indexOf(k)>=0;
    was laid stays put; what is shut is the way in. */
 const blockedGround=(b,i)=>groundFlag(b[i].ground,'gNoEntry');
 const openAt=(b,i)=>!b[i].teece&&!b[i].razed&&!blockedGround(b,i);
+/* A panel a Teece may be PLAYED onto from the hand: open, and no seed planted
+   there. A seed's panel can still be moved onto. */
+const playAt=(b,i)=>openAt(b,i)&&!b[i].seed;
 function actsOf(b,i){
   const t=b[i].teece; if(!t)return[];
   const out=[]; const d=DEF(t);
@@ -17691,7 +17694,7 @@ function canSummon(q,id){
   const d=CARDS[id];
   if(!d||d.type!=='teece'||isBossCard(id)||sacsNeeded(id,q)>0)return false;
   if(hexOn(q,'freeze'))return false;
-  for(let i=0;i<BN;i++)if(openAt(G.board,i))return true;
+  for(let i=0;i<BN;i++)if(playAt(G.board,i))return true;
   return false;
 }
 async function summonFromHand(q,idx){
@@ -17782,7 +17785,7 @@ async function playTeece(p,handIdx){
   }
   /* Legaless already riding a Mount saddled on in hand lands anywhere. */
   const ride=mustRide(p,handIdx,id);
-  const empt=[];if(!ride)for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
+  const empt=[];if(!ride)for(let i=0;i<BN;i++)if(playAt(b,i))empt.push(i);
   /* A Knight can land on one of your Mounts and ride it; Legaless only there. */
   const mspots=knightSpots(b,p,id);
   if(ride&&!mspots.length){toast(d.name+' must be played on one of your Mounts.');return false;}
@@ -17807,7 +17810,7 @@ async function playTeece(p,handIdx){
      the card being played is about to shift everything after it. */
   const sacHIds=sacH.map(x=>pl.hand[x]);
   const spots=empt.concat(mspots);
-  if(!ride)for(const c of sacP)if(!b[c].razed&&!blockedGround(b,c)&&spots.indexOf(c)<0)spots.push(c);
+  if(!ride)for(const c of sacP)if(!b[c].razed&&!b[c].seed&&!blockedGround(b,c)&&spots.indexOf(c)<0)spots.push(c);
   spots.sort((x,y)=>x-y);
   /* What the Teece would actually arrive as, panel by panel. Every other prompt
      in the game previews its own consequence and this one previewed nothing, so
@@ -17883,8 +17886,8 @@ async function playTeece(p,handIdx){
   /* A death can fill the very panel it emptied -- an Egg Sac boiling over, a
      resummon, a Token that arrives where its summoner fell. Ask again rather
      than dropping the new Teece on top of whatever moved in. */
-  if(!openAt(b,spot)){
-    const open2=[];for(let i=0;i<BN;i++)if(openAt(b,i))open2.push(i);
+  if(!playAt(b,spot)){
+    const open2=[];for(let i=0;i<BN;i++)if(playAt(b,i))open2.push(i);
     if(!open2.length){
       toGrave(p,id);
       dumpPlate(worn,'with the card it was bolted to',id);
@@ -20478,7 +20481,7 @@ async function aiSupport(){
 async function aiPlayTeece(){
   const p=G.turn,pl=G.players[p],b=G.board;
   if(G.teecePlayed&&!(G.freePlay&&G.freePlay.p===p))return false;
-  const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
+  const empt=[];for(let i=0;i<BN;i++)if(playAt(b,i))empt.push(i);
   const anySac=b.some(c=>c.teece&&c.teece.owner===p&&!c.teece.isToken);
   if(!empt.length&&!anySac&&!mountSpots(b,p).length)return false;
   const base=boardValue(b,p);
@@ -20526,7 +20529,7 @@ async function aiPlayTeece(){
     const ms=knightSpots(b,p,id);
     const ride=mustRide(p,h,id);
     const spots=ride?ms.slice():empt.concat(ms);
-    if(!ride)for(const sc of sacP)if(!b[sc].razed&&spots.indexOf(sc)<0)spots.push(sc);
+    if(!ride)for(const sc of sacP)if(!b[sc].razed&&!b[sc].seed&&spots.indexOf(sc)<0)spots.push(sc);
     for(const c of spots){
       for(const rot of rots){
         const bb=cloneBoard(b);
@@ -21582,7 +21585,7 @@ function panelHtml(i){
   if(c.waymark)h+='<div class="dt">'+pposs(c.waymark.owner).replace(/^./,x=>x.toUpperCase())+' Waymark. The next ally of '+pname(c.waymark.owner)+' to arrive here gets +'+c.waymark.n+'; the next enemy gets -'+c.waymark.n+'.</div>';
   if(c.prime)h+='<div class="dt">This panel is primed. The next Teece to arrive here gets '+sgn(c.prime.n)+'.</div>';
   if(c.seed)h+='<div class="dt">'+pname(c.seed.owner)+' has a seed planted here, '+c.seed.turns+' turn'+(c.seed.turns===1?'':'s')+
-    ' from growing. If the panel is empty then, a Teece is raised from the graveyard with '+sgn(c.seed.n||1)+'.</div>';
+    ' from growing. No Teece can be played onto it, though one can be moved onto it. If the panel is empty then, a Teece is raised from the graveyard with '+sgn(c.seed.n||1)+'.</div>';
   if(c.enchant)h+='<div class="dt" style="color:var(--gold)">'+enchantText(c.enchant)+'</div>';
   if(c.fire)h+='<div class="dt" style="color:var(--gold)">'+fireText(c.fire)+'</div>';
   const pm=panelMark(G.board,i);
@@ -21924,7 +21927,7 @@ function teecePlayBlock(p){
   if(G.teecePlayed&&!held.some(id=>freePlayFor(p,id)))return teeceCap(p)>1
     ?'You have played every Teece you get this turn.'
     :'You have already played a Teece this turn, and only one Teece may be played per turn.';
-  let room=0;for(let i=0;i<BN;i++)if(openAt(G.board,i))room++;
+  let room=0;for(let i=0;i<BN;i++)if(playAt(G.board,i))room++;
   let own=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p&&!t.isToken)own++;}
   if(held.every(id=>(CARDS[id].sac||0)>own))
     return 'Every Teece in your hand costs more sacrifices than you have Teece on the field to pay with.';

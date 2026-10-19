@@ -562,7 +562,7 @@
         "The board lights up any line standing at two with its last panel still open, whoever holds it.",
         "bOX and XOD count as an X and an O at once, which is two lines from one body."
       ],
-      "level": "advanced",
+      "level": "beginner",
       "kind": "utility"
     },
     "solar": {
@@ -877,7 +877,7 @@
         "The Infernal Contract lets a Devil offer its PACT again once a turn, and Devil Numbers renumbers any Teece to 6 on every side with one side at 0 before letting an ally offer its PACT again.",
         "Beginner Devil’s PACT throws away your hand, your whole board and your whole deck for +1. Sorry, it’s new. Take it only when something else is paying."
       ],
-      "level": "intermediate",
+      "level": "advanced",
       "kind": "warrior"
     },
     "runeblade": {
