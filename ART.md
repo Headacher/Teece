@@ -302,7 +302,19 @@ where they fall short.
 - **Locust.** Insect heads `\\ ^ //` with feelers. Consistent, but it leans on one
   template.
 - **Devil.** Horned faces `/\ /\` and contracts. Consistent.
-- **Runeblade.** Swords, with the letter `R` written into several of them.
+- **Runeblade.** Redrawn around one sword, in single angular strokes. The
+  Runeblade is always the same build: a `()` pommel, an `=` grip, a `[##]`
+  guard (or a `| |` cross-guard on the big equips), and a blade whose fuller is
+  cut with glyph runes `<>` `^` `|>` `\|/` (shapes, never letters); glow is
+  `*` `'` `.`. The tribe are front-on figures with a `.<>.` rune on the brow, an
+  `(o  o)` face and a `/^^^^\` fur mantle, and each card is the pose its name
+  says: the Sworn salute with the blade before the face, the Elder leans on it,
+  the Hurler throws runes off its tip, the Keeper calls it back round a loop,
+  the Exile has no brow rune. The jokes are in the sword: Runebladeblade is a
+  blade whose point runs into a second hilt, the Bladerang is bent into an L,
+  and the Blade That's Close Enough droops, with tape and doodles for runes.
+  The back is the same runes, shrunk to a faint all-over texture (36px tile)
+  so it no longer cuts through the drawings.
 - **Wizard.** Pointed hats with `*` stars over `(o o)` faces. The element tokens
   are simple glyphs. Earth and Deep Earth are `####` texture.
 - **Gun.** Gunmen, ammo and plating. Mostly fine. Gun Range is a model ground.
