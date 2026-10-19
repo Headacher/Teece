@@ -24,9 +24,9 @@
         1189,
         1190
       ],
-      "blurb": "The deck for a first game. Every card does one plain thing, so each one teaches a single rule of Teece and nothing gets in the way of learning to read the board.",
+      "blurb": "The deck for a first game, and the plainest in the box. Every card does one thing, and each one teaches a single rule of Teece: aiming a strong edge, Flying and Ranged, Tokens and sacrifice, equips, magic and battlegrounds. Its numbers are honest and middling with no tricks behind them, so it wins by reading the board better than the other side, and struggles against any deck that changes the rules underneath it.",
       "how": [
-        "Point your strong edges. Only the two edges that touch are compared, and the smaller number is destroyed. The Footman is 7 all round; the Shieldbearer, the Brawler and the Gatekeeper are strong on some sides and weak on others, so where you put them matters. The Pikeman has 11 on one side only, and may be rotated as it lands so you can aim it.",
+        "Point your strong edges. Only the two edges that touch are compared, and the smaller number is destroyed. The Footman is 6 on every side; the Shieldbearer, the Brawler and the Gatekeeper are strong on some sides and weak on others, so where you put them matters. The Pikeman has 10 on one side only, and may be rotated as it lands so you can aim it.",
         "Movement and reach. Flying moves one space once per your turn: the Hawk Rider has it, and the Windcaller lends it with +2 for a turn. Ranged strikes the first enemy beyond the next panel and nothing strikes back: the Bowman has it, and lands with +3 for the turn.",
         "Bodies and Tokens. The Conscript brings two Tokens beside it. Tokens never count toward winning and cannot be sacrificed, but the Captain and the General can only be played by sacrificing one or two of your other Teece; the General then calls a Soldier Token every turn. The Powder Carrier is weak, but every enemy beside it when it falls gets -8.",
         "Cards that are not Teece. Equips (Iron Sword, Feathered Cloak, Longbow) go onto one of your Teece and stay. Magic is used once: Blink teleports a Teece and comes back to your hand the first time, Sway gives +3 or -3, and Waymark leaves a mark that pays the next ally to arrive +4 or the next enemy -4. Battlegrounds stay on a panel: Hilltop gives +3, Bog -3."
@@ -60,7 +60,7 @@
       ],
       "noDominate": true,
       "swarmWin": "any",
-      "blurb": "Something is lurking in the sewers of the metropolis, and there is a great deal of it. Ten of the twenty cards are the same Rat, and each one you play lets you play another for free, so a hand goes down in a single turn. Every body in the deck gets +1 for every ally standing with it — the swarm is worth more for being a swarm. The price is the win condition: Rats can never take the game by being four Teece ahead. They win the moment their Teece cover every panel on the board, or by still holding the field when somebody runs out of cards.",
+      "blurb": "A swarm that wins by covering the board rather than by out-numbering it. Ten of the twenty cards are the same Rat, each one lets you play another for free, and every body in the deck gets +1 for every ally standing with it, so a hand goes down in a single turn and grows as it lands. Rats can never win by being four Teece ahead: they take the game the moment their Teece hold every panel, or by holding the most of the field when a deck runs dry. Brilliant on an open board; weak to anything that clears it in one go, and a razed panel shuts the main ending off for good.",
       "how": [
         "Each Rat you play opens the door for the next one, free of the turn's Teece play. Nine panels is the only thing that stops you.",
         "Every Teece here reads the crowd: +1 for every other ally on the board, and the Rat King hands out another +2 on top of that. Swarmcloak pays +2 per ally to whoever wears it.",
@@ -86,7 +86,7 @@
         311,
         312
       ],
-      "blurb": "Twelve cards, every one of them overpowered. Win before you run dry: your own empty deck never loses you the game, only your opponent's does.",
+      "blurb": "Only twelve cards, and every one of them is bigger than it has any right to be: Titan is 16 on every side, Skullsplitter 15 on one edge, and even the smallest trade above their weight. The short deck is safe because Berserkers never deck out: your own empty deck does not end the game, only your opponent's does. The cards that are not Teece bring your dead back, to hand or to the board, so the plan is simply to hit hardest and keep hitting. It has little to say to silence, theft or tricks, and a thin hand can run out of bodies.",
       "how": [
         "Titan is 16 on every side and Skullsplitter is 15 on one — check which edge is facing you before you trade with either.",
         "Warcamp sends your dying cards back to your hand instead of the graveyard, and charges an opponent two cards to break it.",
@@ -119,11 +119,11 @@
         339,
         340
       ],
-      "blurb": "Defence soaks up the difference. A Teece with Defence 2 only dies to an attack that beats it by three or more.",
+      "blurb": "Defence is the deck. Defence soaks up the difference in a fight, so a Teece with Defence 2 only dies to an edge that beats it by three or more, and almost every card here has some, hands some out, or turns it into attack. The Quarry Foreman, Studded Plate and the battlegrounds stack it up; the Rock Sergeant, Stoneheart and the Master Rock Flinger spend it as numbers, and Avalanche clears every enemy below a sacrificed ally. Slow to start and very hard to shift once built; weak to silence and to anything that destroys without fighting.",
       "how": [
-        "Colossus is 10 on every side and destroys nothing at all unless your Master Rock Flinger is standing.",
+        "Colossus is 11 on every side and destroys nothing at all unless your Master Rock Flinger is standing.",
         "Master Rock Flinger pays every Teece on your side, itself included, +X where X is that Teece's own Defence, and gives it Flying.",
-        "Rock Sergeant pays every other ally its own Defence, and Stoneheart pays its wearer +1 for each point it has — the deck stacks Defence, then spends it as attack.",
+        "Rock Sergeant pays an ally its own Defence as it lands, and Stoneheart pays its wearer +1 for each point it has — the deck stacks Defence, then spends it as attack.",
         "Muckraider and Bedrock are immune to stat reduction, and cannot be selected by enemy effects."
       ],
       "level": "beginner",
@@ -153,7 +153,7 @@
         369,
         370
       ],
-      "blurb": "Shove everything, then make sure it cannot do anything about it. Ogres move Teece around and the penalties they hand out are permanent — but the new weapon is STUN: a stunned Teece destroys nothing and can activate no ability until the end of your next turn. It keeps every number it has. It simply stops working. Almost every card here lays one, so a shoved board is a board that cannot fight back, and negative attributes are still lethal.",
+      "blurb": "Shove everything, then make sure it cannot answer. Almost every Ogre moves a Teece as it lands, the penalties they hand out are permanent, and most of them Stun: a stunned Teece keeps its numbers but destroys nothing and uses no ability until the end of your next turn. The Trapper and the Tactician punish every enemy move however it happened, so your own shoves feed them, and Sinkhole and Concussion Alley make the panel itself the trap. Excellent at taking a built-up board apart; the bodies are only middling, and a Teece that cannot be moved, or is immune to stat reduction, shrugs off most of it.",
       "how": [
         "Stun is the deck. A stunned Teece cannot destroy anything and cannot use any ability — not even Flying — until the end of your next turn, which means it is useless for the whole of its controller's turn. The panel shows a burst badge, and a chip under the board names every stunned Teece on the field.",
         "Ogre Trapper and Ogre Tactician punish movement however it happened, so your own shoves feed them — and the Tactician stuns on every enemy move for nothing at all.",
@@ -188,10 +188,10 @@
         429,
         430
       ],
-      "blurb": "Every Robot Flies, and Drones roll off the line all game. Drones are Tokens with 3 on every side that also Fly — they block, they kill, and several Robots pay you for keeping them moving.",
+      "blurb": "A flying factory. Every Robot has Flying, and nearly every one builds Drones as it lands, dies or stands: Tokens with 3 on every side that fly too. Drones never count toward winning, but they block, trade and pay: Swarm Node and Drone Tether grow them, the Chassis and the Data Centre grow on their deaths, and a Grey Goo Drone copies itself onto an adjacent empty panel at the start of each of your turns, every copy included, until the board is full of it. Strong at holding panels and at moving; the Robots themselves are only middling, so anything that sweeps Tokens away hurts it badly.",
       "how": [
         "Drones are flying Tokens with 3 on every side, and Tokens never count toward winning: they are board, not lead.",
-        "Swarm Node and Drone Tether pay the Drones, Grey Goo builds one that copies itself at the end of the turn; Overclocker pays for movement instead, and Signal Relay wires the next three Drones to explode.",
+        "Swarm Node and Drone Tether pay the Drones, Grey Goo builds one that copies itself at the start of each of your turns, and every copy does the same; Overclocker pays for movement instead, and Signal Relay wires the next three Drones to explode.",
         "Factory Line can be paid with two Drones instead of a Teece, and a War Machine you cannot afford can be discarded for a Drone."
       ],
       "level": "intermediate",
@@ -221,10 +221,10 @@
         459,
         460
       ],
-      "blurb": "Almost every card asks you to choose a mode. The deck is built to cheat that choice — fire every mode at once, fire the chosen one twice, or switch modes off for both players entirely.",
+      "blurb": "Almost every card asks you to choose a mode, and the rest of the deck cheats that choice. Null Module, Preset, Coupling Rig, the Modular Platform and the Grand Apparatus make the next choice fire every mode at once or the chosen mode twice; the Safety Interlock locks every one of your choices to its first mode or its last; the Overdrive Engine grows and flies every time one resolves. The cards are small and flexible rather than strong, so it rewards a player who knows what every mode does and punishes one who just picks one.",
       "how": [
         "Null Module, Preset, Coupling Rig and Grand Apparatus all bend the next choice: every mode at once, or the chosen mode twice.",
-        "Safety Interlock switches your OWN modalities off — while it stands, your cards that offer a choice simply do nothing.",
+        "Safety Interlock takes the choosing out of your hands: it locks every modality of yours to its first choice, or to its last. Played while a modality fires every mode, it locks both ends, and both fire every time.",
         "Modular Platform sells the same trick as ground, and the size you give it decides which trick you get."
       ],
       "level": "advanced",
@@ -254,9 +254,9 @@
         399,
         400
       ],
-      "blurb": "Cards that grow or rot on a clock. Every Teece ages at the start of your turn; some come of age into something far bigger, others decay every turn you keep them.",
+      "blurb": "Cards that grow or rot on a clock. Every Teece ages at the start of your turn: the Acorn, the Long Game and the Heir Apparent are next to worthless when they land and huge a turn or two later, while the Cut Flower, the Hourglass Knight and the Fading Titan, 30 on every side, start big and decay. Fast Forward, the Timekeeper, the Whetted Blade and Last Breath push clocks forward, the Chronoplate stops one dead, and Pause and the Stasis Field keep the growing ones alive long enough to pay. Strong in a long game; slow to start, and anything that kills a seedling before it ripens wastes the whole investment.",
       "how": [
-        "Acorn and Long Game are nearly worthless for two turns and then 10 and 12 on every side.",
+        "Acorn and Long Game are nearly worthless for two turns; then the Acorn comes up 10 on every side with +6 on top, and the Long Game 12 on every side.",
         "Fast Forward, Timekeeper, Whetted Blade and Last Breath all push clocks forward — that is how you collect early.",
         "Chronoplate stops a clock dead, which is what saves a Fading Titan. Sundial doubles it, which is only ever good on something growing."
       ],
@@ -287,7 +287,7 @@
         509,
         511
       ],
-      "blurb": "Eight Hexes instead of equipment or ground. Witches are physically fragile, but a Hex can silence a player, freeze their Teece in hand, turn one against them, or raze a panel off the board for good.",
+      "blurb": "Eight Hexes in place of equipment and battlegrounds, and twelve Witches that answer magic. A Hex can make a player lose a draw, silence their whole side, freeze them out of playing Teece, steal one of their Teece for a turn, or raze an empty panel off the board for good. Most Witches grow, fly, summon Familiars or silence something whenever you cast, so every Hex is also a growth spurt, and the Hex Collector, Hag of the Hollow, Witch Doctor and Witch Queen keep the spells coming back. Strong, steady control; the smaller Witches are fragile once the spells run out, and Hex of Freezing buys time rather than the win.",
       "how": [
         "Hex of Freezing is the trump: they cannot play a Teece at all, and you cannot win the game until it lifts — it buys time, not the win.",
         "Most Witches trigger on you playing magic at all, so a cheap Hex is also a growth spurt.",
@@ -321,7 +321,7 @@
         489,
         490
       ],
-      "blurb": "Crazy area-of-effect damage that risks blowing itself up too. Lay Mines to control the board, then turn the damage into a boost with Blast Ward.",
+      "blurb": "Area damage that does not care whose side it lands on. Mines on empty panels, Frag Charges, Cluster Bombs, Carpet Bombers and dying Shrapnel Troopers take numbers off everything in the blast, and the Chain Charge and the Overcharged Warhead make every Mine worse. The deck survives its own blasts with Blast Ward, which turns every loss on its wearer into a gain, and with the Blast-Proof Bunker and Siege Plating, which are immune to stat reduction. Brutal against swarms and crowded boards; careless placement blows up your own side, and the Unstable Warhead destroys itself the moment anything touches it.",
       "how": [
         "Blast Ward inverts the whole deck: the Teece wearing it gains whatever it would have lost.",
         "Mines sit on empty panels for -2 as anything arrives, and Chain Charge, Minefield and Overcharged Warhead all make them bigger.",
@@ -354,9 +354,9 @@
         539,
         540
       ],
-      "blurb": "Plants that feed each other. Almost every card hands out a permanent bonus, and the bonuses stack all game — but every plant is soft at the bottom, so watch the edge it is standing on.",
+      "blurb": "Plants that feed each other. Almost every card hands out a bonus, most of them permanent, and the Mother Tree, the Bramble Wall, the Ancient Redwood and the Creeping Ivy keep adding more, so the side grows all game. Hothouse Orchid and Sunlit Loam double the bonuses, and Sprouts pay +2 to every other ally when they die. The catch is the root: nearly every plant is soft on its bottom edge, so the panel above one is where it dies, and silence or a sweeping penalty undoes a lot of patient growth at once.",
       "how": [
-        "Nearly every plant is thin on its bottom edge — Sapling 1, Elder Willow 1, Mother Tree 1 — so the panel above it is where it dies.",
+        "Nearly every plant is thin on its bottom edge — Sapling and Elder Willow 2, Mother Tree and Hothouse Orchid 1 — so the panel above it is where it dies.",
         "Hothouse Orchid and Sunlit Loam double every positive effect, and the bonuses here are permanent, so they compound all game.",
         "Plant Pot is +20 on the bottom side alone, which is exactly the edge the deck keeps leaving open."
       ],
@@ -387,11 +387,11 @@
         559,
         560
       ],
-      "blurb": "Tiny flying creatures with almost no numbers and an enormous amount of magic. Every pixie flies, and the deck keeps pulling magic back out of graveyards, decks and thin air — then bends what is on the field with it: minds taken, Teece stretched or shrunk, wings bought by the turn.",
+      "blurb": "Tiny flying creatures with almost no numbers and an enormous amount of magic. Every pixie flies, and the deck keeps pulling spells out of graveyards, out of the deck and out of thin air, then bends the field with them: Mind Control takes a Teece for a turn, Enlarge and Shrink rewrite one, Invisibility and Pixie Projection protect, and Silence strips one for good. The Pixie Queen hands you a Queen's Enlarge every turn, and the Spellbound Pixie grows with every spell. The pixies are 0s, 1s and 2s, so it is very strong in skilled hands and falls over the moment the spells run out.",
       "how": [
         "Pixies are 0s, 1s and 2s. They are not meant to fight — they are meant to keep casting.",
         "Trickspinner, Wisp of Nothing and Enchantment conjure magic out of nothing; Thieving Sprite, Grave Pixie and Echo Pixie pull it back out of graveyards and decks.",
-        "Pixie Queen gives every other pixie of yours +10, and is the one card that turns the swarm into a board."
+        "Pixie Queen hands you a Queen’s Enlarge every turn (+10 until the start of your next turn), and is the one card that turns the swarm into a board."
       ],
       "level": "advanced",
       "kind": "utility"
@@ -421,7 +421,7 @@
         580
       ],
       "web": true,
-      "blurb": "A cannibal swarm. The Web is on the field from the first turn, covering every panel but the corners. Every Spider Teece and Spiderling standing on it can Skitter one space each turn, and a Spiderling has +1 Defence there. Spiders pour out Spiderlings with 4 on every side and then eat them to pay for everything else.",
+      "blurb": "A cannibal swarm on its own battlefield. The Web covers every panel but the corners from the first turn; a Spider Teece or Spiderling on it can Skitter one space a turn, and a Spiderling has +1 Defence there. The Spiders pour out Spiderlings with 4 on every side and then eat them to pay for everything else: the Spider itself, 10 on every side, costs one, Eaten Alive spends three to destroy any Teece, and the Brood Mother makes every Spiderling on the Web a 12. Spiderlings are Tokens and never count toward winning, so the deck needs real bodies to close, and the corners are where it is weakest.",
       "noRogue": true,
       "how": [
         "Spiderlings are Tokens, and Tokens never count toward winning: they are fuel and board, never a lead.",
@@ -456,7 +456,7 @@
         619,
         620
       ],
-      "blurb": "They grow by taking. Drain X pulls X off a Teece and hands the drinker exactly what it managed to take — which is not always X, because a Teece immune to stat reduction gives up nothing and the deck's own castle, catalyst and fangs all bend the number on the way.",
+      "blurb": "They grow by taking. Drain X takes X off a Teece and gives the drinker exactly what it managed to take, so a Teece immune to stat reduction gives up nothing, and the Vampire Castle, the Transfusion Catalyst and Enhanced Fangs all bend the number on the way. The Fledgling, Nightstalker and Starveling drain as they land; the Nosferatu, the Elder and the Transmogrifying Vampire, which turns from a Humanoid into a flying Bat and back, keep drinking every turn; Blood Bank saves every drop for one huge bite. Mist Form is the trump card: an ally invulnerable for three of your turns, though it destroys nothing while it lasts. A plain beginner deck that wins long fights; the Parasite must drink every turn or die, and silence stops the bleeding.",
       "how": [
         "Parasite has to drain at least once on each of your turns, by any means, or it withers and dies. Its own bite only drinks from your side, but any other drain counts.",
         "Enhanced Fangs doubles what you take. Vampire Castle and Transfusion Catalyst double everything either way, up and down alike.",
@@ -489,7 +489,7 @@
         639,
         640
       ],
-      "blurb": "They come back when you kill them. X Undying Y means X returns a game, each worth Y more than the last, on any free panel you choose. A returned Teece has no protection, so placement is what keeps it alive. The rest of the deck works both graveyards: summoning out of them, stealing from the enemy's, and taking cards back to hand.",
+      "blurb": "They come back when you kill them. X Undying Y means the card returns X times a game, each time Y stronger (or weaker) than the last, on any free panel you choose, so the Shambler grows and the Rotting Brute shrinks but is still a body. The rest of the deck works both graveyards: the Necromancer and Brief Return raise the enemy's dead, Back Again and Death's Avatar wind Undying counters back, and Plague Winds tilts the whole board by one every turn. Very hard to grind out; silence keeps a zombie down, and a returned body arrives with no protection, so placement is everything.",
       "how": [
         "The return count belongs to the card, not the body, so bouncing a zombie back to hand does not launder it. Back Again and Death's Avatar are the two that wind it back.",
         "Silence stops it getting up. A silenced zombie stays down.",
@@ -522,7 +522,7 @@
         659,
         660
       ],
-      "blurb": "A second board laid over the first. Every Teece here is an X, an O, or both, and the two Toerrains mark a bare panel on their own. Three of one letter in a straight line takes the game at the end of that turn, however far behind you are on bodies.",
+      "blurb": "A second game laid over the first. Every Teece is an X, an O, or both, and three of one letter of yours in a straight line wins at the end of that turn, however far behind you are on bodies. The X and O Toerrains mark bare panels, the cOrpse, X-tinct and XOD leave Toerrains behind when they die, and the Oliminitator, Xecutioner, suppOrt and mediX grow with every letter on the field, whoever controls it. The bodies are tiny, so it lives or dies on reading lines: a body standing on your Toerrain blocks it, and a destroyed letter or a razed panel stops a line cold.",
       "noRogue": true,
       "how": [
         "A body covers the ground it stands on, so standing on their Toerrain blocks that line instead of joining it.",
@@ -556,7 +556,7 @@
         699,
         700
       ],
-      "blurb": "The sun at the corner of the board turns to a moon at the start of every round, so each of your own turns runs the other way from the last. Half of what this deck prints is worth having in one half of the cycle and worth nothing in the other — so play the sky, not just the card.",
+      "blurb": "The sun in the corner of the board becomes a moon at the start of every round, so your turns alternate between Day and Night. Half of what this deck prints is worth having in one half of the cycle and nothing in the other: by day it summons Solar Tokens and pays its allies, by night it silences, assassinates and takes numbers off enemies. Duskfall, Daybreak, Solstice and the Solar Tyrant turn the sky on purpose, and the Stopped Sundial stops the round turning it. Flexible and strong for a player who plans two turns ahead; awkward when the sky is wrong for the hand you hold.",
       "how": [
         "A card that only works in one half of the cycle tells you so when you play it in the other.",
         "Equips read the sky too: Twilight Cloak is +3 Defence by night, and +7 with Flying by day.",
@@ -589,7 +589,7 @@
         719,
         720
       ],
-      "blurb": "A deck that is paid for its shape. Almost nothing here is worth much standing alone — Teece gain attributes, Ranged, March and cover for standing beside an ally, and the equips pay for lines, triangles and a lone point. Field Marshal Marshall ends the geometry altogether: while he stands, every Teece on the field counts as adjacent to all of its allies, wherever they are.",
+      "blurb": "A deck paid for its shape. Almost nothing here is worth much standing alone: Teece gain numbers, Ranged, March and protection for standing beside an ally, and the equips pay for lines, corner triangles and a lone Teece in the middle. Brigadier Ryan and Brigadier Bryan call each other down and are +10 each side by side, Colonel Cornell pays everyone in his huddle, and Field Marshal Marshall makes every Teece count as adjacent to all of its allies, the enemy's included. Strong and simple to pilot; break up the formation, by shoves or one kill in the middle, and every number falls with it.",
       "how": [
         "Beside means the four panels a side touches, never a diagonal. Line Formation is the only card here that counts diagonals, and it counts them as lines rather than as neighbours.",
         "Brigadier Ryan and Brigadier Bryan call each other up: play one and the other may go down the same turn without spending your Teece play. Side by side they are +10 each.",
@@ -650,7 +650,7 @@
         "play": 2,
         "draw": 2
       },
-      "blurb": "Twice the deck and twice the turn: forty-odd cards, two Teece plays and two draws every turn. Nothing here is worth much on its own, and most of it pays for itself by being thrown away — the graveyard is the stockpile, and Living Dump, Trash King and the Dumpster all read the size of the heap behind you.",
+      "blurb": "Twice the deck and twice the turn: forty-four cards, two Teece plays and two draws every turn. Nothing here is worth much on its own, and much of it pays by being thrown away: the graveyard is the stockpile, Living Dump, Trash King and the Dumpster read the heap behind you, and the Raccoon and the Garbage Man fish cards back out of it. The bigger turns flood the board with small bodies, while Rancid Mist and Living Smog sour the enemy and fire, rats and a shopping cart do the rest. Strong at out-numbering slower decks; every single card is weak, so one big body or a sweeper can stall it.",
       "how": [
         "Two Teece a turn and two cards a turn are the deck's own rule, not a card's: they hold for as long as you are playing Garbage. Garbage Soul adds a third of each while it stands.",
         "The graveyard is a resource. Living Dump grows with it, Trash King eats it for attributes, Garbage Man and Raccoon fish cards back out of it, and Banana Peel and the Dumpster spend it.",
@@ -683,7 +683,7 @@
         783,
         784
       ],
-      "blurb": "The end arrives on schedule. The four Horsemen are lifted back out of the shuffle and stacked on top of your deck, so they are your opening hand, and each one played drags a second out of it silenced. Everything after them is paid for in cards: the graveyard is this deck's second resource, and two of its three ways to clear the field are bought with discards.",
+      "blurb": "The end arrives on schedule. The four Horsemen start on top of your deck, so they are your opening hand, and each one played can bring another out of your hand with it, silenced. The Harbingers turn the board against itself (War makes every Teece fight its own neighbours, Plague and Famine wear the enemy down), and the Trumpet and the Seal of Armageddon call the Horsemen back as Tokens. Everything after that is paid for in cards: Final Judgement and the River of Blood clear the field for discards, and the deck grows on every card that reaches a graveyard. Fast and wide early; it burns through its own hand to win, and a long game leaves it short.",
       "level": "intermediate",
       "kind": "warrior"
     },
@@ -712,10 +712,10 @@
         804
       ],
       "freeDiscard": true,
-      "blurb": "Played out of the graveyard rather than into it. Throwing a card away is a move here, not a loss: on your turn you may discard any card in your hand, as often as you like, and almost every card in the deck does its work on the way OUT. An empty hand is a win condition of its own — the Goggles, the Mindwyrm and two of the Teece all pay for holding nothing.",
+      "blurb": "Played out of the graveyard rather than into it. On your turn you may discard any card in your hand as often as you like, and almost every card here does its work on the way out: turning a Teece, making one invulnerable, +8 to a top, Teece that climb back out of the grave, spells that refill the hand. An empty hand is a win condition of its own: Astral Mindwyrm, the Goggles of Truth and the Paranoid Schizophrenic all pay for holding nothing, and the Echo of Gol’god’oth makes everyone throw their hand away. Enormously flexible for a player who sees the lines and baffling for one who does not; it runs through its cards fast.",
       "how": [
         "Discarding is free and unlimited on your turn. It is a rule of the deck, not of any card, so no card has to print it.",
-        "An empty hand pays: Astral Mindwyrm is +10, Paranoid Schizophrenic is Top 11, Right 12, Bottom 13, Left 14, and the Goggles of Truth add another +5 the moment anybody runs dry.",
+        "An empty hand pays: Astral Mindwyrm is +10, Paranoid Schizophrenic is +10 (Top 12, Right 13, Bottom 14, Left 15), and the Goggles of Truth add another +5 the moment anybody runs dry.",
         "The Eldritch Library shelves discards as a wall of Defence instead of burying them, and the Pocket Dimension takes back everything you threw away this turn."
       ],
       "level": "advanced",
@@ -745,7 +745,7 @@
         823,
         824
       ],
-      "blurb": "Eight of its twenty cards are battlegrounds, and the other twelve only mean anything standing on one. Two of them stack onto a battleground rather than replacing it, so the panel ends up saying several things at once — and a Dimension of Dimensions or a Warden makes ground nobody can take back off the board.",
+      "blurb": "Eight of its twenty cards are battlegrounds, and the twelve Teece only mean much standing on one. The panels do the fighting: the Dimension of Change swaps opposite sides, Multiplicities doubles printed numbers, Goo pins and silences, Pain rots, the Black Hole swallows everything beside it, and the Extradimensional Plane of Matter hangs a tenth panel off the edge of the board. The Riftwalker, Native of Nowhere, Shifting Architect and Eldritch Terraformer reward and rearrange the ground, and the Warden of the Threshold or a Dimension of Dimensions make it impossible to remove. Strong once the field is laid; a deck that destroys battlegrounds, or a draw of bodies with no ground to stand on, leaves it weak.",
       "how": [
         "Almost every body here reads the panel rather than itself: Native of Nowhere and Dimensional Anchor pay only on a battleground, and Riftwalker starts walking the moment anybody lays one.",
         "Dimension of Dimensions is played ON another battleground: the two fold into one panel that cannot be replaced or destroyed, and it reaches one panel further out.",
@@ -783,7 +783,7 @@
       "allFlying": true,
       "swarmWin": "locust",
       "noRogue": true,
-      "blurb": "A swarm deck that wins by filling the board with copies of itself. Winged: every Teece you control has Flying, printed on the deck rather than on the cards. Swarm: you can never take the game by holding the field four Teece ahead — instead you win outright the moment every panel on the board is holding a Locust of yours. Half the deck answers being destroyed by putting more of itself down, so it is the one swarm with real recovery: the Nymph bursts onto every panel beside it, the Breeding Locust does it coming and going, and the Carrion Locust digs the dead back up. No two of the twelve Locusts you draft are the same shape, so which edge of one is facing you decides the trade — the deck is soft underneath almost everywhere. Once the swarm is out and the enemy has been eaten by a thousand hungry mouths, all will become Locust.",
+      "blurb": "A swarm that wins by filling the board with copies of itself. Every Teece you control has Flying, printed on the deck rather than the cards, and you can never win by being four Teece ahead: you win outright the moment every panel holds a Locust of yours. Half the deck answers being destroyed by putting more of itself down (the Nymph bursts onto every panel beside it, the Breeding Locust copies itself coming and going, the Carrion Locust digs the dead back up), and the Locus and the Hivemind arm the swarm once it is out. No two Locusts are the same shape and most are soft underneath, and a single razed panel puts the ending out of reach for good.",
       "how": [
         "The ending is the deck: a Locust on every panel takes the game as a turn closes, however far behind you are on bodies. The chip beside the board counts how many of the panels are yours — and warns you if one is ever razed off the board, because nothing can stand on a razed panel and that puts the ending out of reach for good. Raze and the Hex of Razing are the answer to this deck.",
         "A copy does not fire its own when-played, so a Locust Brood fills four panels and stops. When-DESTROYED does fire, which is why the Locust Nymph chains — and why it is capped at three bursts a turn across every copy of it.",
@@ -819,7 +819,7 @@
         884
       ],
       "souls": 1,
-      "blurb": "Devils are evil, but lawfully. Every one of them offers you a PACT the moment it is played — a price before the semicolon, a reward after it — and it is always up to you whether to take it. Reject it and the Devil simply stands there as printed — and keeps the PACT on offer, so you can take it on any later turn, once per turn: this is a beginner deck, big plain numbers first and bargains second. Passive: you begin the game holding a SOUL, and a SOUL can be spent to ignore the price of any PACT. Trump: Soul Debtor’s Prison lets you go wild once your SOULS run out, putting every price on its tab — but if it is ever destroyed, you pay back double what you owe.",
+      "blurb": "Devils are evil, but lawfully. Every Devil offers you a PACT as it lands, a price before the semicolon and a reward after it, and the choice is always yours: pay it, pay with a SOUL instead, or reject it and keep it on offer for a later turn. You start the game holding one SOUL, Soul Harvest and Brimstone Wings make more, and Soul Debtor's Prison lets you run up a tab once they are gone, paid back double if it ever falls. The Devils are solid numbers on their own and the bargains are optional, so it is gentle to start with; the steep prices (the Beginner Devil, the Adversary, the Infernal Bargain) are where it wins games and where it loses them.",
       "how": [
         "A PACT reads PRICE ; REWARD. When a Devil lands you choose: Accept PACT and pay the price, Pay with a SOUL instead, or Reject PACT. A rejected PACT is not lost: the Devil keeps a PACT button you can press once per turn until you take it.",
         "You start with one SOUL, and the chip beside the board shows how many you hold. Soul Harvest makes another every time it is cast, and comes back to your hand if you feed it an ally; Brimstone Wings pays one out when its wearer dies.",
@@ -859,13 +859,13 @@
         885
       ],
       "noRogue": true,
-      "blurb": "Far to the north, an ancient tribe of nomadic warriors perfect ancestral magics. Their most powerful artefact is the Runeblade, the magical sword their entire culture has been built around for countless millennia, carved with thousands of tiny sigils by their ancestors. Said to have slain the World Dragon, vanquished the Vampire Lord and felled the Leviathan, those sigils have made the Runeblade immortal — and when a member of the tribe wields it, they gain special powers. Passive: you start the game with the Runeblade equip card in your hand, and once a turn it comes back to your hand from anywhere.",
+      "blurb": "One sword, and a tribe built around it. You start the game holding the Runeblade, an equip that adds nothing on its own, and once a turn it comes back to your hand from wherever it is. Almost every Teece reads it: the Runeblade Elder is +7 with it, the Sigil Hurler gains Ranged, the Skyleap Raider flies, the Hush-Seer silences everything beside it, the Blade-Waker stands it up as a flying Teece and Bladerang throws it through a line of enemies. Consistent and strong, since the key card never leaves you; but it is one sword, so stunning, stealing or bouncing its wielder slows the whole deck, and the Bladeless Exile pays for every turn the sword is out.",
       "how": [
-        "The Runeblade is one equip card. On its own it adds nothing; almost every Teece in the deck reads it instead — the Runeblade Elder is Top 1, Right 2, Bottom 2, Left 3 without it and gets +9 with it, the Sigil Hurler becomes Ranged, the Skyleap Raider flies, and the Hush-Seer silences and weakens every enemy beside it.",
+        "The Runeblade is one equip card. On its own it adds nothing; almost every Teece in the deck reads it instead — the Runeblade Elder is Top 1, Right 2, Bottom 2, Left 3 without it and gets +7 with it, the Sigil Hurler becomes Ranged, the Skyleap Raider flies, and the Hush-Seer silences and weakens every enemy beside it.",
         "Once a turn, on your turn, the Runeblade returns to your hand from wherever it is: off a dead Teece in your graveyard, off whoever is wearing it, out of a Runestone, or up off the field when it is standing there as a Teece. The chip beside the board is the button. The Keeper of the Blade calls it back a second time.",
-        "Hand it on: the Blade-Waker stands the sword up as a Flyer with 8 on every side, Bladerang throws it through every enemy in a line and into an ally's hand, and the Grudgebearer bolts it onto whatever killed your last wielder — which is stunned for as long as it has to hold it.",
+        "Hand it on: the Blade-Waker stands the sword up as a Flyer with 8 on every side, Bladerang throws it through every enemy in a line and onto an ally, and the Grudgebearer bolts it onto whatever killed your last wielder — which is stunned for as long as it has to hold it.",
         "Keep it alive: the Blade-Sworn Squire breaks the Runeblade to dodge its own death, the Decoy Runeblade dies in the real one's place, and The Runeblade’s Chosen makes its wielder invulnerable until the sword leaves the field.",
-        "Make more: The Ancestor-Smith forges a second Runeblade onto itself, and the Barrow Forge makes another every third time a wielder falls on it. The Bladeless Exile is the price of all this — huge, but -5 while any Teece anywhere holds the sword.",
+        "Make more: The Ancestor-Smith forges a second Runeblade onto itself, and the Barrow Forge makes another every second time a wielder falls on it. The Bladeless Exile is the price of all this — huge, but -5 while any Teece anywhere holds the sword.",
         "Ragnarok ends it: break a Runeblade for good, with its wielder, and two Teece of your choice go down with it. Or take Triumph, and the next Teece to take up the sword gets +5 and Flying for the turn."
       ],
       "level": "intermediate",
@@ -895,7 +895,7 @@
         924,
         925
       ],
-      "blurb": "Advanced deck, and very complicated. The Wizards are an ancient race who have shepherded every sentient being along the enlightened path of magic. They purged their dark sorcerers long ago, exiling them to the undead planet where zombies and vampires wage their eternal war. With their Elemental helpers, and the reluctant help of their sisters the Witches and the trickster Pixies, they are the oldest and most respected masters of magic in Teece. Only the most skilled can wield them.",
+      "blurb": "Advanced and complicated. Every Wizard conjures an element into your hand as it lands (Fire, Water, Wind or Earth, each a small spell), and two different elements combine for free into something stronger: Steam, Fireball, Lava, Ice, Mud or a Sandstorm Elemental. The Elementals grow on their own element, the Archmage makes every element stronger, and with a Grand Magus out all four fold into Holy. The bodies are small and the power is in a hand that never empties, so it rewards careful planning and punishes forgetting the hand limit of six.",
       "how": [
         "Every Wizard conjures an element when it is played: Fire (a Teece gets -2), Water (+2), Wind (move a Teece one space) or Earth (a battleground with +3 Defence). Elements go straight into your hand as magic cards.",
         "Two different elements in hand can be combined with the Combine button on the card, which costs no play: Steam, Fireball, Lava, Ice, Mud, or Summon Sandstorm Elemental (puts a flying token with 7 on every side and Defence 2 on the board, which leaves a Sandstorm when destroyed), each stronger than either half.",
@@ -930,7 +930,7 @@
         1019,
         1020
       ],
-      "blurb": "Beginner resource deck. Gain bullets, then spend them. On your turn the gun comes out, and every bullet is a -1 on any Teece you can point it at, up to six shots a turn before the magazine runs dry. The rest of the deck feeds the gun, rides it, or turns it into something worse: an Executioner who finishes whatever has been shot five times, a Sponge that grows on lead, and The Gun Devil, who empties your reserves in every direction at once.",
+      "blurb": "Gain bullets, then spend them. Bullets are a count, not cards, and on your turn the gun comes out: every bullet is a permanent -1 on any Teece you point it at, up to six shots a turn. The rest of the deck feeds the gun (the Gunslinger, the Ammo Drone, the Bandolier, the Armored Ammo Truck), answers it (the Sharpshooter and the Shock Trooper react to every shot, the Bullet Sponge and the Kevlar Juggernaut want to be shot), or turns it into something worse: the Executioner finishes anything shot five times in a turn, and The Gun Devil fires in all eight directions as it lands. Simple to play, with precise damage anywhere on the board; it runs dry without its suppliers, and a Teece immune to stat reduction shrugs off the whole magazine.",
       "how": [
         "Bullets are a count, not cards: the Gunslinger, the Ammo Drone, the Armored Ammo Truck and others hand them over when played, destroyed, or discarded from your hand. Your count shows beside your name and on the gun chip under the board.",
         "On your turn, tap the gun chip to take out your gun. The pointer becomes a crosshair: tap any Teece to spend a bullet and give it -1 permanently. Shooting costs no play. Holster it whenever you like.",
@@ -966,7 +966,7 @@
         1039,
         1040
       ],
-      "blurb": "Advanced deck. In the space between the dimensions the Dimension Teece glide through there is a space between spaces, where the energy of different dimensions commingles and combines. The Fusion Teece emerge from it: strange combinations of different entities. Every one of the twelve can be played on its own, or FUSED with another Fusion Teece into one card that is both of them -- every side added together, and every effect and every equip kept.",
+      "blurb": "Twelve odd creatures that can become one. Every Fusion Teece has Fuse: two of them in hand fuse into a single card with both cards' sides added together and both cards' keywords, Defence and effects, and two standing side by side can fuse on the board once a turn, keeping every equip and bonus. The board counts bodies, so fusing trades two Teece for one far bigger one; the magic fuses anywhere on the board, makes a bonus permanent, or fuses two fusions into a Boss. Advanced, and very strong when the right pairs line up; fuse carelessly and you are a body short.",
       "how": [
         "Every Fusion Teece has the Fuse keyword. On your turn, tap Fuse on one in your hand and pick another Teece in your hand that also has Fuse. The two become one card whose sides are the two added together, carrying both cards' keywords, Defence and effects. Play it as your Teece for the turn and both when-played effects fire.",
         "Once per turn you can also fuse on the board: a Fusion Teece standing beside another of your Fuse Teece can use Fuse to become one body with it, on either of the two panels. Both bodies' equips and every bonus and penalty on them are kept. A Mergeling in the fusion adds +3.",
@@ -1002,11 +1002,11 @@
         1059,
         1060
       ],
-      "blurb": "Lightning Teece flash onto the field at instant speed, triggered by your opponent's actions. Every card in hand is a trap. They are a swarm deck focused on winning quickly by board domination.",
+      "blurb": "A swarm that floods the board faster than anyone. Thunder Twin, Spark Sprite and Last Light play more Teece out of your hand by effect, which costs no Teece play; Surge Rider, the Surge Coil and the Lightning Queen buy extra plays; and the Static Conductor, Stormwing and the Thunderhead Rig grow on every arrival. A few cards answer on your opponent's turn at instant speed: Counterstrike when they play a Teece, Static Counter when they cast magic, Zeus' Blessing when one of yours would be destroyed. Fast and aggressive, aiming at board domination; but a Teece summoned by an effect does not count toward domination until it has started a turn under your control, and the bodies are small once the burst is spent.",
       "how": [
         "Playing a card by an effect is called a summon. It never costs the turn's Teece play, and a Teece that arrives by an effect from this deck counts as a Thunder summon: it does not count towards board domination until it has started a turn under your control.",
         "Counterstrike answers any enemy Teece being played, and Static Counter answers any magic card your opponent plays: either one can be played straight from your hand the moment it happens. Zeus' Blessing answers a Teece of yours about to be destroyed on your opponent's turn, and the Teece survives.",
-        "Thunder Twin and Spark Sprite chain into more Teece from your hand, and Last Light and Spark Sprite replace themselves when destroyed. Flashstrike is a plain 5 until it arrives by an effect, then it is a 9.",
+        "Thunder Twin and Spark Sprite chain into more Teece from your hand, and Last Light and Spark Sprite replace themselves when destroyed. Flashstrike is a plain 6 until it arrives by an effect, then it is a 10.",
         "Bolt Army puts three Bolt Tokens in your hand. They can be sacrificed to pay for the Lightning Queen or for Zeus, and each one lets you play another Bolt Token when it lands. Zeus calls a Lightning Bolt into your hand every turn, and the Bolt takes 6 off the highest Teece in whichever column you pick.",
         "Capacitor, Surge Coil and Thunderhead Rig are plated onto a Teece while it is still in your hand. Storm Landing and Static Field turn the panel itself into a trap."
       ],
@@ -1037,7 +1037,7 @@
         1080,
         1081
       ],
-      "blurb": "A beginner warrior deck built on one curse, and the bandage that drags enemies onto it. If a panel is cursed, a non-Mummy Teece on that panel is cursed, and the curse is removed from the panel. If a cursed Teece would be cursed again, it gets -1 instead. Every Mummy has Mummy Wrap: once a turn it fires a bandage up, right, down or left, pulls in the first Teece it hits (an enemy gets -2), or swings to the wall if nothing is there.",
+      "blurb": "A beginner warrior deck built on one curse, and the bandage that drags enemies onto it. Mummies curse panels and Teece; a non-Mummy that lands on a cursed panel picks the curse up, and a cursed Teece cursed again gets -1 instead. Every Mummy has Mummy Wrap, once a turn: a bandage fired up, right, down or left that pulls in the first Teece it hits (an enemy gets -2), or swings the Mummy to the wall if nothing is there. The Tomb Stalker, the Pharaoh, Pharaoh's Vengeance and the Cursed Tomb cash curses in for big penalties and kills. Simple and punishing at close range; Cleanse lifts curses, and silence turns the payoffs off.",
       "how": [
         "Curse the empty panels first, then wrap. A bandage pulls its catch one space back along the line, so an enemy one step past a cursed panel lands on it and picks up the curse. Tomb Stalker charges -3 for every enemy moved onto a curse.",
         "Each Mummy Wrap is once a turn. Tomb Stalker has two, Burial Wrappings adds two more to whoever wears it, Mummy or not, and Linen Mummy and Cursed Bandages pay +3 for the turn every time their Teece wraps. A bandage that hits nothing swings the Mummy to the wall, which is how a Mummy gets around.",
@@ -1071,7 +1071,7 @@
         1100,
         1101
       ],
-      "blurb": "A beginner swarm deck that fills the board from one card. Pack Leader: when played, a Token copy of the Teece appears on every free panel beside it, and when the Pack Leader leaves the field, so do its copies. Howl gives an ally +3 for the turn and Bloodlust, which teleports it to a panel beside an enemy.",
+      "blurb": "A beginner swarm that fills the board from one card. A Pack Leader brings a Token copy of itself onto every free panel beside it, and when the leader leaves the field its copies go with it. Howl gives an ally +3 for the turn and Bloodlust, which teleports it beside an enemy; the Den Mother and the Wolf Pup lend numbers to the pack, the Pack Warden makes leaders invulnerable inside their packs, and the Dire Wolf and Fenrir can be paid for with the Tokens. Huge board presence early; the copies never count toward winning, and killing a leader takes its whole pack with it.",
       "how": [
         "Play Pack Leaders where the most panels around them are free: a Grey Wolf in the middle of an empty board is five bodies. The copies are Tokens, so they never count toward board domination, but they fight, they block, and they carry everything printed on the card except Pack Leader itself.",
         "The copies keep their card’s text. A Den Mother’s copies give +1 to whatever stands beside them, a Wolf Pup’s give +3 and Bloodlust, and a Pack Warden’s copies count as a Warden too.",
@@ -1105,7 +1105,7 @@
         1120,
         1121
       ],
-      "blurb": "Priests are devotees to their god, imbued with its strength to smite their opponents down in an instant. They channel that power across many practitioners, conjuring Smites that grow stronger as they are gathered together. Worship a god at the start of the game and every priest you field fights harder on that god's side.",
+      "blurb": "Priests channel their god into Smites. At the start of the game you Worship one of the four gods, and every priest of yours gets +3 on that god's side. Most priests conjure a Quarter Smite as they land, die or end your turn, and Smites combine for free in your hand: two Quarters make a Half, two Halves a Smite that destroys a Teece for a discard, two Smites a Divine Smite that destroys one outright. The High Priest and the Avatar can be paid for with Smites instead of bodies. Advanced, and one of the strongest decks in the box when the hand is managed well; the priests themselves are modest, and the hand limit of six is always pressing.",
       "how": [
         "Worship: at the start of the game choose a god. Levt rules the left, Topus the top, Rightorious the right and Bottomor the bottom; all your priests get +3 on that side. A Prophet lets you switch. Worship belongs to the Priest deck: a priest the other side steals, or one drafted into another deck, gets no god.",
         "Most priests conjure a Quarter Smite straight into your hand (a Teece gets -1 until the end of the turn). Two Quarters combine into a Half Smite (-5), two Halves into a Smite (discard a card: destroy a Teece), and two Smites into a Divine Smite (destroy a Teece, free). Combining uses the Combine button on the card and costs no play.",
@@ -1140,12 +1140,12 @@
         1146,
         1147
       ],
-      "blurb": "For countless millennia, the Dwarves have perfected their craftsmanship deep within caves and caverns. Forgoing other tactics, they invest heavily in powerful gear that lets them concentrate their power into singular juggernauts.",
+      "blurb": "Craftsmen who put everything into their gear. Eight equips stand in for magic and battlegrounds, and most dwarves read what they wear: Ranged, Flying, +4, or +5 Defence while equipped, and +3 for every piece on the Gear-Laden Recruit. Gear keeps coming back (the Tunnel Scavenger, the Delver and the Mountain King pull it out of the graveyard, and the Thane and the King take theirs home when they fall), so the plan is one juggernaut piled high and guarded by Mithril Mail, the Antimagic Airship and Ancestor's Aegis. Straightforward and sturdy; an unequipped dwarf is small, and anything that destroys equips or sends the juggernaut back to hand costs a great deal.",
       "how": [
-        "Eight equips stand in for magic and battlegrounds. Most dwarves read their own gear: Ranged, Flying, +4 or +5 Defence while equipped, or +3 for every equip on the Gear-Laden Recruit.",
-        "Gear comes back. The Tunnel Scavenger, the Deep Warden and the Delver each pull an equip out of your graveyard into your hand, and the Mountain King equips two straight from the graveyard as it lands. The Thane and the King take their gear home to your hand when they fall.",
+        "Eight equips stand in for magic and battlegrounds. Most dwarves read their own gear: Ranged, Flying, +4, or +5 Defence while equipped, or +3 for every equip on the Gear-Laden Recruit. The Deep Warden takes only one equip and doubles it.",
+        "Gear comes back. The Tunnel Scavenger and the Delver each pull an equip out of your graveyard into your hand, and the Mountain King equips two straight from the graveyard as it lands. The Thane and the King take their gear home to your hand when they fall.",
         "Pile it onto one body. Heirloom Pauldrons pay +2 for every equip on their wearer, the Fresh-Forged Axe is plated onto a Teece still in your hand, and Ball and Chain goes on an enemy instead.",
-        "Protect the juggernaut: Mithril Mail silences enemy Teece effects, the Antimagic Airship enemy magic and every battleground, Ancestor’s Aegis keeps it alive through the next turn, and Soul of the Mountains leaves an Avalanche behind when it falls."
+        "Protect the juggernaut: Mithril Mail adds +2 and +2 Defence, the Antimagic Airship floats clear of battlegrounds and soaks up the first enemy effect aimed at it, Ancestor’s Aegis keeps it alive through the next turn, and Soul of the Mountains leaves an Avalanche behind when it falls."
       ],
       "level": "beginner",
       "kind": "warrior"
@@ -1174,7 +1174,7 @@
         1168,
         1193
       ],
-      "blurb": "Warlocks borrow their power from a patron, and every Teece you field carries the patron you are channelling: the Boon. Ten Warlocks each name a different god, and calling one up changes what your whole side does.",
+      "blurb": "Warlocks borrow their power from a patron, and every Teece you control carries the patron you are channelling: the Boon. Ten Warlocks each name a different patron (the Rock God, the Fey, the Devils, the Ogre God, the Old One, Zeus, the Bomb God, Ankhtepot, Nagash and Death), and calling one up changes what your whole side does, from +3 Defence to Flying to a stun on every arrival. The Adept and the Avatar let you hold several Boons at once, and Patron's Mark and the Patron's Shrine make one fire twice. Advanced and very flexible, with an answer for most boards; the Warlocks' own numbers are uneven, and it takes judgement to know which patron the turn needs.",
       "how": [
         "The Boon: you channel one patron at a time, and every Teece you control has its effect. A Warlock that names a patron offers to switch the Boon as it lands. It is always optional, and the switch comes before its own when-played Boon fires, so a Warlock of Zeus can call Zeus and take his +5 at once.",
         "A Warlock left on the field keeps a Channel button, once per turn, so you can swap back to its patron on a later turn without playing anything.",
@@ -1210,7 +1210,7 @@
         1213,
         1214
       ],
-      "blurb": "The Cult summons its god, Gol’God’Oth, by performing a ritual. Its Teece are weak; the board is its weapon. The whole field is a pentagram, and every line its followers walk brings the god a step closer.",
+      "blurb": "The Cult works to summon its god, Gol’God’Oth, and the whole board is its altar: a pentagram whose five points any Teece can Traverse between once a turn. Three missions run in order: light all five lines by walking them, cast the Convert they hand you to take a Teece beside one of yours, then end a turn with an ally in the middle panel, where it is sacrificed and a Tendril Of Gol’God’Oth rises, a Boss with 20 on every side. The Tendril is a Token, so it never counts toward winning, but it destroys almost anything beside it, and Gol’God’Oth Arrives copies it onto every empty panel around it. The cultists themselves are weak and the ritual is slow, so the god clears the way; the game is still won by holding the field.",
       "how": [
         "The Pentagram: the board is a pentagram whose five points are the top-middle, middle-left, middle-right, bottom-left and bottom-right panels. It shows through the Web and every battleground and cannot be removed or covered.",
         "Traverse The Pentagram: once a turn, any Teece on a point, yours or the enemy’s, can teleport to one of the two points its lines reach, if that panel is empty. From the top-middle that is either bottom corner; from the bottom-right, the top-middle or the middle-left.",
@@ -1245,7 +1245,7 @@
         1237,
         1238
       ],
-      "blurb": "Paladins swear Oaths to one of three gods and fight harder while they keep them. Each god asks something different of its knight, and an Oath broken costs the Paladin its blessing. Their Cleanse lifts every curse off an ally and strips an enemy bare.",
+      "blurb": "Paladins swear Oaths to one of three gods and fight harder while they keep them. Solitarius pays +4 to a Paladin that stands apart from its allies, Protectius +4 to every ally beside one, Pacificius +5 Defence to one that never kills; a broken Oath leaves the Paladin Oathbroken, with no bonus and -2. The Lights, the Vowkeeper and Glorious Redemption keep Oaths whole, the Paragon of the Three swears all three at once, and Cleanse lifts every curse, stun and penalty off an ally or strips an enemy bare. The Paladins are tiny until sworn, so the deck arranges the board around its Oaths, and anything that forces the wrong kind of contact breaks them.",
       "how": [
         "Oath: as a Paladin is played, swear it to a god. Solitarius gives it +4 but breaks when it becomes adjacent to an ally. Protectius gives every adjacent ally +4 and breaks when one of them dies. Pacificius gives it +5 Defence and breaks when it destroys an enemy. A broken Oath leaves the Paladin Oathbroken: no bonus, and -2.",
         "Cleanse: on an ally it lifts every negative effect (stun, silence, curses, penalties); on an enemy it silences it and strips every bonus to its numbers. Devoathee Cleanses as it lands, and Holy Light's blessing Cleanses the whole cross around its Paladin each turn.",
@@ -1279,11 +1279,12 @@
         1259,
         1260
       ],
-      "blurb": "Knights ride into battle on Mounts that lend them their numbers, their wings and their tricks. Bring a Knight down and its Mount is still standing, ready for the next Knight to climb on.",
+      "blurb": "Knights ride into battle on Mounts that lend them their numbers, their wings and their tricks. Every Knight is Armoured, with 1 Defence, and lands already riding the Mount printed on it, with the Mount's numbers and abilities on top of its own; bring the Knight down and its Mount is played on that panel or one next to it, ready for the next rider. Remount, Cavalry Muster and Call the Warhorse put spare Mounts on the board, the Stables guards them, and a Herd Saddle or a Mount Mount stacks several under one Knight. Hard to grind out, since every kill leaves a body behind; but the Knights alone are small, and a riderless Mount is a Token that never counts toward winning.",
       "how": [
         "Armoured: every Knight has 1 Defence. Mounts do not.",
         "Mount: a Knight is played already riding the Mount printed on it and has the Mount’s numbers, Defence and abilities on top of its own. When the Knight is destroyed, its Mount is played on that panel or one next to it.",
         "Play a Knight onto one of your Mounts on the board and it rides that Mount in place of its own. A Knight can have only one Mount, unless a Herd Saddle lets it keep both. Legaless can only be played onto a Mount.",
+        "A Mount standing on its own can, once per your turn, carry one of your Knights that has room for it: a Knight whose Mount was destroyed, or one wearing a Herd Saddle.",
         "Remount and Cavalry Muster put copies of Mounts on the board for the next Knights to ride; Stables makes a waiting Mount hard to kill, and the Armoury pays any equipped Teece, mounted Knights included."
       ],
       "level": "intermediate",
