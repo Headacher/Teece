@@ -283,8 +283,18 @@ where they fall short.
   fields are texture.
 - **Nature.** Plants over a `~~~~` ground line. Soil and vines are `####`
   texture.
-- **Pixie.** One sprite template `\( o )/ (/|\)` on every card, with only the
-  face changing. It needs the kind of variety the Priests have.
+- **Pixie.** Redrawn around butterfly wings. Every pixie is a tiny figure (an
+  `o` head, arms `\o/`, a petal dress `/_\`) between four rounded wing lobes:
+  `.--.` and `(    \` above, `.'` and `(__.-'` below. A small pixie is the
+  same in miniature, `.-. .-.` over `(  \o/  )` over `'-/_\-'`. Fairy dust is
+  `.` and `'`, sparkle is `*`, and magic is a little card `.---. | * |`. Each
+  card adds its subject to that figure: the Thieving Sprite carries a card off
+  over its head, the Grave Pixie sits on a headstone while a card climbs out of
+  the soil, the Echo Pixie sends sound arcs to a dotted copy, the Changeling is
+  half butterfly and half bat, the Queen wears a crown. Silence is the muted
+  speaker, Enlarge and Shrink are a small and a big pixie with an arrow, and
+  Invisibility is a pixie whose right half has faded to dots. The back's
+  sparkle field was faded to a quiet texture so the fine strokes read over it.
 - **Spider.** Redrawn: see above.
 - **Vampire.** Redrawn: see above.
 - **Zombie.** Redrawn: see above.
