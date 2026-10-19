@@ -1394,10 +1394,10 @@
       "lore": "The Host of Topus lives above the top edge, in the Heavens it shares with the Solar sky and Zeus's storm. Its nine choirs, one for every panel of the board, carry the top edge's word down to the world, which is why the Priests worship Topus and still find his messengers faintly embarrassing. The Host keeps its numbers at seven out of spite for the Devils of the Pit, who keep theirs at six, and an Angel that falls from the Heavens lands in the bottom row with a six on its sides and a contract waiting. The Solar orders tolerate the Angels as long as they stay out of the light, and Zeus is still deciding whether they count as weather.",
       "home": "above",
       "how": [
-        "The Heavens: three slots above the board, one per column. Tap Heavens on a Heavenly card in hand to play it up there; that spends your Teece play. Up there it doesn't fight, counts toward nobody's field lead, can't be selected by anything, and is safe from whatever happens on the board.",
+        "The Heavens: three slots above the board, one per column. To play a Heavenly card up there, tap it in hand and then tap an empty Heaven; that spends your Teece play. Up there it doesn't fight, counts toward nobody's field lead, can't be selected by anything, and is safe from whatever happens on the board.",
         "Descend and Ascend: once per your turn, a Teece in the Heavens can drop down its column onto the first empty panel, but not on the turn it went up. A Heavenly Teece in the top row (or on a Cloudbank) can go back up into the empty Heaven above it. The Wheel of Eyes, Wings of Light and the Pearly Gates change where a Descent lands.",
         "Aim downward. An Angel's strong side is its Bottom, which faces whatever is below where it lands, so pick the column by what is under its first empty panel.",
-        "Work from the sky. The Guardian Angel takes a death for an ally below it, the Watcher on High weakens every enemy in its column, the Dominion gives its column Defence, and the Messenger swaps an ally up and out of danger. The Archangel can go up with no sacrifice at all, if you are willing to wait."
+        "Work from the sky. The Guardian Angel takes a death for an ally below it, the Watcher on High weakens every enemy in its column, the Dominion gives its column Defence, and the Messenger swaps an ally up and out of danger. The Archangel can go up with no sacrifice at all, but then only The Last Trumpet brings it down."
       ],
       "level": "intermediate",
       "kind": "warrior"
