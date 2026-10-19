@@ -25,7 +25,7 @@ body{
 button{font-family:var(--body);cursor:pointer}
 button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
-#app{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px 18px;max-width:1280px;margin:0 auto;padding:12px 16px 16px;min-height:100%;
+#app{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px 18px;max-width:1440px;margin:0 auto;padding:12px 16px 16px;min-height:100%;
   /* A page shorter than the window keeps its rows packed at the top; left to
      stretch, the spare height went into the header as an empty band. */
   align-content:start}
@@ -116,13 +116,13 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
 .card .cn{flex:none;font-family:var(--disp);font-size:clamp(12px,10cqw,17px);line-height:1.05;overflow-wrap:break-word}
 .card .tart{flex:1 1 0;min-height:0}
 .card.t-teece .tart{margin:0 calc(var(--r) - 5px)}
-.card .htx,.card .cs{flex:0 1 auto;min-height:0;overflow:auto;scrollbar-width:none;font-size:clamp(9px,7.2cqw,12px);
+.card .htx,.card .cs{flex:0 1 auto;min-height:0;overflow:auto;scrollbar-width:none;font-size:clamp(10px,7.6cqw,13px);
   line-height:1.22;font-weight:500;overflow-wrap:break-word}
 .card .htx::-webkit-scrollbar,.card .cs::-webkit-scrollbar{display:none}
 .card .htx{text-align:center;margin:0 calc(var(--r) - 5px)}
-.card .htx.l1,.card .cs.l1{font-size:clamp(8.5px,6.6cqw,11px)}
-.card .htx.l2,.card .cs.l2{font-size:clamp(8px,6cqw,10.5px);line-height:1.18}
-.card .htx.l3,.card .cs.l3{font-size:clamp(7.5px,5.6cqw,10px);line-height:1.15}
+.card .htx.l1,.card .cs.l1{font-size:clamp(9.5px,7cqw,12px)}
+.card .htx.l2,.card .cs.l2{font-size:clamp(9px,6.5cqw,11.5px);line-height:1.18}
+.card .htx.l3,.card .cs.l3{font-size:clamp(8.5px,6cqw,11px);line-height:1.15}
 .card .rsym{position:absolute;top:3px;left:4px;width:clamp(14px,11cqw,20px);height:clamp(14px,11cqw,20px);z-index:3}
 .handrow .card[data-card-deck]::after{font-size:clamp(11px,9cqw,15px);top:3px;right:4px}
 .discardBtn{position:absolute;left:4px;bottom:4px;font-size:9px;letter-spacing:.06em;text-transform:uppercase;
@@ -133,7 +133,8 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
 .combineBtn{border-color:#f5cf6b;color:#f5cf6b;font-weight:700}
 /* The bottom number has the middle of the bottom edge, so the button takes the
    corner beside it. */
-.card.t-teece .discardBtn{left:3px;bottom:3px;padding:2px 4px;border-radius:4px}
+.card.t-teece .discardBtn{left:3px;bottom:3px;padding:2px 3px;border-radius:4px;font-size:clamp(7px,5.8cqw,9px);letter-spacing:0;
+  max-width:calc(50% - var(--r) - 5px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card.t-equip{background:#e6dcc6}
 .card.t-magic{background:#e2dae8}
 .card.t-ground{background:#e0dcc2}
@@ -151,11 +152,11 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
 .card:has(.plated){margin-bottom:15px}
 
 /* Hand sizes. A phone gets two cards to a row, big enough to read the rules on. */
-.handrow{--hc:144px}
+.handrow{--hc:clamp(144px,calc((100cqw - 58px) / 6),176px)}
 @media(max-width:560px){.handrow{--hc:min(190px,calc((100cqw - 26px) / 2))}}
 /* Compact view: the same square, smaller, without the rules. The other seats'
    face-up rows and the rules pages draw this way too. */
-.sqhand .handrow{--hc:112px}
+.sqhand .handrow{--hc:120px}
 @media(max-width:560px){.sqhand .handrow{--hc:calc((100cqw - 34px) / 3)}}
 #oppHands .handrow.mini{--hc:86px}
 .sqhand .card .htx,.sqhand .card .cs,#oppHands .handrow.mini .card .htx,#oppHands .handrow.mini .card .cs{display:none}
@@ -376,7 +377,7 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
 .boardrow{--gap:8px;--cs:min(var(--csmax,168px),
   calc((100cqw - (var(--cols,3) - 1) * var(--gap) - var(--xgap,0px)) / var(--cols,3)),
   max(118px,calc((100svh - 330px) / var(--bw,3))))}
-@media(max-width:560px){.boardrow{--gap:6px}}
+@media(max-width:560px){.boardrow{--gap:6px}.boardrow:has(>#board.bw4){--gap:3px}}
 #board{display:grid;grid-template-columns:repeat(var(--bw,3),var(--cs));
   grid-auto-rows:var(--cs);gap:var(--gap);position:relative}
 /* The Cult's Pentagram: over every panel, under no click -- and under every
@@ -492,24 +493,40 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
 .teece{--cardbg:var(--cream);--artink:#6d5f45;position:absolute;inset:var(--tin,12%);border-radius:7px;background:var(--cream);color:var(--ink);
   border:2px solid var(--p0);cursor:pointer;z-index:4;container-type:size;
   --r:max(12.5px,13.5cqw);--nf:max(12px,12cqw)}
-@media(max-width:560px){.cell>.teece{--tin:11%}#board.bw4 .cell>.teece{--tin:7%}}
+@media(max-width:560px){.cell>.teece{--tin:11%}#board.bw4 .cell>.teece{--tin:10%}
+  /* Four panels across a phone leave a margin of nine pixels round a Teece:
+     the battleground's name and the equip tabs are cut to fit it, so neither
+     ever has to lie across the card. */
+  #board.bw4 .bglayer .gname{height:8.5px;font-size:7px;letter-spacing:.04em;padding:0 4px;border-radius:0 0 5px 5px}
+  #board.bw4 .teece .eqtab{font-size:7px;padding:0 3px 1px;line-height:8px}}
 .teece.o1{border-color:var(--p1)}
 .teece.o2{border-color:var(--p2)}
 .teece .tz{position:absolute;inset:calc(var(--r) + 1px) 3px calc(var(--r) + 1px);display:flex;flex-direction:column;
   align-items:stretch;gap:1px;z-index:1;min-height:0}
-.teece .tnm{flex:none;display:flex;justify-content:center;padding:0 2px}
-/* Two lines at most, stepping down a size for a long name rather than being
+/* The name and the status row keep between the two side half-discs, so a
+   long name on two lines, or a row on a small Teece, can never reach a number. */
+.teece .tnm{flex:none;display:flex;justify-content:center;margin:0 calc(var(--r) + 1px)}
+/* Three lines at most, stepping down a size for a long name rather than being
    cut off: the panel is the only place the name shows once it is down. */
-.teece .nm{text-align:center;font-family:var(--disp);font-size:clamp(8.5px,10.5cqw,15px);line-height:1.04;
-  max-width:100%;overflow:hidden;overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.teece .nm.long{font-size:clamp(8px,9.2cqw,13.5px)}
-.teece .nm.longer{font-size:clamp(7.5px,8.2cqw,12px);letter-spacing:-.2px}
+.teece .nm{text-align:center;font-family:var(--disp);font-size:clamp(11.5px,12.5cqw,16px);line-height:1.1;
+  max-width:100%;overflow:hidden;overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.teece .nm.long{font-size:clamp(11px,11.5cqw,15px)}
+.teece .nm.longer{font-size:clamp(10.5px,10.5cqw,14px);letter-spacing:-.2px}
 .teece .tart{flex:1 1 0;min-height:0;margin:0 calc(var(--r) - 3px)}
+/* A Teece too small for the usual sizes (four panels across a phone) steps
+   its name and its status row down to fit between the half-discs. */
+@container (max-width:86px){
+  .teece>*{--r:10px;--nf:11px}
+  .teece .tz{gap:0}
+  .teece .nm,.teece .nm.long,.teece .nm.longer{font-size:9.5px;letter-spacing:-.25px;line-height:1;-webkit-line-clamp:3}
+  .teece .rgd{font-size:9.5px;gap:1px;height:1.2em}
+}
 .teece.arted .nm{text-shadow:0 0 3px var(--cardbg),0 0 3px var(--cardbg)}
 /* One row for every status symbol. When they will not all fit, the row ends
    in +N and the rest are in its tooltip and the Detail panel. */
 .teece .rgd{flex:none;display:flex;flex-wrap:nowrap;overflow:hidden;line-height:1;align-items:center;justify-content:center;
-  gap:2px;font-size:clamp(9px,9.5cqw,13px);min-height:1.25em}
+  gap:2px;font-size:clamp(10.5px,11cqw,14px);height:1.3em;margin:0 calc(var(--r) + 1px)}
+.teece .tz.wide>.tnm,.teece .tz.wide>.rgd{margin:0 calc(var(--nf) * 1.45 + 2px)}
 .teece .rgd:empty{display:none}
 .teece .rgd>*{flex:none}
 .teece .rgd .dfn{display:inline-flex;align-items:center;gap:1px;font-weight:700;font-variant-numeric:tabular-nums}
@@ -571,7 +588,9 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
 .teece.token .tokshape path{fill:var(--cardbg);stroke:var(--p0);stroke-width:2px;stroke-linejoin:round}
 .teece.token.o1 .tokshape path{stroke:var(--p1)}
 .teece.token.o2 .tokshape path{stroke:var(--p2)}
-.teece.token .tnm{padding:0 12%}
+/* A Token's top and bottom arms are narrower than the card: its name and its
+   status row keep inside them. */
+.teece.token .tz>.tnm,.teece.token .tz>.rgd{margin:0 19%}
 .teece.token .actdot{right:calc(var(--notch) + 4px);top:4px}
 .teece.token .rsym{left:calc(var(--notch) - 2px);top:1px}
 /* The rank, as a symbol in the top left corner wherever the card is drawn: a
@@ -583,7 +602,8 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
 .rsym svg{display:block;width:100%;height:100%}
 .rsym.mini{box-shadow:0 0 0 1px rgba(220,220,230,.45)}
 .rsym.mega{box-shadow:0 0 0 1px rgba(255,130,60,.8),0 0 6px rgba(255,120,40,.6)}
-.teece .rsym{top:2px;left:2px;width:clamp(13px,14cqw,22px);height:clamp(13px,14cqw,22px);z-index:3}
+/* Level with the top half-disc, in the corner, clear of the name below it. */
+.teece .rsym{top:1px;left:1px;width:calc(var(--r) - 1px);height:calc(var(--r) - 1px);padding:1.5px;z-index:3}
 /* Bosses on the board carry a faint aura of drifting motes; minibosses only a
    thin dim rim and two slow, barely-there motes, so the two read differently. The
    motes are spans inside .aura, and their delays are set from the clock when
@@ -5787,7 +5807,10 @@ const semiNums=(sd,pfx,cls)=>[0,1,2,3].map(k=>'<div class="'+pfx+' '+pfx+k+(cls?
 /* A board Teece's face. o: name (html), cardId (its drawing), sides, numCls,
    badges (status symbols), rank (draw the rank symbol). */
 function teeceFace(o){
-  return '<div class="tz">'+(o.name!=null?'<div class="tnm"><span class="'+nmClass(o.name)+'">'+o.name+'</span></div>':'')+
+  /* A two-figure number on a side edge makes its half-disc wider: the name
+     and the status row are held further in to clear it. */
+  const wide=o.sides&&(String(o.sides[1]).length>1||String(o.sides[3]).length>1);
+  return '<div class="tz'+(wide?' wide':'')+'">'+(o.name!=null?'<div class="tnm"><span class="'+nmClass(o.name)+'">'+o.name+'</span></div>':'')+
     '<div class="tart">'+(o.cardId!=null?artPre(o.cardId):'')+'</div>'+
     '<div class="rgd">'+(o.badges||[]).join('')+'</div></div>'+
     semiNums(o.sides,'s',o.numCls)+(o.rank?rankSym(o.cardId):'');
