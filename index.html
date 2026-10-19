@@ -839,6 +839,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 #infoOverlay{z-index:30}
 #infoBox .isym{font-size:40px;line-height:1}
 #infoBox .icount{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+#infoBox .ilore{margin:-2px 0 12px;padding:2px 0 2px 12px;border-left:2px solid var(--line);font-style:italic;font-size:12.5px;line-height:1.55;color:var(--muted)}
 #infoBox ul{margin:6px 0 0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.6}
 #infoBox li{margin:4px 0}
 #infoBox .cardList{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0 0}
@@ -20378,7 +20379,9 @@ function showDeckInfo(key){
     '<div class="isym">'+(DECK_SYM[key]||'\u2753')+'</div>'+
     '<div><h2 style="margin:0">'+escHtml(dk.name)+'</h2>'+
     '<div class="icount">'+dk.cards.length+' cards</div></div></div>'+
-    '<p>'+escHtml(dk.blurb||'')+'</p>';
+    '<p>'+escHtml(dk.blurb||'')+'</p>'+
+    /* The faction's place in the world: flavour, set apart from the rules. */
+    (dk.lore?'<p class="ilore">'+escHtml(dk.lore)+'</p>':'');
   if((dk.how||[]).length){
     h+='<h3>How it works</h3><ul>'+dk.how.map(l=>'<li>'+escHtml(l)+'</li>').join('')+'</ul>';
   }
