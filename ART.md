@@ -309,7 +309,18 @@ where they fall short.
 - **Fusion.** Chimera bodies stitched from parts. No shared style yet.
 - **Lightning.** Bolts and storm figures. Mixed, with several plain boxes.
 - **Mummy.** Redrawn: see above.
-- **Wolf.** Wolf heads with no single construction. Howl spells out `AWOOO`.
+- **Wolf.** Redrawn: every wolf is in profile facing right, with one head: `/\ /\`
+  ears over a `V` brow, an `o` eye, a long muzzle `\___` ending in a `___>` nose,
+  and a `.-'vv` jaw. Standing wolves have a long `_.----'` back and `| |` legs
+  on `/_/` paws, so their feet stand in the back's pines; sitters (Lone Wolf, Pack
+  Warden) are the same head over a `.-.` haunch. Each card adds one thing: the
+  Timber Wolf's log, the Tundra Wolf's snow, Ironhide's `[##]` plates, the
+  bosses' `/\/\/\` hackles, `VVVVV`/`^^^^^` jaws and Fenrir's `o=o=o` chain.
+  The pack is a small `/\/\ ( o _>` head, closed-eyed `-` when asleep and dotted
+  `:':':.` when it is a copy just appearing (Wolven Promotion). The spells are
+  the head close up: Howl and the Howler point the muzzle up at the back's moon
+  with `)  )` sound arcs, never words. The back (moon top right, pines along
+  the bottom) is unchanged.
 - **Priest.** The model deck: see above.
 - **Dwarves.** `(o_o)` faces over `WWW` beards, under helmets. Consistent.
 - **Warlock.** One small `\o/ /_\` warlock under a different patron sign on
