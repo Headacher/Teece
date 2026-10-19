@@ -126,7 +126,7 @@
       "blurb": "Defence is the deck. Defence soaks up the difference in a fight, so a Teece with Defence 2 only dies to an edge that beats it by three or more, and almost every card here has some, hands some out, or turns it into attack. The Quarry Foreman, Studded Plate and the battlegrounds stack it up; the Rock Sergeant, Stoneheart and the Master Rock Flinger spend it as numbers, and Avalanche clears every enemy below a sacrificed ally. Slow to start and very hard to shift once built; weak to silence and to anything that destroys without fighting.",
       "lore": "The Rock are the living stone of the Mountains, children of the Rock God, the slowest and most patient of the Warlocks' patrons. They do not fight so much as decline to be moved. The Dwarves mine them, which they take personally; the Bombardiers blow them up, which they take very personally; and the Ogres throw them, which they have come, grudgingly, to enjoy.",
       "how": [
-        "Colossus is 11 on every side and destroys nothing at all unless your Master Rock Flinger is standing.",
+        "Colossus is 10 on every side and destroys nothing at all unless your Master Rock Flinger is standing.",
         "Master Rock Flinger pays every Teece on your side, itself included, +X where X is that Teece's own Defence, and gives it Flying.",
         "Rock Sergeant pays an ally its own Defence as it lands, and Stoneheart pays its wearer +1 for each point it has — the deck stacks Defence, then spends it as attack.",
         "Muckraider and Bedrock are immune to stat reduction, and cannot be selected by enemy effects."
@@ -368,7 +368,7 @@
       "blurb": "Plants that feed each other. Almost every card hands out a bonus, most of them permanent, and the Mother Tree, the Bramble Wall, the Ancient Redwood and the Creeping Ivy keep adding more, so the side grows all game. Hothouse Orchid and Sunlit Loam double the bonuses, and Sprouts pay +2 to every other ally when they die. The catch is the root: nearly every plant is soft on its bottom edge, so the panel above one is where it dies, and silence or a sweeping penalty undoes a lot of patient growth at once.",
       "lore": "The Wildwood grows over the lower panels in the keeping of Bottomor, god of the bottom edge, which is why every plant is soft in exactly the place its god is meant to be holding it up. The plants feed each other because nobody else will. The Locusts eat them, the Garbage smothers them and the Pixies live in them rent-free; the Solar orders are the only neighbours they actually like.",
       "how": [
-        "Nearly every plant is thin on its bottom edge — Sapling and Elder Willow 2, Mother Tree and Hothouse Orchid 1 — so the panel above it is where it dies.",
+        "Nearly every plant is thin on its bottom edge — Sapling, Elder Willow and Mother Tree 1, Hothouse Orchid 0 — so the panel above it is where it dies.",
         "Hothouse Orchid and Sunlit Loam double every positive effect, and the bonuses here are permanent, so they compound all game.",
         "Plant Pot is +20 on the bottom side alone, which is exactly the edge the deck keeps leaving open."
       ],
@@ -737,7 +737,7 @@
       "lore": "The Mad are what is left of scholars who listened too closely to Gol’God’Oth. They throw away everything they hold because the voices say a full hand is a cage, and the worrying thing is that it works. Most of them were Wizards and Witches once; the Eldritch Library is the one the Wizards locked and lost the key to, and the Cult sends missionaries among them who mostly come back confused.",
       "how": [
         "Discarding is free and unlimited on your turn. It is a rule of the deck, not of any card, so no card has to print it.",
-        "An empty hand pays: Astral Mindwyrm is +10, Paranoid Schizophrenic is +10 (Top 12, Right 13, Bottom 14, Left 15), and the Goggles of Truth add another +5 the moment anybody runs dry.",
+        "An empty hand pays: Astral Mindwyrm is +10, Paranoid Schizophrenic is +10 (Top 11, Right 12, Bottom 13, Left 14), and the Goggles of Truth add another +5 the moment anybody runs dry.",
         "The Eldritch Library shelves discards as a wall of Defence instead of burying them, and the Pocket Dimension takes back everything you threw away this turn."
       ],
       "level": "advanced",
@@ -1036,7 +1036,7 @@
       "how": [
         "Playing a card by an effect is called a summon. It never costs the turn's Teece play, and a Teece that arrives by an effect from this deck counts as a Thunder summon: it does not count towards board domination until it has started a turn under your control.",
         "Counterstrike answers any enemy Teece being played, and Static Counter answers any magic card your opponent plays: either one can be played straight from your hand the moment it happens. Zeus' Blessing answers a Teece of yours about to be destroyed on your opponent's turn, and the Teece survives.",
-        "Thunder Twin and Spark Sprite chain into more Teece from your hand, and Last Light and Spark Sprite replace themselves when destroyed. Flashstrike is a plain 6 until it arrives by an effect, then it is a 10.",
+        "Thunder Twin and Spark Sprite chain into more Teece from your hand, and Last Light and Spark Sprite replace themselves when destroyed. Flashstrike is a plain 5 until it arrives by an effect, then it is a 9.",
         "Bolt Army puts three Bolt Tokens in your hand. They can be sacrificed to pay for the Lightning Queen or for Zeus, and each one lets you play another Bolt Token when it lands. Zeus calls a Lightning Bolt into your hand every turn, and the Bolt takes 6 off the highest Teece in whichever column you pick.",
         "Capacitor, Surge Coil and Thunderhead Rig are plated onto a Teece while it is still in your hand. Storm Landing and Static Field turn the panel itself into a trap."
       ],
