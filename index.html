@@ -941,7 +941,12 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 #infoBox .ilore{margin:-2px 0 12px;padding:2px 0 2px 12px;border-left:2px solid var(--line);font-style:italic;font-size:12.5px;line-height:1.55;color:var(--muted)}
 #infoBox ul{margin:6px 0 0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.6}
 #infoBox li{margin:4px 0}
-#infoBox .cardList{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0 0}
+#infoBox .cardList{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:12px 0 0}
+#infoBox .cardList .dcard{cursor:default}
+#infoBox .cardList .dcard:hover{transform:none;box-shadow:none}
+/* The whole rules text is on the card, so a long one scrolls, and says so. */
+#infoBox .cardList .dcard .dz .dtx{scrollbar-width:thin}
+#infoBox .cardList .dcard .dz .dtx::-webkit-scrollbar{display:block;width:4px}
 #infoBox .cardItem{padding:8px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;font-size:12px;color:var(--cream2);display:flex;flex-direction:column;gap:6px}
 /* Sides come in top/right/bottom/left order; a compass puts each number on the
    edge it defends, the way the card does, instead of a 2x2 grid that reads diagonally. */
@@ -1366,7 +1371,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:248,date:'2026-10-19'};
+const VERSION={build:249,date:'2026-10-19'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -20848,18 +20853,11 @@ function showDeckInfo(key){
   if(own)h+='<h3>Deck rules</h3><div class="rules">'+own+'</div>';
   h+=
     '<h3>The '+dk.cards.length+' cards</h3><div class="cardList">';
+  /* Each card whole, as it is drawn in a draft: numbers, drawing and all of
+     its rules. */
   for(const cid of dk.cards){
-    const c=CARDS[cid];
-    if(!c)continue;
-    h+='<div class="cardItem" data-type="'+c.type+'">';
-    if(c.type==='teece'&&c.sides){
-      const cs=cardSides(cid);
-      h+='<div class="cstats"><div class="stat">'+cs[0]+'</div><div class="stat">'+cs[1]+
-        '</div><div class="stat">'+cs[2]+'</div><div class="stat">'+cs[3]+'</div></div>';
-    }
-    h+='<div class="cname">'+escHtml(c.name)+'</div>';
-    if(c.text)h+='<div class="ctext">'+escHtml(c.text)+'</div>';
-    h+='</div>';
+    if(!CARDS[cid])continue;
+    h+='<div class="'+dcardClass(cid)+'" data-card-deck="'+getCardDeck(cid)+'">'+dcardInner(cid,true)+'</div>';
   }
   h+='</div>'+
     '<div class="row"><button class="btn primary" id="infoClose">Back to the decks</button></div>';
@@ -22559,6 +22557,23 @@ function draftName(p){
   if(!G_DRAFT)return 'Player '+(p+1);
   return G_DRAFT.vsAI?'You':'Player '+(p+1);
 }
+/* A whole card seen large: the draft's cards and the deck info page's. No
+   keyword line and no "teece" label: the rules text already says Ranged or
+   Flying, and a card with four half-discs of numbers is plainly a Teece. The
+   other three kinds still say what they are. A draft shows the first line of
+   the rules; the info page shows all of it. */
+function dcardClass(id){
+  const cd=CARDS[id];
+  return 'dcard t-'+cd.type+(cd.type==='teece'?'':' nostat')+(CARD_ART[id]?' arted':'');
+}
+function dcardInner(id,full){
+  const cd=CARDS[id],tx=cd.text||'';
+  return (cd.type==='teece'?semiNums(cardSides(id),'ds')+rankSym(id):'')+
+    '<div class="dz"><div class="dnm">'+cd.name+rankTag(id)+'</div>'+
+    (cd.type!=='teece'?'<div class="dty">'+cd.type+'</div>':'')+
+    '<div class="tart">'+artPre(id)+'</div>'+
+    '<div class="dtx">'+(full?tx.split('\n').map(kwify).join('<br>'):kwify(tx.split('\n')[0]))+'</div></div>';
+}
 function renderDraft(p,offer,k,res){
   const overlay=document.getElementById('draftOverlay');
   const ready=tapArm(overlay);
@@ -22574,17 +22589,9 @@ function renderDraft(p,offer,k,res){
     const dc=document.createElement('div');
     /* a draft card is a hand card seen larger: same deck colour, same emoji in
        the corner, same drawing behind the face */
-    const art=CARD_ART[id];
-    dc.className='dcard t-'+cd.type+(cd.type==='teece'?'':' nostat')+(art?' arted':'');
+    dc.className=dcardClass(id);
     dc.setAttribute('data-card-deck',getCardDeck(id));
-    /* No keyword line and no "teece" label: the rules text already says
-       Ranged or Flying, and a card with four half-discs of numbers is plainly
-       a Teece. The other three kinds still say what they are. */
-    dc.innerHTML=(cd.type==='teece'?semiNums(cardSides(id),'ds')+rankSym(id):'')+
-      '<div class="dz"><div class="dnm">'+cd.name+rankTag(id)+'</div>'+
-      (cd.type!=='teece'?'<div class="dty">'+cd.type+'</div>':'')+
-      '<div class="tart">'+artPre(id)+'</div>'+
-      '<div class="dtx">'+kwify(cd.text.split('\n')[0])+'</div></div>';
+    dc.innerHTML=dcardInner(id,false);
     dc.addEventListener('click',()=>{if(!ready())return;res(id);overlay.classList.add('hidden');});
     cards.appendChild(dc);
   }
