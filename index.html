@@ -1481,7 +1481,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:258,date:'2026-10-19'};
+const VERSION={build:259,date:'2026-10-19'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -5908,7 +5908,7 @@ const CARDS = {
     onDescend:[{fx:'angel',op:'selfMod',n:7}],
     text:'Sacrifice two Teece to play, or play it into the Heavens with no sacrifice; then it never Descends on its own. Heavenly. Flying. Whenever it Descends: +7 permanently.'},
  1285:{name:'The Last Trumpet',type:'magic',trump:true,angelAi:'trumpet',cast:[{fx:'angel',op:'trumpet'}],
-    text:'Trump card. Every Teece in the Heavens Descends now, in the order you choose, even one that went up this turn. Each one that lands destroys the enemy directly below it. If that enemy has Ward, the effect is silenced.'},
+    text:'Trump card. Every Teece in the Heavens Descends now, in the order you choose, even one that went up this turn. Each one that lands gets +4 until the end of the turn.'},
  1286:{name:'Divine Intervention',type:'magic',angelReact:true,angelAi:'never',cast:[{fx:'angel',op:'divine'}],
     text:'When a Teece of yours would be destroyed on your opponent’s turn, you can play this. It isn’t destroyed, and goes up into an empty Heaven instead (the one above its column if that is free).'},
  1287:{name:'Fall from Grace',type:'magic',angelAi:'grace',cast:[{fx:'angel',op:'grace',n:-3}],
@@ -23680,12 +23680,12 @@ function hvSimLand(bb,i,t,c,trumpet){
     else if(st.op==='stunAdj'){for(const j of ADJ[i]){const o=bb[j].teece;if(o&&!sameTeam(o.owner,nt.owner))o.stunUntil=G.turnNum+2;}}
     else if(st.op==='belowMod'){const j=i+BW,o=j<GRID?bb[j].teece:null;if(o&&!sameTeam(o.owner,nt.owner))applyModT(o,st.n,'perm');}
   }
-  if(trumpet){const j=i+BW,o=j<GRID?bb[j].teece:null;
-    if(o&&!sameTeam(o.owner,nt.owner)&&kwOf(bb,j).indexOf('ward')<0)simDeath(bb,{cell:j,t:o,killers:[]});}
+  if(trumpet)applyModT(nt,4,'temp');
 }
 /* Down from the Heavens. opts.forced: The Last Trumpet, which ignores the
    charge and the wait and cannot be called off; opts.trumpet: and the landing
-   destroys the enemy directly below; opts.cell: the computer's pick. */
+   Teece gets +4 until the end of the turn (Greg, build 259; it used to
+   destroy the enemy below); opts.cell: the computer's pick. */
 async function heavenDescend(c,opts){
   opts=opts||{};
   const h=heavens(),t=h[c];
@@ -23725,16 +23725,8 @@ async function heavenDescend(c,opts){
     if(G.over)return true;
   }
   if(opts.trumpet&&b[cell].teece===t){
-    const j=cell+BW,o=j<GRID?b[j].teece:null;
-    if(o&&!sameTeam(o.owner,t.owner)){
-      if(kwOf(b,j).indexOf('ward')>=0)log(nm(o)+' has Ward: the effect is silenced.');
-      else{
-        log('The Last Trumpet: '+nm(t)+' strikes down '+nm(o)+'.');
-        await anim([j],'dying',190);
-        await processDeath({cell:j,t:o,killers:[]});
-        if(G.over)return true;
-      }
-    }
+    applyModT(t,4,'temp');
+    log('The Last Trumpet: '+nm(t)+' gets +4 until the end of the turn.');
   }
   G.eventFlag=true;
   if(!opts.noCombat){await resolveCombat();render();}
@@ -24229,14 +24221,7 @@ function aiAngelPlan(d){
   if(d.angelAi==='trumpet'){
     const h=heavens();
     if(!h.some(t=>t&&t.owner===p))return null;
-    /* Held until it would strike something down: a Trumpet that only lands
-       bodies spends the deck's one Trump on what Descending does for free. */
-    let kills=0;
-    for(let c=0;c<h.length;c++){const t=h[c];if(!t||t.owner!==p)continue;
-      let land=-1;for(let r=0;r<BW;r++){const i=r*BW+c;if(openAt(b,i)){land=i;break;}}
-      const j=land>=0?land+BW:-1,o=j>=0&&j<GRID?b[j].teece:null;
-      if(o&&!sameTeam(o.owner,p)&&kwOf(b,j).indexOf('ward')<0)kills++;}
-    if(!kills)return null;
+    /* Weighed on the board it leaves: everything down at once, +4 apiece. */
     return {thr:2.0,cands:[0],mut:bb=>{
       for(let c=0;c<h.length;c++){const t=h[c];if(!t)continue;
         let land=-1;for(let r=0;r<BW;r++){const i=r*BW+c;if(openAt(bb,i)){land=i;break;}}
