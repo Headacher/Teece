@@ -262,8 +262,16 @@ where they fall short.
   and sigils are mixed and need one hand.
 - **Rock.** Boulder bodies `( o o )` with `.-'-.` shoulders, and rubble `(_)`.
   Consistent. Bedrock and Clinging Moss are only texture.
-- **Ogre.** One head `( o o ) (^\___/^)` repeated on every Teece. This is the
-  same problem the old Vampire deck had.
+- **Ogre.** Redrawn: a front-on hulk, its small head sunk between humped
+  shoulders (`.--d(oo)b--.`, the `d b` ears either side of close-set eyes), a
+  tusked underbite `\^^/`, a round gut `( )`, long arms hanging to `(_)` fists
+  and stubby `(__)(__)` feet. Each card changes the pose or the prop: the
+  Bruiser punches, the Hurler holds a Teece overhead, the Warden blocks a
+  doorway with crossed arms, the Tactician points at a grid map. Bosses add a
+  feathered headdress and skull staff (Chieftain) or a horned helm and spiked
+  pauldrons (Warlord). The shoved Teece is always the same little `o /|\ / \`
+  ringed in `*` stun stars. The Goblin is the one exception, with `/\` ears and
+  a `vv` grin. The back's two big footprints sit behind the art as texture.
 - **Robot.** Square heads `[o_o]` and `|===|` chassis. Consistent and readable.
 - **Gadget.** Boxes with dials and switches. Mixed. The fields (Polarity Field)
   are only lines.
@@ -283,8 +291,18 @@ where they fall short.
   fields are texture.
 - **Nature.** Plants over a `~~~~` ground line. Soil and vines are `####`
   texture.
-- **Pixie.** One sprite template `\( o )/ (/|\)` on every card, with only the
-  face changing. It needs the kind of variety the Priests have.
+- **Pixie.** Redrawn around butterfly wings. Every pixie is a tiny figure (an
+  `o` head, arms `\o/`, a petal dress `/_\`) between four rounded wing lobes:
+  `.--.` and `(    \` above, `.'` and `(__.-'` below. A small pixie is the
+  same in miniature, `.-. .-.` over `(  \o/  )` over `'-/_\-'`. Fairy dust is
+  `.` and `'`, sparkle is `*`, and magic is a little card `.---. | * |`. Each
+  card adds its subject to that figure: the Thieving Sprite carries a card off
+  over its head, the Grave Pixie sits on a headstone while a card climbs out of
+  the soil, the Echo Pixie sends sound arcs to a dotted copy, the Changeling is
+  half butterfly and half bat, the Queen wears a crown. Silence is the muted
+  speaker, Enlarge and Shrink are a small and a big pixie with an arrow, and
+  Invisibility is a pixie whose right half has faded to dots. The back's
+  sparkle field was faded to a quiet texture so the fine strokes read over it.
 - **Spider.** Redrawn: see above.
 - **Vampire.** Redrawn: see above.
 - **Zombie.** Redrawn: see above.
@@ -298,18 +316,48 @@ where they fall short.
 - **Apocalypse.** The Horsemen ride, and that is good. The rest is mixed:
   River of Blood, Wastes and Chainmail are texture.
 - **Madness.** Faces with `@` and `?` eyes, but no shared construction.
-- **Dimension.** Nested `+--+` boxes. It is abstract, and most cards look alike.
+- **Dimension.** Redrawn in single strokes as Planewalkers and the planes they
+  carry. Every Planewalker is the same hooded figure: a pointed hood `/^\`,
+  star eyes `(* *)`, a robe `/|~|\` and feet `_/ \_`; the bosses add a third
+  eye or a world in their hands. A battleground held as an object is a slab in
+  perspective `/____/` with a `*` on it, a rift is a zigzag tear `/\ < > \/`,
+  and the Black Hole pulls everything into an `@`. The back is a starfield, so
+  the drawings leave open space for its stars instead of drawing their own; a
+  `.` or `:` fades into it, which is how the Fading Rift fades.
 - **Locust.** Insect heads `\\ ^ //` with feelers. Consistent, but it leans on one
   template.
 - **Devil.** Horned faces `/\ /\` and contracts. Consistent.
-- **Runeblade.** Swords, with the letter `R` written into several of them.
+- **Runeblade.** Redrawn around one sword, in single angular strokes. The
+  Runeblade is always the same build: a `()` pommel, an `=` grip, a `[##]`
+  guard (or a `| |` cross-guard on the big equips), and a blade whose fuller is
+  cut with glyph runes `<>` `^` `|>` `\|/` (shapes, never letters); glow is
+  `*` `'` `.`. The tribe are front-on figures with a `.<>.` rune on the brow, an
+  `(o  o)` face and a `/^^^^\` fur mantle, and each card is the pose its name
+  says: the Sworn salute with the blade before the face, the Elder leans on it,
+  the Hurler throws runes off its tip, the Keeper calls it back round a loop,
+  the Exile has no brow rune. The jokes are in the sword: Runebladeblade is a
+  blade whose point runs into a second hilt, the Bladerang is bent into an L,
+  and the Blade That's Close Enough droops, with tape and doodles for runes.
+  The back is the same runes, shrunk to a faint all-over texture (36px tile)
+  so it no longer cuts through the drawings.
 - **Wizard.** Pointed hats with `*` stars over `(o o)` faces. The element tokens
   are simple glyphs. Earth and Deep Earth are `####` texture.
 - **Gun.** Gunmen, ammo and plating. Mostly fine. Gun Range is a model ground.
 - **Fusion.** Chimera bodies stitched from parts. No shared style yet.
 - **Lightning.** Bolts and storm figures. Mixed, with several plain boxes.
 - **Mummy.** Redrawn: see above.
-- **Wolf.** Wolf heads with no single construction. Howl spells out `AWOOO`.
+- **Wolf.** Redrawn: every wolf is in profile facing right, with one head: `/\ /\`
+  ears over a `V` brow, an `o` eye, a long muzzle `\___` ending in a `___>` nose,
+  and a `.-'vv` jaw. Standing wolves have a long `_.----'` back and `| |` legs
+  on `/_/` paws, so their feet stand in the back's pines; sitters (Lone Wolf, Pack
+  Warden) are the same head over a `.-.` haunch. Each card adds one thing: the
+  Timber Wolf's log, the Tundra Wolf's snow, Ironhide's `[##]` plates, the
+  bosses' `/\/\/\` hackles, `VVVVV`/`^^^^^` jaws and Fenrir's `o=o=o` chain.
+  The pack is a small `/\/\ ( o _>` head, closed-eyed `-` when asleep and dotted
+  `:':':.` when it is a copy just appearing (Wolven Promotion). The spells are
+  the head close up: Howl and the Howler point the muzzle up at the back's moon
+  with `)  )` sound arcs, never words. The back (moon top right, pines along
+  the bottom) is unchanged.
 - **Priest.** The model deck: see above.
 - **Dwarves.** `(o_o)` faces over `WWW` beards, under helmets. Consistent.
 - **Warlock.** One small `\o/ /_\` warlock under a different patron sign on
