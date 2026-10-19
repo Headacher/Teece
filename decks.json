@@ -1,5 +1,5 @@
 {
-  "world": "Teece is a world of nine panels, three by three, hung in the dark like a board somebody set out and never put away. Four old gods hold its frame (Topus the top edge, Rightorious the right, Bottomor the bottom and Levt the left), and everything living on it is a Teece, born with a number on each side and a firm belief that the bigger one wins. Middlemark and its great sewer-riddled metropolis fill the middle panel; the Mountains and the frozen north lie above, the Wildwood and the Wastes below, and past the bottom edge, if you dig far enough, the Undead Planet and the Devils' Pit beneath that. Beyond the edges fold the Dimensions, and somewhere under the middle panel a thing called Gol’God’Oth is waiting to be let in. Every faction has its reasons for fighting over the nine panels, most of them bad, and by long tradition whoever ends a turn holding four more of them than everybody else is, for the moment, in charge.",
+  "world": "Teece is a board of nine panels, three by three, and everything that lives on it is a Teece, born with a number on each side and a firm belief that the bigger one wins. Four old gods hold its frame: Topus the top edge, Rightorious the right, Bottomor the bottom and Levt the left. The further right you go the newer everything gets, from the workshops of the Works to the smoking Badlands; the further left, the older, from the Hallowed North down through the Wildwood to the Gloaming, where the dead keep house. Above the top edge burn the Heavens, home of the sun and the storm; below the bottom edge lies the Pit, where the Devils keep their books. In the middle panel, where every extreme meets and fights, stands Middlemark, built over Gol’God’Oth, who was asleep down there long before anyone laid the board on top of him. Past the edges the World of Teece runs on, folding over on itself, and strange things wander in from the creases. By long tradition, whoever ends a turn four Teece ahead of everyone else is, for the moment, in charge.",
   "decks": {
     "basic": {
       "name": "Basic",
@@ -26,7 +26,8 @@
         1190
       ],
       "blurb": "The deck for a first game, and the plainest in the box. Every card does one thing, and each one teaches a single rule of Teece: aiming a strong edge, Flying and Ranged, Tokens and sacrifice, equips, magic and battlegrounds. Its numbers are honest and middling with no tricks behind them, so it wins by reading the board better than the other side, and struggles against any deck that changes the rules underneath it.",
-      "lore": "The Common Levy of Middlemark: farmers, porters and apprentices from the country around the middle panel, where nobody has an ability and everybody has a pitchfork. Every war in Teece marches through Middlemark sooner or later, so its Footmen have fought for the Army, against the Ogres and under Knights who never learned their names. No god has ever bothered to recruit them, which they count as a blessing.",
+      "lore": "The Common Levy of Middlemark: farmers, porters and apprentices from the streets and fields of the middle panel, where nobody has an ability and everybody has a pitchfork. Every war in Teece passes through Middlemark sooner or later, so the Footmen have fought for the Army, against the Ogres and under Knights who never learned their names. They sleep soundly, which in a city built over Gol’God’Oth takes real talent.",
+      "home": "mc",
       "how": [
         "Point your strong edges. Only the two edges that touch are compared, and the smaller number is destroyed. The Footman is 6 on every side; the Shieldbearer, the Brawler and the Gatekeeper are strong on some sides and weak on others, so where you put them matters. The Pikeman has 10 on one side only, and may be rotated as it lands so you can aim it.",
         "Movement and reach. Flying moves one space once per your turn: the Hawk Rider has it, and the Windcaller lends it with +2 for a turn. Ranged strikes the first enemy beyond the next panel and nothing strikes back: the Bowman has it, and lands with +3 for the turn.",
@@ -63,7 +64,8 @@
       "noDominate": true,
       "swarmWin": "any",
       "blurb": "A swarm that wins by covering the board rather than by out-numbering it. Ten of the twenty cards are the same Rat, each one lets you play another for free, and every body in the deck gets +1 for every ally standing with it, so a hand goes down in a single turn and grows as it lands. Rats can never win by being four Teece ahead: they take the game the moment their Teece hold every panel, or by holding the most of the field when a deck runs dry. Brilliant on an open board; weak to anything that clears it in one go, and a razed panel shuts the main ending off for good.",
-      "lore": "Something is lurking in the sewers of the metropolis of Middlemark, and there is a great deal of it. The Rats answer to the Rat King and his Queen, worship nothing, and hold that any panel with a Rat on it is a panel improved. They share the tunnels with the Garbage, which they regard as lunch, and they watch the Locusts from the Wastes with the cold respect of one swarm for another.",
+      "lore": "Something is lurking in the sewers under Middlemark, and there is a great deal of it. The Rats answer to the Rat King and his Queen and hold that any panel with a Rat on it is a panel improved. They dig deeper every year, and the Priests would very much like to know what they keep hearing down there. The sewers drain to the Dump in the Badlands, where the Garbage lives, which the Rats regard as lunch.",
+      "home": "mc",
       "how": [
         "Each Rat you play opens the door for the next one, free of the turn's Teece play. Nine panels is the only thing that stops you.",
         "Every Teece here reads the crowd: +1 for every other ally on the board, and the Rat King hands out another +2 on top of that. Swarmcloak pays +2 per ally to whoever wears it.",
@@ -90,7 +92,8 @@
         312
       ],
       "blurb": "Only twelve cards, and every one of them is bigger than it has any right to be: Titan is 16 on every side, Skullsplitter 15 on one edge, and even the smallest trade above their weight. The short deck is safe because Berserkers never deck out: your own empty deck does not end the game, only your opponent's does. The cards that are not Teece bring your dead back, to hand or to the board, so the plan is simply to hit hardest and keep hitting. It has little to say to silence, theft or tricks, and a thin hand can run out of bodies.",
-      "lore": "The Berserkers are the far-northern cousins of the Runeblade tribe, who walked out the day the elders said the sword had to be shared. Twelve of them came south, and twelve has always been enough. They have no gods and few tactics, they never run out because they never stop, and they hold a grudge against the Ogres, who once shoved one of them.",
+      "lore": "The Berserkers are the cousins of the Runeblade tribe, who walked out of the Hallowed North the day the elders said the sword had to be shared. Twelve of them came south, and twelve has always been enough. They never run out because they never stop, and they hold a grudge against the Ogres of the Wildwood, who once shoved one of them.",
+      "home": "tl",
       "how": [
         "Titan is 16 on every side and Skullsplitter is 15 on one — check which edge is facing you before you trade with either.",
         "Warcamp sends your dying cards back to your hand instead of the graveyard, and charges an opponent two cards to break it.",
@@ -124,7 +127,8 @@
         340
       ],
       "blurb": "Defence is the deck. Defence soaks up the difference in a fight, so a Teece with Defence 2 only dies to an edge that beats it by three or more, and almost every card here has some, hands some out, or turns it into attack. The Quarry Foreman, Studded Plate and the battlegrounds stack it up; the Rock Sergeant, Stoneheart and the Master Rock Flinger spend it as numbers, and Avalanche clears every enemy below a sacrificed ally. Slow to start and very hard to shift once built; weak to silence and to anything that destroys without fighting.",
-      "lore": "The Rock are the living stone of the Mountains, children of the Rock God, the slowest and most patient of the Warlocks' patrons. They do not fight so much as decline to be moved. The Dwarves mine them, which they take personally; the Bombardiers blow them up, which they take very personally; and the Ogres throw them, which they have come, grudgingly, to enjoy.",
+      "lore": "The Rock are the living stone of the High Mountains, children of the Rock God, the slowest and most patient of the Warlocks' patrons. They do not fight so much as decline to be moved. The Dwarves mine them, which they take personally; the Bombardiers of the Badlands blow them up, which they take very personally; and the Ogres throw them, which they have come, grudgingly, to enjoy.",
+      "home": "tc",
       "how": [
         "Colossus is 10 on every side and destroys nothing at all unless your Master Rock Flinger is standing.",
         "Master Rock Flinger pays every Teece on your side, itself included, +X where X is that Teece's own Defence, and gives it Flying.",
@@ -159,7 +163,8 @@
         370
       ],
       "blurb": "Shove everything, then make sure it cannot answer. Almost every Ogre moves a Teece as it lands, the penalties they hand out are permanent, and most of them Stun: a stunned Teece keeps its numbers but destroys nothing and uses no ability until the end of your next turn. The Trapper and the Tactician punish every enemy move however it happened, so your own shoves feed them, and Sinkhole and Concussion Alley make the panel itself the trap. Excellent at taking a built-up board apart; the bodies are only middling, and a Teece that cannot be moved, or is immune to stat reduction, shrugs off most of it.",
-      "lore": "The Ogres live in the foothills under the Mountains and serve the Ogre God, who is mostly a very large shove. Their great tactical insight is that a Teece that has been moved, hit and confused will not be doing anything for a while. They have a forty-year feud with the Army over who may move whom, they throw the Rock for sport and Goblins for distance, and Warlocks who channel their god come home with sore shoulders.",
+      "lore": "The Ogres live in the foothills between the Wildwood and the Mountains and serve the Ogre God, who is mostly a very large shove. Their great tactical insight is that a Teece that has been moved, hit and confused will not be doing anything for a while. They have a forty-year feud with the Army over who may move whom, they throw the Rock for sport and Goblins for distance, and Warlocks who channel their god come home with sore shoulders.",
+      "home": "ml",
       "how": [
         "Stun is the deck. A stunned Teece cannot destroy anything and cannot use any ability — not even Flying — until the end of your next turn, which means it is useless for the whole of its controller's turn. The panel shows a burst badge, and a chip under the board names every stunned Teece on the field.",
         "Ogre Trapper and Ogre Tactician punish movement however it happened, so your own shoves feed them — and the Tactician stuns on every enemy move for nothing at all.",
@@ -195,7 +200,8 @@
         430
       ],
       "blurb": "A flying factory. Every Robot has Flying, and nearly every one builds Drones as it lands, dies or stands: Tokens with 3 on every side that fly too. Drones never count toward winning, but they block, trade and pay: Swarm Node and Drone Tether grow them, the Chassis and the Data Centre grow on their deaths, and a Grey Goo Drone copies itself onto an adjacent empty panel at the start of each of your turns, every copy included, until the board is full of it. Strong at holding panels and at moving; the Robots themselves are only middling, so anything that sweeps Tokens away hurts it badly.",
-      "lore": "The Robots were built in the Gadget workshops to do the jobs nobody wanted, and then they built the Drones to do the jobs they did not want either. A Gadgeteer left a batch of Grey Goo running over a long weekend, and the Drones have been copying themselves ever since. They fly because the ground is covered in Garbage, and they keep well away from the Bombardiers, who keep asking to borrow some.",
+      "lore": "The Robots were built in the Works to do the jobs nobody wanted, and then they built the Drones to do the jobs they did not want either. A Gadgeteer left a batch of Grey Goo running over a long weekend, and the Drones have been copying themselves ever since. They fly because the road to the Badlands is covered in Garbage, and they keep well away from the Bombardiers, who keep asking to borrow some.",
+      "home": "mr",
       "how": [
         "Drones are flying Tokens with 3 on every side, and Tokens never count toward winning: they are board, not lead.",
         "Swarm Node and Drone Tether pay the Drones, Grey Goo builds one that copies itself at the start of each of your turns, and every copy does the same; Overclocker pays for movement instead, and Signal Relay wires the next three Drones to explode.",
@@ -229,7 +235,8 @@
         460
       ],
       "blurb": "Almost every card asks you to choose a mode, and the rest of the deck cheats that choice. Null Module, Preset, Coupling Rig, the Modular Platform and the Grand Apparatus make the next choice fire every mode at once or the chosen mode twice; the Safety Interlock locks every one of your choices to its first mode or its last; the Overdrive Engine grows and flies every time one resolves. The cards are small and flexible rather than strong, so it rewards a player who knows what every mode does and punishes one who just picks one.",
-      "lore": "The Gadgeteers are the tinkerers' guild of Middlemark, engineers who believe there is no problem a sufficiently complicated tool cannot make more interesting. They built the Robots, the Overdrive Engine, and the Safety Interlock, which was meant to stop the Overdrive Engine and did not. They buy scrap from the Garbage and sell magazines to the Gun, and they have not been allowed back into the Wizards' Tower since the Grand Apparatus incident.",
+      "lore": "The Gadgeteers are the tinkerers' guild of the Works, engineers who believe there is no problem a sufficiently complicated tool cannot make more interesting. They built the Robots, the Overdrive Engine, and the Safety Interlock, which was meant to stop the Overdrive Engine and did not. They buy scrap from the Garbage, sell magazines to the Gun, and have not been allowed back into the Wizards' Tower since the Grand Apparatus incident.",
+      "home": "mr",
       "how": [
         "Null Module, Preset, Coupling Rig and Grand Apparatus all bend the next choice: every mode at once, or the chosen mode twice.",
         "Safety Interlock takes the choosing out of your hands: it locks every modality of yours to its first choice, or to its last. Played while a modality fires every mode, it locks both ends, and both fire every time.",
@@ -263,7 +270,8 @@
         400
       ],
       "blurb": "Cards that grow or rot on a clock. Every Teece ages at the start of your turn: the Acorn, the Long Game and the Heir Apparent are next to worthless when they land and huge a turn or two later, while the Cut Flower, the Hourglass Knight and the Fading Titan, 30 on every side, start big and decay. Fast Forward, the Timekeeper, the Whetted Blade and Last Breath push clocks forward, the Chronoplate stops one dead, and Pause and the Stasis Field keep the growing ones alive long enough to pay. Strong in a long game; slow to start, and anything that kills a seedling before it ripens wastes the whole investment.",
-      "lore": "The Clock Gardeners tend the Hours, a garden at the edge of time where an Acorn becomes an oak in two turns and a Cut Flower wilts in the same. They are kin to the Wildwood but trust nothing that grows at its own speed. They sold the Solar orders the Stopped Sundial and have regretted it ever since, and the Fading Titan is the last of the giants who ruled before anyone started the clock.",
+      "lore": "The Clock Gardeners tend the Hours, a garden high in the Clockwork Heights where the world's clock is wound and an Acorn becomes an oak in two turns. They are kin to the Wildwood but trust nothing that grows at its own speed. They sold the Solar orders the Stopped Sundial and have regretted it ever since, and the Fading Titan is the last of the giants who ruled before anyone started the clock.",
+      "home": "tr",
       "how": [
         "Acorn and Long Game are nearly worthless for two turns; then the Acorn comes up 10 on every side with +6 on top, and the Long Game 12 on every side.",
         "Fast Forward, Timekeeper, Whetted Blade and Last Breath all push clocks forward — that is how you collect early.",
@@ -297,7 +305,8 @@
         511
       ],
       "blurb": "Eight Hexes in place of equipment and battlegrounds, and twelve Witches that answer magic. A Hex can make a player lose a draw, silence their whole side, freeze them out of playing Teece, steal one of their Teece for a turn, or raze an empty panel off the board for good. Most Witches grow, fly, summon Familiars or silence something whenever you cast, so every Hex is also a growth spurt, and the Hex Collector, Hag of the Hollow, Witch Doctor and Witch Queen keep the spells coming back. Strong, steady control; the smaller Witches are fragile once the spells run out, and Hex of Freezing buys time rather than the win.",
-      "lore": "The Witches are the Wizards' sisters, who left the Tower the day it was decided that hexing a colleague did not count as scholarship. They brew in the Hollow at the left edge of the world, under Levt's patient eye, and trade Hexes to the Pixies for gossip. The Mummies' curses are older and cruder, and the Witches call them amateurs, loudly, from a safe distance.",
+      "lore": "The Witches are the Wizards' sisters, who left the Tower the day it was decided that hexing a colleague did not count as scholarship. They brew in the Hollow, down in the Gloaming under Levt's patient eye, and trade Hexes to the Pixies for gossip. The Vampires and Zombies have learned to fight around the Hollow rather than through it. The Mummies' curses are older and cruder, and the Witches call them amateurs, loudly, from a safe distance.",
+      "home": "bl",
       "how": [
         "Hex of Freezing is the trump: they cannot play a Teece at all, and you cannot win the game until it lifts — it buys time, not the win.",
         "Most Witches trigger on you playing magic at all, so a cheap Hex is also a growth spurt.",
@@ -332,7 +341,8 @@
         490
       ],
       "blurb": "Area damage that does not care whose side it lands on. Mines on empty panels, Frag Charges, Cluster Bombs, Carpet Bombers and dying Shrapnel Troopers take numbers off everything in the blast, and the Chain Charge and the Overcharged Warhead make every Mine worse. The deck survives its own blasts with Blast Ward, which turns every loss on its wearer into a gain, and with the Blast-Proof Bunker and Siege Plating, which are immune to stat reduction. Brutal against swarms and crowded boards; careless placement blows up your own side, and the Unstable Warhead destroys itself the moment anything touches it.",
-      "lore": "The Bombardiers serve the Bomb God, a patron the Warlocks rent from only in emergencies and only from a great distance. They were miners once, until they found that blowing up a mountain is faster than digging through it, which made them the bitterest enemies of the Dwarves and of the Rock. The Avatar of the Nuclear Apocalypse is the Bomb God's idea of a sermon, and the Four Horsemen keep trying to take the credit for it.",
+      "lore": "The Bombardiers serve the Bomb God, a patron the Warlocks rent from only in emergencies and only from a great distance. They were miners once, until they found that blowing up a mountain is faster than digging through it, and they moved down to the Badlands where nobody minds the craters. That made them the bitterest enemies of the Dwarves and of the Rock. The Avatar of the Nuclear Apocalypse is the Bomb God's idea of a sermon, and the Four Horsemen keep trying to take the credit for it.",
+      "home": "br",
       "how": [
         "Blast Ward inverts the whole deck: the Teece wearing it gains whatever it would have lost.",
         "Mines sit on empty panels for -2 as anything arrives, and Chain Charge, Minefield and Overcharged Warhead all make them bigger.",
@@ -366,7 +376,8 @@
         540
       ],
       "blurb": "Plants that feed each other. Almost every card hands out a bonus, most of them permanent, and the Mother Tree, the Bramble Wall, the Ancient Redwood and the Creeping Ivy keep adding more, so the side grows all game. Hothouse Orchid and Sunlit Loam double the bonuses, and Sprouts pay +2 to every other ally when they die. The catch is the root: nearly every plant is soft on its bottom edge, so the panel above one is where it dies, and silence or a sweeping penalty undoes a lot of patient growth at once.",
-      "lore": "The Wildwood grows over the lower panels in the keeping of Bottomor, god of the bottom edge, which is why every plant is soft in exactly the place its god is meant to be holding it up. The plants feed each other because nobody else will. The Locusts eat them, the Garbage smothers them and the Pixies live in them rent-free; the Solar orders are the only neighbours they actually like.",
+      "lore": "The Wildwood grows down Levt's side of the board, older than any road through it, and its plants feed each other because nobody else will. The Locusts eat them, the Garbage smothers them and the Pixies live in them rent-free; the Solar orders, warming them from the Heavens, are the only neighbours they actually like. The Knights ride through it as if they owned it, and the forest is very patient.",
+      "home": "ml",
       "how": [
         "Nearly every plant is thin on its bottom edge — Sapling, Elder Willow and Mother Tree 1, Hothouse Orchid 0 — so the panel above it is where it dies.",
         "Hothouse Orchid and Sunlit Loam double every positive effect, and the bonuses here are permanent, so they compound all game.",
@@ -400,7 +411,8 @@
         560
       ],
       "blurb": "Tiny flying creatures with almost no numbers and an enormous amount of magic. Every pixie flies, and the deck keeps pulling spells out of graveyards, out of the deck and out of thin air, then bends the field with them: Mind Control takes a Teece for a turn, Enlarge and Shrink rewrite one, Invisibility and Pixie Projection protect, and Silence strips one for good. The Pixie Queen hands you a Queen's Enlarge every turn, and the Spellbound Pixie grows with every spell. The pixies are 0s, 1s and 2s, so it is very strong in skilled hands and falls over the moment the spells run out.",
-      "lore": "The Pixies are children of the Fey, tiny, airborne and ungovernable, and the reason a Warlock's Fey patron never answers on the first ring. They steal spells from the Wizards for fun and from the Witches for profit, and they once enlarged a sewer Rat to the size of a cathedral, which is where the Rat King got his ideas. Nobody has ever caught one, because nobody has ever managed to hit a 1.",
+      "lore": "The Pixies are children of the Fey, tiny, airborne and ungovernable, and they live in the canopy of the Wildwood, which is the reason a Warlock's Fey patron never answers on the first ring. They steal spells from the Wizards for fun and from the Witches for profit, and they once enlarged a Middlemark sewer Rat to the size of a cathedral, which is where the Rat King got his ideas. Nobody has ever caught one, because nobody has ever managed to hit a 1.",
+      "home": "ml",
       "how": [
         "Pixies are 0s, 1s and 2s. They are not meant to fight — they are meant to keep casting.",
         "Trickspinner, Wisp of Nothing and Enchantment conjure magic out of nothing; Thieving Sprite, Grave Pixie and Echo Pixie pull it back out of graveyards and decks.",
@@ -435,7 +447,8 @@
       ],
       "web": true,
       "blurb": "A cannibal swarm on its own battlefield. The Web covers every panel but the corners from the first turn; a Spider Teece or Spiderling on it can Skitter one space a turn, and a Spiderling has +1 Defence there. The Spiders pour out Spiderlings with 4 on every side and then eat them to pay for everything else: the Spider itself, 10 on every side, costs one, Eaten Alive spends three to destroy any Teece, and the Brood Mother makes every Spiderling on the Web a 12. Spiderlings are Tokens and never count toward winning, so the deck needs real bodies to close, and the corners are where it is weakest.",
-      "lore": "The Spiders spin the Web that covers every panel but the corners, and they say they were here first and the board was simply laid on top of them. They are a cannibal brood that raises Spiderlings to eat them, and the Brood Mother is older than the Wildwood. They catch Pixies, have a standing arrangement with the Cult (whose pentagram, they point out, is drawn on their silk), and refuse to discuss the corners.",
+      "lore": "The Spiders spin the Web that covers every panel but the corners, anchored in the Sinking Sands where the Brood Mother waits. They say they were here before the board, though not, they admit, before what sleeps under Middlemark. They are a cannibal brood that raises Spiderlings to eat them, they catch Pixies, they have a standing arrangement with the Cult (whose pentagram, they point out, is drawn on their silk), and they refuse to discuss the corners.",
+      "home": "bc",
       "noRogue": true,
       "how": [
         "Spiderlings are Tokens, and Tokens never count toward winning: they are fuel and board, never a lead.",
@@ -471,7 +484,8 @@
         620
       ],
       "blurb": "They grow by taking. Drain X takes X off a Teece and gives the drinker exactly what it managed to take, so a Teece immune to stat reduction gives up nothing, and the Vampire Castle, the Transfusion Catalyst and Enhanced Fangs all bend the number on the way. The Fledgling, Nightstalker and Starveling drain as they land; the Nosferatu, the Elder and the Transmogrifying Vampire, which turns from a Humanoid into a flying Bat and back, keep drinking every turn; Blood Bank saves every drop for one huge bite. Mist Form is the trump card: an ally invulnerable for three of your turns, though it destroys nothing while it lasts. A plain beginner deck that wins long fights; the Parasite must drink every turn or die, and silence stops the bleeding.",
-      "lore": "The Vampires are the Wizards' exiled dark sorcerers, banished to the Undead Planet below the bottom edge, where they have spent ten thousand years at war with the Zombies over who gets to eat the living. Their Lord fell to the Runeblade, and the Elders still flinch at swords. They grow by taking, they mortgage their castles to the Devils, and they think the Zombies vulgar for eating the whole thing.",
+      "lore": "The Vampires are the Wizards' exiled dark sorcerers, banished to the Gloaming at the bottom left of the board, where they have spent ten thousand years at war with the Zombies over who gets to eat the living. Their Lord fell to the Runeblade, and the Elders still flinch at swords. They grow by taking, they mortgage their castles to the Devils next door, and they think the Zombies vulgar for eating the whole thing.",
+      "home": "bl",
       "how": [
         "Parasite has to drain at least once on each of your turns, by any means, or it withers and dies. Its own bite only drinks from your side, but any other drain counts.",
         "Enhanced Fangs doubles what you take. Vampire Castle and Transfusion Catalyst double everything either way, up and down alike.",
@@ -505,7 +519,8 @@
         640
       ],
       "blurb": "They come back when you kill them. X Undying Y means the card returns X times a game, each time Y stronger (or weaker) than the last, on any free panel you choose, so the Shambler grows and the Rotting Brute shrinks but is still a body. The rest of the deck works both graveyards: the Necromancer and Brief Return raise the enemy's dead, Back Again and Death's Avatar wind Undying counters back, and Plague Winds tilts the whole board by one every turn. Very hard to grind out; silence keeps a zombie down, and a returned body arrives with no protection, so placement is everything.",
-      "lore": "The Zombies are the other army of the Undead Planet, raised by Nagash, the necromancer-god the Warlocks rent from, who is the reason none of them will stay down. The war with the Vampires has lasted so long that both sides have forgotten the cause, though the Zombies suspect it was brains. The Mummies are their snobbish distant cousins, and a Priest's Smite is the one thing they genuinely fear.",
+      "lore": "The Zombies are the other army of the Gloaming, raised by Nagash, the necromancer-god the Warlocks rent from, who is the reason none of them will stay down. The war with the Vampires has lasted so long that both sides have forgotten the cause, though the Zombies suspect it was brains. The Mummies of the Sinking Sands are their snobbish distant cousins, and a Priest's Smite is the one thing they genuinely fear.",
+      "home": "bl",
       "how": [
         "The return count belongs to the card, not the body, so bouncing a zombie back to hand does not launder it. Back Again and Death's Avatar are the two that wind it back.",
         "Silence stops it getting up. A silenced zombie stays down.",
@@ -539,7 +554,8 @@
         660
       ],
       "blurb": "A second game laid over the first. Every Teece is an X, an O, or both, and three of one letter of yours in a straight line wins at the end of that turn, however far behind you are on bodies. The X and O Toerrains mark bare panels, the cOrpse, X-tinct and XOD leave Toerrains behind when they die, and the Oliminitator, Xecutioner, suppOrt and mediX grow with every letter on the field, whoever controls it. The bodies are tiny, so it lives or dies on reading lines: a body standing on your Toerrain blocks it, and a destroyed letter or a razed panel stops a line cold.",
-      "lore": "Nobody knows where the Noughts and Crosses came from; the Planewalkers of the Dimensions swear the Xs and Os leaked in from a smaller board laid over this one. They care nothing for bodies, only for lines, and they have no gods, though the Priests of the Four Sides note uneasily that three in a row along an edge looks a lot like a prayer to that edge's god. The Cult watches their lines with professional interest.",
+      "lore": "Nobody knows where the Noughts and Crosses came from. The Planewalkers swear they fell out of a crease in the World of Teece, where the land is folded so tight it comes out in little grids. They care nothing for bodies, only for lines, and the Priests of the Four Sides note uneasily that three in a row along an edge looks a lot like a prayer to that edge's god. The Cult watches their lines with professional interest.",
+      "home": "world",
       "noRogue": true,
       "how": [
         "A body covers the ground it stands on, so standing on their Toerrain blocks that line instead of joining it.",
@@ -574,7 +590,8 @@
         700
       ],
       "blurb": "The sun in the corner of the board becomes a moon at the start of every round, so your turns alternate between Day and Night. Half of what this deck prints is worth having in one half of the cycle and nothing in the other: by day it summons Solar Tokens and pays its allies, by night it silences, assassinates and takes numbers off enemies. Duskfall, Daybreak, Solstice and the Solar Tyrant turn the sky on purpose, and the Stopped Sundial stops the round turning it. Flexible and strong for a player who plans two turns ahead; awkward when the sky is wrong for the hand you hold.",
-      "lore": "The Solar orders tend the great sky that turns in the corner of the board, a sun one round and a moon the next, and they split long ago into those who serve the day and those who serve the night. Both halves share a deck because neither will let the other out of its sight. By day they warm the Wildwood and by night they hide their Assassins, and they blame every eclipse on the Time gardeners, who sold them the Stopped Sundial.",
+      "lore": "The Solar orders tend the great sky that turns in the Heavens above Topus's edge, a sun one round and a moon the next, and they split long ago into those who serve the day and those who serve the night. Both halves share a deck because neither will let the other out of its sight. By day they warm the Wildwood and by night they hide their Assassins, and they blame every eclipse on the Clock Gardeners, who sold them the Stopped Sundial.",
+      "home": "above",
       "how": [
         "A card that only works in one half of the cycle tells you so when you play it in the other.",
         "Equips read the sky too: Twilight Cloak is +3 Defence by night, and +7 with Flying by day.",
@@ -608,7 +625,8 @@
         720
       ],
       "blurb": "A deck paid for its shape. Almost nothing here is worth much standing alone: Teece gain numbers, Ranged, March and protection for standing beside an ally, and the equips pay for lines, corner triangles and a lone Teece in the middle. Brigadier Ryan and Brigadier Bryan call each other down and are +10 each side by side, Colonel Cornell pays everyone in his huddle, and Field Marshal Marshall makes every Teece count as adjacent to all of its allies, the enemy's included. Strong and simple to pilot; break up the formation, by shoves or one kill in the middle, and every number falls with it.",
-      "lore": "The Grand Army of Middlemark, drilled by Field Marshal Marshall in the belief that standing next to someone is a moral virtue. It recruits from the Common Levy, borrows horses from the Knights it insists it does not need, and has spent forty years in a border feud with the Ogres over who is allowed to move whom. Brigadier Ryan and Brigadier Bryan are not related, and are tired of being asked.",
+      "lore": "The Grand Army marches out of the Clockwork Heights, drilled by Field Marshal Marshall in the belief that standing next to someone is a moral virtue. It recruits from the Common Levy of Middlemark, borrows horses from the Knights it insists it does not need, and has spent forty years in a border feud with the Ogres over who is allowed to move whom. Brigadier Ryan and Brigadier Bryan are not related, and are tired of being asked.",
+      "home": "tr",
       "how": [
         "Beside means the four panels a side touches, never a diagonal. Line Formation is the only card here that counts diagonals, and it counts them as lines rather than as neighbours.",
         "Brigadier Ryan and Brigadier Bryan call each other up: play one and the other may go down the same turn without spending your Teece play. Side by side they are +10 each.",
@@ -670,7 +688,8 @@
         "draw": 2
       },
       "blurb": "Twice the deck and twice the turn: forty-four cards, two Teece plays and two draws every turn. Nothing here is worth much on its own, and much of it pays by being thrown away: the graveyard is the stockpile, Living Dump, Trash King and the Dumpster read the heap behind you, and the Raccoon and the Garbage Man fish cards back out of it. The bigger turns flood the board with small bodies, while Rancid Mist and Living Smog sour the enemy and fire, rats and a shopping cart do the rest. Strong at out-numbering slower decks; every single card is weak, so one big body or a sweeper can stall it.",
-      "lore": "Everything the metropolis throws away ends up in the Dump, and in Teece anything left lying long enough with a number on each side eventually stands up. The Garbage is led, loosely, by MucKing, and worships the God of the Forgotten, who is made of every card ever discarded. It shares the sewers with the Rats, sells scrap to the Gadget workshops, and once ate a Robot.",
+      "lore": "Everything Middlemark and the Works throw away ends up in the Dump in the Badlands, and in Teece anything left lying long enough with a number on each side eventually stands up. The Garbage is led, loosely, by MucKing, and worships the God of the Forgotten, who is made of every card ever discarded. It shares the drains with the Rats, sells scrap back to the Gadgeteers, and once ate a Robot.",
+      "home": "br",
       "how": [
         "Two Teece a turn and two cards a turn are the deck's own rule, not a card's: they hold for as long as you are playing Garbage. Garbage Soul adds a third of each while it stands.",
         "The graveyard is a resource. Living Dump grows with it, Trash King eats it for attributes, Garbage Man and Raccoon fish cards back out of it, and Banana Peel and the Dumpster spend it.",
@@ -704,7 +723,8 @@
         784
       ],
       "blurb": "The end arrives on schedule. The four Horsemen start on top of your deck, so they are your opening hand, and each one played can bring another out of your hand with it, silenced. The Harbingers turn the board against itself (War makes every Teece fight its own neighbours, Plague and Famine wear the enemy down), and the Trumpet and the Seal of Armageddon call the Horsemen back as Tokens. Everything after that is paid for in cards: Final Judgement and the River of Blood clear the field for discards, and the deck grows on every card that reaches a graveyard. Fast and wide early; it burns through its own hand to win, and a long game leaves it short.",
-      "lore": "The Four Horsemen, Famine, War, Plague and Death, are not so much a faction as an appointment, and it is written on every calendar in Teece. Death rides for the Warlocks' patron of the same name, War hires itself out to the Army whenever the Army can afford it, and the Bombardiers keep trying to bring the date forward, which the Horsemen find unprofessional. The End Draws Near is not a threat, only a scheduling note.",
+      "lore": "The Four Horsemen, Famine, War, Plague and Death, are not so much a faction as an appointment, and it is written on every calendar in Teece. They ride in from the far World of Teece, from every edge at once. Death rides for the Warlocks' patron of the same name, War hires itself out to the Army whenever the Army can afford it, and the Bombardiers keep trying to bring the date forward, which the Horsemen find unprofessional. The End Draws Near is not a threat, only a scheduling note.",
+      "home": "world",
       "level": "intermediate",
       "kind": "warrior"
     },
@@ -734,7 +754,8 @@
       ],
       "freeDiscard": true,
       "blurb": "Played out of the graveyard rather than into it. On your turn you may discard any card in your hand as often as you like, and almost every card here does its work on the way out: turning a Teece, making one invulnerable, +8 to a top, Teece that climb back out of the grave, spells that refill the hand. An empty hand is a win condition of its own: Astral Mindwyrm, the Goggles of Truth and the Paranoid Schizophrenic all pay for holding nothing, and the Echo of Gol’god’oth makes everyone throw their hand away. Enormously flexible for a player who sees the lines and baffling for one who does not; it runs through its cards fast.",
-      "lore": "The Mad are what is left of scholars who listened too closely to Gol’God’Oth. They throw away everything they hold because the voices say a full hand is a cage, and the worrying thing is that it works. Most of them were Wizards and Witches once; the Eldritch Library is the one the Wizards locked and lost the key to, and the Cult sends missionaries among them who mostly come back confused.",
+      "lore": "The Mad are what is left of the Middlemark scholars who listened too closely to Gol’God’Oth through the floor. They throw away everything they hold because the voices say a full hand is a cage, and the worrying thing is that it works. Most of them were Wizards and Witches once; the Eldritch Library is the one the Wizards locked and lost the key to, and the Cult sends missionaries among them who mostly come back confused.",
+      "home": "mc",
       "how": [
         "Discarding is free and unlimited on your turn. It is a rule of the deck, not of any card, so no card has to print it.",
         "An empty hand pays: Astral Mindwyrm is +10, Paranoid Schizophrenic is +10 (Top 11, Right 12, Bottom 13, Left 14), and the Goggles of Truth add another +5 the moment anybody runs dry.",
@@ -768,7 +789,8 @@
         824
       ],
       "blurb": "Eight of its twenty cards are battlegrounds, and the twelve Teece only mean much standing on one. The panels do the fighting: the Dimension of Change swaps opposite sides, Multiplicities doubles printed numbers, Goo pins and silences, Pain rots, the Black Hole swallows everything beside it, and the Extradimensional Plane of Matter hangs a tenth panel off the edge of the board. The Riftwalker, Native of Nowhere, Shifting Architect and Eldritch Terraformer reward and rearrange the ground, and the Warden of the Threshold or a Dimension of Dimensions make it impossible to remove. Strong once the field is laid; a deck that destroys battlegrounds, or a draw of bodies with no ground to stand on, leaves it weak.",
-      "lore": "Beyond the edges of the nine panels lie the Dimensions, other boards folded around this one, and the Planewalkers who live in them treat the ground itself as a weapon. They first noticed this world when a careless Wizard opened the Extradimensional Plane of Matter, and they have been redecorating it ever since. The Fusion creatures crawl out through the gaps they leave, the Noughts and Crosses came in through one of their rifts, and the Cult believes one of the Dimensions is Gol’God’Oth's front door.",
+      "lore": "Past the edges of the nine panels the World of Teece folds over on itself, crease after crease, and the Planewalkers who live in the folds treat the ground itself as a weapon. They first noticed the board when a careless Wizard opened the Extradimensional Plane of Matter, and they have been redecorating it ever since. The Fusion creatures crawl out of the creases they leave, and the Cult believes one of the folds runs all the way down to Gol’God’Oth.",
+      "home": "world",
       "how": [
         "Almost every body here reads the panel rather than itself: Native of Nowhere and Dimensional Anchor pay only on a battleground, and Riftwalker starts walking the moment anybody lays one.",
         "Dimension of Dimensions is played ON another battleground: the two fold into one panel that cannot be replaced or destroyed, and it reaches one panel further out.",
@@ -807,7 +829,8 @@
       "swarmWin": "locust",
       "noRogue": true,
       "blurb": "A swarm that wins by filling the board with copies of itself. Every Teece you control has Flying, printed on the deck rather than the cards, and you can never win by being four Teece ahead: you win outright the moment every panel holds a Locust of yours. Half the deck answers being destroyed by putting more of itself down (the Nymph bursts onto every panel beside it, the Breeding Locust copies itself coming and going, the Carrion Locust digs the dead back up), and the Locus and the Hivemind arm the swarm once it is out. No two Locusts are the same shape and most are soft underneath, and a single razed panel puts the ending out of reach for good.",
-      "lore": "The Locusts come out of the Wastes beyond the Wildwood once in a generation and eat everything until there is only Locust. They have no god, unless the Hivemind counts, and no plan beyond the next panel. The Wildwood dreads them, the Rats resent the competition, and the Four Horsemen claim them as Famine's outriders, which the Locusts have not noticed.",
+      "lore": "The Locusts come out of the Wastes in the far World of Teece once in a generation and eat everything until there is only Locust. They have no plan beyond the next panel, unless the Hivemind has one and is not saying. The Wildwood dreads them, the Rats resent the competition, and the Four Horsemen claim them as Famine's outriders, which the Locusts have not noticed.",
+      "home": "world",
       "how": [
         "The ending is the deck: a Locust on every panel takes the game as a turn closes, however far behind you are on bodies. The chip beside the board counts how many of the panels are yours — and warns you if one is ever razed off the board, because nothing can stand on a razed panel and that puts the ending out of reach for good. Raze and the Hex of Razing are the answer to this deck.",
         "A copy does not fire its own when-played, so a Locust Brood fills four panels and stops. When-DESTROYED does fire, which is why the Locust Nymph chains — and why it is capped at three bursts a turn across every copy of it.",
@@ -844,7 +867,8 @@
       ],
       "souls": 1,
       "blurb": "Devils are evil, but lawfully. Every Devil offers you a PACT as it lands, a price before the semicolon and a reward after it, and the choice is always yours: pay it, pay with a SOUL instead, or reject it and keep it on offer for a later turn. You start the game holding one SOUL, Soul Harvest and Brimstone Wings make more, and Soul Debtor's Prison lets you run up a tab once they are gone, paid back double if it ever falls. The Devils are solid numbers on their own and the bargains are optional, so it is gentle to start with; the steep prices (the Beginner Devil, the Adversary, the Infernal Bargain) are where it wins games and where it loses them.",
-      "lore": "The Devils run the Pit beneath the Undead Planet as a commercial concern: evil, but lawful, and scrupulous about paperwork. Every PACT is binding, every SOUL is accounted for, and Soul Debtor's Prison holds half the Vampire aristocracy for unpaid castles. They are the Warlocks' favourite patrons because the terms are always clearly printed, and they wrote the contract that made The Gun Devil, which they maintain was a misprint.",
+      "lore": "The Devils run the Pit beneath the bottom edge as a commercial concern: evil, but lawful, and scrupulous about paperwork. Every PACT is binding, every SOUL is accounted for, and Soul Debtor's Prison holds half the Vampire aristocracy of the Gloaming for unpaid castles. They are the Warlocks' favourite patrons because the terms are always clearly printed, and they wrote the contract that made The Gun Devil, which they maintain was a misprint.",
+      "home": "below",
       "how": [
         "A PACT reads PRICE ; REWARD. When a Devil lands you choose: Accept PACT and pay the price, Pay with a SOUL instead, or Reject PACT. A rejected PACT is not lost: the Devil keeps a PACT button you can press once per turn until you take it.",
         "You start with one SOUL, and the chip beside the board shows how many you hold. Soul Harvest makes another every time it is cast, and comes back to your hand if you feed it an ally; Brimstone Wings pays one out when its wearer dies.",
@@ -885,7 +909,8 @@
       ],
       "noRogue": true,
       "blurb": "One sword, and a tribe built around it. You start the game holding the Runeblade, an equip that adds nothing on its own, and once a turn it comes back to your hand from wherever it is. Almost every Teece reads it: the Runeblade Elder is +7 with it, the Sigil Hurler gains Ranged, the Skyleap Raider flies, the Hush-Seer silences everything beside it, the Blade-Waker stands it up as a flying Teece and Bladerang throws it through a line of enemies. Consistent and strong, since the key card never leaves you; but it is one sword, so stunning, stealing or bouncing its wielder slows the whole deck, and the Bladeless Exile pays for every turn the sword is out.",
-      "lore": "Far to the north, an ancient tribe of nomadic warriors perfected their ancestral magic. Their greatest artefact is the Runeblade, the sword their whole culture has been built around for countless millennia, carved with thousands of tiny sigils by their ancestors and said to have slain the World Dragon, vanquished the Vampire Lord and felled the Leviathan. The Berserkers are the cousins who left, the Vampires still flinch at the sight of it, and the Dwarves have spent a thousand years trying to forge a copy; the Blade That's Close Enough is as near as they have come.",
+      "lore": "In the Hallowed North, an ancient tribe of nomadic warriors perfected their ancestral magic. Their greatest artefact is the Runeblade, the sword their whole culture has been built around for countless millennia, carved with thousands of tiny sigils by their ancestors and said to have slain the World Dragon, vanquished the Vampire Lord and felled the Leviathan. The Berserkers are the cousins who left, the Vampires still flinch at the sight of it, and the Dwarves have spent a thousand years trying to forge a copy; the Blade That's Close Enough is as near as they have come.",
+      "home": "tl",
       "how": [
         "The Runeblade is one equip card. On its own it adds nothing; almost every Teece in the deck reads it instead — the Runeblade Elder is Top 1, Right 2, Bottom 2, Left 3 without it and gets +7 with it, the Sigil Hurler becomes Ranged, the Skyleap Raider flies, and the Hush-Seer silences and weakens every enemy beside it.",
         "Once a turn, on your turn, the Runeblade returns to your hand from wherever it is: off a dead Teece in your graveyard, off whoever is wearing it, out of a Runestone, or up off the field when it is standing there as a Teece. The chip beside the board is the button. The Keeper of the Blade calls it back a second time.",
@@ -922,7 +947,8 @@
         925
       ],
       "blurb": "Advanced and complicated. Every Wizard conjures an element into your hand as it lands (Fire, Water, Wind or Earth, each a small spell), and two different elements combine for free into something stronger: Steam, Fireball, Lava, Ice, Mud or a Sandstorm Elemental. The Elementals grow on their own element, the Archmage makes every element stronger, and with a Grand Magus out all four fold into Holy. The bodies are small and the power is in a hand that never empties, so it rewards careful planning and punishes forgetting the hand limit of six.",
-      "lore": "The Wizards are an ancient race who have shepherded every sentient being along the enlightened path of magic, from a Tower nobody else is allowed to find. They purged their dark sorcerers long ago, exiling them to the Undead Planet, where the Vampires and the Zombies wage their eternal war. With their Elemental helpers, and the reluctant help of their sisters the Witches and the trickster Pixies, they are the oldest and most respected masters of magic in Teece, and the only ones who know what is really under the middle panel.",
+      "lore": "The Wizards are an ancient race who have shepherded every sentient being along the enlightened path of magic, from a Tower in the High Mountains nobody else is allowed to find. They purged their dark sorcerers long ago, exiling them to the Gloaming, where the Vampires and the Zombies wage their eternal war. With their Elemental helpers, and the reluctant help of their sisters the Witches and the trickster Pixies, they are the oldest and most respected masters of magic in Teece, and the only ones who know exactly how deep Gol’God’Oth sleeps.",
+      "home": "tc",
       "how": [
         "Every Wizard conjures an element when it is played: Fire (a Teece gets -2), Water (+2), Wind (move a Teece one space) or Earth (a battleground with +3 Defence). Elements go straight into your hand as magic cards.",
         "Two different elements in hand can be combined with the Combine button on the card, which costs no play: Steam, Fireball, Lava, Ice, Mud, or Summon Sandstorm Elemental (puts a flying token with 7 on every side and Defence 2 on the board, which leaves a Sandstorm when destroyed), each stronger than either half.",
@@ -958,7 +984,8 @@
         1020
       ],
       "blurb": "Gain bullets, then spend them. Bullets are a count, not cards, and on your turn the gun comes out: every bullet is a permanent -1 on any Teece you point it at, up to six shots a turn. The rest of the deck feeds the gun (the Gunslinger, the Ammo Drone, the Bandolier, the Armored Ammo Truck), answers it (the Sharpshooter and the Shock Trooper react to every shot, the Bullet Sponge and the Kevlar Juggernaut want to be shot), or turns it into something worse: the Executioner finishes anything shot five times in a turn, and The Gun Devil fires in all eight directions as it lands. Simple to play, with precise damage anywhere on the board; it runs dry without its suppliers, and a Teece immune to stat reduction shrugs off the whole magazine.",
-      "lore": "The Gun rode in from the dusty right edge of the world, under Rightorious, with an invention nobody else had, and they have never stopped explaining it. They follow the Gun God, who is on no Warlock's list because he refuses to share, and buy their magazines from the Gadget guild. Zeus says he invented the bolt first; The Gun Devil was a Devils' contract that went extremely wrong.",
+      "lore": "The Gun rode in from the dusty Badlands, down in Rightorious's corner, with an invention nobody else had, and they have never stopped explaining it. They follow the Gun God, who is on no Warlock's list because he refuses to share, and buy their magazines from the Gadget guild in the Works. Zeus says he invented the bolt first; The Gun Devil was a contract from the Pit next door that went extremely wrong.",
+      "home": "br",
       "how": [
         "Bullets are a count, not cards: the Gunslinger, the Ammo Drone, the Armored Ammo Truck and others hand them over when played, destroyed, or discarded from your hand. Your count shows beside your name and on the gun chip under the board.",
         "On your turn, tap the gun chip to take out your gun. The pointer becomes a crosshair: tap any Teece to spend a bullet and give it -1 permanently. Shooting costs no play. Holster it whenever you like.",
@@ -995,7 +1022,8 @@
         1040
       ],
       "blurb": "Twelve odd creatures that can become one. Every Fusion Teece has Fuse: two of them in hand fuse into a single card with both cards' sides added together and both cards' keywords, Defence and effects, and two standing side by side can fuse on the board once a turn, keeping every equip and bonus. The board counts bodies, so fusing trades two Teece for one far bigger one; the magic fuses anywhere on the board, makes a bonus permanent, or fuses two fusions into a Boss. Advanced, and very strong when the right pairs line up; fuse carelessly and you are a body short.",
-      "lore": "Between the Dimensions the Planewalkers glide through there is a Space Between Spaces, where the energy of different dimensions commingles and combines. The Fusion Teece emerge from it: strange combinations of different entities, the Chimera and the Shellephant among them, each one looking for something to become one with. The Wizards study them, the Pixies keep them as pets, and Hyperfusion is what happens when somebody leaves two of them alone in a room.",
+      "lore": "Where two folds of the World of Teece press together there is a Space Between Spaces, a seam where the stuff of different places commingles and combines. The Fusion Teece emerge from it: strange combinations of different entities, the Chimera and the Shellephant among them, each one looking for something to become one with. The Wizards study them, the Pixies keep them as pets, and Hyperfusion is what happens when somebody leaves two of them alone in a room.",
+      "home": "world",
       "how": [
         "Every Fusion Teece has the Fuse keyword. On your turn, tap Fuse on one in your hand and pick another Teece in your hand that also has Fuse. The two become one card whose sides are the two added together, carrying both cards' keywords, Defence and effects. Play it as your Teece for the turn and both when-played effects fire.",
         "Once per turn you can also fuse on the board: a Fusion Teece standing beside another of your Fuse Teece can use Fuse to become one body with it, on either of the two panels. Both bodies' equips and every bonus and penalty on them are kept. A Mergeling in the fusion adds +3.",
@@ -1032,7 +1060,8 @@
         1060
       ],
       "blurb": "A swarm that floods the board faster than anyone. Thunder Twin, Spark Sprite and Last Light play more Teece out of your hand by effect, which costs no Teece play; Surge Rider, the Surge Coil and the Lightning Queen buy extra plays; and the Static Conductor, Stormwing and the Thunderhead Rig grow on every arrival. A few cards answer on your opponent's turn at instant speed: Counterstrike when they play a Teece, Static Counter when they cast magic, Zeus' Blessing when one of yours would be destroyed. Fast and aggressive, aiming at board domination; but a Teece summoned by an effect does not count toward domination until it has started a turn under your control, and the bodies are small once the burst is spent.",
-      "lore": "The Stormborn are the children of Zeus, a sky god from somewhere above the top edge who is also, to his annoyance, a Warlock patron. They flash into being the instant something happens, which makes them the fastest faction in Teece and the worst at conversation. Zeus has a long feud with the Gun over who invented the bolt, and the Lightning Queen keeps a strained truce with the Solar orders for the sake of the weather.",
+      "lore": "The Stormborn are the children of Zeus, a sky god who lives in the Heavens above the top edge and is also, to his annoyance, a Warlock patron. They flash into being the instant something happens, which makes them the fastest faction in Teece and the worst at conversation. Zeus has a long feud with the Gun over who invented the bolt, and the Lightning Queen keeps a strained truce with the Solar orders, who share the sky, for the sake of the weather.",
+      "home": "above",
       "how": [
         "Playing a card by an effect is called a summon. It never costs the turn's Teece play, and a Teece that arrives by an effect from this deck counts as a Thunder summon: it does not count towards board domination until it has started a turn under your control.",
         "Counterstrike answers any enemy Teece being played, and Static Counter answers any magic card your opponent plays: either one can be played straight from your hand the moment it happens. Zeus' Blessing answers a Teece of yours about to be destroyed on your opponent's turn, and the Teece survives.",
@@ -1068,7 +1097,8 @@
         1081
       ],
       "blurb": "A beginner warrior deck built on one curse, and the bandage that drags enemies onto it. Mummies curse panels and Teece; a non-Mummy that lands on a cursed panel picks the curse up, and a cursed Teece cursed again gets -1 instead. Every Mummy has Mummy Wrap, once a turn: a bandage fired up, right, down or left that pulls in the first Teece it hits (an enemy gets -2), or swings the Mummy to the wall if nothing is there. The Tomb Stalker, the Pharaoh, Pharaoh's Vengeance and the Cursed Tomb cash curses in for big penalties and kills. Simple and punishing at close range; Cleanse lifts curses, and silence turns the payoffs off.",
-      "lore": "The Mummies serve Ankhtepot, a god-king who died at the bottom edge of the world and has refused to accept it ever since. They wrap, curse and drag their enemies into the sand, and their curses are the oldest magic in Teece, older than the Witches' Hexes, a point the Witches dispute. The Paladins have sworn to Cleanse every curse they lay, the Zombies are the cousins they do not invite to dinner, and Warlocks who channel Ankhtepot come home with bandages in strange places.",
+      "lore": "The Mummies serve Ankhtepot, a god-king who died in the Sinking Sands and has refused to accept it ever since, even as his tomb slides an inch a year toward the Pit. They wrap, curse and drag their enemies into the sand, and their curses are the oldest magic in Teece, older than the Witches' Hexes, a point the Witches dispute. The Paladins have sworn to Cleanse every curse they lay, the Zombies are the cousins they do not invite to dinner, and Warlocks who channel Ankhtepot come home with bandages in strange places.",
+      "home": "bc",
       "how": [
         "Curse the empty panels first, then wrap. A bandage pulls its catch one space back along the line, so an enemy one step past a cursed panel lands on it and picks up the curse. Tomb Stalker charges -3 for every enemy moved onto a curse.",
         "Each Mummy Wrap is once a turn. Tomb Stalker has two, Burial Wrappings adds two more to whoever wears it, Mummy or not, and Linen Mummy and Cursed Bandages pay +3 for the turn every time their Teece wraps. A bandage that hits nothing swings the Mummy to the wall, which is how a Mummy gets around.",
@@ -1103,7 +1133,8 @@
         1101
       ],
       "blurb": "A beginner swarm that fills the board from one card. A Pack Leader brings a Token copy of itself onto every free panel beside it, and when the leader leaves the field its copies go with it. Howl gives an ally +3 for the turn and Bloodlust, which teleports it beside an enemy; the Den Mother and the Wolf Pup lend numbers to the pack, the Pack Warden makes leaders invulnerable inside their packs, and the Dire Wolf and Fenrir can be paid for with the Tokens. Huge board presence early; the copies never count toward winning, and killing a leader takes its whole pack with it.",
-      "lore": "The Wolves run in packs across the northern steppe, between the camps of the Runeblade tribe and the frontier forts of the Knights. Every pack is one wolf and its echoes, and when the leader falls the echoes fade into the snow. They hunt the Knights' horses, howl at the Solar moon, and get on well with the Berserkers, the only people in Teece who howl back.",
+      "lore": "The Wolves run in packs across the Hallowed North, between the camps of the Runeblade tribe and the Paladins' snowline chapels. Every pack is one wolf and its echoes, and when the leader falls the echoes fade into the snow. They come down into the Wildwood to hunt the Knights' horses, howl at the Solar moon, and get on well with the Berserkers, the only people in Teece who howl back.",
+      "home": "tl",
       "how": [
         "Play Pack Leaders where the most panels around them are free: a Grey Wolf in the middle of an empty board is five bodies. The copies are Tokens, so they never count toward board domination, but they fight, they block, and they carry everything printed on the card except Pack Leader itself.",
         "The copies keep their card’s text. A Den Mother’s copies give +1 to whatever stands beside them, a Wolf Pup’s give +3 and Bloodlust, and a Pack Warden’s copies count as a Warden too.",
@@ -1138,7 +1169,8 @@
         1121
       ],
       "blurb": "Priests channel their god into Smites. At the start of the game you Worship one of the four gods, and every priest of yours gets +3 on that god's side. Most priests conjure a Quarter Smite as they land, die or end your turn, and Smites combine for free in your hand: two Quarters make a Half, two Halves a Smite that destroys a Teece for a discard, two Smites a Divine Smite that destroys one outright. The High Priest and the Avatar can be paid for with Smites instead of bodies. Advanced, and one of the strongest decks in the box when the hand is managed well; the priests themselves are modest, and the hand limit of six is always pressing.",
-      "lore": "The Priesthood of the Four Sides worships the oldest gods in Teece: Topus of the top edge, Rightorious of the right, Bottomor of the bottom and Levt of the left, who between them hold the world in its frame. The faithful fight hardest facing their god's direction, and a Smite is simply a prayer, concentrated. The Priests think the Paladins' three gods a passing fashion and the Warlocks thieves of divine power, and the Cult is the reason they keep watch on the edges at all.",
+      "lore": "The Priesthood of the Four Sides worships the oldest gods in Teece: Topus of the top edge, Rightorious of the right, Bottomor of the bottom and Levt of the left, who between them hold the world in its frame. Their Temple stands at the heart of Middlemark, the one place equally far from all four, and directly on top of Gol’God’Oth, which is not a coincidence. The faithful fight hardest facing their god's direction, and a Smite is simply a prayer, concentrated. The Priests think the Paladins' three gods a passing fashion and the Warlocks thieves of divine power.",
+      "home": "mc",
       "how": [
         "Worship: at the start of the game choose a god. Levt rules the left, Topus the top, Rightorious the right and Bottomor the bottom; all your priests get +3 on that side. A Prophet lets you switch. Worship belongs to the Priest deck: a priest the other side steals, or one drafted into another deck, gets no god.",
         "Most priests conjure a Quarter Smite straight into your hand (a Teece gets -1 until the end of the turn). Two Quarters combine into a Half Smite (-5), two Halves into a Smite (discard a card: destroy a Teece), and two Smites into a Divine Smite (destroy a Teece, free). Combining uses the Combine button on the card and costs no play.",
@@ -1174,7 +1206,8 @@
         1147
       ],
       "blurb": "Craftsmen who put everything into their gear. Eight equips stand in for magic and battlegrounds, and most dwarves read what they wear: Ranged, Flying, +4, or +5 Defence while equipped, and +3 for every piece on the Gear-Laden Recruit. Gear keeps coming back (the Tunnel Scavenger, the Delver and the Mountain King pull it out of the graveyard, and the Thane and the King take theirs home when they fall), so the plan is one juggernaut piled high and guarded by Mithril Mail, the Antimagic Airship and Ancestor's Aegis. Straightforward and sturdy; an unequipped dwarf is small, and anything that destroys equips or sends the juggernaut back to hand costs a great deal.",
-      "lore": "For countless millennia the Dwarves have perfected their craft in the caverns under the Mountains, forging gear so good that whoever wears it hardly needs to be anyone at all. Their mines run straight through the Rock, which has led to a very long and very slow war, and they sell their surplus armour to the Knights at prices the Knights still complain about. The Soul of the Mountains was forged from a chip of the Rock God, and the Rock would like it back.",
+      "lore": "For countless millennia the Dwarves have perfected their craft in the caverns under the High Mountains, forging gear so good that whoever wears it hardly needs to be anyone at all. Their mines run straight through the Rock, which has led to a very long and very slow war, and they sell their surplus armour to the Knights at prices the Knights still complain about. The Soul of the Mountains was forged from a chip of the Rock God, and the Rock would like it back.",
+      "home": "tc",
       "how": [
         "Eight equips stand in for magic and battlegrounds. Most dwarves read their own gear: Ranged, Flying, +4, or +5 Defence while equipped, or +3 for every equip on the Gear-Laden Recruit. The Deep Warden takes only one equip and doubles it.",
         "Gear comes back. The Tunnel Scavenger and the Delver each pull an equip out of your graveyard into your hand, and the Mountain King equips two straight from the graveyard as it lands. The Thane and the King take their gear home to your hand when they fall.",
@@ -1209,7 +1242,8 @@
         1193
       ],
       "blurb": "Warlocks borrow their power from a patron, and every Teece you control carries the patron you are channelling: the Boon. Ten Warlocks each name a different patron (the Rock God, the Fey, the Devils, the Ogre God, the Old One, Zeus, the Bomb God, Ankhtepot, Nagash and Death), and calling one up changes what your whole side does, from +3 Defence to Flying to a stun on every arrival. The Adept and the Avatar let you hold several Boons at once, and Patron's Mark and the Patron's Shrine make one fire twice. Advanced and very flexible, with an answer for most boards; the Warlocks' own numbers are uneven, and it takes judgement to know which patron the turn needs.",
-      "lore": "Warlocks are the gods' tenants: they rent power from any patron who will sign a lease, from the Rock God, the Fey, the Devils, the Ogre God, Zeus, the Bomb God, Ankhtepot, Nagash and Death to, for the desperate, the Old One. The Priests call this theft and the Devils call it an excellent business opportunity. The Cult insists the Old One's real name is Gol’God’Oth, and that the Warlocks are behind on the rent.",
+      "lore": "Warlocks are the gods' tenants. They keep their lease-market in the Sinking Sands, at the lip of the Pit, and rent power from any patron who will sign: the Rock God, the Fey, the Devils, the Ogre God, Zeus, the Bomb God, Ankhtepot, Nagash and Death, and, for the desperate, the Old One. The Priests call this theft and the Devils call it an excellent business opportunity. The Cult insists the Old One's real name is Gol’God’Oth, and that the Warlocks are behind on the rent.",
+      "home": "bc",
       "how": [
         "The Boon: you channel one patron at a time, and every Teece you control has its effect. A Warlock that names a patron offers to switch the Boon as it lands. It is always optional, and the switch comes before its own when-played Boon fires, so a Warlock of Zeus can call Zeus and take his +5 at once.",
         "A Warlock left on the field keeps a Channel button, once per turn, so you can swap back to its patron on a later turn without playing anything.",
@@ -1246,7 +1280,8 @@
         1214
       ],
       "blurb": "The Cult works to summon its god, Gol’God’Oth, and the whole board is its altar: a pentagram whose five points any Teece can Traverse between once a turn. Three missions run in order: light all five lines by walking them, cast the Convert they hand you to take a Teece beside one of yours, then end a turn with an ally in the middle panel, where it is sacrificed and a Tendril Of Gol’God’Oth rises, a Boss with 20 on every side. The Tendril is a Token, so it never counts toward winning, but it destroys almost anything beside it, and Gol’God’Oth Arrives copies it onto every empty panel around it. The cultists themselves are weak and the ritual is slow, so the god clears the way; the game is still won by holding the field.",
-      "lore": "The Cult of Gol’God’Oth believes the nine panels are not a board at all but a pentagram drawn in the dark, with its god pressed up underneath the middle panel waiting to be let in. Gol’God’Oth is the thing the Warlocks politely call the Old One, and its whispering is what drove the Madness out of their minds. The Priests of the Four Sides guard the edges against it, and the Wizards have sealed the middle panel twice, which the Cult considers extremely rude.",
+      "lore": "The Cult of Gol’God’Oth meets in the cellars of Middlemark, as close to its god as the floor allows. It believes the nine panels are not a board at all but a pentagram, built over Gol’God’Oth to keep it asleep, and that the right lines lit in the right order will wake it. Gol’God’Oth is the thing the Warlocks politely call the Old One, and its whispering is what drove the Madness out of their minds. The Priests of the Four Sides pray on top of it, and the Wizards have sealed the middle panel twice, which the Cult considers extremely rude.",
+      "home": "mc",
       "how": [
         "The Pentagram: the board is a pentagram whose five points are the top-middle, middle-left, middle-right, bottom-left and bottom-right panels. It shows through the Web and every battleground and cannot be removed or covered.",
         "Traverse The Pentagram: once a turn, any Teece on a point, yours or the enemy’s, can teleport to one of the two points its lines reach, if that panel is empty. From the top-middle that is either bottom corner; from the bottom-right, the top-middle or the middle-left.",
@@ -1282,7 +1317,8 @@
         1238
       ],
       "blurb": "Paladins swear Oaths to one of three gods and fight harder while they keep them. Solitarius pays +4 to a Paladin that stands apart from its allies, Protectius +4 to every ally beside one, Pacificius +5 Defence to one that never kills; a broken Oath leaves the Paladin Oathbroken, with no bonus and -2. The Lights, the Vowkeeper and Glorious Redemption keep Oaths whole, the Paragon of the Three swears all three at once, and Cleanse lifts every curse, stun and penalty off an ally or strips an enemy bare. The Paladins are tiny until sworn, so the deck arranges the board around its Oaths, and anything that forces the wrong kind of contact breaks them.",
-      "lore": "The Paladins serve the three gods of the Light, Solitarius, Protectius and Pacificius, young gods who broke away from the four Sides of the world over the question of what a Teece should do when it is not fighting. Each Oath is a vow to one of the three answers. They have sworn to Cleanse every curse Ankhtepot's Mummies lay, they want their horses back from the Knights, and the Priests regard them as heretics with very good manners.",
+      "lore": "The Paladins serve the three gods of the Light, Solitarius, Protectius and Pacificius, young gods who broke away from the four Sides of the world over the question of what a Teece should do when it is not fighting. They keep their chapels on the snowline of the Hallowed North, as close to the Heavens as the old ways allow, and each Oath is a vow to one of the three answers. They have sworn to Cleanse every curse Ankhtepot's Mummies lay, they want their horses back from the Knights, and the Priests regard them as heretics with very good manners.",
+      "home": "tl",
       "how": [
         "Oath: as a Paladin is played, swear it to a god. Solitarius gives it +4 but breaks when it becomes adjacent to an ally. Protectius gives every adjacent ally +4 and breaks when one of them dies. Pacificius gives it +5 Defence and breaks when it destroys an enemy. A broken Oath leaves the Paladin Oathbroken: no bonus, and -2.",
         "Cleanse: on an ally it lifts every negative effect (stun, silence, curses, penalties); on an enemy it silences it and strips every bonus to its numbers. Devoathee Cleanses as it lands, and Holy Light's blessing Cleanses the whole cross around its Paladin each turn.",
@@ -1317,7 +1353,8 @@
         1260
       ],
       "blurb": "Knights ride into battle on Mounts that lend them their numbers, their wings and their tricks. Every Knight is Armoured, with 1 Defence, and lands already riding the Mount printed on it, with the Mount's numbers and abilities on top of its own; bring the Knight down and its Mount is played on that panel or one next to it, ready for the next rider. Remount, Cavalry Muster and Call the Warhorse put spare Mounts on the board, the Stables guards them, and a Herd Saddle or a Mount Mount stacks several under one Knight. Hard to grind out, since every kill leaves a body behind; but the Knights alone are small, and a riderless Mount is a Token that never counts toward winning.",
-      "lore": "The mounted orders of Middlemark, who hold that a Teece is only as good as what it is sitting on. Their warhorses were bred from Celestial Steeds stolen from the Paladins, which the Paladins have never forgiven, and the Emu cavalry was a procurement error nobody will discuss. They buy their armour from the Dwarves, lend their officers to the Army, and take the credit for its victories.",
+      "lore": "The mounted orders of the Wildwood marches, who hold from their castles at the forest's edge that a Teece is only as good as what it is sitting on. Their warhorses were bred from Celestial Steeds stolen from the Paladins, which the Paladins have never forgiven, and the Emu cavalry was a procurement error nobody will discuss. They buy their armour from the Dwarves, lend their officers to the Army, and take the credit for its victories.",
+      "home": "ml",
       "how": [
         "Armoured: every Knight has 1 Defence. Mounts do not.",
         "Mount: a Knight is played already riding the Mount printed on it and has the Mount’s numbers, Defence and abilities on top of its own. When the Knight is destroyed, its Mount is played on that panel or one next to it.",
@@ -2098,5 +2135,67 @@
     1258,
     1259,
     1260
+  ],
+  "map": [
+    {
+      "id": "above",
+      "name": "The Heavens",
+      "text": "Beyond the top edge, past Topus: the turning sky, the sun and moon, and the storm."
+    },
+    {
+      "id": "tl",
+      "name": "The Hallowed North",
+      "text": "Snowfields and cloisters where the old ways meet the light. The Paladins keep their chapels on the snowline and the northern tribes roam below them."
+    },
+    {
+      "id": "tc",
+      "name": "The High Mountains",
+      "text": "The roof of the board, right under Topus. Living stone, deep mines, and a Tower nobody else is allowed to find."
+    },
+    {
+      "id": "tr",
+      "name": "The Clockwork Heights",
+      "text": "Where progress climbs toward the sky: parade grounds, signal towers, and the garden where the world’s clock is wound."
+    },
+    {
+      "id": "ml",
+      "name": "The Wildwood",
+      "text": "The old forest down Levt’s side of the board, with castles at its edges and foothills behind it. Tradition grows here, slowly."
+    },
+    {
+      "id": "mc",
+      "name": "Middlemark",
+      "text": "The intersection: the middle ground, the meeting and the conflict of every extreme. A city built over the sleeping Gol’God’Oth, with the Temple of the Four Sides at its heart."
+    },
+    {
+      "id": "mr",
+      "name": "The Works",
+      "text": "Rightorious’s side of the board, all chimneys and workshops. Everything new in Teece is built, tested and blown up here first."
+    },
+    {
+      "id": "bl",
+      "name": "The Gloaming",
+      "text": "Old, dark and close to the Pit: crumbling castles, open graves and the Hollow where the Witches brew. The Vampires and the Zombies have warred here for ten thousand years."
+    },
+    {
+      "id": "bc",
+      "name": "The Sinking Sands",
+      "text": "Directly over the Pit, slowly sliding into it. Ankhtepot’s tombs, the Brood Mother’s silk, and the market where gods are rented by the hour."
+    },
+    {
+      "id": "br",
+      "name": "The Badlands",
+      "text": "Progress gone to seed near the Pit: dust, scrap, blast craters and the Dump where everyone else’s rubbish stands up and walks."
+    },
+    {
+      "id": "below",
+      "name": "The Pit",
+      "text": "Beneath the bottom edge, past Bottomor. The Devils run it as a business."
+    },
+    {
+      "id": "world",
+      "name": "The World of Teece",
+      "text": "Off the board but still Teece: the endless country past the edges, where the world folds over on itself. Things here are not from anywhere in particular."
+    }
   ]
 }
