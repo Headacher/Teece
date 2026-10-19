@@ -86,8 +86,10 @@ then:
   picker opens sorted by `level` and only lists decks that carry one, so a deck
   without it is missing from the default view. Edit it with a script rather than by
   hand; it is long enough that a stray comma is hard to see.
-- `CARD_ART` — one 13-column drawing per card, tokens included. Anything not 13
-  wide skews the face it sits behind.
+- `CARD_ART` — one drawing per card, tokens included, any size: the page shrinks
+  it to fit its box. Read `ART.md` first. It covers the size budget (a Teece
+  stays within 24 columns by 8 rows so it reads on a phone board), the one
+  consistent style per deck, and how to check a drawing at board size.
 - `DECK_SYM` — the deck's emoji.
 - Three CSS blocks keyed on `data-card-deck="<key>"`: the `.card`/`.dcard`
   palette with its `.kwl`/`.ct` accent, the `::after` symbol, and `.teece` for
