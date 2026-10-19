@@ -76,6 +76,85 @@ card is the subject.
 **No words, letters or numbers in a picture.** No `BOOM`, `AWOOO`, `R.I.P` or
 `[R]`. The card already has a name.
 
+## Play with the card back
+
+Every deck has a back: the pattern in `--deckbg` that sits behind the drawing
+in hand, in a draft and on the board. A player never sees the drawing without
+it, so the drawing and the back make one picture. Either they work together or
+they fight. The old Time cards show what fighting looks like: two clock hands,
+printed on the back at about four o'clock, ran straight through every drawing.
+The Baby Dragon had a minute hand through its body, and nothing in the drawing
+had anything to do with time.
+
+There are two ways to make them work together.
+
+**The back leaves room.** The middle of the card is where the drawing goes.
+Anything bold the back puts in the middle (a pair of hands, a pivot, a big
+emblem) cuts through all twenty drawings. Keep the back's strong shapes at the
+edges and keep the middle quiet. These backs already leave room:
+
+- The Vampire's dark drape across the top.
+- The Devil's flames along the bottom.
+- The Bomb's hazard stripes on the top and bottom edges.
+- An all-over pattern faint enough to read as texture, like the Knights' mail
+  or the Mummy's wrappings.
+
+The Time back now keeps to its rim: the dial ring, the hour ticks and a double
+tick at twelve, with an empty face in the middle.
+
+**The drawing uses the back.** A drawing can leave out what the back already
+draws and let the back finish the picture. Some ways to do it, deck by deck:
+
+- **Time.** The back is a clock dial, so Fast Forward and Time Stop draw only
+  the hands and a pivot. On the card, they are a whole clock.
+- **Gun.** The back is a reticle with its crosshair in the middle, so anything
+  drawn in the middle is already in the sights. A target does not need its own
+  scope.
+- **Cult.** The pentacle runs through every drawing. That works because a
+  cultist standing in a summoning circle is the picture.
+- **Devil.** The flames are along the bottom, so a figure whose feet reach the
+  bottom row stands in fire without drawing any.
+- **Vampire.** A bat can hang upside down from the drape at the top. It does
+  not have to float.
+- **Priest.** Light rays fall from above, so a figure looking up with raised
+  arms is standing in them.
+- **Spider.** The web fans out from the top-left corner, so a spider can drop
+  from the top row on a single `|` thread and hang from the back's web.
+- **Tic-Tac-Toe.** The back is the three-by-three grid, so one mark drawn in
+  the middle lands in the centre square.
+
+These are possibilities, not rules. The one rule is to look at the drawing on
+its back and decide which of the two ways the card is using.
+
+**Line-ups are loose.** The art box moves around. The name sits above it, and
+in the text view the rules text sits below it. A Teece's side badges push in
+from the edges, a draft card is wide and a board panel is small. The back is
+sized to the card (most use `50% 50%/cover`) and the drawing to its box, so a
+drawing never lands on an exact spot of the back. Use the parts of the back
+that need no lining up: a band along one edge, an all-over field, or "the
+middle" as a whole. When a drawing does lean on the middle, give it its own
+anchor. The Time hands carry their own `o` pivot, so they still read as a clock
+when they land a little off centre. Never draw something whose meaning depends
+on touching one particular tick or line of the back.
+
+**Don't draw the back twice.** A clock drawn inside its own circle sits inside
+the back's circle: two rings, and the picture is lost between them. A web drawn
+on the Spider back is mostly noise. The exception is a card whose subject is
+that very thing, such as Spun Nest, which is a web.
+
+**When the back is the problem, change the back.** The back is CSS. It lives in
+the `--deckbg` of the deck's `.card`/`.dcard` rule and again in its `.teece`
+rule, and the two must stay identical. When every drawing fights the back,
+fixing one back is cheaper than redrawing twenty cards. After changing it,
+check two things: the deck must still be told apart from every other deck on
+the dark table, and the name, the rules text and the side numbers must still
+read over it.
+
+**Check them together.** The art sheet (`CARD_ART` drawn on a flat panel) shows
+whether a drawing reads. It does not show the back, so also look at the real
+cards. Check the hand in both the text and the square view, the board, and a
+draft, on a desktop and on a phone.
+
 ## What good looks like, and what bad looks like
 
 **Good** (these are in the game now):
@@ -188,8 +267,15 @@ where they fall short.
 - **Robot.** Square heads `[o_o]` and `|===|` chassis. Consistent and readable.
 - **Gadget.** Boxes with dials and switches. Mixed. The fields (Polarity Field)
   are only lines.
-- **Time.** Hourglass Knight is the model: draw time as hourglasses, clocks and
-  sand. Fast Forward, Rewind, Pause and Time Warp are bare arrows and bars.
+- **Time.** Redrawn around Hourglass Knight: time is drawn as hourglasses,
+  clocks and sand, in single strokes. Every hourglass has `[=]`/`=` brass caps,
+  and sand is `.:`. The growing and wilting cards are time-lapses: Green Shoot
+  in three pots, Cut Flower going from fresh to fallen. Each spell is an
+  hourglass in a different state: turned over for Rewind, laid on its side for
+  Pause. The exceptions are Fast Forward and Time Stop, which are the dial's own
+  hands. The back is only the dial ring and its ticks, with no fixed hands, so
+  the face is clear for the drawing. The hands-only cards let the back be their
+  clock face (see "Play with the card back").
 - **Witch.** Pointed hats `/\ /__\` over `(o o)` faces. The hexes are a mix of
   symbols.
 - **Bomb.** Round bombs with fuses `.-'-.` and `(*)` blasts. The mines and
