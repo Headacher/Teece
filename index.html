@@ -25,103 +25,141 @@ body{
 button{font-family:var(--body);cursor:pointer}
 button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
-#app{display:grid;grid-template-columns:1fr 300px;gap:18px;max-width:1120px;margin:0 auto;padding:16px;min-height:100%;
+#app{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px 18px;max-width:1440px;margin:0 auto;padding:12px 16px 16px;min-height:100%;
   /* A page shorter than the window keeps its rows packed at the top; left to
      stretch, the spare height went into the header as an empty band. */
   align-content:start}
-@media(max-width:880px){#app{grid-template-columns:1fr}}
+@media(max-width:880px){#app{grid-template-columns:minmax(0,1fr);padding:10px 8px 16px;gap:10px}}
 #oppHands.collapsed{display:none}
 #log.collapsed{display:none}
-header{grid-column:1/-1;display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding-bottom:8px}
-header h1{font-family:var(--disp);font-size:34px;font-weight:400;margin:0;letter-spacing:.02em}
+header{grid-column:1/-1;display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding-bottom:4px}
+header h1{font-family:var(--disp);font-size:28px;font-weight:400;margin:0;letter-spacing:.02em}
 header .sub{color:var(--muted);font-size:12px;letter-spacing:.16em;text-transform:uppercase}
-main{display:flex;flex-direction:column;gap:12px;align-items:center}
+/* main is the measure the board and the hand are sized from: the board takes
+   a third of its width a panel, up to a cap, so it grows with the window. */
+main{display:flex;flex-direction:column;gap:10px;align-items:center;container-type:inline-size;min-width:0}
 
 .handrow{width:100%;min-height:108px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
   padding:8px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.18)}
 .handlbl{width:100%;text-align:center;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
-.oppbar{display:flex;align-items:center;justify-content:center;gap:10px;width:100%}
-.oppbar .handlbl{width:auto}
-.oppbar .btn{padding:2px 9px;font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+/* The other hands sit above the board, always: small, and face down unless
+   handVisible says this screen may see them. */
+#oppHands{width:100%;display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:6px 22px}
+#oppHands:empty{display:none}
+#oppHands .handrow.opp{width:auto;min-height:0;padding:0;border:0;background:none;gap:4px;align-items:center;justify-content:center}
+#oppHands .handrow.opp .handlbl{width:auto;font-size:10px;letter-spacing:.12em;margin-right:4px}
+#oppHands .handrow.opp .card.back{width:24px;height:24px;min-height:0;padding:0;border-radius:4px;box-shadow:0 1px 0 rgba(0,0,0,.35)}
+/* A hotseat seat whose turn it is plays from its own row: full size. */
+#oppHands .handrow.opp.live{width:100%;padding:8px;border:1px solid var(--gold);border-radius:10px;background:rgba(0,0,0,.18)}
+#oppHands .handrow.opp.live .handlbl{width:100%}
+#oppHands .handrow.opp.mini{max-width:100%}
 
-.card{--cardbg:var(--cream);--artink:#6d5f45;position:relative;width:88px;min-height:84px;background:var(--cream);color:var(--ink);border-radius:7px;
-  padding:6px;border:1px solid #cdbe9c;display:flex;flex-direction:column;gap:2px;
-  box-shadow:0 2px 0 rgba(0,0,0,.35);user-select:none}
-.card.t-teece{min-height:92px;border-color:#b9a67f}
-.card .hs{position:absolute;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink)}
-.card .hs0{top:3px;left:50%;transform:translateX(-50%)}
-.card .hs1{right:6px;top:50%;transform:translateY(-50%)}
-.card .hs2{bottom:3px;left:50%;transform:translateX(-50%)}
-.card .hs3{left:6px;top:50%;transform:translateY(-50%)}
-.card .hcn{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
-  text-align:center;padding:0 15px;font-size:12.5px;line-height:1.05}
-.card .ct{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#7a6a4d}
-.card .cn{font-family:var(--disp);font-size:15px;line-height:1.05}
-.card .cs{font-size:11px;font-weight:700;margin-top:auto}
-.card{container-type:inline-size}
-/* The drawing is the face of the card: as wide as the card, centred behind the
-   name and the numbers, and just faint enough for them to read over it. Sized
-   off the card's own width (13 columns of monospace are about 7.8em), so it
-   fills a hand card, a board panel and a draft card alike. */
-.card .ascii{position:absolute;inset:4px;margin:0;z-index:0;
-  pointer-events:none;overflow:hidden;background:transparent;color:var(--artink);opacity:.72;
-  display:flex;align-items:center;justify-content:center;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Courier New',monospace;
-  font-size:10px;font-size:calc(100cqw / 8.3);line-height:1.02;white-space:pre}
-/* the face has to stay readable over the drawing */
-.card.arted .hcn,.card.arted .hs{text-shadow:0 0 3px var(--cardbg,var(--cream)),0 0 3px var(--cardbg,var(--cream)),0 0 2px var(--cardbg,var(--cream))}
-.card.arted .hcn{position:relative;z-index:1}
-.card.arted .ct,.card.arted .cn,.card.arted .cs{position:relative;z-index:1;
-  text-shadow:0 0 3px var(--cardbg),0 0 3px var(--cardbg),0 0 2px var(--cardbg)}
-.card.arted.t-magic .ascii,.card.arted.t-equip .ascii,.card.arted.t-ground .ascii{opacity:.4}
-/* Text view: the name first, the drawing under it, and nothing laid over the
-   drawing but the side numbers. A magic, equip or battleground card stacks
-   name, drawing and rules down the card; a Teece card puts its name just under
-   the top number and gives the drawing the space between that and the bottom
-   one. Square view keeps its own centred layout. */
-body:not(.sqhand) .card.t-magic .ascii,body:not(.sqhand) .card.t-equip .ascii,body:not(.sqhand) .card.t-ground .ascii{
-  position:relative;inset:auto;flex:0 0 auto;margin:4px -4px 2px;opacity:.6;order:2}
-body:not(.sqhand) .card .cs{order:3}
-body:not(.sqhand) .card.t-teece .hcn,body:not(.sqhand) .card.arted.t-teece .hcn{position:absolute;top:21px;bottom:auto;
-  transform:none;z-index:1}
-body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 58px);min-height:40px}
+/* ---- the status bar: one strip across the top of the table ---- */
+#turnPanel{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:8px 12px}
+#turnPanel .tbturn{display:flex;align-items:center;gap:8px;min-width:0}
+#turnPanel .turnline{font-size:14px;flex-wrap:wrap;row-gap:2px}
+#turnPanel .turnline strong{white-space:nowrap}
+#turnPanel .counts{flex:1 1 auto}
+#turnPanel .tbbtns{display:flex;gap:8px;margin-left:auto}
+#turnPanel #warnBar{flex-basis:100%;margin-top:0}
+/* On a desk the bar stays in view while the page scrolls, so End Turn is never
+   a scroll away from the hand. (A phone pins its questions and its ability bar
+   to the window's edges instead, so there it scrolls with the page.) */
+@media(min-width:881px){#turnPanel{position:sticky;top:6px;z-index:14;box-shadow:0 8px 18px -10px rgba(0,0,0,.8)}}
+@media(max-width:880px){
+  #turnPanel{gap:6px 10px;padding:8px 10px}
+  #turnPanel .tbturn{flex:1 1 auto}
+  #turnPanel .tbbtns{order:2}
+  #turnPanel .counts{order:3;flex-basis:100%}
+  #turnPanel .tblead{order:4;flex-basis:100%}
+  #turnPanel #warnBar{order:5}
+}
+
+/* ---- a card in hand. Square, in both views. Text view (the default) is the
+       whole card: the four numbers each in a half-disc set into the middle of
+       its edge, the name under the top one, the drawing, and the rules --
+       written on the card, because a phone has no hover to reach the Detail
+       panel with. Compact view keeps the square and drops the rules. ---- */
+.card{--cardbg:var(--cream);--artink:#6d5f45;position:relative;width:var(--hc,150px);height:var(--hc,150px);flex:none;
+  background:var(--cream);color:var(--ink);border-radius:8px;padding:0;border:1px solid #cdbe9c;
+  box-shadow:0 2px 0 rgba(0,0,0,.35);user-select:none;container-type:inline-size;
+  --r:clamp(13px,12.5cqw,22px);--nf:clamp(12px,10.5cqw,18px)}
+.card.t-teece{border-color:#b9a67f}
+/* The four numbers. A half-disc, flat side on the edge, round side to the
+   middle; a number too wide for it stretches it into a half-stadium rather
+   than spilling out. */
+.card .hs,.teece .s,.dcard .ds,.dface .s{position:absolute;z-index:2;display:flex;align-items:center;justify-content:center;
+  background:rgba(16,12,9,.84);color:#f7f0e2;font-weight:700;font-size:var(--nf);line-height:1;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;text-shadow:none!important;box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+.card .hs0,.teece .s0,.dcard .ds0,.dface .s0{top:0;left:50%;transform:translateX(-50%);min-width:calc(var(--r) * 2);height:var(--r);
+  padding:0 .22em 1px;border-radius:0 0 var(--r) var(--r)}
+.card .hs2,.teece .s2,.dcard .ds2,.dface .s2{bottom:0;left:50%;transform:translateX(-50%);min-width:calc(var(--r) * 2);height:var(--r);
+  padding:1px .22em 0;border-radius:var(--r) var(--r) 0 0}
+.card .hs1,.teece .s1,.dcard .ds1,.dface .s1{right:0;top:50%;transform:translateY(-50%);min-height:calc(var(--r) * 2);min-width:var(--r);
+  padding:0 1px 0 .2em;border-radius:var(--r) 0 0 var(--r)}
+.card .hs3,.teece .s3,.dcard .ds3,.dface .s3{left:0;top:50%;transform:translateY(-50%);min-height:calc(var(--r) * 2);min-width:var(--r);
+  padding:0 .2em 0 1px;border-radius:0 var(--r) var(--r) 0}
+/* The face between the numbers: one column of fixed zones, so nothing is ever
+   laid over the name or the numbers. The drawing takes whatever height is
+   left and scales itself to fit it. */
+.card .hz{position:absolute;inset:6px 6px 6px;display:flex;flex-direction:column;gap:2px;z-index:1;min-height:0}
+.card.t-teece .hz{inset:calc(var(--r) + 1px) 5px calc(var(--r) + 2px)}
+.card:not(.t-teece):has(.discardBtn) .hz{bottom:22px}
+.card .hcn{flex:none;text-align:center;font-family:var(--disp);font-size:clamp(11px,9.5cqw,16px);line-height:1.05;
+  overflow-wrap:break-word;max-height:2.3em;overflow:hidden}
+.card .hcn:has(.rank){max-height:none}
+.card .hcn .rank{display:inline-block;margin:0 0 0 4px;vertical-align:.12em}
+/* Rules that run past the card scroll inside it, and fade at the foot to say so. */
+.card .htx.over,.card .cs.over{-webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 10px),transparent);
+  mask-image:linear-gradient(180deg,#000 calc(100% - 10px),transparent)}
+.card .ct{flex:none;font-size:clamp(8px,6cqw,10px);letter-spacing:.12em;text-transform:uppercase;color:#7a6a4d;padding-right:16px}
+.card .cn{flex:none;font-family:var(--disp);font-size:clamp(12px,10cqw,17px);line-height:1.05;overflow-wrap:break-word}
+.card .tart{flex:1 1 0;min-height:0}
+.card.t-teece .tart{margin:0 calc(var(--r) - 5px)}
+.card .htx,.card .cs{flex:0 1 auto;min-height:0;overflow:auto;scrollbar-width:none;font-size:clamp(10px,7.6cqw,13px);
+  line-height:1.22;font-weight:500;overflow-wrap:break-word}
+.card .htx::-webkit-scrollbar,.card .cs::-webkit-scrollbar{display:none}
+.card .htx{text-align:center;margin:0 calc(var(--r) - 5px)}
+.card .htx.l1,.card .cs.l1{font-size:clamp(9.5px,7cqw,12px)}
+.card .htx.l2,.card .cs.l2{font-size:clamp(9px,6.5cqw,11.5px);line-height:1.18}
+.card .htx.l3,.card .cs.l3{font-size:clamp(8.5px,6cqw,11px);line-height:1.15}
+.card .rsym{position:absolute;top:3px;left:4px;width:clamp(14px,11cqw,20px);height:clamp(14px,11cqw,20px);z-index:3}
+.handrow .card[data-card-deck]::after{font-size:clamp(11px,9cqw,15px);top:3px;right:4px}
 .discardBtn{position:absolute;left:4px;bottom:4px;font-size:9px;letter-spacing:.06em;text-transform:uppercase;
   background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:5px;padding:2px 5px;
-  cursor:pointer;z-index:2}
+  cursor:pointer;z-index:3}
 .discardBtn:hover{border-color:var(--gold)}
 .discardBtn:disabled{opacity:.4;cursor:default}
 .combineBtn{border-color:#f5cf6b;color:#f5cf6b;font-weight:700}
-/* On a Teece the bottom number sits centred along the same edge, and a Fusion
-   hand puts a Fuse button on almost every card: kept to a small pill tucked
-   into the corner so the number beside it stays readable. */
-.card.t-teece .discardBtn{left:2px;bottom:2px;font-size:8px;letter-spacing:0;padding:1px 3px;border-radius:4px}
-/* The button sits in the card's bottom corner, so the rules text stops short of it. */
-.card:has(.discardBtn){padding-bottom:22px}
+/* The bottom number has the middle of the bottom edge, so the button takes the
+   corner beside it. */
+.card.t-teece .discardBtn{left:3px;bottom:3px;padding:2px 3px;border-radius:4px;font-size:clamp(7px,5.8cqw,9px);letter-spacing:0;
+  max-width:calc(50% - var(--r) - 5px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card.t-equip{background:#e6dcc6}
 .card.t-magic{background:#e2dae8}
 .card.t-ground{background:#e0dcc2}
 .card.back{background:repeating-linear-gradient(45deg,#3a2f24,#3a2f24 6px,#463a2c 6px,#463a2c 12px);border-color:#241d15;color:transparent}
+.handrow .card.back{width:44px;height:44px}
 .card.dim{opacity:.45}
 .card.playable{cursor:pointer}
 .card.playable:hover{transform:translateY(-3px);box-shadow:0 5px 0 rgba(0,0,0,.4)}
 .card.target{box-shadow:inset 0 0 0 2px var(--gold),0 2px 0 rgba(0,0,0,.35);cursor:pointer}
 .card.target:hover{transform:translateY(-3px)}
 .card .hs.pl{color:var(--gold)}
-.card .plated{position:absolute;top:2px;left:4px;font-size:8px;letter-spacing:.05em;z-index:2;
-  color:#5d4a22;background:rgba(201,168,90,.55);border-radius:3px;padding:0 3px}
+/* What a card in hand is plated with hangs under it as tabs, the way an equip
+   hangs under a Teece on the board. */
+.card .plated{position:absolute;top:100%;left:8px;right:8px;display:flex;justify-content:center;gap:2px;z-index:2}
+.card:has(.plated){margin-bottom:15px}
 
-/* Square hand. A magic, equip or ground card prints its whole first line of
-   rules into .cs, so at 88px wide it grows into a tall block of text and the
-   hand stops being scannable. Square view drops that line, pins every card to
-   one size whatever it prints, and lets the drawing and the name carry it --
-   the rules are still a hover away in the Detail panel. Teece cards barely
-   move; it is the other three types this is for. */
-.sqhand .card,.sqhand .card.t-teece{height:88px;min-height:0}
-.sqhand .card .cs{display:none}
-.sqhand .card .ct{position:absolute;top:4px;left:0;right:0;text-align:center}
-.sqhand .card .cn{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
-  text-align:center;padding:0 6px;font-size:12.5px;line-height:1.05}
-.sqhand .card.arted .cn,.sqhand .card.arted .ct{z-index:1}
+/* Hand sizes. A phone gets two cards to a row, big enough to read the rules on. */
+.handrow{--hc:clamp(144px,calc((100cqw - 58px) / 6),176px)}
+@media(max-width:560px){.handrow{--hc:min(190px,calc((100cqw - 26px) / 2))}}
+/* Compact view: the same square, smaller, without the rules. The other seats'
+   face-up rows and the rules pages draw this way too. */
+.sqhand .handrow{--hc:120px}
+@media(max-width:560px){.sqhand .handrow{--hc:calc((100cqw - 34px) / 3)}}
+#oppHands .handrow.mini{--hc:86px}
+.sqhand .card .htx,.sqhand .card .cs,#oppHands .handrow.mini .card .htx,#oppHands .handrow.mini .card .cs{display:none}
 .handview{margin-left:8px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;
   background:var(--panel2);color:var(--cream);border:1px solid var(--line);border-radius:5px;
   padding:1px 6px;cursor:pointer;vertical-align:middle}
@@ -339,13 +377,22 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .teece[data-card-deck="teece100"]{--cardbg:#d79ba3;--artink:#6e2a34;--acc:#6c1828;background:var(--cardbg);color:#3a1218}
 .teece[data-card-deck="classic"]{--cardbg:#efe6d0;--artink:#6d5f45;background:var(--cardbg);color:#241f18}
 
-#board{display:grid;grid-template-columns:repeat(var(--bw,3),minmax(0,var(--cs,110px)));
-  grid-auto-rows:var(--cs,110px);gap:8px;position:relative}
-/* The Cult's Pentagram: over every panel, under no click. */
-#board svg.penta{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6;overflow:visible}
-/* The Pentagram lies over webs and battlegrounds but under the Teece. */
-#board.pentaOn .teece{z-index:7}
-#board.pentaOn .teece.strike{z-index:8}
+/* The board grows with the window: a third of the width it has a panel (a
+   quarter, four wide), up to a cap, and on a short desk window held so the
+   hand is not pushed far below it. --cols counts an Extradimensional Plane in
+   the margin as one more panel. Defined on the row so the Plane's own panel,
+   which stands beside the board rather than in it, reads the same size. */
+@property --cs{syntax:'<length>';inherits:true;initial-value:110px}
+.boardrow{--gap:8px;--cs:min(var(--csmax,168px),
+  calc((100cqw - (var(--cols,3) - 1) * var(--gap) - var(--xgap,0px)) / var(--cols,3)),
+  max(118px,calc((100svh - 330px) / var(--bw,3))))}
+@media(max-width:560px){.boardrow{--gap:6px}.boardrow:has(>#board.bw4){--gap:3px}}
+#board{display:grid;grid-template-columns:repeat(var(--bw,3),var(--cs));
+  grid-auto-rows:var(--cs);gap:var(--gap);position:relative}
+/* The Cult's Pentagram: over every panel, under no click -- and under every
+   Teece, so a line never crosses a name or a number. The battleground, the
+   Web, a fire and a Sanctified glow all lie beneath it in turn. */
+#board svg.penta{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}
 #board svg.penta .pl{stroke:#a0303c;stroke-width:3;stroke-linecap:round;opacity:.5}
 #board svg.penta .pl.lit{stroke:#ff2a3a;stroke-width:4.5;opacity:.95;animation:pentaPulse 2.4s ease-in-out infinite}
 #board svg.penta .pp{fill:#1a0508;stroke:#d0404c;stroke-width:2;opacity:.85}
@@ -361,8 +408,6 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .dfn.oath.broke{color:#ff8a7a;text-decoration:line-through}
 .teece[data-card-deck="paladin"] .dfn.oath{color:#8a6400}
 .teece[data-card-deck="paladin"] .dfn.oath.broke{color:#b3261e}
-@media(max-width:420px){#board{--cs:var(--cs-sm,96px)}}
-#oppHands{width:100%;display:flex;flex-direction:column;gap:8px}
 .cell{position:relative;border:1px solid var(--line);border-radius:8px;background:#191410;overflow:hidden;cursor:default}
 .cell .coord{position:absolute;top:2px;left:4px;font-size:9px;color:#584a38;z-index:0}
 .cell.splash{background:rgba(201,162,39,.20);box-shadow:inset 0 0 0 2px rgba(201,162,39,.5)}
@@ -379,12 +424,9 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .ghost.doomed .gtag{color:#ffd9d4;font-weight:700}
 /* .teece is positioned against the panel it stands on, so away from the board
    it needs a frame of its own to sit in. */
-.pvwrap{position:relative;width:76px;height:76px;flex:none}
+.pvwrap{position:relative;width:84px;height:84px;flex:none}
 .pvwrap .teece{inset:0;cursor:default;opacity:1}
-.pvwrap .teece .s{font-size:13px}
-.pvwrap .teece .mid{padding:0 20px;gap:0}
-.pvwrap .gtag{font-size:8px;line-height:1.15}
-.pvwrap .rgd{font-size:9px}
+.pvwrap .gtag{font-size:8px;line-height:1.1;text-align:center}
 /* The panel the numbers belong to, so the tile is never orphaned from it. */
 .cell.previewing{box-shadow:inset 0 0 0 3px var(--gold),0 0 12px rgba(201,162,39,.45)}
 .cell.previewing.doomed{box-shadow:inset 0 0 0 3px var(--p1),0 0 12px rgba(200,70,60,.5)}
@@ -408,7 +450,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .mcurseMark{position:absolute;bottom:1px;right:4px;font-size:24px;font-weight:900;line-height:1;z-index:1;
   color:#e3c8ff;pointer-events:none;-webkit-text-stroke:.6px #2a0b4a;
   text-shadow:0 0 2px #1a0630,0 0 6px #b45cff,0 0 12px #9b3dff,0 0 18px #9b3dff;animation:curseGlow 2.4s ease-in-out infinite}
-.teece .rgd .mcursed{font-size:17px;font-weight:900;line-height:1;color:#f0dcff;-webkit-text-stroke:.5px #2a0b4a;
+.teece .rgd .mcursed{font-size:1.35em;font-weight:900;line-height:1;color:#f0dcff;-webkit-text-stroke:.5px #2a0b4a;
   text-shadow:0 0 2px #1a0630,0 0 5px #b45cff,0 0 10px #9b3dff,0 0 14px #9b3dff;animation:curseGlow 2.4s ease-in-out infinite}
 @keyframes curseGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35) drop-shadow(0 0 4px #b45cff)}}
 @media (prefers-reduced-motion:reduce){.mcurseMark,.teece .rgd .mcursed{animation:none}}
@@ -425,8 +467,20 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .fireMark{position:absolute;bottom:3px;left:5px;font-size:11px;line-height:1;z-index:1;color:#ffb055}
 .cell.afire{box-shadow:inset 0 0 14px rgba(255,120,40,.55)}
 .cell.razed{background-image:repeating-linear-gradient(45deg,rgba(0,0,0,.42) 0 6px,transparent 6px 12px)}
-.bglayer{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;
-  font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding-bottom:2px}
+/* ---- a battleground fills its whole panel: the tint, the frame drawn from
+       GROUND_ART around the edge (the ring a Teece standing there leaves in
+       view), and the name on a tab at the top edge, where the Teece never
+       reaches. An empty panel shows the same. ---- */
+.bglayer{position:absolute;inset:0;container-type:size;pointer-events:none}
+.bglayer .gframe{position:absolute;inset:0;margin:0;overflow:hidden;white-space:pre;text-align:left;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Courier New',monospace;
+  font-size:calc(100cqw / (17 * var(--monoem,.6)));line-height:calc(100cqh / 9);
+  color:currentColor;opacity:.62;letter-spacing:0}
+.bglayer .gname{position:absolute;top:0;left:50%;transform:translateX(-50%);max-width:calc(100% - 30px);
+  height:clamp(11px,11cqh,16px);display:block;padding:0 7px;border-radius:0 0 7px 7px;
+  font-size:clamp(7.5px,6.2cqw,10px);font-weight:700;letter-spacing:.08em;text-transform:uppercase;line-height:clamp(11px,11cqh,16px);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:rgba(16,12,9,.82);
+  box-shadow:0 0 0 1px currentColor;z-index:1}
 /* What the empty panel is offering, big enough to read across the board at a
    glance, because the decision it informs is made by looking at the board. */
 .bggive{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
@@ -434,79 +488,103 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
   color:var(--gold);text-shadow:0 1px 4px rgba(0,0,0,.75);pointer-events:none;z-index:1}
 .bggive.neg{color:#c7a8e8}
 .bggive.small{font-size:12px;letter-spacing:.02em;white-space:nowrap}
-.bgplus{background:linear-gradient(180deg,rgba(201,162,39,.05),rgba(201,162,39,.28));color:var(--gold)}
-.bgminus{background:linear-gradient(180deg,rgba(125,91,166,.05),rgba(125,91,166,.30));color:#b79ad6}
-.bgutil{background:linear-gradient(180deg,rgba(63,160,138,.05),rgba(63,160,138,.22));color:#7fc4b2}
-.teece{--cardbg:var(--cream);--artink:#6d5f45;position:absolute;inset:8px;border-radius:6px;background:var(--cream);color:var(--ink);
-  border:2px solid var(--p0);cursor:pointer}
+.bgplus{background:radial-gradient(circle at 50% 50%,rgba(201,162,39,.10),rgba(201,162,39,.30));color:#e6c45a}
+.bgminus{background:radial-gradient(circle at 50% 50%,rgba(125,91,166,.10),rgba(125,91,166,.34));color:#c4a6e4}
+.bgutil{background:radial-gradient(circle at 50% 50%,rgba(63,160,138,.08),rgba(63,160,138,.28));color:#8fd2c0}
+
+/* ---- a Teece on the board. Smaller than its panel and centred in it, so the
+       panel -- its battleground, its marks -- shows all round it. Fixed zones,
+       one place for everything: a half-disc on the middle of each edge for
+       its four numbers, the name under the top one, the drawing in the
+       middle, one row of status symbols over the bottom one, the rank in the
+       top left corner and the ready dot in the top right. Equips hang under
+       it as named tabs. ---- */
+.teece{--cardbg:var(--cream);--artink:#6d5f45;position:absolute;inset:var(--tin,12%);border-radius:7px;background:var(--cream);color:var(--ink);
+  border:2px solid var(--p0);cursor:pointer;z-index:4;container-type:size;
+  --r:max(12.5px,13.5cqw);--nf:max(12px,12cqw)}
+@media(max-width:560px){.cell>.teece{--tin:11%}#board.bw4 .cell>.teece{--tin:10%}
+  /* Four panels across a phone leave a margin of nine pixels round a Teece:
+     the battleground's name and the equip tabs are cut to fit it, so neither
+     ever has to lie across the card. */
+  #board.bw4 .bglayer .gname{height:8.5px;line-height:8.5px;font-size:7px;letter-spacing:.04em;padding:0 4px;border-radius:0 0 5px 5px}
+  #board.bw4 .teece .eqtab{font-size:7px;padding:0 3px 1px;line-height:8px}}
 .teece.o1{border-color:var(--p1)}
 .teece.o2{border-color:var(--p2)}
-/* The side numbers sit on the same centre line as the name, so the name has to
-   be held clear of them. 13px of padding only ever cleared a single digit: any
-   Teece into double figures -- a Boss, anything buffed, an Oliminitator reading
-   the field -- ran its name under the numbers, and nowrap meant a name of two
-   words was cut off rather than simply wrapping. The clearance is now the width
-   of a two-digit number, the name wraps, and a long one steps down a size. */
-/* Name and badges ride together in one centred stack, so the badges follow the
-   name down when it takes a second or third line rather than being pinned at a
-   fixed offset underneath it. The stack carries the clearance from the side
-   numbers; neither child positions itself. */
-.teece .mid{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:1px;padding:0 26px;z-index:1;
-  /* Held inside the band between the top and bottom numbers, so a name that
-     takes three lines shrinks rather than growing into them. */
-  max-height:calc(100% - 40px);justify-content:center}
-.teece .nm{text-align:center;font-family:var(--disp);font-size:12px;line-height:1.05;
-  max-width:100%;overflow:hidden;overflow-wrap:break-word}
-.teece .nm.long{font-size:10px}
-.teece .nm.longer{font-size:8.5px;letter-spacing:-.2px}
-/* A name sharing the card with badges gives up a size before the badges do. */
-.teece .mid:has(.rgd) .nm{font-size:10px}
-.teece .mid:has(.rgd) .nm.long{font-size:8.5px}
-.teece .mid:has(.rgd) .nm.longer{font-size:7.5px;letter-spacing:-.2px}
-.teece .tok{font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#7a6a4d;
-  position:absolute;left:0;right:0;bottom:2px;text-align:center}
-.teece .s{position:absolute;font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
-.teece .s0{top:1px;left:50%;transform:translateX(-50%)}
-.teece .s1{right:4px;top:50%;transform:translateY(-50%)}
-.teece .s2{bottom:1px;left:50%;transform:translateX(-50%)}
-.teece .s3{left:4px;top:50%;transform:translateY(-50%)}
-.teece .eq{position:absolute;top:2px;right:4px;font-size:8px;color:#7a6a4d;letter-spacing:.05em}
-/* Tight enough that a bow, a shield and a turning arrow together still sit in
-   the gap the side numbers leave. */
-.teece .rgd{display:flex;line-height:1;align-items:center;justify-content:center;
-  gap:3px;font-size:10px;flex:0 0 auto}
-.teece .rgd .dfn{display:inline-flex;align-items:center;gap:2px;font-weight:700;
-  font-variant-numeric:tabular-nums}
-/* \u21BB is a text glyph rather than an emoji, so it needs a size of its own to
+.teece .tz{position:absolute;inset:calc(var(--r) + 1px) 3px calc(var(--r) + 1px);display:flex;flex-direction:column;
+  align-items:stretch;gap:1px;z-index:1;min-height:0}
+/* The name and the status row keep between the two side half-discs, so a
+   long name on two lines, or a row on a small Teece, can never reach a number. */
+.teece .tnm{flex:none;display:flex;justify-content:center;margin:0 calc(var(--r) + 1px)}
+/* Three lines at most, stepping down a size for a long name rather than being
+   cut off: the panel is the only place the name shows once it is down. */
+.teece .nm{text-align:center;font-family:var(--disp);font-size:clamp(11.5px,12.5cqw,16px);line-height:1.1;
+  max-width:100%;overflow:hidden;overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.teece .nm.long{font-size:clamp(11px,11.5cqw,15px)}
+.teece .nm.longer{font-size:clamp(10.5px,10.5cqw,14px);letter-spacing:-.2px}
+.teece .tart{flex:1 1 0;min-height:0;margin:0 calc(var(--r) - 3px)}
+/* A Teece too small for the usual sizes (four panels across a phone) steps
+   its name and its status row down to fit between the half-discs. */
+@container (max-width:86px){
+  .teece>*{--r:10px;--nf:11px}
+  .teece .tz{gap:0}
+  .teece .nm,.teece .nm.long,.teece .nm.longer{font-size:9.5px;letter-spacing:-.25px;line-height:1;-webkit-line-clamp:3}
+  .teece .rgd{font-size:9.5px;gap:1px;height:1.2em}
+}
+.teece.arted .nm{text-shadow:0 0 3px var(--cardbg),0 0 3px var(--cardbg)}
+/* One row for every status symbol. When they will not all fit, the row ends
+   in +N and the rest are in its tooltip and the Detail panel. */
+.teece .rgd{flex:none;display:flex;flex-wrap:nowrap;overflow:hidden;line-height:1;align-items:center;justify-content:center;
+  gap:2px;font-size:clamp(10.5px,11cqw,14px);height:1.3em;margin:0 calc(var(--r) + 1px)}
+.teece .tz.wide>.tnm,.teece .tz.wide>.rgd{margin:0 calc(var(--nf) * 1.3 + 1px)}
+.teece .rgd:empty{display:none}
+.teece .rgd>*{flex:none}
+.teece .rgd .dfn{display:inline-flex;align-items:center;gap:1px;font-weight:700;font-variant-numeric:tabular-nums}
+.teece .rgd .more{font-size:.85em;padding:0 3px;border-radius:6px;background:rgba(16,12,9,.82);color:#f7f0e2;line-height:1.3}
+/* ↻ is a text glyph rather than an emoji, so it needs a size of its own to
    sit level with the bow and the shield beside it. */
-.teece .rgd .ward{display:inline-flex;width:15px;height:15px;padding:2px;box-sizing:content-box;
+.teece .rgd .ward{display:inline-flex;width:1.05em;height:1.05em;padding:1.5px;box-sizing:content-box;
   color:#8ff0c4;background:rgba(16,12,9,.85);border-radius:50%;
   filter:drop-shadow(0 0 3px rgba(110,240,180,.85))}
 .ward svg{width:100%;height:100%;display:block}
-.card .hward{position:absolute;top:3px;right:4px;width:14px;height:14px;z-index:2;display:flex;
+.card .hward{position:absolute;bottom:3px;right:4px;width:14px;height:14px;z-index:3;display:flex;
   color:#8ff0c4;background:rgba(16,12,9,.8);border-radius:50%;padding:2px;box-sizing:content-box;
   filter:drop-shadow(0 0 3px rgba(110,240,180,.7))}
 .teece .rgd .fly.flown{filter:grayscale(1);opacity:.35}
-.teece .rgd .undy{font-size:13px;line-height:1;gap:1px}
+.teece .rgd .undy{font-size:1.25em;line-height:1;gap:1px}
 /* Invulnerable. A text glyph like the Undying arrow, so it needs its own size
    to sit level; given a light of its own because "cannot be destroyed" is the
    one badge that changes what an attack is worth. */
-.teece .rgd .inv{font-size:13px;line-height:1;color:#7fd4ff;
+.teece .rgd .inv{font-size:1.25em;line-height:1;color:#7fd4ff;
   text-shadow:0 0 5px rgba(127,212,255,.85)}
 /* Stunned. The other side of the same coin as Invulnerable -- that one says this
    panel cannot be killed, this one says it cannot kill -- so it is lit the same
    way and in the colour of a thing that has been hit. */
-.teece .rgd .stun{font-size:12px;line-height:1;
+.teece .rgd .stun{font-size:1.1em;line-height:1;
   filter:drop-shadow(0 0 4px rgba(255,196,64,.9))}
-.teece{container-type:size}
-.teece .ascii{position:absolute;inset:2px;margin:0;z-index:0;
-  pointer-events:none;overflow:hidden;background:transparent;color:var(--artink);opacity:.72;
-  display:flex;align-items:center;justify-content:center;
+.teece .rgd .sil{font-size:1em;filter:drop-shadow(0 0 3px rgba(255,120,110,.8))}
+.teece .rgd .tmr{font-size:.9em;padding:0 2px;border-radius:5px;background:rgba(16,12,9,.75);color:#f7f0e2}
+/* The drawing is the middle of the card, and only the middle: it scales to
+   whatever room the name and the status row leave it, on a board panel, a
+   hand card, a draft card or the Detail panel alike, and when that room is
+   too small to draw in it steps aside. */
+.tart{position:relative;container-type:size}
+.tart>.ascii{position:absolute;inset:0;margin:0;z-index:0;pointer-events:none;overflow:hidden;background:transparent;
+  color:var(--artink);opacity:.8;display:flex;align-items:center;justify-content:center;
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Courier New',monospace;
-  font-size:9px;font-size:calc(100cqw / 8.3);line-height:1.02;white-space:pre}
-.teece.arted .mid,.teece.arted .s{text-shadow:0 0 3px var(--cardbg),0 0 3px var(--cardbg),0 0 2px var(--cardbg)}
-.teece.arted .s{z-index:1}
+  font-size:min(calc(100cqw / (13.6 * var(--monoem,.6))),calc(100cqh / (var(--rows,7) * 1.04)));line-height:1.04;white-space:pre}
+@container (max-height:14px){.tart>.ascii{visibility:hidden}}
+/* Equips, a ridden Mount among them, hang from the bottom edge of the Teece as
+   named tabs, one each. */
+.eqtabs{position:absolute;top:100%;left:4%;right:4%;display:flex;justify-content:center;gap:2px;z-index:1;pointer-events:none}
+.eqtab{display:block;flex:0 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-size:9.5px;font-weight:600;line-height:1;padding:2px 6px 3px;border-radius:0 0 6px 6px;
+  background:#2c2419;color:#f3e7c8;border:1px solid rgba(201,162,39,.6);border-top:0;letter-spacing:.01em}
+.eqtab.mount{background:#262c33;color:#e6edf5;border-color:rgba(170,184,200,.75)}
+.eqtab.more{flex:none}
+/* On the board the tabs may use the panel's whole width under the Teece, not
+   only the Teece's own. */
+.teece>.eqtabs{left:calc(-1 * var(--tin,12%) * 1.25);right:calc(-1 * var(--tin,12%) * 1.25)}
+.teece .eqtab{font-size:clamp(7.5px,7.5cqw,10px);padding:clamp(1px,1.2cqw,2px) 5px clamp(2px,1.6cqw,3px)}
 /* A Token is not a whole card: it stands on the panel as a cross, its four
    corners cut away. The cross is an inline SVG (.tokshape) drawn behind the
    face, so its corners and notches can be rounded: a clip-path polygon only
@@ -519,8 +597,22 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 .teece.token .tokshape path{fill:var(--cardbg);stroke:var(--p0);stroke-width:2px;stroke-linejoin:round}
 .teece.token.o1 .tokshape path{stroke:var(--p1)}
 .teece.token.o2 .tokshape path{stroke:var(--p2)}
-.teece.token .actdot{left:calc(var(--notch) + 4px);top:4px}
-.teece.token .eq{right:calc(var(--notch) + 4px);top:4px}
+/* A Token's top and bottom arms are narrower than the card: its name and its
+   status row keep inside them. */
+.teece.token .tz>.tnm,.teece.token .tz>.rgd{margin:0 19%}
+.teece.token .actdot{right:calc(var(--notch) + 4px);top:4px}
+.teece.token .rsym{left:calc(var(--notch) - 2px);top:1px}
+/* The rank, as a symbol in the top left corner wherever the card is drawn: a
+   crown for a Boss, a crown in fire under a star for a Megaboss, a silver star
+   for a Miniboss. The word is beside the name in hand, in a draft and in the
+   Detail panel; on the board the symbol and the aura carry it. */
+.rsym{display:block;position:absolute;border-radius:50%;background:rgba(16,12,9,.86);padding:2px;box-sizing:border-box;
+  box-shadow:0 0 0 1px rgba(255,206,110,.55);pointer-events:auto}
+.rsym svg{display:block;width:100%;height:100%}
+.rsym.mini{box-shadow:0 0 0 1px rgba(220,220,230,.45)}
+.rsym.mega{box-shadow:0 0 0 1px rgba(255,130,60,.8),0 0 6px rgba(255,120,40,.6)}
+/* Level with the top half-disc, in the corner, clear of the name below it. */
+.teece .rsym{top:1px;left:1px;width:calc(var(--r) - 1px);height:calc(var(--r) - 1px);padding:1.5px;z-index:3}
 /* Bosses on the board carry a faint aura of drifting motes; minibosses only a
    thin dim rim and two slow, barely-there motes, so the two read differently. The
    motes are spans inside .aura, and their delays are set from the clock when
@@ -541,7 +633,7 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 @keyframes auraRiseFaint{0%{opacity:0;transform:translateY(0)}30%{opacity:.35}100%{opacity:0;transform:translateY(-8px)}}
 @keyframes auraGlow{0%,100%{box-shadow:0 0 8px 0 rgba(255,206,110,.28)}50%{box-shadow:0 0 12px 2px rgba(255,206,110,.42)}}
 @media(prefers-reduced-motion:reduce){.aura,.aura .pt{animation:none}.aura .pt{display:none}}
-.teece .actdot{position:absolute;top:2px;left:4px;width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px var(--gold)}
+.teece .actdot{position:absolute;top:4px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px var(--gold);z-index:3}
 
 @keyframes dieShake{
   0%{transform:translateX(0)}12%{transform:translateX(-4px) rotate(-2deg)}24%{transform:translateX(4px) rotate(2deg)}
@@ -561,8 +653,6 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
 @keyframes placePop{0%{transform:translateY(-10px) scale(1.18);opacity:0}
   60%{transform:translateY(0) scale(.96);opacity:1}100%{transform:scale(1);opacity:1}}
 .teece.placed{animation:placePop .3s cubic-bezier(.2,.8,.3,1.2) both}
-.teece .shield{position:absolute;left:0;right:0;bottom:1px;text-align:center;font-size:9px;
-  letter-spacing:.02em;color:#6b5a3c;font-weight:700}
 #detail .dlock{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
 #actionBar{width:100%;max-width:560px;display:flex;align-items:center;justify-content:center;gap:8px;
   flex-wrap:wrap;padding:8px 10px;border:1px solid var(--gold);border-radius:8px;background:rgba(201,162,39,.08)}
@@ -588,28 +678,18 @@ body:not(.sqhand) .card.t-teece .ascii{top:auto;bottom:20px;height:calc(100% - 5
   body.actpin #app{padding-bottom:var(--actpin,110px)}
 }
 button,.teece,.cell,.card{touch-action:manipulation}
-/* Every number sits on a chip of its own. Printed straight onto the card it was
-   dark ink on crimson, pale text on cream and green on green depending on the
-   deck, and the drawing behind it made it worse; on a chip it reads the same
-   on every card in the game. */
-.teece .s,.card .hs,.dcard .ds{background:rgba(16,12,9,.8);color:#f7f0e2;border-radius:4px;padding:0 3px;
-  min-width:1.3em;text-align:center;line-height:1.25;text-shadow:none!important;
-  box-shadow:0 0 0 1px rgba(255,255,255,.1)}
-.card .hs.pl{color:var(--gold)}
-/* Chips sit flush to the edges and the name keeps to the middle between them:
-   a chip is wider than a bare number was, and a name squeezed any harder
-   breaks mid-word. */
-.teece .s{font-size:13px;padding:0 2px;min-width:1.15em}
-.teece .s1{right:2px} .teece .s3{left:2px}
-.teece .mid{padding:0 18px}
-.card .hs{font-size:12px;padding:0 2px;min-width:1.15em}
-.card .hs1{right:3px} .card .hs3{left:3px}
-.card .hcn{padding:0 18px;font-size:12px}
+/* Every number sits in a half-disc of its own (the rules are with .card .hs
+   above). Printed straight onto the card it was dark ink on crimson, pale text
+   on cream and green on green depending on the deck, and the drawing behind it
+   made it worse; on the dark half-disc it reads the same on every card. */
 #promptBar{min-height:38px;width:100%;max-width:560px;display:flex;align-items:center;justify-content:center;
   gap:10px;padding:8px 12px;border:1px dashed var(--line);border-radius:8px;text-align:center;flex-wrap:wrap}
 #promptBar.hot{border-color:var(--gold);border-style:solid;background:rgba(201,162,39,.07)}
 /* With no question open the bar is only a gap held for one: no outline. */
 #promptBar:not(.hot){border-color:transparent}
+/* On a phone a question pins the bar to the top of the window, out of the
+   page, so the gap held for it would only ever be empty. */
+@media(max-width:880px){#promptBar:not(.hot){min-height:0;padding:0;border:0}#promptBar:not(.hot) .msg{display:none}}
 /* With a preview tile in it the bar has three things to fit, and wrapping the
    button onto its own line costs a phone another 40px of the screen it is
    pinned over. The question takes the slack instead. */
@@ -680,14 +760,10 @@ body.gunmode #board .cell.target{box-shadow:inset 0 0 0 2px #f0a04b}
 #planeStrip .cell{width:var(--cs,110px);height:var(--cs,110px);border-style:dashed;
   border-color:#6a6ad0;box-shadow:0 0 12px rgba(80,84,200,.35)}
 /* The board plus a Plane is one panel wider than the board, and on a phone the
-   board already fills the screen. Shrink every panel while it is out rather
-   than let the extra one hang off the edge where no thumb can reach it. */
-@media(max-width:560px){.boardrow.hasplane{--cs:72px;--cs-sm:72px}}
-.sidecol{display:flex;flex-direction:column;align-items:center;gap:6px}
-.sidecol>.dombar{flex:1;min-height:0}
-/* The sky, kept where the fight is: flush with the top right corner of the
-   board, in the same column as the domination meter so it is part of the
-   layout rather than pinned over it. */
+   board already fills the screen: --cols counts the Plane, so every panel
+   shrinks while it is out rather than the extra one hanging off the edge
+   where no thumb can reach it. */
+/* The sky, beside whose turn it is in the status bar. */
 .sundial{flex:none;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);
   background:#191410;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1}
 .sundial.day{box-shadow:0 0 9px rgba(240,190,80,.55);border-color:#8a6a22}
@@ -711,6 +787,13 @@ body.gunmode #board .cell.target{box-shadow:inset 0 0 0 2px #f0a04b}
 .domlead.held{color:var(--violet)}
 @keyframes domNear{0%,100%{opacity:1}50%{opacity:.45}}
 @media(prefers-reduced-motion:reduce){.domlead.near{animation:none}}
+/* The same meter laid flat in the status bar, with its words beside it. */
+.tblead{display:flex;align-items:center;gap:8px;white-space:nowrap;cursor:help}
+.tblead .domlead{font-size:12px;font-weight:600;letter-spacing:0;color:var(--muted);text-align:left}
+.tblead .domlead b{font-size:15px;color:var(--cream);margin:0 1px}
+.tblead .domlead.near b,.tblead .domlead.held b{color:inherit}
+.tblead .dommeter{flex:none;flex-direction:row;gap:3px;padding:3px;border-radius:6px}
+.tblead .domseg{flex:none;width:22px;height:9px}
 
 aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
@@ -719,19 +802,26 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
 .d0{background:var(--p0)} .d1{background:var(--p1)} .d2{background:var(--p2)}
 .teamtag{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.counts{display:grid;grid-template-columns:1fr auto auto auto;gap:3px 12px;
-  align-items:baseline;font-size:12px;color:var(--muted);margin-top:8px}
-.counts .ch{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#6d5f4c;text-align:right}
-.counts .cn{color:var(--cream2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.counts .cv{text-align:right;font-variant-numeric:tabular-nums;color:var(--cream2)}
+/* Every seat on one line of the status bar: its cards in hand, in the deck and
+   in the graveyard. */
+.counts{display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center;font-size:12px;color:var(--muted)}
+.counts .seat{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.counts .seat .dot{margin-right:0}
+.counts .cn{color:var(--cream2);font-weight:600;margin-right:2px}
+.counts .ck{color:var(--muted)}
+.counts .cv{font-variant-numeric:tabular-nums;color:var(--cream2);font-weight:600}
 .counts .cv.low{color:var(--down);font-weight:700}
+.counts .sep{color:#5d5040}
 /* The grave count is the way into the graveyard, so it looks pressable. */
-.counts .gravebtn{font:inherit;font-variant-numeric:tabular-nums;background:var(--panel2);border:1px solid var(--line);
-  border-radius:5px;padding:1px 7px;margin-left:auto;cursor:pointer;color:var(--cream2);min-width:28px}
+.counts .gravebtn{font:inherit;font-weight:600;font-variant-numeric:tabular-nums;background:var(--panel2);border:1px solid var(--line);
+  border-radius:5px;padding:1px 7px;cursor:pointer;color:var(--cream2);min-width:26px}
 .counts .gravebtn:hover{border-color:var(--gold);color:var(--cream)}
 #detail .dn{font-family:var(--disp);font-size:20px}
-#detail .dart.card{width:100%;height:118px;min-height:0;margin:2px 0 8px;padding:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
-#detail .dart .ascii{inset:6px;opacity:.9;font-size:min(calc(100cqw / 8.3),18px)}
+/* The card itself at the head of the Detail panel, square, with its numbers
+   in their half-discs like everywhere else. */
+#detail .dart.card{width:min(100%,184px);height:auto;aspect-ratio:1;margin:2px auto 8px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+#detail .dart.card:not(.t-teece){width:100%;aspect-ratio:auto;height:118px}
+#detail .dart .tart>.ascii{opacity:.9}
 #detail .dsep{margin-top:9px;padding-top:7px;border-top:1px solid var(--line);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .optcard{border-color:var(--gold)!important}
 #detail .dt{font-size:12px;color:var(--muted);line-height:1.45;margin-top:4px}
@@ -748,11 +838,23 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 #kwPop{position:fixed;z-index:60;max-width:min(300px,calc(100vw - 24px));background:#111;border:1px solid var(--gold);
   border-radius:8px;padding:8px 11px;font-size:12px;line-height:1.45;color:var(--cream2);box-shadow:0 6px 20px rgba(0,0,0,.55)}
 #kwPop[hidden]{display:none}
-.compass{display:inline-grid;grid-template-columns:repeat(3,18px);grid-template-rows:repeat(3,18px);gap:1px;vertical-align:middle;margin:2px 6px 2px 0}
-#kwPop .compass{display:grid;margin:4px 0 6px}
-.compass i{font-style:normal;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;
-  border:1px solid var(--line);border-radius:3px;background:rgba(255,255,255,.06)}
-.compass .c0{grid-area:1/2}.compass .c1{grid-area:2/3}.compass .c2{grid-area:3/2}.compass .c3{grid-area:2/1}
+/* A Teece's numbers drawn small -- a Mount's in the Detail panel and in a
+   keyword popup, the attribute total, a deck page's list -- are the card in
+   miniature: a square with each number in a half-disc on its own edge. */
+.compass,.sdia,#infoBox .cstats{position:relative;display:inline-block;flex:none;width:54px;height:54px;vertical-align:middle;
+  border:1px solid var(--line);border-radius:7px;background:rgba(255,255,255,.05);margin:2px 6px 2px 0;text-align:center}
+#kwPop .compass{display:block;margin:4px 0 6px}
+.compass i,.sdia i,#infoBox .cstats .stat{position:absolute;font-style:normal;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+  background:rgba(16,12,9,.86);color:#f7f0e2;box-shadow:0 0 0 1px rgba(255,255,255,.14);border:0;width:auto;height:auto}
+.compass .c0,.sdia .t,#infoBox .cstats .stat:nth-child(1){top:0;left:50%;transform:translateX(-50%);
+  min-width:22px;height:11px;padding:0 3px 1px;border-radius:0 0 11px 11px;grid-area:auto}
+.compass .c2,.sdia .b,#infoBox .cstats .stat:nth-child(3){bottom:0;left:50%;transform:translateX(-50%);
+  min-width:22px;height:11px;padding:1px 3px 0;border-radius:11px 11px 0 0;grid-area:auto}
+.compass .c1,.sdia .r,#infoBox .cstats .stat:nth-child(2){right:0;top:50%;transform:translateY(-50%);
+  min-height:22px;min-width:11px;padding:0 1px 0 3px;border-radius:11px 0 0 11px;grid-area:auto}
+.compass .c3,.sdia .l,#infoBox .cstats .stat:nth-child(4){left:0;top:50%;transform:translateY(-50%);
+  min-height:22px;min-width:11px;padding:0 3px 0 1px;border-radius:0 11px 11px 0;grid-area:auto}
 #kwPop b{display:block;color:var(--gold);font-size:13px;margin-bottom:2px}
 #detail .dstats{font-size:12px;margin-top:6px;font-variant-numeric:tabular-nums}
 /* One line per buff or debuff standing on a Teece: what did it, and by how
@@ -784,10 +886,6 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   justify-content:center;padding:20px;z-index:20;overflow:auto}
 .overlay .box{max-width:640px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px;margin:auto}
 .overlay h2{font-family:var(--disp);font-weight:400;font-size:30px;margin:0 0 8px}
-.sdia{display:inline-grid;grid-template-columns:repeat(3,1.35em);grid-template-rows:repeat(3,1.15em);
-  vertical-align:middle;text-align:center;font-style:normal;font-variant-numeric:tabular-nums;line-height:1.15em}
-.sdia i{font-style:normal}
-.sdia .t{grid-area:1/2} .sdia .l{grid-area:2/1} .sdia .r{grid-area:2/3} .sdia .b{grid-area:3/2}
 .overlay h2 .ver{font-size:11px;letter-spacing:.08em;text-transform:uppercase;
   color:var(--muted);vertical-align:middle;margin-left:10px;font-family:inherit}
 .overlay h3{font-family:var(--disp);font-weight:400;font-size:19px;margin:14px 0 2px}
@@ -855,12 +953,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 #infoBox .cardItem{padding:8px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;font-size:12px;color:var(--cream2);display:flex;flex-direction:column;gap:6px}
 /* Sides come in top/right/bottom/left order; a compass puts each number on the
    edge it defends, the way the card does, instead of a 2x2 grid that reads diagonally. */
-#infoBox .cstats{display:grid;grid-template-columns:repeat(3,24px);grid-template-rows:repeat(3,24px);gap:2px;align-self:flex-start}
-#infoBox .cstats .stat:nth-child(1){grid-area:1/2}
-#infoBox .cstats .stat:nth-child(2){grid-area:2/3}
-#infoBox .cstats .stat:nth-child(3){grid-area:3/2}
-#infoBox .cstats .stat:nth-child(4){grid-area:2/1}
-#infoBox .stat{width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:var(--panel);border:1px solid var(--line);border-radius:3px;font-weight:500;font-size:11px}
+#infoBox .cstats{align-self:flex-start;margin:0}
 #infoBox .cname{font-weight:600;font-size:11px;letter-spacing:.5px;text-transform:uppercase}
 #infoBox .ctext{font-size:11px;color:var(--muted);line-height:1.3}
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -937,15 +1030,9 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
    to fit the width a phone leaves it rather than pushing the page sideways. */
 .tgrid.fit{--tcs:min(96px,calc((100vw - 104px) / 3))!important}
 .tutart .teece{cursor:default}
-/* Every example is single digits but the Gate's 10, so the name can have more
-   of the tile than the live board, which has to clear two-digit numbers. */
-.tutart .teece .mid{padding:0 14px}
-.tutart .teece .nm{font-size:11px}
+/* The examples are the board's own Teece, zones and half-discs and all, sized
+   off the tile they stand on. */
 .tbig{--tcs:132px}
-.tbig .teece .s{font-size:21px}
-.tbig .teece .nm{font-size:17px}
-.tbig .teece .ascii{font-size:10px}
-.tbig .teece .mid{padding:0 30px}
 .tanat{display:grid;grid-template-columns:auto auto auto;gap:4px 10px;align-items:center;justify-items:center}
 .tanat .lab{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .tanat .lab b{display:block;text-align:center;font-size:15px;letter-spacing:0;color:var(--gold)}
@@ -956,9 +1043,9 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .tkey .up{color:var(--up);font-weight:700} .tkey .down{color:var(--down);font-weight:700}
 .tkey .dotx{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px var(--gold)}
 /* The two edges that meet, and the side of the fight each one is on. */
-.tutart .teece .s.win,.tutart .teece .s.lose{border-radius:4px;padding:0 3px;text-shadow:none}
+.tutart .teece .s.win,.tutart .teece .s.lose{text-shadow:none}
 .tutart .teece .s.win{background:var(--gold);color:#241f18}
-.tutart .teece .s.tie{outline:2px solid var(--gold);outline-offset:1px;border-radius:4px}
+.tutart .teece .s.tie{outline:2px solid var(--gold);outline-offset:1px}
 .tutart .teece .s.lose{background:var(--down);color:#fff}
 /* Destroyed: a red frame and a badge in the corner, clear of the numbers the
    caption is talking about. */
@@ -973,8 +1060,8 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
    touch light up, and the smaller one goes. Five seconds a round, and every
    piece keyed to the same clock so they cannot drift apart. */
 @keyframes tArrive{0%,8%{opacity:0;transform:scale(.8)}16%,100%{opacity:1;transform:scale(1)}}
-@keyframes tWin{0%,24%{background:transparent;color:inherit}32%,100%{background:var(--gold);color:#241f18}}
-@keyframes tLoseN{0%,24%{background:transparent;color:inherit}32%,100%{background:var(--down);color:#fff}}
+@keyframes tWin{0%,24%{background:rgba(16,12,9,.84);color:#f7f0e2}32%,100%{background:var(--gold);color:#241f18}}
+@keyframes tLoseN{0%,24%{background:rgba(16,12,9,.84);color:#f7f0e2}32%,100%{background:var(--down);color:#fff}}
 @keyframes tLose{0%,48%{opacity:1;transform:none;box-shadow:none}51%{transform:translateX(-3px)}54%{transform:translateX(3px)}
   57%{transform:translateX(-2px)}60%{transform:none;box-shadow:inset 0 0 0 3px var(--down);opacity:1}70%,100%{opacity:.08}}
 .tfight .arrive{animation:tArrive 5s ease-out infinite}
@@ -982,9 +1069,8 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .tfight .s.lose{animation:tLoseN 5s linear infinite}
 .tfight .loser{animation:tLose 5s linear infinite}
 .tmini{--tcs:58px}
-.tmini .teece{inset:5px}
-.tmini .teece .mid,.tmini .teece .ascii{display:none}
-.tmini .teece .s{font-size:10.5px}
+.tmini .teece{inset:5px;--r:9px;--nf:10px}
+.tmini .teece .tz{display:none}
 .tmeter{display:flex;gap:14px;align-items:stretch}
 .tmeter .dombar{height:auto}
 .thand{display:grid;grid-template-columns:repeat(4,auto);gap:8px;justify-content:center}
@@ -992,7 +1078,8 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* The hand stretches its cards to one height, and the name on a Teece card is
    centred against that height. Wrapped for its label, a card here is no longer
    stretched, so it is given the height outright. */
-.thand .card,.thand .card.t-teece{cursor:default;height:112px}
+.thand{--hc:120px}
+.thand .card{cursor:default}
 .thand .tlbl{display:block;text-align:center;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-top:5px}
 .ttrack{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center}
 .ttrack .tk{padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);font-size:12px;color:var(--cream2)}
@@ -1022,11 +1109,6 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .dcard:not([data-card-deck]).t-equip{background:#e6dcc6}
 .dcard:not([data-card-deck]).t-magic{background:#e2dae8}
 .dcard:not([data-card-deck]).t-ground{background:#e0dcc2}
-.dcard .ds{position:absolute;font-weight:700;font-size:17px}
-.dcard .ds0{top:6px;left:50%;transform:translateX(-50%)}
-.dcard .ds1{right:9px;top:64px}
-.dcard .ds2{top:112px;left:50%;transform:translateX(-50%)}
-.dcard .ds3{left:9px;top:64px}
 .dcard .dnm{font-family:var(--disp);font-size:19px;text-align:center;margin-top:56px}
 .dcard.nostat .dnm{margin-top:6px}
 .dcard .dty{font-size:9px;letter-spacing:.14em;text-transform:uppercase;text-align:center;color:#7a6a4d}
@@ -1034,14 +1116,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .dcard .dtx{font-size:11.5px;line-height:1.45;text-align:center;margin-top:auto;padding-top:34px}
 .dcard.nostat .dtx{padding-top:8px}
 .dcard[data-card-deck]::after{top:7px;right:9px;font-size:22px}
-.dcard .ascii{position:absolute;top:22px;right:14px;bottom:44px;left:14px;margin:0;z-index:0;
-  pointer-events:none;overflow:hidden;background:transparent;color:var(--artink);opacity:.42;
-  display:flex;align-items:center;justify-content:center;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Courier New',monospace;
-  font-size:20px;line-height:1.02;white-space:pre;opacity:.5}
-.dcard.arted .dnm,.dcard.arted .ds,.dcard.arted .dkw,.dcard.arted .dty{text-shadow:0 0 4px var(--cardbg,var(--cream)),0 0 4px var(--cardbg,var(--cream)),0 0 3px var(--cardbg,var(--cream))}
 .dcard .dnm,.dcard .dtx{position:relative;z-index:1}
-.dcard .ds{z-index:1}
 .dcard.perkcard{background:linear-gradient(180deg,#3a3223,#2a231a);color:var(--cream);
   border-color:var(--gold);min-height:170px;justify-content:flex-start}
 .dcard.perkcard .dty{color:var(--gold)}
@@ -1064,24 +1139,19 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
    background in --deckbg, each layer at its own size, so the gloss above goes
    on top of it rather than replacing it. */
 .dcard.dsym:is([data-card-deck="knights"],[data-card-deck="classic"],[data-card-deck="basic"],[data-card-deck="paladin"],[data-card-deck="priest"],[data-card-deck="mummy"],[data-card-deck="solar"],[data-card-deck="nature"],[data-card-deck="time"],[data-card-deck="teece100"],[data-card-deck="zombie"],[data-card-deck="rock"],[data-card-deck="runeblade"]) .dnm{text-shadow:0 1px 1px rgba(255,255,255,.5)}
-/* A draft card reads top to bottom: name, drawing, rules. The four numbers are
-   tabs on the four edges they fight with -- top on the top, left on the left --
-   so the middle of the card is left to the drawing instead of being crossed by
-   a row of numbers and a bottom number parked in the art. */
-.dcard.t-teece{min-height:250px;padding:30px 30px 34px}
-.dcard.t-teece .ds{background:rgba(16,12,9,.82);color:#f7f0e2;font-size:18px;line-height:1;text-shadow:none;
-  display:flex;align-items:center;justify-content:center;min-width:34px;min-height:34px;padding:0 4px;
-  box-shadow:0 0 0 1px rgba(255,255,255,.1)}
-.dcard.t-teece .ds0{top:0;left:50%;transform:translateX(-50%);border-radius:0 0 17px 17px;min-height:26px}
-.dcard.t-teece .ds2{top:auto;bottom:0;left:50%;transform:translateX(-50%);border-radius:17px 17px 0 0;min-height:26px}
-.dcard.t-teece .ds1{top:50%;right:0;transform:translateY(-50%);border-radius:17px 0 0 17px;min-width:26px}
-.dcard.t-teece .ds3{top:50%;left:0;transform:translateY(-50%);border-radius:0 17px 17px 0;min-width:26px}
-.dcard.t-teece .dnm{margin-top:4px}
-.dcard.t-teece .dtx{padding-top:6px}
-/* The drawing sits in the flow between the name and the rules, on every draft
-   card that has one. */
-.dcard.arted .ascii{position:relative;inset:auto;order:2;flex:0 0 auto;margin:10px -6px 4px;font-size:15px;opacity:.72}
-.dcard.arted .dtx{order:3}
+/* A draft card is a hand card seen larger, and square like it: the numbers in
+   their half-discs on the four edges they fight with, the name under the top
+   one, the drawing, and the rules. A long rules text scrolls inside the card. */
+.dcard.t-teece,.dcard.t-magic,.dcard.t-equip,.dcard.t-ground{width:212px;height:212px;min-height:0;padding:0;--r:20px;--nf:19px}
+.dcard .dz{position:absolute;inset:9px;display:flex;flex-direction:column;gap:3px;z-index:1;min-height:0}
+.dcard.t-teece .dz{inset:calc(var(--r) + 2px) 8px calc(var(--r) + 3px)}
+.dcard .dz .dnm{margin:0;flex:none;font-size:18px;line-height:1.05}
+.dcard .dz .dty{flex:none}
+.dcard .dz .tart{flex:1 1 0;min-height:0}
+.dcard .dz .dtx{flex:0 1 auto;min-height:0;margin:0;padding:0;overflow:auto;scrollbar-width:none;font-size:11px;line-height:1.32}
+.dcard .dz .dtx::-webkit-scrollbar{display:none}
+.dcard.t-teece .dz .tart,.dcard.t-teece .dz .dtx{margin:0 calc(var(--r) - 8px)}
+.dcard .rsym{position:absolute;top:5px;left:6px;width:24px;height:24px;z-index:3}
 /* The three-player formats are menu cards like the start screen's, not
    playing cards: dark, with the sides drawn between the name and the rules. */
 .dcard.fmt{background:linear-gradient(180deg,#2c241b,var(--panel2));color:var(--cream);border:1px solid var(--line);
@@ -1168,34 +1238,29 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
     <h1>Teece</h1>
     <span class="sub" id="modeLbl">three by three</span>
   </header>
-  <main>
-    <div class="oppbar">
-      <span class="handlbl">Opponent hands</span>
-      <button class="btn" id="toggleOppHands">Show</button>
+  <!-- The one status bar: whose turn, every seat's cards, the field lead and
+       End Turn, across the top of the table above the board. -->
+  <div class="panel" id="turnPanel">
+    <div class="tbturn"><div class="sundial" id="sunDial" aria-live="polite"></div><div class="turnline" id="turnInfo"></div></div>
+    <div class="counts" id="counts"></div>
+    <div class="tblead" id="domBar"></div>
+    <div class="tbbtns">
+      <button class="btn primary" id="endTurn">End Turn</button>
+      <button class="btn" id="restart">Forfeit</button>
     </div>
-    <div id="oppHands" class="collapsed"></div>
+    <div id="warnBar" class="hidden"></div>
+  </div>
+  <main>
+    <div id="oppHands"></div>
     <div id="promptBar"><span class="msg">&nbsp;</span></div>
     <div class="boardrow">
       <div id="board"></div>
-      <div class="sidecol">
-        <div class="sundial" id="sunDial" aria-live="polite"></div>
-        <div class="dombar" id="domBar"></div>
-      </div>
     </div>
     <div id="actionBar" class="hidden"></div>
     <div id="statusBar" class="hidden"></div>
     <div class="handrow" id="myHand"></div>
   </main>
   <aside>
-    <div class="panel" id="turnPanel">
-      <div class="turnline" id="turnInfo"></div>
-      <div class="counts" id="counts"></div>
-      <div id="warnBar" class="hidden"></div>
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button class="btn primary" id="endTurn">End Turn</button>
-        <button class="btn" id="restart">Forfeit</button>
-      </div>
-    </div>
     <div class="panel" id="detail"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Detail</h2><button class="btn" id="resetDetail" style="padding:4px 8px;font-size:12px" title="Unstick the inspector: clears the selected Teece and lets hovering work again.">Reset</button></div><div id="detailBody"><div class="dt">Hover or tap a card. Click one of your Teece to use its abilities.</div></div></div>
     <div class="panel" id="logPanel"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Log</h2><button class="btn" id="toggleLog" style="padding:4px 8px;font-size:12px">Hide</button></div><div id="log"></div></div>
   </aside>
@@ -1309,7 +1374,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:245,date:'2026-10-19'};
+const VERSION={build:246,date:'2026-10-19'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -5827,6 +5892,134 @@ function rankOf(id){
   return (c.sac||0)===1?'Miniboss':'';
 }
 const rankTag=id=>{const r=rankOf(id);return r?'<div class="rank'+(r==='Miniboss'?' mini':'')+'">'+r+'</div>':'';};
+/* The rank as a symbol, in the top left corner of the card face wherever the
+   card is drawn: a gold crown for a Boss, the crown in fire under a star for a
+   Megaboss, a silver star for a Miniboss. Drawn rather than an emoji so it
+   reads the same on every phone and every deck's colours. */
+const RANK_SVG={
+  boss:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 17.6 2.2 7.2l5.4 4.3L12 3.6l4.4 7.9 5.4-4.3-1 10.4z" fill="#ffd36e" stroke="#4a3006" stroke-width="1.3" stroke-linejoin="round"/>'+
+    '<rect x="3.2" y="17.9" width="17.6" height="3" rx=".9" fill="#e0a636" stroke="#4a3006" stroke-width="1.1"/></svg>',
+  mega:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .6l1.1 2.3 2.5.3-1.8 1.8.4 2.5L12 6.3 9.8 7.5l.4-2.5-1.8-1.8 2.5-.3z" fill="#fff0b0"/>'+
+    '<path d="M3.2 19 2.4 9.6l5 3.7L12 7.4l4.6 5.9 5-3.7-.8 9.4z" fill="#ff8a3d" stroke="#4a1404" stroke-width="1.3" stroke-linejoin="round"/>'+
+    '<rect x="3.2" y="19.2" width="17.6" height="2.9" rx=".9" fill="#d9472b" stroke="#4a1404" stroke-width="1.1"/>'+
+    '<circle cx="7.6" cy="16.4" r="1.1" fill="#fff0b0"/><circle cx="12" cy="15.6" r="1.2" fill="#fff0b0"/><circle cx="16.4" cy="16.4" r="1.1" fill="#fff0b0"/></svg>',
+  mini:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.6 5.5 6 .8-4.4 4.1 1.1 6L12 16.7l-5.3 2.9 1.1-6-4.4-4.1 6-.8z" fill="#e4e6ea" stroke="#2b2d33" stroke-width="1.3" stroke-linejoin="round"/></svg>'
+};
+function rankSym(id){
+  const r=rankOf(id);
+  if(!r)return '';
+  const k=r==='Megaboss'?'mega':(r==='Boss'?'boss':'mini');
+  return '<span class="rsym '+k+'" title="'+r+'" role="img" aria-label="'+r+'">'+RANK_SVG[k]+'</span>';
+}
+/* ============ card faces ============
+   One layout wherever a Teece is drawn: each of its four numbers in a
+   half-disc set into the middle of the edge it fights with, the name under the
+   top one, the drawing in the middle, and the status symbols in one row over
+   the bottom one. Nothing is ever laid across the name or the numbers. */
+const artPre=id=>{const a=CARD_ART[id];return a?'<pre class="ascii" aria-hidden="true" style="--rows:'+a.length+'">'+a.map(escHtml).join('\n')+'</pre>':'';};
+const nmClass=n=>{const l=String(n).replace(/<[^>]*>/g,'').length;return l>15?'nm longer':(l>10?'nm long':'nm');};
+/* The four numbers, top/right/bottom/left. pfx is the class family (s on the
+   board, hs in hand, ds in a draft); cls(k) adds a class to one of them. */
+const semiNums=(sd,pfx,cls)=>[0,1,2,3].map(k=>'<div class="'+pfx+' '+pfx+k+(cls?cls(k)||'':'')+'">'+sd[k]+'</div>').join('');
+/* A board Teece's face. o: name (html), cardId (its drawing), sides, numCls,
+   badges (status symbols), rank (draw the rank symbol). */
+function teeceFace(o){
+  /* A two-figure number on a side edge makes its half-disc wider: the name
+     and the status row are held further in to clear it. */
+  const wide=o.sides&&(String(o.sides[1]).length>1||String(o.sides[3]).length>1);
+  return '<div class="tz'+(wide?' wide':'')+'">'+(o.name!=null?'<div class="tnm"><span class="'+nmClass(o.name)+'">'+o.name+'</span></div>':'')+
+    '<div class="tart">'+(o.cardId!=null?artPre(o.cardId):'')+'</div>'+
+    '<div class="rgd">'+(o.badges||[]).join('')+'</div></div>'+
+    semiNums(o.sides,'s',o.numCls)+(o.rank?rankSym(o.cardId):'');
+}
+/* How long a card's rules run, so a long one steps down a size or two. */
+const txLen=t=>{const n=String(t||'').replace(/<[^>]*>/g,'').length;return n>230?' l3':(n>150?' l2':(n>95?' l1':''));};
+/* A card in hand, inside its .card: the numbers and rank on a Teece, then one
+   column of name, drawing and rules. p names whose hand it is, for the cards
+   whose title follows their owner's god. */
+function handFace(id,sides,numCls,p){
+  const cd=CARDS[id];
+  if(cd.type==='teece'){
+    const tx=String(cd.text||'');
+    return semiNums(sides,'hs',numCls)+rankSym(id)+
+      '<div class="hz"><div class="hcn cn">'+(p!=null?cardTitle(id,p):escHtml(cd.name))+rankTag(id)+'</div>'+
+      '<div class="tart">'+artPre(id)+'</div>'+
+      (tx?'<div class="htx'+txLen(tx)+'">'+tx+'</div>':'')+'</div>';
+  }
+  const tx=String(cd.text||'').split('\n')[0];
+  return '<div class="hz"><div class="ct">'+cd.type+'</div><div class="cn">'+cd.name+'</div>'+
+    '<div class="tart">'+artPre(id)+'</div>'+(tx?'<div class="cs'+txLen(tx)+'">'+tx+'</div>':'')+'</div>';
+}
+/* Equips hang under a card as named tabs, a ridden Mount among them; past
+   three, the last becomes +N with the rest in its tooltip. */
+function eqTabs(list){
+  if(!list||!list.length)return '';
+  const tab=e=>{const c=CARDS[e.cardId];if(!c)return '';
+    return '<span class="eqtab'+(e.mount?' mount':'')+'" title="'+escHtml((e.mount?'Mount: '+c.name:eqLabel(e))+' — '+(c.text||''))+'">'+
+      (e.mount?'♞ ':'')+escHtml(c.name)+'</span>';};
+  if(list.length<=3)return list.map(tab).join('');
+  const rest=list.slice(2);
+  return list.slice(0,2).map(tab).join('')+'<span class="eqtab more" title="'+
+    escHtml(rest.map(e=>CARDS[e.cardId]?CARDS[e.cardId].name:'').join('\n'))+'">+'+rest.length+'</span>';
+}
+/* The monospace advance, measured once: a battleground frame is 17 columns
+   that must span its panel exactly, whatever monospace font this device has. */
+let MONO_EM=null;
+function measureMono(){
+  if(MONO_EM||!HAS_DOM||!document.body)return;
+  const sp=document.createElement('span');
+  sp.style.cssText="position:absolute;left:-9999px;top:0;visibility:hidden;white-space:pre;font-size:100px;line-height:1;"+
+    "font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Courier New',monospace";
+  sp.textContent='0000000000';
+  document.body.appendChild(sp);
+  const w=sp.getBoundingClientRect().width/1000;
+  sp.remove();
+  if(w>.3&&w<1){MONO_EM=w;document.documentElement.style.setProperty('--monoem',w.toFixed(4));}
+}
+/* A name that will not fit its lines at its size steps down half a pixel at
+   a time (to 8.5px) rather than breaking a word in the middle; only a word
+   too long even then is broken, and only a name too long even then ends in an
+   ellipsis. The whole name is always in the Detail panel. */
+function fitNames(root){
+  if(!HAS_DOM||!root)return;
+  /* First the room between the side half-discs, measured: a half-disc with a
+     two- or three-figure number in it is wider than the CSS can know. */
+  for(const t of root.querySelectorAll('.teece')){
+    const tz=t.querySelector(':scope>.tz'),a=t.querySelector(':scope>.s1'),c=t.querySelector(':scope>.s3');
+    if(!tz||!a||!c)continue;
+    const inset=parseFloat(getComputedStyle(tz).left)||0;
+    let m=Math.max(a.offsetWidth,c.offsetWidth)-inset+1;
+    if(t.classList.contains('token'))m=Math.max(m,tz.clientWidth*.19);
+    for(const z of tz.querySelectorAll(':scope>.tnm,:scope>.rgd'))z.style.margin='0 '+Math.ceil(m)+'px';
+  }
+  for(const n of root.querySelectorAll('.teece .nm')){
+    const over=()=>n.scrollWidth>n.clientWidth+1||n.scrollHeight>n.clientHeight+1;
+    n.style.overflowWrap='normal';
+    let fs=parseFloat(getComputedStyle(n).fontSize);
+    while(over()&&fs>8.5){fs-=0.5;n.style.fontSize=fs+'px';}
+    if(over())n.style.overflowWrap='';
+  }
+}
+/* A status row that will not fit ends in +N; what it hides is in the +N's
+   tooltip, and all of it is in the Detail panel. Measured after the board is
+   in the page, since only the page knows how wide the symbols draw. */
+function fitBadgeRows(root){
+  if(!HAS_DOM||!root)return;
+  for(const r of root.querySelectorAll('.teece .rgd')){
+    if(!r.children.length||r.scrollWidth<=r.clientWidth+1)continue;
+    const kids=Array.from(r.children),hid=[];
+    const more=document.createElement('span');
+    more.className='more';
+    r.appendChild(more);
+    while(kids.length>1&&r.scrollWidth>r.clientWidth+1){
+      const k=kids.pop();
+      hid.unshift(k.getAttribute('title')||'');
+      k.remove();
+      more.textContent='+'+hid.length;
+    }
+    more.title=hid.filter(Boolean).join('\n');
+  }
+}
 /* The aura a Boss (or, fainter, a Miniboss) is drawn with on the board only;
    a card in hand carries none. Deterministic positions per card, delays read off the clock so the
    motes keep drifting through a re-render instead of starting over. */
@@ -9044,10 +9237,18 @@ function markTargetDeath(v){
    the board is not already in view, so it never yanks a screen that was fine. */
 function showBoard(){
   if(!HAS_DOM)return;
+  /* The tutorial's coach brings the one thing it wants touched into view
+     itself -- sometimes a card in the hand -- and a smooth scroll to the board
+     started after it would carry that card back off the screen. */
+  if(G&&G.tut)return;
   const row=document.querySelector('.boardrow');
   if(!row)return;
   const r=row.getBoundingClientRect();
   if(r.top>=0&&r.bottom<=window.innerHeight)return;
+  /* A question that takes a card in hand as well is already answerable while
+     any of the board shows, and the hand is the other half of it. */
+  const pd=G&&G.pending;
+  if(pd&&pd.hands&&pd.hands.length&&r.bottom>0&&r.top<window.innerHeight)return;
   row.scrollIntoView({block:'center',behavior:'smooth'});
 }
 /* A spell nobody is aiming. The Dimension of Energy lets go of everything it
@@ -20839,12 +21040,10 @@ function previewTileHtml(i){
     sides=platedSides(cardId,spec.plate||[],owner);
     tag='in hand';
   }
-  const num=k=>'<div class="s s'+k+'">'+sides[k]+'</div>';
   return '<div class="pvwrap" aria-live="polite"><div class="teece ghost o'+owner+(doomed?' doomed':'')+
     '" data-card-deck="'+getCardDeck(cardId)+'">'+
-    '<div class="mid"><div class="gtag">'+tag+'</div>'+
-    (def>0?'<div class="rgd"><span class="dfn">\u{1F6E1}\uFE0F'+def+'</span></div>':'')+'</div>'+
-    [0,1,2,3].map(num).join('')+'</div></div>';
+    teeceFace({name:'<span class="gtag">'+tag+'</span>',cardId:null,sides,
+      badges:def>0?['<span class="dfn">\u{1F6E1}\uFE0F'+def+'</span>']:[]})+'</div></div>';
 }
 /* Repainted on its own rather than through render(): crossing the board would
    otherwise rebuild every panel nine times over, and nothing on the board has
@@ -20896,12 +21095,13 @@ function planeHost(){
   if(pl){
     if(pl.side===1)rowEl.insertBefore(el,bd.nextSibling);
     else rowEl.insertBefore(el,bd);
-    el.style.paddingTop='calc((var(--cs,110px) + 8px) * '+row(pl.host)+')';
+    el.style.paddingTop='calc((var(--cs,110px) + var(--gap,8px)) * '+row(pl.host)+')';
   }
   return el;
 }
 function renderBoard(){
   const b=document.getElementById('board');
+  measureMono();
   b.innerHTML='';
   const strip=document.getElementById('planeStrip');
   if(strip)strip.innerHTML='';
@@ -20971,7 +21171,14 @@ function renderBoard(){
          Dimension counting the field is the colour it has earned. */
       const gtot=groundGives(G.board,i).reduce((a,c)=>a+c,0);
       const cls=gtot>0?'bgplus':(gtot<0?'bgminus':'bgutil');
-      cell.innerHTML+='<div class="bglayer '+cls+'">'+gd.name+'</div>';
+      /* The whole panel is the battleground: its tint, its frame drawn round
+         the edge where a Teece standing on it leaves it in view, and its name
+         on a tab at the top edge. A ground with no frame drawn yet is the
+         tint and the name. */
+      const ga=GROUND_ART[bg.cardId];
+      cell.innerHTML+='<div class="bglayer '+cls+'">'+
+        (ga?'<pre class="gframe" aria-hidden="true">'+ga.map(escHtml).join('\n')+'</pre>':'')+
+        '<div class="gname" title="'+escHtml(gd.name)+'">'+gd.name+'</div></div>';
     }
     /* What an arriving Teece would get here, terrain and auras together, on
        any empty panel whether or not it has a battleground -- a Mark of
@@ -21014,66 +21221,60 @@ function renderBoard(){
       const bart=CARD_ART[t.cardId];
       tp.className='teece o'+t.owner+(bart?' arted':'')+(t.isToken?' token':'')+((an==='dying'||an==='placed'||an==='strike')?' '+an:'');
       tp.setAttribute('data-card-deck',getCardDeck(t.cardId));
-      /* One badge row under the name: a bow for Ranged, a shield and its number
-         for Defence, a turning arrow and its number for how many more times an
-         Undying Teece gets back up. The keyword initials that used to sit in the
-         corner were unpositioned and landed on top of the card. */
+      /* One status row over the bottom number, every symbol in it, most
+         pressing first: a row that will not fit ends in +N (fitBadgeRows).
+         Stunned and Invulnerable decide what an attack on this panel is worth,
+         so they lead; then Ward, Defence, Undying, the curse and the Oaths,
+         then the movement keywords and the rest. */
       const badges=[];
-      if(kws.indexOf('ranged')>=0)badges.push('<span title="Ranged">\u{1F3F9}</span>');
-      /* Flying, beside the bow and the shield. Greyed once its flight is spent
-         on its own turn, so a glance says which of your fliers can still go. */
-      if(kws.indexOf('flying')>=0){
-        const fe=aul.find(e=>e.key==='kfly');
-        const flown=!!(fe&&t.owner===G.turn&&!actAvailable(t,fe));
-        badges.push('<span class="fly'+(flown?' flown':'')+'" title="'+(flown?'Flying \u2014 already flown this turn':'Flying')+'">\u{1FABD}</span>');
-      }
+      /* Stunned: whether this panel can kill anything is the first thing you
+         need to know about it, and a chip under the board is three feet away. */
+      const stT=stunText(G.board,i);
+      if(stT)badges.push('<span class="dfn stun" title="'+escHtml(stT)+'">\u{1F4A5}</span>');
+      if(t.blinded)badges.push('<span class="dfn" title="Blinded: it destroys nothing.">\u{1F576}️</span>');
+      /* Cannot be destroyed: the single fact that decides whether attacking
+         this panel is worth anything. */
+      const invT=invulnText(G.board,i);
+      if(invT)badges.push('<span class="dfn inv" title="'+escHtml(invT)+'">◈</span>');
+      if(t.silenced)badges.push('<span class="dfn sil" title="Silenced: every effect it has is silenced.">\u{1F507}</span>');
       /* Ward. The one keyword that decides whether an enemy card can touch this
          panel at all, so it is a symbol rather than a word in a list: a sight
          with a bar through it -- nobody across the table can aim at it. Read off
          kwOf, so a Ward lent by an aura, a ground or a formation shows too. */
       if(kws.indexOf('ward')>=0)badges.push(wardBadge());
       const dv=defOf(G.board,i);
-      if(dv>0)badges.push('<span class="dfn" title="Defence '+dv+'">\u{1F6E1}\uFE0F'+dv+'</span>');
+      if(dv>0)badges.push('<span class="dfn" title="Defence '+dv+'">\u{1F6E1}️'+dv+'</span>');
       const un=undyLeft(t);
       if(un>0)badges.push('<span class="dfn undy" title="Undying: gets back up '+un+
-        ' more time'+(un===1?'':'s')+'">\u21BB'+un+'</span>');
-      /* Cannot be destroyed. Common enough to belong on the badge row beside
-         Defence and Undying rather than only in a chip under the board: it is
-         the single fact that decides whether attacking this panel is worth
-         anything, and it was being read three feet away from the panel. */
-      const invT=invulnText(G.board,i);
-      if(invT)badges.push('<span class="dfn inv" title="'+escHtml(invT)+'">\u25C8</span>');
-      /* Stunned. It belongs here for the same reason Invulnerable does: whether
-         this panel can kill anything is the first thing you need to know about
-         it, and a chip under the board is three feet from the panel. */
-      const stT=stunText(G.board,i);
-      if(stT)badges.push('<span class="dfn stun" title="'+escHtml(stT)+'">\u{1F4A5}</span>');
+        ' more time'+(un===1?'':'s')+'">↻'+un+'</span>');
+      /* Cursed by a Mummy: the one fact every Mummy card reads. */
+      if(t.mcursed)badges.push('<span class="dfn mcursed" title="Cursed. Cursed again, it gets -1 instead.">☥</span>');
       /* Each Oath: the god's initial, struck through once it has broken. */
       for(const o of oathsOf(t))badges.push('<span class="dfn oath'+(o.broken?' broke':'')+'" title="'+
-        (o.broken?'Oathbroken ('+OATHS[o.god].name+'): -2':'Oath of '+OATHS[o.god].name+(t.silenced?' (silenced)':''))+'">\u269C'+OATHS[o.god].name.charAt(0)+'</span>');
-      /* Cursed by a Mummy: the one fact every Mummy card reads. */
-      if(t.mcursed)badges.push('<span class="dfn mcursed" title="Cursed. Cursed again, it gets -1 instead.">\u2625</span>');
-      /* Long names step down a size rather than being cut off: the panel is the
-         only place the name appears once a Teece is on the board. Name and
-         badges are stacked and centred together, so a name that takes three
-         lines pushes the badges down instead of being sat on by them. */
-      const tnm=t.animGround?CARDS[t.animGround.cardId].name:DEF(t).name;
-      const nmCls=tnm.length>15?'nm longer':(tnm.length>10?'nm long':'nm');
-      tp.innerHTML=(t.isToken?TOKEN_SHAPE_SVG:'')+(bart?'<pre class="ascii" aria-hidden="true">'+bart.map(escHtml).join('\n')+'</pre>':'')+
-        '<div class="mid"><div class="'+nmCls+'">'+tnm+'</div>'+(t.animGround?'':rankTag(t.cardId))+
-        (badges.length?'<div class="rgd">'+badges.join('')+'</div>':'')+'</div>'+
-        '<div class="s s0">'+s[0]+'</div>'+
-        '<div class="s s1">'+s[1]+'</div>'+
-        '<div class="s s2">'+s[2]+'</div>'+
-        '<div class="s s3">'+s[3]+'</div>';
-      if(t.equips.length)tp.innerHTML+='<div class="eq">E'+t.equips.length+'</div>';
-      if(!t.isToken||isBossCard(t.cardId))tp.insertAdjacentHTML('afterbegin',auraHtml(t.cardId));
-      const hasActs=ownTurn(t.owner)&&aul.some(e=>actAvailable(t,e));
-      if(hasActs)tp.innerHTML+='<div class="actdot"></div>';
+        (o.broken?'Oathbroken ('+OATHS[o.god].name+'): -2':'Oath of '+OATHS[o.god].name+(t.silenced?' (silenced)':''))+'">⚜'+OATHS[o.god].name.charAt(0)+'</span>');
+      /* Flying, greyed once its flight is spent on its own turn, so a glance
+         says which of your fliers can still go. */
+      if(kws.indexOf('flying')>=0){
+        const fe=aul.find(e=>e.key==='kfly');
+        const flown=!!(fe&&t.owner===G.turn&&!actAvailable(t,fe));
+        badges.push('<span class="fly'+(flown?' flown':'')+'" title="'+(flown?'Flying — already flown this turn':'Flying')+'">\u{1FABD}</span>');
+      }
+      if(kws.indexOf('ranged')>=0)badges.push('<span title="Ranged">\u{1F3F9}</span>');
+      if(t.holyLight)badges.push('<span class="dfn" title="Blessed by Holy Light">☀️</span>');
+      if(t.echo)badges.push('<span class="dfn" title="Doubled: '+(t.echo+1)+' copies of each of its effects">×'+(t.echo+1)+'</span>');
+      if(t.trapArmed)badges.push('<span class="dfn" title="Trap armed: if it is destroyed, the next Teece played against its side is destroyed.">⚠️</span>');
+      if(t.graveMarks)badges.push('<span class="dfn" title="'+t.graveMarks+' mark'+(t.graveMarks===1?'':'s')+'">✚'+t.graveMarks+'</span>');
       const tmr=DEF(t).timer;
       const left=tmr&&!t.transformed?Math.max(0,tmr.turns-(t.age||0)):0;
-      if(left>0)tp.innerHTML+='<div class="shield">'+left+' to go</div>';
-      else if(t.isToken)tp.innerHTML+='<div class="tok">token</div>';
+      if(left>0)badges.push('<span class="dfn tmr" title="Grows in '+left+' more of its owner’s turns">⏳'+left+'</span>');
+      const tnm=t.animGround?CARDS[t.animGround.cardId].name:DEF(t).name;
+      tp.innerHTML=(t.isToken?TOKEN_SHAPE_SVG:'')+
+        teeceFace({name:tnm,cardId:t.cardId,sides:s,badges,rank:!t.animGround})+
+        (t.equips.length?'<div class="eqtabs">'+eqTabs(t.equips)+'</div>':'');
+      if(!t.isToken||isBossCard(t.cardId))tp.insertAdjacentHTML('afterbegin',auraHtml(t.cardId));
+      const hasActs=ownTurn(t.owner)&&aul.some(e=>actAvailable(t,e));
+      if(hasActs)tp.innerHTML+='<div class="actdot" title="It has an ability ready"></div>';
+      if(t.isToken)tp.title='Token';
       tp.addEventListener('click',e=>{
         if(!HAS_DOM||G.over)return;
         if(G.pending)return;
@@ -21149,6 +21350,10 @@ function renderBoard(){
      the battlegrounds and the Teece standing on it, and takes no clicks. */
   b.classList.toggle('pentaOn',cultInPlay());
   if(cultInPlay())b.insertAdjacentHTML('beforeend',pentaSvg());
+  fitNames(b);
+  fitNames(document.getElementById('planeStrip'));
+  fitBadgeRows(b);
+  fitBadgeRows(document.getElementById('planeStrip'));
 }
 /* Everything on one panel besides the Teece: the battleground, Mines, a
    Curse, a razing, a priming, a seed. Hovering a panel should show the lot. */
@@ -21216,7 +21421,7 @@ function showDetail(i){
   }
   const cd=DEF(t);
   const locked=G.detailLock===i;
-  let html=(locked?'<div class="dlock">Selected</div>':'')+detailArt(t.cardId)+
+  let html=(locked?'<div class="dlock">Selected</div>':'')+detailArt(t.cardId,effSides(G.board,i))+
     '<div class="dn">'+nm(t)+'</div><div class="dt">'+kwify(cd.text)+'</div>'+
     (cd.flavor?'<div class="dt" style="font-style:italic;opacity:.8">'+cd.flavor+'</div>':'')+
     (t.silenced?'<div class="dt" style="color:var(--bad);font-weight:bold">⛔ Silenced</div>':'')+
@@ -21339,13 +21544,32 @@ function handVisible(p){
   if(G.vsAI)return !isAIP(p);
   return p===G.turn;
 }
+/* Whether this screen plays from seat p's hand right now, as opposed to only
+   being allowed to look at it: handVisible without the developer code and the
+   spectator's view. */
+function handLive(p){
+  if(NET||!G||G.spectate)return false;
+  if(G.pending&&G.pending.p===p)return true;
+  if(G.vsAI)return !isAIP(p);
+  return p===G.turn;
+}
 function renderHand(p){
   const pl=G.players[p],h=handSlot(p);
   if(!h)return;
   h.innerHTML='';
+  /* Another seat's row sits above the board, small. Face down it is a row of
+     backs and a count. Face up it is small compact cards -- unless it is a
+     hotseat seat whose turn it is (or that a question is being put to), which
+     plays from this row and so gets full-size cards. */
+  const opp=p!==netSeat();
+  const live=opp&&handLive(p);
+  h.classList.toggle('opp',opp);
+  h.classList.toggle('live',live);
+  h.classList.toggle('mini',opp&&handVisible(p)&&!live);
   const lbl=document.createElement('div');
   lbl.className='handlbl';
-  lbl.textContent=(pname(p)==='You'||(NET&&p===NET.seat)?'Your':pname(p)+'’s')+' hand';
+  lbl.textContent=opp&&!live?pname(p)+' \u00b7 '+pl.hand.length+' card'+(pl.hand.length===1?'':'s'):
+    (pname(p)==='You'||(NET&&p===NET.seat)?'Your':pname(p)+'’s')+' hand';
   h.appendChild(lbl);
   /* The switch lives on your own hand only: the other seats' rows follow it. */
   if(p===netSeat()){
@@ -21385,18 +21609,11 @@ function renderHand(p){
     const art=CARD_ART[id];
     if(art)card.classList.add('arted');
     if(cd.type==='teece'){
+      /* Gold where plating has raised a number, as before. */
       const ps=platedSides(id,worn,p);
-      const cs=cardSides(id),sc=k=>'hs hs'+k+(ps[k]!==cs[k]?' pl':'');
-      card.innerHTML=(art?'<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>':'')+
-        '<div class="'+sc(0)+'">'+ps[0]+'</div>'+
-        '<div class="'+sc(1)+'">'+ps[1]+'</div>'+
-        '<div class="'+sc(2)+'">'+ps[2]+'</div>'+
-        '<div class="'+sc(3)+'">'+ps[3]+'</div>'+
-        '<div class="hcn cn">'+cardTitle(id,p)+rankTag(id)+'</div>';
-    }else{
-      card.innerHTML=(art?'<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>':'')+
-        '<div class="ct">'+cd.type+'</div><div class="cn">'+cd.name+'</div><div class="cs">'+cd.text.split('\n')[0]+'</div>';
-    }
+      const cs=cardSides(id);
+      card.innerHTML=handFace(id,ps,k=>ps[k]!==cs[k]?' pl':'',p);
+    }else card.innerHTML=handFace(id,null,null,p);
     /* Outside the type branch: a deck that lets you discard freely lets you
        discard a magic card, an equip and a battleground too, and the button
        used to be built only for Teece. */
@@ -21438,10 +21655,12 @@ function renderHand(p){
     if(cd.type==='teece'&&((cd.kw||[]).indexOf('ward')>=0||
        worn.some(e=>{const g=CARDS[e.cardId].grants;return g&&(g.kw||[]).indexOf('ward')>=0;})))
       card.insertAdjacentHTML('beforeend',wardBadge('hward'));
+    /* Plating hangs under the card as tabs, the way an equip hangs under a
+       Teece on the board. */
     if(worn.length){
       const pb=document.createElement('div');
       pb.className='plated';
-      pb.textContent='E'+worn.length;
+      pb.innerHTML=eqTabs(worn);
       pb.title=worn.map(e=>CARDS[e.cardId].name+' — '+CARDS[e.cardId].text).join('\n\n');
       card.appendChild(pb);
     }
@@ -21454,21 +21673,27 @@ function renderHand(p){
     card.addEventListener('mouseleave',()=>{if(G.detailLock==null&&G.detailHover==='h'+p+i){G.detailHover=null;showDetail(null);}});
     h.appendChild(card);
   }
+  /* Rules too long for the card scroll inside it; mark those so they fade. */
+  for(const el of h.querySelectorAll('.htx,.cs'))el.classList.toggle('over',el.scrollHeight>el.clientHeight+1);
 }
 /* The card's drawing at the head of the Detail panel, on the card's own deck
    colours. It borrows .card for the palette, the deck symbol in the corner and
    the art sizing, and overrides the hand card's shape. */
-function detailArt(id){
-  const art=CARD_ART[id];
-  if(!art)return '';
-  return '<div class="card arted dart" data-card-deck="'+getCardDeck(id)+'" aria-hidden="true">'+
-    '<pre class="ascii">'+art.map(escHtml).join('\n')+'</pre></div>';
+function detailArt(id,sides,numCls){
+  const cd=CARDS[id],art=CARD_ART[id];
+  const face=!!(cd&&cd.type==='teece'&&sides);
+  if(!art&&!face)return '';
+  /* A Teece is drawn whole, square, its numbers in their half-discs and its
+     rank in the corner; anything else is its drawing. */
+  return '<div class="card arted dart t-'+(cd?cd.type:'teece')+'" data-card-deck="'+getCardDeck(id)+'" aria-hidden="true">'+
+    (face?semiNums(sides,'hs',numCls)+rankSym(id):'')+
+    '<div class="hz"><div class="tart">'+artPre(id)+'</div></div></div>';
 }
 function showDetailCard(id,worn,owner){
   const cd=CARDS[id],d=document.getElementById('detailBody');
   if(!d)return;
   const ps=cd.type==='teece'?platedSides(id,worn,owner):null;
-  let html=detailArt(id)+'<div class="dn">'+cd.name+'</div>'+
+  let html=detailArt(id,ps,ps?(k=>ps[k]!==cardSides(id)[k]?' pl':''):null)+'<div class="dn">'+cd.name+'</div>'+
     (cd.type==='teece'?'<div class="dstats" style="color:var(--gold)">'+sidesBlock(ps)+
       (worn&&worn.length&&ps.join()!==cardSides(id).join()?' &nbsp;plated, from '+sidesBlock(cardSides(id)):'')+
       (rankOf(id)?' \u00b7 '+rankOf(id):'')+(cd.sac?' \u00b7 '+kwSpan('sacrifice','sacrifice')+' '+cd.sac:'')+(cd.def?' \u00b7 '+kwSpan('defence','Defence')+' '+cd.def:'')+'</div>':
@@ -22076,19 +22301,21 @@ function renderStatus(){
 function renderCounts(){
   const c=document.getElementById('counts');
   const teamed=teamsInPlay().some(tm=>seatsOnTeam(tm).length>1);
-  /* Fielded counts belong to the meter beside the board. What is left here is
-     what the meter cannot show: cards, not panels. */
-  let h='<span></span><span class="ch">hand</span><span class="ch">deck</span><span class="ch">grave</span>';
+  /* Fielded counts belong to the field-lead meter. What is left here is what
+     the meter cannot show: cards, not panels -- every seat on one line of the
+     status bar. */
+  let h='';
   for(let p=0;p<PLAYERS();p++){
     const pl=G.players[p];
-    const tag=teamed?' <span class="teamtag">side '+(teamOf(p)+1)+'</span>':'';
-    const out=seatAlive(p)?'':' <span class="teamtag">out</span>';
-    const ammo=pl.hasGun?' <span class="teamtag ammo" title="'+bulletsOf(p)+' bullet'+(bulletsOf(p)===1?'':'s')+'">\u{1F52B}'+bulletsOf(p)+'</span>':'';
-    h+='<span class="cn"><span class="dot d'+p+'"></span>'+pname(p)+tag+ammo+out+'</span>'+
-      '<span class="cv">'+pl.hand.length+'</span>'+
-      '<span class="cv'+(pl.deck.length<=2&&!pl.noDeckOut&&G.mode!=='rogue'?' low':'')+'">'+pl.deck.length+'</span>'+
+    const tag=teamed?'<span class="teamtag">side '+(teamOf(p)+1)+'</span>':'';
+    const out=seatAlive(p)?'':'<span class="teamtag">out</span>';
+    const ammo=pl.hasGun?'<span class="teamtag ammo" title="'+bulletsOf(p)+' bullet'+(bulletsOf(p)===1?'':'s')+'">\u{1F52B}'+bulletsOf(p)+'</span>':'';
+    h+='<span class="seat"><span class="dot d'+p+'"></span><span class="cn">'+pname(p)+'</span>'+tag+ammo+out+
+      '<span class="ck">hand</span><span class="cv">'+pl.hand.length+'</span><span class="sep">\u00b7</span>'+
+      '<span class="ck">deck</span><span class="cv'+(pl.deck.length<=2&&!pl.noDeckOut&&G.mode!=='rogue'?' low':'')+'">'+pl.deck.length+'</span>'+
+      '<span class="sep">\u00b7</span><span class="ck">grave</span>'+
       '<button type="button" class="cv gravebtn" data-p="'+p+'" title="See '+pposs(p)+' graveyard"'+
-        ' aria-label="'+pname(p)+': '+pl.grave.length+' in the graveyard. Show them.">'+pl.grave.length+'</button>';
+        ' aria-label="'+pname(p)+': '+pl.grave.length+' in the graveyard. Show them.">'+pl.grave.length+'</button></span>';
   }
   c.innerHTML=h;
   for(const b of c.querySelectorAll('.gravebtn'))b.onclick=()=>showGrave(+b.dataset.p);
@@ -22161,7 +22388,11 @@ function renderDom(){
   const seat=leader!=null?seatsOnTeam(leader)[0]:null;
   const cls=(st&&st.blocked&&raw>=need)?' held':(gap>=need-1?' near':'');
   const tint=(cls||seat==null)?'':' style="color:var(--p'+seat+')"';
-  let h='<div class="domlead'+cls+'"'+tint+'>'+gap+'/'+need+'</div>'+
+  /* Laid flat in the status bar and said in words: how far ahead the leader
+     is, of how far ahead wins. */
+  el.title=domTitle(rows,st);
+  let h='<div class="domlead'+cls+'">'+(seat!=null&&gap>0?'<span class="dot d'+seat+'"></span>':'')+
+    'Field lead <b'+tint+'>'+gap+'</b> of '+need+' to win</div>'+
     '<div class="dommeter" title="'+escHtml(domTitle(rows,st))+'">';
   /* One segment per Teece of the lead. Level is a blank gauge; each Teece a
      side goes ahead lights one more in that side's colour, and a full gauge is
@@ -22274,13 +22505,21 @@ function renderActionBar(){
 function render(){
   if(!HAS_DOM||!G)return;
   syncHandSlots();
+  const bd=document.getElementById('board');
+  bd.style.setProperty('--bw',BW);
+  bd.classList.toggle('bw4',BW>=4);
+  /* The panel size itself is CSS (.boardrow --cs): it only needs to know how
+     many panels share the width, the Plane counted, and how big one may get. */
+  const brow=document.querySelector('.boardrow');
+  if(brow){
+    brow.style.setProperty('--bw',BW);
+    brow.style.setProperty('--cols',BW+(planeOn()?1:0));
+    brow.style.setProperty('--xgap',planeOn()?'12px':'0px');
+    brow.style.setProperty('--csmax',BW>=4?'142px':'168px');
+  }
   renderBoard();
   for(let p=0;p<PLAYERS();p++)renderHand(p);
   renderCounts();renderSun();renderDom();renderWarn();renderLog();renderPrompt();renderPreview();renderActionBar();renderStatus();
-  const bd=document.getElementById('board');
-  bd.style.setProperty('--bw',BW);
-  bd.style.setProperty('--cs',(BW>=4?'86px':'110px'));
-  bd.style.setProperty('--cs-sm',(BW>=4?'70px':'96px'));
   document.getElementById('modeLbl').textContent=
     G.mode==='rogue'?'roguelike · level '+G.level:
     G.mode==='three'?((G.formatName||'three players')+' \u00b7 four by four'+
@@ -22338,20 +22577,14 @@ function renderDraft(p,offer,k,res){
     const art=CARD_ART[id];
     dc.className='dcard t-'+cd.type+(cd.type==='teece'?'':' nostat')+(art?' arted':'');
     dc.setAttribute('data-card-deck',getCardDeck(id));
-    if(art)dc.innerHTML='<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>';
-    if(cd.type==='teece'){
-      const dsd=cardSides(id);
-      dc.innerHTML+='<div class="ds ds0">'+dsd[0]+'</div>'+
-        '<div class="ds ds1">'+dsd[1]+'</div>'+
-        '<div class="ds ds2">'+dsd[2]+'</div>'+
-        '<div class="ds ds3">'+dsd[3]+'</div>';
-    }
     /* No keyword line and no "teece" label: the rules text already says
-       Ranged or Flying, and a card with four number tabs is plainly a Teece.
-       The other three kinds still say what they are. */
-    dc.innerHTML+='<div class="dnm">'+cd.name+rankTag(id)+'</div>';
-    if(cd.type!=='teece')dc.innerHTML+='<div class="dty">'+cd.type+'</div>';
-    dc.innerHTML+='<div class="dtx">'+kwify(cd.text.split('\n')[0])+'</div>';
+       Ranged or Flying, and a card with four half-discs of numbers is plainly
+       a Teece. The other three kinds still say what they are. */
+    dc.innerHTML=(cd.type==='teece'?semiNums(cardSides(id),'ds')+rankSym(id):'')+
+      '<div class="dz"><div class="dnm">'+cd.name+rankTag(id)+'</div>'+
+      (cd.type!=='teece'?'<div class="dty">'+cd.type+'</div>':'')+
+      '<div class="tart">'+artPre(id)+'</div>'+
+      '<div class="dtx">'+kwify(cd.text.split('\n')[0])+'</div></div>';
     dc.addEventListener('click',()=>{if(!ready())return;res(id);overlay.classList.add('hidden');});
     cards.appendChild(dc);
   }
@@ -24802,13 +25035,9 @@ function tutMark(k){
 function tutTeece(id,owner,o){
   o=o||{};
   const cd=CARDS[id],s=cd.sides,art=CARD_ART[id],hot=o.hot||{};
-  const nmCls=cd.name.length>15?'nm longer':(cd.name.length>10?'nm long':'nm');
-  let h='<div class="teece o'+owner+(art?' arted':'')+(o.cls?' '+o.cls:'')+'" data-card-deck="classic">'+
-    (art?'<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>':'')+
-    '<div class="mid"><div class="'+nmCls+'">'+escHtml(cd.name)+'</div></div>';
-  for(let k=0;k<4;k++)
-    h+='<div class="s s'+k+(hot[k]?' '+hot[k]:'')+'">'+s[k]+'</div>';
-  return h+(o.dot?'<div class="actdot"></div>':'')+'</div>';
+  return '<div class="teece o'+owner+(art?' arted':'')+(o.cls?' '+o.cls:'')+'" data-card-deck="classic">'+
+    teeceFace({name:escHtml(cd.name),cardId:id,sides:s,numCls:k=>hot[k]?' '+hot[k]:''})+
+    (o.dot?'<div class="actdot"></div>':'')+'</div>';
 }
 /* A small board, row by row. Each entry is one panel: '' for an empty one, a
    tutTeece string, or {h,cls} for a panel that needs a class of its own.
@@ -24822,16 +25051,9 @@ function tutGrid(cells,o){
 /* A card as the hand draws it, with what kind of card it is written under it. */
 function tutHandCard(id,label){
   const cd=CARDS[id],art=CARD_ART[id];
-  let h='<div><div class="card t-'+cd.type+(art?' arted':'')+'" data-card-deck="classic">'+
-    (art?'<pre class="ascii" aria-hidden="true">'+art.map(escHtml).join('\n')+'</pre>':'');
-  if(cd.type==='teece'){
-    for(let k=0;k<4;k++)h+='<div class="hs hs'+k+'">'+cd.sides[k]+'</div>';
-    h+='<div class="hcn cn">'+escHtml(cd.name)+'</div>';
-  }else{
-    h+='<div class="ct">'+cd.type+'</div><div class="cn">'+escHtml(cd.name)+'</div>'+
-      '<div class="cs">'+escHtml(cd.text.split('\n')[0])+'</div>';
-  }
-  return h+'</div><span class="tlbl">'+label+'</span></div>';
+  return '<div><div class="card t-'+cd.type+(art?' arted':'')+'" data-card-deck="classic">'+
+    handFace(id,cd.type==='teece'?cd.sides:null,null,null)+
+    '</div><span class="tlbl">'+label+'</span></div>';
 }
 /* The pages. Card ids are the classic set: 1 Grunt 7/7/7/7, 2 Hypeman 6s,
    6 Sniper 4/4/8/8, 8 Gate 10/1/10/1, 9 Sensei 8s, 10 Southpaw 6/6/6/9,
@@ -24935,7 +25157,7 @@ const TUT_PAGES=[
        '<div class="cap">Five Teece to one is four ahead. End your turn like this and the game is yours.</div></div>',
    body:'<ul class="tutlist">'+
      '<li><span class="k">Take the field</span><span>End your turn <b>four Teece ahead</b> on the board. The '+
-       'meter beside the board lights one bar for every Teece of lead. Tokens do not count.</span></li>'+
+       'field-lead meter above the board lights one bar for every Teece of lead. Tokens do not count.</span></li>'+
      '<li><span class="k">Wipe them out</span><span>A side with no Teece left anywhere, whether on the board, '+
        'in hand or in the deck, is out.</span></li>'+
      '<li><span class="k">Outlast them</span><span>When a player has to draw from an empty deck, or when turn '+
@@ -25065,7 +25287,7 @@ const TUT_LESSONS=[
      sayPick:'Put it beside the Knight: tap the glowing panel.'},
     {end:true,
      say:'10 beats 9. You have three Teece and the Trainer has none. End a turn with <b>four more</b> Teece than the '+
-       'other side and you win; the meter beside the board counts the lead. Press <b>End Turn</b>.'}]},
+       'other side and you win; the field-lead meter above the board counts the lead. Press <b>End Turn</b>.'}]},
   {t:'Magic',steps:[
     {play:964,pick:[0],done:()=>!G.board[0].teece,
      say:'The <b>Sentinel</b> ties your Squire, 10 against 10, and your Recruit, 9 against 9. Magic can break a tie. '+
@@ -25284,12 +25506,13 @@ if(HAS_DOM){
 }
 
 /* ============ boot & mode select ============ */
-/* Every game opens with the other hands tucked away. */
+/* The other hands are always on the table now, small and face down unless
+   handVisible says otherwise; there is nothing to tuck away. Kept so the start
+   of a game still clears any old collapsed state. */
 function hideOppHands(){
   if(!HAS_DOM)return;
-  const oh=document.getElementById('oppHands'),btn=document.getElementById('toggleOppHands');
-  if(oh)oh.classList.add('collapsed');
-  if(btn)btn.textContent='Show';
+  const oh=document.getElementById('oppHands');
+  if(oh)oh.classList.remove('collapsed');
 }
 async function start(mode,vsAI,preset){
   if(!HAS_DOM)return;
@@ -25385,9 +25608,8 @@ async function startInner(mode,vsAI,preset){
     G=newState('deck',true,[DECKS[a].cards.slice(),DECKS[c].cards.slice()],{aiSeats:[0,1],seatNames:[na,nc]});
     G.spectate=true;
     G.deckNames=[DECKS[a].name,DECKS[c].name];
-    /* Nobody's hand is a secret here: open the second clanker's row too. */
-    {const oh=document.getElementById('oppHands'),btn=document.getElementById('toggleOppHands');
-     if(oh)oh.classList.remove('collapsed');if(btn)btn.textContent='Hide';}
+    /* Nobody's hand is a secret here: handVisible shows the second clanker's
+       row face up too. */
     applyDeckRules(0,a);
     applyDeckRules(1,c);
     log('Clanker On Clanker: '+na+' faces '+nc+'. The computer plays both sides.');
@@ -25995,6 +26217,9 @@ function restart(){
   document.getElementById('promptBar').classList.remove('hot');
 }
 if(HAS_DOM){
+  /* The board is sized off the window, and a status row that fitted at one
+     size may not at another: draw it again once a resize settles. */
+  {let rz=0;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(G)render();},160);});}
   window.addEventListener('error',e=>{
     const pb=document.getElementById('promptBar');
     if(pb){pb.classList.add('hot');pb.textContent='Script error: '+(e.message||'unknown');}
@@ -26030,12 +26255,6 @@ if(HAS_DOM){
   document.getElementById('endRestart').onclick=restart;
   document.getElementById('tutBtn').onclick=()=>startTutorial();
   document.getElementById('rulesBtn').onclick=()=>openRules();
-  document.getElementById('toggleOppHands').onclick=()=>{
-    const oh=document.getElementById('oppHands');
-    const btn=document.getElementById('toggleOppHands');
-    oh.classList.toggle('collapsed');
-    btn.textContent=oh.classList.contains('collapsed')?'Show':'Hide';
-  };
   /* Keyword popups. Capture phase, because a tap on a Teece stops its click
      from bubbling, and that tap still has to close an open popup. */
   document.addEventListener('click',e=>{
