@@ -404,6 +404,12 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
 .hvslot .teece{--tin:6% 9%}
 .hvslot .hvempty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-family:var(--disp);font-size:clamp(10px,10cqw,14px);color:#9fb8d4;letter-spacing:.06em;opacity:.7}
+/* A thin bank of cloud between the Heavens and the top row: nothing fights across it. */
+.hvcloud{grid-row:1;grid-column:1/-1;align-self:end;height:10px;pointer-events:none;z-index:5;
+  transform:translateY(calc(50% + var(--gap) / 2));opacity:.9;
+  background:radial-gradient(circle at 9px 7px,#fff 5px,transparent 6px) repeat-x 0 0/18px 10px,
+    radial-gradient(circle at 4px 6px,#eef4fb 4px,transparent 5px) repeat-x 9px 1px/18px 10px;
+  filter:drop-shadow(0 1px 1px rgba(40,70,110,.35))}
 .hvbtns{position:absolute;right:2px;bottom:2px;display:flex;flex-direction:column;align-items:flex-end;gap:2px;z-index:6}
 .hvbtn{font:inherit;font-size:clamp(9px,9cqw,12px);font-weight:700;padding:2px 6px;border-radius:999px;cursor:pointer;
   border:1px solid #c79a2a;background:#f6e7b0;color:#3b2a00;box-shadow:0 1px 2px rgba(0,0,0,.4)}
@@ -1481,7 +1487,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:260,date:'2026-10-19'};
+const VERSION={build:261,date:'2026-10-19'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1604,7 +1610,7 @@ const KW_RULES={
   ram:'Once per your turn: select a Teece in the same row or column; stun it, give it -3, and move one space toward it if able.',
   paladin:'A Teece from the Paladin deck, or any Teece that has sworn an Oath.',
   armoured:'Every Knight has 1 Defence. Mounts do not.',
-  heavens:'Three slots above the board, one over each column. A Teece up there is off the field: it doesn\u2019t fight, nothing is adjacent to it, battlegrounds and auras don\u2019t reach it, effects can\u2019t select it, and it counts toward nobody\u2019s field lead. Some Angels have an ability that works only from up there.',
+  heavens:'Three slots above the board, one over each column. A Teece up there is off the field: it doesn\u2019t fight, nothing is adjacent to it, battlegrounds and auras don\u2019t reach it, effects can\u2019t select it (though you can equip it), and it counts toward nobody\u2019s field lead. Once per your turn, tap an Angel up there to step it into an empty Heaven beside it. Some Angels have an ability that works only from up there.',
   descend:'Come down from the Heavens: drop down the column and land on the first empty panel from the top. Once per your turn, and not on the turn it went up. If the column is full, it stays where it is. Descending is a move, not a play.',
   ascend:'Go up from the top row into the empty Heaven above, once per your turn. A Heavenly Teece can do it; it can\u2019t Descend again until your next turn.',
   fall:'The Fallen Angel, destroyed for the first time, comes back on an empty panel in the bottom row as a Devil with Top 6, Right 6, Bottom 0 and Left 6.',
@@ -18286,17 +18292,34 @@ async function playEquip(p,handIdx){
   }
   /* The Runeblade can be set in a Runestone instead of into a hand. */
   const sheaths=ed.runeblade?sheathSpots(p):[];
-  if(!cands.length&&!hands.length&&!sheaths.length){toast(ed.onlyHand?'No Teece in your hand to equip.':ed.onlySpiderling?'No Spiderling to equip.':
+  /* Your own Teece up in the Heavens take gear too (Greg, build 261). Not an
+     equip that does something as it goes on: those read the panel it lands on. */
+  const hvEq=[];
+  if(G.heaven&&!ed.onlyHand&&!ed.onlyToken&&!ed.onlySpiderling&&!ed.onlyOath&&!ed.onlyMount&&!ed.onlyPackLeader&&!(ed.grants&&ed.grants.onEquip))
+    for(let c=0;c<G.heaven.length;c++){const t=G.heaven[c];if(t&&t.owner===p&&equipRoom(t))hvEq.push(c);}
+  if(!cands.length&&!hands.length&&!sheaths.length&&!hvEq.length){toast(ed.onlyHand?'No Teece in your hand to equip.':ed.onlySpiderling?'No Spiderling to equip.':
     ed.onlyToken?'No Token to equip.':ed.onlyOath?'No Paladin of yours is sworn to '+OATHS[ed.onlyOath].name+'.':ed.onlyMount?'No Mount of yours on the board.':ed.onlyPackLeader?'No Pack Leader to equip, on the board or in hand.':'No Teece to equip, on the board or in hand.');return false;}
   const targets=cands.concat(sheaths.filter(i=>cands.indexOf(i)<0));
   const sheathe=(bb,i)=>{const g=bb[i].ground;if(g)bb[i].ground=Object.assign({},g,{sheath:(g.sheath||[]).concat([{cardId:id,owner:p}])});};
   const c=await chooseCell(p,targets,'Choose a Teece for '+CARDS[id].name+(ed.anyOwner?' \u2014 either side\u2019s':'')+
     (sheaths.length?', or a Runestone to set it in':'')+
+    (hvEq.length?', or tap one in the Heavens':'')+
     (hands.length?', on the board or in your hand.':'.'),
-    {cancel:true,hands,mut:(bb,i)=>{if(cands.indexOf(i)>=0&&bb[i].teece)bb[i].teece.equips.push({cardId:id,owner:p});else sheathe(bb,i);}});
+    {cancel:true,hands,heavens:hvEq.length?hvEq:undefined,mut:(bb,i)=>{if(cands.indexOf(i)>=0&&bb[i].teece)bb[i].teece.equips.push({cardId:id,owner:p});else sheathe(bb,i);}});
   if(c==null||c==='CANCEL')return false;
   if(typeof c==='string'&&c[0]==='h'){
     if(!plateHand(p,handIdx,parseInt(c.slice(1),10)))return false;
+    render();
+    return true;
+  }
+  if(typeof c==='string'&&c[0]==='v'){
+    const ht=G.heaven[+c.slice(1)];
+    if(!ht||ht.owner!==p||!equipRoom(ht))return false;
+    handTake(p,handIdx);
+    ht.equips.push({cardId:id,owner:p});
+    log(pname(p)+' equips '+CARDS[id].name+' to '+nm(ht)+', up in '+hvWhere(+c.slice(1))+'.');
+    equipLanded(id);
+    await resolveCombat();
     render();
     return true;
   }
@@ -23907,6 +23930,32 @@ async function heavenPlace(p,handIdx,id,o){
   render();
   return true;
 }
+/* An Angel in the Heavens can step one Heaven left or right into an empty one,
+   once per its controller's turn (Greg, build 261). Its own charge: it neither
+   spends nor needs the Descend/Ascend one. */
+function hvShiftCols(c){
+  const t=heavens()[c],o=[];
+  if(!t||!heavenlyBody(t)||t.hvShift===G.turnNum)return o;
+  for(const d of [c-1,c+1])if(d>=0&&d<BW&&!heavens()[d])o.push(d);
+  return o;
+}
+async function heavenShift(c,dest){
+  const h=heavens(),t=h[c];
+  if(!t||G.over)return false;
+  const opts=hvShiftCols(c);
+  if(!opts.length){toast(nm(t)+' cannot move: '+(t.hvShift===G.turnNum?'it has already moved this turn':'no empty Heaven beside it')+'.');return false;}
+  let d=dest!=null&&opts.indexOf(dest)>=0?dest:null;
+  if(d==null){
+    d=opts.length===1&&(isAIP(t.owner)||!HAS_DOM)?opts[0]:await chooseHeaven(t.owner,opts,'Tap the Heaven '+nm(t)+' moves to.',{cancel:true});
+    if(d==null||d==='CANCEL')return false;
+  }
+  h[c]=null;h[d]=t;t.hvShift=G.turnNum;
+  log(nm(t)+' moves from '+hvWhere(c)+' to '+hvWhere(d)+'.');
+  G.eventFlag=true;
+  await resolveCombat();
+  render();
+  return true;
+}
 /* The Messenger, from the Heavens: trade places with an ally on the board. */
 function messengerTargets(c){
   const m=heavens()[c],b=G.board,o=[];
@@ -24071,6 +24120,8 @@ function heavenStatuses(p,push){
     if(!hvDescendBlock(c))push('hvd'+c,'good','Descend: '+nm(t),
       nm(t)+' is in '+hvWhere(c)+'. Tap to bring it down its column onto the first empty panel.',
       ()=>heavenDescend(c));
+    if(hvShiftCols(c).length)push('hvs'+c,'good','Move: '+nm(t),
+      nm(t)+' can step into an empty Heaven beside it, once this turn.',()=>heavenShift(c));
     if(!t.silenced&&DEF(t).hvSwap&&t.msgTurn!==G.turnNum&&messengerTargets(c).length)
       push('hvm'+c,'good','Swap: '+nm(t),nm(t)+' can trade places with an ally on the board: the ally goes up into '+hvWhere(c)+'.',
         ()=>messengerSwap(c));
@@ -24083,6 +24134,7 @@ function renderHeavens(bEl){
   bEl.classList.toggle('hvOn',on);
   if(!on)return;
   const h=heavens();
+  {const cl=document.createElement('div');cl.className='hvcloud';cl.title='The Heavens: nothing up here fights the board below.';bEl.appendChild(cl);}
   for(let c=0;c<BW;c++){
     const s=document.createElement('div');
     s.className='hvslot';
@@ -24107,7 +24159,10 @@ function renderHeavens(bEl){
     /* Hover or tap reads the card in the Detail panel, the way a panel does. */
     const peek=()=>{if(G.detailLock==null)showDetailCard(t.cardId,t.equips,t.owner);};
     tp.addEventListener('mouseenter',peek);
-    tp.addEventListener('click',e=>{e.stopPropagation();if(G.pending)return;G.detailLock=null;showDetailCard(t.cardId,t.equips,t.owner);});
+    /* Tapping your own Angel up there also selects it to step sideways: the
+       empty Heavens beside it light up. */
+    tp.addEventListener('click',e=>{e.stopPropagation();if(G.pending)return;G.detailLock=null;showDetailCard(t.cardId,t.equips,t.owner);
+      if(ownTurn(t.owner)&&!G.over&&hvShiftCols(c).length)uiDo('status',{sp:t.owner,k:'hvs'+c},()=>heavenShift(c));});
     s.appendChild(tp);
     const p=t.owner;
     if(ownTurn(p)&&!G.over){
@@ -24183,6 +24238,18 @@ async function aiAngels(late){
        whose work is done from the sky stays unless the landing is very good. */
     const stay=(DEF(t).hvAura||DEF(t).hvDef||DEF(t).hvGuard)?3:(late?0.2:0.6);
     if(best!=null&&bg>stay){await heavenDescend(c,{cell:best});await wait(250);}
+  }
+  /* Sideways: a body that works from the sky steps over a column that needs it more. */
+  for(let c=0;c<h.length;c++){
+    const t=h[c];
+    if(G.over||!t||t.owner!==p)continue;
+    const d=DEF(t),halo=t.equips.some(e=>{const g=eqG(e);return g&&g.hvTop;});
+    if(!(d.hvAura||d.hvDef||d.hvGuard||halo))continue;
+    const worth=x=>{let n=0;for(let r=0;r<BW;r++){const o=G.board[r*BW+x].teece;if(!o)continue;
+      if(d.hvAura?!sameTeam(o.owner,p):sameTeam(o.owner,p))n++;}return n;};
+    let best=null,bv=worth(c);
+    for(const x of hvShiftCols(c))if(worth(x)>bv){bv=worth(x);best=x;}
+    if(best!=null){await heavenShift(c,best);await wait(200);c=-1;}
   }
   /* The Messenger: swap when the ally that goes up is worth saving. */
   for(let c=0;c<h.length;c++){
@@ -27503,7 +27570,7 @@ if(HAS_DOM){
 }
 /* ============ exports for harness ============ */
 if(typeof module!=='undefined'){
-  module.exports={heavens,heavenDescend,playToHeaven,heavenlyCard,heavenlyBody,hvLandSpots,hvDescendBlock,ascendBlock,
+  module.exports={heavens,heavenShift,hvShiftCols,heavenDescend,playToHeaven,heavenlyCard,heavenlyBody,hvLandSpots,hvDescendBlock,ascendBlock,
     messengerSwap,heavenSides,aiAngels,angelsInPlay,statusesFor,
     makeFusionCard,fuseOnBoard,fusePartners,canFuseOnBoard,canFuseHand,fuseHandAt,fuseHandOpts,
     aiFuseHand,aiFusionMagicPlan,fusionsInPlay,forgetFusions,
