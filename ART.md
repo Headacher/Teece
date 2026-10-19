@@ -262,8 +262,16 @@ where they fall short.
   and sigils are mixed and need one hand.
 - **Rock.** Boulder bodies `( o o )` with `.-'-.` shoulders, and rubble `(_)`.
   Consistent. Bedrock and Clinging Moss are only texture.
-- **Ogre.** One head `( o o ) (^\___/^)` repeated on every Teece. This is the
-  same problem the old Vampire deck had.
+- **Ogre.** Redrawn: a front-on hulk, its small head sunk between humped
+  shoulders (`.--d(oo)b--.`, the `d b` ears either side of close-set eyes), a
+  tusked underbite `\^^/`, a round gut `( )`, long arms hanging to `(_)` fists
+  and stubby `(__)(__)` feet. Each card changes the pose or the prop: the
+  Bruiser punches, the Hurler holds a Teece overhead, the Warden blocks a
+  doorway with crossed arms, the Tactician points at a grid map. Bosses add a
+  feathered headdress and skull staff (Chieftain) or a horned helm and spiked
+  pauldrons (Warlord). The shoved Teece is always the same little `o /|\ / \`
+  ringed in `*` stun stars. The Goblin is the one exception, with `/\` ears and
+  a `vv` grin. The back's two big footprints sit behind the art as texture.
 - **Robot.** Square heads `[o_o]` and `|===|` chassis. Consistent and readable.
 - **Gadget.** Boxes with dials and switches. Mixed. The fields (Polarity Field)
   are only lines.
