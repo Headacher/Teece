@@ -130,6 +130,8 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
 .discardBtn:hover{border-color:var(--gold)}
 .discardBtn:disabled{opacity:.4;cursor:default}
 .combineBtn{border-color:#f5cf6b;color:#f5cf6b;font-weight:700}
+.card.t-teece .discardBtn.dismountBtn{left:auto;right:3px;text-transform:none}
+.sqhand .card.t-teece .discardBtn.dismountBtn{padding:2px 2px;letter-spacing:-.02em}
 /* The bottom number has the middle of the bottom edge, so the button takes the
    corner beside it. */
 .card.t-teece .discardBtn{left:3px;bottom:3px;padding:2px 3px;border-radius:4px;font-size:clamp(7px,5.8cqw,9px);letter-spacing:0;
@@ -1371,7 +1373,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:249,date:'2026-10-19'};
+const VERSION={build:250,date:'2026-10-19'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1492,7 +1494,7 @@ const KW_RULES={
   paladin:'A Teece from the Paladin deck, or any Teece that has sworn an Oath.',
   armoured:'Every Knight has 1 Defence. Mounts do not.',
   knight:'A Teece from the Knights deck. Knights are Armoured and ride Mounts.',
-  mount:'A Token that a Knight rides as an equip. A Knight is played already riding the Mount printed on it, and has the Mount\u2019s numbers, Defence and abilities on top of its own. When the Knight is destroyed, its Mount is played on that panel or one next to it. A Knight played onto one of your Mounts on the board rides that Mount instead of its own. A Knight can have only one Mount, unless it wears a Herd Saddle. Once per your turn, a Mount standing on its own can carry one of your Knights that has room for another Mount: one whose Mount is gone, or one with a Herd Saddle.'
+  mount:'A Token that a Knight rides as an equip. A Knight is played already riding the Mount printed on it, and has the Mount\u2019s numbers, Defence and abilities on top of its own. When the Knight is destroyed, its Mount is played on that panel or one next to it. A Knight played onto one of your Mounts on the board rides that Mount instead of its own. A Knight can have only one Mount, unless it wears a Herd Saddle. Once per your turn, a Mount standing on its own can carry one of your Knights that has room for another Mount: one whose Mount is gone, or one with a Herd Saddle. In hand, a Knight can dismount: its Mount becomes a card of its own, to play on its own or to saddle onto another Knight in hand that has no Mount.'
 };
 /* The spells a Wizard conjures and a Priest folds together. Built from the
    cards themselves at the moment of the tap, so the popup cannot drift from the
@@ -2823,7 +2825,7 @@ function canPlay(p,cardId){
   if(cd.type==='teece'){
     if((G.teecePlayed&&!freePlayFor(p,cardId))||hexOn(p,'freeze'))return false;
     let room=false;
-    if(!cd.mustMount)for(let i=0;i<BN;i++)if(openAt(G.board,i)){room=true;break;}
+    if(!mustRide(p,G.players[p].hand.indexOf(cardId),cardId))for(let i=0;i<BN;i++)if(openAt(G.board,i)){room=true;break;}
     /* A Knight can also be played onto one of your Mounts; Legaless only there. */
     if(!room&&cd.knight&&knightSpots(G.board,p,cardId).length)room=true;
     if(!room)return false;
@@ -5668,12 +5670,12 @@ const CARDS = {
  1248:{name:'Emu Knight',type:'teece',sides:[4,2,2,4],def:1,knight:true,mountOf:1268,
     text:'Armoured. {mount}'},
  1249:{name:'Legaless',type:'teece',sides:[9,9,9,9],def:1,knight:true,mustMount:true,kw:['ranged'],
-    text:'Armoured. Ranged. Must be played on one of your Mounts, which it rides.'},
+    text:'Armoured. Ranged. Must be played on one of your Mounts, which it rides, unless a Mount was saddled onto it in hand.'},
  1250:{name:'Giraffe Knight',type:'teece',sides:[8,0,0,0],def:1,knight:true,mountOf:1269,
     text:'Armoured. {mount}'},
  1251:{name:'Knight Captain',type:'teece',sides:[6,6,6,6],def:1,sac:1,knight:true,mountOf:1270,
-    handDiscard:[{fx:'token',tok:1270,count:1}],
-    text:'Sacrifice a Teece to play. Armoured. {mount} Discard this from your hand: play its Mount, a Barded Charger.'},
+    handDiscard:[{fx:'mountsOut'}],
+    text:'Sacrifice a Teece to play. Armoured. {mount} Discard this from your hand: play its Mount.'},
  1252:{name:'Grand Marshal',type:'teece',sides:[5,5,5,5],def:1,sac:2,knight:true,mountOf:1271,
     text:'Sacrifice two Teece to play. Armoured. {mount}'},
  /* ---- Knights equips ---- */
@@ -6973,9 +6975,10 @@ function newState(mode,vsAI,decks,extra){
    plating lives in a parallel array and the two must always be spliced
    together. handPush and handTake are the only places allowed to touch either,
    which is what keeps them the same length. */
-function handPush(p,id,plate){
-  /* ...nor in a hand. */
-  if(isMountCard(id))return -1;
+function handPush(p,id,plate,asCard){
+  /* ...nor in a hand -- except a Mount a Knight dismounts in hand, which
+     becomes a card of its own on purpose (asCard). */
+  if(isMountCard(id)&&!asCard)return -1;
   const pl=G.players[p];
   if(!pl.plate)pl.plate=pl.hand.map(()=>[]);
   pl.hand.push(id);
@@ -7066,7 +7069,9 @@ function cardSides(cardId){
    back is drawn with its printed numbers gone, because that is how it lands. */
 function platedSides(cardId,worn,owner){
   const cd=CARDS[cardId];
-  const s=cardSides(cardId);
+  /* A Knight's Mounts in hand are read off its plate: dismounted, it is on foot. */
+  const s=cd.sides.slice();
+  for(const m of handMounts(cardId,worn))for(let k=0;k<4;k++)s[k]+=m.sides[k];
   if(owner!=null&&isCoffined(owner,cardId))for(let k=0;k<4;k++)s[k]-=cd.sides[k];
   if(!worn||!worn.length)return s;
   const selfDbl=!!cd.selfDoublePos;
@@ -7082,6 +7087,7 @@ function platedSides(cardId,worn,owner){
 /* plating whose Teece never reaches the board is scrapped with it */
 function dumpPlate(plate,why,cardId){
   for(const e of plate||[]){
+    if(e.off)continue;
     /* An Astral Mindwyrm does not come off the card it was bolted to, even
        when that card never reached the board: it goes into the graveyard
        still attached, and comes back when the card does. */
@@ -15731,6 +15737,16 @@ async function FXRUN(st,ctx){
     mountUp(b[j].teece,m,true);
     await anim([c,j],'zap');
     return;}
+  /* The Knight Captain thrown away from hand plays the Mount it is carrying
+     there, whichever that is; dismounted, it has none to play. */
+  case 'mountsOut':{
+    const hx=ctx.handIdx,pl=G.players[p];
+    const ms=hx!=null&&pl.hand[hx]!=null?handMounts(pl.hand[hx],plateOf(p,hx)):[];
+    /* Refused outright, so the card stays in hand rather than going for nothing. */
+    if(!ms.length){toast(CARDS[pl.hand[hx]].name+' has no Mount to play: it was dismounted.');return 'ABORT';}
+    let did=false;
+    for(const m of ms){const r=await FXRUN({fx:'token',tok:m.cardId,count:1},ctx);if(r!=='NONE'&&r!=='ABORT')did=true;}
+    return did?undefined:'NONE';}
   /* ---- Paladin ---- */
   case 'cleanse':{
     const cands=[];
@@ -17526,7 +17542,7 @@ async function playHandDiscard(p,handIdx){
      effect is its ordinary onDiscard. Handing a boolean to runSteps put `true`
      through a for..of, which throws, so the Discard button did nothing at all. */
   const steps=Array.isArray(d.handDiscard)?d.handDiscard:null;
-  const ok=steps?await runSteps(steps,{p,cell:null,t:null,first:true}):true;
+  const ok=steps?await runSteps(steps,{p,cell:null,t:null,first:true,handIdx}):true;
   if(!ok)return false;
   const idx=pl.hand.indexOf(id);
   const gone=idx>=0?handTake(p,idx):null;
@@ -17550,7 +17566,7 @@ async function playFromHand(p,handIdx){
   else if(d.type==='equip')ok=await playEquip(p,handIdx);
   else if(d.type==='magic')ok=await playMagic(p,handIdx);
   else if(d.type==='ground')ok=await playGround(p,handIdx);
-  if(ok){G.eventFlag=true;if(d.type==='teece')pl.teecePlayedThisTurn++;}
+  if(ok){G.eventFlag=true;if(d.type==='teece'&&ok!=='saddled')pl.teecePlayedThisTurn++;}
   else{
     /* Some cards cannot resolve at all right now — a spell with no legal
        target aborts every time. Remember it, so the forced-play rule stops
@@ -17649,8 +17665,10 @@ async function playTeece(p,handIdx){
   const platedFree=plateOf(p,handIdx).some(e=>{const g=eqG(e);return g&&g.freePlay;});
   const free=G.viaReveal||G.viaEffect||called||platedFree;
   const spend=()=>{if(called)G.freePlay=null;if(!free)spendTeecePlay(p);};
-  if(G.teecePlayed&&!free){toast(teeceCap(p)>1?'Every Teece for this turn is already played.':'Only one Teece per turn.');return false;}
-  if(hexOn(p,'freeze')){toast('Frozen: you cannot play Teece.');return false;}
+  /* A Mount card can go onto a Knight in hand instead, which spends no play. */
+  const saddleTo=(isMountCard(id)&&!G.viaEffect&&!G.viaReveal)?saddleHands(p,handIdx):[];
+  if(G.teecePlayed&&!free){if(saddleTo.length)return saddlePick(p,handIdx,saddleTo);toast(teeceCap(p)>1?'Every Teece for this turn is already played.':'Only one Teece per turn.');return false;}
+  if(hexOn(p,'freeze')){if(saddleTo.length)return saddlePick(p,handIdx,saddleTo);toast('Frozen: you cannot play Teece.');return false;}
   const need=sacsNeeded(id,p);
   const pool=sacPool(p,handIdx,id);
   const sacables=pool.cells;
@@ -17662,14 +17680,16 @@ async function playTeece(p,handIdx){
     toast(d.sacSpiderling?'You need a Spiderling of yours to sacrifice.':pool.hands.length?'Not enough to sacrifice.':'Not enough Teece to sacrifice.');
     return false;
   }
-  const empt=[];if(!d.mustMount)for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
+  /* Legaless already riding a Mount saddled on in hand lands anywhere. */
+  const ride=mustRide(p,handIdx,id);
+  const empt=[];if(!ride)for(let i=0;i<BN;i++)if(openAt(b,i))empt.push(i);
   /* A Knight can land on one of your Mounts and ride it; Legaless only there. */
   const mspots=knightSpots(b,p,id);
-  if(d.mustMount&&!mspots.length){toast(d.name+' must be played on one of your Mounts.');return false;}
+  if(ride&&!mspots.length){toast(d.name+' must be played on one of your Mounts.');return false;}
   /* A sacrifice empties the panel it was standing on, and that panel is a place
      the new Teece may land. So a full board is only a wall when the card pays
      for nothing. */
-  if(!empt.length&&!mspots.length&&!need){toast('No empty space.');return false;}
+  if(!empt.length&&!mspots.length&&!need){if(saddleTo.length)return saddlePick(p,handIdx,saddleTo);toast('No empty space.');return false;}
   const plan=(isAIP(p)&&AI_TEECE_PLAN)?AI_TEECE_PLAN:null;
   const sacP=[],sacH=[];
   for(let paidW=0,s=0;paidW<need;s++){
@@ -17687,7 +17707,7 @@ async function playTeece(p,handIdx){
      the card being played is about to shift everything after it. */
   const sacHIds=sacH.map(x=>pl.hand[x]);
   const spots=empt.concat(mspots);
-  if(!d.mustMount)for(const c of sacP)if(!b[c].razed&&!blockedGround(b,c)&&spots.indexOf(c)<0)spots.push(c);
+  if(!ride)for(const c of sacP)if(!b[c].razed&&!blockedGround(b,c)&&spots.indexOf(c)<0)spots.push(c);
   spots.sort((x,y)=>x-y);
   /* What the Teece would actually arrive as, panel by panel. Every other prompt
      in the game previews its own consequence and this one previewed nothing, so
@@ -17706,13 +17726,16 @@ async function playTeece(p,handIdx){
     if(rm)bb[c].teece=null;
     if(!openAt(bb,c))return;
     const gt=makeTeece(id,p);
-    for(const e of plateOf(p,handIdx))gt.equips.push(e);
+    const pt=plateOf(p,handIdx);
+    for(const e of pt)if(!e.mount)gt.equips.push(e);
+    wearHandMounts(gt,pt);
     if(rm)mountUp(gt,rm,false);
     putTeece(bb,c,gt,false);
   };
-  let spot=plan?plan.c:await chooseCell(p,spots,'Choose a space for '+d.name+'.',
-    {cancel:true,mut:previewPlace,preview:{cardId:id,plate:plateOf(p,handIdx)}});
+  let spot=plan?plan.c:await chooseCell(p,spots,'Choose a space for '+d.name+(saddleTo.length?', or a Knight in your hand to carry it.':'.'),
+    {cancel:true,mut:previewPlace,preview:{cardId:id,plate:plateOf(p,handIdx)},hands:saddleTo.length?saddleTo:undefined});
   if(spot==null||spot==='CANCEL')return false;
+  if(typeof spot==='string'&&spot[0]==='h')return saddleHand(p,handIdx,parseInt(spot.slice(1),10))?'saddled':false;
   /* Committed. The card comes out of the hand HERE, before the sacrifices are
      paid, because a death can reach into that same hand -- a Harbinger of Death
      discards as it falls -- and every rule in the game indexes the hand by
@@ -17721,7 +17744,8 @@ async function playTeece(p,handIdx){
      putting back. */
   const taken=handTake(p,handIdx);
   if(!taken)return false;
-  const worn=taken.plate;
+  /* Gear only: a Knight's Mounts in hand are worn by wearHandMounts. */
+  const worn=taken.plate.filter(e=>!e.mount);
   const sacked=[];
   /* Paid out of the hand first: nothing on the board has moved yet, so a
      Willing Sacrifice that draws and discards cannot disturb a panel already
@@ -17780,6 +17804,7 @@ async function playTeece(p,handIdx){
   /* anything plated onto it in hand is already bolted on when it lands, so the
      board sees the equipped stats from the first moment */
   for(const e of worn)t.equips.push(e);
+  wearHandMounts(t,taken.plate);
   for(const e of gearTaken)t.equips.push(e);
   if(ridden)mountUp(t,ridden,true);
   if(plan&&plan.rot)spinT(t,plan.rot===1?'cw':'ccw');
@@ -20399,8 +20424,9 @@ async function aiPlayTeece(){
     /* the panels a sacrifice is about to clear are landing spots too, and a
        Knight's are your Mounts as well */
     const ms=knightSpots(b,p,id);
-    const spots=d.mustMount?ms.slice():empt.concat(ms);
-    if(!d.mustMount)for(const sc of sacP)if(!b[sc].razed&&spots.indexOf(sc)<0)spots.push(sc);
+    const ride=mustRide(p,h,id);
+    const spots=ride?ms.slice():empt.concat(ms);
+    if(!ride)for(const sc of sacP)if(!b[sc].razed&&spots.indexOf(sc)<0)spots.push(sc);
     for(const c of spots){
       for(const rot of rots){
         const bb=cloneBoard(b);
@@ -20409,6 +20435,7 @@ async function aiPlayTeece(){
         if(rm)bb[c].teece=null;
         if(bb[c].teece)continue;
         const t=makeTeece(id,p);
+        wearHandMounts(t,plateOf(p,h));
         if(rm)mountUp(t,rm,false);
         if(rot===1){const s=t.base;t.base=[s[3],s[0],s[1],s[2]];}
         if(rot===-1){const s=t.base;t.base=[s[1],s[2],s[3],s[0]];}
@@ -20688,6 +20715,7 @@ async function aiTurn(){
   if(stale(ep)||G.over)return;
   for(let k=0;k<2;k++){if(!await aiFuseHand())break;if(stale(ep)||G.over)return;}
   if(stale(ep)||G.over)return;
+  await aiKnightHand();
   await aiKnightSaddle();
   await aiPlayTeece();
   if(stale(ep)||G.over)return;
@@ -21607,7 +21635,7 @@ function renderHand(p){
     card.setAttribute('data-card-deck',getCardDeck(id));
     /* A card a Brigadier called up is still playable with the turn's Teece
        spent, so it must not be greyed out with the rest of them. */
-    if(!isTarget&&(p!==G.turn||(G.teecePlayed&&cd.type==='teece'&&!freePlayFor(p,id))||G.over))card.classList.add('dim');
+    if(!isTarget&&(p!==G.turn||(G.teecePlayed&&cd.type==='teece'&&!freePlayFor(p,id)&&!(isMountCard(id)&&saddleHands(p,i).length))||G.over))card.classList.add('dim');
     const art=CARD_ART[id];
     if(art)card.classList.add('arted');
     if(cd.type==='teece'){
@@ -21652,18 +21680,34 @@ function renderHand(p){
       db.addEventListener('click',(e)=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)uiDo('discard',{i},()=>playHandDiscard(p,i));});
       card.appendChild(db);
     }
+    /* A Knight in hand can get off its Mount, which becomes a card of its own.
+       In the other bottom corner, so a Knight Captain keeps its Discard. */
+    if(canDismount(p,i)){
+      const mb=document.createElement('button');
+      mb.className='discardBtn dismountBtn';
+      mb.type='button';
+      mb.textContent='Dismount';
+      mb.title='Take '+handMounts(id,worn).map(m=>CARDS[m.cardId].name).join(' and ')+' off '+cd.name+
+        ': it becomes a card in your hand, to play on its own or saddle onto another Knight in hand with no Mount.';
+      mb.disabled=(p!==G.turn||G.over||!!G.pending);
+      mb.addEventListener('click',e=>{e.stopPropagation();if(p===G.turn&&!G.over&&!G.pending)uiDo('dismount',{i},()=>dismountHand(p,i));});
+      card.appendChild(mb);
+    }
     /* The Ward sight in the hand as well, printed or bolted on, so it is known
        before the card is laid. */
     if(cd.type==='teece'&&((cd.kw||[]).indexOf('ward')>=0||
-       worn.some(e=>{const g=CARDS[e.cardId].grants;return g&&(g.kw||[]).indexOf('ward')>=0;})))
+       worn.some(e=>{const g=!e.off&&CARDS[e.cardId].grants;return g&&(g.kw||[]).indexOf('ward')>=0;})))
       card.insertAdjacentHTML('beforeend',wardBadge('hward'));
     /* Plating hangs under the card as tabs, the way an equip hangs under a
        Teece on the board. */
-    if(worn.length){
+    const shown=worn.filter(e=>!e.off);
+    /* A dismounted Knight says so: its text still names the Mount it left. */
+    const onFoot=cd.knight&&!handMounts(id,worn).length&&worn.some(e=>e.off);
+    if(shown.length||onFoot){
       const pb=document.createElement('div');
       pb.className='plated';
-      pb.innerHTML=eqTabs(worn);
-      pb.title=worn.map(e=>CARDS[e.cardId].name+' — '+CARDS[e.cardId].text).join('\n\n');
+      pb.innerHTML=eqTabs(shown)+(onFoot?'<span class="eqtab mount" title="Dismounted: it arrives on foot, with no Mount.">on foot</span>':'');
+      pb.title=shown.map(e=>(e.mount?'Mount: ':'')+CARDS[e.cardId].name+' — '+CARDS[e.cardId].text).join('\n\n')+(onFoot?(shown.length?'\n\n':'')+'Dismounted: it arrives on foot.':'');
       card.appendChild(pb);
     }
     card.addEventListener('click',async()=>{
@@ -21703,10 +21747,13 @@ function showDetailCard(id,worn,owner){
     (owner!=null&&cd.type==='teece'&&isCoffined(owner,id)?'<div class="dstats">Back from a Coffin: its printed numbers are gone, and it costs no sacrifice.</div>':'')+
     '<div class="dt">'+kwify(cd.text)+'</div>'+
     (cd.flavor?'<div class="dt" style="font-style:italic;opacity:.8">'+cd.flavor+'</div>':'');
-  if(worn&&worn.length){
+  const shown=(worn||[]).filter(e=>!e.off);
+  if(cd.knight&&(worn||[]).some(e=>e.off)&&!handMounts(id,worn).length)
+    html+='<div class="dstats" style="color:var(--gold)">Dismounted: it arrives on foot.</div>';
+  if(shown.length){
     html+='<div class="dstats" style="color:var(--gold)">Plated, and arrives wearing:</div>';
-    for(const e of worn)html+='<div class="dstats" style="font-size:11px">'+CARDS[e.cardId].name+
-      ' &mdash; '+kwify(CARDS[e.cardId].text)+'</div>';
+    for(const e of shown)html+='<div class="dstats" style="font-size:11px">'+(e.mount?'Mount: ':'')+CARDS[e.cardId].name+
+      ' &mdash; '+(e.mount?compassWords(e.sides)+(CARDS[e.cardId].ride?'; '+CARDS[e.cardId].ride:''):kwify(CARDS[e.cardId].text))+'</div>';
   }
   d.innerHTML=html;
 }
@@ -23166,7 +23213,8 @@ function redeemSim(bb,i,p,n){
    lend the rest. A Knight card names the Mount it is played riding (mountOf).
    When the Knight is destroyed, the Mount's grants.onDeath plays it on that
    panel. A Mount never goes to a graveyard or a hand: toGrave and handPush
-   refuse it, so it simply stops existing anywhere else it would have gone. */
+   refuse it, so it simply stops existing anywhere else it would have gone.
+   The one way into a hand is a Knight dismounting there (dismountHand). */
 const isMountCard=id=>!!(CARDS[id]&&CARDS[id].mount);
 const isMountBody=t=>!!(t&&isMountCard(t.cardId));
 const isKnight=t=>!!(t&&DEF(t).knight);
@@ -23217,6 +23265,82 @@ function mountUp(t,m,live){
     t.equips.push(e);
   }
   if(live)log(nm(t)+' mounts '+CARDS[m.cardId].name+'.');
+}
+/* ---- Mounts in hand (Greg, build 250) ----
+   A Knight in hand rides its printed Mount until its plate says otherwise. Once
+   the plate holds any mount entry, those entries ARE its Mounts in hand; an
+   entry marked off is the Knight dismounted, kept so the marker still names a
+   real card for everything that reads a plate. Dismounting hands the Mount
+   over as a card of its own: played like any Teece, or saddled onto a Knight in
+   hand with room for it -- dismounted, Legaless, or plated with a Herd Saddle --
+   which spends no play. */
+function handMounts(cardId,plate){
+  const pm=(plate||[]).filter(e=>e.mount);
+  if(pm.length)return pm.filter(e=>!e.off);
+  const d=CARDS[cardId];
+  return d&&d.mountOf?[mountEntry(d.mountOf,null)]:[];
+}
+function handMountCap(plate){
+  for(const e of plate||[]){if(e.mount)continue;const g=eqG(e);if(g&&g.mountCap)return 99;}
+  return 1;
+}
+/* Legaless must land on a Mount unless it is already carrying one from hand. */
+function mustRide(p,handIdx,id){
+  const d=CARDS[id];
+  return !!(d&&d.mustMount&&!handMounts(id,handIdx>=0?plateOf(p,handIdx):[]).length);
+}
+/* What a Knight carries off the hand: the plate's Mounts in place of the printed one. */
+function wearHandMounts(t,plate){
+  if(!(plate||[]).some(e=>e.mount))return;
+  t.equips=t.equips.filter(e=>!e.mount).concat(plate.filter(e=>e.mount&&!e.off).map(e=>Object.assign({},e,{owner:t.owner})));
+}
+/* Knights in hand a Mount card at index skip could be saddled onto. */
+function saddleHands(p,skip){
+  const pl=G.players[p],out=[];
+  for(let x=0;x<pl.hand.length;x++){
+    if(x===skip||!CARDS[pl.hand[x]]||!CARDS[pl.hand[x]].knight)continue;
+    const pt=plateOf(p,x);
+    if(handMounts(pl.hand[x],pt).length<handMountCap(pt))out.push(x);
+  }
+  return out;
+}
+function canDismount(p,i){
+  const pl=G&&G.players[p],id=pl&&pl.hand[i];
+  return !!(id!=null&&CARDS[id]&&CARDS[id].knight&&handMounts(id,plateOf(p,i)).length);
+}
+function dismountHand(p,i){
+  if(!G||G.over||G.pending||p!==G.turn||!canDismount(p,i))return false;
+  const pl=G.players[p],id=pl.hand[i],pt=plateOf(p,i),ms=handMounts(id,pt);
+  pl.plate[i]=pt.filter(e=>!e.mount).concat([{cardId:ms[0].cardId,owner:p,mount:true,off:true}]);
+  for(const m of ms)handPush(p,m.cardId,[],true);
+  log(pname(p)+' '+vb(p,'dismounts','dismount')+' '+CARDS[id].name+' in hand: '+
+    ms.map(m=>CARDS[m.cardId].name).join(' and ')+(ms.length>1?' are cards':' is a card')+' of '+(ms.length>1?'their':'its')+' own.');
+  render();
+  return true;
+}
+/* The Mount card at mi onto the Knight at ki, both in p's hand. Gear plated on
+   the Mount card goes along with it. */
+function saddleHand(p,mi,ki){
+  const pl=G.players[p],mid=pl.hand[mi],kid=pl.hand[ki];
+  if(mi===ki||!isMountCard(mid)||!CARDS[kid]||!CARDS[kid].knight)return false;
+  if(saddleHands(p,mi).indexOf(ki)<0)return false;
+  /* A Knight still on its printed Mount (one with a Herd Saddle) keeps it:
+     written out before another joins it, since any mount entry overrides it. */
+  const pt=plateOf(p,ki);
+  const keep=pt.some(e=>e.mount)?[]:handMounts(kid,pt).map(e=>Object.assign(e,{owner:p}));
+  const gone=handTake(p,mi);
+  if(!gone)return false;
+  const k=ki>mi?ki-1:ki;
+  pl.plate[k]=pl.plate[k].filter(e=>!e.off).concat(keep,[mountEntry(gone.id,p)],gone.plate||[]);
+  log(pname(p)+' '+vb(p,'saddles','saddle')+' '+CARDS[gone.id].name+' onto '+CARDS[kid].name+' in hand.');
+  render();
+  return true;
+}
+/* A Mount card that can't go on the board right now can still go onto a Knight. */
+async function saddlePick(p,mi,hands){
+  const c=await chooseCell(p,[],'Choose a Knight in your hand to carry '+CARDS[G.players[p].hand[mi]].name+'.',{cancel:true,hands});
+  if(c==null||c==='CANCEL'||typeof c!=='string'||c[0]!=='h')return false;
+  return saddleHand(p,mi,parseInt(c.slice(1),10))?'saddled':false;
 }
 /* A copy of a Mount, laid next to cell c if there is room, else anywhere. */
 async function summonMountCopy(p,c,id,why,safe){
@@ -23314,6 +23438,32 @@ async function aiKnightSaddle(){
   if(h<0)return;
   const k=pl.hand.findIndex((id,x)=>CARDS[id].knight&&CARDS[id].mountOf&&canPlay(p,id)&&!plateOf(p,x).some(e=>CARDS[e.cardId].grants&&CARDS[e.cardId].grants.mountCap));
   if(k>=0)plateHand(p,h,k);
+}
+/* Mounts in hand. Legaless with no Mount of ours on the board takes the best
+   Mount off a non-Boss Knight in hand; then any Mount card goes onto the Knight
+   in hand that gains most from it, Legaless first. */
+async function aiKnightHand(){
+  const p=G.turn,pl=G.players[p],sum=a=>a.reduce((x,y)=>x+y,0);
+  const lx=pl.hand.findIndex((id,x)=>mustRide(p,x,id));
+  if(lx>=0&&!G.teecePlayed&&!mountSpots(G.board,p).length&&!pl.hand.some(isMountCard)){
+    let best=-1,bv=-1;
+    for(let x=0;x<pl.hand.length;x++){
+      const id=pl.hand[x];
+      if(x===lx||!CARDS[id].knight||CARDS[id].sac)continue;
+      const ms=handMounts(id,plateOf(p,x));
+      if(ms.length&&sum(ms[0].sides)>bv){bv=sum(ms[0].sides);best=x;}
+    }
+    if(best>=0)dismountHand(p,best);
+  }
+  for(let guard=0;guard<4;guard++){
+    const mi=pl.hand.findIndex(isMountCard);
+    if(mi<0)break;
+    const ks=saddleHands(p,mi);
+    if(!ks.length)break;
+    const v=x=>(mustRide(p,x,pl.hand[x])?100:0)+sum(CARDS[pl.hand[x]].sides);
+    ks.sort((a,c)=>v(c)-v(a));
+    if(!saddleHand(p,mi,ks[0]))break;
+  }
 }
 async function aiKnightDiscard(){
   const p=G.turn,pl=G.players[p];
@@ -25929,6 +26079,7 @@ async function netRun1(m){
     case 'combine':if(okIdx)await combineAt(p,i);return;
     case 'fuse':if(okIdx)await fuseHandAt(p,i);return;
     case 'discard':if(okIdx)await playHandDiscard(p,i);return;
+    case 'dismount':if(okIdx)dismountHand(p,i);return;
     case 'end':await endTurn();return;
     case 'act':{
       const c=m.cell,t=typeof c==='number'&&G.board[c]?G.board[c].teece:null;
@@ -26363,7 +26514,8 @@ if(typeof module!=='undefined'){
     cultSeat,cultInPlay,pentaPts,pentaLines,pentaPoints,pentaNext,pentaLineOf,cultGuarded,onActiveLine,cultSettle,cultRitual,pentaSvg,
     aiCultPlan,aiCultDest,cultPlaceBonus,CULT_CONVERT,CULT_TENDRIL,
     OATHS,oathsOf,oathOn,isPaladin,swearOath,oathBreak,oathSweep,cleanseAt,cleanseAlly,cleanseEnemy,aiOathPick,aiPaladinPlan,squaresWith,
-    isMountCard,isMountBody,isKnight,mountsOf,isMounted,mountEntry,mountCap,mountSpots,knightSpots,mountUp,summonMountCopy,grabTargets,aiKnightPlan,compassHtml};
+    isMountCard,isMountBody,isKnight,mountsOf,isMounted,mountEntry,mountCap,mountSpots,knightSpots,mountUp,summonMountCopy,grabTargets,aiKnightPlan,compassHtml,
+    handMounts,mustRide,wearHandMounts,saddleHands,canDismount,dismountHand,saddleHand,aiKnightHand};
 }
 </script>
 </body>
