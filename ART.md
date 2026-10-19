@@ -271,9 +271,10 @@ where they fall short.
   clocks and sand, in single strokes. Every hourglass has `[=]`/`=` brass caps,
   and sand is `.:`. The growing and wilting cards are time-lapses: Green Shoot
   in three pots, Cut Flower going from fresh to fallen. Each spell is an
-  hourglass in a different state: turned over for Rewind, laid on its side for
-  Pause. The exceptions are Fast Forward and Time Stop, which are the dial's own
-  hands. The back is only the dial ring and its ticks, with no fixed hands, so
+  hourglass in a different state: turned over for Rewind. The exceptions are
+  Fast Forward and Time Stop, which are the dial's own hands, and Pause, which
+  is just the pause symbol (Greg: "Pause should just be a ⏸️ duh"). When a card
+  is named for a symbol everyone knows, draw the symbol. The back is only the dial ring and its ticks, with no fixed hands, so
   the face is clear for the drawing. The hands-only cards let the back be their
   clock face (see "Play with the card back").
 - **Witch.** Pointed hats `/\ /__\` over `(o o)` faces. The hexes are a mix of
