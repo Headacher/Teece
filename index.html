@@ -71,7 +71,6 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
   #turnPanel .tbturn{flex:1 1 auto}
   #turnPanel .tbbtns{order:2}
   #turnPanel .counts{order:3;flex-basis:100%}
-  #turnPanel .tblead{order:4;flex-basis:100%}
   #turnPanel #warnBar{order:5}
 }
 
@@ -384,7 +383,7 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
    which stands beside the board rather than in it, reads the same size. */
 @property --cs{syntax:'<length>';inherits:true;initial-value:110px}
 .boardrow{--gap:8px;--cs:min(var(--csmax,168px),
-  calc((100cqw - (var(--cols,3) - 1) * var(--gap) - var(--xgap,0px)) / var(--cols,3)),
+  calc((100cqw - (var(--cols,3) - 1) * var(--gap) - var(--xgap,0px) - 38px) / var(--cols,3)),
   max(118px,calc((100svh - 330px) / var(--bw,3))))}
 @media(max-width:560px){.boardrow{--gap:6px}.boardrow:has(>#board.bw4){--gap:3px}}
 #board{display:grid;grid-template-columns:repeat(var(--bw,3),var(--cs));
@@ -773,7 +772,7 @@ body.gunmode #board .cell.target{box-shadow:inset 0 0 0 2px #f0a04b}
 .phase{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.03em;white-space:nowrap}
 .phase.day{color:#e9b84c}
 .phase.night{color:#a8b6e4}
-.dombar{width:26px;display:flex;flex-direction:column;gap:5px}
+.dombar{flex:none;width:26px;display:flex;flex-direction:column;gap:5px}
 .dommeter{flex:1;display:flex;flex-direction:column-reverse;gap:3px;padding:3px;
   border:1px solid var(--line);border-radius:7px;background:#191410}
 .domseg{flex:1;min-height:0;border-radius:3px;background:#241c12;
@@ -787,13 +786,6 @@ body.gunmode #board .cell.target{box-shadow:inset 0 0 0 2px #f0a04b}
 .domlead.held{color:var(--violet)}
 @keyframes domNear{0%,100%{opacity:1}50%{opacity:.45}}
 @media(prefers-reduced-motion:reduce){.domlead.near{animation:none}}
-/* The same meter laid flat in the status bar, with its words beside it. */
-.tblead{display:flex;align-items:center;gap:8px;white-space:nowrap;cursor:help}
-.tblead .domlead{font-size:12px;font-weight:600;letter-spacing:0;color:var(--muted);text-align:left}
-.tblead .domlead b{font-size:15px;color:var(--cream);margin:0 1px}
-.tblead .domlead.near b,.tblead .domlead.held b{color:inherit}
-.tblead .dommeter{flex:none;flex-direction:row;gap:3px;padding:3px;border-radius:6px}
-.tblead .domseg{flex:none;width:22px;height:9px}
 
 aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
@@ -1243,7 +1235,6 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
   <div class="panel" id="turnPanel">
     <div class="tbturn"><div class="sundial" id="sunDial" aria-live="polite"></div><div class="turnline" id="turnInfo"></div></div>
     <div class="counts" id="counts"></div>
-    <div class="tblead" id="domBar"></div>
     <div class="tbbtns">
       <button class="btn primary" id="endTurn">End Turn</button>
       <button class="btn" id="restart">Forfeit</button>
@@ -1255,6 +1246,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
     <div id="promptBar"><span class="msg">&nbsp;</span></div>
     <div class="boardrow">
       <div id="board"></div>
+      <div class="dombar" id="domBar"></div>
     </div>
     <div id="actionBar" class="hidden"></div>
     <div id="statusBar" class="hidden"></div>
@@ -1374,7 +1366,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:247,date:'2026-10-19'};
+const VERSION={build:248,date:'2026-10-19'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -5007,7 +4999,7 @@ const CARDS = {
     text:'It counts as Earth, Fire, Water or Wind for combining. Conjure Water or Wind. Once a game, from your graveyard: return it to your hand.'},
  920:{name:'Spell Mirror',type:'magic',wiz:'conjure',
     cast:[{fx:'choose',msg:'Spell Mirror:',opts:[
-      {lbl:'Copy a magic card in your hand',steps:[{fx:'copyHandMagic'}]},
+      {lbl:'Copy a magic card in your hand',need:'handMagic',steps:[{fx:'copyHandMagic'}]},
       {lbl:'Conjure Fire or Earth',steps:[{fx:'conjureEl',opts:['fire','earth']}]}]}],
     text:'Choose one: copy a magic card in your hand into your hand, or conjure Fire or Earth.'},
  921:{name:'Ancient Oakwood Staff',type:'equip',mod:1,grants:{kw:['ranged'],conjureTwice:true},
@@ -12718,7 +12710,12 @@ async function FXRUN(st,ctx){
       fireModal(p);
       return;
     }
-    const opts=st.opts.map((o,x)=>({v:String(x),lbl:o.lbl}));
+    /* A mode that has nothing to work on still stays on offer, but says so,
+       and the computer passes it over. */
+    const opts=st.opts.map((o,x)=>{
+      const dead=o.need&&!optNeedMet(p,o.need);
+      return {v:String(x),lbl:dead?o.lbl+' (you have none: does nothing)':o.lbl,dead:!!dead};
+    });
     /* Reading the modes is not committing to one. While this is still the first
        step nothing has happened yet -- the card is in hand, the ability keeps
        its charge -- so the question can be called off, exactly as a cell prompt
@@ -19629,7 +19626,14 @@ function aiPickCell(cells,opt,forP){
   return best;
 }
 function aiPickOpt(opts){
+  const live=opts.filter(o=>!o.dead);
+  if(live.length)opts=live;
   return opts.length?opts[Math.floor(Math.random()*opts.length)].v:null;
+}
+/* What a mode of a modal card needs before it can do anything. */
+function optNeedMet(p,need){
+  if(need==='handMagic')return handOpts(p).some(o=>CARDS[o.cid].type==='magic');
+  return true;
 }
 /* ============ AI planning ============ */
 function aiPlanFor(id){
@@ -22388,11 +22392,7 @@ function renderDom(){
   const seat=leader!=null?seatsOnTeam(leader)[0]:null;
   const cls=(st&&st.blocked&&raw>=need)?' held':(gap>=need-1?' near':'');
   const tint=(cls||seat==null)?'':' style="color:var(--p'+seat+')"';
-  /* Laid flat in the status bar and said in words: how far ahead the leader
-     is, of how far ahead wins. */
-  el.title=domTitle(rows,st);
-  let h='<div class="domlead'+cls+'">'+(seat!=null&&gap>0?'<span class="dot d'+seat+'"></span>':'')+
-    'Field lead <b'+tint+'>'+gap+'</b> of '+need+' to win</div>'+
+  let h='<div class="domlead'+cls+'"'+tint+'>'+gap+'/'+need+'</div>'+
     '<div class="dommeter" title="'+escHtml(domTitle(rows,st))+'">';
   /* One segment per Teece of the lead. Level is a blank gauge; each Teece a
      side goes ahead lights one more in that side's colour, and a full gauge is
