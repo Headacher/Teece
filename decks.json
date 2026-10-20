@@ -449,7 +449,6 @@
       "blurb": "A cannibal swarm on its own battlefield. The Web covers every panel but the corners from the first turn; a Spider Teece or Spiderling on it can Skitter one space a turn, and a Spiderling has +1 Defence there. The Spiders pour out Spiderlings with 4 on every side and then eat them to pay for everything else: the Spider itself, 10 on every side, costs one, Eaten Alive spends three to destroy any Teece, and the Brood Mother makes every Spiderling on the Web a 12. Spiderlings are Tokens and never count toward winning, so the deck needs real bodies to close, and the corners are where it is weakest.",
       "lore": "The Spiders spin the Web that covers every panel but the corners, anchored in the Sinking Sands where the Brood Mother waits. They say they were here before the board, though not, they admit, before what sleeps under Middlemark. They are a cannibal brood that raises Spiderlings to eat them, they catch Pixies, they have a standing arrangement with the Cult (whose pentagram, they point out, is drawn on their silk), and they refuse to discuss the corners.",
       "home": "bc",
-      "noRogue": true,
       "how": [
         "Spiderlings are Tokens, and Tokens never count toward winning: they are fuel and board, never a lead.",
         "The corners are never Web, which makes them the one place a Spiderling gets neither Skitter nor its extra Defence.",

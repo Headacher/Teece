@@ -1487,7 +1487,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:262,date:'2026-10-19'};
+const VERSION={build:263,date:'2026-10-20'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1548,12 +1548,24 @@ if(HAS_DOM)loadDeckData();
 
 /* Cards that bring the Web with them. Rebuilt whenever deck data lands, since
    the decks arrive over fetch rather than being written into this file. */
-let WEB_CARDS={};
+let WEB_CARDS={},CULT_CARDS={};
 function rebuildWebCards(){
   DECK_OF={};
-  WEB_CARDS={};
-  for(const key of Object.keys(DECKS||{}))
+  WEB_CARDS={};CULT_CARDS={};
+  for(const key of Object.keys(DECKS||{})){
     if(DECKS[key].web)for(const id of DECKS[key].cards)WEB_CARDS[id]=true;
+    if(DECKS[key].cult)for(const id of DECKS[key].cards)CULT_CARDS[id]=true;
+  }
+}
+/* A roguelike seat has no deck key for applyDeckRules to read, so the
+   Pentagram comes with the cards instead: a seat holding any Cult card in its
+   pile walks the board as a Cult seat, which is also what draws the star. */
+function cultFromCards(p){
+  const pl=G.players[p];
+  if(!pl||pl.cultist)return;
+  const all=pl.deck.concat(pl.hand);
+  if(!all.some(id=>CULT_CARDS[id]))return;
+  pl.cultist=true;pl.cult={lines:[0,0,0,0,0],stage:1};pl.cultBoon=pl.cultBoon||0;
 }
 /* The keywords a card can print, in the words the engine actually enforces.
    Read off the code rather than the card text: Flying and Skitter are both ADJ
@@ -2924,17 +2936,13 @@ const GROUND_ART={
 
    Except a deck marked noRogue in decks.json, which stays out of a run
    altogether -- out of your draft offers and out of the deck the computer is
-   built from, since both come through here. Two decks carry it, for the same
-   reason: their cards only mean anything as a whole deck. Three Tic Tac Toe
-   marks in a line takes the game, so stray Xs in a drafted pile are either
-   dead text on a body or a win nobody was playing for; and every Spider card
-   is written for the Web, which only exists because the Spider deck brings it.
+   built from, since both come through here. Three Tic Tac Toe marks in a line
+   takes the game, so stray Xs in a drafted pile are either dead text on a body
+   or a win nobody was playing for.
 
-   Spider used to be held out by the per-card spider:true flag instead, and
-   that never worked: the flag marks a Spider TEECE, so the deck's three equips
-   and two grounds do not carry it and were always draftable. The flag is still
-   what the Web rules read -- it just has no business deciding a draft, so the
-   test moved to the deck and the flag stayed where it belongs. */
+   Spiders are back in: a drafted Spider card brings the Web into the game for
+   both sides (newState spins it when either pile holds a WEB_CARDS card), the
+   same way a drafted Cult card brings the Pentagram (cultFromCards). */
 function allDraftable(){
   const out=[];
   for(const k of Object.keys(CARDS)){
@@ -17670,6 +17678,7 @@ async function rogueLevel(replay){
   }
   G=newState('rogue',true,[R.deck.slice(),R.oppDeck.slice()],
     {enemyBonus:rogueBonus(R.level),level:R.level,perks:R.perks});
+  for(let p=0;p<2;p++)cultFromCards(p);
   render();
   await startTurn();
 }
@@ -27611,7 +27620,7 @@ if(typeof module!=='undefined'){
     noteGraveReturn,attachRiders,equipCameOff,addBone,clearGroundAt,processDeath,defOf,kwOf,actsOf,
     aiPlayTeece,aiSupport,fireMagic,
     panelMark,hasMark,countMark,markCountFor,markLines,markLine,checkTicTacToe,markOfCard,markOfId,markValue,
-    swarmHold,checkSwarmWin,swarmValue,adjAllyCount,ownedCount,turnCapTake,applyDeckRules,
+    swarmHold,checkSwarmWin,swarmValue,adjAllyCount,ownedCount,turnCapTake,applyDeckRules,cultFromCards,CULT_CARDS:()=>CULT_CARDS,
     simDeath,simCombat,simOnPlay,aiPlanFor,aiSupport,aiActMuts,aiActs,
     isStunned,applyStun,stunText,PLAYERS,nextTurnExpiry,actBlockedReason,LUMBER_ACT,
     payRecall,getLines:()=>LINES,
