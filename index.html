@@ -1507,7 +1507,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:270,date:'2026-10-20'};
+const VERSION={build:271,date:'2026-10-20'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -5940,11 +5940,11 @@ const CARDS = {
     text:'Heavenly. In the Heavens: every enemy in the column below has -2.'},
  1281:{name:'Fallen Angel',type:'teece',sides:[0,7,7,7],noHeaven:true,fallTo:1293,
     text:'Can’t go into the Heavens. When destroyed (not sacrificed): it Falls. Summon it again on an empty panel in the bottom row, with Top 6, Right 6, Bottom 0 and Left 6. It can’t Fall again.'},
- 1282:{name:'Angel of Mercy',type:'teece',sides:[2,4,6,4],kw:['heavenly'],
+ 1282:{name:'Angel of Mercy',type:'teece',sides:[2,4,6,4],kw:['heavenly'],hvDef:3,
+    text:'Heavenly. In the Heavens: every ally in the column below has +3 Defence.'},
+ 1283:{name:'Dominion',type:'teece',sides:[4,8,10,8],sac:1,kw:['heavenly'],
     onDescend:[{fx:'angel',op:'mercy'}],
-    text:'Heavenly. When it Descends: you can put a non-Boss Teece from your graveyard into the Heaven it just left.'},
- 1283:{name:'Dominion',type:'teece',sides:[4,8,10,8],sac:1,kw:['heavenly'],hvDef:3,
-    text:'Sacrifice a Teece to play. Heavenly. In the Heavens: every ally in the column below has +3 Defence.'},
+    text:'Sacrifice a Teece to play. Heavenly. When it Descends: you can put a non-Boss Teece from your graveyard into the Heaven it just left.'},
  1284:{name:'Archangel of Topus',type:'teece',sides:[7,7,9,7],sac:2,kw:['heavenly'],hvReturn:true,hvSacOnly:true,
     text:'Sacrifice two Teece to play. Heavenly. When destroyed: play this back on any empty Heaven panel. If only Teece in the Heavens were sacrificed to play this, it must be played in the Heavens.'},
  1285:{name:'The Last Trumpet',type:'magic',trump:true,angelAi:'trumpet',cast:[{fx:'angel',op:'trumpet'}],
@@ -8443,7 +8443,7 @@ function defOf(b,i,raw){
   if(t.defGone&&!fastD)return 0;
   let d=(DEF(t).def||0)+(fastD?Math.max(0,t.defPerm||0):(t.defPerm||0))+(fastD?Math.max(0,t.defTemp2||0):(t.defTemp2||0));
   if(DEF(t).defPerAlly)d+=DEF(t).defPerAlly*allyCount(b,i,true);
-  /* The Dominion, from the Heaven above this column. */
+  /* The Angel of Mercy, from the Heaven above this column. */
   d+=heavenDefOn(b,i);
   /* Defence held only while a formation holds: the Shieldwall Dwarf, equipped. */
   if(DEF(t).defIf&&formationCount(b,i,DEF(t).defIf))d+=DEF(t).defIf.n;
@@ -23764,7 +23764,7 @@ function heavenAuraOn(b,i){
     if(g&&g.hvTop)out.push({n:[g.hvTop,0,0,0],label:CARDS[e.cardId].name+' on '+DEF(w).name+', in the Heaven above'});}
   return out;
 }
-/* ...and the Dominion's Defence to allies. Read by defOf. */
+/* ...and the Angel of Mercy's Defence to allies. Read by defOf. */
 function heavenDefOn(b,i){
   if(HV_SCRATCH||!G||!G.heaven||isPlane(i))return 0;
   const t=b[i].teece,w=G.heaven[col(i)];
@@ -24194,7 +24194,7 @@ async function angelFx(st,ctx){
     }else{
       const opts=ids.slice(0,8).map(id=>({v:String(id),lbl:CARDS[id].name}));
       opts.push({v:'skip',lbl:'Leave the Heaven empty'});
-      const r=await chooseOption(p,opts,'Angel of Mercy: put a Teece from your graveyard into '+hvWhere(c)+'.');
+      const r=await chooseOption(p,opts,(ctx.t?nm(ctx.t):'Dominion')+': put a Teece from your graveyard into '+hvWhere(c)+'.');
       if(r==null||r==='skip')return 'NONE';
       pick=ids.find(id=>String(id)===String(r));
     }
