@@ -1507,7 +1507,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:273,date:'2026-10-20'};
+const VERSION={build:274,date:'2026-10-20'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1786,6 +1786,18 @@ function kwPopOpen(el){
   if(!p||!kwDesc(k))return;
   const mid=KW_TOKEN[k]&&KW_TOKEN[k][0];
   p.innerHTML='<b>'+escHtml(kwTitle(k))+'</b>'+(mid&&CARDS[mid].mount?compassHtml(CARDS[mid].sides):'')+escHtml(kwDesc(k));
+  kwPopPlace(p,el);
+}
+/* The same popup, saying what an empty Heaven is (Greg's words, build 274). */
+const HEAVEN_INFO='This is Heaven. Heavenly Teece can be played in or Ascend to Heaven. Teece in Heaven can\u2019t be targeted or destroyed and can Descend onto the highest free space on its column.';
+function heavenPopOpen(el){
+  const p=HAS_DOM&&document.getElementById('kwPop');
+  if(!p)return;
+  p.innerHTML='<b>Heaven</b>'+escHtml(HEAVEN_INFO);
+  p.dataset.kw='heaven';p._for=el;
+  kwPopPlace(p,el);
+}
+function kwPopPlace(p,el){
   p.hidden=false;
   const r=el.getBoundingClientRect(),pw=p.offsetWidth,ph=p.offsetHeight,vw=innerWidth,vh=innerHeight;
   const x=Math.max(12,Math.min(r.left,vw-pw-12));
@@ -24452,6 +24464,7 @@ function heavenStatuses(p,push){
 /* The row of Heavens drawn over the board. Each slot is the grid's first row,
    placed explicitly so the panels flow into the rows under it. */
 function renderHeavens(bEl){
+  {const pp=document.getElementById('kwPop');if(pp&&!pp.hidden&&pp.dataset.kw==='heaven'&&!(pp._for&&pp._for.isConnected))kwPopClose();}
   const on=angelsInPlay();
   bEl.classList.toggle('hvOn',on);
   if(!on)return;
@@ -24468,7 +24481,15 @@ function renderHeavens(bEl){
       s.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();resolvePending('v'+c);},true);
     }
     const t=h[c];
-    if(!t){s.innerHTML='<div class="hvempty">Heaven</div>';s.title='An empty Heaven. A Heavenly Teece can be played up here, or Ascend into it from the panel below.';bEl.appendChild(s);continue;}
+    if(!t){
+      s.innerHTML='<div class="hvempty">Heaven</div>';
+      /* Hover (a mouse) or a tap (when it is not the answer to a question)
+         explains it. */
+      s.addEventListener('mouseenter',()=>{if(matchMedia('(hover:hover)').matches)heavenPopOpen(s);});
+      s.addEventListener('mouseleave',()=>{const pp=document.getElementById('kwPop');if(pp&&pp._for===s)kwPopClose();});
+      s.addEventListener('click',e=>{if(s.classList.contains('target'))return;e.stopPropagation();
+        const pp=document.getElementById('kwPop');if(pp&&!pp.hidden&&pp._for===s)kwPopClose();else heavenPopOpen(s);});
+      bEl.appendChild(s);continue;}
     const tp=document.createElement('div');
     tp.className='teece o'+t.owner+(CARD_ART[t.cardId]?' arted':'');
     tp.setAttribute('data-card-deck',getCardDeck(t.cardId));
