@@ -798,6 +798,10 @@ body.gunmode #board .cell.target{box-shadow:inset 0 0 0 2px #f0a04b}
    way that matters to the game. */
 #planeStrip{display:flex;flex-direction:column;align-items:flex-start;flex:0 0 auto}
 #planeStrip:empty{display:none}
+/* Level with the panel it hangs off: --prow board rows down, and below the
+   Heavens too while they stand over the board. */
+#planeStrip{padding-top:calc((var(--cs,110px) + var(--gap,8px)) * var(--prow,0))}
+.boardrow:has(>#board.hvOn)>#planeStrip{padding-top:calc(var(--cs,110px) * .7 + var(--gap,8px) + (var(--cs,110px) + var(--gap,8px)) * var(--prow,0))}
 #planeStrip .cell{width:var(--cs,110px);height:var(--cs,110px);border-style:dashed;
   border-color:#6a6ad0;box-shadow:0 0 12px rgba(80,84,200,.35)}
 /* The board plus a Plane is one panel wider than the board, and on a phone the
@@ -1503,7 +1507,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:268,date:'2026-10-20'};
+const VERSION={build:269,date:'2026-10-20'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -21539,7 +21543,7 @@ function planeHost(){
   if(pl){
     if(pl.side===1)rowEl.insertBefore(el,bd.nextSibling);
     else rowEl.insertBefore(el,bd);
-    el.style.paddingTop='calc((var(--cs,110px) + var(--gap,8px)) * '+row(pl.host)+')';
+    el.style.setProperty('--prow',String(row(pl.host)));
   }
   return el;
 }
