@@ -1605,7 +1605,7 @@ const KEYWORDS={
   teleport:'Once per your turn, move to any empty panel on the board.',
   ranged:'Strikes the first enemy beyond the next panel, straight up, down or sideways. Nothing strikes back.',
   ward:'Your opponents cannot target it with anything.',
-  floating:'It is not touching the ground. Battlegrounds do nothing to it, and neither does anything planted on the panel under it: Mines, cursed and enchanted panels, fire, the Web.',
+  floating:'It is not touching the ground, so it is also Flying. Battlegrounds do nothing to it, and neither does anything planted on the panel under it: Mines, cursed and enchanted panels, fire, the Web.',
   steadfast:'Nothing can reduce its attributes or its Defence: every penalty, aura, equip, battleground, strip or shrink, from anywhere, is refused. It can still be turned, and it can still be destroyed in a fight.',
   defender:'It never destroys a Teece in combat. It can still be destroyed.',
   needsflinger:'It destroys nothing unless an allied Master Rock Flinger is standing on the board.',
@@ -5620,8 +5620,8 @@ const CARDS = {
  /* ---- Dwarf equips ---- */
  1140:{name:'Mithril Mail',type:'equip',mod:2,grants:{def:2},
     text:'The equipped Teece has +2 and +2 Defence.'},
- 1141:{name:'Antimagic Airship',type:'equip',mod:2,grants:{kw:['flying','floating'],tape:true,tapeMsg:'takes the hit for'},
-    text:'The equipped Teece has +2, Flying and Floating: unaffected by battlegrounds and by effects planted on the panel below it. The first time an enemy effect targets it, the Airship is destroyed instead and the effect is silenced.'},
+ 1141:{name:'Antimagic Airship',type:'equip',mod:2,grants:{kw:['floating'],tape:true,tapeMsg:'takes the hit for'},
+    text:'The equipped Teece has +2 and is Floating, so it is Flying: unaffected by battlegrounds and by effects planted on the panel below it. The first time an enemy effect targets it, the Airship is destroyed instead and the effect is silenced.'},
  1142:{name:'Soul of the Mountains',type:'equip',mod:0,grants:{def:3,onDeath:[{fx:'toerrain',bg:1149}],becomesGround:true},
     text:'The equipped Teece has +3 Defence. When it is destroyed: this equip becomes an Avalanche on its panel (+3 Defence, and +3 more while an ally is adjacent).'},
  1143:{name:'Fresh-Forged Axe',type:'equip',mod:0,onlyHand:true,
@@ -5923,8 +5923,8 @@ const CARDS = {
  1275:{name:'Guardian Angel',type:'teece',sides:[2,5,5,5],kw:['heavenly'],hvGuard:true,
     text:'Heavenly. In the Heavens: when an ally in the column below would be destroyed, you can destroy this instead. That ally can’t be destroyed until the start of your turn.'},
  1276:{name:'Cherub',type:'teece',sides:[3,2,3,2],kw:['heavenly','flying'],
-    onAscend:[{fx:'draw',n:1}],
-    text:'Heavenly. Flying. When it Ascends: draw a card.'},
+    onPlay:[{fx:'angel',op:'cherub'}],onAscend:[{fx:'angel',op:'cherub'}],
+    text:'Heavenly. Flying. When played and when it Ascends: select an ally in the Heavens; it can attack the Teece below it this turn (it still can’t be destroyed).'},
  1277:{name:'Flamewing',type:'teece',sides:[4,5,8,5],kw:['heavenly'],
     onDescend:[{fx:'angel',op:'colMod',n:-2}],
     text:'Heavenly. When it Descends: every enemy in its column gets -2 permanently.'},
@@ -5941,13 +5941,12 @@ const CARDS = {
     text:'Heavenly. When it Descends: you can put a non-Boss Teece from your graveyard into the Heaven it just left.'},
  1283:{name:'Dominion',type:'teece',sides:[4,8,10,8],sac:1,kw:['heavenly'],hvDef:3,
     text:'Sacrifice a Teece to play. Heavenly. In the Heavens: every ally in the column below has +3 Defence.'},
- 1284:{name:'Archangel of Topus',type:'teece',sides:[7,7,7,7],sac:2,kw:['heavenly','flying'],heavenFree:true,
-    onDescend:[{fx:'angel',op:'selfMod',n:7}],onAscend:[{fx:'angel',op:'selfMod',n:-7,up:true}],
-    text:'Sacrifice two Teece to play, or play it into the Heavens with no sacrifice; then it never Descends on its own. Heavenly. Flying. Whenever it Descends: +7 permanently. Whenever it Ascends: -7 permanently.'},
+ 1284:{name:'Archangel of Topus',type:'teece',sides:[7,7,9,7],sac:2,kw:['heavenly'],hvReturn:true,hvSacOnly:true,
+    text:'Sacrifice two Teece to play. Heavenly. When destroyed: play this back on any empty Heaven panel. If only Teece in the Heavens were sacrificed to play this, it must be played in the Heavens.'},
  1285:{name:'The Last Trumpet',type:'magic',trump:true,angelAi:'trumpet',cast:[{fx:'angel',op:'trumpet'}],
     text:'Trump card. Every Teece in the Heavens Descends now, in the order you choose, even one that went up this turn. Each one that lands gets +4 until the end of the turn.'},
  1286:{name:'Divine Intervention',type:'magic',angelReact:true,angelAi:'never',cast:[{fx:'angel',op:'divine'}],
-    text:'When a Teece of yours would be destroyed on your opponent’s turn, you can play this. It isn’t destroyed, and goes up into an empty Heaven instead (the one above its column if that is free).'},
+    text:'When a Teece of yours would be destroyed on your opponent’s turn, you can play this. It is invulnerable until the end of the turn. Teleport it to the Heaven panel on its column. If that Heaven is taken, this fizzles.'},
  1287:{name:'Fall from Grace',type:'magic',angelAi:'grace',cast:[{fx:'angel',op:'grace',n:-3}],
     text:'Select an enemy in the top row. It gets -3 permanently and falls to the lowest empty panel in its column.'},
  1288:{name:'Halo',type:'equip',mod:2,grants:{hvTop:5},
@@ -5956,10 +5955,10 @@ const CARDS = {
     text:'The equipped Teece has +1 and Flying. When it Descends, it can land on any empty panel instead of in its column.'},
  1290:{name:'Flaming Sword',type:'equip',mod:3,grants:{onDescend:[{fx:'angel',op:'belowMod',n:-4}]},
     text:'The equipped Teece has +3. When it Descends: the enemy directly below where it lands gets -4 permanently.'},
- 1291:{name:'Pearly Gates',type:'ground',gmod:2,gPearly:3,
-    text:'A Teece on this battleground has +2. When something Descends into this column and this panel is empty, it lands here wherever this is in the column, and gets +3 permanently.'},
+ 1291:{name:'Pearly Gates',type:'ground',gPearly:8,
+    text:'A Teece in this column can Descend directly onto this battleground. If it does: it gets +8 until the end of the turn.'},
  1292:{name:'Cloudbank',type:'ground',gkw:['floating'],gAscend:true,
-    text:'A Teece on this battleground is Floating. A Heavenly Teece on it can Ascend from here as if it stood in the top row.'},
+    text:'A Teece on this battleground is Floating, so it is Flying. A Heavenly Teece on it can Ascend directly from here.'},
  1293:{name:'Fallen Angel',type:'teece',sides:[6,6,0,6],devil:true,deck:'angels',perkOnly:true,noHeaven:true,graveAs:1281,
     text:'A Fallen Angel that has Fallen. It counts as a Devil, and can’t Fall again.'},
  /* ---- Basic: the deck for a first game. Every card shows one of the base
@@ -8606,6 +8605,8 @@ function kwOf(b,i,noGround){
       if(onWeb)ks.push('immovable');
     }
   }
+  /* Floating entails Flying (Greg, build 263). */
+  if(ks.indexOf('floating')>=0&&ks.indexOf('flying')<0)ks.push('flying');
   return ks;
 }
 const hasKw=(b,i,k)=>kwOf(b,i).indexOf(k)>=0;
@@ -9413,6 +9414,16 @@ function scanDeaths(b){
   for(let i=0;i<BN;i++){
     if(!b[i].teece||immune(i))continue;
     if(eff[i].some(v=>v<0))mark(i,null);
+  }
+  /* A Teece in the Heavens a Cherub has selected strikes the Teece in the top
+     panel of its column this turn, Bottom against Top. Nothing strikes back. */
+  if(G&&G.heaven&&!HV_SCRATCH)for(let c=0;c<G.heaven.length&&c<BW;c++){
+    const w=G.heaven[c];
+    if(!w||w.hvStrike!==G.turnNum||w.harmless||w.blinded)continue;
+    if(w.stunUntil&&G.turnNum<w.stunUntil)continue;
+    const o=b[c]&&b[c].teece;
+    if(!o||!foes(o.owner,w.owner)||immune(c))continue;
+    if(heavenSides(w,c)[2]-eff[c][0]>dfn[c])mark(c,null);
   }
   for(let i=0;i<BN;i++){
     const t=b[i].teece; if(!t)continue;
@@ -17052,6 +17063,10 @@ async function processDeath(d){
   if(!gone&&!d.cost&&!t.silenced&&DEF(t).fallTo&&!t.isToken&&!t.isCopy){
     if(await angelFall(t,cell))gone=true;
   }
+  /* The Archangel of Topus goes back up into an empty Heaven. */
+  if(!gone&&!d.cost&&!t.silenced&&DEF(t).hvReturn&&!t.isToken&&!t.isCopy){
+    if(await angelReturn(t,cell))gone=true;
+  }
   if(!gone&&!d.cost&&undyLeft(t)>0){
     if(await undyingReturn(t,cell))gone=true;
   }
@@ -17746,8 +17761,13 @@ function sacPool(p,skipHand,cardId){
     /* High Priest and Avatar take Smites from the hand in place of bodies. */
     else if(cardId!=null&&CARDS[cardId]&&CARDS[cardId].sacSmite&&CARDS[cardId].sacSmite[pl.hand[x]])hands.push(x);
   }
-  const worth=cells.reduce((a,i)=>a+sacWorthOf(b[i].teece,cardId),0)+hands.reduce((a,x)=>a+handSacWorth(cardId,pl.hand[x]),0);
-  return {cells,hands,worth};
+  /* Your own Teece up in the Heavens pay for a Boss or Miniboss too (Greg,
+     build 263). */
+  const hv=[];
+  if(G.heaven)for(let c=0;c<G.heaven.length;c++){const t=G.heaven[c];if(t&&t.owner===p&&(!t.isToken||DEF(t).sacOK||sacTok))hv.push(c);}
+  const worth=cells.reduce((a,i)=>a+sacWorthOf(b[i].teece,cardId),0)+hands.reduce((a,x)=>a+handSacWorth(cardId,pl.hand[x]),0)+
+    hv.reduce((a,c)=>a+sacWorthOf(G.heaven[c],cardId),0);
+  return {cells,hands,worth,heavens:hv};
 }
 /* What one card thrown from the hand pays toward cardId's sacrifice: a
    Divine Smite pays an Avatar twice. */
@@ -17766,10 +17786,25 @@ function sacWorthOf(t,cardId){
    looks at the board, so the computer would never see a hand card offered
    through opt.hands; it is answered here instead, and spends the card before
    the body because a body on the field is worth more than one in hand. */
-async function chooseSacrifice(p,cells,hands,msg){
-  if(!hands.length)return await chooseCell(p,cells,msg,{cancel:true,mut:null});
-  if(isAIP(p)||!HAS_DOM)return 'h'+hands[0];
-  return await chooseCell(p,cells,msg,{cancel:true,mut:null,hands});
+async function chooseSacrifice(p,cells,hands,msg,hv){
+  hv=hv||[];
+  if(isAIP(p)||!HAS_DOM){
+    if(!cells.length&&!hands.length&&hv.length)return 'v'+hv[0];
+    if(!hands.length)return await chooseCell(p,cells,msg,{cancel:true,mut:null});
+    return 'h'+hands[0];
+  }
+  return await chooseCell(p,cells,msg+(hv.length?' A Teece in the Heavens can pay too.':''),
+    {cancel:true,mut:null,hands:hands.length?hands:undefined,heavens:hv.length?hv:undefined});
+}
+/* A Teece in the Heavens paid away for a sacrifice. */
+function hvSacrifice(c){
+  const t=heavens()[c];
+  if(!t)return;
+  heavens()[c]=null;
+  shedGear(t,null);
+  if(!t.isToken&&!t.isCopy)toGrave(t.baseOwner,t.cardId);
+  log(nm(t)+' is sacrificed from '+hvWhere(c)+'.');
+  G.eventFlag=true;
 }
 /* Whether this card can be thrown away from hand for its own sake. A card may
    carry its own handDiscard list -- Spare Parts, the two Solar cards -- and a
@@ -17941,19 +17976,7 @@ async function playTeece(p,handIdx){
   let need=freeBoss?0:sacsNeeded(id,p);
   const pool=sacPool(p,handIdx,id);
   const sacables=pool.cells;
-  /* The Archangel's two prices are asked before any sacrifice: a Heaven for
-     nothing, or a panel for two Teece. */
   let preSpot=null,hvPick=null;
-  if(hvOpen.length&&d.heavenFree&&need>0){
-    const pay=pool.worth>=need;
-    let cells=[];
-    if(pay){for(let i=0;i<BN;i++)if(playAt(b,i))cells.push(i);cells=cells.concat(knightSpots(b,p,id));if(!cells.length)cells=sacables.slice();}
-    const r=await chooseCell(p,cells,'Tap a Heaven to play '+d.name+' there with no sacrifice'+(pay?', or a panel to sacrifice '+(need>1?need+' Teece':'a Teece')+' for it':'')+'.',
-      {cancel:true,heavens:hvOpen,mut:null});
-    if(r==null||r==='CANCEL')return false;
-    if(typeof r==='string'&&r[0]==='v'){hvPick=+r.slice(1);toH=true;freeBoss=true;need=0;}
-    else preSpot=r;
-  }
   /* The pool is measured in what it is WORTH rather than how many bodies are
      in it, and the asking stops as soon as the price is met. A Cultist of
      Babble in hand is one of those payments without ever reaching the field. */
@@ -17972,22 +17995,26 @@ async function playTeece(p,handIdx){
      the new Teece may land. So a full board is only a wall when the card pays
      for nothing. */
   if(!toH&&!hvOpen.length&&!empt.length&&!mspots.length&&!need){if(saddleTo.length)return saddlePick(p,handIdx,saddleTo);toast('No empty space.');return false;}
-  const sacP=[],sacH=[];
+  const sacP=[],sacH=[],sacV=[];
   for(let paidW=0,s=0;paidW<need;s++){
     const left=need-paidW;
     const c=plan?plan.sacP[s]:await chooseSacrifice(p,
       sacables.filter(i=>sacP.indexOf(i)<0),
       pool.hands.filter(x=>sacH.indexOf(x)<0),
-      'Choose a sacrifice ('+left+' more to pay).');
+      'Choose a sacrifice ('+left+' more to pay).',
+      d.sacSpiderling?[]:(pool.heavens||[]).filter(x=>sacV.indexOf(x)<0));
     if(c==null||c==='CANCEL')return false;
     if(typeof c==='string'&&c.charAt(0)==='h'){const hx=parseInt(c.slice(1),10);sacH.push(hx);paidW+=handSacWorth(id,pl.hand[hx]);}
+    else if(typeof c==='string'&&c.charAt(0)==='v'){const hc=+c.slice(1);sacV.push(hc);paidW+=sacWorthOf(heavens()[hc],id);}
     else{sacP.push(c);paidW+=worthAt(c);}
     if(plan&&s+1>=plan.sacP.length)break;
   }
   /* Resolved to card ids while the indices still mean something: handTake for
      the card being played is about to shift everything after it. */
   const sacHIds=sacH.map(x=>pl.hand[x]);
-  if(toH)return await heavenPlace(p,handIdx,id,{sacP,sacHIds,plan:hvPick!=null?{hcol:hvPick}:plan,spend,freeBoss});
+  /* The Archangel of Topus paid for wholly out of the Heavens goes back up there. */
+  if(d.hvSacOnly&&sacV.length&&!sacP.length&&!sacH.length)toH=true;
+  if(toH)return await heavenPlace(p,handIdx,id,{sacP,sacHIds,sacV,plan:hvPick!=null?{hcol:hvPick}:plan,spend,freeBoss});
   const spots=empt.concat(mspots);
   if(!ride)for(const c of sacP)if(!b[c].razed&&!b[c].seed&&!blockedGround(b,c)&&spots.indexOf(c)<0)spots.push(c);
   spots.sort((x,y)=>x-y);
@@ -18015,11 +18042,11 @@ async function playTeece(p,handIdx){
     putTeece(bb,c,gt,false);
   };
   /* A Heavenly Teece is offered the open Heavens in the same question. */
-  const hvAsk=preSpot==null?hvOpen.filter(c=>!heavens()[c]):[];
+  const hvAsk=preSpot==null?hvOpen.concat(sacV.filter(c=>hvOpen.indexOf(c)<0&&heavenlyCard(id,plateOf(p,handIdx)))).sort():[];
   let spot=plan?plan.c:(preSpot!=null&&spots.indexOf(preSpot)>=0)?preSpot:await chooseCell(p,spots,'Choose a space for '+d.name+(hvAsk.length?', or tap a Heaven above the board':'')+(saddleTo.length?', or a Knight in your hand to carry it.':'.'),
     {cancel:true,mut:previewPlace,preview:{cardId:id,plate:plateOf(p,handIdx)},hands:saddleTo.length?saddleTo:undefined,heavens:hvAsk.length?hvAsk:undefined});
   if(spot==null||spot==='CANCEL')return false;
-  if(typeof spot==='string'&&spot[0]==='v')return await heavenPlace(p,handIdx,id,{sacP,sacHIds,plan:{hcol:+spot.slice(1)},spend,freeBoss:false});
+  if(typeof spot==='string'&&spot[0]==='v')return await heavenPlace(p,handIdx,id,{sacP,sacHIds,sacV,plan:{hcol:+spot.slice(1)},spend,freeBoss:false});
   if(typeof spot==='string'&&spot[0]==='h')return saddleHand(p,handIdx,parseInt(spot.slice(1),10))?'saddled':false;
   /* Committed. The card comes out of the hand HERE, before the sacrifices are
      paid, because a death can reach into that same hand -- a Harbinger of Death
@@ -18062,6 +18089,7 @@ async function playTeece(p,handIdx){
     if(!t.isToken&&!t.isCopy)sacked.push({cardId:t.cardId,to:pd.bodyTo});
     log(nm(t)+' is sacrificed.');
   }
+  for(const hc of sacV){const ht=heavens()[hc];if(ht&&!ht.isToken&&!ht.isCopy)sacked.push({cardId:ht.cardId,to:{grave:ht.baseOwner}});hvSacrifice(hc);}
   /* The Mount it is landing on leaves the board without dying, to be ridden. */
   let ridden=null;
   if(mspots.indexOf(spot)>=0&&isMountBody(b[spot].teece)&&b[spot].teece.owner===p){ridden=b[spot].teece;b[spot].teece=null;}
@@ -23746,7 +23774,9 @@ function hvLandSpots(c,t){
     if(first<0)first=i;
     if(gate<0&&!floats(t)&&b[i].ground&&!b[i].ground.gsil&&groundFlag(b[i].ground,'gPearly'))gate=i;
   }
-  if(gate>=0)add(gate);else if(first>=0)add(first);
+  /* The Pearly Gates are a choice beside the usual landing (Greg, build 263). */
+  if(gate>=0)add(gate);
+  if(first>=0)add(first);
   if(t.equips.some(e=>{const g=eqG(e);return g&&g.descendAny;}))for(let i=0;i<GRID;i++)add(i);
   for(let i=0;i<GRID;i++){
     const w=b[i].teece;
@@ -23770,7 +23800,7 @@ function hvSimLand(bb,i,t,c,trumpet){
   if(!openAt(bb,i))return;
   const nt=cloneBoard([{teece:t}])[0].teece;
   putTeece(bb,i,nt,false);
-  if(bb[i].ground&&!floats(nt)&&groundFlag(bb[i].ground,'gPearly'))applyModT(nt,groundNum(bb[i].ground,'gPearly'),'perm');
+  if(bb[i].ground&&!floats(nt)&&groundFlag(bb[i].ground,'gPearly'))applyModT(nt,groundNum(bb[i].ground,'gPearly'),'temp');
   const steps=(nt.silenced?[]:(DEF(nt).onDescend||[])).slice();
   for(const e of nt.equips){const g=eqG(e);if(g&&g.onDescend)steps.push(...g.onDescend);}
   for(const st of steps){
@@ -23813,8 +23843,8 @@ async function heavenDescend(c,opts){
   const b=G.board;
   if(b[cell].ground&&!b[cell].ground.gsil&&!floats(t)&&groundFlag(b[cell].ground,'gPearly')){
     const n=groundNum(b[cell].ground,'gPearly');
-    applyModT(t,n,'perm');
-    log(nm(t)+' comes through the '+CARDS[b[cell].ground.cardId].name+': '+sgn(n)+'.');
+    applyModT(t,n,'temp');
+    log(nm(t)+' comes through the '+CARDS[b[cell].ground.cardId].name+': '+sgn(n)+' until the end of the turn.');
   }
   await fireMove(null,cell,t.owner);
   if(G.over)return true;
@@ -23889,7 +23919,9 @@ async function angelSaves(d){
   }
   if(sameTeam(G.turn,q)||DEF(t).noHeaven)return false;
   const pl=G.players[q],idx=pl.hand.findIndex(h=>CARDS[h]&&CARDS[h].angelReact);
-  const open=hvOpenCols();
+  /* Only the Heaven straight above will do (Greg, build 263): with that one
+     taken the card would fizzle, so it is not offered at all. */
+  const open=hvOpenCols().filter(x=>x===c);
   if(idx<0||!open.length||hexOn(q,'silence')||hexOn(q,'nomagic')||magicLocked(q))return false;
   const cid=pl.hand[idx];
   const yes=(isAIP(q)||!HAS_DOM)?true:
@@ -23901,13 +23933,9 @@ async function angelSaves(d){
   const gone=handTake(q,at);
   if(gone)dumpPlate(gone.plate,'with the card it was bolted to',cid);
   log(pname(q)+' '+vb(q,'plays','play')+' '+CARDS[cid].name+' in answer.');
-  let hc=open.indexOf(c)>=0?c:open[0];
-  if(open.indexOf(c)<0&&open.length>1&&!isAIP(q)&&HAS_DOM){
-    const r=await chooseHeaven(q,open,'Tap the Heaven '+nm(t)+' goes up into.');
-    if(typeof r==='number'&&open.indexOf(r)>=0)hc=r;
-  }
   toGrave(q,cid);
-  hvLift(b,cell,hc,'is lifted');
+  t.immortalOwner=q;t.immortalUntil=G.turnNum;
+  hvLift(b,cell,c,'is invulnerable until the end of the turn, and teleports');
   await anim([cell],'zap');
   return true;
 }
@@ -23927,6 +23955,23 @@ async function angelFall(t,cell){
   putTeece(b,dst,nt,true);
   log(DEF(t).name+' Falls, and lands in the '+CN[dst]+' as a Devil.');
   await anim([dst],'placed',140);
+  return true;
+}
+/* The Archangel of Topus, destroyed: played back into any empty Heaven, as a
+   fresh card. True when the body is accounted for. */
+async function angelReturn(t,cell){
+  const open=hvOpenCols(),q=t.baseOwner;
+  if(!open.length){log(DEF(t).name+' has no empty Heaven to return to.');return false;}
+  const c=open.length===1?open[0]:await chooseHeaven(q,open,DEF(t).name+' is destroyed. Tap the Heaven it returns to.');
+  const hc=(typeof c==='number'&&!heavens()[c])?c:hvOpenCols()[0];
+  if(hc==null)return false;
+  shedGear(t,cell);
+  const nt=makeTeece(t.cardId,q,{real:true});
+  nt.resummoned=true;
+  heavens()[hc]=nt;
+  nt.hvMoved=G.turnNum;nt.hvReady=hvTurns(q)+1;
+  log(DEF(t).name+' is destroyed, and is played back into '+hvWhere(hc)+'.');
+  G.eventFlag=true;
   return true;
 }
 /* The temporary things a body in the Heavens carries still run out on time. */
@@ -23963,7 +24008,8 @@ function canHeavenHand(p,i){
 /* The rest of playTeece for a Heaven: called once the sacrifice is chosen. */
 async function heavenPlace(p,handIdx,id,o){
   const pl=G.players[p],d=CARDS[id],b=G.board;
-  const open=hvOpenCols();
+  const sacV=o.sacV||[];
+  const open=hvOpenCols().concat(sacV).sort();
   if(!open.length){toast('Every Heaven is taken.');return false;}
   let c=o.plan&&o.plan.hcol!=null&&open.indexOf(o.plan.hcol)>=0?o.plan.hcol:null;
   if(c==null){
@@ -23991,6 +24037,7 @@ async function heavenPlace(p,handIdx,id,o){
     log(nm(st)+' is sacrificed.');
     if(G.over)return true;
   }
+  for(const hc of sacV)hvSacrifice(hc);
   if(heavens()[c]){const o2=hvOpenCols();if(!o2.length){toGrave(p,id);log(d.name+' has no Heaven left to go to, and is discarded.');o.spend();await resolveCombat();render();return true;}c=o2[0];}
   const t=makeTeece(id,p,{real:true});
   for(const e of taken.plate)if(!e.mount&&!e.off)t.equips.push(e);
@@ -24165,6 +24212,27 @@ async function angelFx(st,ctx){
     }
     noteTargeted(p);
     return;}
+  case 'cherub':{
+    /* Select an ally in the Heavens: this turn it strikes the Teece in the
+       panel straight below it, Bottom against Top, and cannot be destroyed for
+       it. scanDeaths reads t.hvStrike. */
+    const h=heavens(),mine=[];
+    for(let c=0;c<h.length;c++)if(h[c]&&sameTeam(h[c].owner,p))mine.push(c);
+    if(!mine.length)return none('There is no ally in the Heavens to select.');
+    let c=mine[0];
+    if(mine.length>1){
+      if(isAIP(p)||!HAS_DOM){
+        let bv=-1e9;
+        for(const x of mine){const o=b[x].teece;const v=o&&!sameTeam(o.owner,p)?heavenSides(h[x],x)[2]-effSides(b,x)[0]-defOf(b,x):-99;if(v>bv){bv=v;c=x;}}
+      }else{
+        const r=await chooseHeaven(p,mine,'Select an ally in the Heavens: it can attack the Teece below it this turn.');
+        if(typeof r==='number')c=r;
+      }
+    }
+    h[c].hvStrike=G.turnNum;
+    log(nm(h[c])+' can attack the Teece below it this turn.');
+    G.eventFlag=true;
+    return;}
   case 'trumpet':{
     const h=heavens();
     let left=[];for(let c=0;c<h.length;c++)if(h[c])left.push(c);
@@ -24231,6 +24299,7 @@ function renderHeavens(bEl){
     tp.setAttribute('data-card-deck',getCardDeck(t.cardId));
     const badges=[];
     if(t.silenced)badges.push('<span class="dfn sil" title="Silenced">\u{1F507}</span>');
+    if(t.hvStrike===G.turnNum)badges.push('<span class="dfn" title="Attacks the Teece below it this turn">\u2694\uFE0F</span>');
     const why=hvDescendBlock(c);
     if(why&&why!=='nowhere to land')badges.push('<span class="dfn" title="'+escHtml('Cannot Descend yet: '+why)+'">⏳</span>');
     tp.innerHTML=teeceFace({name:DEF(t).name,cardId:t.cardId,sides:heavenSides(t,c),badges,rank:true});
