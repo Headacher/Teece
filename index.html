@@ -1507,7 +1507,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:269,date:'2026-10-20'};
+const VERSION={build:270,date:'2026-10-20'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -4720,7 +4720,7 @@ const CARDS = {
     text:'A Teece on this battleground cannot move or be moved, has +3 Defence, and is silenced the moment it arrives.'},
  808:{name:'Dimension of Energy',type:'ground',gSpellJar:true,
     text:'A magic card played by either player is equipped to this instead of being cast. When this battleground goes, every spell on it is cast in the order it arrived, at targets nobody chooses.'},
- 809:{name:'Dimension of Dimensions',type:'ground',gOnGround:true,gAnchor:true,gReach:true,gmod:2,
+ 809:{name:'Dimension of Dimensions',type:'ground',gOnGround:true,gAnchorEquipped:true,gReach:true,gmod:2,
     text:'Lay this on a panel that already has a battleground and it is equipped to that battleground rather than replacing it. Neither can then be replaced or destroyed. A Teece on it or beside it counts as standing on it, and gets +2.'},
  810:{name:'Extradimensional Plane of Matter',type:'ground',gAnchor:true,gOffField:true,
     gact:[{name:'Drift the Plane',once:'turn',steps:[{fx:'driftPlane'}]}],
@@ -4758,8 +4758,8 @@ const CARDS = {
     act:[{name:'Unmake the ground',once:'turn',steps:[{fx:'breakAnyGround'},{fx:'mod',who:'self',n:2,dur:'perm'}]}],
     text:'Flying: once per your turn, move one space. Whenever any battleground is replaced or destroyed: +4 until the end of the turn. Unmake the ground — once per your turn: destroy a battleground, and this gets +2 permanently.'},
  822:{name:'Terrain Animator',type:'teece',sides:[1,1,1,1],
-    act:[{name:'Animate the terrain',once:'game',steps:[{fx:'animate'}]}],
-    text:'Animate the terrain — once a game: select a battleground with nothing standing on it. It comes up off its panel and stands as a Teece with 9 on every side that flies, so the battleground itself is what moves. When Terrain Animator leaves the field, or when the animated battleground is destroyed, it lies back down as a battleground — on whatever panel it has reached by then.'},
+    act:[{name:'Animate the terrain',once:'turn',steps:[{fx:'animate'}]}],
+    text:'Animate the terrain — once per turn: select a battleground with nothing standing on it; it becomes a Top 9, Right 9, Bottom 9, Left 9 with Flying. When Terrain Animator leaves the field, or when the animated battleground is destroyed, it becomes a battleground again.'},
  823:{name:'Worldshaper',type:'teece',sides:[8,8,8,8],sac:1,
     onPlay:[{fx:'seedPlanes'}],
     text:'Sacrifice a Teece to play. When played: every panel without a battleground gets one that gives a Teece standing on it +1 for every battleground on the field.'},
@@ -4778,7 +4778,7 @@ const CARDS = {
  'GFUSE':{name:'The Folded Dimension',type:'ground',token:true,deck:'dimension',
     text:'Every battleground folded into this one still speaks from underneath it.'},
  'TANIM':{name:'Animated Terrain',type:'teece',token:true,deck:'dimension',sides:[9,9,9,9],kw:['flying'],
-    text:'A battleground that stood up. Flying: once per your turn, move one space. It lies back down as a battleground when it is destroyed, or when the Terrain Animator that woke it leaves the field.'},
+    text:'Animated Terrain Token. Flying: once per your turn, move one space. When the Terrain Animator that animated it leaves the field, or when it is destroyed, it becomes a battleground again.'},
  /* Not in any deck: Cannonball is handed out by a roguelike perk. */
  590:{name:'Cannonball',type:'magic',perkOnly:true,
     text:'Select a Teece and one of its sides; that side gets -4.',
@@ -6644,6 +6644,13 @@ function groundAnchored(b,i){
   const g=b[i].ground;
   if(!g)return false;
   if(groundFlag(g,'gAnchor'))return true;
+  /* A Dimension of Dimensions anchors only once it is equipped: "Neither can
+     THEN be replaced or destroyed". Lying on its own it is an ordinary
+     battleground -- it can be replaced, destroyed, or woken by an Animator. */
+  if(!g.gsil){
+    const cs=gcards(g);
+    if(cs.some(gd=>gd.gAnchorEquipped)&&cs.some(gd=>!gd.gAnchorEquipped&&gd!==CARDS.GFUSE))return true;
+  }
   for(let j=0;j<BN;j++){
     const t=b[j].teece;
     if(!t||t.silenced)continue;
@@ -11037,7 +11044,7 @@ async function FXRUN(st,ctx){
       if(span>1)continue;
       cands.push(i);
     }
-    if(!cands.length)return none('There is no battleground standing empty that could get up.');
+    if(!cands.length)return none('There is no battleground with nothing standing on it.');
     const c=await pickCell(cands,'Wake which battleground?',
       (bb,i)=>{bb[i].ground=null;putTeece(bb,i,makeTeece('TANIM',p),false);},false);
     if(c==='CANCEL')return 'ABORT';
@@ -11048,7 +11055,7 @@ async function FXRUN(st,ctx){
     tk.animBy=ctx.t?ctx.t.uid:null;
     tk.animGround=g;
     putTeece(b,c,tk,true);
-    log(gnm+' tears itself off the '+CN[c]+' and stands up: 9 on every side, and it flies.');
+    log(gnm+' at the '+CN[c]+' is animated: Top 9, Right 9, Bottom 9, Left 9, with Flying.');
     return;}
   case 'seedPlanes':{
     let n=0;
@@ -17207,7 +17214,7 @@ async function processDeath(d){
       if(cell!=null&&b[cell]&&!b[cell].razed){
         if(b[cell].ground&&b[cell].ground!==ag)await clearGroundAt(cell,t.owner);
         b[cell].ground=ag;
-        log(CARDS[ag.cardId].name+' falls, and lies back down at the '+CN[cell]+'.');
+        log(CARDS[ag.cardId].name+' is destroyed, and becomes a battleground again at the '+CN[cell]+'.');
       }else{
         for(const held of (ag.held||[]))handPush(held.owner,held.cardId);
         if(!CARDS[ag.cardId].token)toGrave(ag.owner,ag.cardId);
@@ -17307,9 +17314,9 @@ async function syncGrounds(){
          the whole point of giving it wings. */
       if(b[i].ground)await clearGroundAt(i,t.owner);
       b[i].ground=t.animGround;
-      log(CARDS[t.animGround.cardId].name+' lies back down at the '+CN[i]+
-        ': the Animator that woke it is gone.');
-    }else log(nm(t)+' lies back down: the Animator that woke it is gone.');
+      log(CARDS[t.animGround.cardId].name+' becomes a battleground again at the '+CN[i]+
+        ': Terrain Animator has left the field.');
+    }else log(nm(t)+' becomes a battleground again: Terrain Animator has left the field.');
   }
 }
 async function resolveCombat(){
