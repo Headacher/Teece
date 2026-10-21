@@ -1531,7 +1531,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:280,date:'2026-10-21'};
+const VERSION={build:281,date:'2026-10-21'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -25425,7 +25425,35 @@ function hellCell(el,i){
   if(on)el.classList.add('hell');
   if(G.hellRow&&!isPlane(i)&&row(i)>=BW)el.classList.add('hellrow');
   if(on&&!b[i].teece&&!b[i].ground)el.innerHTML+='<div class="hellempty">Hell</div>';
-  if(on)el.title=(G.hellRow&&row(i)>=BW&&!b[i].ground?'Hell, under the board. ':'A Hell panel. ')+HELL_INFO;
+  if(!on||b[i].teece)return;
+  /* Like an empty Heaven: hover (a mouse) or a tap that answers no question
+     opens the same popup, saying what this Hell is and why it is Hell. The
+     board is rebuilt on every render, so an open popup moves to the new cell
+     rather than closing under the pointer. */
+  const pp=HAS_DOM&&document.getElementById('kwPop');
+  if(pp&&!pp.hidden&&pp.dataset.kw==='hell'&&pp._cell===i&&!(pp._for&&pp._for.isConnected))pp._for=el;
+  el.addEventListener('mouseenter',()=>{if(matchMedia('(hover:hover)').matches)hellPopOpen(el,i);});
+  el.addEventListener('mouseleave',()=>{const q=document.getElementById('kwPop');if(q&&q._for===el)kwPopClose();});
+  el.addEventListener('click',()=>{if(G.pending)return;hellPopOpen(el,i);});
+}
+/* Why this panel is Hell, in the order hellAt reads it. */
+function hellWhy(b,i){
+  const c=b[i];
+  if(hellBoots(b,i))return 'Brimstone Boots make the panel under their wearer Hell.';
+  if(c.ground)return 'The '+CARDS[c.ground.cardId].name+' says this panel is Hell.';
+  if(c.hell)return G.hellRow&&row(i)>=BW?'This is the Hell row, under the board. Its panels fight and count like any other.':'This panel is Hell for good.';
+  if(c.hellT!=null&&G.turnNum<=c.hellT)return 'Hell until the end of this turn.';
+  if(c.hellBy!=null)return 'The Spreading Pit made this panel Hell while it stays on the field.';
+  if(G.hellAll)return 'Satan\u2019s Little Helper fell: every panel is Hell until the end of '+ownOf(G.hellAll.p)+' next turn.';
+  return '';
+}
+function hellPopOpen(el,i){
+  const p=HAS_DOM&&document.getElementById('kwPop');
+  if(!p)return;
+  const w=hellWhy(G.board,i);
+  p.innerHTML='<b>Hell</b>'+escHtml((w?w+' ':'')+HELL_INFO);
+  p.dataset.kw='hell';p._for=el;p._cell=i;
+  kwPopPlace(p,el);
 }
 const HELL_INFO='Non-Demons in Hell have -2, but Hell never takes a side below 0. A battleground on a Hell panel negates Hell there, unless it says the panel is Hell.';
 function hellStatuses(p,push){
