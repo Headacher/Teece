@@ -21,9 +21,32 @@ differently-numbered codebase that `main` used to carry — and every push
 succeeded while none of it reached the game. The pushes are never the problem.
 The branch is.
 
-`main` now carries this same tree, so a session that starts there is at least
-working on the right code; it still has to move to the shipping branch before
-pushing, because Pages does not build `main`.
+`main` carries the same tree but **not the same commits**, and it drifts. A
+session that starts there is at least working on the right codebase, but it is
+working on an older one: the shipping branch has repeatedly been several builds
+and a dozen commits ahead. Never assume the two agree — diff them.
+
+So a task branch is where you work, and the shipping branch is where you land.
+Finishing means merging into `claude/overclocker-fly-gadget-bugs-rvlhsg`, not
+pushing somewhere and stopping. **This holds for a new deck by default.** A deck
+that exists only on `main` is a deck nobody can play, and "add a deck" is never
+complete until it is on the branch Pages builds. If you are told to push
+somewhere else, push there too — but say plainly that the change is not live
+until it reaches the shipping branch, and offer to take it there.
+
+The merge is usually small — your one commit onto whatever landed meanwhile —
+but it conflicts on `VERSION` every time, and on `CARDS` whenever both sides
+added cards next to each other. Keep the shipping branch's number and bump it
+past theirs; keep both sides' cards. Then re-run the tests on the MERGED tree:
+the shipping branch has its own engine work that your changes have never been
+tested against.
+
+**Push to the branch the owner can actually see.** Said plainly, because it has
+been said three times in this file and still gets missed: the only branch worth
+landing on is the one serving https://headacher.github.io/Teece/. A task branch
+is scaffolding. If you finish a change and it is not on
+`claude/overclocker-fly-gadget-bugs-rvlhsg`, you have not finished it — go and
+put it there, in the same session, without being asked again.
 
 Before believing anything is live, check the deployment rather than the push. The
 Pages build shows up as a `pages build and deployment` workflow run, and its
@@ -46,6 +69,65 @@ const VERSION={build:3,date:'2026-09-05'};
 Every push carries a bump, in the same commit as the change: `build` up by one
 (once per push, not per commit), `date` set to the day of the push.
 
+## Adding a deck
+
+A deck is registered in seven places, and missing one of them fails quietly —
+the cards exist and simply never reach a player. Take the next free block of
+twenty ids (Wizard is 906–925, with its conjured tokens at 926–941, the
+tutorial's cards sit at 960–970, Gun is 1001–1020, Fusion is 1021–1040, Lightning is 1041–1060 with its Bolt Token at 1061, Mummy is 1062–1081, Wolf is 1082–1101, Priest is 1102–1121 with its Smites at 1122–1127, Warlock is 1150–1170 plus its Pact Talisman at 1193, and Basic is 1171–1192; grep `CARDS` for the highest id before you pick, because two decks landing at once have collided),
+then:
+
+- `CARDS` in `index.html` — the twenty cards, plus any token cards they make.
+  A token carries `token:true` and `deck:'<key>'`, which keeps it out of drafts
+  while still colouring it as yours.
+- `decks.json` — a `decks.<key>` entry with `name`, `cards`, `blurb` and `how`,
+  plus `level` (`beginner`/`intermediate`/`advanced`) and `kind`
+  (`warrior`/`swarm`/`utility`), and the twenty ids appended to `pool`. The
+  picker opens sorted by `level` and only lists decks that carry one, so a deck
+  without it is missing from the default view. Edit it with a script rather than by
+  hand; it is long enough that a stray comma is hard to see.
+- `CARD_ART` — one drawing per card, tokens included, any size: the page shrinks
+  it to fit its box. Read `ART.md` first. It covers the size budget (a Teece
+  stays within 24 columns by 8 rows so it reads on a phone board), the one
+  consistent style per deck, and how to check a drawing at board size.
+- `DECK_SYM` — the deck's emoji.
+- Three CSS blocks keyed on `data-card-deck="<key>"`: the `.card`/`.dcard`
+  palette with its `.kwl`/`.ct` accent, the `::after` symbol, and `.teece` for
+  the board. The rules name `.card` and `.dcard` together so a card in hand and
+  the same card in a draft never diverge.
+
+Then check it the way a player would: the deck appears in the picker, its cards
+carry the palette in hand, and every one of the twenty actually fires in a real
+game — drive some AI games and grep the log for each card's name, because a
+card the AI never plays is a card you never tested.
+
+And land it on the shipping branch. See the top of this file: a deck that stops
+at `main` is a deck nobody can play.
+
+### Designing a deck: a machine, not a pile of cards
+
+The point of designing a deck is a well-oiled machine. Every card synergizes
+with every other card, and the deck's own unique theme is what makes the combos
+possible. Read the existing decks before designing one, because they show the
+pattern.
+
+- **One mechanic, read in many ways.** Zombie has Undying, Spider has the Web
+  and Spiderlings, Vampire has Drain, Army has adjacency. Most cards either
+  produce the deck's resource or spend it.
+- **Every role through the theme.** Starters, payoffs, recovery, comebacks,
+  defence, mobility and silence/answers should all be reachable, and each one
+  should go through the mechanic rather than around it. Recovery in Zombie is
+  getting back up. Mobility in Spider is skittering on the Web.
+- **Combos emerge from overlap.** Two cards that each make sense alone should
+  make something new together: a puller plus a cursed panel, a reset plus a
+  trigger that fires once per application. If a card only works alone, it is
+  filler.
+- **Shape.** The deck has twenty different cards, one copy each. Most decks run
+  twelve Teece (usually one or two `sac:1` and one `sac:2` boss), three magic,
+  three equips and two grounds. The deck also needs a `blurb` that names the
+  mechanic and three or four `how` lines that teach its non-obvious
+  interactions.
+
 ## Testing
 
 The file exports its internals when `module` exists, so the game can be driven
@@ -64,12 +146,19 @@ Then `newState` / `setG` / `getG` to build a position, and `playFromHand`,
 `runAct`, `endTurn`, `resolveCombat` to drive it. Set `G.aiSeats=[]` to drive
 both sides by hand so no AI turn races an assertion.
 
-Two things about the harness:
+Three things about the harness:
 
 - With no DOM, every prompt auto-resolves through `aiPickCell`/`aiPickOpt`, which
   pick **randomly**. A test depending on where a Teece lands must constrain the
   board to one legal choice or retry until it gets the placement it needs.
 - `HAS_DOM` is false, so `anim()` returns at once and `toast()` does nothing.
+- A prompt offered with `skip:true` is **declined** whenever the placement does
+  not move `boardValue` by 0.05 — `aiPickCell` weighs the board and takes the
+  skip. Anything whose worth is later rather than now scores zero, so it never
+  fires in a test and never fires for the AI: the Eldritch Library laying
+  itself down read as a dead effect for exactly this reason. Before believing
+  an effect is broken, check whether it offered a skip at all. If the card says
+  "play this" rather than "you may", do not pass `skip`.
 
 For rendering, input or overlays, drive the real page with Playwright — but serve
 it over HTTP first (`npx http-server -p 8137 -s -c-1 .`), because `fetch('decks.json')`
@@ -80,6 +169,15 @@ needs a real origin and fails on `file://`. Chromium is preinstalled at
 `-c-1` is not optional. Without it http-server sends `max-age=3600`, so a server
 started before an edit keeps serving the old file and the failures it produces
 look like real bugs in whatever you just wrote.
+
+A fresh browser context is a first-time player: the page skips the menu and
+starts the interactive tutorial, which refuses every move but the one it is
+teaching. A test that is not about the tutorial must mark it seen before the
+page loads:
+
+```js
+await context.addInitScript(()=>{try{localStorage.setItem('teece.tutorial','seen');}catch(e){}});
+```
 
 Three more things a page test gets wrong before it gets right:
 
@@ -122,10 +220,64 @@ Anything pinned to a viewport edge needs matching room held open at that end of
 the page, or it buries the content underneath. On a phone `aside` stacks below
 `main`, so the end of the page is the side panel — pad `#app`, not `main`.
 
+## Online play
+
+Decks → Online hosts a 1v1 and gives a `?join=<code>` link. The two pages meet
+through PeerJS's public broker (loaded from jsDelivr on demand) and then talk
+over WebRTC. The host's page runs the whole engine; the guest's page only draws
+the snapshots it is sent (`netSnapshot`, which blanks the host's hand, both
+decks and the host's questions) and sends its clicks back as small orders that
+`netRun` re-checks. So a click that changes the game must go through `uiDo` /
+`uiAct` / `resolvePending`, never straight to `playFromHand` and friends, or the
+guest's click will run on a copy that nobody else sees.
+
+Difficulty online is per seat: the host sets `G.seatBonus` (-3..+3 each) and
+`seatBonus(owner)` is what `makeTeece` and the other base-number sites read; vs
+the computer it falls back to `enemyBonus` on every enemy. The host runs one
+order at a time (`NET.localBusy` for its own clicks, `NET.queue` for the
+guest's): an End Turn landing mid-play used to start the guest's turn under a
+play whose next question then orphaned the guest's prompt and hung the game.
+`netTurnCheck` (end of `render`) fires the your-turn banner, chime, blinking
+title and system notification.
+
+To test it, run a local broker (`peer` npm package, `PeerServer({port:9000,
+host:'127.0.0.1',path:'/'})`), open both pages with `?peerhost=127.0.0.1:9000`,
+and route the jsDelivr PeerJS URL to a local copy, since the CDN and
+0.peerjs.com are not reachable from the sandbox.
+
 ## House rules for the game code
 
 - Cards are data in `CARDS`, keyed by id. Prefer adding a field the engine reads
   over special-casing a card by id.
+- A rule that belongs to a DECK rather than a card goes in `decks.json` and is
+  copied onto the seat at setup — `perTurn` and `freeDiscard` both work this
+  way. There are two setup paths that do the copying (the two-seat one and the
+  three-seat one) and `newState` is not one of them, so a headless test or a
+  soak built straight on `newState` never sees the rule and will report the
+  feature dead. Set the seat flag by hand in the harness.
+- `opt.hands` lets a cell prompt accept a card in hand as the answer, but
+  `aiPickCell` only ever looks at the board, so the computer and every headless
+  prompt will ignore those targets entirely. Anything the AI has to be able to
+  choose needs its own branch, the way `chooseSacrifice` does.
+- A keyword's engine name and what a player reads can differ: `KW_LABEL` maps
+  one to the other (`steadfast` reads "Immune to stat reduction"), and the
+  Detail panel and deck pages show keywords through `kwLabel`. Card text should
+  use the player-facing words.
+- Silence and theft both go through `DEF(t)`, which is what a body's card says
+  right now. A silenced body reads as its card stripped to `ID_KEYS` (name,
+  printed sides and Defence, sacrifice price, tribe tags) so **every** effect is
+  gone, passives such as "+1 per ally" included. A body with `t.grafts` (Mindless
+  Hunger, Soul Steal) reads as its card with each grafted card's effects merged
+  on, fusion-style. So read a card's effects through `DEF(t)`, never
+  `CARDS[t.cardId]`, or silence and theft will both miss it. A new identity
+  field that must survive silence (a tribe tag) belongs in `ID_KEYS`.
+- Steadfast (shown as "Immune to stat reduction") means nothing lowers its
+  numbers or its Defence, from anywhere. `applyModT`, `applyDef` and
+  `applySides` refuse a loss, and `effSides`/`defOf` drop every negative
+  layer: auras, equips, grounds, Shrink, and old penalties. An effect that
+  wipes or overwrites numbers directly must take `holdStats(t)` before it and
+  call the result after, or it will strip a steadfast Teece. Turning it round
+  is not a loss and still happens.
 - `effSides` is the single source of truth for a Teece's current numbers; auras,
   equips, grounds and doubling all compose there.
 - Effects that must land before combat go on the effect stack via `queueFx`;
@@ -136,6 +288,229 @@ the page, or it buries the content underneath. On a phone `aside` stacks below
 - A card in hand and the same card in a draft both render from `CARD_ART` and
   `data-card-deck`; the deck palette rules name `.card` and `.dcard` together so
   the two never diverge.
+
+### The tutorial is a scripted game, and it leans on the engine
+
+The interactive tutorial (`startTutorial`) is a real game against a Trainer
+whose five moves are fixed in `TUT_OPP`, played with effect-free cards 960–970
+that are in no deck and not in the pool.
+
+**The pool is not what the roguelike drafts from.** `allDraftable` walks every
+card in `CARDS` and skips only `token`, `perkOnly` and `tutorial` cards (the
+classic, Gadget and Garbage cards are drafted that way on purpose). So any card
+that must never reach a player's deck needs one of those flags, or it turns up
+in roguelike drafts: the tutorial's 14/14/14/14 no-sacrifice Warlord did,
+builds 99–107, until the cards were given `tutorial:true`. The Witches'
+random `conjure` walks every magic card the same way and skips tokens and
+tutorial cards. Each of your turns is one lesson in
+`TUT_LESSONS`; the current step is the first whose `done()` is false, read off
+the board every render. The step gates three places: `playFromHand` (which card),
+`chooseCell` (which panels or hand cards a prompt will take, via `tutFilter`)
+and `endTurn`. Nothing else is special-cased, so a change to fights, equips,
+plating, sacrifice, magic targeting or the domination check can quietly break a
+lesson — the captions also do the arithmetic out loud ("10 beats 9"). The whole
+script is also balanced so no one reaches a lead of four before the last lesson.
+After touching any of those, play the tutorial through in a browser: a fresh
+context, then keep clicking the centre of the one `.tuthi` element (by
+coordinates, checking it sits above `#coach`) until `G.over`; it takes 23 taps
+and must end on "Tutorial complete" on desktop and a phone viewport alike.
+
+`TUT_PAGES` are the rules pages behind the menu's Rules button, drawn with the
+classic cards by id. They quote numbers the engine keeps elsewhere (`WIN_LEAD`,
+five cards to open, six to keep); re-read them when those change.
+
+### Hands are hidden, and a developer code shows them
+
+`handVisible(p)` decides whose cards a hand row draws: against the computer only
+yours, at a hotseat only the seat whose turn it is (plus any seat a prompt is
+asking right now). Every other hand is dealt face down. Typing up up down down
+left right left right toggles `SHOW_ALL_HANDS` to show every hand. A page test
+that reads the computer's hand from the DOM must turn that on first; `G` always
+has the real hands.
+
+Animation lengths live in `ANIM_MS`, not at the call sites, and the CSS
+keyframes (`placePop`, `strikeFlare`, `dieShake`, `zapPulse`) are matched to
+them. A fight is two beats in `resolveCombat`: the killers `strike`, then the
+losers go `dying`.
+
+### The Wizard conjures, combines and leaves weather behind
+
+Wizards conjure element tokens (Fire 926, Water 927, Wind 928, Earth 929)
+straight into the hand through `conjureEl`; each element's spell is the
+`element` fx, which reads `archmageFor` for the stronger version. Two different
+elements combine through `combineOpts`/`combineAt` into the tokens in
+`EL_COMBO`, from a Combine button that takes the Discard button's place;
+Alchemical Compounds is a wildcard (`alchemy`), and Holy needs a Grand Magus
+(`holyCombine`) on the field. A magic card's `elem` list is what the
+Elementals' `onMagicElem` reads, so Steam counts as Fire and as Water.
+
+The Fireball's fire is a `scorch` fire: it gives no standing penalty, and
+`scorchFires` (run at the top of every `resolveCombat`) takes -4 off whatever
+stands in it for good and puts that fire out. The Sandstorm moves what stands
+on it in `sandstormTurn`, at the start of every turn. A Ley Line pays on
+arrival through `groundArrive`, called from `playTeece` and `fireMove`.
+
+Balance, measured in AI-vs-AI games against every other deck: with bodies
+around 5s it won 85% (Runeblade, the strongest other deck, wins 70% of the
+same matchups), and the conjuring was the source. The owner then took 3 off
+every side of all twelve Teece, bosses included, and it won 21% (build 103).
+Settled at 2 off every side and 1 back on the Archmage and Grand Magus
+(8s and 11s): 51% (build 104). Re-soak it after any change to the elements or
+the bodies.
+
+### The Gun spends bullets, six shots a turn
+
+Bullets are numbers on the seat (`bullets`, plus Speedloader's `hotBullets`,
+which are spent first and lapse in `endTurn`), not cards. `shots` counts the
+magazine: `MAG_SIZE` is 6, `startTurn` refills it for the seat whose turn it
+is, and `reloadMag` refills it early. Any seat holding bullets has a gun, so a
+Warzone arms the other side and a drafted Gun card brings the gun with it;
+`hasGun` only decides whether the chip and the count beside the name show.
+
+The gun is the `gun` status chip under the board: `drawGun` opens a cell
+prompt with `opt.gun` (which turns the pointer over the board into a
+crosshair) and keeps reopening it until it is holstered or runs dry. Every
+shot, from anywhere, goes through `shootTeece`, and that is where all of the
+"when shot" cards answer — `shotGain`, `shotKw`, `onShotAny`, `shotStun`,
+`shotExec` and the Warzone's `gShotBullet`. `fireGunAt` is the paid-for pull of
+the trigger (a bullet, a shot, then `resolveCombat`). A Gun Range is shot by
+raising `gmod` on the ground instance itself. The Stuntman's dodge is
+`gunDodge`, called from `processDeath`; the Gun Devil's eight lines are
+`gunLine`. The Avatar of the Gun God (`gunGod`) turns the chip off for the seat
+that bolted it on and gives its wearer an act, `gunGodShot`.
+
+The computer shoots in `aiGun`, one best shot at a time on a cloned board via
+`simShot`, and keeps three bullets back while it holds a Gun Devil. Balance in
+AI-vs-AI games against every other deck: 59% over 500 games (build 115).
+
+### Fusion makes cards that nobody printed
+
+Every Fusion Teece prints the `fuse` keyword. Two Teece cards in hand (one of
+them a fuser, the other any Teece) fuse through `fuseHandOpts`/`fuseHandAt`,
+from a Fuse button that takes the Discard button's place; two of a seat's own
+Teece standing side by side fuse through the `kfuse` act (`FUSE_ACT`, which
+`actsOf` adds to any body whose OWN card prints `fuse`), once per turn per
+seat via `onceTurn:'fuse'`.
+
+`makeFusionCard(a,b)` builds the result as a real card and registers it in
+`CARDS` under a string id (`FU1`, `FU2`, ...) with `fusion:[a,b]` and
+`deck:'fusion'`: sides and Defence added, keywords pooled (minus `fuse`, which
+is why a fusion never fuses again), lists such as `onPlay`/`onDeath`/`act`
+joined, numbers added, a second aura pushed into `auras`, art stitched from
+both halves. Everything downstream therefore reads it as any other card. The
+same pair always returns the same id (`FUSE_CACHE`), so the AI simulating a
+fusion on a cloned board does not leave cards behind, and `newState` clears
+them all (`forgetFusions`) — a fusion card made before a `newState` in a test
+is gone after it. `toGrave` buries a fusion as its parts, recursively.
+
+On the board `fuseOnBoard` adds the two bodies' own bases (so turns and
+handicaps carry), perm/temp/temp2, Defence, keywords, equips, links and
+grafts. `afterFusion` then breaks any Unstable Catalyst (`grants.fuseBreak`,
+also checked on hand plating) and offers the Fusion Chamber's draw
+(`gFuseDraw`). Hyperfusion (`fuHyper`) fuses two fusions from hand, field or
+one of each into a card with `boss:true`, which `isBossCard` now also reads.
+Phase Drift parks its +5 on `t.fuseCharge`, which `fuseOnBoard` turns
+permanent. The Paradox Twins' "cannot win until the start of your next turn"
+is a `nowin` hex marked `liftAtStart`, removed in `startTurn` rather than
+counted down in `tickHexes`.
+
+The computer fuses in hand in `aiFuseHand` (strongest pair, up to twice a
+turn, before it plays a Teece), on the board when `aiActMuts` scores it, and
+casts the three spells through `aiFusionMagicPlan`. Fusing is the deck: a
+computer that never fused in hand won 24%; fusing every pair it can, up to two
+a turn, won 47.5% and 50.5% in two 1040-game AI-vs-AI soaks against every
+other deck (build 116).
+
+### The Priest worships, conjures Smites and combines them
+
+Worship is a seat value, `pl.worship` (a side index: Topus 0, Rightorious 1,
+Bottomor 2, Levt 3, in `GODS`), chosen in `startTurn` the first time a seat
+playing the Priest deck starts a turn. It is a deck rule: `decks.json` sets
+`worship`, `applyDeckRules` copies it to `pl.worshipper`, and `seatHasPriest`
+refuses any other seat, so drafted priests and roguelike runs get no god.
+`effSides` gives every `priest` +3 on that side, read off the body's current
+controller, so a priest the other side steals gets nothing; `priest` and `godTitle` are in
+`ID_KEYS`, so silence keeps Worship. A `godTitle` card (High Priest, Avatar)
+is named for the god: `nm`/the hand use the owner's via `cardTitle`, and
+`CARDS[id].name` itself is a getter (`godTitleName`, printed name kept in
+`baseName`) so the Detail panel, log and prompts follow too. `worshipPlus` (Devotee) and the Icon of
+Devotion's `worshipTriple` (the finished side value, tripled) compose there too.
+A headless test built on `newState` must set `pl.worship` (or `pl.worshipper`) by hand.
+
+Smites are token magic 1122–1125 with `smiteLvl` 1–4; Divine Retribution
+(1115) has `smiteLvl:2` so it combines as a Half, and is played only from
+`retributionReact` in `processDeath`. `combineOpts` hands any `smiteLvl` card to
+`smiteCombineOpts`, so the Wizard's Combine button and `combineAt` do the work;
+`onCombine` (Seraph) answers in `combineAt`. Every conjure goes through
+`conjureSmites`, where Prayer Beads' `onConjure` pays. `scanDeaths` now records
+the side each killer struck with in `dead.ksides`, and on-kill steps see it as
+`ctx.killSide` (the Zealot). High Priest and Avatar take Smites from the hand as
+sacrifice through `sacSmite` (worth per card id, read by `handSacWorth`).
+
+The computer folds Quarters and Halves always and Smites into a Divine only
+when it lacks discard fodder (`aiSmiteCombine`), and casts through
+`aiSmitePlan`. AI-vs-AI against every other deck, at the owner's printed numbers: 75% over
+180 games (build 168), 73% over 120 once Worship became deck-only and Vigil
+Keeper own-turn-only (build 169).
+
+### Lightning summons out of the hand, and answers at instant speed
+
+A summon is a Teece played out of the hand by an effect (`summonFromHand`,
+which sets `G.viaEffect`): it spends no Teece play, only a non-Boss that costs
+no sacrifice can be summoned (`canSummon`), and the body that lands is marked
+`t.thunder`, which `realCount` ignores until `startTurn` clears it for its
+owner. On a step, `fromHand:true` means "except by an effect" and
+`viaEffect:true` means "only by one".
+
+A card with `handOnEnemyPlay` or `handOnEnemyMagic` is offered the moment the
+other side plays a Teece or casts magic (`reactHand`, from `playTeece` and
+`fireMagic`; the computer always says yes, and the depth is capped at 3).
+`reactDeath` (Zeus' Blessing) is offered from `processDeath` before the body
+leaves (`zeusReact`). `foeTurnEnd` steps run in `endTurn` for the Teece that are
+not on the side whose turn is ending. Plated equips read `freePlay` and
+`onPlayTemp` in `playTeece`.
+
+### Clanker On Clanker is a deck game with nobody playing
+
+The start menu's Clanker On Clanker (`start('clank')`) picks two prebuilt
+decks and builds an ordinary `newState('deck', ...)` with `aiSeats:[0,1]` and
+the deck names as `seatNames`, so the engine never knows. `G.spectate` does the
+rest: `handVisible` shows both hands, and one capture-phase click listener
+swallows any click on a hand card, an ability button, Discard or End Turn
+while it is set. A page test that wants to freeze the computers must bump
+`G.epoch` (`G.epoch=++EPOCH`), not just `EPOCH`: `stale()` compares against
+`G.epoch`, and an AI turn already in flight keeps playing otherwise.
+
+### Holding a Teece back has a limit
+
+A player with no Teece on the field may pass up a playable Teece (`holdsPlayableTeece`)
+twice in a row; the third turn, End Turn refuses until one goes down
+(`mustPlayTeece`, `PASS_LIMIT`). `notePass` counts the streak in `endTurn`, once
+the turn has really ended, and anything else clears it: playing a Teece,
+having one on the field, holding nothing playable. The status chips say
+"Last pass" and "Must play a Teece" before End Turn does. The computer always
+plays a Teece when it can, so in practice this only ever binds a human.
+
+### Games end at turn 100
+
+`checkTurnLimit` runs at the end of every turn, after the other win checks:
+when turn `TURN_LIMIT` (100, counted across all seats the way the turn banner
+counts) ends, `deckOutWinner` decides it -- most Teece on the field, Tokens
+not counted, level is a draw. The turn panel shows "turn N of 100" for the last
+ten, and `lastTurnNotice` stops a human seat at the start of its final turn
+with a notice it must acknowledge (not the computer's, not the tutorial's). A
+page test that runs a game near turn 100 has to press `#lastTurnOk`. A soak that
+loops "up to 300 turns" now always stops by 100.
+
+### Day and Night exist only with Solar cards
+
+The round turns the sky only when `skyShowing()` finds a card that reads it
+somewhere in the game (board, hands, decks, graves); otherwise the phase stays
+Day and nothing reads it. The Stopped Sundial (`timeStop`) stops only that
+round's turn: `setPhase` still lets a card change the sky under it. A magic card
+with `onlyWhen:'night'` refuses to be played at the wrong time, and a
+`graveAct` with `when` is only offered in that half of the cycle. `defender` is
+a keyword `scanDeaths` reads: that Teece never destroys anything in combat.
 
 ### An ability reads as X : Y ; Z
 
