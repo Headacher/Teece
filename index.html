@@ -1531,7 +1531,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:277,date:'2026-10-21'};
+const VERSION={build:278,date:'2026-10-21'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -5335,7 +5335,7 @@ const CARDS = {
  1002:{name:'Ammo Mule',type:'teece',sides:[6,9,2,2],onDeath:[{fx:'bullets',n:3}],
     text:'When destroyed: gain 3 bullets.'},
  1003:{name:'Bullet Sponge',type:'teece',sides:[5,5,5,5],shotGain:7,
-    text:'When it is shot, it gets +1 instead, until it has gained +7 this way.'},
+    text:'Shots can\'t reduce or destroy it. When it is shot, it gets +1 instead, until it has gained +7 this way.'},
  1004:{name:'Shock Trooper',type:'teece',sides:[2,7,8,2],shotStun:true,
     text:'Whenever an enemy Teece is shot, it is also stunned.'},
  1005:{name:'Ammo Drone',type:'teece',sides:[0,0,0,0],kw:['flying'],
@@ -26897,7 +26897,7 @@ function simShot(bb,i,dmg){
   let n=dmg||1;
   if(t.apTurn===turn)n+=1;
   if(t.headshot&&t.headshot.turn===turn)n+=t.headshot.n;
-  if(!t.silenced&&d.shotGain&&(t.shotGained||0)<d.shotGain){applyModT(t,1,'perm');return;}
+  if(!t.silenced&&d.shotGain){if((t.shotGained||0)<d.shotGain)applyModT(t,1,'perm');return;}
   applyModT(t,-n,'perm');
 }
 async function shootTeece(p,i,o){
@@ -26911,12 +26911,17 @@ async function shootTeece(p,i,o){
   if(t.apTurn===turn)n+=1;
   if(t.headshot&&t.headshot.turn===turn)n+=t.headshot.n;
   const awake=!t.silenced;
-  if(o.kill){}
-  else if(awake&&d.shotGain&&(t.shotGained||0)<d.shotGain){
-    t.shotGained=(t.shotGained||0)+1;
-    applyModT(t,1,'perm');
-    log(nm(t)+' soaks up the bullet: +1 ('+t.shotGained+' of +'+d.shotGain+').');
-  }else{
+  /* The Bullet Sponge takes every shot whole: no -1, no Gun Devil, no
+     execution. Past +7 the bullet still disappears into it, for nothing. */
+  const soak=awake&&!!d.shotGain;
+  if(soak){
+    if((t.shotGained||0)<d.shotGain){
+      t.shotGained=(t.shotGained||0)+1;
+      applyModT(t,1,'perm');
+      log(nm(t)+' soaks up the bullet: +1 ('+t.shotGained+' of +'+d.shotGain+').');
+    }else log(nm(t)+' soaks up the bullet, already full at +'+d.shotGain+'.');
+  }else if(o.kill){}
+  else{
     applyModT(t,-n,'perm');
     log(nm(t)+' is shot'+(o.by?' by '+o.by:'')+': -'+n+(isSteadfast(t)?', which it shrugs off':'')+'.');
   }
@@ -26924,7 +26929,7 @@ async function shootTeece(p,i,o){
     for(const k of d.shotKw)if(t.kwTemp.indexOf(k)<0)t.kwTemp.push(k);
     log(nm(t)+' takes '+d.shotKw.map(kwLabel).join(' and ')+' until the end of the turn.');
   }
-  if(o.kill){forceDeath(t);log(nm(t)+' is cut down by the Gun Devil.');}
+  if(o.kill&&!soak){forceDeath(t);log(nm(t)+' is cut down by the Gun Devil.');}
   if(!sameTeam(t.owner,p))noteTargeted(p);
   for(let j=0;j<BN;j++){
     const w=b[j].teece;
@@ -26933,7 +26938,7 @@ async function shootTeece(p,i,o){
     if(wd.onShotAny){applyModT(w,wd.onShotAny,'temp');log(nm(w)+' draws a bead: '+sgn(wd.onShotAny)+' until the end of the turn.');}
     if(sameTeam(w.owner,t.owner)||b[i].teece!==t)continue;
     if(wd.shotStun)applyStun(b,i,true,w.owner);
-    if(wd.shotExec&&t.shotLog.n>=wd.shotExec&&!o.kill&&!isHeldSafe(t)){
+    if(wd.shotExec&&t.shotLog.n>=wd.shotExec&&!o.kill&&!soak&&!isHeldSafe(t)){
       forceDeath(t);
       log(nm(w)+' calls it: '+nm(t)+' has been shot '+t.shotLog.n+' times this turn and is executed.');
     }
@@ -27054,7 +27059,7 @@ function aiGunPick(p,god){
     let g=boardValue(bb,p)-base;
     /* What the Executioner will do on the fifth shot is not in the numbers. */
     const t=b[c.i].teece;
-    if(c.what==='t'&&t&&!sameTeam(t.owner,p)&&t.shotLog&&t.shotLog.turn===G.turnNum){
+    if(c.what==='t'&&t&&!sameTeam(t.owner,p)&&!(DEF(t).shotGain&&!t.silenced)&&t.shotLog&&t.shotLog.turn===G.turnNum){
       for(let j=0;j<BN;j++){const w=b[j].teece;if(w&&!w.silenced&&sameTeam(w.owner,p)&&DEF(w).shotExec)g+=t.shotLog.n*0.6;}
     }
     if(g>bg){bg=g;best=c;}
