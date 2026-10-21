@@ -1533,7 +1533,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:283,date:'2026-10-21'};
+const VERSION={build:284,date:'2026-10-21'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -24532,10 +24532,21 @@ async function heavenPlace(p,handIdx,id,o){
   o.spend();
   log(pname(p)+' '+vb(p,'plays','play')+' '+d.name+' into '+hvWhere(c)+
     (o.freeBoss?', with no sacrifice: it never Descends on its own, only to The Last Trumpet.':'.'));
-  /* A when-played effect that works from up there still fires (Greg, build 267:
-     the Cherub). Only steps that need no panel: anything else stays unfired. */
-  const ups=(DEF(t).onPlay||[]);
-  if(ups.length&&ups.every(st=>st.fx==='angel'||st.fx==='draw'))await runSteps(ups,{p,cell:null,t,first:false,hvCol:c});
+  /* Its when-played effects fire up there too, any deck's (Greg, builds 267
+     and 284). The body stands on no panel, so a step that reads its panel or
+     its neighbours has nothing to reach: each step runs on its own, and one
+     that finds no panel is reported and skipped rather than stopping the rest. */
+  const ups=t.silenced?[]:(DEF(t).onPlay||[]);
+  for(const st of ups){
+    if(G.over)return true;
+    try{
+      const r=await runSteps([st],{p,cell:null,t,first:false,hvCol:c,fromHand:!G.viaEffect,viaEffect:!!G.viaEffect});
+      if(r===false)break;
+    }catch(e){
+      if(G.pending)G.pending=null;
+      log(d.name+': part of its when-played effect reaches the Teece beside it, and nothing is beside it in the Heavens.');
+    }
+  }
   if(G.over)return true;
   G.eventFlag=true;
   await resolveCombat();
