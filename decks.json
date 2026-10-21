@@ -64,8 +64,8 @@
       "noDominate": true,
       "swarmWin": "any",
       "blurb": "A swarm that wins by covering the board rather than by out-numbering it. Ten of the twenty cards are the same Rat, each one lets you play another for free, and every body in the deck gets +1 for every ally standing with it, so a hand goes down in a single turn and grows as it lands. Rats can never win by being four Teece ahead: they take the game the moment their Teece hold every panel, or by holding the most of the field when a deck runs dry. Brilliant on an open board; weak to anything that clears it in one go, and a razed panel shuts the main ending off for good.",
-      "lore": "Something is lurking in the sewers under Middlemark, and there is a great deal of it. The Rats answer to the Rat King and his Queen and hold that any panel with a Rat on it is a panel improved. They dig deeper every year, and the Priests would very much like to know what they keep hearing down there. The sewers drain to the Dump in the Badlands, where the Garbage lives, which the Rats regard as lunch.",
-      "home": "mc",
+      "lore": "Something is lurking in the drains under the Dump in the Badlands, the dark where progress throws whatever it has finished with, and there is a great deal of it. The Rats answer to the Rat King and his Queen and hold that any panel with a Rat on it is a panel improved. Every pipe from Middlemark and the Works runs down to them, so they hear everything the rest of Teece flushes away, and they have been gnawing their way back up those pipes for years. They share the dark with the Garbage, which they regard as lunch.",
+      "home": "br",
       "how": [
         "Each Rat you play opens the door for the next one, free of the turn's Teece play. Nine panels is the only thing that stops you.",
         "Every Teece here reads the crowd: +1 for every other ally on the board, and the Rat King hands out another +2 on top of that. Swarmcloak pays +2 per ally to whoever wears it.",
@@ -411,7 +411,7 @@
         560
       ],
       "blurb": "Tiny flying creatures with almost no numbers and an enormous amount of magic. Every pixie flies, and the deck keeps pulling spells out of graveyards, out of the deck and out of thin air, then bends the field with them: Mind Control takes a Teece for a turn, Enlarge and Shrink rewrite one, Invisibility and Pixie Projection protect, and Silence strips one for good. The Pixie Queen hands you a Queen's Enlarge every turn, and the Spellbound Pixie grows with every spell. The pixies are 0s, 1s and 2s, so it is very strong in skilled hands and falls over the moment the spells run out.",
-      "lore": "The Pixies are children of the Fey, tiny, airborne and ungovernable, and they live in the canopy of the Wildwood, which is the reason a Warlock's Fey patron never answers on the first ring. They steal spells from the Wizards for fun and from the Witches for profit, and they once enlarged a Middlemark sewer Rat to the size of a cathedral, which is where the Rat King got his ideas. Nobody has ever caught one, because nobody has ever managed to hit a 1.",
+      "lore": "The Pixies are children of the Fey, tiny, airborne and ungovernable, and they live in the canopy of the Wildwood, which is the reason a Warlock's Fey patron never answers on the first ring. They steal spells from the Wizards for fun and from the Witches for profit, and they once enlarged a Badlands drain Rat to the size of a cathedral, which is where the Rat King got his ideas. Nobody has ever caught one, because nobody has ever managed to hit a 1.",
       "home": "ml",
       "how": [
         "Pixies are 0s, 1s and 2s. They are not meant to fight — they are meant to keep casting.",
@@ -1426,8 +1426,8 @@
         1313
       ],
       "blurb": "Mimics are chests, bookcases, doors and wardrobes with teeth: the biggest bodies in the game, each with a catch that helps your opponent. A Bookcase hands them two cards when it falls, a Front Door gives their next Teece +2, a Toy Chest summons two Tokens on their side. Play around the catch: silence your own Mimics with the Cushion, Play Dead or the Haunted Manor, turn the gift round with a Looking Glass or a Skeleton Key, or stand The Hoard on the field so every Mimic that falls pays you instead.",
-      "lore": "Mimics turn up wherever the World of Teece keeps its treasure, and nobody has ever seen one arrive. A chest in a Dwarf vault, a wardrobe in a Middlemark inn, a door that was not there last week: each one waits for a hand to reach in, and each one gives a little back as it is broken open, which is why treasure hunters keep going into rooms they should not. The Hoard is what a Mimic becomes when it is left alone long enough with enough gold.",
-      "home": "world",
+      "lore": "Mimics are what becomes of the things progress forgets. Down in the Badlands, among the lockers, safes and strongboxes nobody came back for, a chest left long enough in the dark starts to wait for a hand. They creep out into the rest of Teece dressed as treasure: a chest in a Dwarf vault, a wardrobe in a Middlemark inn, a door that was not there last week. Each one gives a little back as it is broken open, which is why treasure hunters keep going into rooms they should not, and the Hoard is what a Mimic becomes when it is left alone long enough with enough gold.",
+      "home": "br",
       "how": [
         "Every Mimic's drawback helps your opponent: a card drawn, a bonus on their next Teece, Tokens on their side, invulnerability. The numbers are huge to pay for it.",
         "A silenced Mimic keeps its numbers and loses its drawback. The Cushion silences an ally when played and when discarded (and can be discarded from your hand on your turn), Play Dead silences the next ally you play, and the Haunted Manor silences every Teece left in your deck.",
@@ -2353,7 +2353,7 @@
     {
       "id": "br",
       "name": "The Badlands",
-      "text": "Progress gone to seed near the Pit: dust, scrap, blast craters and the Dump where everyone else’s rubbish stands up and walks."
+      "text": "The dark and forgotten refuse of progress, down near the Pit: dust, scrap, blast craters, the drains under the Dump, and everything the Works and Middlemark threw away and stopped thinking about. Some of it stands up and walks. Some of it waits."
     },
     {
       "id": "below",
