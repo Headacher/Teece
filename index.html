@@ -325,6 +325,13 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
 .card[data-card-deck="knights"] .kwl,.dcard[data-card-deck="knights"] .dkw{color:#2e3540}
 .card[data-card-deck="knights"] .ct,.dcard[data-card-deck="knights"] .dty{color:#2e3540}
 .card[data-card-deck="knights"]::after,.dcard[data-card-deck="knights"]::after{content:'\265E'}
+/* Demons: black rock under the board. Rock teeth hang along the top, a seam of
+   magma glows along the bottom and faint cracks run all over, so the middle
+   stays quiet for the drawing. Not the Devils' red and tall flames. */
+.card[data-card-deck="demons"],.dcard[data-card-deck="demons"]{--cardbg:#1e0f16;--artink:#ffcfb0;--deckbg:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath fill='rgba(8,3,6,.88)' d='M0 0H100V6L96 12L92 5L87 16L82 6L77 11L72 4L67 15L61 5L56 10L50 3L44 13L39 5L33 14L28 4L23 11L18 6L13 15L8 5L4 10L0 6Z'/%3E%3Cpath fill='none' stroke='rgba(255,98,36,.55)' stroke-width='.7' d='M0 6L4 10L8 5L13 15L18 6L23 11L28 4L33 14L39 5L44 13L50 3L56 10L61 5L67 15L72 4L77 11L82 6L87 16L92 5L96 12L100 6'/%3E%3C/svg%3E") 50% 0/100% clamp(10px,15%,24px) no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath fill='none' stroke='rgba(255,120,40,.95)' stroke-width='1.1' stroke-linejoin='round' d='M0 6L7 4L12 7L20 3L27 6L33 4L41 7L48 3L55 6L62 4L70 7L77 3L84 6L91 4L100 6'/%3E%3Cpath fill='none' stroke='rgba(255,210,120,.7)' stroke-width='.45' d='M0 6L7 4L12 7L20 3L27 6L33 4L41 7L48 3L55 6L62 4L70 7L77 3L84 6L91 4L100 6'/%3E%3C/svg%3E") 0 100%/100% clamp(6px,8%,12px) no-repeat,radial-gradient(80% 26% at 50% 104%,rgba(255,96,30,.32),rgba(255,96,30,0) 80%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cpath d='M0 14L9 18L15 12L24 19L22 28M15 12L13 3M24 19L35 15L41 22L52 18L60 23M41 22L39 33L46 41M22 28L12 34L8 45L0 47M39 33L28 38L25 49L31 60M46 41L57 39M8 45L14 53' fill='none' stroke='rgba(255,96,32,.16)' stroke-width='.9' stroke-linecap='round'/%3E%3C/svg%3E") 0 0/52px 52px,linear-gradient(180deg,#140a10 0%,#22101a 45%,#2c1012 80%,#3a140c 100%),var(--cardbg);background:var(--deckbg);color:#f6e2d6;border-color:#5a1c12}
+.card[data-card-deck="demons"] .kwl,.dcard[data-card-deck="demons"] .dkw{color:#ff8a4c}
+.card[data-card-deck="demons"] .ct,.dcard[data-card-deck="demons"] .dty{color:#ff8a4c}
+.card[data-card-deck="demons"]::after,.dcard[data-card-deck="demons"]::after{content:'\1F47F'}
 .card[data-card-deck="angels"],.dcard[data-card-deck="angels"]{--cardbg:#d6e8f6;--artink:#2c4866;--deckbg:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath fill='rgba(255,255,255,.62)' d='M0 40V24C5 17 13 18 16 23C19 13 31 12 35 21C39 13 50 12 54 21C58 14 69 13 73 22C77 15 88 15 92 22C95 18 99 19 100 21V40Z'/%3E%3Cpath fill='rgba(255,255,255,.9)' d='M0 40V31C4 27 9 27 12 30C15 24 24 24 27 29C31 23 41 23 45 29C49 24 58 24 62 30C66 25 75 25 79 30C83 26 92 26 95 30C97 28 99 28 100 29V40Z'/%3E%3C/svg%3E") 0 100%/100% clamp(20px,26%,42px) no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath d='M8 1Q50 19 92 1' fill='none' stroke='rgba(214,166,46,.85)' stroke-width='1.6' stroke-linecap='round'/%3E%3Cpath d='M16 1Q50 13 84 1' fill='none' stroke='rgba(255,226,140,.6)' stroke-width='.9' stroke-linecap='round'/%3E%3C/svg%3E") 50% 0/100% clamp(10px,16%,24px) no-repeat,linear-gradient(180deg,#9fcaf0 0%,#cfe3f5 38%,#f2f1ec 72%,#fbf6ea 100%),var(--cardbg);background:var(--deckbg);color:#14202e;border-color:#6e93b8}
 .card[data-card-deck="angels"] .kwl,.dcard[data-card-deck="angels"] .dkw{color:#7a560a}
 .card[data-card-deck="angels"] .ct,.dcard[data-card-deck="angels"] .dty{color:#7a560a}
@@ -380,6 +387,7 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
 .teece[data-card-deck="cult"]{--cardbg:#2a0a10;--artink:#e0505a;--acc:#ff7a84;--deckbg:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='xMidYMid slice'%3E%3Cg fill='none' stroke='rgba(224,80,90,.32)'%3E%3Ccircle cx='50' cy='50' r='44' stroke-width='1.5'/%3E%3Ccircle cx='50' cy='50' r='40' stroke-width='.8'/%3E%3Cpath d='M50 10L73.5 82.4L12 37.6L88 37.6L26.5 82.4Z' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/g%3E%3C/svg%3E") 50% 50%/cover no-repeat,radial-gradient(circle at 50% 50%,rgba(0,0,0,0) 30%,rgba(0,0,0,.25)),var(--cardbg);background:var(--deckbg);color:#f6e2e2}
 .teece[data-card-deck="paladin"]{--cardbg:#f8f8c1;--artink:#6e5c0e;--acc:#8a6400;--deckbg:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='xMidYMid meet'%3E%3Cpath d='M42 14H58L54 40L80 36V52V64L54 60L58 86H42L46 60L20 64V36L46 40Z' fill='rgba(205,170,40,.2)' stroke='rgba(170,135,20,.32)' stroke-width='1'/%3E%3C/svg%3E") 50% 50%/100% 100% no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Crect x='3.5' y='3.5' width='93' height='93' rx='3' fill='none' stroke='rgba(190,150,30,.5)' stroke-width='1.6' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") 0 0/100% 100% no-repeat,radial-gradient(circle at 50% 50%,#fbfbd6,#f8f8c1 55%,#eeeaa8),var(--cardbg);background:var(--deckbg);color:#3a3312}
 .teece[data-card-deck="knights"]{--cardbg:#b3b9c1;--artink:#252b33;--acc:#2e3540;--deckbg:radial-gradient(circle,transparent 0 3.2px,#d2d7dd 3.2px 3.8px,#9aa1aa 3.8px 4.6px,transparent 5px) 0 0/10px 10px,radial-gradient(circle,transparent 0 3.2px,#d2d7dd 3.2px 3.8px,#9aa1aa 3.8px 4.6px,transparent 5px) 5px 5px/10px 10px,linear-gradient(160deg,#c9ced5,#9ea5ae);background:var(--deckbg);color:#161a20}
+.teece[data-card-deck="demons"]{--cardbg:#1e0f16;--artink:#ffcfb0;--acc:#ff8a4c;--deckbg:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath fill='rgba(8,3,6,.88)' d='M0 0H100V6L96 12L92 5L87 16L82 6L77 11L72 4L67 15L61 5L56 10L50 3L44 13L39 5L33 14L28 4L23 11L18 6L13 15L8 5L4 10L0 6Z'/%3E%3Cpath fill='none' stroke='rgba(255,98,36,.55)' stroke-width='.7' d='M0 6L4 10L8 5L13 15L18 6L23 11L28 4L33 14L39 5L44 13L50 3L56 10L61 5L67 15L72 4L77 11L82 6L87 16L92 5L96 12L100 6'/%3E%3C/svg%3E") 50% 0/100% clamp(10px,15%,24px) no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath fill='none' stroke='rgba(255,120,40,.95)' stroke-width='1.1' stroke-linejoin='round' d='M0 6L7 4L12 7L20 3L27 6L33 4L41 7L48 3L55 6L62 4L70 7L77 3L84 6L91 4L100 6'/%3E%3Cpath fill='none' stroke='rgba(255,210,120,.7)' stroke-width='.45' d='M0 6L7 4L12 7L20 3L27 6L33 4L41 7L48 3L55 6L62 4L70 7L77 3L84 6L91 4L100 6'/%3E%3C/svg%3E") 0 100%/100% clamp(6px,8%,12px) no-repeat,radial-gradient(80% 26% at 50% 104%,rgba(255,96,30,.32),rgba(255,96,30,0) 80%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cpath d='M0 14L9 18L15 12L24 19L22 28M15 12L13 3M24 19L35 15L41 22L52 18L60 23M41 22L39 33L46 41M22 28L12 34L8 45L0 47M39 33L28 38L25 49L31 60M46 41L57 39M8 45L14 53' fill='none' stroke='rgba(255,96,32,.16)' stroke-width='.9' stroke-linecap='round'/%3E%3C/svg%3E") 0 0/52px 52px,linear-gradient(180deg,#140a10 0%,#22101a 45%,#2c1012 80%,#3a140c 100%),var(--cardbg);background:var(--deckbg);color:#f6e2d6}
 .teece[data-card-deck="angels"]{--cardbg:#d6e8f6;--artink:#2c4866;--acc:#7a560a;--deckbg:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath fill='rgba(255,255,255,.62)' d='M0 40V24C5 17 13 18 16 23C19 13 31 12 35 21C39 13 50 12 54 21C58 14 69 13 73 22C77 15 88 15 92 22C95 18 99 19 100 21V40Z'/%3E%3Cpath fill='rgba(255,255,255,.9)' d='M0 40V31C4 27 9 27 12 30C15 24 24 24 27 29C31 23 41 23 45 29C49 24 58 24 62 30C66 25 75 25 79 30C83 26 92 26 95 30C97 28 99 28 100 29V40Z'/%3E%3C/svg%3E") 0 100%/100% clamp(20px,26%,42px) no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath d='M8 1Q50 19 92 1' fill='none' stroke='rgba(214,166,46,.85)' stroke-width='1.6' stroke-linecap='round'/%3E%3Cpath d='M16 1Q50 13 84 1' fill='none' stroke='rgba(255,226,140,.6)' stroke-width='.9' stroke-linecap='round'/%3E%3C/svg%3E") 50% 0/100% clamp(10px,16%,24px) no-repeat,linear-gradient(180deg,#9fcaf0 0%,#cfe3f5 38%,#f2f1ec 72%,#fbf6ea 100%),var(--cardbg);background:var(--deckbg);color:#14202e}
 .teece[data-card-deck="mimics"]{--cardbg:#7a4220;--artink:#fff0d8;--acc:#ffd47a;--deckbg:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Crect y='1.5' width='100' height='7' fill='rgba(214,170,64,.9)'/%3E%3Crect y='1.5' width='100' height='1.2' fill='rgba(255,230,150,.7)'/%3E%3Crect y='7.3' width='100' height='1.2' fill='rgba(90,55,10,.6)'/%3E%3C/svg%3E") 0 0/100% clamp(9px,11%,16px) no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Crect y='1.5' width='100' height='7' fill='rgba(214,170,64,.9)'/%3E%3Crect y='1.5' width='100' height='1.2' fill='rgba(255,230,150,.7)'/%3E%3Crect y='7.3' width='100' height='1.2' fill='rgba(90,55,10,.6)'/%3E%3C/svg%3E") 0 100%/100% clamp(9px,11%,16px) no-repeat,radial-gradient(circle,rgba(110,70,15,.95) 0 1.6px,rgba(255,226,140,.9) 1.6px 2.4px,transparent 2.6px) 6px 2px/22px clamp(9px,11%,16px) repeat-x,radial-gradient(circle,rgba(110,70,15,.95) 0 1.6px,rgba(255,226,140,.9) 1.6px 2.4px,transparent 2.6px) 6px 100%/22px clamp(9px,11%,16px) repeat-x,radial-gradient(ellipse 18% 6% at 22% 38%,rgba(60,24,6,.22),transparent 70%),radial-gradient(ellipse 22% 5% at 76% 70%,rgba(60,24,6,.2),transparent 70%),repeating-linear-gradient(180deg,rgba(40,16,4,.0) 0 18px,rgba(40,16,4,.38) 18px 19.5px,rgba(255,200,140,.08) 19.5px 21px),linear-gradient(160deg,#9a5a2c,#7a4220 55%,#62331a),var(--cardbg);background:var(--deckbg);color:#fff4e4}
 .teece.token[data-card-deck]{background:transparent}
@@ -398,7 +406,7 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
 @property --cs{syntax:'<length>';inherits:true;initial-value:110px}
 .boardrow{--gap:8px;--cs:min(var(--csmax,168px),
   calc((100cqw - (var(--cols,3) - 1) * var(--gap) - var(--xgap,0px) - 38px) / var(--cols,3)),
-  max(118px,calc((100svh - 330px) / var(--bw,3))))}
+  max(118px,calc((100svh - 330px) / var(--bh,var(--bw,3)))))}
 @media(max-width:560px){.boardrow{--gap:6px}.boardrow:has(>#board.bw4){--gap:3px}}
 #board{display:grid;grid-template-columns:repeat(var(--bw,3),var(--cs));
   grid-auto-rows:var(--cs);gap:var(--gap);position:relative}
@@ -442,6 +450,17 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
 .teece[data-card-deck="paladin"] .dfn.oath{color:#8a6400}
 .teece[data-card-deck="paladin"] .dfn.oath.broke{color:#b3261e}
 .cell{position:relative;border:1px solid var(--line);border-radius:8px;background:#191410;overflow:hidden;cursor:default}
+/* Hell: a panel the Demons have taken -- black rock cracked through with
+   magma and burning along its foot -- and the row of them under the board,
+   set off from the square by a glowing seam. A Hell-row panel turned back by
+   the Devil Demon is bare black rock. */
+.cell.hellrow{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cpath d='M0 14L9 18L15 12L24 19L22 28M15 12L13 3M24 19L35 15L41 22L52 18L60 23M41 22L39 33L46 41M22 28L12 34L8 45L0 47M39 33L28 38L25 49L31 60M46 41L57 39M8 45L14 53' fill='none' stroke='rgba(255,96,32,.22)' stroke-width='.9' stroke-linecap='round'/%3E%3C/svg%3E") 0 0/60px 60px,linear-gradient(180deg,#1c1414,#251a18);border-color:#4a2a22}
+.cell.hellrow::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;pointer-events:none;z-index:1;
+  background:linear-gradient(90deg,#ff4d14,#ffb347 30%,#ff4d14 55%,#ffb347 80%,#ff4d14);box-shadow:0 0 8px 2px rgba(255,90,20,.55)}
+.cell.hell{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 30' preserveAspectRatio='none'%3E%3Cpath fill='rgba(230,60,20,.55)' d='M0 30V18C3 22 6 22 8 16C9 10 7 6 10 1C12 9 15 12 17 20C19 13 22 10 25 6C25 14 28 18 30 23C33 16 35 13 38 4C40 12 42 18 45 22C47 15 50 11 52 2C54 11 57 17 60 22C62 16 65 12 68 6C68 15 71 19 74 23C76 16 79 12 82 3C84 12 86 18 89 21C91 15 94 12 97 8C97 14 99 17 100 18V30Z'/%3E%3Cpath fill='rgba(255,170,50,.45)' d='M0 30V25C4 26 7 25 9 21C11 25 14 27 18 24C20 20 22 18 25 14C26 21 29 24 33 26C36 22 38 20 41 15C43 21 46 25 50 23C52 19 54 17 56 12C58 19 61 23 65 25C68 21 71 21 74 17C76 23 80 26 84 23C87 19 90 19 94 22C96 24 98 24 100 23V30Z'/%3E%3C/svg%3E") 0 100%/100% 36% no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cpath d='M0 14L9 18L15 12L24 19L22 28M15 12L13 3M24 19L35 15L41 22L52 18L60 23M41 22L39 33L46 41M22 28L12 34L8 45L0 47M39 33L28 38L25 49L31 60M46 41L57 39M8 45L14 53' fill='none' stroke='rgba(255,96,32,.22)' stroke-width='.9' stroke-linecap='round'/%3E%3C/svg%3E") 0 0/60px 60px,radial-gradient(120% 60% at 50% 112%,rgba(255,80,20,.45),rgba(255,80,20,0) 70%),linear-gradient(180deg,#160709,#2a0b0c 55%,#46100a);border-color:#b23a1c}
+.cell.hell .hellempty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;
+  font-family:var(--disp);font-size:clamp(10px,calc(var(--cs,110px) * .13),16px);letter-spacing:.08em;color:#ff9a5a;opacity:.7;text-shadow:0 0 6px rgba(255,80,20,.6)}
+#board.hellOn svg.penta{height:auto;bottom:calc(var(--cs) + var(--gap))}
 .cell .coord{position:absolute;top:2px;left:4px;font-size:9px;color:#584a38;z-index:0}
 .cell.splash{background:rgba(201,162,39,.20);box-shadow:inset 0 0 0 2px rgba(201,162,39,.5)}
 .cell.splash .teece{box-shadow:0 0 0 2px var(--gold)}
@@ -1512,7 +1531,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:275,date:'2026-10-21'};
+const VERSION={build:276,date:'2026-10-21'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1573,13 +1592,14 @@ if(HAS_DOM)loadDeckData();
 
 /* Cards that bring the Web with them. Rebuilt whenever deck data lands, since
    the decks arrive over fetch rather than being written into this file. */
-let WEB_CARDS={},CULT_CARDS={};
+let WEB_CARDS={},CULT_CARDS={},HELL_CARDS={};
 function rebuildWebCards(){
   DECK_OF={};
-  WEB_CARDS={};CULT_CARDS={};
+  WEB_CARDS={};CULT_CARDS={};HELL_CARDS={};
   for(const key of Object.keys(DECKS||{})){
     if(DECKS[key].web)for(const id of DECKS[key].cards)WEB_CARDS[id]=true;
     if(DECKS[key].cult)for(const id of DECKS[key].cards)CULT_CARDS[id]=true;
+    if(DECKS[key].hell)for(const id of DECKS[key].cards)HELL_CARDS[id]=true;
   }
 }
 /* A roguelike seat has no deck key for applyDeckRules to read, so the
@@ -1650,6 +1670,8 @@ const KW_RULES={
   ram:'Once per your turn: select a Teece in the same row or column; stun it, give it -3, and move one space toward it if able.',
   paladin:'A Teece from the Paladin deck, or any Teece that has sworn an Oath.',
   armoured:'Every Knight has 1 Defence. Mounts do not.',
+  hell:'A panel the Demons have taken. The Demons open a row of Hell panels under the board, and their cards turn more panels into Hell. A Hell panel is an ordinary panel in every other way: Teece fight across it and it counts for the lead. Non-Demons in Hell have -2. A battleground on a Hell panel negates Hell there, unless it says the panel is Hell.',
+  demon:'A Teece from the Demons deck. Hell costs a Demon nothing.',
   heavens:'Three slots above the board, one over each column. A Teece up there is off the field: it doesn\u2019t fight, nothing is adjacent to it, battlegrounds and auras don\u2019t reach it, effects can\u2019t select it (though you can equip it), and it counts toward nobody\u2019s field lead. Once per your turn, tap an Angel up there to step it into an empty Heaven beside it. Some Angels have an ability that works only from up there.',
   descend:'Come down from the Heavens: drop down the column and land on the first empty panel from the top. Once per your turn, and not on the turn it went up. If the column is full, it stays where it is. Descending is a move, not a play.',
   ascend:'Go up from the top row into the empty Heaven above, once per your turn. A Heavenly Teece can do it; it can\u2019t Descend again until your next turn.',
@@ -1704,7 +1726,7 @@ const KW_FORMS=[
   ['Solitarius','solitarius'],['Protectius','protectius'],['Pacificius','pacificius'],['Ram','ram'],
   ['Pack Leaders?','packleader'],['Mummy Wraps?','mummywrap'],['Trump card','trump'],
   ['Immune to stat reduction','steadfast'],['Steadfast','steadfast'],
-  ['Heavenly','heavenly'],['Heavens?','heavens'],['Descend(?:s|ed|ing)?','descend'],['Ascend(?:s|ed|ing)?','ascend'],['Falls','fall'],
+  ['Heavenly','heavenly'],['Heavens?','heavens'],['Hell(?: panels?)?','hell'],['Demons?','demon'],['Descend(?:s|ed|ing)?','descend'],['Ascend(?:s|ed|ing)?','ascend'],['Falls','fall'],
   ['Flying','flying'],['Ranged','ranged'],['Ward','ward'],['Teleport','teleport'],['Immovable','immovable'],
   ['Fuse','fuse'],['Skitter','skitter'],['March','march'],['Lumber','lumber'],['Bloodlust','bloodlust'],
   ['Defender','defender'],['Floating','floating'],['Howl','howl'],['[Ii]nvulnerable','invulnerable'],
@@ -1723,7 +1745,7 @@ const KW_FORMS=[
    wording means the effect fizzled, Dumpster Fire is an ability's name, and so
    on. Matched first and handed back untouched -- no lookbehind, which older
    iPhones refuse to parse. */
-const KW_PLAIN=['effect (?:is|was) silenced','Dumpster Fire','Blow In The Wind','Fire Elemental','Water Elemental',
+const KW_PLAIN=['effect (?:is|was) silenced','Lake of Fire','Dumpster Fire','Blow In The Wind','Fire Elemental','Water Elemental',
   'Wind Elemental','Earth Elemental','Twin Conjuring','Deep Earth','Gol\u2019God\u2019Oth\u2019s Boon'];
 /* Named Tokens -- Drone, Spiderling, Bat -- read off CARDS, so a deck that
    gains a token gets its popup without touching this. CARDS is defined further
@@ -1862,7 +1884,7 @@ function deckKeywords(key){
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
   zombie:'\u{1F9DF}',tictactoe:'#\uFE0F\u20E3',solar:'\u2600\uFE0F',army:'\u{1FA96}',
-  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',angels:'\u{1F47C}',mimics:'\u{1F381}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}',priest:'\u{1F64F}',dwarves:'\u26CF\uFE0F',warlock:'\u26E7',basic:'\u{1F530}',cult:'\u26E4',paladin:'\u269C\uFE0F',knights:'\u265E'};
+  garbage:'\u{1F5D1}\uFE0F',apocalypse:'\u2604\uFE0F',madness:'\u{1F300}',dimension:'\u{1F30C}',rats:'\u{1F400}',locust:'\u{1F997}',devil:'\u{1F608}',angels:'\u{1F47C}',mimics:'\u{1F381}',demons:'\u{1F47F}',runeblade:'\u{1F5E1}\uFE0F',wizard:'\u{1F9D9}\u200D\u2642\uFE0F',gun:'\u{1F52B}',fusion:'\u269B\uFE0F',lightning:'\u26A1',mummy:'\u2625',wolf:'\u{1F43A}',priest:'\u{1F64F}',dwarves:'\u26CF\uFE0F',warlock:'\u26E7',basic:'\u{1F530}',cult:'\u26E4',paladin:'\u269C\uFE0F',knights:'\u265E'};
 /* ---- Card art. One ASCII drawing per card, laid transparently behind the
        face in hand and behind the Teece on the board. Keyed by card id,
        tokens included. Any number of rows and columns: artPre pads the rows
@@ -2312,6 +2334,26 @@ const CARD_ART={
   1313:[" .====================.", " |o .--------------. o|", " |  |  .--------.  |  |", " |  |  |  (@)   |  |  |", " |  |  '--------'  |  |", " |o '--------------' o|", " | o o o o o o o o o  |", " '===================='"],
   1314:["     .-.", "    (o o)-+-", "    [===]", "    _/ \\_"],
   1293:["     \\/   .---.   \\/", "      \\  (> <)  /", " \\\\  _/\\_/ V \\_/\\_  //", " \\ \\\\\\   /| |\\   /// /", "  \\ \\\\\\ / | | \\ /// /", "   \\  \\\\/ | | \\// /", "    '   /_| |_\\   '", "       .---."],
+  1320:["  ,/(      )\\,", " (  \\.----./  )      .", "     | *  * |    '  .  *", "     \\ vvvv /   .  *", "    /|'----'|\\_/ ' .  *", "   / |  ##  |    ' *", "     |_/  \\_|     ^  ^", "    _/      \\_   ^^^^^^"],
+  1321:["  ,/(      )\\,", " (  \\.----./  )", "     | *  * |", "     \\ vvvv /=o=o=o=o=.", "    /|'----'|\\        |", "   >||  ##  ||<      _|", "     |_/  \\_|       (_", "    _/      \\_"],
+  1322:[" ~  ~ ,/(    )\\, ~  ~", "~  ~ (  \\.--./  ) ~  ~", " ~~ ~   | -  - |   ~ ~~", "~  ~ ~  \\ vvvv /  ~ ~  ~", " ~~ ~~ ~ )~~~~( ~ ~~ ~~", "~  ~~ ~ (~~~~~~) ~ ~~  ~", " ~~  ~~~ ~~~~~~ ~~~  ~~"],
+  1323:["     ,/(    )\\,", "    (  \\.--./  )", "        |*  *|", "        \\vvvv/", "       /|'--'|\\", "      > | ## | <", "        |_/\\_|"],
+  1324:[" ,/(", "(  \\.__", " \\  *  \\____.-------.", "  \\_vvvv_ ,_)        \\~", "       \\/ |  .----.  |", "          | |     | |", "         _| |_   _| |_"],
+  1325:[" ,/(      )\\,", "(  \\.----./  )", "    | *  * |", "    \\ vvvv /         o", "   /|'----'|\\====>> /|\\", "  > |  ##  |        / \\", "    |_/  \\_|       *   *", "   _/      \\_"],
+  1326:[" /\\/\\ ,/(    )\\, /\\/\\", "/    (  \\.--./  )    \\", "\\ /\\  \\  |*  *|  /  /\\/", " \\  \\  \\ \\vvvv/ /  /  /", "  \\/ \\  \\/|##|\\/  / \\/", "      \\_/ |  | \\_/", "         _/    \\_"],
+  1327:["     ,/(  )\\,", "    (  \\__/  )", "      |*  *|        ^", "      \\vvvv/      (^^^)", "     /|'--'|\\_____|___|", "       |_/\\_|", "       /    \\"],
+  1328:[" ,/(      )\\,  ________", "(  \\.----./  )|=|=|=|=|", "    | *  * |  | | | | |", "    \\ vvvv /  | | | | |", "   /|'----'|\\ | | | | |", "  >||  ##  ||<| | | | |", "    |_/  \\_|  | | | | |", "   _/      \\_ |_|_|_|_|"],
+  1329:["   ,/(  /^^^^\\  )\\,", "  (  \\ [======] /  )", "       | *  * |", "       \\ vvvv /", "   .--.|'----'|.", "   |##||  ##  ||>", "   '--'|_/  \\_|", "      _/      \\_"],
+  1330:[" ,/()\\,  ,/()\\,  ,/()\\,", "  (**)    (**)    (**)", "  \\vv/    \\vv/    \\vv/", " ,/()\\,  ,/()\\,  ,/()\\,", "  (**)    (**)    (**)", "  \\vv/    \\vv/    \\vv/"],
+  1331:[" ,//(    /\\/\\/\\/\\    )\\\\,", "((  \\\\   |/\\/\\/\\|   //  ))", "     \\\\._|______|_.//", "         | *  * |", "         \\vvvvvv/", "      /|'--------'|\\", "     / |  ######  | \\", "    >  |___/  \\___|  <"],
+  1332:["        .-~~~~~~-.", "      .'  .-~~-.  '.", "     /  .' .--. '.  \\", "    |  (  ( @@ )  )  |", "     \\  '. '--' .'  /", "      '.  '-~~-'  .'", "     ^^ '-~^^^^~-' ^^"],
+  1333:["           ,/(  )\\,", "          (  \\__/  )", "            |*  *|", "        ____\\vvvv/____", "       /  ^  /||\\  ^  \\", "      | ^ ^ ^ || ^ ^ ^ |", "       \\______________/"],
+  1334:["     ^     ^^    ^     ^", "    ^^^   ^^^^  ^^^   ^^^", "  ___\\ /___\\  /__\\ /____", " /####\\ /###\\/###\\ /####\\", "|######V#####/\\###V######|", " \\######################/"],
+  1335:["                   ___________", "                  /___________", " ================<____________", "                  \\___________"],
+  1336:["      .", "      |\\", "      | \\        ^ ^", "      |  \\      ^^^^", "  ----+---)====>>^^^", "      |  /      ^^^^", "      | /        ^ ^", "      |/", "      '"],
+  1337:["    ___        ___", "   |   |      |   |", "   |   |      |   |", "   |   |___   |   |___", "   |_______)  |_______)", "    ^ ^ ^ ^    ^ ^ ^ ^", "   ^^^^^^^^^^^^^^^^^^^^"],
+  1338:["  \\     .   ^   .     /", "   \\  ~~~~~~~~~~~~~  /", " ---\\######~~~######/---", "     \\####/^^^\\####/", " ----\\\\##/^^^^^\\##//----", "       \\/_______\\/", "      /     |     \\"],
+  1339:["  ^   ^^   ^    ^^   ^", " ^^^ ^^^^ ^^^  ^^^^ ^^^", "~~~~~~~~~~~~~~~~~~~~~~~~", " ~ ~~ ~~~ ~~ ~~~ ~~ ~ ~", "~~~~~~~~~~~~~~~~~~~~~~~~", "  ~ ~~~ ~ ~~ ~~ ~~~ ~"],
 
   'TLOCUST':[" \\\\\\\\ ^ //// "," ( O   O )   ","  \\ ===== /  "," (_________) ","   ~~~~~~~   "],
   "TNEST":["     .-.     ","    ( o )    ","    /| |\\    ","   _/   \\_   ","     ~~~     "],
@@ -2994,6 +3036,8 @@ const GROUND_ART={
   1292:[".-~~-. .-~~-. .-.", "(               )", " )             ( ", "(               )", " )             ( ", "(               )", " )             ( ", "(               )", "'-..-' '-..-' '-'"],
   1312:["        /\\       ", "       /  \\      ", "      /    \\     ", "     /      \\    ", "    /        \\   ", "   /          \\  ", "  /            \\ ", " /[]          []\\", "/_[]_________[]_\\"],
   1313:[".===============.", "|o  .-------.  o|", "|  /         \\  |", "| |           | |", "| |    (@)    | |", "| |           | |", "|  \\         /  |", "|o o o o o o o o|", "'==============='"],
+  1338:["\\       |       /", " \\   .--+--.   / ", "--\\ /   |   \\ /--", "   (  ^ ^ ^  )   ", "---|  ^^^^^  |---", "   (  ^^^^^  )   ", "--/ \\_______/ \\--", " /      |      \\ ", "/       |       \\"],
+  1339:["^ ^^ ^  ^  ^ ^^ ^", "^^^^^^ ^^^ ^^^^^^", "~~~~~~~~~~~~~~~~~", "~~ ~~         ~ ~", "~ ~           ~~ ", "~~ ~         ~ ~~", "~~~~~~~~~~~~~~~~~", " ~ ~~ ~~~ ~~ ~ ~ ", "~~~~~~~~~~~~~~~~~"],
   "GRIFT":["  .    \\   '  .  "," '      \\ .      ","   .   / \\   '   ","      /  .\\    . "," .    \\ ' /  .   ","   '   \\ /    '  ","       / \\  .    "," .   '/   \\    ' ","     /  .  \\  .  "],
   "GLENT":["+ - - - - - - - +","   +---------+   ",":  |         |  :","   |         |   ",":  |         |  :","   |         |   ",":  +---------+  :","     \\__[o]      ","+ - - - - - - - +"],
   "GNASC":["  . . . . . . .  "," .   . . . .   . ",".   .       .   .",".  .   . .   .  .",".  .  . * .  .  .",".  .   . .   .  .",".   .       .   ."," .   . . . .   . ","  . . . . . . .  "],
@@ -3050,7 +3094,7 @@ function canPlay(p,cardId){
   if(cd.type==='teece'){
     if((G.teecePlayed&&!freePlayFor(p,cardId))||hexOn(p,'freeze'))return false;
     let room=false;
-    if(!mustRide(p,G.players[p].hand.indexOf(cardId),cardId))for(let i=0;i<BN;i++)if(playAt(G.board,i)){room=true;break;}
+    if(!mustRide(p,G.players[p].hand.indexOf(cardId),cardId))for(let i=0;i<BN;i++)if(playAt(G.board,i,p)){room=true;break;}
     /* A Knight can also be played onto one of your Mounts; Legaless only there. */
     if(!room&&cd.knight&&knightSpots(G.board,p,cardId).length)room=true;
     if(!room)return false;
@@ -6066,6 +6110,64 @@ const CARDS = {
     text:'A Teece on this battleground has +5. When it is destroyed: its controller’s opponent draws a card.'},
  1314:{name:'Wind-up Toy',type:'teece',token:true,deck:'mimics',sides:[2,2,2,2],
     text:'Token. Cannot be sacrificed to play a Teece; never counts toward winning.'},
+ /* ---- Demons: 1320-1339. A Beginner deck that lives in Hell, the row of
+        panels it opens under the board. The engine is under "Demons: Hell".
+        Fields it reads: demon (a Demon, which Hell costs nothing); bonus and
+        kwWhen with when:'hell'; aura.hellOnly; hellShroud, hellGate and
+        hellDemonDef on Teece; grants.hellUnder and grants.kwHell on equips;
+        gHell, gHellSpread and gNonDemon on battlegrounds. Every effect goes
+        through fx 'hell'. ---- */
+ 1320:{name:'Brimstone Sower',type:'teece',demon:true,sides:[6,4,4,4],
+    onPlay:[{fx:'hell',op:'here'}],
+    text:'When played: the panel under this becomes a Hell panel.'},
+ 1321:{name:'Pit Dragger',type:'teece',demon:true,sides:[7,3,3,3],
+    onDeath:[{fx:'hell',op:'drag'}],
+    text:'When destroyed: select a Teece; move it to the lowest empty panel in its column.'},
+ 1322:{name:'Smoke Demon',type:'teece',demon:true,sides:[8,2,2,2],hellShroud:true,
+    text:'Allies in Hell can’t be selected by enemy effects.'},
+ 1323:{name:'Lesser Demon',type:'teece',demon:true,sides:[5,3,3,3],bonus:{when:'hell',n:4},
+    text:'While in Hell: +4.'},
+ 1324:{name:'Hellhound',type:'teece',demon:true,sides:[8,5,2,5],bonus:{when:'hell',n:2},
+    text:'While in Hell: +2.'},
+ 1325:{name:'Tormentor',type:'teece',demon:true,sides:[9,0,0,0],aura:{who:'enemy',where:'adj',n:-4,hellOnly:true},
+    text:'Adjacent enemies in Hell have -4.'},
+ 1326:{name:'Devil Demon',type:'teece',demon:true,sides:[7,6,0,6],
+    onPlay:[{fx:'pact'}],
+    pact:{y:'turn one Hell panel into a normal panel',z:'this gets +2 and Flying',ai:'take',
+      price:{hell:1},cost:[{fx:'hell',op:'unhell'}],gain:[{fx:'hell',op:'selfFly',n:2}]},
+    text:'PACT — Turn one Hell panel into a normal panel ; this gets +2 and Flying.'},
+ 1327:{name:'Satan’s Little Helper',type:'teece',demon:true,sides:[3,1,1,1],
+    onDeath:[{fx:'hell',op:'all'}],
+    text:'When destroyed: all panels become Hell until the end of your next turn.'},
+ 1328:{name:'Hellgate Warden',type:'teece',demon:true,sides:[7,6,6,6],hellGate:true,
+    text:'Enemies can’t be played in Hell.'},
+ 1329:{name:'Pit Sergeant',type:'teece',demon:true,sides:[6,5,3,5],hellDemonDef:2,
+    text:'Demons have +2 Defence in Hell.'},
+ 1330:{name:'Legion',type:'teece',demon:true,sides:[8,6,5,6],sac:1,
+    onPlay:[{fx:'hell',op:'legion'}],
+    text:'Sacrifice a Teece to play. When played: summon a copy of this on every empty Hell panel.'},
+ 1331:{name:'Demon King',type:'teece',demon:true,sides:[10,10,10,10],sac:2,
+    onPlay:[{fx:'hell',op:'allPerm'}],
+    text:'Sacrifice two Teece to play. When played: all panels become Hell.'},
+ /* ---- Demons magic ---- */
+ 1332:{name:'Hell Portal',type:'magic',hellAi:'portal',cast:[{fx:'hell',op:'portal'}],
+    text:'Select a Teece; teleport it, then the panel under it becomes Hell.'},
+ 1333:{name:'Raise from the Pit',type:'magic',hellAi:'raise',cast:[{fx:'hell',op:'raise',n:-4}],
+    text:'Play a non-Boss Demon from your graveyard onto an empty Hell panel with -4 (this can’t make its numbers less than 0). You can’t win by board domination this turn.'},
+ 1334:{name:'Hell Breaks Loose',type:'magic',hellAi:'breach',cast:[{fx:'hell',op:'breach'}],
+    text:'Select a panel; destroy the battleground on it, and it becomes Hell until the end of the turn. The next Demon you play is invulnerable until the end of your next turn.'},
+ /* ---- Demons equips ---- */
+ 1335:{name:'Pitchfork',type:'equip',mod:0,grants:{bonus:{when:'hell',n:4}},
+    text:'The equipped Teece has +4 while it is in Hell.'},
+ 1336:{name:'Hellfire Bow',type:'equip',mod:0,grants:{bonus:{when:'hell',n:3},kwHell:['ranged']},
+    text:'The equipped Teece has +3 and Ranged while it is in Hell.'},
+ 1337:{name:'Brimstone Boots',type:'equip',mod:2,grants:{hellUnder:true},
+    text:'The equipped Teece has +2. The panel under it is Hell, and no battleground can be played on that panel.'},
+ /* ---- Demons battlegrounds ---- */
+ 1338:{name:'Spreading Pit',type:'ground',gHell:true,gHellSpread:true,
+    text:'This panel is Hell. When a Teece is destroyed on this panel: select an adjacent panel; it becomes Hell for as long as this battleground is on the field.'},
+ 1339:{name:'Lake of Fire',type:'ground',gHell:true,gNonDemon:-4,
+    text:'This panel is Hell. A non-Demon on this battleground has -4.'},
  /* ---- Basic: the deck for a first game. Every card shows one of the base
         rules on its own -- uneven sides, rotation, Flying, Ranged, Tokens,
         sacrifice, equips, magic, battlegrounds -- and nothing else. ---- */
@@ -7035,7 +7137,8 @@ let G=null, UID=1;
 let NET=null;               /* the online link, when this screen is one of two */
 /* ---- board geometry, rebuilt whenever the board size changes ---- */
 let BW=3;                 /* board width in panels  */
-let BN=9;                 /* total panels = BW*BW   */
+let BH=3;                 /* board height in rows: BW, or BW+1 with the Hell row */
+let BN=9;                 /* total panels = BW*BH   */
 let ADJ=[],DIAG=[],CN=[];
 let LINES=[];             /* every run of three panels in a straight line */
 const ALL=()=>{const a=[];for(let i=0;i<BN;i++)a.push(i);return a;};
@@ -7159,10 +7262,10 @@ function sideNbr(i,k){
   const r=row(i),c=col(i);
   if(k===0)return r>0?i-BW:-1;
   if(k===1)return c<BW-1?i+1:-1;
-  if(k===2)return r<BW-1?i+BW:-1;
+  if(k===2)return r<BH-1?i+BW:-1;
   return c>0?i-1:-1;
 }
-const isCornerCell=i=>{if(isPlane(i))return false;const r=row(i),c=col(i);return (r===0||r===BW-1)&&(c===0||c===BW-1);};
+const isCornerCell=i=>{if(isPlane(i))return false;const r=row(i),c=col(i);return (r===0||r===BH-1)&&(c===0||c===BW-1);};
 /* The sides of a panel that have no panel across them, so nothing can ever be
    fought there. Two of them make a corner, one an edge, none the middle -- one
    reading of the board that the Army deck's postures and formations all share. */
@@ -7192,32 +7295,37 @@ function fileName(k,n){
   if(n===3)return 'middle';
   return 'column '+(k+1);
 }
-function buildGeometry(w){
-  BW=w; GRID=w*w; BN=GRID;
+/* h is the number of rows: the square's own, or one more when the Demons'
+   Hell row opens under it (the "Demons: Hell" block). The Hell row is real
+   panels at the bottom of the grid, so everything that walks the board walks
+   it too; only its names say Hell rather than a band of the square. */
+function buildGeometry(w,h){
+  BW=w; BH=h||w; GRID=w*BH; BN=GRID;
   ADJ=[];DIAG=[];CN=[];LINES=[];
   for(let i=0;i<BN;i++){
     const r=Math.floor(i/w),c=i%w,a=[],d=[];
     for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
       if(!dr&&!dc)continue;
       const rr=r+dr,cc=c+dc;
-      if(rr<0||rr>=w||cc<0||cc>=w)continue;
+      if(rr<0||rr>=BH||cc<0||cc>=w)continue;
       const j=rr*w+cc;
       d.push(j);
       if(!dr||!dc)a.push(j);
     }
     a.sort((x,y)=>x-y);d.sort((x,y)=>x-y);
     ADJ.push(a);DIAG.push(d);
-    if(w===3&&r===1&&c===1)CN.push('center');
+    if(r>=w)CN.push((fileName(c,w)+' Hell panel').trim());
+    else if(w===3&&r===1&&c===1)CN.push('center');
     else CN.push((bandName(r,w)+'-'+fileName(c,w)).replace(/^-|-$/g,''));
   }
   /* Every run of three panels in a straight line: the eight lines of noughts
      and crosses on the usual board, and the same shape slid along a wider one
      so the rule does not quietly stop working if the board ever grows. Built
      here rather than written down, because it has to follow the geometry. */
-  for(let r=0;r<w;r++)for(let c=0;c<w;c++){
+  for(let r=0;r<BH;r++)for(let c=0;c<w;c++){
     for(const[dr,dc]of[[0,1],[1,0],[1,1],[1,-1]]){
       const rr=r+2*dr,cc=c+2*dc;
-      if(rr<0||rr>=w||cc<0||cc>=w)continue;
+      if(rr<0||rr>=BH||cc<0||cc>=w)continue;
       LINES.push([r*w+c,(r+dr)*w+(c+dc),rr*w+cc]);
     }
   }
@@ -7276,7 +7384,12 @@ function newState(mode,vsAI,decks,extra){
   DEF_SIL={};DEF_GRAFT={};
   const nP=extra.seats||2;
   const teams=extra.teams||Array.from({length:nP},(_,i)=>i);
-  buildGeometry(extra.width||3);
+  /* Hell opens under the board when either pile holds a Demon (HELL_CARDS),
+     the way the Web spins for a Spider card. Decided here because it is
+     geometry: the Hell row is a fourth row of real panels. */
+  const _hell=(extra&&extra.hell!=null)?!!extra.hell
+    :(decks||[]).some(d=>d&&d.some(id=>HELL_CARDS[id]));
+  buildGeometry(extra.width||3,_hell?(extra.width||3)+1:0);
   /* A card that starts on top of the deck is lifted back out of the shuffle
      afterwards and stacked on the end of the array, which is the end drawCards
      pops from. Several of them keep whatever order the shuffle gave them, so
@@ -7295,10 +7408,10 @@ function newState(mode,vsAI,decks,extra){
     mKillNext:0,mEnterCursed:0,sharpTeeth:0,sharpTeethN:-2});
   const s={mode,vsAI,players:Array.from({length:nP},(_,i)=>mk(i)),teams:teams.slice(),
     aiSeats:extra.aiSeats?extra.aiSeats.slice():[1],
-    width:BW,
+    width:BW,height:BH,hellRow:_hell,
     web:Array.from({length:BN},(_,i)=>_spun&&!isCornerCell(i)),
     heaven:Array.from({length:BW},()=>null),
-    board:Array.from({length:BN},()=>({teece:null,ground:null,mine:null,defMark:null,razed:false,curseP:null,mcurse:null,seed:null,enchant:null,fire:null})),
+    board:Array.from({length:BN},(_,i)=>({teece:null,ground:null,mine:null,defMark:null,razed:false,curseP:null,mcurse:null,seed:null,enchant:null,fire:null,hell:_hell&&i>=BW*BW})),
     turn:Math.floor(Math.random()*nP),turnNum:1,teecePlayed:false,over:false,winner:null,pending:null,
     phase:'day',
     detailLock:null,detailHover:null,panelTap:null,anim:null,log:[],curses:[],movedThisTurn:[],groundSeq:1,graveThisTurn:[],graveLastTurn:[],
@@ -7958,6 +8071,7 @@ function formationCount(b,i,bo){
     const n=t.equips.filter(e=>!e.rider&&CARDS[e.cardId]&&CARDS[e.cardId].type==='equip').length;
     return bo.when==='equips'||bo.each?n:(n?1:0);
   }
+  if(bo.when==='hell')return hellAt(b,i)?1:0;
   if(bo.when==='runeAny'){
     for(let j=0;j<BN;j++){
       const o=b[j].teece;
@@ -7976,6 +8090,7 @@ function formationLabel(bo){
   if(bo.when==='rune')return 'Wielding the Runeblade';
   if(bo.when==='runeAny')return 'A Teece on the field holds the Runeblade';
   if(bo.when==='equipped')return 'While equipped';
+  if(bo.when==='hell')return 'In Hell';
   if(bo.when==='equips')return 'One for every equip card on it';
   return 'Formation';
 }
@@ -8268,6 +8383,7 @@ function effSides(b,i,parts){
       if(gd.gTokenMod&&t.isToken)addGround(s,gd.gTokenMod,gd.name+', for a Token'+where);
       if(gd.gEquipMod&&t.equips.some(e=>!e.rider))addGround(s,gd.gEquipMod,gd.name+', for an equipped Teece'+where);
       if(gd.gWarlockMod&&DEF(t).warlock)addGround(s,gd.gWarlockMod,gd.name+', for a Warlock'+where);
+      if(gd.gNonDemon&&!isDemon(t))addGround(s,gd.gNonDemon,gd.name+', on a non-Demon'+where);
       if(gd.gPerAlly){
         const na=allyCount(b,i,false);
         if(na)addGround(s,gd.gPerAlly*na,gd.name+', one for each of its '+na+' all'+(na===1?'y':'ies'));
@@ -8325,6 +8441,8 @@ function effSides(b,i,parts){
      as much the panel, and both go through applyModT, which has always turned
      a negative away. Fire landed only because it composes here instead. */
   if(b[i].fire&&!b[i].fire.scorch&&!aloft)addGround(s,-FIRE_N,'The panel is on fire');
+  /* Hell, to anything that is not a Demon. */
+  if(!isDemon(t)&&hellAt(b,i))addGround(s,-HELL_N,'In Hell, and not a Demon');
   for(let j=0;j<BN;j++){
     const o=b[j].teece; if(!o)continue;
     /* A Teece standing inside its own aura. Nearly every aura in the game pays
@@ -8356,6 +8474,7 @@ function effSides(b,i,parts){
       /* the Mummy auras reach only a body that carries the curse */
       if(a.cursedOnly&&!t.mcursed)continue;
       if(a.markOnly&&markOfCard(DEF(t)).indexOf(a.markOnly)<0)continue;
+      if(a.hellOnly&&!hellAt(b,i))continue;
       /* needRune is the source holding the sword; runeOnly is the receiver. */
       if(a.needRune&&!wieldsRune(o))continue;
       if(a.runeOnly&&!wieldsRune(t))continue;
@@ -8475,6 +8594,7 @@ function auraGives(b,i,p){
     for(const a of auras){
       if(!phaseIs(a.when))continue;
       if(a.tokenOnly||a.pixieOnly||a.markOnly||a.byDef||a.runeOnly)continue;
+      if(a.hellOnly&&!hellAt(b,i))continue;
       if(a.needRune&&!wieldsRune(o))continue;
       const ally=sameTeam(o.owner,p);
       if(a.who==='ally'&&!ally)continue;
@@ -8546,6 +8666,8 @@ function defOf(b,i,raw){
   if(DEF(t).defPerAlly)d+=DEF(t).defPerAlly*allyCount(b,i,true);
   /* The Angel of Mercy, from the Heaven above this column. */
   d+=heavenDefOn(b,i);
+  /* The Pit Sergeant: every Demon in Hell. */
+  d+=hellDefOn(b,i);
   /* Defence held only while a formation holds: the Shieldwall Dwarf, equipped. */
   if(DEF(t).defIf&&formationCount(b,i,DEF(t).defIf))d+=DEF(t).defIf.n;
   const dMul=equipMul(t);
@@ -8622,6 +8744,7 @@ function canTarget(b,i,byPlayer,kind){
   const t=b[i].teece; if(!t)return false;
   if(byPlayer==null||t.owner===byPlayer)return true;
   if(kwOf(b,i).indexOf('ward')>=0)return false;
+  if(hellShrouded(b,i,byPlayer))return false;
   const k=kind||(G&&G.castingMagic?'magic':'teece');
   for(const e of t.equips){
     const g=eqG(e);if(!g)continue;
@@ -8689,6 +8812,7 @@ function kwOf(b,i,noGround){
     const g=eqG(e);
     if(g&&g.kw)ks.push(...g.kw);
     if(g&&g.kwWhen){const kw=phasePick(g.kwWhen);if(kw)ks.push(...kw);}
+    if(g&&g.kwHell&&hellAt(b,i))ks.push(...g.kwHell);
     if(e.chosen)ks.push('flying');
   }
   if(b[i].ground&&!noGround&&!b[i].ground.gsil&&!bgProof(t))
@@ -8730,7 +8854,7 @@ const blockedGround=(b,i)=>groundFlag(b[i].ground,'gNoEntry');
 const openAt=(b,i)=>!b[i].teece&&!b[i].razed&&!blockedGround(b,i);
 /* A panel a Teece may be PLAYED onto from the hand: open, and no seed planted
    there. A seed's panel can still be moved onto. */
-const playAt=(b,i)=>openAt(b,i)&&!b[i].seed;
+const playAt=(b,i,p)=>openAt(b,i)&&!b[i].seed&&!hellBarred(b,i,p);
 function actsOf(b,i){
   const t=b[i].teece; if(!t)return[];
   const out=[]; const d=DEF(t);
@@ -9812,6 +9936,7 @@ function pactShort(p,t,pk){
   const pr=pk.price||{},b=G.board,out=[];
   if(pr.hand&&handCount(p)<pr.hand)out.push(pr.hand===1?'a card in hand to discard':pr.hand+' cards in hand to discard');
   if(pr.deck&&G.players[p].deck.length<pr.deck)out.push('a card left in your deck');
+  if(pr.hell&&!hellUnhellable(b).length)out.push('Hell panel to turn back');
   if(pr.ally){
     let n=0;
     for(let i=0;i<BN;i++){const o=b[i].teece;if(o&&o!==t&&sameTeam(o.owner,p)&&canSacrifice(b,i))n++;}
@@ -10442,6 +10567,7 @@ async function FXRUN(st,ctx){
   switch(st.fx){
   case 'angel':return await angelFx(st,ctx);
   case 'mimic':return await mimicFx(st,ctx);
+  case 'hell':return await hellFx(st,ctx);
   case 'mod':{
     let dur=st.dur;
     if(st.who==='self'){if(ctx.t)applyModT(ctx.t,st.n,dur);return;}
@@ -17060,6 +17186,8 @@ async function processDeath(d){
   if(!d.cost&&cell!=null&&!floats(t)&&G.board[cell]&&groundFlag(G.board[cell].ground,'gDeathGift'))
     deathFx.push({fx:'mimic',op:'draw',n:groundNum(G.board[cell].ground,'gDeathGift'),ground:true});
   for(const e of t.equips){const g=eqG(e);if(!d.cost&&g&&g.onDeath)for(let r=0;r<(g.becomesGround?1:equipMul(t));r++)deathFx.push(...g.onDeath);}
+  {const hg=G.board[cell]&&G.board[cell].ground;
+   if(!d.cost&&hg&&!hg.gsil&&groundFlag(hg,'gHellSpread'))deathFx.push({fx:'hell',op:'spread',gid:hg.gid,owner:hg.owner});}
   const groundCard=G.board[cell].ground&&CARDS[G.board[cell].ground.cardId];
   const dblG=groundCard&&groundCard.gDouble;
   const dblFx=groundCard&&groundCard.gDoubleEffects;
@@ -17301,7 +17429,7 @@ async function processDeath(d){
       if(eg&&eg.reequip&&!(eg.reequipOnce&&G.players[e.owner].onceUsed['req'+e.cardId])){
         if(eg.reequipOnce)G.players[e.owner].onceUsed['req'+e.cardId]=true;
         const hosts=[];
-        for(let i2=0;i2<9;i2++)if(G.board[i2].teece&&G.board[i2].teece.owner===e.owner)hosts.push(i2);
+        for(let i2=0;i2<BN;i2++)if(G.board[i2].teece&&G.board[i2].teece.owner===e.owner)hosts.push(i2);
         if(hosts.length){
           const c2=await chooseCell(e.owner,hosts,'Move '+CARDS[e.cardId].name+' to another Teece, or let it go.',
             {skip:true,mut:(bb,i3)=>{bb[i3].teece.equips.push({cardId:e.cardId,owner:e.owner});}});
@@ -17681,7 +17809,7 @@ function leadState(){
      Rats never win this way at all. Team-wide either way -- allies win
      together, so one seat's rule holds the whole side back. */
   const seats=seatsOnTeam(lead.tm);
-  const frozen=seats.some(s=>hexOn(s,'nowin'));
+  const frozen=seats.some(s=>hexOn(s,'nowin')||(G.players[s]&&G.players[s].noDomTurn===G.turnNum));
   const never=seats.some(s=>G.players[s]&&G.players[s].noDominate);
   return {lead,second,gap:lead.n-second.n,need:winLeadFor(lead.tm),
           blocked:frozen||never,blockedForGood:never&&!frozen};
@@ -17696,7 +17824,8 @@ function checkDomination(){
          a win back. A deck that never wins this way is not news twice: it would
          print on every scan of every turn for the rest of the game, and the
          status chip says it permanently anyway. Once per side. */
-      if(!st.blockedForGood)log('The Hex of Freezing holds the win back for now.');
+      if(!st.blockedForGood)log(seatsOnTeam(st.lead.tm).some(s=>G.players[s]&&G.players[s].noDomTurn===G.turnNum)
+        ?'Raise from the Pit holds the win back this turn.':'The Hex of Freezing holds the win back for now.');
       else{
         G.nodomSaid=G.nodomSaid||{};
         if(!G.nodomSaid[st.lead.tm]){
@@ -18024,7 +18153,7 @@ function canSummon(q,id){
   const d=CARDS[id];
   if(!d||d.type!=='teece'||isBossCard(id)||sacsNeeded(id,q)>0)return false;
   if(hexOn(q,'freeze'))return false;
-  for(let i=0;i<BN;i++)if(playAt(G.board,i))return true;
+  for(let i=0;i<BN;i++)if(playAt(G.board,i,q))return true;
   return false;
 }
 async function summonFromHand(q,idx){
@@ -18123,7 +18252,7 @@ async function playTeece(p,handIdx){
   }
   /* Legaless already riding a Mount saddled on in hand lands anywhere. */
   const ride=mustRide(p,handIdx,id);
-  const empt=[];if(!ride)for(let i=0;i<BN;i++)if(playAt(b,i))empt.push(i);
+  const empt=[];if(!ride)for(let i=0;i<BN;i++)if(playAt(b,i,p))empt.push(i);
   /* A Knight can land on one of your Mounts and ride it; Legaless only there. */
   const mspots=knightSpots(b,p,id);
   if(ride&&!mspots.length){toast(d.name+' must be played on one of your Mounts.');return false;}
@@ -18152,7 +18281,7 @@ async function playTeece(p,handIdx){
   if(d.hvSacOnly&&sacV.length&&!sacP.length&&!sacH.length)toH=true;
   if(toH)return await heavenPlace(p,handIdx,id,{sacP,sacHIds,sacV,plan:hvPick!=null?{hcol:hvPick}:plan,spend,freeBoss});
   const spots=empt.concat(mspots);
-  if(!ride)for(const c of sacP)if(!b[c].razed&&!b[c].seed&&!blockedGround(b,c)&&spots.indexOf(c)<0)spots.push(c);
+  if(!ride)for(const c of sacP)if(!b[c].razed&&!b[c].seed&&!blockedGround(b,c)&&!hellBarred(b,c,p)&&spots.indexOf(c)<0)spots.push(c);
   spots.sort((x,y)=>x-y);
   /* What the Teece would actually arrive as, panel by panel. Every other prompt
      in the game previews its own consequence and this one previewed nothing, so
@@ -18232,8 +18361,8 @@ async function playTeece(p,handIdx){
   /* A death can fill the very panel it emptied -- an Egg Sac boiling over, a
      resummon, a Token that arrives where its summoner fell. Ask again rather
      than dropping the new Teece on top of whatever moved in. */
-  if(!playAt(b,spot)){
-    const open2=[];for(let i=0;i<BN;i++)if(playAt(b,i))open2.push(i);
+  if(!playAt(b,spot,p)){
+    const open2=[];for(let i=0;i<BN;i++)if(playAt(b,i,p))open2.push(i);
     if(!open2.length){
       toGrave(p,id);
       dumpPlate(worn,'with the card it was bolted to',id);
@@ -18336,6 +18465,12 @@ async function playTeece(p,handIdx){
     t.immortalOwner=p;t.immortalUntil=long?nextTurnExpiry():0;
     log(nm(t)+' arrives under cover: it is invulnerable until the '+
       (long?'end':'start')+' of '+pposs(p)+' next turn.');
+  }
+  /* Hell Breaks Loose: the next Demon, through the end of the player's next turn. */
+  if(pl.nextDemonShield>0&&isDemon(t)){
+    pl.nextDemonShield--;
+    t.immortalOwner=p;t.immortalUntil=nextTurnExpiry();
+    log(nm(t)+' comes up out of the breach: it is invulnerable until the end of '+ownOf(p)+' next turn.');
   }
   /* The Bargain Imp's reward: cover that lasts out the turn it is played. */
   if(pl.nextInvuln>0){
@@ -18795,6 +18930,7 @@ async function playGround(p,handIdx){
     /* Ground that cannot be replaced is nowhere to lay another battleground --
        unless this is the one written to go on top of one rather than over it. */
     if(!d.gOnGround&&cs.some(j=>b[j].ground&&groundAnchored(b,j)))continue;
+    if(cs.some(j=>hellBoots(b,j)))continue;
     cands.push(i);
   }
   if(!cands.length){toast('No room for it.');return false;}
@@ -19185,6 +19321,7 @@ async function endTurn(){
     }
   }
   heavenEndTurn();
+  hellEndTurn(p);
   for(let i=0;i<BN;i++){
     const t=G.board[i].teece;
     if(!t)continue;
@@ -19841,7 +19978,8 @@ function cloneBoard(b){
     waymark:c.waymark?Object.assign({},c.waymark):null,
     sanct:c.sanct?Object.assign({},c.sanct):null,
     defMark:c.defMark?Object.assign({},c.defMark):null,
-    seed:c.seed?Object.assign({},c.seed):null
+    seed:c.seed?Object.assign({},c.seed):null,
+    hell:!!c.hell,hellT:c.hellT,hellOff:!!c.hellOff,hellBy:c.hellBy
   }));
 }
 /* The Avalanche on a simulated board: the ally goes, then every enemy under it. */
@@ -20061,6 +20199,8 @@ function simOnPlay(b,cell,id,p){
         if(st.who==='enemy'&&ally)continue;
         applyModT(o,st.n,st.dur);
       }
+    }else if(st.fx==='hell'){
+      hellSimPlay(b,cell,st,t,p);
     }else if(st.fx==='packCall'){
       packCall(b,cell,false);
     }else if(st.fx==='copy'){
@@ -20233,6 +20373,7 @@ function aiPlanFor(id){
        is weighing the one thing it does not do. */
     const cands=[];
     for(let i=0;i<BN;i++){
+      if(hellBoots(b,i))continue;
       if(d.gOnGround){if(b[i].ground&&!(b[i].ground.fuse||[]).length)cands.push(i);}
       else if(!b[i].ground)cands.push(i);
     }
@@ -20338,6 +20479,7 @@ function aiPlanFor(id){
   if(d.palAi)return aiPaladinPlan(d);
   if(d.angelAi)return aiAngelPlan(d);
   if(d.mimicAi)return aiMimicPlan(d);
+  if(d.hellAi)return aiHellPlan(d);
   if(d.knightAi)return aiKnightPlan(d);
   if(d.gunAi)return aiGunMagicPlan(d);
   if(d.fuAi)return aiFusionMagicPlan(d);
@@ -20968,7 +21110,7 @@ async function aiSupport(){
 async function aiPlayTeece(){
   const p=G.turn,pl=G.players[p],b=G.board;
   if(G.teecePlayed&&!(G.freePlay&&G.freePlay.p===p))return false;
-  const empt=[];for(let i=0;i<BN;i++)if(playAt(b,i))empt.push(i);
+  const empt=[];for(let i=0;i<BN;i++)if(playAt(b,i,p))empt.push(i);
   const anySac=b.some(c=>c.teece&&c.teece.owner===p&&!c.teece.isToken);
   if(!empt.length&&!anySac&&!mountSpots(b,p).length)return false;
   const base=boardValue(b,p);
@@ -21043,7 +21185,7 @@ async function aiPlayTeece(){
     const ms=knightSpots(b,p,id);
     const ride=mustRide(p,h,id);
     const spots=ride?ms.slice():empt.concat(ms);
-    if(!ride)for(const sc of sacP)if(!b[sc].razed&&!b[sc].seed&&spots.indexOf(sc)<0)spots.push(sc);
+    if(!ride)for(const sc of sacP)if(!b[sc].razed&&!b[sc].seed&&!hellBarred(b,sc,p)&&spots.indexOf(sc)<0)spots.push(sc);
     for(const c of spots){
       for(const rot of rots){
         const bb=cloneBoard(b);
@@ -21969,6 +22111,7 @@ function renderBoard(){
     }
     if(G.board[i].razed)cell.classList.add('razed');
     if(G.board[i].sanct)cell.classList.add('sanct');
+    hellCell(cell,i);
     const t=G.board[i].teece;
     if(t){
       const s=effSides(G.board,i),kws=kwOf(G.board,i),aul=actsOf(G.board,i);
@@ -22506,7 +22649,7 @@ function teecePlayBlock(p){
   if(G.teecePlayed&&!held.some(id=>freePlayFor(p,id)))return teeceCap(p)>1
     ?'You have played every Teece you get this turn.'
     :'You have already played a Teece this turn, and only one Teece may be played per turn.';
-  let room=0;for(let i=0;i<BN;i++)if(playAt(G.board,i))room++;
+  let room=0;for(let i=0;i<BN;i++)if(playAt(G.board,i,p))room++;
   let own=0;for(let i=0;i<BN;i++){const t=G.board[i].teece;if(t&&t.owner===p&&!t.isToken)own++;}
   if(held.every(id=>(CARDS[id].sac||0)>own))
     return 'Every Teece in your hand costs more sacrifices than you have Teece on the field to pay with.';
@@ -22562,6 +22705,7 @@ function statusesFor(p){
 
   /* --- the Heavens: Descend, and the Messenger's swap --- */
   heavenStatuses(p,push);
+  hellStatuses(p,push);
   /* --- the god this seat worships --- */
   if(worshipOf(p)!=null)push('worship','good','Worship: '+godName(p),
     'Your priests get +3 on their '+SIDE_NAMES[worshipOf(p)]+' side. A Prophet can switch it.');
@@ -23318,6 +23462,7 @@ function render(){
   const bd=document.getElementById('board');
   bd.style.setProperty('--bw',BW);
   bd.classList.toggle('bw4',BW>=4);
+  bd.classList.toggle('hellOn',!!G.hellRow);
   /* The panel size itself is CSS (.boardrow --cs): it only needs to know how
      many panels share the width, the Plane counted, and how big one may get. */
   const brow=document.querySelector('.boardrow');
@@ -23326,6 +23471,7 @@ function render(){
     brow.style.setProperty('--cols',BW+(planeOn()?1:0));
     brow.style.setProperty('--xgap',planeOn()?'12px':'0px');
     brow.style.setProperty('--csmax',BW>=4?'142px':'168px');
+    brow.style.setProperty('--bh',BH+(angelsInPlay()?0.7:0));
   }
   renderBoard();
   for(let p=0;p<PLAYERS();p++)renderHand(p);
@@ -23913,7 +24059,7 @@ function squaresWith(i){
   const r=row(i),c=col(i),out=[];
   for(const dr of [-1,0])for(const dc of [-1,0]){
     const r0=r+dr,c0=c+dc;
-    if(r0<0||c0<0||r0+1>=BW||c0+1>=BW)continue;
+    if(r0<0||c0<0||r0+1>=BH||c0+1>=BW)continue;
     const tl=r0*BW+c0;
     out.push([tl,tl+1,tl+BW,tl+BW+1]);
   }
@@ -24089,7 +24235,7 @@ function hvLandSpots(c,t,bd){
   const b=bd||G.board,out=[];
   const add=i=>{if(out.indexOf(i)<0&&openAt(b,i))out.push(i);};
   let gate=-1,first=-1;
-  for(let r=0;r<BW;r++){
+  for(let r=0;r<BH;r++){
     const i=r*BW+c;
     if(!openAt(b,i))continue;
     if(first<0)first=i;
@@ -24127,7 +24273,7 @@ function hvSimLand(bb,i,t,c,trumpet){
   for(const st of steps){
     if(st.fx!=='angel')continue;
     if(st.op==='selfMod')applyModT(nt,st.n,'perm');
-    else if(st.op==='colMod'){for(let r=0;r<BW;r++){const j=r*BW+col(i),o=bb[j].teece;if(o&&!sameTeam(o.owner,nt.owner))applyModT(o,st.n,'perm');}}
+    else if(st.op==='colMod'){for(let r=0;r<BH;r++){const j=r*BW+col(i),o=bb[j].teece;if(o&&!sameTeam(o.owner,nt.owner))applyModT(o,st.n,'perm');}}
     else if(st.op==='stunAdj'){for(const j of ADJ[i]){const o=bb[j].teece;if(o&&!sameTeam(o.owner,nt.owner))o.stunUntil=G.turnNum+2;}}
     else if(st.op==='belowMod'){const j=i+BW,o=j<GRID?bb[j].teece:null;if(o&&!sameTeam(o.owner,nt.owner))applyModT(o,st.n,'perm');}
   }
@@ -24479,7 +24625,7 @@ async function angelFx(st,ctx){
   case 'colMod':{
     const i=ctx.cell;if(i==null)return 'NONE';
     let n=0;
-    for(let r=0;r<BW;r++){const j=r*BW+col(i),o=b[j].teece;
+    for(let r=0;r<BH;r++){const j=r*BW+col(i),o=b[j].teece;
       if(o&&!sameTeam(o.owner,p)){applyModT(o,st.n,'perm');n++;log(nm(o)+' is scorched: '+sgn(st.n)+'.');}}
     if(!n)return none('There is no enemy in its column.');
     return;}
@@ -24579,7 +24725,7 @@ async function angelFx(st,ctx){
 }
 /* The lowest empty panel in a Teece's column, below it. */
 function graceDest(bb,i){
-  for(let r=BW-1;r>row(i);r--){const j=r*BW+col(i);if(openAt(bb,j))return j;}
+  for(let r=BH-1;r>row(i);r--){const j=r*BW+col(i);if(openAt(bb,j))return j;}
   return -1;
 }
 /* The status chips that are the Heavens' buttons: Descend for each body of
@@ -24707,7 +24853,7 @@ function aiSkyExtra(t,c,p,bb){
   if(!t||t.silenced)return 0;
   const d=DEF(t);
   let v=0;
-  for(let r=0;r<BW;r++){
+  for(let r=0;r<BH;r++){
     const o=bb[r*BW+c].teece;
     if(!o||!sameTeam(o.owner,p)||o.isToken)continue;
     if(d.hvGuard)v+=1.0;
@@ -24939,13 +25085,12 @@ function aiAngelPlan(d){
     /* Weighed on the board it leaves: everything down at once, +4 apiece. */
     return {thr:2.0,cands:[0],mut:bb=>{
       for(let c=0;c<h.length;c++){const t=h[c];if(!t)continue;
-        let land=-1;for(let r=0;r<BW;r++){const i=r*BW+c;if(openAt(bb,i)){land=i;break;}}
+        let land=-1;for(let r=0;r<BH;r++){const i=r*BW+c;if(openAt(bb,i)){land=i;break;}}
         if(land>=0)hvSimLand(bb,land,t,c,true);}}};
   }
   return null;
 }
-/* ============ Mimics ============
-   A Mimic is a huge body with a drawback that helps the other side. Every
+/* ============ Mimics =====   A Mimic is a huge body with a drawback that helps the other side. Every
    drawback is an fx 'mimic' step, and mimicGiftTo picks who it lands on: the
    opponent, unless something turns it round.
    - The Hoard (mimicFlip): while it stands unsilenced, every Mimic's
@@ -25181,6 +25326,313 @@ function aiMimicPlan(d){
     for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&!sameTeam(t.owner,p)&&canTarget(b,i,p))cands.push(i);}
     if(!cands.length)return null;
     return {thr:1.5,cands,mut:(bb,i)=>mimicRansackSim(bb,i)};
+  }
+  return null;
+}
+/* ============ Demons: Hell ============
+   Hell is something a PANEL is, not a place off the board. The Demons open a
+   row of real panels under the square (newState hands buildGeometry one more
+   row when either pile holds a Demon card), and every panel of that row starts
+   as Hell: Teece stand on them, fight across them, are adjacent across them
+   and count toward the lead, exactly as anywhere else on the board.
+
+   A panel is Hell for one of these reasons, read by hellAt and nowhere else:
+     cell.hell     -- for good: the Hell row, a Brimstone Sower, a Hell Portal,
+                      the Demon King
+     cell.hellT    -- until the end of turn hellT: Hell Breaks Loose
+     cell.hellBy   -- while the Spreading Pit with that gid is on the field
+     G.hellAll     -- every panel, until the end of seat G.hellAll.p's turn
+                      after next (Satan's Little Helper); left counts down at
+                      the end of each of that seat's turns
+   A battleground on a panel decides it outright: one that says "This panel is
+   Hell" (gHell) makes it Hell and any other negates Hell there. Brimstone Boots
+   (grants.hellUnder) make the panel under their wearer Hell over all of that,
+   and keep battlegrounds off it. The Devil Demon's PACT turns a panel back
+   (cell.hellOff), which holds until something makes that panel Hell again.
+
+   A non-Demon in Hell has -2 (effSides). A Demon is `demon:true`. Everything a
+   Demon card does goes through fx 'hell'. */
+const HELL_N=2;
+const isDemon=t=>!!(t&&DEF(t).demon);
+const hellBoots=(b,i)=>{const t=b[i]&&b[i].teece;return !!(t&&t.equips.some(e=>{const g=eqG(e);return g&&g.hellUnder;}));};
+function hellAt(b,i){
+  const c=b&&b[i];
+  if(!c)return false;
+  if(hellBoots(b,i))return true;
+  if(c.ground)return !c.ground.gsil&&groundFlag(c.ground,'gHell');
+  if(c.hellOff)return false;
+  if(c.hell)return true;
+  if(c.hellT!=null&&G&&G.turnNum<=c.hellT)return true;
+  if(c.hellBy!=null&&b.some(x=>x.ground&&x.ground.gid===c.hellBy))return true;
+  return !!(G&&G.hellAll&&G.hellAll.left>0);
+}
+/* Making a panel Hell clears any turning-back the Devil Demon did there. */
+function hellMake(b,i,until){
+  const c=b[i];if(!c)return;
+  c.hellOff=false;
+  if(until!=null)c.hellT=Math.max(c.hellT||0,until);else c.hell=true;
+}
+/* The panels the Devil Demon's PACT can turn back: Hell because the panel
+   itself is, not because a battleground or a pair of Boots says so. */
+function hellUnhellable(b){
+  const out=[];
+  for(let i=0;i<BN;i++)if(hellAt(b,i)&&!b[i].ground&&!hellBoots(b,i))out.push(i);
+  return out;
+}
+function hellUnmake(b,i){const c=b[i];c.hell=false;c.hellT=null;c.hellBy=null;c.hellOff=true;}
+/* The Pit Sergeant's Defence, to every Demon standing in Hell. */
+function hellDefOn(b,i){
+  const t=b[i].teece;
+  if(!isDemon(t)||!hellAt(b,i))return 0;
+  let d=0;
+  for(let j=0;j<BN;j++){const o=b[j].teece;if(o&&!o.silenced&&DEF(o).hellDemonDef)d+=DEF(o).hellDemonDef;}
+  return d;
+}
+/* The Smoke Demon hides its allies in Hell from the other side's effects. */
+function hellShrouded(b,i,by){
+  const t=b[i].teece;
+  if(!t||by==null||sameTeam(t.owner,by)||!hellAt(b,i))return false;
+  for(let j=0;j<BN;j++){
+    const o=b[j].teece;
+    if(j!==i&&o&&!o.silenced&&DEF(o).hellShroud&&sameTeam(o.owner,t.owner))return true;
+  }
+  return false;
+}
+/* The Hellgate Warden: an enemy of seat p's on the field keeps p out of Hell. */
+function hellBarred(b,i,p){
+  if(p==null||!G||!hellAt(b,i))return false;
+  for(let j=0;j<BN;j++){
+    const o=b[j].teece;
+    if(o&&!o.silenced&&DEF(o).hellGate&&!sameTeam(o.owner,p))return true;
+  }
+  return false;
+}
+function hellEndTurn(p){
+  const b=G.board;
+  for(let i=0;i<BN;i++)if(b[i].hellT!=null&&b[i].hellT<=G.turnNum){b[i].hellT=null;
+    if(!hellAt(b,i))log('The Hell at the '+CN[i]+' closes over.');}
+  const ha=G.hellAll;
+  if(ha&&ha.p===p&&--ha.left<=0){G.hellAll=null;log('Hell sinks back: the panels it took are panels again.');}
+}
+/* The panel itself, drawn: Hell's colours on the cell, the Hell row marked as
+   the row under the board, and the word on an empty one. */
+function hellCell(el,i){
+  const b=G.board,on=hellAt(b,i);
+  if(on)el.classList.add('hell');
+  if(G.hellRow&&!isPlane(i)&&row(i)>=BW)el.classList.add('hellrow');
+  if(on&&!b[i].teece&&!b[i].ground)el.innerHTML+='<div class="hellempty">Hell</div>';
+  if(on)el.title=(G.hellRow&&row(i)>=BW&&!b[i].ground?'Hell, under the board. ':'A Hell panel. ')+HELL_INFO;
+}
+const HELL_INFO='Non-Demons in Hell have -2. A battleground on a Hell panel negates Hell there, unless it says the panel is Hell.';
+function hellStatuses(p,push){
+  const pl=G.players[p];
+  if(G.hellAll)push('hellall','warn','All panels are Hell',
+    'Satan’s Little Helper fell: every panel is Hell until the end of '+ownOf(G.hellAll.p)+' next turn. A battleground still negates it where it lies.');
+  if(pl.nextDemonShield>0)push('demonshield','good','Next Demon invulnerable',
+    'Hell Breaks Loose: the next Demon you play is invulnerable until the end of your next turn.');
+  if(pl.noDomTurn===G.turnNum)push('nodomturn','warn','No win by domination this turn',
+    'Raise from the Pit: you can’t win by board domination this turn.');
+}
+/* A Demon's when-played on a scratch board, for the computer. */
+function hellSimPlay(b,cell,st,t,p){
+  if(st.op==='here')hellMake(b,cell);
+  else if(st.op==='allPerm'){for(let i=0;i<BN;i++)hellMake(b,i);}
+  else if(st.op==='legion'&&t){for(let i=0;i<BN;i++)if(openAt(b,i)&&hellAt(b,i)){const cp=makeTeece(t.cardId,p);cp.isCopy=true;putTeece(b,i,cp,false);}}
+}
+async function hellFx(st,ctx){
+  const b=G.board,p=ctx.p;
+  const none=msg=>{log(msg);ctx.noneMsg=msg;return 'NONE';};
+  switch(st.op){
+  case 'here':{
+    if(ctx.cell==null)return none('There is no panel under it.');
+    hellMake(b,ctx.cell);
+    log('The '+CN[ctx.cell]+' becomes a Hell panel'+(b[ctx.cell].ground&&!hellAt(b,ctx.cell)?', though the battleground on it holds Hell back.':'.'));
+    await anim([ctx.cell],'zap');
+    return;}
+  case 'allPerm':{
+    for(let i=0;i<BN;i++)hellMake(b,i);
+    log('Every panel becomes Hell.');
+    await anim(ALL(),'zap');
+    return;}
+  case 'all':{
+    const own=ctx.deadOwner!=null?ctx.deadOwner:p;
+    for(let i=0;i<BN;i++)b[i].hellOff=false;
+    /* Through the end of the owner's next turn: two of its turn-ends when it
+       falls on its own turn, one when it falls on somebody else's. */
+    G.hellAll={p:own,left:G.turn===own?2:1};
+    log('Every panel becomes Hell until the end of '+ownOf(own)+' next turn.');
+    await anim(ALL(),'zap');
+    return;}
+  case 'legion':{
+    if(!ctx.t)return none('There is nothing here to copy.');
+    const at=[];for(let i=0;i<BN;i++)if(openAt(b,i)&&hellAt(b,i))at.push(i);
+    if(!at.length)return none('There is no empty Hell panel for a copy.');
+    for(const j of at){const cp=makeTeece(ctx.t.cardId,p);cp.isCopy=true;putTeece(b,j,cp,true);}
+    log((at.length===1?'A copy of ':at.length+' copies of ')+DEF(ctx.t).name+' climb'+(at.length===1?'s':'')+' out of Hell onto the '+at.map(j=>CN[j]).join(', ')+'.');
+    await anim(at,'placed',140);
+    return;}
+  case 'drag':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p)&&!hasKw(b,i,'immovable')&&graceDest(b,i)>=0)cands.push(i);
+    if(!cands.length)return none('No Teece can be dragged any lower.');
+    const c=await chooseCell(p,cands,'Choose a Teece: it is dragged to the lowest empty panel in its column.',
+      {mut:(bb,i)=>{const j=graceDest(bb,i);if(j>=0&&bb[i].teece)moveT(bb,i,j,false);}});
+    if(c==null||c==='CANCEL')return;
+    if(wardMagic(b,c,p)||tapeSave(b,c,p)){await anim([c],'zap');return;}
+    const t=b[c].teece,dst=graceDest(b,c);
+    if(dst<0)return;
+    if(!sameTeam(t.owner,p))noteTargeted(p);
+    moveT(b,c,dst,true);
+    log(nm(t)+' is dragged down to the '+CN[dst]+'.');
+    await anim([dst],'placed',140);
+    await fireMove(c,dst,p);
+    return;}
+  case 'unhell':{
+    const cands=hellUnhellable(b);
+    if(!cands.length)return none('There is no Hell panel to turn back.');
+    const c=await chooseCell(p,cands,'Choose a Hell panel: it becomes a normal panel.',{mut:(bb,i)=>hellUnmake(bb,i)});
+    if(c==null||c==='CANCEL')return 'NONE';
+    hellUnmake(b,c);
+    log('The '+CN[c]+' is a normal panel again.');
+    await anim([c],'zap');
+    return;}
+  case 'selfFly':{
+    const t=ctx.t;
+    if(!t||!b.some(x=>x.teece===t))return none(DEF(t||{}).name?nm(t)+' is gone.':'Nothing is left to take it.');
+    applyModT(t,st.n,'perm');
+    t.kwPerm=t.kwPerm||[];if(t.kwPerm.indexOf('flying')<0)t.kwPerm.push('flying');
+    log(nm(t)+' gets '+sgn(st.n)+' and Flying.');
+    return;}
+  case 'portal':{
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p)&&!hasKw(b,i,'immovable')&&ALL().some(j=>j!==i&&openAt(b,j)))cands.push(i);
+    if(!cands.length)return none('There is no Teece that can be teleported.');
+    const bestDst=(bb,i)=>{
+      let best=-1,bg=-1e9;
+      for(let j=0;j<BN;j++){
+        if(j===i||!openAt(bb,j))continue;
+        const cb=cloneBoard(bb);moveT(cb,i,j,false);hellMake(cb,j);simCombat(cb);
+        const g=boardValue(cb,p);
+        if(g>bg){bg=g;best=j;}
+      }
+      return best;
+    };
+    const c=await chooseCell(p,cands,'Choose a Teece to teleport. The panel it lands on becomes Hell.',
+      {cancel:!!ctx.first,mut:(bb,i)=>{const j=bestDst(bb,i);if(j>=0){moveT(bb,i,j,false);hellMake(bb,j);}}});
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(wardMagic(b,c,p)||tapeSave(b,c,p)){ctx.last=c;await anim([c],'zap');return;}
+    const t=b[c].teece;
+    if(!sameTeam(t.owner,p))noteTargeted(p);
+    const open=[];for(let j=0;j<BN;j++)if(j!==c&&openAt(b,j))open.push(j);
+    const dst=await chooseCell(p,open,'Teleport '+nm(t)+' to which empty panel? It becomes Hell.',
+      {mut:(bb,j)=>{if(bb[c].teece)moveT(bb,c,j,false);hellMake(bb,j);}});
+    if(dst==null||dst==='CANCEL')return;
+    teleT(b,c,dst,true);
+    hellMake(b,dst);
+    ctx.last=dst;
+    log(nm(t)+' teleports to the '+CN[dst]+', and the panel under it becomes Hell'+(hellAt(b,dst)?'.':', though the battleground there holds Hell back.'));
+    await anim([dst],'placed',140);
+    await fireMove(c,dst,p);
+    return;}
+  case 'raise':{
+    const pl=G.players[p];
+    /* Can't win by domination this turn, whether or not anything comes up. */
+    pl.noDomTurn=G.turnNum;
+    log(pname(p)+' can’t win by board domination this turn.');
+    const ids=pl.grave.filter(id=>CARDS[id]&&CARDS[id].type==='teece'&&CARDS[id].demon&&!isBossCard(id));
+    const empt=[];for(let i=0;i<BN;i++)if(openAt(b,i)&&hellAt(b,i))empt.push(i);
+    if(!ids.length)return none('There is no non-Boss Demon in the graveyard.');
+    if(!empt.length)return none('There is no empty Hell panel to raise it on.');
+    const down=bt=>{for(let k=0;k<4;k++)bt.base[k]=Math.max(0,bt.base[k]+st.n);};
+    let cid=ids[0];
+    if(ids.length>1){
+      /* The computer raises whatever comes up worth the most. */
+      if(isAIP(p)||!HAS_DOM){
+        let bv=-1e9;
+        for(const id of ids){const bb=cloneBoard(b);const nt=makeTeece(id,p);down(nt);putTeece(bb,empt[0],nt,false);const v=boardValue(bb,p);if(v>bv){bv=v;cid=id;}}
+      }else{
+        const pick=await chooseOption(p,ids.map((id,x)=>({v:String(x),lbl:CARDS[id].name,cid:id})),'Raise which Demon from the Pit?');
+        if(pick==null||pick==='CANCEL')return;
+        cid=ids[parseInt(pick,10)];
+      }
+    }
+    const c=empt.length===1?empt[0]:await chooseCell(p,empt,'Choose an empty Hell panel for '+CARDS[cid].name+'.',
+      {mut:(bb,i)=>{const nt=makeTeece(cid,p);down(nt);putTeece(bb,i,nt,false);}});
+    if(c==null||c==='CANCEL')return;
+    const gi=pl.grave.indexOf(cid);
+    if(gi<0)return;
+    pl.grave.splice(gi,1);
+    const nt=makeTeece(cid,p,{real:true});
+    down(nt);
+    putTeece(b,c,nt,true);
+    attachRiders(p,cid,nt,true);
+    log(pname(p)+' '+vb(p,'raises','raise')+' '+CARDS[cid].name+' from the Pit onto the '+CN[c]+', with '+sgn(st.n)+'.');
+    await anim([c],'placed',140);
+    await fireRevivedOnPlay(cid,c,p,nt.uid);
+    return;}
+  case 'breach':{
+    const cands=[];for(let i=0;i<BN;i++)if(!b[i].razed)cands.push(i);
+    if(!cands.length)return none('There is no panel to break open.');
+    const c=await chooseCell(p,cands,'Choose a panel: its battleground is destroyed, and it is Hell until the end of the turn.',
+      {cancel:!!ctx.first,mut:(bb,i)=>{bb[i].ground=null;hellMake(bb,i,G.turnNum);}});
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null)return;
+    if(b[c].ground)await clearGroundAt(c,p);
+    hellMake(b,c,G.turnNum);
+    log('Hell breaks loose at the '+CN[c]+': it is Hell until the end of the turn.');
+    await anim([c],'zap');
+    const pl=G.players[p];
+    pl.nextDemonShield=(pl.nextDemonShield||0)+1;
+    log('The next Demon '+whoIn(p)+' '+vb(p,'plays','play')+' is invulnerable until the end of '+ownOf(p)+' next turn.');
+    return;}
+  case 'spread':{
+    const cell=ctx.deadCell!=null?ctx.deadCell:ctx.cell;
+    const q=st.owner!=null?st.owner:p;
+    if(cell==null||!b.some(x=>x.ground&&x.ground.gid===st.gid))return none('The Spreading Pit is gone.');
+    const cands=ADJ[cell].filter(j=>!isPlane(j)&&!(b[j].hellBy===st.gid));
+    if(!cands.length)return none('Every panel beside the Spreading Pit is already in it.');
+    const c=await chooseCell(q,cands,'The Spreading Pit spreads: choose an adjacent panel. It is Hell for as long as the Pit is on the field.',
+      {mut:(bb,i)=>{bb[i].hellBy=st.gid;bb[i].hellOff=false;}});
+    if(c==null||c==='CANCEL')return;
+    b[c].hellBy=st.gid;b[c].hellOff=false;
+    log('The Spreading Pit spreads to the '+CN[c]+(hellAt(b,c)?'.':', though the battleground there holds Hell back.'));
+    await anim([c],'zap');
+    return;}
+  }
+  return 'NONE';
+}
+/* The computer's Demon spells. */
+function aiHellPlan(d){
+  const b=G.board,p=G.turn;
+  if(d.hellAi==='portal'){
+    const cands=[];
+    for(let i=0;i<BN;i++)if(b[i].teece&&canTarget(b,i,p)&&!hasKw(b,i,'immovable'))cands.push(i);
+    if(!cands.length||!b.some(c=>!c.teece&&!c.razed))return null;
+    return {thr:1.2,cellPick:true,cands,mut:(bb,i)=>{
+      let best=-1,bg=-1e9;
+      for(let j=0;j<BN;j++){if(j===i||!openAt(bb,j))continue;
+        const cb=cloneBoard(bb);moveT(cb,i,j,false);hellMake(cb,j);simCombat(cb);const g=boardValue(cb,p);if(g>bg){bg=g;best=j;}}
+      if(best>=0){moveT(bb,i,best,false);hellMake(bb,best);}}};
+  }
+  if(d.hellAi==='raise'){
+    const pl=G.players[p];
+    const ids=pl.grave.filter(id=>CARDS[id]&&CARDS[id].type==='teece'&&CARDS[id].demon&&!isBossCard(id));
+    const cands=[];for(let i=0;i<BN;i++)if(openAt(b,i)&&hellAt(b,i))cands.push(i);
+    if(!ids.length||!cands.length)return null;
+    /* Not on a turn the field might be won outright. */
+    const ls=leadState();
+    if(ls&&ls.lead.tm===teamOf(p)&&ls.gap>=ls.need-1)return null;
+    return {thr:1.0,bonus:1.2,cellPick:true,cands,mut:(bb,i)=>{
+      let bt=null,bv=-1;
+      for(const id of ids){const nt=makeTeece(id,p);for(let k=0;k<4;k++)nt.base[k]=Math.max(0,nt.base[k]-4);
+        const v=nt.base.reduce((a,c)=>a+c,0);if(v>bv){bv=v;bt=nt;}}
+      if(bt)putTeece(bb,i,bt,false);}};
+  }
+  if(d.hellAi==='breach'){
+    const cands=[];for(let i=0;i<BN;i++)if(!b[i].razed)cands.push(i);
+    const demonHeld=G.players[p].hand.some(id=>CARDS[id]&&CARDS[id].demon&&CARDS[id].type==='teece');
+    return {thr:1.0,bonus:demonHeld&&!G.teecePlayed?1.2:0,cellPick:true,cands,mut:(bb,i)=>{bb[i].ground=null;hellMake(bb,i,G.turnNum);}};
   }
   return null;
 }
@@ -26081,7 +26533,7 @@ const WL_BLESS={
 /* Zeus' Blessing strikes the top of a column: the first Teece down from the
    top edge. */
 function zeusTarget(b,c){
-  for(let r=0;r<BW;r++){const i=r*BW+c;if(i<BN&&b[i].teece)return i;}
+  for(let r=0;r<BH;r++){const i=r*BW+c;if(i<BN&&b[i].teece)return i;}
   return -1;
 }
 /* The computer's Blessing: what each patron's part is roughly worth on the
@@ -26429,7 +26881,7 @@ function canFireGun(p){
    in direction d, or -1 when the bullet leaves the board. */
 function gunLine(b,r,c,d){
   r+=d[0];c+=d[1];
-  while(r>=0&&r<BW&&c>=0&&c<BW){
+  while(r>=0&&r<BH&&c>=0&&c<BW){
     const j=r*BW+c;
     if(b[j].teece)return j;
     r+=d[0];c+=d[1];
@@ -28224,7 +28676,7 @@ function netApply(snap){
   const keep=G?{detailLock:G.detailLock,detailHover:G.detailHover,panelTap:G.panelTap,
     previewCell:G.previewCell,previewTouch:G.previewTouch}:{};
   G=Object.assign(snap.G,keep);
-  if(G.width!==BW)buildGeometry(G.width);
+  if(G.width!==BW||(G.height||G.width)!==BH)buildGeometry(G.width,G.height);
   syncPlane();
   if(!me.started){
     me.started=true;
@@ -28461,7 +28913,7 @@ if(HAS_DOM){
 }
 /* ============ exports for harness ============ */
 if(typeof module!=='undefined'){
-  module.exports={heavens,heavenShift,hvShiftCols,heavenDescend,playToHeaven,heavenlyCard,heavenlyBody,hvLandSpots,hvDescendBlock,ascendBlock,
+  module.exports={hellAt,hellUnhellable,hellBarred,hellShrouded,isDemon,aiHellPlan,checkDomination,heavens,heavenShift,hvShiftCols,heavenDescend,playToHeaven,heavenlyCard,heavenlyBody,hvLandSpots,hvDescendBlock,ascendBlock,
     messengerSwap,heavenSides,aiAngels,angelsInPlay,statusesFor,
     makeFusionCard,fuseOnBoard,fusePartners,canFuseOnBoard,canFuseHand,fuseHandAt,fuseHandOpts,
     aiFuseHand,aiFusionMagicPlan,fusionsInPlay,forgetFusions,
@@ -28470,7 +28922,7 @@ if(typeof module!=='undefined'){
     packCall,packSweepB,isPackLeader,packGuarded,howlGranted,wolfBehind,sacPool,invulnText,movePool,
     startTurn,getG:()=>G,setG:s=>{G=s;},actsOf,actAvailable,effSides,scanDeaths,render,
     aiDraftDeck,aiTurn,realCount,totalTeece,hcapLabel,HCAPS,
-    getGeom:()=>({BW,BN,ADJ,DIAG,CN}),buildGeometry,
+    getGeom:()=>({BW,BH,BN,ADJ,DIAG,CN}),buildGeometry,
     teamOf,sameTeam,teamsInPlay,seatsOnTeam,teamReal,teamTotal,seatAlive,nextLiveSeat,FORMATS,teamName,
     runSteps,fireMove,moveT,applyModT,hasKw,putTeece,actsOf,boardValue,
     modalCtl,fireModal,setModalNext,kwOf,playTeece,offerReveal,groundFlag,enemySeats,
