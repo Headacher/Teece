@@ -1531,7 +1531,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:279,date:'2026-10-21'};
+const VERSION={build:280,date:'2026-10-21'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1669,7 +1669,7 @@ const KW_RULES={
   ram:'Once per your turn: select a Teece in the same row or column; stun it, give it -3, and move one space toward it if able.',
   paladin:'A Teece from the Paladin deck, or any Teece that has sworn an Oath.',
   armoured:'Every Knight has 1 Defence. Mounts do not.',
-  hell:'A panel the Demons have taken. The Demons open a row of Hell panels under the board, and their cards turn more panels into Hell. A Hell panel is an ordinary panel in every other way: Teece fight across it and it counts for the lead. Non-Demons in Hell have -2. A battleground on a Hell panel negates Hell there, unless it says the panel is Hell.',
+  hell:'A panel the Demons have taken. The Demons open a row of Hell panels under the board, and their cards turn more panels into Hell. A Hell panel is an ordinary panel in every other way: Teece fight across it and it counts for the lead. Non-Demons in Hell have -2, but Hell never takes a side below 0. A battleground on a Hell panel negates Hell there, unless it says the panel is Hell.',
   demon:'A Teece from the Demons deck. Hell costs a Demon nothing.',
   heavens:'Three slots above the board, one over each column. A Teece up there is off the field: it doesn\u2019t fight, nothing is adjacent to it, battlegrounds and auras don\u2019t reach it, effects can\u2019t select it (though you can equip it), and it counts toward nobody\u2019s field lead. Once per your turn, tap a Teece of yours up there to step it into an empty Heaven beside it. Some Angels have an ability that works only from up there.',
   descend:'Come down from the Heavens: drop down the column and land on the first empty panel from the top. Once per your turn, and not on the turn it went up. If the column is full, it stays where it is. Descending is a move, not a play.',
@@ -6142,9 +6142,9 @@ const CARDS = {
     text:'Enemies can’t be played in Hell.'},
  1329:{name:'Pit Sergeant',type:'teece',demon:true,sides:[6,5,3,5],hellDemonDef:2,
     text:'Demons have +2 Defence in Hell.'},
- 1330:{name:'Legion',type:'teece',demon:true,sides:[8,6,5,6],sac:1,
+ 1330:{name:'Legion',type:'teece',demon:true,trump:true,sides:[8,6,5,6],sac:1,
     onPlay:[{fx:'hell',op:'legion'}],
-    text:'Sacrifice a Teece to play. When played: summon a copy of this on every empty Hell panel.'},
+    text:'Trump card. Sacrifice a Teece to play. When played: summon a Token copy of this on every empty Hell panel.'},
  1331:{name:'Demon King',type:'teece',demon:true,sides:[10,10,10,10],sac:2,
     onPlay:[{fx:'hell',op:'allPerm'}],
     text:'Sacrifice two Teece to play. When played: all panels become Hell.'},
@@ -8440,8 +8440,6 @@ function effSides(b,i,parts){
      as much the panel, and both go through applyModT, which has always turned
      a negative away. Fire landed only because it composes here instead. */
   if(b[i].fire&&!b[i].fire.scorch&&!aloft)addGround(s,-FIRE_N,'The panel is on fire');
-  /* Hell, to anything that is not a Demon. */
-  if(!isDemon(t)&&hellAt(b,i))addGround(s,-HELL_N,'In Hell, and not a Demon');
   for(let j=0;j<BN;j++){
     const o=b[j].teece; if(!o)continue;
     /* A Teece standing inside its own aura. Nearly every aura in the game pays
@@ -8489,6 +8487,14 @@ function effSides(b,i,parts){
   if(parts&&selfDbl)parts.push({label:DEF(t).selfDoublePos
     ?'Every positive effect on it counts double'
     :'The ground here doubles every positive effect',note:true});
+  /* Hell, to anything that is not a Demon. Non-lethal (Greg, build 280): it
+     takes a side down to 0 and no further, so it is read off the finished
+     numbers, after everything else has had its say. */
+  if(!isDemon(t)&&!fast&&hellAt(b,i)){
+    const hd=s.map(v=>-Math.min(HELL_N,Math.max(0,v)));
+    for(let k=0;k<4;k++)s[k]+=hd[k];
+    put('In Hell, and not a Demon (never below 0)',hd);
+  }
   /* The Icon of Devotion triples the finished number on the Worship side. */
   if(wside!=null&&DEF(t).priest&&s[wside]>0&&t.equips.some(e=>{const g=eqG(e);return g&&g.worshipTriple;})){
     const add=s[wside]*2;
@@ -25421,7 +25427,7 @@ function hellCell(el,i){
   if(on&&!b[i].teece&&!b[i].ground)el.innerHTML+='<div class="hellempty">Hell</div>';
   if(on)el.title=(G.hellRow&&row(i)>=BW&&!b[i].ground?'Hell, under the board. ':'A Hell panel. ')+HELL_INFO;
 }
-const HELL_INFO='Non-Demons in Hell have -2. A battleground on a Hell panel negates Hell there, unless it says the panel is Hell.';
+const HELL_INFO='Non-Demons in Hell have -2, but Hell never takes a side below 0. A battleground on a Hell panel negates Hell there, unless it says the panel is Hell.';
 function hellStatuses(p,push){
   const pl=G.players[p];
   if(G.hellAll)push('hellall','warn','All panels are Hell',
@@ -25435,7 +25441,7 @@ function hellStatuses(p,push){
 function hellSimPlay(b,cell,st,t,p){
   if(st.op==='here')hellMake(b,cell);
   else if(st.op==='allPerm'){for(let i=0;i<BN;i++)hellMake(b,i);}
-  else if(st.op==='legion'&&t){for(let i=0;i<BN;i++)if(openAt(b,i)&&hellAt(b,i)){const cp=makeTeece(t.cardId,p);cp.isCopy=true;putTeece(b,i,cp,false);}}
+  else if(st.op==='legion'&&t){for(let i=0;i<BN;i++)if(openAt(b,i)&&hellAt(b,i)){const cp=makeTeece(t.cardId,p);cp.isCopy=true;cp.isToken=true;putTeece(b,i,cp,false);}}
 }
 async function hellFx(st,ctx){
   const b=G.board,p=ctx.p;
@@ -25465,8 +25471,8 @@ async function hellFx(st,ctx){
     if(!ctx.t)return none('There is nothing here to copy.');
     const at=[];for(let i=0;i<BN;i++)if(openAt(b,i)&&hellAt(b,i))at.push(i);
     if(!at.length)return none('There is no empty Hell panel for a copy.');
-    for(const j of at){const cp=makeTeece(ctx.t.cardId,p);cp.isCopy=true;putTeece(b,j,cp,true);}
-    log((at.length===1?'A copy of ':at.length+' copies of ')+DEF(ctx.t).name+' climb'+(at.length===1?'s':'')+' out of Hell onto the '+at.map(j=>CN[j]).join(', ')+'.');
+    for(const j of at){const cp=makeTeece(ctx.t.cardId,p);cp.isCopy=true;cp.isToken=true;putTeece(b,j,cp,true);}
+    log((at.length===1?'A Token copy of ':at.length+' Token copies of ')+DEF(ctx.t).name+' climb'+(at.length===1?'s':'')+' out of Hell onto the '+at.map(j=>CN[j]).join(', ')+'.');
     await anim(at,'placed',140);
     return;}
   case 'drag':{
