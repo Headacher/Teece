@@ -1533,7 +1533,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:285,date:'2026-10-21'};
+const VERSION={build:286,date:'2026-10-21'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -4818,7 +4818,7 @@ const CARDS = {
     text:'Lay this on a panel that already has a battleground and it is equipped to that battleground rather than replacing it. Neither can then be replaced or destroyed. A Teece on it or beside it counts as standing on it, and gets +2.'},
  810:{name:'Extradimensional Plane of Matter',type:'ground',gAnchor:true,gOffField:true,
     gact:[{name:'Drift the Plane',once:'turn',steps:[{fx:'driftPlane'}]}],
-    text:'Played outside the field, hanging off the left or right edge of a panel. It is a panel of its own from then on — a Teece may be played onto it, and fights across the edge it hangs on — and it cannot be replaced or destroyed. While one of your Teece stands on it, once per your turn: drift it round to hang off any other edge of the board, carrying whatever stands on it.'},
+    text:'Played outside the field, hanging off the left or right edge of a panel. It is a panel of its own from then on — a Teece may be played onto it, and fights across the edge it hangs on — and it cannot be replaced or destroyed: a battleground played onto it goes on top of it. While one of your Teece stands on it, once per your turn: drift it round to hang off any other edge of the board, carrying whatever stands on it.'},
  811:{name:'Dimension of Multiplicities',type:'ground',gDoubleBase:true,gFreeAct:{
       name:'Collapse the Multiplicity',steps:[{fx:'price',hand:2},{fx:'discard',n:2,cost:true},{fx:'breakGround'}]},
     text:'A Teece on this battleground has the numbers printed on its card doubled. Either player, on their turn: discard two cards and destroy this battleground.'},
@@ -7172,6 +7172,9 @@ let GRID=9;               /* panels in the square itself */
 const PLANE=()=>GRID;     /* the index the Plane occupies when it is in play */
 const planeOn=()=>BN>GRID;
 const isPlane=i=>i===GRID&&planeOn();
+/* The Plane is a panel, not a battleground in the way of one: another
+   battleground played onto it goes on top of it and leaves it where it is. */
+const planeFold=(b,i)=>isPlane(i)&&!!(b[i]&&b[i].ground);
 const row=i=>isPlane(i)?-1:Math.floor(i/BW), col=i=>isPlane(i)?-1:i%BW;
 /* row() and col() say the Plane is off the grid, and they have to: several
    things walk the board by adding 1 or BW to an index and use a shared row or
@@ -18945,13 +18948,14 @@ async function playGround(p,handIdx){
     if(!cs)continue;
     /* Ground that cannot be replaced is nowhere to lay another battleground --
        unless this is the one written to go on top of one rather than over it. */
-    if(!d.gOnGround&&cs.some(j=>b[j].ground&&groundAnchored(b,j)))continue;
+    if(!d.gOnGround&&!planeFold(b,i)&&cs.some(j=>b[j].ground&&groundAnchored(b,j)))continue;
     if(cs.some(j=>hellBoots(b,j)))continue;
     cands.push(i);
   }
   if(!cands.length){toast('No room for it.');return false;}
   const c=await chooseCell(p,cands,'Choose where '+d.name+' goes.',
-    {cancel:true,mut:(bb,i)=>{for(const j of groundCells(i,shape)){bb[j].ground=Object.assign({cardId:id,owner:p},gmode||{});
+    {cancel:true,mut:(bb,i)=>{if(planeFold(bb,i)){bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);return;}
+       for(const j of groundCells(i,shape)){bb[j].ground=Object.assign({cardId:id,owner:p},gmode||{});
        /* A Celestial mount under a non-Paladin is gone by the end of the turn. */
        const o=bb[j].teece;if(d.gPalOnly&&o&&!isPaladin(o)&&!floats(o))bb[j].ground=null;}},
      foot:i=>groundCells(i,shape)});
@@ -18960,13 +18964,22 @@ async function playGround(p,handIdx){
   /* A Dimension of Dimensions laid over a battleground is equipped to it
      instead of burying it: from here on the panel says everything both cards
      say, and nothing can take either of them off it. */
-  if(d.gOnGround&&b[c].ground){
+  const ontoPlane=planeFold(b,c);
+  if((d.gOnGround&&b[c].ground)||ontoPlane){
     const host=b[c].ground,hid=host.gid;
     for(let j=0;j<BN;j++){
       const hg=b[j].ground;
       if(hg&&(hid?hg.gid===hid:j===c))hg.fuse=(hg.fuse||[]).concat([id]);
     }
-    log(pname(p)+' folds '+d.name+' onto '+CARDS[host.cardId].name+' at the '+CN[c]+
+    /* On the Plane a mode rides the panel it was chosen for, as it would on
+       a battleground of its own. */
+    if(ontoPlane){
+      Object.assign(host,gmode||{});
+      if(d.gShapeModal)host.gModalAll=true;
+      log(pname(p)+' lays '+d.name+' on the '+CARDS[host.cardId].name+
+        ': the Plane is a panel, and it stays under it.');
+    }
+    else log(pname(p)+' folds '+d.name+' onto '+CARDS[host.cardId].name+' at the '+CN[c]+
       ': the two are one panel now, and neither can be replaced or destroyed.');
     await fireGroundPlay(p,id,c);
     await resolveCombat();
@@ -20391,7 +20404,7 @@ function aiPlanFor(id){
     for(let i=0;i<BN;i++){
       if(hellBoots(b,i))continue;
       if(d.gOnGround){if(b[i].ground&&!(b[i].ground.fuse||[]).length)cands.push(i);}
-      else if(!b[i].ground)cands.push(i);
+      else if(!b[i].ground||planeFold(b,i))cands.push(i);
     }
     if(!cands.length)return null;
     /* A battleground that fields a body every turn, or grows whatever stands on
@@ -20477,7 +20490,7 @@ function aiPlanFor(id){
       bonus+=0.6+(d.gact?0.8:0)+0.3*(d.gdef||0);
     }
     return {thr:0.8,bonus,cands,mut:(bb,i)=>{
-      if(d.gOnGround&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
+      if((d.gOnGround||planeFold(bb,i))&&bb[i].ground)bb[i].ground.fuse=(bb[i].ground.fuse||[]).concat([id]);
       else bb[i].ground={cardId:id,owner:p};
       const o=bb[i].teece;
       if(d.gMCurseOn&&o&&!isMummy(o)&&!o.mcursed)mCurseT(bb,i,false);
