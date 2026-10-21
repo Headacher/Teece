@@ -366,3 +366,11 @@ where they fall short.
 - **Paladin.** Great helms `_/^\_` with `|+++|` tabards. Consistent.
 - **Knights.** Horse and rider in profile, `_[=]_` helms and lances.
   Consistent, and a good model for a deck of mounts.
+- **Mimics.** Furniture and loot with teeth, front-on, in single strokes. The seam
+  where a lid or door opens is the mouth: a row of `V` teeth over a row of `^`,
+  a `~` tongue between them, and `o` eyes on the lid or frame. Each card is its
+  object (chest, bookcase, chandelier, door, safe, wardrobe, gift box, bear
+  trap, a coin heap for The Hoard, a house for the Haunted Manor). Play Dead is
+  the same chest with its eyes shut `-` and its mouth closed. The back is oak
+  planks with a riveted brass strap along the top and bottom edges, so the
+  middle stays plain grain.

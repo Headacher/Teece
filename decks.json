@@ -1400,6 +1400,42 @@
       ],
       "level": "intermediate",
       "kind": "warrior"
+    },
+    "mimics": {
+      "name": "Mimics",
+      "cards": [
+        1294,
+        1295,
+        1296,
+        1297,
+        1298,
+        1299,
+        1300,
+        1301,
+        1302,
+        1303,
+        1304,
+        1305,
+        1306,
+        1307,
+        1308,
+        1309,
+        1310,
+        1311,
+        1312,
+        1313
+      ],
+      "blurb": "Mimics are chests, bookcases, doors and wardrobes with teeth: the biggest bodies in the game, each with a catch that helps your opponent. A Bookcase hands them two cards when it falls, a Front Door gives their next Teece +2, a Toy Chest summons two Tokens on their side. Play around the catch: silence your own Mimics with the Cushion, Play Dead or the Haunted Manor, turn the gift round with a Looking Glass or a Skeleton Key, or stand The Hoard on the field so every Mimic that falls pays you instead.",
+      "lore": "Mimics turn up wherever the World of Teece keeps its treasure, and nobody has ever seen one arrive. A chest in a Dwarf vault, a wardrobe in a Middlemark inn, a door that was not there last week: each one waits for a hand to reach in, and each one gives a little back as it is broken open, which is why treasure hunters keep going into rooms they should not. The Hoard is what a Mimic becomes when it is left alone long enough with enough gold.",
+      "home": "world",
+      "how": [
+        "Every Mimic's drawback helps your opponent: a card drawn, a bonus on their next Teece, Tokens on their side, invulnerability. The numbers are huge to pay for it.",
+        "A silenced Mimic keeps its numbers and loses its drawback. The Cushion silences an ally when played and when discarded (and can be discarded from your hand on your turn), Play Dead silences the next ally you play, and the Haunted Manor silences every Teece left in your deck.",
+        "Turn the gift round. While The Hoard stands, every Mimic's when-destroyed effect goes to you. A Skeleton Key does the same for the Teece wearing it, and a Looking Glass turns your next gift round once.",
+        "Ransack strips an enemy of every bonus, its equips and its battleground, and it can never be sacrificed again. The Cursed Crown passes to whatever destroys its wearer, so you can destroy it once per turn rather than hand it over."
+      ],
+      "level": "intermediate",
+      "kind": "warrior"
     }
   },
   "formats": [
@@ -2189,7 +2225,27 @@
     1289,
     1290,
     1291,
-    1292
+    1292,
+    1294,
+    1295,
+    1296,
+    1297,
+    1298,
+    1299,
+    1300,
+    1301,
+    1302,
+    1303,
+    1304,
+    1305,
+    1306,
+    1307,
+    1308,
+    1309,
+    1310,
+    1311,
+    1312,
+    1313
   ],
   "map": [
     {
