@@ -1531,7 +1531,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:278,date:'2026-10-21'};
+const VERSION={build:279,date:'2026-10-21'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1628,7 +1628,6 @@ const KEYWORDS={
   bloodlust:'Once per your turn, teleport to any free panel beside an enemy.',
   howl:'Once per your turn, select an ally: it gets +3 and Bloodlust until the end of the turn.',
   invulnerable:'Can\u2019t be destroyed.',
-  heavenly:'It can be played into an empty Heaven above the board instead of onto a panel. Once per your turn it can Descend from the Heavens, or Ascend into the Heaven above it from the top row.',
   mummywrap:'Once per your turn for each Mummy Wrap it has: fire a bandage up, right, down or left. If it hits a Teece, pull that Teece one space toward this one, and an enemy also gets -2. If it hits the wall, this Teece slides to the panel beside the wall. Every Mummy has one.',
   skitter:'Once per your turn, move one space up, down or sideways. Spiders and Spiderlings have it while they stand on the Web.',
   teleport:'Once per your turn, move to any empty panel on the board.',
@@ -1672,9 +1671,9 @@ const KW_RULES={
   armoured:'Every Knight has 1 Defence. Mounts do not.',
   hell:'A panel the Demons have taken. The Demons open a row of Hell panels under the board, and their cards turn more panels into Hell. A Hell panel is an ordinary panel in every other way: Teece fight across it and it counts for the lead. Non-Demons in Hell have -2. A battleground on a Hell panel negates Hell there, unless it says the panel is Hell.',
   demon:'A Teece from the Demons deck. Hell costs a Demon nothing.',
-  heavens:'Three slots above the board, one over each column. A Teece up there is off the field: it doesn\u2019t fight, nothing is adjacent to it, battlegrounds and auras don\u2019t reach it, effects can\u2019t select it (though you can equip it), and it counts toward nobody\u2019s field lead. Once per your turn, tap an Angel up there to step it into an empty Heaven beside it. Some Angels have an ability that works only from up there.',
+  heavens:'Three slots above the board, one over each column. A Teece up there is off the field: it doesn\u2019t fight, nothing is adjacent to it, battlegrounds and auras don\u2019t reach it, effects can\u2019t select it (though you can equip it), and it counts toward nobody\u2019s field lead. Once per your turn, tap a Teece of yours up there to step it into an empty Heaven beside it. Some Angels have an ability that works only from up there.',
   descend:'Come down from the Heavens: drop down the column and land on the first empty panel from the top. Once per your turn, and not on the turn it went up. If the column is full, it stays where it is. Descending is a move, not a play.',
-  ascend:'Go up from the top row into the empty Heaven above, once per your turn. A Heavenly Teece can do it; it can\u2019t Descend again until your next turn.',
+  ascend:'Go up from the top row into the empty Heaven above, once per your turn. Any Teece can do it while the Heavens are open; it can\u2019t Descend again until your next turn.',
   fall:'The Falling Angel, destroyed for the first time, comes back on an empty panel in the bottom row with Top 6, Right 6, Bottom 0 and Left 6.',
   mimic:'A Teece from the Mimics deck. Most Mimics are huge, and hand your opponent something when they are played or destroyed.',
   knight:'A Teece from the Knights deck. Knights are Armoured and ride Mounts.',
@@ -1726,7 +1725,7 @@ const KW_FORMS=[
   ['Solitarius','solitarius'],['Protectius','protectius'],['Pacificius','pacificius'],['Ram','ram'],
   ['Pack Leaders?','packleader'],['Mummy Wraps?','mummywrap'],['Trump card','trump'],
   ['Immune to stat reduction','steadfast'],['Steadfast','steadfast'],
-  ['Heavenly','heavenly'],['Heavens?','heavens'],['Hell(?: panels?)?','hell'],['Demons?','demon'],['Descend(?:s|ed|ing)?','descend'],['Ascend(?:s|ed|ing)?','ascend'],['Falls','fall'],
+  ['Heavens?','heavens'],['Hell(?: panels?)?','hell'],['Demons?','demon'],['Descend(?:s|ed|ing)?','descend'],['Ascend(?:s|ed|ing)?','ascend'],['Falls','fall'],
   ['Flying','flying'],['Ranged','ranged'],['Ward','ward'],['Teleport','teleport'],['Immovable','immovable'],
   ['Fuse','fuse'],['Skitter','skitter'],['March','march'],['Lumber','lumber'],['Bloodlust','bloodlust'],
   ['Defender','defender'],['Floating','floating'],['Howl','howl'],['[Ii]nvulnerable','invulnerable'],
@@ -1817,7 +1816,7 @@ function kwPopOpen(el){
   kwPopPlace(p,el);
 }
 /* The same popup, saying what an empty Heaven is (Greg's words, build 274). */
-const HEAVEN_INFO='This is Heaven. Heavenly Teece can be played in or Ascend to Heaven. Teece in Heaven can\u2019t be targeted or destroyed and can Descend onto the highest free space on its column.';
+const HEAVEN_INFO='This is Heaven. Any Teece can be played in or Ascend to Heaven. Teece in Heaven can\u2019t be targeted or destroyed and can Descend onto the highest free space on its column.';
 function heavenPopOpen(el){
   const p=HAS_DOM&&document.getElementById('kwPop');
   if(!p)return;
@@ -5997,41 +5996,41 @@ const CARDS = {
     onDeath:[{fx:'aoe',n:-3,dur:'perm'}],
     text:'Mount. Defence 3. When destroyed: give every adjacent Teece -3.'},
  /* ---- Angels: 1273-1292, and the Falling Angel's fallen self (the Fallen Angel) at 1293 ----
-        Heavenly Teece go up into the Heavens, three slots above the board, and
-        Descend down their column. The engine is under "Angels: the Heavens".
+        While any Angel card is in the game, every Teece can go up into the
+        Heavens, three slots above the board, and Descend down its column. The engine is under "Angels: the Heavens".
         A field the engine reads: onDescend / onAscend (steps), hvAura,
         hvDef, hvGuard, hvSwap (what it does from up there), heavenFree,
         landBeacon, noHeaven, fallTo; grants.descendAny and grants.onDescend
         on equips; gPearly and gAscend on battlegrounds. ---- */
- 1273:{name:'Choir Angel',type:'teece',sides:[3,4,6,4],kw:['heavenly'],
+ 1273:{name:'Choir Angel',type:'teece',sides:[3,4,6,4],
     onDescend:[{fx:'angel',op:'selfMod',n:2}],
-    text:'Heavenly. When it Descends: +2 permanently.'},
- 1274:{name:'Trumpeter',type:'teece',sides:[2,4,5,4],kw:['heavenly'],
+    text:'When it Descends: +2 permanently.'},
+ 1274:{name:'Trumpeter',type:'teece',sides:[2,4,5,4],
     onDescend:[{fx:'angel',op:'stunAdj'}],
-    text:'Heavenly. When it Descends: stun every enemy adjacent to where it lands.'},
- 1275:{name:'Guardian Angel',type:'teece',sides:[2,5,5,5],kw:['heavenly'],hvGuard:true,
-    text:'Heavenly. In the Heavens: when an ally in the column below would be destroyed, you can destroy this instead. That ally can’t be destroyed until the start of your turn.'},
- 1276:{name:'Cherub',type:'teece',sides:[3,2,3,2],kw:['heavenly','flying'],
+    text:'When it Descends: stun every enemy adjacent to where it lands.'},
+ 1275:{name:'Guardian Angel',type:'teece',sides:[2,5,5,5],hvGuard:true,
+    text:'In the Heavens: when an ally in the column below would be destroyed, you can destroy this instead. That ally can’t be destroyed until the start of your turn.'},
+ 1276:{name:'Cherub',type:'teece',sides:[3,2,3,2],kw:['flying'],
     onPlay:[{fx:'angel',op:'cherub'}],onAscend:[{fx:'angel',op:'cherub'}],
-    text:'Heavenly. Flying. When played and when it Ascends: select an ally in the Heavens; it can attack the Teece below it this turn (it still can’t be destroyed).'},
- 1277:{name:'Flamewing',type:'teece',sides:[4,5,8,5],kw:['heavenly'],
+    text:'Flying. When played and when it Ascends: select an ally in the Heavens; it can attack the Teece below it this turn (it still can’t be destroyed).'},
+ 1277:{name:'Flamewing',type:'teece',sides:[4,5,8,5],
     onDescend:[{fx:'angel',op:'colMod',n:-2}],
-    text:'Heavenly. When it Descends: every enemy in its column gets -2 permanently.'},
+    text:'When it Descends: every enemy in its column gets -2 permanently.'},
  1278:{name:'Wheel of Eyes',type:'teece',sides:[5,5,5,5],def:1,landBeacon:true,
     text:'Defence 1. When an ally Descends, it can land on any empty panel adjacent to the Wheel of Eyes instead of in its own column.'},
- 1279:{name:'Messenger',type:'teece',sides:[3,4,4,4],kw:['heavenly'],hvSwap:true,
-    text:'Heavenly. In the Heavens, once per your turn: swap places with an ally on the board. The ally goes up into this Heaven, and the Messenger lands on the ally’s panel.'},
- 1280:{name:'Watcher on High',type:'teece',sides:[1,3,9,3],kw:['heavenly'],hvAura:{enemy:-2},
-    text:'Heavenly. In the Heavens: every enemy in the column below has -2.'},
+ 1279:{name:'Messenger',type:'teece',sides:[3,4,4,4],hvSwap:true,
+    text:'In the Heavens, once per your turn: swap places with an ally on the board. The ally goes up into this Heaven, and the Messenger lands on the ally’s panel.'},
+ 1280:{name:'Watcher on High',type:'teece',sides:[1,3,9,3],hvAura:{enemy:-2},
+    text:'In the Heavens: every enemy in the column below has -2.'},
  1281:{name:'Falling Angel',type:'teece',sides:[0,7,7,7],noHeaven:true,fallTo:1293,
     text:'Can’t go into the Heavens. When destroyed (not sacrificed): it Falls. Summon it again on an empty panel in the bottom row, with Top 6, Right 6, Bottom 0 and Left 6. It can’t Fall again.'},
- 1282:{name:'Angel of Mercy',type:'teece',sides:[2,4,6,4],kw:['heavenly'],hvDef:3,
-    text:'Heavenly. In the Heavens: every ally in the column below has +3 Defence.'},
- 1283:{name:'Dominion',type:'teece',sides:[4,8,10,8],sac:1,kw:['heavenly'],
+ 1282:{name:'Angel of Mercy',type:'teece',sides:[2,4,6,4],hvDef:3,
+    text:'In the Heavens: every ally in the column below has +3 Defence.'},
+ 1283:{name:'Dominion',type:'teece',sides:[4,8,10,8],sac:1,
     onDescend:[{fx:'angel',op:'mercy'}],
-    text:'Sacrifice a Teece to play. Heavenly. When it Descends: you can put a non-Boss Teece from your graveyard into the Heaven it just left.'},
- 1284:{name:'Archangel of Topus',type:'teece',sides:[7,7,9,7],sac:2,kw:['heavenly'],hvReturn:true,hvSacOnly:true,
-    text:'Sacrifice two Teece to play. Heavenly. When destroyed: play this back on any empty Heaven panel. If only Teece in the Heavens were sacrificed to play this, it must be played in the Heavens.'},
+    text:'Sacrifice a Teece to play. When it Descends: you can put a non-Boss Teece from your graveyard into the Heaven it just left.'},
+ 1284:{name:'Archangel of Topus',type:'teece',sides:[7,7,9,7],sac:2,hvReturn:true,hvSacOnly:true,
+    text:'Sacrifice two Teece to play. When destroyed: play this back on any empty Heaven panel. If only Teece in the Heavens were sacrificed to play this, it must be played in the Heavens.'},
  1285:{name:'The Last Trumpet',type:'magic',trump:true,angelAi:'trumpet',cast:[{fx:'angel',op:'trumpet'}],
     text:'Trump card. Every Teece in the Heavens Descends now, in the order you choose, even one that went up this turn. Each one that lands gets +4 until the end of the turn.'},
  1286:{name:'Divine Intervention',type:'magic',angelReact:true,angelAi:'never',cast:[{fx:'angel',op:'divine'}],
@@ -6047,7 +6046,7 @@ const CARDS = {
  1291:{name:'Pearly Gates',type:'ground',gPearly:8,
     text:'A Teece in this column can Descend directly onto this battleground. If it does: it gets +8 until the end of the turn.'},
  1292:{name:'Cloudbank',type:'ground',gkw:['floating'],gAscend:true,
-    text:'A Teece on this battleground is Floating, so it is Flying. A Heavenly Teece on it can Ascend directly from here.'},
+    text:'A Teece on this battleground is Floating, so it is Flying. A Teece on it can Ascend directly from here.'},
  1293:{name:'Fallen Angel',type:'teece',sides:[6,6,0,6],deck:'angels',perkOnly:true,noHeaven:true,graveAs:1281,
     text:'A Falling Angel that has Fallen. It can’t Fall again.'},
  /* ---- Mimics: 1294-1313, and the Wind-up Toy Token at 1314 ----
@@ -8901,8 +8900,9 @@ function actsOf(b,i){
   if(t.drainMove)out.push({key:'kdrainstep',act:DRAIN_STEP_ACT});
   if(t.stepOwed>0)out.push({key:'kowedstep',act:OWED_STEP_ACT});
   if(hasKw(b,i,'teleport'))out.push({key:'ktele',act:TELE_ACT});
-  /* Heavenly, in the top row (or on a Cloudbank): up into the Heaven above. */
-  if(b===G.board&&hasKw(b,i,'heavenly')&&!DEF(t).noHeaven&&ascendCol(b,i)>=0)out.push({key:'kasc',act:ASCEND_ACT});
+  /* While the Heavens are open, any Teece in the top row (or on a Cloudbank)
+     can go up into the Heaven above. */
+  if(b===G.board&&heavenlyBody(t)&&ascendCol(b,i)>=0)out.push({key:'kasc',act:ASCEND_ACT});
   /* Granted by the Holy Light spell, so silence takes it. */
   if(t.holyLight&&!t.silenced)out.push({key:'kholy',act:HOLY_ACT});
   if(isMountBody(t)&&!t.silenced)out.push({key:'kmount',act:SADDLE_ACT});
@@ -18306,7 +18306,7 @@ async function playTeece(p,handIdx){
     if(rm)mountUp(gt,rm,false);
     putTeece(bb,c,gt,false);
   };
-  /* A Heavenly Teece is offered the open Heavens in the same question. */
+  /* While the Heavens are open, every Teece is offered them in the same question. */
   const hvAsk=preSpot==null?hvOpen.concat(sacV.filter(c=>hvOpen.indexOf(c)<0&&heavenlyCard(id,plateOf(p,handIdx)))).sort():[];
   let spot=plan?plan.c:(preSpot!=null&&spots.indexOf(preSpot)>=0)?preSpot:await chooseCell(p,spots,'Choose a space for '+d.name+(hvAsk.length?', or tap a Heaven above the board':'')+(saddleTo.length?', or a Knight in your hand to carry it.':'.'),
     {cancel:true,mut:previewPlace,preview:{cardId:id,plate:plateOf(p,handIdx)},hands:saddleTo.length?saddleTo:undefined,heavens:hvAsk.length?hvAsk:undefined});
@@ -24140,9 +24140,10 @@ function redeemSim(bb,i,p,n){
    and auras miss it, effects cannot select it, and it counts for nobody's lead.
    The slots belong to nobody: whoever puts a Teece there controls it.
 
-   Heavenly is the keyword that gets a Teece up there: played into an empty
-   Heaven from the hand (which spends the Teece play and pays the sacrifice,
-   except the Archangel's), or Ascending from the top row. Anything up there
+   The Heavens open whenever an Angel card is anywhere in the game, and then any
+   Teece can go up (Greg, build 278: the Heavenly keyword is gone): played into
+   an empty Heaven from the hand (which spends the Teece play and pays the
+   sacrifice), or Ascending from the top row. Anything up there
    may Descend, once per its controller's turn and never on the turn it went
    up: down its column onto the first empty panel. Descending is a move, not a
    play, so nothing "when played" fires again.
@@ -24167,18 +24168,14 @@ async function chooseHeaven(p,cols,msg,opt){
   return r;
 }
 function hvOpenCols(){const h=heavens(),o=[];for(let c=0;c<h.length;c++)if(!h[c])o.push(c);return o;}
-function hasHeavenKw(ks){return !!ks&&ks.indexOf('heavenly')>=0;}
-/* A card in hand: printed Heavenly, or plated with gear that grants it. */
+/* Whether a card in hand / a body can go up: any Teece while the Heavens are
+   open, except one that says it can't. */
 function heavenlyCard(id,plate){
   const d=CARDS[id];
-  if(!d||d.type!=='teece'||d.noHeaven)return false;
-  if(hasHeavenKw(d.kw))return true;
-  return (plate||[]).some(e=>{if(e.off||e.mount)return false;const g=CARDS[e.cardId]&&CARDS[e.cardId].grants;return !!(g&&hasHeavenKw(g.kw));});
+  return !!(d&&d.type==='teece'&&!d.noHeaven&&angelsInPlay());
 }
 function heavenlyBody(t){
-  if(!t||DEF(t).noHeaven)return false;
-  if(hasHeavenKw(DEF(t).kw)||hasHeavenKw(t.kwTemp)||hasHeavenKw(t.kwPerm))return true;
-  return t.equips.some(e=>{const g=eqG(e);return g&&hasHeavenKw(g.kw);});
+  return !!(t&&!DEF(t).noHeaven&&angelsInPlay());
 }
 const hvTurns=p=>(G.players[p]&&G.players[p].turnsTaken)||0;
 /* Whether the Heavens are worth drawing: anything up there, or a card that can
@@ -24187,13 +24184,14 @@ const hvTurns=p=>(G.players[p]&&G.players[p].turnsTaken)||0;
 function angelsInPlay(){
   if(!G)return false;
   if(G.hvShow)return true;
-  const can=id=>{const d=CARDS[id];if(!d)return false;
-    return hasHeavenKw(d.kw)||!!(d.grants&&hasHeavenKw(d.grants.kw))||!!d.angelDeck;};
-  let on=heavens().some(Boolean)||G.board.some(c=>c.teece&&heavenlyBody(c.teece));
+  /* Looked for once a turn: the AI asks this for every card it weighs. */
+  if(G.hvScan===G.turnNum)return false;
+  const can=id=>!!CARDS[id]&&getCardDeck(id)==='angels';
+  let on=heavens().some(Boolean)||G.board.some(c=>c.teece&&can(c.teece.cardId));
   if(!on)for(const pl of G.players){
     if([pl.deck,pl.hand,pl.grave].some(l=>(l||[]).some(can))){on=true;break;}
   }
-  if(on)G.hvShow=true;
+  if(on)G.hvShow=true;else G.hvScan=G.turnNum;
   return on;
 }
 /* A Teece's numbers while it is up there: what it carries itself, with no
@@ -24462,7 +24460,7 @@ function heavenEndTurn(){
 async function playToHeaven(p,handIdx){
   if(!G||G.over||G.pending||p!==G.turn)return false;
   const pl=G.players[p],id=pl.hand[handIdx];
-  if(!heavenlyCard(id,plateOf(p,handIdx))){toast('Only a Heavenly Teece can go up into the Heavens.');return false;}
+  if(!heavenlyCard(id,plateOf(p,handIdx))){toast(angelsInPlay()?'That Teece can’t go up into the Heavens.':'The Heavens are not open in this game.');return false;}
   if(!hvOpenCols().length){toast('Every Heaven is taken.');return false;}
   G.toHeaven=true;
   try{return await playFromHand(p,handIdx);}finally{if(G)G.toHeaven=false;}
