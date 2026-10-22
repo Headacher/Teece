@@ -1533,7 +1533,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:287,date:'2026-10-22'};
+const VERSION={build:288,date:'2026-10-22'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -6069,60 +6069,60 @@ const CARDS = {
         mimicGiftTo decides who receives it: the opponent, unless The Hoard
         (mimicFlip), a Skeleton Key (grants.giftHome) or a Looking Glass
         (pl.mimicRedirect) turns it round. The engine is under "Mimics". ---- */
- 1294:{name:'Treasure Chest',type:'teece',sides:[9,9,9,9],mimic:true,
-    onDeath:[{fx:'mimic',op:'killer',n:2}],
-    text:'When destroyed: its killer gets +2 permanently.'},
- 1295:{name:'Bookcase',type:'teece',sides:[10,10,10,10],mimic:true,
+ 1294:{name:'Treasure Chest',type:'teece',sides:[9,9,9,8],mimic:true,
+    onDeath:[{fx:'mimic',op:'killer',n:3}],
+    text:'When destroyed: its killer gets +3 permanently.'},
+ 1295:{name:'Bookcase',type:'teece',sides:[10,10,10,8],mimic:true,sacToo:true,
     onDeath:[{fx:'mimic',op:'draw',n:2}],
-    text:'When destroyed: your opponent draws 2 cards.'},
- 1296:{name:'Chandelier',type:'teece',sides:[7,7,7,7],kw:['flying','ranged'],def:2,mimic:true,
+    text:'When destroyed or sacrificed: your opponent draws 2 cards.'},
+ 1296:{name:'Chandelier',type:'teece',sides:[7,7,7,6],kw:['flying','ranged'],def:2,mimic:true,sacToo:true,
     onDeath:[{fx:'mimic',op:'nextInvuln',n:2}],
-    text:'Flying. Ranged. Defence 2. When destroyed: the next two Teece your opponent plays are invulnerable until the end of the turn they are played.'},
+    text:'Flying. Ranged. Defence 2. When destroyed or sacrificed: the next two Teece your opponent plays are invulnerable until the end of the turn they are played.'},
  1297:{name:'Front Door',type:'teece',sides:[0,20,0,0],mimic:true,
     onPlay:[{fx:'mimic',op:'nextMod',n:2}],
     text:'When played: the next Teece your opponent plays arrives with +2.'},
- 1298:{name:'Iron Safe',type:'teece',sides:[6,6,6,6],def:6,mimic:true,
+ 1298:{name:'Iron Safe',type:'teece',sides:[6,6,6,6],def:6,mimic:true,sacToo:true,
     onDeath:[{fx:'mimic',op:'nextDef',n:6}],
-    text:'Defence 6. When destroyed: the next Teece your opponent plays gets +6 Defence.'},
+    text:'Defence 6. When destroyed or sacrificed: the next Teece your opponent plays gets +6 Defence.'},
  1299:{name:'Toy Chest',type:'teece',sides:[7,9,9,7],mimic:true,
     onPlay:[{fx:'mimic',op:'tokens',tok:1314,count:2}],
-    text:'When played: your opponent summons 2 Wind-up Toy Tokens (2 on every side).'},
+    text:'When played: your opponent summons 2 Wind-up Toy Tokens that can be sacrificed (2 on every side).'},
  1300:{name:'Cushion',type:'teece',sides:[1,6,1,6],mimic:true,handDiscard:true,
     onPlay:[{fx:'mimic',op:'silenceAlly'}],onDiscard:[{fx:'mimic',op:'silenceAlly'}],
     text:'When played and when discarded: select an ally; silence it. You can discard this from your hand on your turn.'},
  1301:{name:'Wardrobe',type:'teece',sides:[12,11,10,11],mimic:true,trump:true,
     onPlay:[{fx:'mimic',op:'skipDraws',n:2}],
     text:'Trump card. When played: skip your next 2 draws.'},
- 1302:{name:'Gift Box',type:'teece',sides:[9,7,7,9],mimic:true,
-    onPlay:[{fx:'mimic',op:'foeMod',n:1}],
-    text:'When played: select an enemy; it gets +1 permanently.'},
- 1303:{name:'Bear Trap',type:'teece',sides:[5,5,5,5],mimic:true,
+ 1302:{name:'Gift Box',type:'teece',sides:[9,5,7,9],mimic:true,
+    onPlay:[{fx:'mimic',op:'foeMod',n:2}],
+    text:'When played: select an enemy; it gets +2 permanently.'},
+ 1303:{name:'Bear Trap',type:'teece',sides:[5,5,5,5],mimic:true,sacToo:true,
     onPlay:[{fx:'mod',who:'enemy',n:-10,dur:'perm'}],onDeath:[{fx:'mimic',op:'nextMod',n:10}],
-    text:'When played: select an enemy; it gets -10 permanently. When destroyed: the next Teece your opponent plays arrives with +10.'},
- 1304:{name:'The Hoard',type:'teece',sides:[7,7,7,7],sac:1,def:5,mimic:true,mimicFlip:true,
+    text:'When played: select an enemy; it gets -10 permanently. When destroyed or sacrificed: the next Teece your opponent plays arrives with +10.'},
+ 1304:{name:'The Hoard',type:'teece',sides:[12,12,12,12],sac:1,def:5,mimic:true,mimicFlip:true,
     text:'Sacrifice a Teece to play. Defence 5. All Mimics give you their effect when destroyed.'},
  1305:{name:'Haunted Manor',type:'teece',sides:[10,10,10,10],sac:2,mimic:true,
-    onPlay:[{fx:'mimic',op:'silenceDeck'}],handDiscard:[{fx:'mimic',op:'silenceAlly'}],
-    text:'Sacrifice two Teece to play. When played: silence all Teece in your deck. Discard this from your hand: select an ally; silence it.'},
+    onPlay:[{fx:'mimic',op:'silenceDeck'}],handDiscard:[{fx:'mimic',op:'destroyHome'}],
+    text:'Sacrifice two Teece to play. When played: silence all Teece in your deck. Discard this from your hand: select an ally; destroy it and its “When destroyed” effect applies to you instead of the enemy.'},
  1306:{name:'Looking Glass',type:'magic',mimicAi:'glass',cast:[{fx:'mimic',op:'redirect'}],
     text:'The next effect of yours to trigger that would affect your opponent affects you instead.'},
- 1307:{name:'Play Dead',type:'magic',mimicAi:'dead',cast:[{fx:'mimic',op:'silenceNext'}],
-    text:'Silence the next ally you play.'},
+ 1307:{name:'Play Dead',type:'magic',mimicAi:'dead',cast:[{fx:'mimic',op:'silenceAlly'}],
+    text:'Select an ally; silence it.'},
  1308:{name:'Ransack',type:'magic',mimicAi:'ransack',cast:[{fx:'mimic',op:'ransack'}],
     text:'Select an enemy; strip it of every positive effect, destroy every equip on it and any battleground under it. It can no longer be sacrificed.'},
- 1309:{name:'Skeleton Key',type:'equip',mod:0,grants:{giftHome:true},
-    text:'The equipped Teece’s ability applies to you when it is destroyed.'},
- 1310:{name:'Gold Plating',type:'equip',mod:4,grants:{onEquip:[{fx:'mimic',op:'foeMod',n:1}]},
-    text:'The equipped Teece has +4. When equipped: select an enemy; it gets +1 permanently.'},
+ 1309:{name:'Skeleton Key',type:'equip',mod:0,grants:{keySilence:true,onEquip:[{fx:'silenceSelf'}]},
+    text:'The equipped Teece is silenced.'},
+ 1310:{name:'Gold Plating',type:'equip',mod:4,grants:{onEquip:[{fx:'mimic',op:'foeMod',n:2}]},
+    text:'The equipped Teece has +4. When equipped: select an enemy; it gets +2 permanently.'},
  1311:{name:'Cursed Crown',type:'equip',mod:0,
     grants:{kw:['flying','ranged','ward'],def:3,toKiller:true,act:[{name:'Destroy the Cursed Crown',once:'turn',steps:[{fx:'sacEquip'}]}]},
     text:'The equipped Teece has Flying, Ranged, Defence 3 and Ward. When it is destroyed: its killer gains this equip. Once per turn: destroy this.'},
- 1312:{name:'Attic',type:'ground',gSilence:true,
-    text:'A Teece on this battleground is silenced.'},
+ 1312:{name:'Attic',type:'ground',gInvuln:true,gAtticMark:true,
+    text:'A Teece on this battleground is invulnerable but permanently gains “When destroyed: destroy the next Teece you play.”'},
  1313:{name:'Treasure Vault',type:'ground',gmod:5,gDeathGift:1,
     text:'A Teece on this battleground has +5. When it is destroyed: its controller’s opponent draws a card.'},
- 1314:{name:'Wind-up Toy',type:'teece',token:true,deck:'mimics',sides:[2,2,2,2],
-    text:'Token. Cannot be sacrificed to play a Teece; never counts toward winning.'},
+ 1314:{name:'Wind-up Toy',type:'teece',token:true,deck:'mimics',sacOK:true,sides:[2,2,2,2],
+    text:'Token. Doesn’t count toward board domination but can be sacrificed.'},
  /* ---- Demons: 1320-1339. A Beginner deck that lives in Hell, the row of
         panels it opens under the board. The engine is under "Demons: Hell".
         Fields it reads: demon (a Demon, which Hell costs nothing); bonus and
@@ -9648,7 +9648,7 @@ function scanDeaths(b){
      anything that cares how a kill was made (the Zealot). */
   const mark=(vi,ki,ks)=>{const v=b[vi].teece;if(!dead[vi])dead[vi]={cell:vi,t:v,killers:[],ksides:{}};
     if(ki!=null&&dead[vi].killers.indexOf(b[ki].teece.uid)<0){dead[vi].killers.push(b[ki].teece.uid);if(ks!=null)dead[vi].ksides[b[ki].teece.uid]=ks;}};
-  const immune=i=>b[i].teece&&(b[i].teece.immortalOwner!=null||zeusSky(b[i].teece)||runeGuarded(b[i].teece)||blessedOn(b,i)||packGuarded(b,i)||cultGuarded(b,i));
+  const immune=i=>b[i].teece&&(b[i].teece.immortalOwner!=null||zeusSky(b[i].teece)||runeGuarded(b[i].teece)||blessedOn(b,i)||packGuarded(b,i)||cultGuarded(b,i)||groundFlag(gUnder(b,i),'gInvuln'));
   /* Harbinger of War: while it stands, nobody has allies. Every pairing on the
      board is a fight, its own side included -- and it is standing in the middle
      of that board itself. */
@@ -17017,7 +17017,7 @@ const isHeldSafe=t=>{
      so it has to be worked out from where the Teece is standing right now. */
   if(G&&G.board){
     const i=G.board.findIndex(c=>c.teece===t);
-    if(i>=0)return blessedOn(G.board,i)||packGuarded(G.board,i)||cultGuarded(G.board,i);
+    if(i>=0)return blessedOn(G.board,i)||packGuarded(G.board,i)||cultGuarded(G.board,i)||groundFlag(gUnder(G.board,i),'gInvuln');
   }
   return false;
 };
@@ -17167,7 +17167,8 @@ async function processDeath(d){
      Pestilence sours an ally and the souring travels with the body, so it
      survives being moved, stolen or handed around. Sacrifices (d.cost:true)
      are not destroyed: they are removed as a cost and do not fire death effects. */
-  let deathFx=d.cost?[]:(t.silenced?[]:(DEF(t).onDeath||[])).slice();
+  /* A card printed "when destroyed or sacrificed" (sacToo) fires on a sacrifice too. */
+  let deathFx=(t.silenced||(d.cost&&!DEF(t).sacToo))?[]:(DEF(t).onDeath||[]).slice();
   /* The Boon of Death. Read off the panel it fell on, which still holds the
      ground and the equips it carried. */
   if(!d.cost){
@@ -17552,6 +17553,13 @@ async function syncGrounds(){
     if(!t.silenced&&groundFlag(gUnder(b,i),'gGoo')){
       t.silenced=true;
       log(nm(t)+' sinks into the Goo and is silenced.');
+    }
+    /* The Attic: whatever stands on it carries its curse for good, even
+       after it walks off. */
+    if(!t.atticMark&&groundFlag(gUnder(b,i),'gAtticMark')){
+      t.atticMark=true;
+      t.deathFx=(t.deathFx||[]).concat([{fx:'mimic',op:'atticDoom'}]);
+      log(nm(t)+' gains “When destroyed: destroy the next Teece you play.”');
     }
     if(!t.silenced&&groundFlag(gUnder(b,i),'gSilence')){
       t.silenced=true;
@@ -18488,6 +18496,15 @@ async function playTeece(p,handIdx){
     pl.wlShield--;
     t.immortalOwner=p;t.immortalUntil=nextTurnExpiry();
     log(nm(t)+' arrives under Death’s Boon: it is invulnerable until the end of '+ownOf(p)+' next turn.');
+  }
+  /* The Attic's curse: the next Teece is destroyed as it lands. */
+  if(pl.atticDoom>0&&b[spot].teece===t){
+    pl.atticDoom--;
+    log('The Attic’s curse: '+nm(t)+' is destroyed as it lands.');
+    await anim([spot],'dying',190);
+    await processDeath({cell:spot,t,killers:[]});
+    if(G.over)return true;
+    if(b[spot].teece!==t){await resolveCombat();render();return true;}
   }
   /* The Devils' Blessing is paid here: the next Teece is destroyed as it lands. */
   if(pl.wlDoom>0&&b[spot].teece===t){
@@ -20381,6 +20398,15 @@ function aiPlanFor(id){
     if(eg.traverseExtra)ebonus+=cultSeat(p)&&G.players[p].cult.stage===1?1.2:0.2;
     /* A Light is a broken Oath that never happens, which no board shows yet. */
     if(eg.oathShield)ebonus+=0.9;
+    /* The Skeleton Key muzzles one of your own Mimics: only worth it on one
+       still waiting to hand something over. */
+    if(eg.keySilence){
+      const kc=cands.filter(i=>{const t=b[i].teece;return !t.silenced&&DEF(t).mimic&&(DEF(t).onDeath||[]).some(s=>s.fx==='mimic');});
+      if(!kc.length||hoardSeat(p)===p)return null;
+      const kv=Math.max(...kc.map(i=>mimicDrawback(b[i].teece.cardId)));
+      if(kv<2)return null;
+      return {thr:0.5,bonus:0.3*kv,cands:kc,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
+    }
     return {thr:0.8,bonus:ebonus,cands,mut:(bb,i)=>{bb[i].teece.equips.push({cardId:id,owner:p});}};
   }
   if(d.type==='ground'){
@@ -22845,6 +22871,8 @@ function statusesFor(p){
    if(sd+sh)push('silentDeck','good','Silenced Teece: '+(sd+sh),
      'The Haunted Manor silenced every Teece in your deck. '+(sd+sh)+' of them '+(sd+sh===1?'is':'are')+' still to be played, and each arrives silenced'+
      (sh?' ('+Object.keys(pl.silentHand).filter(k=>pl.silentHand[k]>0).map(k=>CARDS[k].name).join(', ')+' in hand)':'')+'.');}
+  if(pl.atticDoom)push('atticDoom','bad','Next Teece destroyed',
+    'The Attic’s curse: the next '+(pl.atticDoom===1?'Teece':pl.atticDoom+' Teece')+' you play '+(pl.atticDoom===1?'is':'are')+' destroyed as '+(pl.atticDoom===1?'it lands':'they land')+'.');
   if(pl.skipDraw)push('skipDraw','bad','Skipping '+(pl.skipDraw===1?'a draw':pl.skipDraw+' draws'),
     'Your next '+(pl.skipDraw===1?'draw is':pl.skipDraw+' draws are')+' skipped.');
   if(hexOn(p,'nomagic'))push('nomagic','bad','No magic','The Adversary\u2019s PACT: you cannot play magic until it lifts.');
@@ -25141,8 +25169,7 @@ function hoardSeat(deadOwner){
 function mimicGiftTo(p,ctx,st){
   const dead=ctx.deadCell!=null&&ctx.t&&!st.ground?ctx.t:null;
   if(dead){
-    const key=dead.equips.find(e=>{const g=eqG(e);return g&&g.giftHome;});
-    if(key)return {to:[key.owner],flip:sameTeam(key.owner,p),why:CARDS[key.cardId].name};
+    if(dead.giftTo!=null)return {to:[dead.giftTo],flip:sameTeam(dead.giftTo,p),why:'the Haunted Manor'};
     if(DEF(dead).mimic){
       const h=hoardSeat(dead.owner);
       if(h!=null)return {to:[h],flip:sameTeam(h,p),why:'The Hoard'};
@@ -25233,6 +25260,28 @@ async function mimicFx(st,ctx){
     b[c].teece.silenced=true;
     log(nm(b[c].teece)+' is silenced: its abilities are negated for the rest of the game.');
     await anim([c],'zap');
+    return;}
+  /* The Attic's curse, carried off the battleground on the body. */
+  case 'atticDoom':{
+    const pl=G.players[p];
+    pl.atticDoom=(pl.atticDoom||0)+1;
+    log('The next Teece '+whoIn(p)+' '+vb(p,'plays','play')+' is destroyed as it lands.');
+    return;}
+  /* The Haunted Manor's discard: an ally destroyed, and its when-destroyed
+     gift comes home to the one who discarded the Manor. */
+  case 'destroyHome':{
+    const cands=[];
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&sameTeam(t.owner,p)&&!isHeldSafe(t))cands.push(i);}
+    if(!cands.length)return none('No ally that can be destroyed.');
+    let pool=cands;
+    if(isAIP(p))pool=[aiMimicSilencePick(cands,p,null)];
+    const c=await chooseCell(p,pool,'Select an ally to destroy: its “When destroyed” effect applies to you.',{cancel:!!ctx.first});
+    if(c==='CANCEL')return 'ABORT';
+    if(c==null||!b[c].teece)return;
+    const t=b[c].teece;
+    t.giftTo=p;
+    await anim([c],'dying',190);
+    await processDeath({cell:c,t,killers:[]});
     return;}
   case 'skipDraws':{
     const pl=G.players[p];
@@ -25340,11 +25389,11 @@ function aiMimicPlan(d){
     return {thr:0.5,pseudo:0.3*v,cands:[0],mut:null};
   }
   if(d.mimicAi==='dead'){
-    if(pl.silenceNext>0||!teeceLeft)return null;
+    if(hoardSeat(p)===p)return null;
     let v=0;
-    for(const cid of pl.hand){const cd=CARDS[cid];if(cd.type==='teece'&&cd.mimic&&!cd.mimicFlip&&!(cd.sac>0))v=Math.max(v,mimicDrawback(cid));}
+    for(let i=0;i<BN;i++){const t=b[i].teece;if(t&&t.owner===p&&!t.silenced&&DEF(t).mimic&&(DEF(t).onDeath||[]).some(s=>s.fx==='mimic'))v=Math.max(v,mimicDrawback(t.cardId));}
     if(v<2)return null;
-    return {thr:0.5,pseudo:0.25*v,cands:[0],mut:null};
+    return {thr:0.5,pseudo:0.3*v,cands:[0],mut:null};
   }
   if(d.mimicAi==='ransack'){
     const cands=[];

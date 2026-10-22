@@ -1425,14 +1425,14 @@
         1312,
         1313
       ],
-      "blurb": "Mimics are chests, bookcases, doors and wardrobes with teeth: the biggest bodies in the game, each with a catch that helps your opponent. A Bookcase hands them two cards when it falls, a Front Door gives their next Teece +2, a Toy Chest summons two Tokens on their side. Play around the catch: silence your own Mimics with the Cushion, Play Dead or the Haunted Manor, turn the gift round with a Looking Glass or a Skeleton Key, or stand The Hoard on the field so every Mimic that falls pays you instead.",
+      "blurb": "Mimics are chests, bookcases, doors and wardrobes with teeth: the biggest bodies in the game, each with a catch that helps your opponent. A Bookcase hands them two cards when it falls or is sacrificed, a Front Door gives their next Teece +2, a Toy Chest summons two Tokens on their side. Play around the catch: silence your own Mimics with the Cushion, Play Dead, a Skeleton Key or the Haunted Manor, turn the gift round with a Looking Glass, or stand The Hoard on the field so every Mimic that falls pays you instead.",
       "lore": "Mimics are what becomes of the things progress forgets. Down in the Badlands, among the lockers, safes and strongboxes nobody came back for, a chest left long enough in the dark starts to wait for a hand. They creep out into the rest of Teece dressed as treasure: a chest in a Dwarf vault, a wardrobe in a Middlemark inn, a door that was not there last week. Each one gives a little back as it is broken open, which is why treasure hunters keep going into rooms they should not, and the Hoard is what a Mimic becomes when it is left alone long enough with enough gold.",
       "home": "br",
       "how": [
-        "Every Mimic's drawback helps your opponent: a card drawn, a bonus on their next Teece, Tokens on their side, invulnerability. The numbers are huge to pay for it.",
-        "A silenced Mimic keeps its numbers and loses its drawback. The Cushion silences an ally when played and when discarded (and can be discarded from your hand on your turn), Play Dead silences the next ally you play, and the Haunted Manor silences every Teece left in your deck.",
-        "Turn the gift round. While The Hoard stands, every Mimic's when-destroyed effect goes to you. A Skeleton Key does the same for the Teece wearing it, and a Looking Glass turns your next gift round once.",
-        "Ransack strips an enemy of every bonus, its equips and its battleground, and it can never be sacrificed again. The Cursed Crown passes to whatever destroys its wearer, so you can destroy it once per turn rather than hand it over."
+        "Every Mimic's drawback helps your opponent: a card drawn, a bonus on their next Teece, Tokens on their side, invulnerability. The numbers are huge to pay for it. Several drawbacks fire when the Mimic is sacrificed, too.",
+        "A silenced Mimic keeps its numbers and loses its drawback. The Cushion silences an ally when played and when discarded (and can be discarded from your hand on your turn), Play Dead and the Skeleton Key silence one, and the Haunted Manor silences every Teece left in your deck.",
+        "Turn the gift round. While The Hoard stands, every Mimic's when-destroyed effect goes to you, and a Looking Glass turns your next gift round once. Discard the Haunted Manor to destroy an ally and take its when-destroyed effect yourself.",
+        "The Attic keeps a Teece invulnerable while it stands there, but marks it for good: when it is destroyed, the next Teece you play is destroyed as it lands. The Cursed Crown passes to whatever destroys its wearer, so you can destroy it once per turn rather than hand it over."
       ],
       "level": "intermediate",
       "kind": "warrior"
