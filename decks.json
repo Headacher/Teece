@@ -482,13 +482,13 @@
         619,
         620
       ],
-      "blurb": "They grow by taking. Drain X takes X off a Teece and gives the drinker exactly what it managed to take, so a Teece immune to stat reduction gives up nothing, and the Vampire Castle, the Transfusion Catalyst and Enhanced Fangs all bend the number on the way. The Fledgling, Nightstalker and Starveling drain as they land; the Nosferatu, the Elder and the Transmogrifying Vampire, which turns from a Humanoid into a flying Bat and back, keep drinking every turn; Blood Bank saves every drop for one huge bite. Mist Form is the trump card: an ally invulnerable for three of your turns, though it destroys nothing while it lasts. A plain beginner deck that wins long fights; the Parasite must drink every turn or die, and silence stops the bleeding.",
+      "blurb": "They grow by taking. Drain X takes X off a Teece and gives the drinker exactly what it managed to take, so a Teece immune to stat reduction gives up nothing, and the Vampire Castle, the Transfusion Catalyst and Enhanced Fangs all bend the number on the way. The Fledgling, Nightstalker and Starveling drain as they land; the Nosferatu, the Elder, which drinks from every other Teece on the field, and the Transmogrifying Vampire, which turns from a Humanoid into a flying Bat and back, keep drinking every turn; Blood Bank doubles every drain in play. Mist Form is the trump card: an ally invulnerable for three of your turns, though it destroys nothing while it lasts. A plain beginner deck that wins long fights; the Parasite must drink every turn or die, and silence stops the bleeding.",
       "lore": "The Vampires are the Wizards' exiled dark sorcerers, banished to the Gloaming at the bottom left of the board, where they have spent ten thousand years at war with the Zombies over who gets to eat the living. Their Lord fell to the Runeblade, and the Elders still flinch at swords. They grow by taking, they mortgage their castles to the Devils next door, and they think the Zombies vulgar for eating the whole thing.",
       "home": "bl",
       "how": [
         "Parasite has to drain at least once on each of your turns, by any means, or it withers and dies. Its own bite only drinks from your side, but any other drain counts.",
         "Enhanced Fangs doubles what you take. Vampire Castle and Transfusion Catalyst double everything either way, up and down alike.",
-        "Blood Bank stores every drain anything else makes, and spends the lot as one bite once a turn."
+        "Blood Bank doubles all Drains, both sides' and Suck's included, and two Blood Banks double them again."
       ],
       "level": "beginner",
       "kind": "warrior"
