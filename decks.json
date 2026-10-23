@@ -2367,89 +2367,248 @@
     }
   ],
   "campaign": {
-    "intro": "Middlemark sleeps soundly as a rule, which in a city built over Gol’God’Oth takes real talent. This season the floor has started to hum. The Priests of the Four Sides say the old thing underneath is turning over in its sleep, and the Cult in the cellars is lighting candles. The Temple has sent its summons to every panel of the board: send your champions to Middlemark. You carry the summons, and in every panel you fight as whoever answers it.",
-    "outro": "The last line never lights. The Wizards seal the middle panel for the third time, the Host goes home to the Heavens, and the Paladins and the Knights argue about horses all the way back up the board. Under Middlemark, Gol’God’Oth turns over and goes back to sleep. The Common Levy, who were never told how close it was, sleep soundly too.",
-    "chapters": [
+    "parts": [
       {
-        "id": "drains",
-        "place": "mc",
-        "title": "The Drains",
-        "mine": "basic",
-        "theirs": "rats",
-        "text": "The first sign is the Rats. They are coming up every pipe from the Badlands at once, and the Rat King is not so much leading them as running in front of them. The Common Levy has pitchforks, honest numbers and nothing else. That will do.",
-        "win": "The Levy holds the cellars. A cornered Rat says only that the drains under Middlemark have gone warm. You take the summons and leave by Levt’s road, into the Wildwood."
+        "title": "The Summons",
+        "intro": "Middlemark sleeps soundly as a rule, which in a city built over Gol’God’Oth takes real talent. This season the floor has started to hum. The Priests of the Four Sides say the old thing underneath is turning over in its sleep, and the Cult in the cellars is lighting candles. The Temple has sent its summons to every panel of the board: send your champions to Middlemark. You carry the summons, and in every panel you fight as whoever answers it.",
+        "outro": "The last line never lights. The Wizards seal the middle panel for the third time, the Host goes home to the Heavens, and the Paladins and the Knights argue about horses all the way back up the board. Under Middlemark, Gol’God’Oth turns over and goes back to sleep. The Common Levy, who were never told how close it was, sleep soundly too.",
+        "chapters": [
+          {
+            "id": "drains",
+            "place": "mc",
+            "title": "The Drains",
+            "mine": "basic",
+            "theirs": "rats",
+            "text": "The first sign is the Rats. They are coming up every pipe from the Badlands at once, and the Rat King is not so much leading them as running in front of them. The Common Levy has pitchforks, honest numbers and nothing else. That will do.",
+            "win": "The Levy holds the cellars. A cornered Rat says only that the drains under Middlemark have gone warm. You take the summons and leave by Levt’s road, into the Wildwood."
+          },
+          {
+            "id": "oldroad",
+            "place": "ml",
+            "title": "The Old Road",
+            "mine": "nature",
+            "theirs": "ogre",
+            "text": "The Wildwood will hear the summons, but not while Ogres from the foothills are using its trees for clubs. They felt the ground hum too, and decided to shove it. The forest is very patient. You are not: feed the plants and let them grow.",
+            "win": "The Ogres go home sulking, and the oldest oak in the forest bends to listen. It has felt Gol’God’Oth shift among its roots, and it points you uphill, to the High Mountains, where the stone remembers everything."
+          },
+          {
+            "id": "stone",
+            "place": "tc",
+            "title": "Living Stone",
+            "mine": "dwarves",
+            "theirs": "rock",
+            "text": "The Dwarves will march for Middlemark, but the Rock has just found another of their tunnels running through it and has declined to move until somebody apologises. Nobody is going to apologise. Let the gear do the work.",
+            "win": "The Rock grumbles and settles. The Dwarf foreman swears the deepest seam now runs warm, all the way down toward the middle panel. You take the long road down Levt’s side of the board, into the Gloaming."
+          },
+          {
+            "id": "tenthousand",
+            "place": "bl",
+            "title": "Ten Thousand Years",
+            "mine": "vampire",
+            "theirs": "zombie",
+            "text": "The Gloaming has no time for summonses. The Vampires and the Zombies have been at war for ten thousand years, and neither side will send a single Teece to Middlemark while the other still stands. The Vampires will hear you out if you win them this round. They grow by taking, so take.",
+            "win": "The Zombies fall back to their graves, for now, and an Elder admits the Pit next door has been loud lately: the Devils are writing contracts as if they expect a sale. The Elder sends you north, where the old Light still burns."
+          },
+          {
+            "id": "horses",
+            "place": "tl",
+            "title": "Stolen Horses",
+            "mine": "paladin",
+            "theirs": "knights",
+            "text": "The Paladins will answer the summons on one condition: their horses back. The Knights ride up from the Wildwood marches on warhorses bred from Celestial Steeds stolen from the Paladins, and they have no intention of walking home. Swear your Oaths and keep them.",
+            "win": "The Knights walk home. The Paladins swear to stand at the Temple when the time comes, and their eldest says the Light has seen the Cult’s candles in Middlemark’s cellars. You cross the top of the board and go down Rightorious’s side, to the Works."
+          },
+          {
+            "id": "leftovers",
+            "place": "mr",
+            "title": "Leftovers",
+            "mine": "robot",
+            "theirs": "garbage",
+            "text": "Everything the Works throws away ends up in the Dump, and the Dump has started throwing it back. The Garbage once ate a Robot, and the Robots have not forgotten. The Gadgeteers will build what Middlemark needs if the Drones can clear the yard. Copy yourself, and keep copying.",
+            "win": "The yard is clear, and the Gadgeteers build a needle that measures how hard a sleeping god is pushing back. It points at the middle panel and trembles. For anything more, you will have to ask the sky."
+          },
+          {
+            "id": "seven",
+            "place": "above",
+            "title": "Seven Against Six",
+            "mine": "angels",
+            "theirs": "devil",
+            "text": "Above the top edge, the Host of Topus has been watching the board. A Devil has climbed all the way up from the Pit to offer it terms: stay out of Middlemark, and the Pit will too. The Host keeps its numbers at seven out of spite for the Devils’ six. Remind them why.",
+            "win": "The Devil tears up its contract, which for a Devil is a serious emotional event, and falls back to the Pit. The Host will descend on Middlemark when called, and an Angel tells you who knows how deep Gol’God’Oth really sleeps: the Wizards, in their Tower."
+          },
+          {
+            "id": "library",
+            "place": "tc",
+            "title": "The Locked Library",
+            "mine": "wizard",
+            "theirs": "madness",
+            "text": "The Wizards have sealed the middle panel twice and will do it a third time, but their Tower is under siege. The Mad, scholars who listened too closely to the floor of Middlemark, have come for the Eldritch Library the Wizards locked and lost the key to. They throw away everything they hold, and it works. Out-think them.",
+            "win": "The Mad scatter, still arguing with the voices. The Wizards find the key in the last place anybody looked and read the one page that matters: tonight the Cult lights its last line. They can seal the middle panel, if the Temple stands until dawn. You go home to Middlemark."
+          },
+          {
+            "id": "temple",
+            "place": "mc",
+            "title": "The Temple of the Four Sides",
+            "mine": "priest",
+            "theirs": "cult",
+            "text": "The Cult of Gol’God’Oth has come up out of the cellars with its pentagram nearly lit. Everyone you met is on the way, but the Temple is here and they are not, yet. The Priests stand on top of the oldest thing in Teece and pray to the four Sides that hold the world in its frame. Face your god, and Smite.",
+            "win": ""
+          }
+        ]
       },
       {
-        "id": "oldroad",
-        "place": "ml",
-        "title": "The Old Road",
-        "mine": "nature",
-        "theirs": "ogre",
-        "text": "The Wildwood will hear the summons, but not while Ogres from the foothills are using its trees for clubs. They felt the ground hum too, and decided to shove it. The forest is very patient. You are not: feed the plants and let them grow.",
-        "win": "The Ogres go home sulking, and the oldest oak in the forest bends to listen. It has felt Gol’God’Oth shift among its roots, and it points you uphill, to the High Mountains, where the stone remembers everything."
-      },
-      {
-        "id": "stone",
-        "place": "tc",
-        "title": "Living Stone",
-        "mine": "dwarves",
-        "theirs": "rock",
-        "text": "The Dwarves will march for Middlemark, but the Rock has just found another of their tunnels running through it and has declined to move until somebody apologises. Nobody is going to apologise. Let the gear do the work.",
-        "win": "The Rock grumbles and settles. The Dwarf foreman swears the deepest seam now runs warm, all the way down toward the middle panel. You take the long road down Levt’s side of the board, into the Gloaming."
-      },
-      {
-        "id": "tenthousand",
-        "place": "bl",
-        "title": "Ten Thousand Years",
-        "mine": "vampire",
-        "theirs": "zombie",
-        "text": "The Gloaming has no time for summonses. The Vampires and the Zombies have been at war for ten thousand years, and neither side will send a single Teece to Middlemark while the other still stands. The Vampires will hear you out if you win them this round. They grow by taking, so take.",
-        "win": "The Zombies fall back to their graves, for now, and an Elder admits the Pit next door has been loud lately: the Devils are writing contracts as if they expect a sale. The Elder sends you north, where the old Light still burns."
-      },
-      {
-        "id": "horses",
-        "place": "tl",
-        "title": "Stolen Horses",
-        "mine": "paladin",
-        "theirs": "knights",
-        "text": "The Paladins will answer the summons on one condition: their horses back. The Knights ride up from the Wildwood marches on warhorses bred from Celestial Steeds stolen from the Paladins, and they have no intention of walking home. Swear your Oaths and keep them.",
-        "win": "The Knights walk home. The Paladins swear to stand at the Temple when the time comes, and their eldest says the Light has seen the Cult’s candles in Middlemark’s cellars. You cross the top of the board and go down Rightorious’s side, to the Works."
-      },
-      {
-        "id": "leftovers",
-        "place": "mr",
-        "title": "Leftovers",
-        "mine": "robot",
-        "theirs": "garbage",
-        "text": "Everything the Works throws away ends up in the Dump, and the Dump has started throwing it back. The Garbage once ate a Robot, and the Robots have not forgotten. The Gadgeteers will build what Middlemark needs if the Drones can clear the yard. Copy yourself, and keep copying.",
-        "win": "The yard is clear, and the Gadgeteers build a needle that measures how hard a sleeping god is pushing back. It points at the middle panel and trembles. For anything more, you will have to ask the sky."
-      },
-      {
-        "id": "seven",
-        "place": "above",
-        "title": "Seven Against Six",
-        "mine": "angels",
-        "theirs": "devil",
-        "text": "Above the top edge, the Host of Topus has been watching the board. A Devil has climbed all the way up from the Pit to offer it terms: stay out of Middlemark, and the Pit will too. The Host keeps its numbers at seven out of spite for the Devils’ six. Remind them why.",
-        "win": "The Devil tears up its contract, which for a Devil is a serious emotional event, and falls back to the Pit. The Host will descend on Middlemark when called, and an Angel tells you who knows how deep Gol’God’Oth really sleeps: the Wizards, in their Tower."
-      },
-      {
-        "id": "library",
-        "place": "tc",
-        "title": "The Locked Library",
-        "mine": "wizard",
-        "theirs": "madness",
-        "text": "The Wizards have sealed the middle panel twice and will do it a third time, but their Tower is under siege. The Mad, scholars who listened too closely to the floor of Middlemark, have come for the Eldritch Library the Wizards locked and lost the key to. They throw away everything they hold, and it works. Out-think them.",
-        "win": "The Mad scatter, still arguing with the voices. The Wizards find the key in the last place anybody looked and read the one page that matters: tonight the Cult lights its last line. They can seal the middle panel, if the Temple stands until dawn. You go home to Middlemark."
-      },
-      {
-        "id": "temple",
-        "place": "mc",
-        "title": "The Temple of the Four Sides",
-        "mine": "priest",
-        "theirs": "cult",
-        "text": "The Cult of Gol’God’Oth has come up out of the cellars with its pentagram nearly lit. Everyone you met is on the way, but the Temple is here and they are not, yet. The Priests stand on top of the oldest thing in Teece and pray to the four Sides that hold the world in its frame. Face your god, and Smite.",
-        "win": ""
+        "title": "The Turning",
+        "intro": "Gol’God’Oth went back to sleep, but it turned over first, and the board has not sat straight since. Panels lean. Ground rises where nobody laid it, the tallest Teece find the floor tilting away under them, and strange things are coming in through the creases at the edge of the world. Everyone who answered the summons has gone home, and whatever you lead now fights uphill: the tilt is printed on every chapter before you fight it.",
+        "outro": "The Horsemen ride off to announce something else. The Warlocks pay what they owe, with interest, and Gol’God’Oth settles into a sleep deep enough that the floor stops humming. The board sits straight again, more or less. The Common Levy never noticed it had tilted.",
+        "chapters": [
+          {
+            "id": "aftershock",
+            "place": "mc",
+            "title": "Aftershock",
+            "mine": "army",
+            "theirs": "berserker",
+            "hcap": 1,
+            "env": {
+              "grounds": [
+                {
+                  "cell": 4,
+                  "card": "CGHEART"
+                }
+              ]
+            },
+            "text": "The quake cracked the Temple floor, and the middle panel now runs hot with whatever Gol’God’Oth is dreaming: anything standing on it is stronger. Berserkers have come down from the Hallowed North to fight on it, because of course they have. Field Marshal Marshall has drilled the Levy into an Army. Hold the middle.",
+            "win": "The Berserkers go home happy, which is how Berserkers lose. The Field Marshal plants a flag on the warm stones and sends you to the edge of the board, where the reports are strangest."
+          },
+          {
+            "id": "creases",
+            "place": "world",
+            "title": "The Creases",
+            "mine": "tictactoe",
+            "theirs": "locust",
+            "ally": -1,
+            "text": "At the edge of the board the World of Teece folds over on itself, and since the quake the folds have opened. The Locusts are pouring out of the Wastes, and the only ones in their way are the Noughts and Crosses, who fell out of a crease themselves. The tilt runs against you here: everything of yours comes in a little smaller.",
+            "win": "Three in a row, and the crease closes. Something on the far side of it was moving the wrong way, down toward the Badlands."
+          },
+          {
+            "id": "dust",
+            "place": "br",
+            "title": "Dust",
+            "mine": "gun",
+            "theirs": "mimics",
+            "hcap": 1,
+            "env": {
+              "tall": 2
+            },
+            "text": "The Badlands have turned to dust storms, and the dust always finds whoever stands tallest. The Mimics like it: a chest does not need to stand tall to wait for a hand. The Gun rode in to clear them out, and has not stopped explaining how.",
+            "win": "The last strongbox goes down full of bullets and gives a little back: a map, in grave dust, of a tomb that is sliding faster than it should."
+          },
+          {
+            "id": "slide",
+            "place": "bc",
+            "title": "The Slide",
+            "mine": "mummy",
+            "theirs": "spider",
+            "hcap": 1,
+            "env": {
+              "grounds": [
+                {
+                  "cell": 7,
+                  "card": 199
+                }
+              ]
+            },
+            "text": "Ankhtepot’s tomb slides an inch a year toward the Pit. Since the quake it has slid a yard, and the bottom of the Sinking Sands has turned to a swamp that holds whatever steps in it. The Brood Mother has spun her Web across the tomb’s door. Ankhtepot refuses to accept this, as he refuses most things.",
+            "win": "The silk burns and the tomb stops sliding, mostly. Ankhtepot’s priests say the sand is not sinking any more. It is being pulled, from below."
+          },
+          {
+            "id": "books",
+            "place": "below",
+            "title": "Below the Books",
+            "mine": "demons",
+            "theirs": "devil",
+            "hcap": 2,
+            "ally": -1,
+            "text": "Something under the Pit is pulling. The Devils say it has nothing to do with them and have a contract to prove it. The Demons, who live further down and read no contracts at all, say the Devils have been selling off the fires. In the Pit everything belongs to the Devils, the advantage included.",
+            "win": "The Demons drag the books down into Hell and burn them, which turns out to settle the argument. With the paperwork gone, the pull stops. Up in the Clockwork Heights, the world’s clock has started running the wrong way."
+          },
+          {
+            "id": "backwards",
+            "place": "tr",
+            "title": "Backwards",
+            "mine": "time",
+            "theirs": "lightning",
+            "ally": -3,
+            "env": {
+              "low": 2
+            },
+            "text": "The quake knocked the world’s clock out of true, and in the Hours everything runs backwards: the smallest thing on the field grows, and your Teece arrive young, three short on every side. Zeus’s Stormborn have flashed down to see what the noise is. They have never waited for anything.",
+            "win": "The storm blows over and the Gardeners wind the clock forward again. Every tick points down Levt’s side of the board, into the Wildwood."
+          },
+          {
+            "id": "feyweather",
+            "place": "ml",
+            "title": "Fey Weather",
+            "mine": "pixie",
+            "theirs": "witch",
+            "hcap": 1,
+            "ally": -2,
+            "env": {
+              "grounds": [
+                {
+                  "cell": 0,
+                  "card": 119
+                },
+                {
+                  "cell": 2,
+                  "card": 119
+                },
+                {
+                  "cell": 6,
+                  "card": 119
+                },
+                {
+                  "cell": 8,
+                  "card": 119
+                }
+              ]
+            },
+            "text": "The Wildwood has risen into hills overnight, one at each corner of the forest, and the Witches have climbed up out of the Hollow to take them. They want their stolen spells back. The Pixies are tiny, and the tilt makes them tinier, but nobody has ever managed to hit a 1.",
+            "win": "The Witches go home without their spells and with several new ones they did not ask for. A Pixie, upside down in a tree, points out what nobody else has: every crease is opening toward the same place."
+          },
+          {
+            "id": "between",
+            "place": "world",
+            "title": "The Space Between Spaces",
+            "mine": "fusion",
+            "theirs": "dimension",
+            "hcap": 3,
+            "env": {
+              "tall": 2
+            },
+            "text": "The creases meet in the Space Between Spaces, and the Planewalkers have been redecorating it since the quake. Everything of theirs comes in bigger than it should, and the tallest thing on the field always slips. The Fusion Teece were born here. Become one with something, and push them back.",
+            "win": "The Planewalkers fold up their ground and the seam narrows. On the far side of it, under the middle of everything, something has stopped dreaming and started to listen."
+          },
+          {
+            "id": "rent",
+            "place": "mc",
+            "title": "The Rent",
+            "mine": "warlock",
+            "theirs": "apocalypse",
+            "hcap": 2,
+            "ally": -2,
+            "env": {
+              "grounds": [
+                {
+                  "cell": 4,
+                  "card": "CGHEART"
+                }
+              ],
+              "tall": 2
+            },
+            "text": "The Four Horsemen have ridden into Middlemark to announce the end of the world, as they do whenever anything happens. This time Gol’God’Oth is listening, and the Warlocks are behind on the rent. Sign with every patron who will have you, and hold the warm middle until the Old One goes back to sleep.",
+            "win": ""
+          }
+        ]
       }
     ]
   }

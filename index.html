@@ -1137,6 +1137,15 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .cside{display:flex;flex-direction:column;align-items:center;gap:5px}
 .clbl,.clvl{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .cvsbig{font-family:var(--disp);font-size:22px;color:var(--muted)}
+.cpart{margin:18px 0 0;color:var(--cream)}
+.cpart.locked{color:var(--muted)}
+.cmodl{font-size:10.5px;color:var(--gold);margin-top:1px}
+.cmods{display:flex;flex-direction:column;gap:6px;margin:10px 0 6px}
+.cmod{display:flex;flex-direction:column;gap:2px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);
+  font-size:12.5px;line-height:1.45;color:var(--cream2)}
+.cmod b{font-size:13px;color:var(--cream)}
+.cmod.s-warn{border-color:var(--gold);background:rgba(201,162,39,.10)}
+.cmod.s-good{border-color:var(--up);background:rgba(47,143,91,.12)}
 @media(max-width:560px){
   .cchap{gap:7px;padding:7px 8px}
   .cvs{font-size:16px}
@@ -1576,7 +1585,7 @@ body.endpeek #app{padding-bottom:72px}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:298,date:'2026-10-23'};
+const VERSION={build:299,date:'2026-10-23'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -2632,6 +2641,7 @@ const CARD_ART={
   824:["|\\ |\\ |\\   /^\\   /| /| /|","| \\| \\| \\ (***) / |/ |/ |","|  |  |  \\/|~|\\/  |  |  |","|  |  |  /\\| |/\\  |  |  |","|  |  |  \\/| |\\/  |  |  |","| /| /| /  / \\  \\ |\\ |\\ |","|/ |/ |/  /   \\  \\| \\| \\|"],
   "GRIFT":["        /\\   ","  \\    /  :  ","   \\  /    : ","--   <      >","     /     : ","--  <     >  ","     \\   :   ","      \\ :    ","       '     "],
   "GLENT":["  ________________          "," /   *           /          ","/_______________/\\          ","                  \\   _____ ","                   '-/ o   |","                     \\_____|"],
+  "CGHEART":["   _.-'''''-._   ", " .'  ~  ~  ~  '. ", "/   ~  .-.  ~   \\", "|  ~  ( @ )  ~  |", "\\   ~  '-'  ~   /", " '.  ~  ~  ~  .' ", "   '-._____.-'   "],
   "GNASC":["     .-'''-.     ","    /\\/\\/\\/\\\\    ","  '.  \\ | /  .'  ","--   -- * --   --","  .'  / | \\  '.  ","   \\/\\/\\/\\/\\/\\/  ","    \\        /   ","     '-.__.-'    "],
   "GFUSE":["      _________________ ","     /  *             /|","    /________________/ /","   /  *             / / ","  /________________/ /  "," /  *             / /   ","/________________/ /    ","|________________|/     "],
   "TANIM":[" _\\|/__\\|/___\\|/_ ","/  *          *  \\","\\_    \\____/    _/","  \\__/\\    /\\__/  ","     \\ \\  / /     ","      \\ \\/ /      ","       \\  /       ","        \\/        "],
@@ -3099,6 +3109,7 @@ const GROUND_ART={
   1339:["^ ^^ ^  ^  ^ ^^ ^", "^^^^^^ ^^^ ^^^^^^", "~~~~~~~~~~~~~~~~~", "~~ ~~         ~ ~", "~ ~           ~~ ", "~~ ~         ~ ~~", "~~~~~~~~~~~~~~~~~", " ~ ~~ ~~~ ~~ ~ ~ ", "~~~~~~~~~~~~~~~~~"],
   "GRIFT":["  .    \\   '  .  "," '      \\ .      ","   .   / \\   '   ","      /  .\\    . "," .    \\ ' /  .   ","   '   \\ /    '  ","       / \\  .    "," .   '/   \\    ' ","     /  .  \\  .  "],
   "GLENT":["+ - - - - - - - +","   +---------+   ",":  |         |  :","   |         |   ",":  |         |  :","   |         |   ",":  +---------+  :","     \\__[o]      ","+ - - - - - - - +"],
+  "CGHEART":["   _.-'''''-._   ", " .'  ~  ~  ~  '. ", "/   ~  .-.  ~   \\", "|  ~  ( @ )  ~  |", "\\   ~  '-'  ~   /", " '.  ~  ~  ~  .' ", "   '-._____.-'   "],
   "GNASC":["  . . . . . . .  "," .   . . . .   . ",".   .       .   .",".  .   . .   .  .",".  .  . * .  .  .",".  .   . .   .  .",".   .       .   ."," .   . . . .   . ","  . . . . . . .  "],
   "GFUSE":[".-------------.  ","|.-------------. ","||.-------------.","|||             |","|||             |","|||             |","'||             |"," '|             |","  '-------------'"]
 };
@@ -4923,6 +4934,10 @@ const CARDS = {
     text:'A Teece on this battleground gets +2.'},
  'GNASC':{name:'Nascent Dimension',type:'ground',token:true,deck:'dimension',gPerGround:1,
     text:'A Teece on this battleground gets +1 for every battleground on the field.'},
+ /* Laid by a campaign chapter, never played: a Token so no draft or conjure
+    reaches it. */
+ 'CGHEART':{name:'The Warm Floor',type:'ground',token:true,deck:'classic',gmod:5,
+    text:'A Teece on this panel gets +5.',flavor:'The Temple floor over Gol\u2019God\u2019Oth, warm with whatever it is dreaming.'},
  'GFUSE':{name:'The Folded Dimension',type:'ground',token:true,deck:'dimension',
     text:'Every battleground folded into this one still speaks from underneath it.'},
  'TANIM':{name:'Animated Terrain',type:'teece',token:true,deck:'dimension',sides:[9,9,9,9],kw:['flying'],
@@ -8563,6 +8578,21 @@ function effSides(b,i,parts){
     const hd=s.map(v=>-Math.min(HELL_N,Math.max(0,v)));
     for(let k=0;k<4;k++)s[k]+=hd[k];
     put('In Hell, and not a Demon (never below 0)',hd);
+  }
+  /* A campaign chapter can tilt the board (campSetup): the tallest Teece on
+     the field shrinks and the smallest grows. Like Hell, the loss stops at 0. */
+  const env=G&&G.env;
+  if(env&&(env.tall||env.low)){
+    const rk=envRank(b);
+    if(rk){
+      const m=envSize(t);
+      if(env.tall&&m===rk.max&&!fast){
+        const d=s.map(v=>-Math.min(env.tall,Math.max(0,v)));
+        for(let k=0;k<4;k++)s[k]+=d[k];
+        put('Tallest on the field (never below 0)',d);
+      }
+      if(env.low&&m===rk.min)addMod(s,env.low,'Smallest on the field');
+    }
   }
   /* The Icon of Devotion triples the finished number on the Worship side. */
   if(wside!=null&&DEF(t).priest&&s[wside]>0&&t.equips.some(e=>{const g=eqG(e);return g&&g.worshipTriple;})){
@@ -20044,10 +20074,13 @@ const ANIM_MS={placed:300,strike:240,dying:420,zap:260};
 const REDUCED_MOTION=HAS_DOM&&typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 async function anim(cells,cls,ms){
   if(!HAS_DOM||!G||!cells||!cells.length)return;
+  const g=G;
   G.anim={cells:cells.filter(c=>c!=null),cls};
   render();
   await wait(REDUCED_MOTION?(ms||150):(ANIM_MS[cls]||ms||150));
-  G.anim=null;
+  g.anim=null;
+  /* Left for the menu, or another game began, while this one was showing. */
+  if(G!==g)return;
   render();
 }
 function toast(m){
@@ -22833,6 +22866,7 @@ function statusesFor(p){
   /* --- the Heavens: Descend, and the Messenger's swap --- */
   heavenStatuses(p,push);
   hellStatuses(p,push);
+  campStatuses(p,push);
   /* --- the god this seat worships --- */
   if(worshipOf(p)!=null)push('worship','good','Worship: '+godName(p),
     'Your priests get +3 on their '+SIDE_NAMES[worshipOf(p)]+' side. A Prophet can switch it.');
@@ -23611,9 +23645,10 @@ function render(){
   renderCounts();renderSun();renderDom();renderWarn();renderLog();renderPrompt();renderPreview();renderActionBar();renderStatus();
   document.getElementById('modeLbl').textContent=
     G.mode==='rogue'?'roguelike · level '+G.level:
+    G.camp!=null?campLabel():
     G.mode==='three'?((G.formatName||'three players')+' \u00b7 four by four'+
       (G.enemyBonus?' \u00b7 enemy '+hcapLabel(G.enemyBonus):'')):
-    (G.mode==='deck'?(G.deckNames?(G.camp!=null?'campaign \u00b7 chapter '+(G.camp+1)+' \u00b7 ':'')+G.deckNames[0]+' vs '+G.deckNames[1]+
+    (G.mode==='deck'?(G.deckNames?G.deckNames[0]+' vs '+G.deckNames[1]+
       (G.seatBonus&&G.seatBonus.some(x=>x)?' \u00b7 '+G.seatBonus.map((x,i)=>pname(i).replace('Player ','P')+' '+hcapLabel(x)).join(', '):'')+
       (G.enemyBonus?' \u00b7 enemy '+hcapLabel(G.enemyBonus):''):'deck mode'):
     'three by three');
@@ -28261,11 +28296,18 @@ function tutEnd(t,x,btn){
 }
 /* ============ campaign ============
    A run of computer games through the World of Teece, one deck at a time and
-   from Basic up. The chapters, their decks and their story are data, under
-   `campaign` in decks.json, so the order and the words can change without
-   touching this. A chapter opens once the one before it has been won, and a
-   won chapter can be played again. Progress is the list of won chapter ids,
-   kept by id so that reordering the chapters keeps what was earned. */
+   from Basic up, in parts. The parts, chapters, decks, story and each chapter's
+   tilt are data, under `campaign` in decks.json, so the order and the words can
+   change without touching this. A chapter opens once the one before it has
+   been won (the first chapter of a part waits on the last of the part before),
+   and a won chapter can be played again. Progress is the list of won chapter
+   ids, kept by id so that reordering the chapters keeps what was earned.
+
+   A chapter may tilt the board: `hcap` is the enemy's advantage, `ally` your
+   own disadvantage (seat bonuses, so a side never falls below 0), and `env`
+   the board itself -- `grounds` laid before the first turn, `tall` taken off
+   the tallest Teece on the field and `low` given to the smallest (both read in
+   effSides through envRank). */
 const CAMP_KEY='teece.campaign';
 let CAMP_MEM=[];
 function campWon(){
@@ -28283,7 +28325,19 @@ function campMark(id){
   const won=campWon();
   if(won.indexOf(id)<0){won.push(id);campSave(won);}
 }
-const campChapters=()=>(CAMPAIGN&&CAMPAIGN.chapters||[]).filter(c=>DECKS[c.mine]&&DECKS[c.theirs]);
+function campParts(){
+  if(!CAMPAIGN)return [];
+  return CAMPAIGN.parts||[{title:'',intro:CAMPAIGN.intro,outro:CAMPAIGN.outro,chapters:CAMPAIGN.chapters||[]}];
+}
+/* Every chapter in play order, each told which part it is in and where. */
+function campChapters(){
+  const out=[];
+  campParts().forEach((pt,pi)=>{
+    const chs=(pt.chapters||[]).filter(c=>DECKS[c.mine]&&DECKS[c.theirs]);
+    chs.forEach((c,n)=>out.push(Object.assign({},c,{part:pi,n,of:chs.length})));
+  });
+  return out;
+}
 function campOpen(i){
   const chs=campChapters(),won=campWon();
   if(!chs[i])return false;
@@ -28291,6 +28345,56 @@ function campOpen(i){
 }
 const campPlace=id=>escHtml((loreRegion(id)||{name:''}).name);
 const campLevel=k=>{const g=DECK_GROUPS.level.find(x=>x[0]===DECKS[k].level);return g?g[1]:'';};
+const campWhere=c=>(campParts().length>1?'Part '+(c.part+1)+' · ':'')+'Chapter '+(c.n+1);
+/* The panels a 3x3 board calls each cell, for a chapter read before any game
+   has built the geometry. */
+const CAMP_CELLS=['top left','top middle','top right','middle left','middle','middle right','bottom left','bottom middle','bottom right'];
+/* What a chapter changes, said once and read in three places: the chapter
+   page before the match, the line in the chapter list, and the status chips
+   under the board during it. */
+function campMods(c){
+  const out=[],env=c.env||{};
+  if(c.hcap>0)out.push({k:'cadv',sev:'warn',label:'Enemy +'+c.hcap,
+    text:'Advantage: every enemy Teece carries +'+c.hcap+' on all four sides, Tokens included.'});
+  if(c.hcap<0)out.push({k:'cadv',sev:'good',label:'Enemy '+c.hcap,
+    text:'Every enemy Teece carries '+c.hcap+' on all four sides, Tokens included. A side never falls below 0.'});
+  if(c.ally<0)out.push({k:'cdis',sev:'warn',label:'Yours '+c.ally,
+    text:'Disadvantage: every Teece of yours carries '+c.ally+' on all four sides, Tokens included. A side never falls below 0.'});
+  const by={};
+  for(const g of env.grounds||[]){if(CARDS[g.card])(by[g.card]=by[g.card]||[]).push(g.cell);}
+  for(const id in by){
+    const cd=CARDS[id],cells=by[id];
+    const where=cells.length===4&&[0,2,6,8].every(x=>cells.indexOf(x)>=0)?'every corner':
+      cells.map(x=>'the '+CAMP_CELLS[x]).join(', ');
+    out.push({k:'cg'+id,sev:(cd.gmod>0?'good':'warn'),label:cd.name+(cells.length>1?' ×'+cells.length:''),
+      text:cd.name+' starts the game on '+where+(cells.length===1&&cells[0]!==4?' panel':cells.length===1?' panel':'')+'. '+cd.text});
+  }
+  if(env.tall)out.push({k:'ctall',sev:'warn',label:'Tallest -'+env.tall,
+    text:'The Teece on the field with the highest numbers gets -'+env.tall+' on every side, never below 0. Its numbers are read as printed plus what it has gained or lost; ties all take it, and when every Teece is level none does.'});
+  if(env.low)out.push({k:'clow',sev:'good',label:'Smallest +'+env.low,
+    text:'The Teece on the field with the lowest numbers gets +'+env.low+' on every side. Its numbers are read as printed plus what it has gained or lost; ties all take it, and when every Teece is level none does.'});
+  return out;
+}
+/* The chips, for the seat at this screen, while a campaign chapter is on. */
+function campStatuses(p,push){
+  if(!G||G.camp==null||isAIP(p))return;
+  const c=campChapters()[G.camp];
+  if(c)for(const m of campMods(c))push(m.k,m.sev,m.label,m.text);
+}
+/* The tallest and smallest on a board, for the env layers in effSides:
+   printed numbers (or a Shrink's) plus what is held for good or for the turn,
+   read straight off the bodies so it can never call back into effSides. Null
+   when fewer than two Teece stand or they are all level. */
+const envSize=t=>{const bs=t.baseTemp||t.base;let n=0;for(let k=0;k<4;k++)n+=bs[k]+(t.perm[k]||0)+(t.temp[k]||0);return n;};
+function envRank(b){
+  let max=-Infinity,min=Infinity,n=0;
+  for(const c of b){if(!c||!c.teece)continue;const m=envSize(c.teece);n++;if(m>max)max=m;if(m<min)min=m;}
+  return n>=2&&max>min?{max,min}:null;
+}
+function campLabel(){
+  const c=campChapters()[G.camp];
+  return 'campaign · '+(c?campWhere(c).toLowerCase()+' · ':'')+(G.deckNames?G.deckNames[0]+' vs '+G.deckNames[1]:'');
+}
 function campClose(){
   document.getElementById('campOverlay').classList.add('hidden');
   /* Leaving from over a finished game goes back to the menu, not to the board. */
@@ -28299,30 +28403,43 @@ function campClose(){
 function openCampaign(){
   const box=document.getElementById('campBox'),ov=document.getElementById('campOverlay');
   if(!box||!ov)return;
-  const chs=campChapters(),won=campWon();
+  const chs=campChapters(),won=campWon(),parts=campParts();
   let h='<h2>Campaign</h2>';
   if(!chs.length)h+='<p>The campaign has not loaded yet. Try again in a moment.</p>';
-  else h+=(CAMPAIGN.intro?'<p class="cintro">'+escHtml(CAMPAIGN.intro)+'</p>':'')+'<ol class="cchaps">';
   let next=-1;
   chs.forEach((c,i)=>{
+    if(c.n===0){
+      const pt=parts[c.part];
+      if(i)h+='</ol>';
+      if(parts.length>1)h+='<h3 class="cpart'+(campOpen(i)?'':' locked')+'">Part '+(c.part+1)+(pt.title?': '+escHtml(pt.title):'')+'</h3>';
+      if(pt.intro)h+=campOpen(i)?'<p class="cintro">'+escHtml(pt.intro)+'</p>':
+        '<p class="cintro">Win the last chapter of Part '+c.part+' to open this part.</p>';
+      h+='<ol class="cchaps">';
+    }
     const done=won.indexOf(c.id)>=0,open=campOpen(i);
     if(open&&!done&&next<0)next=i;
     const st=done?'done':(open?'next':'locked');
+    const mods=campMods(c).map(m=>m.label).join(' · ');
     h+='<li><button type="button" class="cchap '+st+'" data-ch="'+i+'"'+(open?'':' disabled')+'>'+
-      '<span class="cnum">'+(i+1)+'</span>'+
+      '<span class="cnum">'+(c.n+1)+'</span>'+
       '<span class="cmeta"><span class="cplace">'+campPlace(c.place)+'</span><b>'+escHtml(c.title)+'</b>'+
-      '<span class="cdecks">'+escHtml(DECKS[c.mine].name)+' vs '+escHtml(DECKS[c.theirs].name)+'</span></span>'+
+      '<span class="cdecks">'+escHtml(DECKS[c.mine].name)+' vs '+escHtml(DECKS[c.theirs].name)+'</span>'+
+      (mods?'<span class="cmodl">'+escHtml(mods)+'</span>':'')+'</span>'+
       '<span class="cvs">'+(DECK_SYM[c.mine]||'')+'<i>vs</i>'+(DECK_SYM[c.theirs]||'')+'</span>'+
       '<span class="cstate">'+(done?'✓ Won':open?'Play':'\u{1F512}')+'</span></button></li>';
   });
   if(chs.length)h+='</ol>';
+  const nx=next<0?null:chs[next];
   h+='<div class="row">'+(chs.length?'<button class="btn primary" id="campGo">'+
-    (next<0?'Play again from chapter 1':won.length?'Continue: chapter '+(next+1):'Begin')+'</button>':'')+
+    (!nx?'Play again from the start':won.length?'Continue: '+campWhere(nx).replace('Chapter','chapter'):'Begin')+'</button>':'')+
     '<button class="btn" id="campBack">Back</button>'+
     (won.length?'<button class="btn" id="campReset">Reset progress</button>':'')+'</div>';
   box.innerHTML=h;
   ov.classList.remove('hidden');
   ov.scrollTop=0;
+  /* Coming back with progress, open on the chapter that is next rather than
+     at the top of the first part. */
+  if(won.length&&next>0){const el=box.querySelector('.cchap[data-ch="'+next+'"]');if(el&&el.scrollIntoView)el.scrollIntoView({block:'center'});}
   const go=document.getElementById('campGo');
   if(go)go.onclick=()=>campChapter(next<0?0:next);
   document.getElementById('campBack').onclick=campClose;
@@ -28334,8 +28451,8 @@ function openCampaign(){
     if(b&&!b.disabled)campChapter(+b.dataset.ch);
   };
 }
-/* One chapter: where it is, what is happening, and the two decks, read with
-   the same square tile and "i" the deck picker uses. */
+/* One chapter: where it is, what is happening, the two decks, read with the
+   same square tile and "i" the deck picker uses, and how the board tilts. */
 function campChapter(i){
   const chs=campChapters(),c=chs[i];
   if(!c||!campOpen(i)){openCampaign();return;}
@@ -28345,10 +28462,12 @@ function campChapter(i){
     '<div class="dsymbol">'+(DECK_SYM[k]||'❓')+'</div><div class="dnm">'+escHtml(DECKS[k].name)+'</div>'+
     '<button type="button" class="dinfo" aria-label="'+escHtml(DECKS[k].name)+': what this deck does">i</button></div>'+
     '<span class="clvl">'+campLevel(k)+'</span></div>';
-  box.innerHTML='<div class="ckick">Chapter '+(i+1)+' of '+chs.length+' · '+campPlace(c.place)+'</div>'+
+  const mods=campMods(c);
+  box.innerHTML='<div class="ckick">'+campWhere(c)+' of '+c.of+' · '+campPlace(c.place)+'</div>'+
     '<h2>'+escHtml(c.title)+'</h2><p class="ctext">'+escHtml(c.text)+'</p>'+
     '<div class="cmatch">'+tile(c.mine,'You play')+'<span class="cvsbig">vs</span>'+tile(c.theirs,'Against')+'</div>'+
-    (c.hcap?'<p class="fine">Every enemy Teece carries '+hcapLabel(c.hcap)+' on all four sides.</p>':'')+
+    (mods.length?'<div class="cmods"><div class="clbl">The board tilts</div>'+mods.map(m=>
+      '<div class="cmod s-'+m.sev+'"><b>'+escHtml(m.label)+'</b><span>'+escHtml(m.text)+'</span></div>').join('')+'</div>':'')+
     '<div class="row"><button class="btn primary" id="campFight">Fight</button><button class="btn" id="campList">All chapters</button></div>';
   ov.classList.remove('hidden');
   ov.scrollTop=0;
@@ -28365,7 +28484,20 @@ function campStart(i){
   if(!c)return;
   document.getElementById('campOverlay').classList.add('hidden');
   document.getElementById('endOverlay').classList.add('hidden');
-  start('deck',true,{mine:c.mine,theirs:c.theirs,hcap:c.hcap||0,camp:i});
+  start('deck',true,{mine:c.mine,theirs:c.theirs,hcap:c.hcap||0,ally:c.ally||0,env:c.env||null,camp:i});
+}
+/* The tilt, laid on a fresh game before its first turn. Battlegrounds the
+   chapter starts with belong to the computer's seat: the board is against you. */
+function campSetup(preset){
+  G.camp=preset.camp;
+  if(preset.ally)G.seatBonus=[preset.ally,preset.hcap||0];
+  G.env=preset.env?{tall:preset.env.tall||0,low:preset.env.low||0}:null;
+  for(const g of (preset.env&&preset.env.grounds)||[]){
+    if(!CARDS[g.card]||!G.board[g.cell])continue;
+    G.board[g.cell].ground={cardId:g.card,owner:1,gid:G.groundSeq++};
+  }
+  const c=campChapters()[G.camp],mods=c?campMods(c):[];
+  if(mods.length)log('The board tilts: '+mods.map(m=>m.label).join(', ')+'.');
 }
 function campEnd(winner,why,t,x,btn){
   const chs=campChapters(),i=G.camp,c=chs[i];
@@ -28373,22 +28505,25 @@ function campEnd(winner,why,t,x,btn){
   const altTo=(lbl,fn)=>{if(alt){alt.textContent=lbl;alt.classList.remove('hidden');alt.onclick=fn;}};
   const toList=()=>{restart();openCampaign();};
   if(!c){t.textContent=winner===teamOf(0)?'You win':'Game over';x.textContent=why;btn.textContent='New game';btn.onclick=restart;return;}
+  const parts=campParts(),multi=parts.length>1;
   if(winner===teamOf(0)){
     campMark(c.id);
+    const lastOfPart=c.n>=c.of-1,pt=parts[c.part];
     if(i>=chs.length-1){
       t.textContent='Campaign complete';
-      x.textContent=[c.win,CAMPAIGN.outro].filter(Boolean).join(' ');
+      x.textContent=[c.win,pt.outro].filter(Boolean).join(' ');
       btn.textContent='Back to the menu';btn.onclick=restart;
       altTo('All chapters',toList);
     }else{
-      t.textContent='Chapter '+(i+1)+' won';
-      x.textContent=c.win||why;
-      btn.textContent='Chapter '+(i+2)+': '+chs[i+1].title;
+      const nx=chs[i+1];
+      t.textContent=lastOfPart&&multi?'Part '+(c.part+1)+' complete':campWhere(c)+' won';
+      x.textContent=(lastOfPart?[c.win,pt.outro].filter(Boolean).join(' '):c.win)||why;
+      btn.textContent=(nx.part!==c.part?'Part '+(nx.part+1)+': ':'Chapter '+(nx.n+1)+': ')+nx.title;
       btn.onclick=()=>{document.getElementById('endOverlay').classList.add('hidden');campChapter(i+1);};
       altTo('All chapters',toList);
     }
   }else{
-    t.textContent='Chapter '+(i+1)+(winner==null?' stalls out':' lost');
+    t.textContent=campWhere(c)+(winner==null?' stalls out':' lost');
     x.textContent=why+' The chapter replays with the same decks.';
     btn.textContent='Try again';btn.onclick=()=>campStart(i);
     altTo('All chapters',toList);
@@ -28605,10 +28740,10 @@ async function startInner(mode,vsAI,preset){
     }else theirs=await pickDeck('Player 2');
     G=newState('deck',vsAI,[DECKS[mine].cards.slice(),DECKS[theirs].cards.slice()],{enemyBonus:hcap});
     G.deckNames=[DECKS[mine].name,DECKS[theirs].name];
-    if(preset&&preset.camp!=null)G.camp=preset.camp;
+    if(preset&&preset.camp!=null)campSetup(preset);
     applyDeckRules(0,mine);
     applyDeckRules(1,theirs);
-    log((G.camp!=null?'Campaign, chapter '+(G.camp+1)+': ':'')+DECKS[mine].name+' faces '+DECKS[theirs].name+
+    log((G.camp!=null?'Campaign, '+campWhere(campChapters()[G.camp]).toLowerCase()+': ':'')+DECKS[mine].name+' faces '+DECKS[theirs].name+
       (hcap?', and every enemy Teece carries '+hcapLabel(hcap)+' on all four sides.':'.'));
     render();
     await startTurn();
@@ -29295,7 +29430,7 @@ if(HAS_DOM){
 }
 /* ============ exports for harness ============ */
 if(typeof module!=='undefined'){
-  module.exports={hellAt,hellUnhellable,hellBarred,hellShrouded,isDemon,aiHellPlan,checkDomination,heavens,heavenShift,hvShiftCols,heavenDescend,playToHeaven,heavenlyCard,heavenlyBody,hvLandSpots,hvDescendBlock,ascendBlock,
+  module.exports={campChapters,campMods,campSetup,envRank,envSize,hellAt,hellUnhellable,hellBarred,hellShrouded,isDemon,aiHellPlan,checkDomination,heavens,heavenShift,hvShiftCols,heavenDescend,playToHeaven,heavenlyCard,heavenlyBody,hvLandSpots,hvDescendBlock,ascendBlock,
     messengerSwap,heavenSides,aiAngels,angelsInPlay,statusesFor,
     makeFusionCard,fuseOnBoard,fusePartners,canFuseOnBoard,canFuseHand,fuseHandAt,fuseHandOpts,
     aiFuseHand,aiFusionMagicPlan,fusionsInPlay,forgetFusions,
