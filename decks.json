@@ -2485,9 +2485,17 @@
             "title": "The Creases",
             "mine": "tictactoe",
             "theirs": "locust",
-            "ally": -1,
-            "text": "At the edge of the board the World of Teece folds over on itself, and since the quake the folds have opened. The Locusts are pouring out of the Wastes, and the only ones in their way are the Noughts and Crosses, who fell out of a crease themselves. The tilt runs against you here: everything of yours comes in a little smaller.",
-            "win": "Three in a row, and the crease closes. Something on the far side of it was moving the wrong way, down toward the Badlands."
+            "text": "At the edge of the board the World of Teece folds over on itself, and since the quake the folds have opened. The Locusts are pouring out of the Wastes and have already sown a Wheat Field in the middle of the board. The only ones in their way are the Noughts and Crosses, who fell out of a crease themselves. The tilt runs their way: everything of theirs comes in a little bigger.",
+            "win": "Three in a row, and the crease closes. Something on the far side of it was moving the wrong way, down toward the Badlands.",
+            "env": {
+              "grounds": [
+                {
+                  "cell": 4,
+                  "card": 863
+                }
+              ]
+            },
+            "hcap": 1
           },
           {
             "id": "dust",
@@ -2496,11 +2504,21 @@
             "mine": "gun",
             "theirs": "mimics",
             "hcap": 1,
+            "text": "The Badlands have turned to dust storms, and two corners of the board are buried under drifts nobody can stand on. The Mimics like it: a chest does not need much room to wait for a hand. The Gun rode in to clear them out, set up a Gun Range in the middle of the dust, and has not stopped explaining how.",
+            "win": "The last strongbox goes down full of bullets and gives a little back: a map, in grave dust, of a tomb that is sliding faster than it should.",
             "env": {
-              "tall": 2
-            },
-            "text": "The Badlands have turned to dust storms, and the dust always finds whoever stands tallest. The Mimics like it: a chest does not need to stand tall to wait for a hand. The Gun rode in to clear them out, and has not stopped explaining how.",
-            "win": "The last strongbox goes down full of bullets and gives a little back: a map, in grave dust, of a tomb that is sliding faster than it should."
+              "razed": [
+                0,
+                8
+              ],
+              "grounds": [
+                {
+                  "cell": 4,
+                  "card": 1020,
+                  "seat": 0
+                }
+              ]
+            }
           },
           {
             "id": "slide",
@@ -2526,10 +2544,15 @@
             "title": "Below the Books",
             "mine": "demons",
             "theirs": "devil",
-            "hcap": 2,
-            "ally": -1,
-            "text": "Something under the Pit is pulling. The Devils say it has nothing to do with them and have a contract to prove it. The Demons, who live further down and read no contracts at all, say the Devils have been selling off the fires. In the Pit everything belongs to the Devils, the advantage included.",
-            "win": "The Demons drag the books down into Hell and burn them, which turns out to settle the argument. With the paperwork gone, the pull stops. Up in the Clockwork Heights, the world’s clock has started running the wrong way."
+            "hcap": 3,
+            "text": "Something under the Pit is pulling. The Devils say it has nothing to do with them and have a contract to prove it. The Demons, who live further down and read no contracts at all, say the Devils have been selling off the fires, and Hell is already breaking through the bottom corners of the board. In the Pit everything belongs to the Devils, the advantage included.",
+            "win": "The Demons drag the books down into Hell and burn them, which turns out to settle the argument. With the paperwork gone, the pull stops. Up in the Clockwork Heights, the world’s clock has started running the wrong way.",
+            "env": {
+              "hell": [
+                6,
+                8
+              ]
+            }
           },
           {
             "id": "backwards",
@@ -2537,12 +2560,31 @@
             "title": "Backwards",
             "mine": "time",
             "theirs": "lightning",
-            "ally": -3,
+            "text": "The quake knocked the world’s clock out of true, and in the Hours everything runs backwards. Zeus’s Stormborn have flashed down to see what the noise is, and they arrive already grown, three up on every side. Every third round the whole field grows back a little more. The Gardeners have kept two Hilltops for you either side of the middle.",
+            "win": "The storm blows over and the Gardeners wind the clock forward again. Every tick points down Levt’s side of the board, into the Wildwood.",
             "env": {
-              "low": 2
+              "grounds": [
+                {
+                  "cell": 3,
+                  "card": 1189,
+                  "seat": 0
+                },
+                {
+                  "cell": 5,
+                  "card": 1189,
+                  "seat": 0
+                }
+              ],
+              "events": [
+                {
+                  "every": 3,
+                  "fx": "surge",
+                  "n": 1,
+                  "name": "The clock runs back"
+                }
+              ]
             },
-            "text": "The quake knocked the world’s clock out of true, and in the Hours everything runs backwards: the smallest thing on the field grows, and your Teece arrive young, three short on every side. Zeus’s Stormborn have flashed down to see what the noise is. They have never waited for anything.",
-            "win": "The storm blows over and the Gardeners wind the clock forward again. Every tick points down Levt’s side of the board, into the Wildwood."
+            "hcap": 3
           },
           {
             "id": "feyweather",
@@ -2550,8 +2592,7 @@
             "title": "Fey Weather",
             "mine": "pixie",
             "theirs": "witch",
-            "hcap": 1,
-            "ally": -2,
+            "hcap": 3,
             "env": {
               "grounds": [
                 {
@@ -2572,7 +2613,7 @@
                 }
               ]
             },
-            "text": "The Wildwood has risen into hills overnight, one at each corner of the forest, and the Witches have climbed up out of the Hollow to take them. They want their stolen spells back. The Pixies are tiny, and the tilt makes them tinier, but nobody has ever managed to hit a 1.",
+            "text": "The Wildwood has risen into hills overnight, one at each corner of the forest, and the Witches have climbed up out of the Hollow to take them. They want their stolen spells back. The hills make the Witches bigger than ever and the Pixies are as tiny as always, but nobody has ever managed to hit a 1.",
             "win": "The Witches go home without their spells and with several new ones they did not ask for. A Pixie, upside down in a tree, points out what nobody else has: every crease is opening toward the same place."
           },
           {
@@ -2582,11 +2623,25 @@
             "mine": "fusion",
             "theirs": "dimension",
             "hcap": 3,
+            "text": "The creases meet in the Space Between Spaces, and the Planewalkers have been redecorating it since the quake: two corners have been turned inside out by the Dimension of Change. Everything of theirs comes in bigger than it should. The Fusion Teece were born here, and the middle panel still remembers them. Become one with something, and push them back.",
+            "win": "The Planewalkers fold up their ground and the seam narrows. On the far side of it, under the middle of everything, something has stopped dreaming and started to listen.",
             "env": {
-              "tall": 2
-            },
-            "text": "The creases meet in the Space Between Spaces, and the Planewalkers have been redecorating it since the quake. Everything of theirs comes in bigger than it should, and the tallest thing on the field always slips. The Fusion Teece were born here. Become one with something, and push them back.",
-            "win": "The Planewalkers fold up their ground and the seam narrows. On the far side of it, under the middle of everything, something has stopped dreaming and started to listen."
+              "grounds": [
+                {
+                  "cell": 4,
+                  "card": 1040,
+                  "seat": 0
+                },
+                {
+                  "cell": 0,
+                  "card": 805
+                },
+                {
+                  "cell": 8,
+                  "card": 805
+                }
+              ]
+            }
           },
           {
             "id": "rent",
@@ -2594,8 +2649,7 @@
             "title": "The Rent",
             "mine": "warlock",
             "theirs": "apocalypse",
-            "hcap": 2,
-            "ally": -2,
+            "hcap": 3,
             "env": {
               "grounds": [
                 {
@@ -2603,9 +2657,22 @@
                   "card": "CGHEART"
                 }
               ],
-              "tall": 2
+              "events": [
+                {
+                  "every": 2,
+                  "fx": "fire",
+                  "cells": [
+                    1,
+                    3,
+                    5,
+                    7
+                  ],
+                  "where": "the four panels around the middle",
+                  "name": "Middlemark burns"
+                }
+              ]
             },
-            "text": "The Four Horsemen have ridden into Middlemark to announce the end of the world, as they do whenever anything happens. This time Gol’God’Oth is listening, and the Warlocks are behind on the rent. Sign with every patron who will have you, and hold the warm middle until the Old One goes back to sleep.",
+            "text": "The Four Horsemen have ridden into Middlemark to announce the end of the world, as they do whenever anything happens, and every second round they set the streets around the Temple alight. This time Gol’God’Oth is listening, and the Warlocks are behind on the rent. Sign with every patron who will have you, and hold the warm middle until the Old One goes back to sleep.",
             "win": ""
           }
         ]
@@ -2631,9 +2698,15 @@
                   "n": 1,
                   "name": "Nightbite"
                 }
+              ],
+              "grounds": [
+                {
+                  "cell": 2,
+                  "card": 619
+                }
               ]
             },
-            "text": "The night came loose when the world folded, and in the Gloaming it has stopped ending. The Vampires have caught the Zombies in the open with every advantage the dark can give. You do not have to win. You have to still be standing when round eight ends, while the night bites everything on the field.",
+            "text": "The night came loose when the world folded, and in the Gloaming it has stopped ending. The Vampires have caught the Zombies in the open with every advantage the dark can give, and a Bat Cave in the corner keeps their numbers up. You do not have to win. You have to still be standing when round eight ends, while the night bites everything on the field.",
             "win": "Round eight ends, the sun finds its way back over the edge of the board, and the Vampires go to ground. Nagash’s dead are still standing, more or less. Behind the sunrise, the Badlands are fighting over something new."
           },
           {
@@ -2649,11 +2722,37 @@
               2
             ],
             "hcap": 1,
+            "text": "A fold has dropped a second Dump on top of the first, and everything in the Badlands wants it. The Rats, the Garbage and the Mimics are fighting for every heap at once, three ways, on a board grown to four by four. The Rats have a nest in one corner, and every second round the heaps in the middle catch fire.",
+            "win": "The Rat King sits on top of both Dumps and is very pleased about it. From up there he can see what nobody else has: the sky above the board has come unstuck.",
             "env": {
-              "tall": 3
-            },
-            "text": "A fold has dropped a second Dump on top of the first, and everything in the Badlands wants it. The Rats, the Garbage and the Mimics are fighting for every heap at once, three ways, on a board grown to four by four. Whoever stands tallest in the Dump gets buried first.",
-            "win": "The Rat King sits on top of both Dumps and is very pleased about it. From up there he can see what nobody else has: the sky above the board has come unstuck."
+              "grounds": [
+                {
+                  "cell": 0,
+                  "card": 843,
+                  "seat": 0,
+                  "where": "the top left corner"
+                },
+                {
+                  "cell": 15,
+                  "card": 1190,
+                  "where": "the bottom right corner"
+                }
+              ],
+              "events": [
+                {
+                  "every": 2,
+                  "fx": "fire",
+                  "cells": [
+                    5,
+                    6,
+                    9,
+                    10
+                  ],
+                  "where": "the four middle panels",
+                  "name": "The heaps burn"
+                }
+              ]
+            }
           },
           {
             "id": "zerog",
@@ -2664,9 +2763,16 @@
             "hcap": 1,
             "env": {
               "fly": true,
-              "lead": 6
+              "lead": 6,
+              "grounds": [
+                {
+                  "cell": 4,
+                  "card": 699,
+                  "seat": 0
+                }
+              ]
             },
-            "text": "Up in the Heavens the fold has let go of the sky, and nothing stays down any more: every Teece flies. The Heavens are wide, so taking the field needs a lead of six. The Stormborn are fast and do not care. The Solar orders are patient, and know the sky better than anyone.",
+            "text": "Up in the Heavens the fold has let go of the sky, and nothing stays down any more: every Teece flies. The Heavens are wide, so taking the field needs a lead of six. The Stormborn are fast and do not care. The Solar orders are patient, know the sky better than anyone, and hold the Solar Terrace in the middle of it.",
             "win": "The sun and the moon settle back into their turning, and things start falling again, mostly where they were. A boulder from the High Mountains misses you by a panel on its way down."
           },
           {
@@ -2689,14 +2795,32 @@
               ],
               "events": [
                 {
-                  "every": 2,
-                  "fx": "meteor",
-                  "n": 3,
+                  "at": 2,
+                  "fx": "raze",
+                  "cells": [
+                    1
+                  ],
+                  "name": "Rockfall"
+                },
+                {
+                  "at": 4,
+                  "fx": "raze",
+                  "cells": [
+                    3
+                  ],
+                  "name": "Rockfall"
+                },
+                {
+                  "at": 6,
+                  "fx": "raze",
+                  "cells": [
+                    5
+                  ],
                   "name": "Rockfall"
                 }
               ]
             },
-            "text": "The fold has tipped the High Mountains, and the peaks are coming down. The Bombardiers think this is the best thing that has ever happened to them and have already dug in. Every second round the mountain sheds, and the rock lands on whatever stands tallest. The Rock declines to be moved. It may have to decline very hard.",
+            "text": "The fold has tipped the High Mountains, and the peaks are coming down. The Bombardiers think this is the best thing that has ever happened to them and have already dug in. At the end of rounds two, four and six a boulder buries another panel for good. The Rock declines to be moved. It may have to decline very hard.",
             "win": "The Bombardiers run out of things to blow up before the Rock runs out of patience. From the top of the rubble you can see down into the Wildwood, where three old feuds have broken out at once."
           },
           {
@@ -2775,8 +2899,7 @@
             "title": "The Burning Library",
             "mine": "madness",
             "theirs": "wizard",
-            "hcap": 2,
-            "ally": -1,
+            "hcap": 3,
             "env": {
               "lead": 3,
               "events": [
@@ -2810,8 +2933,6 @@
             ],
             "hcap": 1,
             "env": {
-              "tall": 2,
-              "low": 2,
               "events": [
                 {
                   "at": 2,
@@ -2851,9 +2972,16 @@
                 "play": 2,
                 "draw": 2
               },
-              "lead": 6
+              "lead": 6,
+              "razed": [
+                0,
+                3,
+                12,
+                15
+              ],
+              "razedWhere": "the four corners"
             },
-            "text": "At the last crease the World of Teece folds against itself, and everything from nowhere in particular has come to stop you closing it: the Fusion Teece from the Space Between Spaces, and the Four Horsemen, who have been waiting for exactly this. The Planewalkers treat the ground itself as a weapon, and fight as two; the crease is wide, and taking the field needs a lead of six. Here the ground fights back, and underneath it all, Gol’God’Oth is reaching up.",
+            "text": "At the last crease the World of Teece folds against itself, and the corners of the board have folded away entirely. Everything from nowhere in particular has come to stop you closing it: the Fusion Teece from the Space Between Spaces, and the Four Horsemen, who have been waiting for exactly this. The Planewalkers treat the ground itself as a weapon, and fight as two; the crease is wide, and taking the field needs a lead of six. Underneath it all, Gol’God’Oth is reaching up.",
             "win": ""
           }
         ]

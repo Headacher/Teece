@@ -1593,7 +1593,7 @@ body.endpeek #app{padding-bottom:72px}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:302,date:'2026-10-23'};
+const VERSION={build:303,date:'2026-10-23'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -8586,21 +8586,6 @@ function effSides(b,i,parts){
     const hd=s.map(v=>-Math.min(HELL_N,Math.max(0,v)));
     for(let k=0;k<4;k++)s[k]+=hd[k];
     put('In Hell, and not a Demon (never below 0)',hd);
-  }
-  /* A campaign chapter can tilt the board (campSetup): the tallest Teece on
-     the field shrinks and the smallest grows. Like Hell, the loss stops at 0. */
-  const env=G&&G.env;
-  if(env&&(env.tall||env.low)){
-    const rk=envRank(b);
-    if(rk){
-      const m=envSize(t);
-      if(env.tall&&m===rk.max&&!fast){
-        const d=s.map(v=>-Math.min(env.tall,Math.max(0,v)));
-        for(let k=0;k<4;k++)s[k]+=d[k];
-        put('Tallest on the field (never below 0)',d);
-      }
-      if(env.low&&m===rk.min)addMod(s,env.low,'Smallest on the field');
-    }
   }
   /* The Icon of Devotion triples the finished number on the Worship side. */
   if(wside!=null&&DEF(t).priest&&s[wside]>0&&t.equips.some(e=>{const g=eqG(e);return g&&g.worshipTriple;})){
@@ -28354,9 +28339,10 @@ function tutEnd(t,x,btn){
 
    A chapter may tilt the board: `hcap` is the enemy's advantage, `ally` your
    own disadvantage (seat bonuses, so a side never falls below 0), and `env`
-   the board itself -- `grounds` laid before the first turn, `tall` taken off
-   the tallest Teece on the field and `low` given to the smallest (both read in
-   effSides through envRank). */
+   the board itself: battlegrounds, razed and Hell panels laid before the first
+   turn, rules that change how the game is won or played, and events at the
+   end of a round. Every one of them is something the board already draws, so a
+   player can see the twist rather than work it out. */
 const CAMP_KEY='teece.campaign';
 let CAMP_MEM=[];
 function campWon(){
@@ -28406,11 +28392,14 @@ function campSeatRole(c,seat){
   const tm=campTeams(c);
   return seat===0?'you':tm[seat]===tm[0]?'your ally':'the enemy';
 }
+const campCap=t=>t.charAt(0).toUpperCase()+t.slice(1);
 const campOrd=n=>n===1?'round':n===2?'second round':n===3?'third round':n+'th round';
 function campCellsText(c,cells,where){
   if(where)return where;
   if(cells.length===4&&[0,2,6,8].every(x=>cells.indexOf(x)>=0))return 'every corner';
-  return cells.map(x=>'the '+(CAMP_CELLS[x]||'panel '+(x+1))+' panel').join(', ');
+  const nm=cells.map(x=>CAMP_CELLS[x]||'panel '+(x+1));
+  if(nm.length<2)return 'the '+nm[0]+' panel';
+  return 'the '+nm.slice(0,-1).join(', ')+' and '+nm[nm.length-1]+' panels';
 }
 /* One board event in words: when, then what. */
 function campEventText(c,ev){
@@ -28420,7 +28409,9 @@ function campEventText(c,ev){
   const what=
     ev.fx==='quake'?'every Teece on the field gets -'+n+' permanently':
     ev.fx==='surge'?'every Teece on the field gets +'+n+' permanently':
-    ev.fx==='meteor'?'the tallest Teece on the field gets -'+n+' permanently':
+    ev.fx==='raze'?campCellsText(c,ev.cells||[],ev.where)+' '+((ev.cells||[]).length>1?'are':'is')+' razed: no Teece may be played or moved onto '+((ev.cells||[]).length>1?'them':'it')+' again, and anything already there stays':
+    ev.fx==='fire'?campCellsText(c,ev.cells||[],ev.where)+' catch'+((ev.cells||[]).length>1?'':'es')+' fire: anything standing there has -'+FIRE_N+' until it burns out a round later':
+    ev.fx==='hell'?campCellsText(c,ev.cells||[],ev.where)+' '+((ev.cells||[]).length>1?'become':'becomes')+' Hell for the rest of the game':
     ev.fx==='sweep'?'every battleground on the field is destroyed':
     ev.fx==='ground'&&cd?cd.name+' is laid on '+campCellsText(c,ev.cells||[],ev.where)+', replacing what was there':
     ev.fx==='summon'&&cd?cd.name+' ('+campStats(cd.sides)+') is summoned for '+campSeatRole(c,ev.seat||1)+' on '+campCellsText(c,ev.cells||[],ev.where)+', if it is empty':
@@ -28428,7 +28419,7 @@ function campEventText(c,ev){
   return when+', '+what+'.';
 }
 const campStats=sd=>'Top '+sd[0]+', Right '+sd[1]+', Bottom '+sd[2]+', Left '+sd[3];
-const CAMP_EV_NAME={quake:'Quake',surge:'Surge',meteor:'Rockfall',sweep:'Sweep',ground:'Rising ground',summon:'Arrival'};
+const CAMP_EV_NAME={quake:'Quake',surge:'Surge',raze:'Rockfall',fire:'Fire',hell:'Hell rises',sweep:'Sweep',ground:'Rising ground',summon:'Arrival'};
 /* What a chapter changes, said once and read in three places: the chapter
    page before the match, the line in the chapter list, and the status chips
    under the board during it. */
@@ -28471,16 +28462,20 @@ function campMods(c){
         ', on '+campCellsText(c,f.cells,f.where)+'. '+(cd.text||'')});
   }
   const by={};
-  for(const g of env.grounds||[]){if(CARDS[g.card])(by[g.card]=by[g.card]||{cells:[],where:g.where}).cells.push(g.cell);}
-  for(const id in by){
-    const cd=CARDS[id],cells=by[id].cells;
-    out.push({k:'cg'+id,sev:(cd.gmod>0?'good':'warn'),label:cd.name+(cells.length>1?' ×'+cells.length:''),
-      text:cd.name+' starts the game on '+campCellsText(c,cells,by[id].where)+'. '+cd.text});
+  for(const g of env.grounds||[]){
+    if(!CARDS[g.card])continue;
+    const seat=g.seat==null?1:g.seat,key=g.card+'@'+seat;
+    (by[key]=by[key]||{id:g.card,seat,cells:[],where:g.where}).cells.push(g.cell);
   }
-  if(env.tall)out.push({k:'ctall',sev:'warn',label:'Tallest -'+env.tall,
-    text:'The Teece on the field with the highest numbers gets -'+env.tall+' on every side, never below 0. Its numbers are read as printed plus what it has gained or lost; ties all take it, and when every Teece is level none does.'});
-  if(env.low)out.push({k:'clow',sev:'good',label:'Smallest +'+env.low,
-    text:'The Teece on the field with the lowest numbers gets +'+env.low+' on every side. Its numbers are read as printed plus what it has gained or lost; ties all take it, and when every Teece is level none does.'});
+  for(const key in by){
+    const gr=by[key],cd=CARDS[gr.id],cells=gr.cells,who=campSeatRole(c,gr.seat);
+    out.push({k:'cg'+key,sev:(cd.gmod>0||gr.seat===0?'good':'warn'),label:cd.name+(cells.length>1?' \u00d7'+cells.length:''),
+      text:cd.name+' starts the game on '+campCellsText(c,cells,gr.where)+(who==='you'?', and it is yours':who==='your ally'?', belonging to your ally':', belonging to the enemy')+'. '+cd.text});
+  }
+  if((env.razed||[]).length)out.push({k:'craze',sev:'warn',label:'Razed panels \u00d7'+env.razed.length,
+    text:campCap(campCellsText(c,env.razed,env.razedWhere))+' '+(env.razed.length>1?'are':'is')+' razed from the start: no Teece may be played or moved onto '+(env.razed.length>1?'them':'it')+'.'});
+  if((env.hell||[]).length)out.push({k:'chell',sev:'warn',label:'Hell panels \u00d7'+env.hell.length,
+    text:campCap(campCellsText(c,env.hell,env.hellWhere))+' '+(env.hell.length>1?'are':'is')+' Hell for the whole game: a Teece there that is not a Demon gets -'+HELL_N+' on every side, never below 0.'});
   (env.events||[]).forEach((ev,x)=>{
     out.push({k:'cev'+x,ev,sev:(ev.fx==='surge'?'good':'warn'),label:(ev.name||CAMP_EV_NAME[ev.fx]||'Event')+
       (ev.every?' every '+(ev.every>1?ev.every+' rounds':'round'):', round '+ev.at),
@@ -28519,16 +28514,6 @@ function campStatuses(p,push){
       push(m.k,m.sev,'Hold out: round '+Math.min(r,c.env.survive)+' of '+c.env.survive,m.text);
     }else push(m.k,m.sev,m.label,m.text);
   }
-}
-/* The tallest and smallest on a board, for the env layers in effSides:
-   printed numbers (or a Shrink's) plus what is held for good or for the turn,
-   read straight off the bodies so it can never call back into effSides. Null
-   when fewer than two Teece stand or they are all level. */
-const envSize=t=>{const bs=t.baseTemp||t.base;let n=0;for(let k=0;k<4;k++)n+=bs[k]+(t.perm[k]||0)+(t.temp[k]||0);return n;};
-function envRank(b){
-  let max=-Infinity,min=Infinity,n=0;
-  for(const c of b){if(!c||!c.teece)continue;const m=envSize(c.teece);n++;if(m>max)max=m;if(m<min)min=m;}
-  return n>=2&&max>min?{max,min}:null;
 }
 function campLabel(){
   const c=campChapters()[G.camp];
@@ -28639,7 +28624,9 @@ function campSetup(preset){
   if(preset.ally||preset.friend){
     G.seatBonus=G.players.map((_,q)=>q===0?(preset.ally||0):sameTeam(q,0)?(preset.friend||0):(preset.hcap||0));
   }
-  G.env={tall:env.tall||0,low:env.low||0,lead:env.lead||0,survive:env.survive||0,events:env.events||[]};
+  G.env={lead:env.lead||0,survive:env.survive||0,events:env.events||[]};
+  for(const j of env.razed||[])if(G.board[j]){G.board[j].razed=true;G.board[j].ground=null;}
+  for(const j of env.hell||[])if(G.board[j])G.board[j].hell=true;
   for(const g of env.grounds||[]){
     if(!CARDS[g.card]||!G.board[g.cell])continue;
     G.board[g.cell].ground={cardId:g.card,owner:g.seat==null?1:g.seat,gid:G.groundSeq++};
@@ -28671,9 +28658,12 @@ function campRoundEnd(){
     if(ev.fx==='quake'||ev.fx==='surge'){
       const n=ev.fx==='quake'?-(ev.n||1):(ev.n||1);
       for(let i=0;i<BN;i++)if(b[i].teece)applyModT(b[i].teece,n,'perm');
-    }else if(ev.fx==='meteor'){
-      const rk=envRank(b);
-      if(rk)for(let i=0;i<BN;i++)if(b[i].teece&&envSize(b[i].teece)===rk.max)applyModT(b[i].teece,-(ev.n||1),'perm');
+    }else if(ev.fx==='raze'){
+      for(const j of ev.cells||[])if(b[j]){b[j].razed=true;b[j].ground=null;b[j].mine=null;b[j].curseP=null;b[j].mcurse=null;}
+    }else if(ev.fx==='fire'){
+      for(const j of ev.cells||[])if(b[j])setFire(j,ev.seat==null?1:ev.seat,false);
+    }else if(ev.fx==='hell'){
+      for(const j of ev.cells||[])if(b[j]){b[j].hell=true;b[j].hellOff=false;}
     }else if(ev.fx==='sweep'){
       for(let i=0;i<BN;i++)b[i].ground=null;
     }else if(ev.fx==='ground'&&CARDS[ev.card]){
@@ -29623,7 +29613,7 @@ if(HAS_DOM){
 }
 /* ============ exports for harness ============ */
 if(typeof module!=='undefined'){
-  module.exports={campChapters,campMods,campSetup,campRoundEnd,campSurvive,campDecks,campTeams,envRank,envSize,hellAt,hellUnhellable,hellBarred,hellShrouded,isDemon,aiHellPlan,checkDomination,heavens,heavenShift,hvShiftCols,heavenDescend,playToHeaven,heavenlyCard,heavenlyBody,hvLandSpots,hvDescendBlock,ascendBlock,
+  module.exports={campChapters,campMods,campSetup,campRoundEnd,campSurvive,campDecks,campTeams,hellAt,hellUnhellable,hellBarred,hellShrouded,isDemon,aiHellPlan,checkDomination,heavens,heavenShift,hvShiftCols,heavenDescend,playToHeaven,heavenlyCard,heavenlyBody,hvLandSpots,hvDescendBlock,ascendBlock,
     messengerSwap,heavenSides,aiAngels,angelsInPlay,statusesFor,
     makeFusionCard,fuseOnBoard,fusePartners,canFuseOnBoard,canFuseHand,fuseHandAt,fuseHandOpts,
     aiFuseHand,aiFusionMagicPlan,fusionsInPlay,forgetFusions,
