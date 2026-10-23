@@ -1576,7 +1576,7 @@ body.endpeek #app{padding-bottom:72px}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:296,date:'2026-10-23'};
+const VERSION={build:297,date:'2026-10-23'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1710,6 +1710,9 @@ const KW_RULES={
   token:'Not a whole card. A Token cannot be sacrificed to play a Teece and never counts toward winning, and when it is destroyed it is simply gone: no graveyard, no return.',
   silenced:'A silenced Teece has its abilities negated for the rest of the game: nothing printed on it fires any more, its buttons are dead and its auras stop. Its numbers stay. A silenced battleground does nothing.',
   trump:'This card is overpowered and unbalanced. Each deck gets one.',
+  statfx:'Any change to a Teece\u2019s stats on top of what its card prints, up or down: +X or -X from a spell, an ability, an aura, an equip or a battleground, permanent or until the end of the turn. Silencing them returns the Teece to its printed stats.',
+  posfx:'A stat effect that raises a Teece\u2019s stats: every +X it carries from a spell, an ability, an aura, an equip or a battleground. Stripping them takes every bonus away and leaves its printed stats and any penalties; doubling them doubles each bonus.',
+  negfx:'A stat effect that lowers a Teece\u2019s stats: every -X it carries from a spell, an ability, an aura, an equip or a battleground. Doubling them doubles each penalty; a Teece Immune to stat reduction takes none.',
   drain:'Drain X: select a Teece; it gets -X permanently, and the Teece that drains gets +1 permanently for each point it actually lost. A Teece immune to stat reduction loses nothing, so it gives nothing.',
   boon:'The effect of the patron its player is channelling, shown by the patron\u2019s symbol. Every Teece that player controls carries it, Warlock or not. A Warlock that names a patron offers to switch the Boon to it as it is played, and keeps a once-per-turn Channel button on the field to switch later.',
   pact:'PRICE ; REWARD, offered as the card is played. Pay the whole price and take the reward, or turn it down and nothing happens. A SOUL can be spent in place of the price. A PACT turned down as a Teece is played stays on it as a once-per-turn PACT button until it is taken.',
@@ -1767,7 +1770,7 @@ function spellDesc(k){
   return parts.join(' ');
 }
 const kwDesc=k=>(kwRe(),KEYWORDS[k])||KW_RULES[k]||(KW_SPELL[k]?spellDesc(k):'')||(KW_TOKEN[k]?tokenDesc(k):'');
-const KW_TITLE={heavens:'The Heavens',pact:'PACT',soul:'SOUL',holylight:'Holy Light',packleader:'Pack Leader',mummywrap:'Mummy Wrap',steadfast:'Immune to stat reduction',trump:'Trump card',
+const KW_TITLE={heavens:'The Heavens',pact:'PACT',soul:'SOUL',holylight:'Holy Light',packleader:'Pack Leader',mummywrap:'Mummy Wrap',steadfast:'Immune to stat reduction',trump:'Trump card',statfx:'Stat effect',posfx:'Positive stat effect',negfx:'Negative stat effect',
   needsflinger:'Needs a Rock Flinger',sandstormelemental:'Sandstorm Elemental',quartersmite:'Quarter Smite',halfsmite:'Half Smite',divinesmite:'Divine Smite'};
 const kwTitle=k=>KW_TITLE[k]||(kwRe(),KW_TOKEN[k]?CARDS[KW_TOKEN[k][0]].name:k.charAt(0).toUpperCase()+k.slice(1));
 /* The forms each one is printed in. Capitalised only for the ones that are
@@ -1775,6 +1778,8 @@ const kwTitle=k=>KW_TITLE[k]||(kwRe(),KW_TOKEN[k]?CARDS[KW_TOKEN[k][0]].name:k.c
    effect-is-silenced wording means the effect fizzled, not a silenced Teece,
    so it is left plain. */
 const KW_FORMS=[
+  ['[Pp]ositive and negative (?:stat )?effects?','statfx'],['[Pp]ositive (?:stat )?effects?','posfx'],
+  ['[Nn]egative stat effects?','negfx'],['[Ss]tat effects?','statfx'],
   ['Boons?|BOON','boon'],['PACTs?','pact'],['SOULS?','soul'],
   ['Holy Light','holylight'],['Oathbroken','oathbroken'],['Oaths?','oath'],['[Cc]leans(?:e[sd]?|ing)','cleanse'],
   ['Solitarius','solitarius'],['Protectius','protectius'],['Pacificius','pacificius'],['Ram','ram'],
@@ -3873,7 +3878,7 @@ const CARDS = {
     text:'Select a Teece and bind this to it. It gets -3, and you move it one space at the end of each turn.',
     cast:[{fx:'akathisia'}]},
  493:{name:'Hex of Silence',type:'magic',curse:true,
-    text:'Select a player: all their Teece are silenced and stripped of every positive and negative attribute effect. Until the end of your next turn they cannot cast magic or use the activated abilities of any of their cards.',
+    text:'Select a player: all their Teece are silenced and stripped of every positive and negative stat effect. Until the end of your next turn they cannot cast magic or use the activated abilities of any of their cards.',
     cast:[{fx:'hexPlayer',kind:'silence',count:2,silenceAll:true,msg:'Silence which player?'}]},
  494:{name:'Hex of Freezing',type:'magic',curse:true,trump:true,
     text:'Trump card. Select a player: until the end of your next turn they cannot play Teece — and you cannot win the game until after the end of your next turn either.',
@@ -3908,7 +3913,7 @@ const CARDS = {
  504:{name:'Broomstick Caster',type:'teece',sides:[5,5,5,5],kw:['flying','ranged'],onAnyMagic:{n:2,dur:'temp'},
     text:'Flying. Ranged. Whenever any magic card is played, by anyone, this gets +2 until end of turn.'},
  505:{name:'Silencer',type:'teece',sides:[6,6,4,1],onMagic:[{fx:'silenceCard',purge:true}],
-    text:'When you play a magic card: you may choose a Teece on the field and silence it, destroy every equip and battleground on its panel, and strip every positive attribute effect off it.'},
+    text:'When you play a magic card: you may choose a Teece on the field and silence it, destroy every equip and battleground on its panel, and strip every positive stat effect off it.'},
  506:{name:'Familiar Keeper',type:'teece',sides:[3,6,7,7],onMagic:[{fx:'familiar'}],onMagicTimes:2,
     text:'Up to twice a turn, when you play a magic card: summon a Familiar with 4 on every side. Familiars fly, and get +2 until end of turn whenever you play a magic card.'},
  507:{name:'Groundhexer',type:'teece',sides:[7,4,5,6],onMagic:[{fx:'curseCell',n:-2}],handDiscard:[{fx:'conjureCard',id:510}],
@@ -3973,7 +3978,7 @@ const CARDS = {
  487:{name:'Avatar of the Nuclear Apocalypse',type:'teece',sides:[20,20,20,20],sac:1,kw:['flying'],dieAtEndOfTurn:true,
     text:'Sacrifice a Teece to play. Flying. Destroy this at the end of the turn.'},
  488:{name:'Overcharged Warhead',type:'teece',sides:[10,15,10,5],sac:2,mineDoubleAll:true,
-    text:'Sacrifice two Teece to play. When played: lay a Mine on every unoccupied panel. Doubles the negative attribute effects of all Mines. When another Teece is played: give it -2.',
+    text:'Sacrifice two Teece to play. When played: lay a Mine on every unoccupied panel. Doubles the negative stat effects of all Mines. When another Teece is played: give it -2.',
     onPlay:[{fx:'mineAuto',count:99}],onAnyPlay:{n:-2,dur:'perm'}},
  489:{name:'Unstable Ground',type:'ground',gDoubleNeg:true,
     text:'A Teece on this panel that loses attributes loses double instead.'},
@@ -3993,7 +3998,7 @@ const CARDS = {
     text:'Once per your turn: select an adjacent Teece; give it +1.',
     act:[{name:'Shade it',once:'turn',steps:[{fx:'mod',where:'adj',n:1,dur:'perm'}]}]},
  525:{name:'Hothouse Orchid',type:'teece',sides:[3,3,0,3],selfDoublePos:true,
-    text:'Every positive attribute effect on this Teece counts double.'},
+    text:'Every positive stat effect on this Teece counts double.'},
  526:{name:'Bramble Wall',type:'teece',sides:[2,2,1,2],def:4,
     text:'Defence 4. Every other allied Teece gets +2.',
     aura:{who:'ally',where:'global',n:2}},
@@ -4030,7 +4035,7 @@ const CARDS = {
     text:'The equipped Teece has Flying. When you equip it, the Teece gets +5 until the end of the turn.',
     grants:{kw:['flying'],onEquip:[{fx:'mod',who:'self',n:5,dur:'temp'}]}},
  539:{name:'Sunlit Loam',type:'ground',gDoublePosAll:true,
-    text:'Every positive attribute effect on a Teece on this panel counts double. Its own attributes are untouched.'},
+    text:'Every positive stat effect on a Teece on this panel counts double. Its own attributes are untouched.'},
  540:{name:'Spreading Vines',type:'ground',gmod:3,expansive:true,
     text:'A Teece on this panel gets +3. At the start of your turn: this BG expands to contain another adjacent panel unoccupied by another BG. If any part is replaced or destroyed, all of Spreading Vines are replaced with it.'},
  /* ---- Pixie: tiny, weak, and made almost entirely of magic. Every pixie
@@ -4225,7 +4230,7 @@ const CARDS = {
     cast:[{fx:'coffin'}]},
  616:{name:'Transfusion Catalyst',type:'equip',mod:0,anyOwner:true,
     grants:{doublePos:true,doubleNeg:true},
-    text:'Every attribute effect on the equipped Teece counts double, up and down alike. May be equipped to an enemy.'},
+    text:'Every stat effect on the equipped Teece counts double, up and down alike. May be equipped to an enemy.'},
  617:{name:'Enhanced Fangs',type:'equip',mod:0,
     grants:{drainDouble:true},
     text:'When the equipped Teece drains, it drains double.'},
@@ -4238,7 +4243,7 @@ const CARDS = {
  619:{name:'Bat Cave',type:'ground',gEndTurn:'TBAT',
     text:'At the end of your turn, if nothing stands on it, a Bat with 3 on every side hatches here.'},
  620:{name:'Vampire Castle',type:'ground',gDoublePos:true,gDoubleNeg:true,
-    text:'Every attribute effect on a Teece standing here counts double, up and down alike.'},
+    text:'Every stat effect on a Teece standing here counts double, up and down alike.'},
  /* ---- Zombies: they come back when you kill them. ----
     "X Undying Y" is X returns a game, each one worth Y MORE than the last, and
     the body gets back up on the panel it fell on. So Undying +1 is 5/5/5/5,
@@ -4404,7 +4409,7 @@ const CARDS = {
     text:'By night, whenever it destroys a Teece: +2 permanently. By day, while it stands next to an ally: +2.'},
  687:{name:'Nightfall Hush',type:'teece',sides:[4,9,9,4],solar:true,
     onPlay:[{fx:'unmake',when:'night'}],
-    text:'When played by night: select a Teece. Silence it, and every positive and negative attribute effect on it.'},
+    text:'When played by night: select a Teece. Silence it, and every positive and negative stat effect on it.'},
  688:{name:'Noon Echo',type:'teece',sides:[9,4,4,9],solar:true,
     onPlay:[{fx:'echoFx',when:'day'}],
     text:'When played by day: select a Teece. It gains a second copy of each of its effects — its aura counts twice, each of its abilities may be used once more a turn, and its on-kill and when-destroyed effects fire twice.'},
@@ -4433,7 +4438,7 @@ const CARDS = {
     it. Always castable, because whichever clause is out of season is simply
     not there: the card is never dead in hand, and never spent on nothing. */
  697:{name:'Blind / Mute',type:'magic',solar:true,
-    text:'Blind — by day: select a Teece; it can no longer destroy another Teece. Mute — by night: select a Teece; destroy its equips and the battleground under it, silence it, and silence every positive and negative attribute effect on it.',
+    text:'Blind — by day: select a Teece; it can no longer destroy another Teece. Mute — by night: select a Teece; destroy its equips and the battleground under it, silence it, and silence every positive and negative stat effect on it.',
     cast:[{fx:'blind',when:'day'},{fx:'unmake',when:'night',mute:true}]},
  /* The twentieth Solar card. Only castable by night; by day it waits in the
     graveyard for a card to be thrown away to buy it back. */
@@ -5316,7 +5321,7 @@ const CARDS = {
     onMagic:[{fx:'mod',who:'self',n:1,dur:'perm'}],
     text:'When played: conjure Earth, Wind or Water. When you play a magic card: +1 permanently.'},
  913:{name:'Dark Wizard',type:'teece',sides:[5,4,5,4],noGain:true,onPlay:[{fx:'conjureEl',opts:['earth','wind','fire']}],
-    text:'Immune to positive attribute effects. When played: conjure Earth, Wind or Fire.'},
+    text:'Immune to positive stat effects. When played: conjure Earth, Wind or Fire.'},
  914:{name:'Steam Wizard',type:'teece',sides:[2,3,2,3],steamDouble:true,onPlay:[{fx:'conjureEl',opts:['fire','water']}],
     text:'When played: conjure Fire or Water. Whenever a Teece gains or loses attributes from a magic card you cast, it gains or loses double.'},
  915:{name:'Sand Wizard',type:'teece',sides:[3,3,3,3],onGroundMod:2,onPlay:[{fx:'conjureEl',opts:['earth','wind']}],
@@ -12088,7 +12093,7 @@ async function FXRUN(st,ctx){
     }
     const keepX=holdStats(t);
     if(!t.silenced){t.silenced=true;log(nm(t)+' is silenced: its abilities are negated for the rest of the game.');}
-    /* "Strip it of all positive attribute effects" -- everything stacked ON it,
+    /* "Strip it of all positive stat effects" -- everything stacked ON it,
        not the line it was printed with. A negative stays: this takes bonuses
        away, it does not heal.
 
