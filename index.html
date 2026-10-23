@@ -1538,7 +1538,7 @@ body.endpeek #app{padding-bottom:72px}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:291,date:'2026-10-23'};
+const VERSION={build:292,date:'2026-10-23'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -25299,6 +25299,8 @@ async function mimicFx(st,ctx){
     return;}
   /* The Attic's curse, carried off the battleground on the body. */
   case 'atticDoom':{
+    /* The curse is an effect the body gained, so silence takes it (Greg). */
+    if(ctx.t&&ctx.t.silenced)return none(nm(ctx.t)+' is silenced, and the Attic’s curse does not fire.');
     const pl=G.players[p];
     pl.atticDoom=(pl.atticDoom||0)+1;
     log('The next Teece '+whoIn(p)+' '+vb(p,'plays','play')+' is destroyed as it lands.');
