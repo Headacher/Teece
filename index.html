@@ -1593,7 +1593,7 @@ body.endpeek #app{padding-bottom:72px}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:301,date:'2026-10-23'};
+const VERSION={build:302,date:'2026-10-23'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -8997,7 +8997,7 @@ function actsOf(b,i){
   {const pm=pactMap(b,i);
    if(pm&&pm.bomb)out.push({key:'kwlbomb',act:{name:'Boon of the Bomb God',once:'turn',times:pm.bomb,
      steps:[{fx:'modSplash',where:'rowcol',n:-3,dur:'perm'}]}});
-   if(pm&&pm.devils&&t.wlPactOpen>0)out.push({key:'kwlpact',act:{name:'PACT (Boon of the Devils)',once:'turn',steps:[{fx:'wlPactLater'}]}});
+   if(pm&&pm.devils)out.push({key:'kwlpact',act:{name:'PACT (Boon of the Devils)',once:'turn',times:pm.devils,steps:[{fx:'wlPactLater'}]}});
    if(pm&&pm.ankh)out.push({key:'kwlwrap',act:{name:'Mummy Wrap (Ankhtepot)',once:'turn',times:pm.ankh,steps:[{fx:'mWrap'}]}});
    const ck=!t.silenced&&d.channel;
    if(ck&&channelsOn(b,t.owner).indexOf(ck)<0)out.push({key:'kwlchan',act:channelAct(ck)});}
@@ -15702,10 +15702,8 @@ async function FXRUN(st,ctx){
     return ok?undefined:'NONE';}
   case 'wlPactLater':{
     const t=ctx.t,c=t?b.findIndex(x=>x.teece===t):-1;
-    if(c<0||!(t.wlPactOpen>0)||!pactN(b,c,'devils'))return none('There is no PACT left open here.');
-    const r=await offerPact(p,devilBoonPact(c),{t,src:nm(t)+', by the Boon of the Devils',later:true,keepOn:wlPactKeep(t)});
-    if(r!=='NONE')t.wlPactOpen--;
-    return r;}
+    if(c<0||!pactN(b,c,'devils'))return none('It does not carry the Boon of the Devils.');
+    return await offerPact(p,devilBoonPact(c),{t,src:nm(t)+', by the Boon of the Devils',later:true,keepOn:wlPactKeep(t)});}
   case 'channelFill':{
     let any=false;
     while(!G.over&&channelsOn(b,p).length<channelCapOn(b,p)&&channelBackPool(p,false).length){
@@ -18542,48 +18540,9 @@ async function playTeece(p,handIdx){
      :called?' — called up alongside its counterpart, so it doesn’t use this turn’s Teece play.':'.'));
   if(trapped){applyModT(t,TRAP_MOD,'perm');log(nm(t)+' walks straight into the trap: '+sgn(TRAP_MOD)+'.');}
   await anim([spot],'placed',140);
-  if(worn.length){
-    log(nm(t)+' arrives already plated with '+worn.map(e=>CARDS[e.cardId].name).join(', ')+'.');
-    for(const e of worn){
-      const eg=eqG(e);
-      if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:spot,t,first:false,equip:e,plated:true});
-      if(eg&&eg.onPlayTemp){const pt=eg.onPlayTemp*equipMul(t);applyModT(t,pt,'temp');log(nm(t)+' arrives charged by '+CARDS[e.cardId].name+': '+sgn(pt)+' until the end of the turn.');}
-    }
-    runeTriumph(p,t);
-  }
-  if(gearTaken.length){
-    log(gearTaken.map(e=>eqLabel(e)).join(', ')+' '+(gearTaken.length===1?'is':'are')+' transferred onto '+nm(t)+' from what it was paid with.');
-    for(const e of gearTaken)equipLanded(e.cardId);
-  }
-  if(pl.confuse){
-    const cf=pl.confuse;pl.confuse=null;
-    spinT(t,cf.dir);
-    log(nm(t)+' arrives confused, turned '+dirTxt(cf.dir)+'.');
-  }
-  /* The Defence charge Locust Locus arms is spent in putTeece, on whatever
-     arrives -- this play included. */
-  if(pl.nextMod){const nmd=pl.nextMod;pl.nextMod=0;applyModT(t,nmd,'perm');log(nm(t)+' arrives with '+sgn(nmd)+'.');}
-  /* Mimics: Play Dead and the Haunted Manor silence a Teece as it is played,
-     and an Attic silences whatever lands on it -- all before anything it
-     does when played. */
-  if(!t.silenced&&pl.silentHand&&pl.silentHand[id]>0){
-    pl.silentHand[id]--;t.silenced=true;
-    log(nm(t)+' was silenced in the deck by the Haunted Manor, and arrives silenced.');
-  }
-  if(!t.silenced&&pl.silenceNext>0){
-    pl.silenceNext--;t.silenced=true;
-    log(nm(t)+' plays dead: it arrives silenced.');
-  }
-  if(!t.silenced&&groundFlag(gUnder(b,spot),'gSilence')){
-    t.silenced=true;
-    log(nm(t)+' is played into the '+CARDS[b[spot].ground.cardId].name+' and is silenced.');
-  }
-  if(d.handMagic&&pl.handMagic&&pl.handMagic.turn===G.turnNum&&pl.handMagic.ids.indexOf(id)>=0){
-    pl.handMagic.ids.splice(pl.handMagic.ids.indexOf(id),1);
-    applyModT(t,d.handMagic.n,'temp');
-    if(d.handMagic.kw&&t.kwTemp.indexOf(d.handMagic.kw)<0)t.kwTemp.push(d.handMagic.kw);
-    log(nm(t)+' arrives charged by the spell cast while it waited: '+sgn(d.handMagic.n)+(d.handMagic.kw?' and '+d.handMagic.kw:'')+' until the end of the turn.');
-  }
+  /* The covers and the curses that meet a Teece as it lands come first, so a
+     Teece destroyed as it lands has done nothing at all: no plated equip, no
+     Warlock's offer, nothing when played. */
   /* Cadet Annette hands the cover it was under to whoever comes next. An
      immortality with no turn set on it lifts at the start of its owner's turn. */
   if(pl.nextShield){
@@ -18631,6 +18590,48 @@ async function playTeece(p,handIdx){
     if(G.over)return true;
     if(b[spot].teece!==t){await resolveCombat();render();return true;}
   }
+  if(worn.length){
+    log(nm(t)+' arrives already plated with '+worn.map(e=>CARDS[e.cardId].name).join(', ')+'.');
+    for(const e of worn){
+      const eg=eqG(e);
+      if(eg&&eg.onEquip)await runSteps(eg.onEquip,{p,cell:spot,t,first:false,equip:e,plated:true});
+      if(eg&&eg.onPlayTemp){const pt=eg.onPlayTemp*equipMul(t);applyModT(t,pt,'temp');log(nm(t)+' arrives charged by '+CARDS[e.cardId].name+': '+sgn(pt)+' until the end of the turn.');}
+    }
+    runeTriumph(p,t);
+  }
+  if(gearTaken.length){
+    log(gearTaken.map(e=>eqLabel(e)).join(', ')+' '+(gearTaken.length===1?'is':'are')+' transferred onto '+nm(t)+' from what it was paid with.');
+    for(const e of gearTaken)equipLanded(e.cardId);
+  }
+  if(pl.confuse){
+    const cf=pl.confuse;pl.confuse=null;
+    spinT(t,cf.dir);
+    log(nm(t)+' arrives confused, turned '+dirTxt(cf.dir)+'.');
+  }
+  /* The Defence charge Locust Locus arms is spent in putTeece, on whatever
+     arrives -- this play included. */
+  if(pl.nextMod){const nmd=pl.nextMod;pl.nextMod=0;applyModT(t,nmd,'perm');log(nm(t)+' arrives with '+sgn(nmd)+'.');}
+  /* Mimics: Play Dead and the Haunted Manor silence a Teece as it is played,
+     and an Attic silences whatever lands on it -- all before anything it
+     does when played. */
+  if(!t.silenced&&pl.silentHand&&pl.silentHand[id]>0){
+    pl.silentHand[id]--;t.silenced=true;
+    log(nm(t)+' was silenced in the deck by the Haunted Manor, and arrives silenced.');
+  }
+  if(!t.silenced&&pl.silenceNext>0){
+    pl.silenceNext--;t.silenced=true;
+    log(nm(t)+' plays dead: it arrives silenced.');
+  }
+  if(!t.silenced&&groundFlag(gUnder(b,spot),'gSilence')){
+    t.silenced=true;
+    log(nm(t)+' is played into the '+CARDS[b[spot].ground.cardId].name+' and is silenced.');
+  }
+  if(d.handMagic&&pl.handMagic&&pl.handMagic.turn===G.turnNum&&pl.handMagic.ids.indexOf(id)>=0){
+    pl.handMagic.ids.splice(pl.handMagic.ids.indexOf(id),1);
+    applyModT(t,d.handMagic.n,'temp');
+    if(d.handMagic.kw&&t.kwTemp.indexOf(d.handMagic.kw)<0)t.kwTemp.push(d.handMagic.kw);
+    log(nm(t)+' arrives charged by the spell cast while it waited: '+sgn(d.handMagic.n)+(d.handMagic.kw?' and '+d.handMagic.kw:'')+' until the end of the turn.');
+  }
   if(pl.nextSides){
     const ns=pl.nextSides;pl.nextSides=null;
     for(let k=0;k<4;k++)t.perm[k]+=ns[k];
@@ -18647,13 +18648,13 @@ async function playTeece(p,handIdx){
   /* fromHand is the one thing every other way of putting a card down lacks, so
      a clause marked "except by effect" can tell them apart. */
   /* A Warlock offers its patron, then its when-played Boons fire. */
-  if(DEF(t).warlock){await warlockArrive(p,spot,t);if(G.over)return true;}
+  if(b[spot].teece===t&&DEF(t).warlock){await warlockArrive(p,spot,t);if(G.over)return true;}
   else if(b[spot].teece===t&&pactMap(b,spot)){await pactArrive(p,t);if(G.over)return true;}
   /* Oaths are sworn before anything the card does when played. */
   if(b[spot].teece===t){await oathArrive(p,spot,t);if(G.over)return true;}
   /* Cavalry Muster brings a second Mount along. */
   if(b[spot].teece===t){await knightArrive(p,spot,t);if(G.over)return true;}
-  if(d.onPlay&&!t.silenced)for(let k=0;k<dblFx;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked,fromHand:!G.viaEffect,viaEffect:!!G.viaEffect});
+  if(d.onPlay&&!t.silenced&&b.some(c=>c.teece===t))for(let k=0;k<dblFx;k++)await runSteps(d.onPlay,{p,cell:spot,t,first:false,sacked,fromHand:!G.viaEffect,viaEffect:!!G.viaEffect});
   if(b[spot].teece===t)await groundArrive(spot);
   for(let i=0;i<BN;i++){
     const w=b[i].teece;
@@ -26807,10 +26808,12 @@ async function pactArrive(p,t,only){
         await runSteps([{fx:'mod',where:'adj',n:-2,dur:'perm',stun:true,move:true,may:true,
           msg:'Boon of the Ogre God: select an adjacent Teece to give -2 and stun, or skip.'}],{p,cell:c,t,first:false});
       }else if(k==='devils'){
-        /* Rejected, it stays open on the Warlock as a once-per-turn PACT
-           button for as long as the Devils are being channelled. */
+        /* Whatever carries the Devils' Boon has a once-per-turn PACT button
+           for as long as it carries it. The PACT offered as it arrives is
+           one of those: taken, it spends this turn's; rejected, the button
+           is still there to press. */
         const r=await offerPact(p,devilBoonPact(c),{t,src:nm(t)+', by the Boon of the Devils',later:true,keepOn:wlPactKeep(t)});
-        if(r==='NONE'&&!G.over&&b.some(x=>x.teece===t))t.wlPactOpen=(t.wlPactOpen||0)+1;
+        if(r!=='NONE'&&t.owner===G.turn)t.actUsedTurn.kwlpact=(t.actUsedTurn.kwlpact||0)+1;
       }
     }
   }
