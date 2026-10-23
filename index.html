@@ -35,6 +35,8 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outl
 header{grid-column:1/-1;display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding-bottom:4px}
 header h1{font-family:var(--disp);font-size:28px;font-weight:400;margin:0;letter-spacing:.02em}
 header .sub{color:var(--muted);font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+/* On a desk every pixel of height the bars keep is taken from the board. */
+@media(min-width:881px){#app{row-gap:10px}header h1{font-size:22px;line-height:1.1}}
 /* main is the measure the board and the hand are sized from: the board takes
    a third of its width a panel, up to a cap, so it grows with the window. */
 main{display:flex;flex-direction:column;gap:10px;align-items:center;container-type:inline-size;min-width:0}
@@ -155,7 +157,10 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
 .card:has(.plated){margin-bottom:15px}
 
 /* Hand sizes. A phone gets two cards to a row, big enough to read the rules on. */
+/* On a desk the hand gives up height on a short window too, so the board and
+   the hand both fit it (fitBoard sizes the board to what is left). */
 .handrow{--hc:clamp(144px,calc((100cqw - 58px) / 6),176px)}
+@media(min-width:881px){.handrow{--hc:clamp(124px,min(calc((100cqw - 58px) / 6),18svh),176px)}}
 @media(max-width:560px){.handrow{--hc:min(190px,calc((100cqw - 26px) / 2))}}
 /* Compact view: the same square, smaller, without the rules. The other seats'
    face-up rows and the rules pages draw this way too. */
@@ -406,7 +411,7 @@ main{display:flex;flex-direction:column;gap:10px;align-items:center;container-ty
 @property --cs{syntax:'<length>';inherits:true;initial-value:110px}
 .boardrow{--gap:8px;--cs:min(var(--csmax,168px),
   calc((100cqw - (var(--cols,3) - 1) * var(--gap) - var(--xgap,0px) - 38px) / var(--cols,3)),
-  max(118px,calc((100svh - 330px) / var(--bh,var(--bw,3)))))}
+  var(--fitcs,max(118px,calc((100svh - 330px) / var(--bh,var(--bw,3))))))}
 @media(max-width:560px){.boardrow{--gap:6px}.boardrow:has(>#board.bw4){--gap:3px}}
 #board{display:grid;grid-template-columns:repeat(var(--bw,3),var(--cs));
   grid-auto-rows:var(--cs);gap:var(--gap);position:relative}
@@ -869,6 +874,9 @@ body.gunmode #board .cell.target{box-shadow:inset 0 0 0 2px #f0a04b}
 @media(prefers-reduced-motion:reduce){.domlead.near{animation:none}}
 
 aside{display:flex;flex-direction:column;gap:12px;min-width:0}
+/* A desk window holds the side panel to the height it has (fitBoard sets
+   --asidemax): a long card's Detail scrolls inside itself, and the log keeps its place. */
+@media(min-width:881px){aside{max-height:var(--asidemax,none)}aside>#detail{flex:0 1 auto;min-height:0;overflow:auto}aside>#logPanel{flex:none}}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
 .panel h2{font-family:var(--disp);font-weight:400;font-size:16px;margin:0 0 6px}
 .turnline{font-size:13px}
@@ -1585,7 +1593,7 @@ body.endpeek #app{padding-bottom:72px}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:300,date:'2026-10-23'};
+const VERSION={build:301,date:'2026-10-23'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -23623,6 +23631,41 @@ function renderActionBar(){
   document.body.classList.toggle('actpin',pin);
   if(pin)document.body.style.setProperty('--actpin',(ab.offsetHeight+14)+'px');
 }
+/* On a desk the whole table fits the window: the panels take whatever height
+   the status bar, the hand and everything else leave, down to a floor. The
+   page is measured as drawn, the board resized, and measured again, because
+   the hand and the bars do not change with the panel size but rounding does.
+   A phone stacks the side panel under the board and scrolls by design. */
+const FIT_MIN=84;
+let fitAt='';
+function fitBoard(){
+  const brow=document.querySelector('.boardrow'),hand=document.getElementById('myHand'),app=document.getElementById('app');
+  if(!brow||!hand||!app)return;
+  const side=document.querySelector('aside');
+  if(innerWidth<=880||!G){brow.style.removeProperty('--fitcs');if(side)side.style.removeProperty('--asidemax');return;}
+  /* A question or a selected Teece opens a bar for a moment. The panels hold
+     their size through it rather than shrink under the pointer about to tap
+     one; the page may run a little long until it closes. */
+  const at=innerWidth+'x'+innerHeight;
+  if((G.pending||G.detailLock!=null)&&fitAt===at&&brow.style.getPropertyValue('--fitcs'))return;
+  fitAt=at;
+  const pb=parseFloat(getComputedStyle(app).paddingBottom)||0;
+  if(side)side.style.setProperty('--asidemax',Math.max(240,Math.floor(innerHeight-pb-(side.getBoundingClientRect().top-app.getBoundingClientRect().top)))+'px');
+  const units=parseFloat(brow.style.getPropertyValue('--bh'))||BH;
+  for(let pass=0;pass<3;pass++){
+    const cs=parseFloat(getComputedStyle(brow).getPropertyValue('--cs'))||0;
+    if(!cs)return;
+    const need=hand.getBoundingClientRect().bottom-app.getBoundingClientRect().top+pb;
+    const room=innerHeight-need;
+    if(Math.abs(room)<1)break;
+    const cur=parseFloat(brow.style.getPropertyValue('--fitcs'))||cs;
+    /* Room to spare with the width or the cap already binding: nothing to gain. */
+    if(room>0&&cur>cs+0.5)break;
+    const next=Math.max(FIT_MIN,Math.floor((cs+room/units)*4)/4);
+    if(Math.abs(next-cur)<0.25)break;
+    brow.style.setProperty('--fitcs',next+'px');
+  }
+}
 function render(){
   if(!HAS_DOM)return;
   syncEndPeek();
@@ -23683,6 +23726,7 @@ function render(){
   if(G.detailLock!=null&&!G.board[G.detailLock].teece){G.detailLock=null;G.detailHover=null;}
   if(G.detailLock!=null)showDetail(G.detailLock);
   else if(G.detailHover==null)showDetail(null);
+  fitBoard();
   tutCoach();
   if(NET&&NET.role==='host')netSync(false);
   {const fb=document.getElementById('restart');
