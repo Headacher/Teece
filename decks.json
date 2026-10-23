@@ -2609,6 +2609,254 @@
             "win": ""
           }
         ]
+      },
+      {
+        "title": "The Folded World",
+        "intro": "The board sits straight again, but the World of Teece past its edges does not. When Gol’God’Oth turned over it creased the far country, and the creases are folding inward: panels from nowhere in particular are being stitched onto the board, the sky has come loose, and the old rules hold a little less every day. The Planewalkers say the World can be folded back, but only from the far side of the last crease. Every fight from here on breaks a rule, and some of them are fought three ways.",
+        "outro": "The Planewalkers fold the last crease shut, and the World of Teece lies flat again past every edge of the board. The Tendril sinks back into the warm floor. Under Middlemark, Gol’God’Oth sleeps, and for the first time since all this began, it does not dream. The Common Levy, as ever, slept through the whole thing.",
+        "chapters": [
+          {
+            "id": "untildawn",
+            "place": "bl",
+            "title": "Until Dawn",
+            "mine": "zombie",
+            "theirs": "vampire",
+            "hcap": 3,
+            "env": {
+              "survive": 8,
+              "events": [
+                {
+                  "every": 2,
+                  "fx": "quake",
+                  "n": 1,
+                  "name": "Nightbite"
+                }
+              ]
+            },
+            "text": "The night came loose when the world folded, and in the Gloaming it has stopped ending. The Vampires have caught the Zombies in the open with every advantage the dark can give. You do not have to win. You have to still be standing when round eight ends, while the night bites everything on the field.",
+            "win": "Round eight ends, the sun finds its way back over the edge of the board, and the Vampires go to ground. Nagash’s dead are still standing, more or less. Behind the sunrise, the Badlands are fighting over something new."
+          },
+          {
+            "id": "dumpwars",
+            "place": "br",
+            "title": "The Dump Wars",
+            "mine": "rats",
+            "theirs": "garbage",
+            "third": "mimics",
+            "teams": [
+              0,
+              1,
+              2
+            ],
+            "hcap": 1,
+            "env": {
+              "tall": 3
+            },
+            "text": "A fold has dropped a second Dump on top of the first, and everything in the Badlands wants it. The Rats, the Garbage and the Mimics are fighting for every heap at once, three ways, on a board grown to four by four. Whoever stands tallest in the Dump gets buried first.",
+            "win": "The Rat King sits on top of both Dumps and is very pleased about it. From up there he can see what nobody else has: the sky above the board has come unstuck."
+          },
+          {
+            "id": "zerog",
+            "place": "above",
+            "title": "Zero Gravity",
+            "mine": "solar",
+            "theirs": "lightning",
+            "hcap": 1,
+            "env": {
+              "fly": true,
+              "lead": 6
+            },
+            "text": "Up in the Heavens the fold has let go of the sky, and nothing stays down any more: every Teece flies. The Heavens are wide, so taking the field needs a lead of six. The Stormborn are fast and do not care. The Solar orders are patient, and know the sky better than anyone.",
+            "win": "The sun and the moon settle back into their turning, and things start falling again, mostly where they were. A boulder from the High Mountains misses you by a panel on its way down."
+          },
+          {
+            "id": "rockfall",
+            "place": "tc",
+            "title": "Rockfall",
+            "mine": "rock",
+            "theirs": "bomb",
+            "hcap": 2,
+            "env": {
+              "field": [
+                {
+                  "cell": 0,
+                  "card": "TB"
+                },
+                {
+                  "cell": 2,
+                  "card": "TB"
+                }
+              ],
+              "events": [
+                {
+                  "every": 2,
+                  "fx": "meteor",
+                  "n": 3,
+                  "name": "Rockfall"
+                }
+              ]
+            },
+            "text": "The fold has tipped the High Mountains, and the peaks are coming down. The Bombardiers think this is the best thing that has ever happened to them and have already dug in. Every second round the mountain sheds, and the rock lands on whatever stands tallest. The Rock declines to be moved. It may have to decline very hard.",
+            "win": "The Bombardiers run out of things to blow up before the Rock runs out of patience. From the top of the rubble you can see down into the Wildwood, where three old feuds have broken out at once."
+          },
+          {
+            "id": "threefeuds",
+            "place": "ml",
+            "title": "Three Feuds",
+            "mine": "berserker",
+            "theirs": "ogre",
+            "third": "army",
+            "teams": [
+              0,
+              1,
+              2
+            ],
+            "hcap": 1,
+            "env": {
+              "frenzy": {
+                "play": 2,
+                "draw": 2
+              }
+            },
+            "text": "The fold has crushed the Wildwood’s foothills together, and the Berserkers, the Ogres and the Army have all woken up next to each other. Each of them has a grudge against at least one of the others. In the fold everything runs fast: every player plays two Teece and draws two cards a turn.",
+            "win": "Twelve Berserkers walk out of the forest, which is how many walked in. The Ogres have been shoved and the Army has been told. In Middlemark, meanwhile, the treasure has started to bite."
+          },
+          {
+            "id": "outnumbered",
+            "place": "mc",
+            "title": "Outnumbered",
+            "mine": "knights",
+            "theirs": "mimics",
+            "third": "rats",
+            "teams": [
+              0,
+              1,
+              1
+            ],
+            "hcap": 1,
+            "text": "Treasure has been turning up all over Middlemark since the fold, and the Knights rode in to claim it. It is Mimics, all of it, and the Rats have come up the drains to share whatever the Mimics leave. You are on your own against both of them, so you fight as two: two Teece and two cards a turn.",
+            "win": "The Knights ride out with nothing but their horses, which they regard as a victory. A Mimic, broken open, gives a little back: a letter from the Pit, signed by the Archdevil, inviting the Hallowed North to surrender.",
+            "env": {
+              "double": {
+                "play": 2,
+                "draw": 2
+              }
+            }
+          },
+          {
+            "id": "giant",
+            "place": "tl",
+            "title": "The Giant",
+            "mine": "runeblade",
+            "theirs": "wolf",
+            "third": "devil",
+            "teams": [
+              0,
+              0,
+              1
+            ],
+            "hcap": 4,
+            "env": {
+              "field": [
+                {
+                  "cell": 6,
+                  "card": 876,
+                  "seat": 2,
+                  "where": "one of the four middle panels"
+                }
+              ]
+            },
+            "text": "The Archdevil has climbed out of the Pit and up the board to the Hallowed North, and the fold has made it enormous: every Devil fights at +4, and the Archdevil is already standing when the fight begins. The Runeblade tribe has never needed help, and is accepting it anyway. The Wolves run beside you.",
+            "win": "The Archdevil goes back down the board in pieces, each of them filing a complaint. The Wolves howl, and the Runeblade tribe pretends not to be moved. In Middlemark, the libraries have started to burn."
+          },
+          {
+            "id": "burninglibrary",
+            "place": "mc",
+            "title": "The Burning Library",
+            "mine": "madness",
+            "theirs": "wizard",
+            "hcap": 2,
+            "ally": -1,
+            "env": {
+              "lead": 3,
+              "events": [
+                {
+                  "every": 2,
+                  "fx": "sweep",
+                  "name": "Firestorm"
+                },
+                {
+                  "every": 3,
+                  "fx": "quake",
+                  "n": 2,
+                  "name": "Collapse"
+                }
+              ]
+            },
+            "text": "The Wizards came down from their Tower to save the Eldritch Library, and found the Mad already inside and the whole thing burning. Every second round the fire takes every battleground on the field, and every third round the shelves come down on everything. The floor is thin: a lead of three takes the field, for either side.",
+            "win": "The Mad walk out of the ashes holding the one book that mattered, which they immediately throw away, because the voices said so. It lands open at a map of the last crease, at the far edge of the world."
+          },
+          {
+            "id": "lastcrease",
+            "place": "world",
+            "title": "The Last Crease",
+            "mine": "dimension",
+            "theirs": "fusion",
+            "third": "apocalypse",
+            "teams": [
+              0,
+              1,
+              1
+            ],
+            "hcap": 1,
+            "env": {
+              "tall": 2,
+              "low": 2,
+              "events": [
+                {
+                  "at": 2,
+                  "fx": "ground",
+                  "card": "CGHEART",
+                  "cells": [
+                    5,
+                    6,
+                    9,
+                    10
+                  ],
+                  "where": "the four middle panels",
+                  "name": "The Warm Floor"
+                },
+                {
+                  "at": 4,
+                  "fx": "summon",
+                  "card": 1216,
+                  "seat": 1,
+                  "cells": [
+                    5,
+                    6,
+                    9,
+                    10
+                  ],
+                  "where": "one of the four middle panels",
+                  "name": "Gol’God’Oth reaches"
+                },
+                {
+                  "every": 3,
+                  "fx": "quake",
+                  "n": 1,
+                  "name": "Folding"
+                }
+              ],
+              "double": {
+                "play": 2,
+                "draw": 2
+              },
+              "lead": 6
+            },
+            "text": "At the last crease the World of Teece folds against itself, and everything from nowhere in particular has come to stop you closing it: the Fusion Teece from the Space Between Spaces, and the Four Horsemen, who have been waiting for exactly this. The Planewalkers treat the ground itself as a weapon, and fight as two; the crease is wide, and taking the field needs a lead of six. Here the ground fights back, and underneath it all, Gol’God’Oth is reaching up.",
+            "win": ""
+          }
+        ]
       }
     ]
   }

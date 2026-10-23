@@ -1585,7 +1585,7 @@ body.endpeek #app{padding-bottom:72px}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:299,date:'2026-10-23'};
+const VERSION={build:300,date:'2026-10-23'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -17885,7 +17885,7 @@ function mixBonus(b,i){
 /* The lead a side needs to take the field. Four, moved by whichever of the two
    domination perks are held, and never less than one. */
 function winLeadFor(tm){
-  let n=WIN_LEAD;
+  let n=(G&&G.env&&G.env.lead)||WIN_LEAD;
   if(G&&G.perks){
     if(sameTeam(tm,0))n-=perkN('needLess');
     else n+=perkN('foeMore');
@@ -19647,6 +19647,7 @@ async function endTurn(){
       log(CARDS[c.cardId].name+' claws its way back into '+pposs(c.owner)+' hand.');
     }
   }
+  campRoundEnd();
   await resolveCombat();
   if(stale(ep))return;
   checkTicTacToe();
@@ -19654,6 +19655,7 @@ async function endTurn(){
   if(!G.over)checkDomination();
   if(!G.over)checkStalemate();
   if(!G.over)checkTurnLimit();
+  if(!G.over)campSurvive();
   if(G.over)return;
   G.players[p].teecePlayedLastTurn=G.players[p].teecePlayedThisTurn>0;
   tickHexes(p);
@@ -28333,7 +28335,7 @@ function campParts(){
 function campChapters(){
   const out=[];
   campParts().forEach((pt,pi)=>{
-    const chs=(pt.chapters||[]).filter(c=>DECKS[c.mine]&&DECKS[c.theirs]);
+    const chs=(pt.chapters||[]).filter(c=>DECKS[c.mine]&&DECKS[c.theirs]&&(!c.third||DECKS[c.third]));
     chs.forEach((c,n)=>out.push(Object.assign({},c,{part:pi,n,of:chs.length})));
   });
   return out;
@@ -28347,39 +28349,129 @@ const campPlace=id=>escHtml((loreRegion(id)||{name:''}).name);
 const campLevel=k=>{const g=DECK_GROUPS.level.find(x=>x[0]===DECKS[k].level);return g?g[1]:'';};
 const campWhere=c=>(campParts().length>1?'Part '+(c.part+1)+' · ':'')+'Chapter '+(c.n+1);
 /* The panels a 3x3 board calls each cell, for a chapter read before any game
-   has built the geometry. */
+   has built the geometry. A three-player chapter is played on four by four
+   and names its panels itself (`where` on the ground or event). */
 const CAMP_CELLS=['top left','top middle','top right','middle left','middle','middle right','bottom left','bottom middle','bottom right'];
+const campDecks=c=>c.third?[c.mine,c.theirs,c.third]:[c.mine,c.theirs];
+const campTeams=c=>c.third?(c.teams||[0,1,2]):[0,1];
+/* Who a seat is to you, before any game exists to ask. */
+function campSeatRole(c,seat){
+  const tm=campTeams(c);
+  return seat===0?'you':tm[seat]===tm[0]?'your ally':'the enemy';
+}
+const campOrd=n=>n===1?'round':n===2?'second round':n===3?'third round':n+'th round';
+function campCellsText(c,cells,where){
+  if(where)return where;
+  if(cells.length===4&&[0,2,6,8].every(x=>cells.indexOf(x)>=0))return 'every corner';
+  return cells.map(x=>'the '+(CAMP_CELLS[x]||'panel '+(x+1))+' panel').join(', ');
+}
+/* One board event in words: when, then what. */
+function campEventText(c,ev){
+  const when=ev.every?'At the end of every '+campOrd(ev.every)+(ev.at&&ev.at!==ev.every?' from round '+ev.at:''):
+    'At the end of round '+ev.at;
+  const n=ev.n||0,cd=CARDS[ev.card];
+  const what=
+    ev.fx==='quake'?'every Teece on the field gets -'+n+' permanently':
+    ev.fx==='surge'?'every Teece on the field gets +'+n+' permanently':
+    ev.fx==='meteor'?'the tallest Teece on the field gets -'+n+' permanently':
+    ev.fx==='sweep'?'every battleground on the field is destroyed':
+    ev.fx==='ground'&&cd?cd.name+' is laid on '+campCellsText(c,ev.cells||[],ev.where)+', replacing what was there':
+    ev.fx==='summon'&&cd?cd.name+' ('+campStats(cd.sides)+') is summoned for '+campSeatRole(c,ev.seat||1)+' on '+campCellsText(c,ev.cells||[],ev.where)+', if it is empty':
+    '';
+  return when+', '+what+'.';
+}
+const campStats=sd=>'Top '+sd[0]+', Right '+sd[1]+', Bottom '+sd[2]+', Left '+sd[3];
+const CAMP_EV_NAME={quake:'Quake',surge:'Surge',meteor:'Rockfall',sweep:'Sweep',ground:'Rising ground',summon:'Arrival'};
 /* What a chapter changes, said once and read in three places: the chapter
    page before the match, the line in the chapter list, and the status chips
    under the board during it. */
 function campMods(c){
   const out=[],env=c.env||{};
+  if(c.third){
+    const tm=campTeams(c);
+    const fmt=tm[1]===tm[0]?'Two against one':tm[2]===tm[0]?'Two against one':tm[1]===tm[2]?'One against two':'Free-for-all';
+    out.push({k:'cfmt',sev:fmt==='One against two'?'warn':fmt==='Two against one'?'good':'warn',label:fmt,
+      text:fmt==='Free-for-all'?'Three players on a four by four board, every one of them your enemy. The first side four Teece ahead of the next best takes the field.':
+        fmt==='One against two'?'Three players on a four by four board: you alone against two computers fighting as one side.':
+        'Three players on a four by four board: you and a computer ally fight as one side against the third.'});
+  }
   if(c.hcap>0)out.push({k:'cadv',sev:'warn',label:'Enemy +'+c.hcap,
     text:'Advantage: every enemy Teece carries +'+c.hcap+' on all four sides, Tokens included.'});
   if(c.hcap<0)out.push({k:'cadv',sev:'good',label:'Enemy '+c.hcap,
     text:'Every enemy Teece carries '+c.hcap+' on all four sides, Tokens included. A side never falls below 0.'});
   if(c.ally<0)out.push({k:'cdis',sev:'warn',label:'Yours '+c.ally,
     text:'Disadvantage: every Teece of yours carries '+c.ally+' on all four sides, Tokens included. A side never falls below 0.'});
+  if(env.survive)out.push({k:'csurv',sev:'good',label:'Hold out: '+env.survive+' rounds',
+    text:'Survive: if nobody has won when round '+env.survive+' ends, you win. Every other way to win or lose still stands.'});
+  if(env.lead)out.push({k:'clead',sev:'warn',label:'Lead of '+env.lead,
+    text:'Any side takes the field by ending a turn '+env.lead+' Teece ahead of the next best, instead of 4.'});
+  if(env.fly)out.push({k:'cfly',sev:'warn',label:'Everything flies',
+    text:'Every Teece on the field has Flying, on every side.'});
+  if(env.double)out.push({k:'cdouble',sev:'good',label:'You fight as two',
+    text:'You play up to '+env.double.play+' Teece and draw '+env.double.draw+' cards each turn.'});
+  if(env.frenzy)out.push({k:'cfrenzy',sev:'warn',label:'Frenzy',
+    text:'Every player plays up to '+env.frenzy.play+' Teece and draws '+env.frenzy.draw+' cards each turn.'});
+  const fby={};
+  for(const f of env.field||[]){
+    if(!CARDS[f.card])continue;
+    const key=f.card+'@'+(f.seat==null?1:f.seat);
+    (fby[key]=fby[key]||{card:f.card,seat:f.seat==null?1:f.seat,cells:[],where:f.where}).cells.push(f.cell);
+  }
+  for(const key in fby){
+    const f=fby[key],cd=CARDS[f.card],n=f.cells.length;
+    out.push({k:'cf'+key,sev:'warn',label:cd.name+(n>1?' \u00d7'+n:'')+(n>1?' stand':' stands'),
+      text:(n>1?n+' ':'')+cd.name+' ('+campStats(cd.sides)+') '+(n>1?'start':'starts')+' the game on the field for '+campSeatRole(c,f.seat)+
+        ', on '+campCellsText(c,f.cells,f.where)+'. '+(cd.text||'')});
+  }
   const by={};
-  for(const g of env.grounds||[]){if(CARDS[g.card])(by[g.card]=by[g.card]||[]).push(g.cell);}
+  for(const g of env.grounds||[]){if(CARDS[g.card])(by[g.card]=by[g.card]||{cells:[],where:g.where}).cells.push(g.cell);}
   for(const id in by){
-    const cd=CARDS[id],cells=by[id];
-    const where=cells.length===4&&[0,2,6,8].every(x=>cells.indexOf(x)>=0)?'every corner':
-      cells.map(x=>'the '+CAMP_CELLS[x]).join(', ');
+    const cd=CARDS[id],cells=by[id].cells;
     out.push({k:'cg'+id,sev:(cd.gmod>0?'good':'warn'),label:cd.name+(cells.length>1?' ×'+cells.length:''),
-      text:cd.name+' starts the game on '+where+(cells.length===1&&cells[0]!==4?' panel':cells.length===1?' panel':'')+'. '+cd.text});
+      text:cd.name+' starts the game on '+campCellsText(c,cells,by[id].where)+'. '+cd.text});
   }
   if(env.tall)out.push({k:'ctall',sev:'warn',label:'Tallest -'+env.tall,
     text:'The Teece on the field with the highest numbers gets -'+env.tall+' on every side, never below 0. Its numbers are read as printed plus what it has gained or lost; ties all take it, and when every Teece is level none does.'});
   if(env.low)out.push({k:'clow',sev:'good',label:'Smallest +'+env.low,
     text:'The Teece on the field with the lowest numbers gets +'+env.low+' on every side. Its numbers are read as printed plus what it has gained or lost; ties all take it, and when every Teece is level none does.'});
+  (env.events||[]).forEach((ev,x)=>{
+    out.push({k:'cev'+x,ev,sev:(ev.fx==='surge'?'good':'warn'),label:(ev.name||CAMP_EV_NAME[ev.fx]||'Event')+
+      (ev.every?' every '+(ev.every>1?ev.every+' rounds':'round'):', round '+ev.at),
+      text:campEventText(c,ev)});
+  });
   return out;
 }
-/* The chips, for the seat at this screen, while a campaign chapter is on. */
+/* The round a game is in, counted the way the events count them: one round is
+   one turn for every seat. */
+const campRound=()=>Math.ceil(G.turnNum/PLAYERS());
+/* When an event next goes off, or null once it never will again. */
+function campNextFire(ev,from){
+  if(ev.every){const st=ev.at||ev.every;if(from<=st)return st;return st+Math.ceil((from-st)/ev.every)*ev.every;}
+  return from<=ev.at?ev.at:null;
+}
+/* The chips, for the seat at this screen, while a campaign chapter is on.
+   An event's chip counts down to its next round, and goes once it is spent. */
+/* The decks of a chapter in seat order with your side first, joined by "+"
+   between allies and "vs" between enemies. */
+function campLineup(c,item,sep){
+  const tm=campTeams(c),ds=campDecks(c);
+  const order=ds.map((k,q)=>q).sort((a,b)=>(tm[a]===tm[0]?0:1)-(tm[b]===tm[0]?0:1)||a-b);
+  return order.map((q,x)=>(x?sep(tm[q]===tm[order[x-1]]?'+':'vs'):'')+item(ds[q],q)).join('');
+}
 function campStatuses(p,push){
   if(!G||G.camp==null||isAIP(p))return;
   const c=campChapters()[G.camp];
-  if(c)for(const m of campMods(c))push(m.k,m.sev,m.label,m.text);
+  if(!c)return;
+  const r=campRound();
+  for(const m of campMods(c)){
+    if(m.ev){
+      const nx=campNextFire(m.ev,r);
+      if(nx==null)continue;
+      push(m.k,m.sev,(m.ev.name||CAMP_EV_NAME[m.ev.fx]||'Event')+(nx===r?': end of this round':': end of round '+nx),m.text);
+    }else if(m.k==='csurv'){
+      push(m.k,m.sev,'Hold out: round '+Math.min(r,c.env.survive)+' of '+c.env.survive,m.text);
+    }else push(m.k,m.sev,m.label,m.text);
+  }
 }
 /* The tallest and smallest on a board, for the env layers in effSides:
    printed numbers (or a Shrink's) plus what is held for good or for the turn,
@@ -28393,7 +28485,7 @@ function envRank(b){
 }
 function campLabel(){
   const c=campChapters()[G.camp];
-  return 'campaign · '+(c?campWhere(c).toLowerCase()+' · ':'')+(G.deckNames?G.deckNames[0]+' vs '+G.deckNames[1]:'');
+  return 'campaign · '+(c?campWhere(c).toLowerCase()+' · ':'')+(G.deckNames?G.deckNames.join(' vs '):'');
 }
 function campClose(){
   document.getElementById('campOverlay').classList.add('hidden');
@@ -28423,9 +28515,9 @@ function openCampaign(){
     h+='<li><button type="button" class="cchap '+st+'" data-ch="'+i+'"'+(open?'':' disabled')+'>'+
       '<span class="cnum">'+(c.n+1)+'</span>'+
       '<span class="cmeta"><span class="cplace">'+campPlace(c.place)+'</span><b>'+escHtml(c.title)+'</b>'+
-      '<span class="cdecks">'+escHtml(DECKS[c.mine].name)+' vs '+escHtml(DECKS[c.theirs].name)+'</span>'+
+      '<span class="cdecks">'+campLineup(c,k=>escHtml(DECKS[k].name),sep=>' '+sep+' ')+'</span>'+
       (mods?'<span class="cmodl">'+escHtml(mods)+'</span>':'')+'</span>'+
-      '<span class="cvs">'+(DECK_SYM[c.mine]||'')+'<i>vs</i>'+(DECK_SYM[c.theirs]||'')+'</span>'+
+      '<span class="cvs">'+campLineup(c,k=>DECK_SYM[k]||'',sep=>'<i>'+sep+'</i>')+'</span>'+
       '<span class="cstate">'+(done?'✓ Won':open?'Play':'\u{1F512}')+'</span></button></li>';
   });
   if(chs.length)h+='</ol>';
@@ -28465,7 +28557,8 @@ function campChapter(i){
   const mods=campMods(c);
   box.innerHTML='<div class="ckick">'+campWhere(c)+' of '+c.of+' · '+campPlace(c.place)+'</div>'+
     '<h2>'+escHtml(c.title)+'</h2><p class="ctext">'+escHtml(c.text)+'</p>'+
-    '<div class="cmatch">'+tile(c.mine,'You play')+'<span class="cvsbig">vs</span>'+tile(c.theirs,'Against')+'</div>'+
+    '<div class="cmatch">'+campLineup(c,(k,seat)=>tile(k,seat===0?'You play':campSeatRole(c,seat)==='your ally'?'Your ally':'Against'),
+      sep=>'<span class="cvsbig">'+sep+'</span>')+'</div>'+
     (mods.length?'<div class="cmods"><div class="clbl">The board tilts</div>'+mods.map(m=>
       '<div class="cmod s-'+m.sev+'"><b>'+escHtml(m.label)+'</b><span>'+escHtml(m.text)+'</span></div>').join('')+'</div>':'')+
     '<div class="row"><button class="btn primary" id="campFight">Fight</button><button class="btn" id="campList">All chapters</button></div>';
@@ -28484,20 +28577,71 @@ function campStart(i){
   if(!c)return;
   document.getElementById('campOverlay').classList.add('hidden');
   document.getElementById('endOverlay').classList.add('hidden');
-  start('deck',true,{mine:c.mine,theirs:c.theirs,hcap:c.hcap||0,ally:c.ally||0,env:c.env||null,camp:i});
+  const pre={mine:c.mine,theirs:c.theirs,hcap:c.hcap||0,ally:c.ally||0,friend:c.friend||0,env:c.env||null,camp:i};
+  if(c.third)start('three',true,Object.assign(pre,{decks:campDecks(c),teams:campTeams(c)}));
+  else start('deck',true,pre);
 }
-/* The tilt, laid on a fresh game before its first turn. Battlegrounds the
-   chapter starts with belong to the computer's seat: the board is against you. */
+/* The tilt, laid on a fresh game before its first turn, after the decks' own
+   rules (a deck rule such as Winged or Garbage's turn would otherwise
+   overwrite the chapter's). Battlegrounds and Teece the chapter starts with
+   belong to the computer's seat unless it says otherwise: the board is
+   against you. */
 function campSetup(preset){
   G.camp=preset.camp;
-  if(preset.ally)G.seatBonus=[preset.ally,preset.hcap||0];
-  G.env=preset.env?{tall:preset.env.tall||0,low:preset.env.low||0}:null;
-  for(const g of (preset.env&&preset.env.grounds)||[]){
+  const env=preset.env||{};
+  if(preset.ally||preset.friend){
+    G.seatBonus=G.players.map((_,q)=>q===0?(preset.ally||0):sameTeam(q,0)?(preset.friend||0):(preset.hcap||0));
+  }
+  G.env={tall:env.tall||0,low:env.low||0,lead:env.lead||0,survive:env.survive||0,events:env.events||[]};
+  for(const g of env.grounds||[]){
     if(!CARDS[g.card]||!G.board[g.cell])continue;
-    G.board[g.cell].ground={cardId:g.card,owner:1,gid:G.groundSeq++};
+    G.board[g.cell].ground={cardId:g.card,owner:g.seat==null?1:g.seat,gid:G.groundSeq++};
+  }
+  for(const pl of G.players){
+    if(env.fly)pl.allFlying=true;
+    if(env.frenzy)pl.perTurn={play:env.frenzy.play||1,draw:env.frenzy.draw||1};
+  }
+  if(env.double)G.players[0].perTurn={play:env.double.play||1,draw:env.double.draw||1};
+  for(const f of env.field||[]){
+    if(!CARDS[f.card]||!G.board[f.cell]||G.board[f.cell].teece)continue;
+    putTeece(G.board,f.cell,makeTeece(f.card,f.seat==null?1:f.seat),false);
   }
   const c=campChapters()[G.camp],mods=c?campMods(c):[];
   if(mods.length)log('The board tilts: '+mods.map(m=>m.label).join(', ')+'.');
+}
+/* The chapter's board events, at the end of a round: run from endTurn before
+   its fight, so a Teece an event brings to 0 is destroyed in that fight. */
+function campRoundEnd(){
+  if(!G||G.camp==null||!G.env||!G.env.events.length)return;
+  if(G.turnNum%PLAYERS()!==0)return;
+  const r=G.turnNum/PLAYERS(),c=campChapters()[G.camp];
+  const b=G.board;
+  for(const ev of G.env.events){
+    if(campNextFire(ev,r)!==r)continue;
+    log('End of round '+r+': '+campEventText(c,ev).replace(/^At the end of [^,]*, /,''));
+    toast((ev.name||CAMP_EV_NAME[ev.fx]||'Event')+'!');
+    G.eventFlag=true;
+    if(ev.fx==='quake'||ev.fx==='surge'){
+      const n=ev.fx==='quake'?-(ev.n||1):(ev.n||1);
+      for(let i=0;i<BN;i++)if(b[i].teece)applyModT(b[i].teece,n,'perm');
+    }else if(ev.fx==='meteor'){
+      const rk=envRank(b);
+      if(rk)for(let i=0;i<BN;i++)if(b[i].teece&&envSize(b[i].teece)===rk.max)applyModT(b[i].teece,-(ev.n||1),'perm');
+    }else if(ev.fx==='sweep'){
+      for(let i=0;i<BN;i++)b[i].ground=null;
+    }else if(ev.fx==='ground'&&CARDS[ev.card]){
+      for(const j of ev.cells||[])if(b[j])b[j].ground={cardId:ev.card,owner:ev.seat==null?1:ev.seat,gid:G.groundSeq++};
+    }else if(ev.fx==='summon'&&CARDS[ev.card]){
+      const j=(ev.cells||[]).find(x=>b[x]&&!b[x].teece);
+      if(j!=null)summonToken(b,j,ev.card,ev.seat==null?1:ev.seat,true);
+    }
+  }
+}
+/* Hold out: when the last turn of the round the chapter names ends and the
+   game is still going, the seat at this screen's side takes it. */
+function campSurvive(){
+  if(!G||G.over||G.camp==null||!G.env||!G.env.survive)return;
+  if(G.turnNum>=G.env.survive*PLAYERS())endGame(teamOf(0),'Round '+G.env.survive+' is over and you are still standing.');
 }
 function campEnd(winner,why,t,x,btn){
   const chs=campChapters(),i=G.camp,c=chs[i];
@@ -28684,22 +28828,24 @@ async function startInner(mode,vsAI,preset){
     return;
   }
   if(mode==='three'){
-    const fmt=vsAI?await pickFormat():{key:'ffa',name:'Free-for-all',teams:[0,1,2]};
-    const keys=[];
-    keys.push(await pickDeck(vsAI?'You':'Player 1',
+    /* preset: a campaign chapter, which names the sides and all three decks. */
+    const fmt=preset?{key:'camp',name:'Campaign',teams:preset.teams}:vsAI?await pickFormat():{key:'ffa',name:'Free-for-all',teams:[0,1,2]};
+    const keys=preset?preset.decks.slice():[];
+    if(!preset)keys.push(await pickDeck(vsAI?'You':'Player 1',
       {title:vsAI?'Your deck':'Player 1: choose a deck'}));
-    for(let seat=1;seat<3;seat++){
+    for(let seat=1;seat<3&&!preset;seat++){
       const who=vsAI?('Computer '+seat):('Player '+(seat+1));
       const rel=vsAI?(fmt.teams[seat]===fmt.teams[0]?' (your ally)':' (against you)'):'';
       keys.push(await pickDeck(who,{title:'Choose '+who+'\u2019s deck'+rel,
         info:'Any deck, including one already chosen.'}));
     }
-    const hcap=vsAI?await pickHandicap():0;
+    const hcap=preset?(preset.hcap||0):vsAI?await pickHandicap():0;
     G=newState('three',vsAI,keys.map(k=>DECKS[k].cards.slice()),
       {seats:3,width:4,teams:fmt.teams,enemyBonus:hcap,aiSeats:vsAI?[1,2]:[]});
     G.deckNames=keys.map(k=>DECKS[k].name);
     for(let i=0;i<3;i++)applyDeckRules(i,keys[i]);
     G.formatName=fmt.name;
+    if(preset&&preset.camp!=null)campSetup(preset);
     log(fmt.name+': '+keys.map((k,i)=>pname(i)+' brings '+DECKS[k].name).join(', ')+
       (hcap?'. Every Teece against you carries '+hcapLabel(hcap)+'.':'.'));
     render();
@@ -28740,9 +28886,9 @@ async function startInner(mode,vsAI,preset){
     }else theirs=await pickDeck('Player 2');
     G=newState('deck',vsAI,[DECKS[mine].cards.slice(),DECKS[theirs].cards.slice()],{enemyBonus:hcap});
     G.deckNames=[DECKS[mine].name,DECKS[theirs].name];
-    if(preset&&preset.camp!=null)campSetup(preset);
     applyDeckRules(0,mine);
     applyDeckRules(1,theirs);
+    if(preset&&preset.camp!=null)campSetup(preset);
     log((G.camp!=null?'Campaign, '+campWhere(campChapters()[G.camp]).toLowerCase()+': ':'')+DECKS[mine].name+' faces '+DECKS[theirs].name+
       (hcap?', and every enemy Teece carries '+hcapLabel(hcap)+' on all four sides.':'.'));
     render();
@@ -29430,7 +29576,7 @@ if(HAS_DOM){
 }
 /* ============ exports for harness ============ */
 if(typeof module!=='undefined'){
-  module.exports={campChapters,campMods,campSetup,envRank,envSize,hellAt,hellUnhellable,hellBarred,hellShrouded,isDemon,aiHellPlan,checkDomination,heavens,heavenShift,hvShiftCols,heavenDescend,playToHeaven,heavenlyCard,heavenlyBody,hvLandSpots,hvDescendBlock,ascendBlock,
+  module.exports={campChapters,campMods,campSetup,campRoundEnd,campSurvive,campDecks,campTeams,envRank,envSize,hellAt,hellUnhellable,hellBarred,hellShrouded,isDemon,aiHellPlan,checkDomination,heavens,heavenShift,hvShiftCols,heavenDescend,playToHeaven,heavenlyCard,heavenlyBody,hvLandSpots,hvDescendBlock,ascendBlock,
     messengerSwap,heavenSides,aiAngels,angelsInPlay,statusesFor,
     makeFusionCard,fuseOnBoard,fusePartners,canFuseOnBoard,canFuseHand,fuseHandAt,fuseHandOpts,
     aiFuseHand,aiFusionMagicPlan,fusionsInPlay,forgetFusions,
