@@ -1538,7 +1538,7 @@ body.endpeek #app{padding-bottom:72px}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:290,date:'2026-10-23'};
+const VERSION={build:291,date:'2026-10-23'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -6104,9 +6104,9 @@ const CARDS = {
  1303:{name:'Bear Trap',type:'teece',sides:[5,5,5,5],mimic:true,sacToo:true,
     onPlay:[{fx:'mod',who:'enemy',n:-10,dur:'perm'}],onDeath:[{fx:'mimic',op:'nextMod',n:10}],
     text:'When played: select an enemy; it gets -10 permanently. When destroyed or sacrificed: the next Teece your opponent plays arrives with +10.'},
- 1304:{name:'The Hoard',type:'teece',sides:[12,10,12,12],sac:1,def:5,mimic:true,
+ 1304:{name:'The Hoard',type:'teece',sides:[12,10,12,12],sac:1,mimic:true,
     onDeath:[{fx:'mimic',op:'magicEcho',n:1}],
-    text:'Sacrifice a Teece to play. Defence 5. When destroyed: the next magic card your opponent plays adds a copy of itself to your opponent’s hand.'},
+    text:'Sacrifice a Teece to play. When destroyed: the next magic card your opponent plays adds a copy of itself to your opponent’s hand.'},
  1305:{name:'Haunted Manor',type:'teece',sides:[10,10,10,10],sac:2,mimic:true,
     onPlay:[{fx:'mimic',op:'silenceDeck'}],handDiscard:[{fx:'mimic',op:'destroyHome'}],
     text:'Sacrifice two Teece to play. When played: silence all Teece in your deck. Discard this from your hand: select an ally; destroy it and its “When destroyed” effect applies to you instead of the enemy.'},
