@@ -1533,7 +1533,7 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:288,date:'2026-10-22'};
+const VERSION={build:289,date:'2026-10-23'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -6099,8 +6099,9 @@ const CARDS = {
  1303:{name:'Bear Trap',type:'teece',sides:[5,5,5,5],mimic:true,sacToo:true,
     onPlay:[{fx:'mod',who:'enemy',n:-10,dur:'perm'}],onDeath:[{fx:'mimic',op:'nextMod',n:10}],
     text:'When played: select an enemy; it gets -10 permanently. When destroyed or sacrificed: the next Teece your opponent plays arrives with +10.'},
- 1304:{name:'The Hoard',type:'teece',sides:[12,12,12,12],sac:1,def:5,mimic:true,mimicFlip:true,
-    text:'Sacrifice a Teece to play. Defence 5. All Mimics give you their effect when destroyed.'},
+ 1304:{name:'The Hoard',type:'teece',sides:[12,10,12,12],sac:1,def:5,mimic:true,
+    onDeath:[{fx:'mimic',op:'magicEcho',n:1}],
+    text:'Sacrifice a Teece to play. Defence 5. When destroyed: the next magic card your opponent plays adds a copy of itself to your opponent’s hand.'},
  1305:{name:'Haunted Manor',type:'teece',sides:[10,10,10,10],sac:2,mimic:true,
     onPlay:[{fx:'mimic',op:'silenceDeck'}],handDiscard:[{fx:'mimic',op:'destroyHome'}],
     text:'Sacrifice two Teece to play. When played: silence all Teece in your deck. Discard this from your hand: select an ally; destroy it and its “When destroyed” effect applies to you instead of the enemy.'},
@@ -19154,6 +19155,13 @@ async function playMagic(p,handIdx){
     handPush(p,id);
     log(d.name+' returns to '+pname(p)+"'s hand.");
   }else if(!consumed&&at>=0)toGrave(p,id);
+  /* The Hoard's gift: the next magic card this seat plays leaves a copy of
+     itself in its hand. */
+  if(pl.magicEcho>0){
+    pl.magicEcho--;
+    handPush(p,id);
+    log('A copy of '+d.name+' goes into '+ownOf(p)+' hand, from The Hoard.');
+  }
   await fireMagic(p,id);
   await resolveCombat();
   render();
@@ -22871,6 +22879,8 @@ function statusesFor(p){
    if(sd+sh)push('silentDeck','good','Silenced Teece: '+(sd+sh),
      'The Haunted Manor silenced every Teece in your deck. '+(sd+sh)+' of them '+(sd+sh===1?'is':'are')+' still to be played, and each arrives silenced'+
      (sh?' ('+Object.keys(pl.silentHand).filter(k=>pl.silentHand[k]>0).map(k=>CARDS[k].name).join(', ')+' in hand)':'')+'.');}
+  if(pl.magicEcho)push('magicEcho','good','Next magic copied',
+    'The Hoard: the next magic card you play adds a copy of itself to your hand.');
   if(pl.atticDoom)push('atticDoom','bad','Next Teece destroyed',
     'The Attic’s curse: the next '+(pl.atticDoom===1?'Teece':pl.atticDoom+' Teece')+' you play '+(pl.atticDoom===1?'is':'are')+' destroyed as '+(pl.atticDoom===1?'it lands':'they land')+'.');
   if(pl.skipDraw)push('skipDraw','bad','Skipping '+(pl.skipDraw===1?'a draw':pl.skipDraw+' draws'),
@@ -25282,6 +25292,14 @@ async function mimicFx(st,ctx){
     t.giftTo=p;
     await anim([c],'dying',190);
     await processDeath({cell:c,t,killers:[]});
+    return;}
+  case 'magicEcho':{
+    const g=mimicGiftTo(p,ctx,st);if(!g.to.length)return none('No opponent to hand it to.');
+    turned(g);
+    for(const q of g.to){
+      G.players[q].magicEcho=(G.players[q].magicEcho||0)+(st.n||1);
+      log('The next magic card '+whoIn(q)+' '+vb(q,'plays','play')+' adds a copy of itself to '+ownOf(q)+' hand.');
+    }
     return;}
   case 'skipDraws':{
     const pl=G.players[p];
