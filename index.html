@@ -21328,7 +21328,7 @@ async function aiPlayTeece(){
         putTeece(bb,c,t,false);
         if(rots.length===1)simOnPlay(bb,c,id,p);
         simCombat(bb);
-        let g=boardValue(bb,p)-base+2.2+cultPlaceBonus(p,c)+cher-sacPen+handGain;
+        let g=boardValue(bb,p)-base+2.2+cultPlaceBonus(p,c,bb,b)+cher-sacPen+handGain;
         if(hvAlt&&bb[c].teece&&bb[c].teece.owner===p)g-=aiExposed(bb,c)*AI_BODY;
         if(g>bg){bg=g;best={h,c,rot,sacP:sacAll};}
       }
@@ -26202,18 +26202,46 @@ function cultDests(b,i,st){
   else pool=movePool(i,st.range);
   return pool.filter(j=>j!==i&&openAt(b,j));
 }
-/* What a mission is worth to the computer on top of what the board says. */
-function cultMoveBonus(p,from,to){
+/* What a mission is worth to the computer on top of what the board says. A
+   line is worth more the fewer are left, and a Teece left standing on a point
+   with an unlit line open in front of it is part of one already: that is what
+   makes it walk off a good panel onto a worse one, and play onto a point it can
+   walk from straight away. */
+function cultLineWorth(p){
+  if(!cultSeat(p))return 0;
+  const c=G.players[p].cult;
+  return c.stage===1?2.2+0.35*c.lines.filter(Boolean).length:0;
+}
+/* The unlit lines the seat's Teece on b could walk next: each counted once,
+   at a share of what lighting it is worth. */
+function cultReach(b,p){
+  const w=cultLineWorth(p);
+  if(!w)return 0;
+  const c=G.players[p].cult,seen={};
+  for(const i of pentaPoints()){
+    const t=b[i].teece;
+    if(!t||t.owner!==p||hasKw(b,i,'immovable'))continue;
+    for(const j of pentaNext(i)){const k=pentaLineOf(i,j);if(!c.lines[k]&&openAt(b,j))seen[k]=1;}
+  }
+  return Object.keys(seen).length*0.4*w;
+}
+function cultMoveBonus(p,from,to,b0,b1){
   if(!cultSeat(p))return 0;
   const c=G.players[p].cult;
   let v=0;
   const k=pentaLineOf(from,to);
-  if(c.stage===1&&k>=0&&!c.lines[k])v+=1.6;
+  if(c.stage===1&&k>=0&&!c.lines[k]){
+    v+=cultLineWorth(p);
+    /* read as if it were already lit: the line walked now is paid for above,
+       not counted again as one waiting to be walked */
+    if(b0&&b1){const lit=c.lines.slice();c.lines[k]=1;v+=cultReach(b1,p)-cultReach(b0,p);c.lines=lit;}
+  }else if(b0&&b1)v+=cultReach(b1,p)-cultReach(b0,p);
   if(c.stage===3&&to===pentaPts().center)v+=3;
   return v;
 }
-function aiCultDest(p,i,dests,trav){
-  const b=G.board,base=boardValue(b,p);
+function aiCultDest(p,i,dests,trav,b){
+  b=b||G.board;
+  const base=boardValue(b,p);
   let dst=null,gain=-1e9;
   for(const j of dests){
     const bb=cloneBoard(b);
@@ -26225,7 +26253,7 @@ function aiCultDest(p,i,dests,trav){
       if(n)applyModT(t,n,'temp');
     }
     simCombat(bb);
-    const g=boardValue(bb,p)-base+cultMoveBonus(p,i,j);
+    const g=boardValue(bb,p)-base+cultMoveBonus(p,i,j,b,bb);
     if(g>gain){gain=g;dst=j;}
   }
   return {dst,gain};
@@ -26307,17 +26335,23 @@ function cultStatusText(q){
   if(c.stage===3)return 'Mission 3 of 3, Perform The Sacrifice: end a turn of '+ownOf(q)+' with an ally in the middle of the Pentagram. It is sacrificed and a Tendril Of Gol’God’Oth with 20 on every side takes its place.';
   return 'The Tendril has been summoned. Gol’God’Oth Arrives aimed at a Tendril Of Gol’God’Oth creates a copy of it on every empty panel beside it.';
 }
-/* Where the computer puts a Cult Teece down: on a point with an unlit line it
-   can walk next turn, and in the middle once the Sacrifice is all that is left. */
-function cultPlaceBonus(p,c){
+/* Where the computer puts a Cult Teece down: on a point it can walk an unlit
+   line from this same turn -- weighed as the walk it will take, on the board
+   as it will stand -- or failing that one it can walk from next turn, and in
+   the middle once the Sacrifice is all that is left. bb is the board with the
+   Teece already on panel c, b the board before. */
+function cultPlaceBonus(p,c,bb,b){
   if(!cultSeat(p))return 0;
   const cu=G.players[p].cult;
   if(cu.stage===3&&c===pentaPts().center)return 3;
-  if(cu.stage===1&&isPentaPoint(c)){
-    const open=pentaNext(c).filter(j=>!cu.lines[pentaLineOf(c,j)]);
-    return open.length?0.5+0.2*open.length:0;
+  if(cu.stage!==1||!bb)return 0;
+  const t=bb[c].teece;
+  if(!t||t.owner!==p)return 0;
+  if(isPentaPoint(c)){
+    const ds=cultDests(bb,c,{fx:'traverse'});
+    if(ds.length){const r=aiCultDest(p,c,ds,true,bb);if(r.gain>=0.7)return r.gain;}
   }
-  return 0;
+  return cultReach(bb,p)-cultReach(b||G.board,p);
 }
 /* The computer's Cult spells. */
 function aiCultPlan(d){
