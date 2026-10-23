@@ -1362,7 +1362,7 @@
         "In hand, Dismount takes a Knight off its Mount, and the Mount becomes a card of its own: play it as a Teece, or tap it and then a Knight in hand with no Mount (Legaless included) to saddle it there, which costs no play.",
         "Remount and Cavalry Muster put copies of Mounts on the board for the next Knights to ride; Stables makes a waiting Mount hard to kill, and the Armoury pays any equipped Teece, mounted Knights included."
       ],
-      "level": "intermediate",
+      "level": "advanced",
       "kind": "warrior"
     },
     "angels": {
