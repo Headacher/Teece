@@ -1351,15 +1351,15 @@
         1259,
         1260
       ],
-      "blurb": "Knights ride into battle on Mounts that lend them their numbers, their wings and their tricks. Every Knight is Armoured, with 1 Defence, and lands already riding the Mount printed on it, with the Mount's numbers and abilities on top of its own; bring the Knight down and its Mount is played on that panel or one next to it, ready for the next rider. Remount, Cavalry Muster and Call the Warhorse put spare Mounts on the board, the Stables guards them, and a Herd Saddle or a Mount Mount stacks several under one Knight. Hard to grind out, since every kill leaves a body behind; but the Knights alone are small, and a riderless Mount is a Token that never counts toward winning.",
+      "blurb": "Knights ride into battle on Mounts that lend them their numbers, their wings and their tricks. Every Knight is Armoured, with 1 Defence, and lands already riding the Mount printed on it, with the Mount's numbers and abilities on top of its own; bring the Knight down and its Mount is played on that panel or one next to it, ready for the next rider. Remount, Cavalry Muster and Call the Warhorse put spare Mounts on the board, the Stables guards them, and a Herd Saddle or a Mount-ain stacks several under one Knight. Hard to grind out, since every kill leaves a body behind; but the Knights alone are small, and a riderless Mount is a Token that never counts toward winning.",
       "lore": "The mounted orders of the Wildwood marches, who hold from their castles at the forest's edge that a Teece is only as good as what it is sitting on. Their warhorses were bred from Celestial Steeds stolen from the Paladins, which the Paladins have never forgiven, and the Emu cavalry was a procurement error nobody will discuss. They buy their armour from the Dwarves, lend their officers to the Army, and take the credit for its victories.",
       "home": "ml",
       "how": [
         "Armoured: every Knight has 1 Defence. Mounts do not.",
         "Mount: a Knight is played already riding the Mount printed on it and has the Mount’s numbers, Defence and abilities on top of its own. When the Knight is destroyed, its Mount is played on that panel or one next to it.",
-        "Play a Knight onto one of your Mounts on the board and it rides that Mount in place of its own. A Knight can have only one Mount, unless a Herd Saddle lets it keep both. Legaless can only be played onto a Mount.",
-        "A Mount standing on its own can, once per your turn, carry one of your Knights that has room for it: a Knight whose Mount was destroyed, or one wearing a Herd Saddle.",
-        "In hand, Dismount takes a Knight off its Mount, and the Mount becomes a card of its own: play it as a Teece, or tap it and then a Knight in hand with no Mount (Legaless included) to saddle it there, which costs no play.",
+        "Play a Knight onto one of your Mounts on the board and it rides that Mount in place of its own. A Knight can have only one Mount, unless a Herd Saddle lets it keep both. Legaless can only be played onto a Mount on the board.",
+        "A Mount standing on its own can, once per your turn, carry one of your Knights next to it that has room for it: a Knight whose Mount was destroyed, or one wearing a Herd Saddle.",
+        "In hand, Dismount takes a Knight off its Mount (not the Knight Captain or the Grand Marshal), and the Mount becomes a card of its own: play it as a Teece, or tap it and then a Knight in hand with no Mount to saddle it there, which costs no play.",
         "Remount and Cavalry Muster put copies of Mounts on the board for the next Knights to ride; Stables makes a waiting Mount hard to kill, and the Armoury pays any equipped Teece, mounted Knights included."
       ],
       "level": "advanced",
