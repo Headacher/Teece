@@ -925,6 +925,13 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .compass,.sdia,#infoBox .cstats{position:relative;display:inline-block;flex:none;width:54px;height:54px;vertical-align:middle;
   border:1px solid var(--line);border-radius:7px;background:rgba(255,255,255,.05);margin:2px 6px 2px 0;text-align:center}
 #kwPop .compass{display:block;margin:4px 0 6px}
+/* In a card's own text, a Mount's numbers sit in the line as a small compass. */
+.compass.mini{width:32px;height:32px;margin:1px 2px;border-radius:5px;background:rgba(0,0,0,.08)}
+.compass.mini i{font-size:9px}
+.compass.mini .c0,.compass.mini .c2{min-width:15px;height:9px;border-radius:0 0 9px 9px}
+.compass.mini .c2{border-radius:9px 9px 0 0}
+.compass.mini .c1,.compass.mini .c3{min-height:15px;min-width:9px;border-radius:9px 0 0 9px}
+.compass.mini .c3{border-radius:0 9px 9px 0}
 .compass i,.sdia i,#infoBox .cstats .stat{position:absolute;font-style:normal;display:flex;align-items:center;justify-content:center;
   font-size:11px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em;
   background:rgba(16,12,9,.86);color:#f7f0e2;box-shadow:0 0 0 1px rgba(255,255,255,.14);border:0;width:auto;height:auto}
@@ -1593,7 +1600,7 @@ body.endpeek #app{padding-bottom:72px}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:304,date:'2026-10-24'};
+const VERSION={build:305,date:'2026-10-24'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1873,16 +1880,23 @@ const kwSpan=(k,txt)=>'<b class="kw" data-kw="'+k+'" role="button" tabindex="0">
 /* "Channel the Devils." on a Warlock is flavour, not a rule or a keyword: the
    Boon after it is the rule. Set apart in italics wherever the card is read. */
 const channelFlv=h=>String(h).replace(/(^|>)(Channel (?:the )?[A-Z][^.<]*\.)/g,'$1<i class="flv">$2</i>');
+/* A Mount's numbers written "(Top 4, Right 4, Bottom 4, Left 4; Flying)" in a
+   card's text are drawn as a small compass wherever the text is drawn (Greg,
+   build 305). The words stay in the data for logs and tooltips. */
+function compassify(h){
+  return String(h).replace(/\s?\(Top (-?\d+), Right (-?\d+), Bottom (-?\d+), Left (-?\d+)(?:; ([^)]*))?\)/g,
+    (m,a,b,c,d,rest)=>' '+compassHtml([a,b,c,d],'mini')+(rest?' ('+rest+')':''));
+}
 function kwify(h){
-  return channelFlv(h).split(/(<[^>]*>)/).map(part=>part.charAt(0)==='<'?part:
+  return channelFlv(compassify(h)).split(/(<[^>]*>)/).map(part=>part.charAt(0)==='<'?part:
     part.replace(kwRe(),(m,...g)=>{
       for(let j=0;j<KW_FORMS.length;j++)if(g[j]!==undefined)return kwSpan(KW_FORMS[j][1],m);return m;})).join('');
 }
 function kwPopClose(){const p=HAS_DOM&&document.getElementById('kwPop');if(p)p.hidden=true;}
 /* A Teece's four numbers on the edges they defend, top/right/bottom/left, the
    way the card and the deck page draw them. */
-function compassHtml(sd){
-  return '<span class="compass">'+sd.map((n,k)=>'<i class="c'+k+'">'+n+'</i>').join('')+'</span>';
+function compassHtml(sd,cls){
+  return '<span class="compass'+(cls?' '+cls:'')+'">'+sd.map((n,k)=>'<i class="c'+k+'">'+n+'</i>').join('')+'</span>';
 }
 const compassWords=sd=>['Top','Right','Bottom','Left'].map((w,k)=>w+' '+sd[k]).join(', ');
 function kwPopOpen(el){
@@ -6476,11 +6490,11 @@ function handFace(id,sides,numCls,p){
     return semiNums(sides,'hs',numCls)+rankSym(id)+
       '<div class="hz"><div class="hcn cn">'+(p!=null?cardTitle(id,p):escHtml(cd.name))+rankTag(id)+'</div>'+
       '<div class="tart">'+artPre(id)+'</div>'+
-      (tx?'<div class="htx'+txLen(tx)+'">'+channelFlv(tx)+'</div>':'')+'</div>';
+      (tx?'<div class="htx'+txLen(tx)+'">'+channelFlv(compassify(tx))+'</div>':'')+'</div>';
   }
   const tx=String(cd.text||'').split('\n')[0];
   return '<div class="hz"><div class="ct">'+cd.type+'</div><div class="cn">'+cd.name+'</div>'+
-    '<div class="tart">'+artPre(id)+'</div>'+(tx?'<div class="cs'+txLen(tx)+'">'+tx+'</div>':'')+'</div>';
+    '<div class="tart">'+artPre(id)+'</div>'+(tx?'<div class="cs'+txLen(tx)+'">'+compassify(tx)+'</div>':'')+'</div>';
 }
 /* Equips hang under a card as named tabs, a ridden Mount among them; past
    three, the last becomes +N with the rest in its tooltip. */
@@ -22786,7 +22800,7 @@ function showDetailCard(id,worn,owner){
   if(shown.length){
     html+='<div class="dstats" style="color:var(--gold)">Plated, and arrives wearing:</div>';
     for(const e of shown)html+='<div class="dstats" style="font-size:11px">'+(e.mount?'Mount: ':'')+CARDS[e.cardId].name+
-      ' &mdash; '+(e.mount?compassWords(e.sides)+(CARDS[e.cardId].ride?'; '+CARDS[e.cardId].ride:''):kwify(CARDS[e.cardId].text))+'</div>';
+      ' &mdash; '+(e.mount?compassHtml(e.sides,'mini')+(CARDS[e.cardId].ride?' '+CARDS[e.cardId].ride:''):kwify(CARDS[e.cardId].text))+'</div>';
   }
   d.innerHTML=html;
 }
