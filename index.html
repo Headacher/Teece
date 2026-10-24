@@ -1600,7 +1600,7 @@ body.endpeek #app{padding-bottom:72px}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:308,date:'2026-10-24'};
+const VERSION={build:309,date:'2026-10-24'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -3245,6 +3245,8 @@ function canPlay(p,cardId){
     }
     /* a Pack Leader still in hand will be one when it lands, so it can be plated */
     if(cd.onlyPackLeader&&G.players[p].hand.some(h=>CARDS[h].packLeader))return true;
+    /* Mount Mount can go onto a Mount card held in hand (Greg, build 309). */
+    if(cd.onlyMount&&G.players[p].hand.some((h,x)=>isMountCard(h)&&plateRoom(h,plateOf(p,x))))return true;
     if(cd.runeblade&&sheathSpots(p).length)return true;
     return false;
   }
@@ -18797,8 +18799,10 @@ async function playEquip(p,handIdx){
      is ever a card in hand, so there is nothing there for it to bolt onto. */
   const hands=[];
   /* A Light needs an Oath already sworn, which no card in hand has. */
-  if(!ed.onlyToken&&!ed.onlySpiderling&&!ed.onlyOath&&!ed.onlyMount)for(let h=0;h<pl.hand.length;h++){
+  if(!ed.onlyToken&&!ed.onlySpiderling&&!ed.onlyOath)for(let h=0;h<pl.hand.length;h++){
     if(h===handIdx)continue;
+    /* Mount Mount: only a Mount card in hand (Greg, build 309). */
+    if(ed.onlyMount&&!isMountCard(pl.hand[h]))continue;
     if(CARDS[pl.hand[h]].type==='teece'&&plateRoom(pl.hand[h],plateOf(p,h))&&(!ed.onlyPackLeader||CARDS[pl.hand[h]].packLeader))hands.push(h);
   }
   /* The Runeblade can be set in a Runestone instead of into a hand. */
@@ -18809,7 +18813,7 @@ async function playEquip(p,handIdx){
   if(G.heaven&&!ed.onlyHand&&!ed.onlyToken&&!ed.onlySpiderling&&!ed.onlyOath&&!ed.onlyMount&&!ed.onlyPackLeader&&!(ed.grants&&ed.grants.onEquip))
     for(let c=0;c<G.heaven.length;c++){const t=G.heaven[c];if(t&&t.owner===p&&equipRoom(t))hvEq.push(c);}
   if(!cands.length&&!hands.length&&!sheaths.length&&!hvEq.length){toast(ed.onlyHand?'No Teece in your hand to equip.':ed.onlySpiderling?'No Spiderling to equip.':
-    ed.onlyToken?'No Token to equip.':ed.onlyOath?'No Paladin of yours is sworn to '+OATHS[ed.onlyOath].name+'.':ed.onlyMount?'No Mount of yours on the board.':ed.onlyPackLeader?'No Pack Leader to equip, on the board or in hand.':'No Teece to equip, on the board or in hand.');return false;}
+    ed.onlyToken?'No Token to equip.':ed.onlyOath?'No Paladin of yours is sworn to '+OATHS[ed.onlyOath].name+'.':ed.onlyMount?'No Mount of yours on the board or in your hand.':ed.onlyPackLeader?'No Pack Leader to equip, on the board or in hand.':'No Teece to equip, on the board or in hand.');return false;}
   const targets=cands.concat(sheaths.filter(i=>cands.indexOf(i)<0));
   const sheathe=(bb,i)=>{const g=bb[i].ground;if(g)bb[i].ground=Object.assign({},g,{sheath:(g.sheath||[]).concat([{cardId:id,owner:p}])});};
   const c=await chooseCell(p,targets,'Choose a Teece for '+CARDS[id].name+(ed.anyOwner?' \u2014 either side\u2019s':'')+
