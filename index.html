@@ -1600,7 +1600,7 @@ body.endpeek #app{padding-bottom:72px}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:306,date:'2026-10-24'};
+const VERSION={build:307,date:'2026-10-24'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1870,7 +1870,7 @@ function tokenDesc(k){
     /* A Mount's numbers are drawn as a compass beside this (kwPopOpen), never
        written out as x/x/x/x. */
     if(c.mount)return 'A Mount Token: '+compassWords(c.sides)+'. '+body.replace(/^Mount\.\s*/,'');
-    return 'A Token, '+sidesLine(c.sides)+(c.def&&body.indexOf('Defence '+c.def)<0?' with Defence '+c.def:'')+(c.kw||[]).filter(x=>body.indexOf(kwTitle(x))<0).map(x=>', '+kwTitle(x)).join('')+
+    return 'A Token, '+compassWords(c.sides)+(c.def&&body.indexOf('Defence '+c.def)<0?' with Defence '+c.def:'')+(c.kw||[]).filter(x=>body.indexOf(kwTitle(x))<0).map(x=>', '+kwTitle(x)).join('')+
       (ids.length>1?' ('+((DECKS&&DECKS[c.deck]&&DECKS[c.deck].name)||c.deck)+')':'')+'. '+body;
   }).join(' ');
 }
@@ -1970,6 +1970,34 @@ function deckKeywords(key){
     }
   }
   return found.sort();
+}
+/* The rules words only one deck really uses -- PACT for the Devils, Hell for
+   the Demons, Mount for the Knights, Drain for the Vampires -- read off the
+   cards the same way the inspector bolds them, so the deck page explains them
+   with the popup's own words. A word belongs to a deck when at least three in
+   four of the cards that print it are that deck's, so the one Demon that
+   offers a PACT doesn't take it off the Devils' page. Printed keywords are
+   already listed above it, and words every deck shares (Defence, Token,
+   sacrifice) never pass the test. */
+let DECK_OWN_KW=null;
+function deckOwnKeywords(key){
+  if(!DECK_OWN_KW){
+    const per={};
+    for(const dk in DECKS){
+      const texts=DECKS[dk].cards.map(id=>CARDS[id]&&CARDS[id].text||'').concat(DECKS[dk].how||[]);
+      for(const t of texts){
+        const seen=new Set();
+        String(kwify(escHtml(t))).replace(/data-kw="([^"]+)"/g,(m,k)=>{seen.add(k);return m;});
+        for(const k of seen){if(KEYWORDS[k])continue;const c=per[k]=per[k]||{};c[dk]=(c[dk]||0)+1;}
+      }
+    }
+    DECK_OWN_KW={};
+    for(const k in per){
+      const c=per[k],tot=Object.values(c).reduce((x,y)=>x+y,0);
+      for(const dk in c)if(c[dk]*4>=tot*3&&kwDesc(k))(DECK_OWN_KW[dk]=DECK_OWN_KW[dk]||[]).push(k);
+    }
+  }
+  return DECK_OWN_KW[key]||[];
 }
 const DECK_SYM={berserker:'\u{1FA93}',rock:'\u{1FAA8}',ogre:'\u{1F479}',robot:'\u{1F916}',
   gadget:'⚙️',time:'⌛',bomb:'\u{1F4A3}',witch:'\u{1F9D9}',nature:'\u{1F33F}',pixie:'\u{1F9DA}',spider:'\u{1F577}️',vampire:'\u{1F9DB}',
@@ -21830,6 +21858,12 @@ function showDeckInfo(key){
   if((dk.how||[]).length){
     h+='<h3>How it works</h3><ul>'+dk.how.map(l=>'<li>'+escHtml(l)+'</li>').join('')+'</ul>';
   }
+  const own0=deckOwnKeywords(key);
+  if(own0.length){
+    h+='<h3>Keywords unique to this deck</h3><div class="rules">';
+    for(const k of own0)h+='<span class="rk">'+escHtml(kwTitle(k))+'</span><span>'+escHtml(kwDesc(k))+'</span>';
+    h+='</div>';
+  }
   if(kws.length){
     h+='<h3>Keywords on these cards</h3><div class="rules">';
     for(const k of kws)h+='<span class="rk">'+escHtml(kwLabel(k))+'</span><span>'+escHtml(KEYWORDS[k])+'</span>';
@@ -29640,7 +29674,7 @@ if(typeof module!=='undefined'){
     groundGives,givesLabel,invulnText,blessedOn,sameRow,sameCol,oppositeCell,
     groundNum,groundOf,canHandDiscard,auraGives,panelGives,isSteadfast,
     isPlane,planeOn,PLANE,planeSpots,hangPlane,syncPlane,getGrid:()=>GRID,
-    statusesFor,teecePlayBlock,growSeeds,CARD_ART,GROUND_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,kwify,kwDesc,kwTitle,KW_RULES,KW_SPELL,KW_TOKEN,
+    statusesFor,teecePlayBlock,growSeeds,CARD_ART,GROUND_ART,DECK_SYM,getCardDeck,KEYWORDS,deckKeywords,deckOwnKeywords,kwify,kwDesc,kwTitle,KW_RULES,KW_SPELL,KW_TOKEN,
     graveActsFor,graveActAvailable,runGraveAct,dumpPlate,
     setHandView,applyHandView,getHandView:()=>SQHAND,applySides,handCount,afterDiscard,
     canHandDiscard,sacPool,chooseSacrifice,drawPerTurn,
