@@ -1606,7 +1606,7 @@ body.endpeek #app{padding-bottom:72px}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:317,date:'2026-10-24'};
+const VERSION={build:318,date:'2026-10-24'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -6225,8 +6225,8 @@ const CARDS = {
     text:'The equipped Teece has +3. When it Descends: the enemy directly below where it lands gets -4 permanently.'},
  1291:{name:'Pearly Gates',type:'ground',trump:true,gPearly:8,
     text:'Trump card. A Teece in this column can Descend directly onto this battleground. If it does: it gets +8 until the end of the turn.'},
- 1292:{name:'Cloudbank',type:'ground',gkw:['floating'],gAscend:true,
-    text:'A Teece on this battleground is Floating, so it is Flying. A Teece on it can Ascend directly from here.'},
+ 1292:{name:'Cloudbank',type:'ground',gkw:['flying'],gAscend:true,
+    text:'A Teece on this battleground is Flying. A Teece on it can Ascend directly from here.'},
  1293:{name:'Fallen Angel',type:'teece',sides:[6,6,0,6],deck:'angels',perkOnly:true,noHeaven:true,graveAs:1281,
     text:'A Falling Angel that has Fallen. It can’t Fall again.'},
  /* ---- Mimics: 1294-1313, and the Wind-up Toy Token at 1314 ----
@@ -24703,8 +24703,8 @@ function ascendCol(b,i){
   if(!t||isPlane(i))return -1;
   if(row(i)===0)return col(i);
   /* A Cloudbank lifts whatever stands on it as if it stood in the top row. Read
-     straight off the panel: the Cloudbank makes its Teece Floating, and a
-     floating Teece is out of reach of every other battleground effect. */
+     straight off the panel, so a Teece that floats clear of the Cloudbank's
+     keywords can still Ascend from it. */
   if(b[i].ground&&!b[i].ground.gsil&&groundFlag(b[i].ground,'gAscend'))return col(i);
   return -1;
 }
