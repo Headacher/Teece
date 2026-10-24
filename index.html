@@ -1600,7 +1600,7 @@ body.endpeek #app{padding-bottom:72px}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:305,date:'2026-10-24'};
+const VERSION={build:306,date:'2026-10-24'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -1759,7 +1759,7 @@ const KW_RULES={
   fall:'The Falling Angel, destroyed for the first time, comes back on an empty panel in the bottom row with Top 6, Right 6, Bottom 0 and Left 6.',
   mimic:'A Teece from the Mimics deck. Most Mimics are huge, and hand your opponent something when they are played or destroyed.',
   knight:'A Teece from the Knights deck. Knights are Armoured and ride Mounts.',
-  mount:'A Token that a Knight rides as an equip. A Knight is played already riding the Mount printed on it, and has the Mount\u2019s numbers, Defence and abilities on top of its own. When the Knight is destroyed, its Mount is played on that panel or one next to it. A Knight played onto one of your Mounts on the board rides that Mount instead of its own. A Knight can have only one Mount, unless it wears a Herd Saddle. Once per your turn, a Mount standing on its own can carry one of your Knights next to it that has room for another Mount: one whose Mount is gone, or one with a Herd Saddle. In hand, a Knight that is not a Boss or Miniboss can dismount: its Mount becomes a card of its own, to play on its own or to saddle onto another Knight in hand that has no Mount. Legaless never takes a Mount in hand.'
+  mount:'A Token that a Knight rides as an equip. A Knight is played already riding the Mount printed on it, and has the Mount\u2019s numbers, Defence and abilities on top of its own. When the Knight is destroyed, its Mount is played on that panel or one next to it. A Knight played onto one of your Mounts on the board rides that Mount instead of its own. A Knight can have only one Mount, unless it wears a Mount-ain. Once per your turn, a Mount standing on its own can carry one of your Knights next to it that has room for another Mount: one whose Mount is gone, or one with a Mount-ain. In hand, a Knight that is not a Boss or Miniboss can dismount: its Mount becomes a card of its own, to play on its own or to saddle onto another Knight in hand that has no Mount. Legaless never takes a Mount in hand.'
 };
 /* The spells a Wizard conjures and a Priest folds together. Built from the
    cards themselves at the moment of the tap, so the popup cannot drift from the
@@ -6048,9 +6048,9 @@ const CARDS = {
  1252:{name:'Grand Marshal',type:'teece',sides:[4,4,4,4],def:1,sac:2,knight:true,mountOf:1271,
     text:'Sacrifice two Teece to play. Armoured. {mount}'},
  /* ---- Knights equips ---- */
- 1253:{name:'Herd Saddle',type:'equip',mod:0,grants:{mountCap:true},
+ 1253:{name:'Mount-ain',type:'equip',mod:0,grants:{mountCap:true},
     text:'The equipped Teece can have any number of Mounts.'},
- 1254:{name:'Mount-ain',type:'equip',mod:0,onlyMount:true,
+ 1254:{name:'Mount Mount',type:'equip',mod:0,onlyMount:true,
     grants:{mountCap:true,act:[{name:'Mount Up',once:'turn',steps:[{fx:'mountGrab'}]}]},
     text:'Equip only to a Mount. Once per your turn: equip to it a Mount from anywhere on the board. This Mount can have any number of other Mounts.'},
  1255:{name:'Jousting Lance',type:'equip',mod:0,modIfMounted:4,
@@ -25944,7 +25944,7 @@ for(const id in CARDS){
    Token to look up (Greg, build 238). */
 const mountText=id=>{const m=CARDS[id];return 'Mount: '+m.name+' ('+compassWords(m.sides)+(m.ride?'; '+m.ride:'')+').';};
 for(const id in CARDS){const c=CARDS[id];if(c.mountOf&&c.text)c.text=c.text.replace('{mount}',mountText(c.mountOf));}
-/* Herd Saddle and Mount-ain lift the one-Mount limit. */
+/* Mount-ain and Mount Mount lift the one-Mount limit. */
 function mountCap(t){
   for(const e of t.equips){const g=eqG(e);if(g&&g.mountCap)return 99;}
   return 1;
@@ -25963,7 +25963,7 @@ function knightSpots(b,p,id){
   return mountSpots(b,p);
 }
 /* The Teece t climbs onto the Mount body m, which leaves the board without
-   dying. Whatever m was carrying -- other Mounts, a Mount-ain -- goes along.
+   dying. Whatever m was carrying -- other Mounts, a Mount Mount -- goes along.
    With room for one Mount, the new one replaces whatever it was riding. */
 function mountUp(t,m,live){
   const add=[mountEntry(m.cardId,t.owner,m.base)].concat(m.equips.map(e=>e.mount?Object.assign({},e,{owner:t.owner}):e));
@@ -25985,7 +25985,7 @@ function mountUp(t,m,live){
    entry marked off is the Knight dismounted, kept so the marker still names a
    real card for everything that reads a plate. Dismounting hands the Mount
    over as a card of its own: played like any Teece, or saddled onto a Knight in
-   hand with room for it -- dismounted, or plated with a Herd Saddle -- which
+   hand with room for it -- dismounted, or plated with a Mount-ain -- which
    spends no play. A Boss or Miniboss Knight never dismounts, and Legaless never
    takes a Mount in hand: it is played onto a Mount on the board (Greg, build 304). */
 function handMounts(cardId,plate){
@@ -26038,7 +26038,7 @@ function saddleHand(p,mi,ki){
   const pl=G.players[p],mid=pl.hand[mi],kid=pl.hand[ki];
   if(mi===ki||!isMountCard(mid)||!CARDS[kid]||!CARDS[kid].knight)return false;
   if(saddleHands(p,mi).indexOf(ki)<0)return false;
-  /* A Knight still on its printed Mount (one with a Herd Saddle) keeps it:
+  /* A Knight still on its printed Mount (one with a Mount-ain) keeps it:
      written out before another joins it, since any mount entry overrides it. */
   const pt=plateOf(p,ki);
   const keep=pt.some(e=>e.mount)?[]:handMounts(kid,pt).map(e=>Object.assign(e,{owner:p}));
@@ -26082,7 +26082,7 @@ async function knightArrive(p,spot,t){
 }
 /* A Mount standing on its own can, once per your turn, carry one of your
    Knights that has room for another Mount -- one whose Mount was destroyed, or
-   one wearing a Herd Saddle (Greg, build 243). Only a Knight next to it
+   one wearing a Mount-ain (Greg, build 243). Only a Knight next to it
    (Greg, build 304; it used to reach any Knight on the field). The Mount leaves
    its panel without dying. */
 const SADDLE_ACT={name:'Mount a Knight',once:'turn',steps:[{fx:'mountKnight'}]};
@@ -26103,7 +26103,7 @@ function saddleSim(bb,c,j){
   k.equips=k.equips.slice();
   mountUp(k,m,false);
 }
-/* Mounts a Mount-ain could pull onto the Mount at cell c. */
+/* Mounts a Mount Mount could pull onto the Mount at cell c. */
 function grabTargets(b,c,p){
   const out=[];
   for(let j=0;j<BN;j++){
@@ -26144,7 +26144,7 @@ function aiKnightPlan(d){
 }
 /* The Knight Captain thrown away for its Barded Charger once the turn's Teece
    is down and it cannot be paid for. */
-/* A Herd Saddle is worth plating onto a Knight in hand when there is a Mount of
+/* A Mount-ain is worth plating onto a Knight in hand when there is a Mount of
    ours on the board for it to land on: it keeps its own Mount and gains that one. */
 async function aiKnightSaddle(){
   const p=G.turn,pl=G.players[p];
