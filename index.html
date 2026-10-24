@@ -1606,7 +1606,7 @@ body.endpeek #app{padding-bottom:72px}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:314,date:'2026-10-24'};
+const VERSION={build:315,date:'2026-10-24'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -17228,6 +17228,7 @@ async function processDeath(d){
   /* The Guardian Angel above it, or Divine Intervention from the hand. */
   if(!d.cost&&await angelSaves(d))return;
   if(b[cell].teece!==t)return;
+  if(!d.cost)campKill(t);
   /* Who destroyed the Runeblade, for the Grudgebearer: the first killer of a
      Teece holding one, or of the sword standing on its own. Read before the
      equips are buried, which is the last moment the body still says so. */
@@ -19744,6 +19745,7 @@ async function endTurn(){
   if(!G.over)checkDomination();
   if(!G.over)checkStalemate();
   if(!G.over)checkTurnLimit();
+  if(!G.over)campHunt();
   if(!G.over)campSurvive();
   if(G.over)return;
   G.players[p].teecePlayedLastTurn=G.players[p].teecePlayedThisTurn>0;
@@ -28585,8 +28587,10 @@ function campMods(c){
     text:'Every enemy Teece carries '+c.hcap+' on all four sides, Tokens included. A side never falls below 0.'});
   if(c.ally<0)out.push({k:'cdis',sev:'warn',label:'Yours '+c.ally,
     text:'Disadvantage: every Teece of yours carries '+c.ally+' on all four sides, Tokens included. A side never falls below 0.'});
-  if(env.survive)out.push({k:'csurv',sev:'good',label:'Hold out: '+env.survive+' rounds',
+  if(env.survive&&!env.hunt)out.push({k:'csurv',sev:'good',label:'Hold out: '+env.survive+' rounds',
     text:'Survive: if nobody has won when round '+env.survive+' ends, you win. Every other way to win or lose still stands.'});
+  if(env.hunt)out.push({k:'chunt',sev:'good',label:'Hunt: '+env.hunt+' Teece'+(env.survive?' by round '+env.survive:''),
+    text:'Destroy '+env.hunt+' enemy Teece and you win as that turn ends.'+(env.survive?' If round '+env.survive+' ends first, you lose.':'')+' Tokens count; a Teece its own side sacrifices does not. Every other way to win or lose still stands.'});
   if(env.lead)out.push({k:'clead',sev:'warn',label:'Lead of '+env.lead,
     text:'Any side takes the field by ending a turn '+env.lead+' Teece ahead of the next best, instead of 4.'});
   if(env.fly)out.push({k:'cfly',sev:'warn',label:'Everything flies',
@@ -28656,6 +28660,8 @@ function campStatuses(p,push){
       const nx=campNextFire(m.ev,r);
       if(nx==null)continue;
       push(m.k,m.sev,(m.ev.name||CAMP_EV_NAME[m.ev.fx]||'Event')+(nx===r?': end of this round':': end of round '+nx),m.text);
+    }else if(m.k==='chunt'){
+      push(m.k,m.sev,'Hunt: '+Math.min(G.campKills||0,c.env.hunt)+' of '+c.env.hunt+' destroyed'+(c.env.survive?', round '+Math.min(campRound(),c.env.survive)+' of '+c.env.survive:''),m.text);
     }else if(m.k==='csurv'){
       push(m.k,m.sev,'Hold out: round '+Math.min(r,c.env.survive)+' of '+c.env.survive,m.text);
     }else push(m.k,m.sev,m.label,m.text);
@@ -28771,7 +28777,8 @@ function campSetup(preset){
   if(preset.ally||preset.friend){
     G.seatBonus=G.players.map((_,q)=>q===0?(preset.ally||0):sameTeam(q,0)?(preset.friend||0):(preset.hcap||0));
   }
-  G.env={lead:env.lead||0,survive:env.survive||0,events:env.events||[]};
+  G.env={lead:env.lead||0,survive:env.survive||0,hunt:env.hunt||0,events:env.events||[]};
+  G.campKills=0;
   for(const j of env.razed||[])if(G.board[j]){G.board[j].razed=true;G.board[j].ground=null;}
   for(const j of env.hell||[])if(G.board[j])G.board[j].hell=true;
   for(const g of env.grounds||[]){
@@ -28821,11 +28828,30 @@ function campRoundEnd(){
     }
   }
 }
+/* Hunt: a chapter can be won by destroying enemy Teece. Counted as they are
+   destroyed -- not sacrificed or spent as a price; Tokens count -- and
+   checked as each turn ends, alongside every other way to win. */
+function campKill(t){
+  if(!G||G.camp==null||!G.env||!G.env.hunt||!t||sameTeam(t.owner,0))return;
+  G.campKills=(G.campKills||0)+1;
+}
+function campHunt(){
+  if(!G||G.over||G.camp==null||!G.env||!G.env.hunt)return;
+  if((G.campKills||0)>=G.env.hunt)endGame(teamOf(0),G.env.hunt+' enemy Teece destroyed. The hunt is won.');
+}
 /* Hold out: when the last turn of the round the chapter names ends and the
    game is still going, the seat at this screen's side takes it. */
 function campSurvive(){
   if(!G||G.over||G.camp==null||!G.env||!G.env.survive)return;
-  if(G.turnNum>=G.env.survive*PLAYERS())endGame(teamOf(0),'Round '+G.env.survive+' is over and you are still standing.');
+  if(G.turnNum<G.env.survive*PLAYERS())return;
+  /* With a hunt as well, standing is not enough: the hunt had to be won by
+     then, or passing your way to the last round would win it. */
+  if(G.env.hunt&&(G.campKills||0)<G.env.hunt){
+    const foe=teamsInPlay().find(tm=>tm!==teamOf(0));
+    endGame(foe==null?null:foe,'Round '+G.env.survive+' is over, and only '+(G.campKills||0)+' of the '+G.env.hunt+' enemy Teece you had to destroy are gone.');
+    return;
+  }
+  endGame(teamOf(0),'Round '+G.env.survive+' is over and you are still standing.');
 }
 function campEnd(winner,why,t,x,btn){
   const chs=campChapters(),i=G.camp,c=chs[i];
@@ -29780,7 +29806,7 @@ if(HAS_DOM){
 }
 /* ============ exports for harness ============ */
 if(typeof module!=='undefined'){
-  module.exports={campChapters,campMods,campSetup,campRoundEnd,campSurvive,campDecks,campTeams,hellAt,hellUnhellable,hellBarred,hellShrouded,isDemon,aiHellPlan,checkDomination,heavens,heavenShift,hvShiftCols,heavenDescend,playToHeaven,heavenlyCard,heavenlyBody,hvLandSpots,hvDescendBlock,ascendBlock,
+  module.exports={campKill,campHunt,campChapters,campMods,campSetup,campRoundEnd,campSurvive,campDecks,campTeams,hellAt,hellUnhellable,hellBarred,hellShrouded,isDemon,aiHellPlan,checkDomination,heavens,heavenShift,hvShiftCols,heavenDescend,playToHeaven,heavenlyCard,heavenlyBody,hvLandSpots,hvDescendBlock,ascendBlock,
     messengerSwap,heavenSides,aiAngels,angelsInPlay,statusesFor,
     makeFusionCard,fuseOnBoard,fusePartners,canFuseOnBoard,canFuseHand,fuseHandAt,fuseHandOpts,
     aiFuseHand,aiFusionMagicPlan,fusionsInPlay,forgetFusions,
