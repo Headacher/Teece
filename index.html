@@ -979,6 +979,11 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 .overlay h3{font-family:var(--disp);font-weight:400;font-size:19px;margin:14px 0 2px}
 .overlay p{color:var(--muted);font-size:13px;line-height:1.6;margin:6px 0}
 .overlay .row{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+/* Every menu screen opens with a way back, at the top where it is the first
+   thing a thumb finds, and it stays pinned there while a long screen -- the
+   deck list, a deck's twenty cards, the campaign -- scrolls under it. */
+.topback{position:sticky;top:0;z-index:3;display:inline-flex;align-items:center;gap:4px;
+  margin:-8px 0 8px -8px;padding:6px 12px;font-size:13px;box-shadow:0 2px 10px rgba(0,0,0,.55)}
 .hidden{display:none!important}
 .weblayer{position:absolute;inset:0;pointer-events:none;opacity:.6;
   background:repeating-conic-gradient(from 15deg at 50% 50%,rgba(226,220,205,.34) 0 1deg,transparent 1deg 30deg),
@@ -1556,6 +1561,7 @@ body.endpeek #app{padding-bottom:72px}
 
 <div class="overlay hidden" id="draftOverlay">
   <div class="box">
+    <button class="btn topback hidden" id="draftBack" type="button">‹ Back</button>
     <h2 id="draftTitle">Draft</h2>
     <p id="draftInfo"></p>
     <div id="draftCards"></div>
@@ -1600,7 +1606,7 @@ body.endpeek #app{padding-bottom:72px}
 /* ============ version ============
    Shown on the start screen so a player can always name the build in front of
    them. Bump this in the same commit as anything that gets pushed. */
-const VERSION={build:313,date:'2026-10-24'};
+const VERSION={build:314,date:'2026-10-24'};
 /* A Token's cross, rounded at every corner and notch; drawn on a 100x100 box
    stretched to the panel. The notch (21) matches --notch in the CSS. */
 /* Ward: a sight with a bar through it. Drawn rather than an emoji so it reads
@@ -18136,6 +18142,7 @@ function pickPerk(){
     const ready=tapArm(overlay);
     overlay.classList.remove('hidden');
     hideHcapRow();
+    draftBack(null);
     document.getElementById('draftTitle').textContent='Level '+R.level+': take a perk';
     document.getElementById('draftInfo').textContent='One of the three, kept for the rest of the run.';
     const box=document.getElementById('draftCards');
@@ -21893,7 +21900,9 @@ function showDeckInfo(key){
   const box=document.getElementById('infoBox'),ov=document.getElementById('infoOverlay');
   if(!box||!ov)return;
   const kws=deckKeywords(key);
-  let h='<div style="display:flex;gap:14px;align-items:center">'+
+  const back='Back to the '+(document.getElementById('loreOverlay').classList.contains('hidden')?'decks':'map');
+  let h='<button class="btn topback" type="button" id="infoBack">\u2039 '+back+'</button>'+
+    '<div style="display:flex;gap:14px;align-items:center">'+
     '<div class="isym">'+(DECK_SYM[key]||'\u2753')+'</div>'+
     '<div><h2 style="margin:0">'+escHtml(dk.name)+'</h2>'+
     '<div class="icount">'+dk.cards.length+' cards</div>'+
@@ -21954,12 +21963,13 @@ function showDeckInfo(key){
     h+='<div class="'+dcardClass(cid)+'" data-card-deck="'+getCardDeck(cid)+'">'+dcardInner(cid,true)+'</div>';
   }
   h+='</div>'+
-    '<div class="row"><button class="btn primary" id="infoClose">Back to the '+
-    (document.getElementById('loreOverlay').classList.contains('hidden')?'decks':'map')+'</button></div>';
+    '<div class="row"><button class="btn primary" id="infoClose">'+back+'</button></div>';
   box.innerHTML=h;
   ov.classList.remove('hidden');
+  ov.scrollTop=0;
   const close=()=>ov.classList.add('hidden');
   document.getElementById('infoClose').addEventListener('click',close);
+  document.getElementById('infoBack').addEventListener('click',close);
   ov.onclick=e=>{if(e.target===ov)close();};
 }
 /* ---- The lore page: the board drawn as a map, each deck's symbol on the
@@ -21977,7 +21987,8 @@ function openLore(){
   const nm=id=>escHtml((loreRegion(id)||{name:id}).name);
   const world=loreDecks('world'),half=Math.ceil(world.length/2);
   /* The map first, so a phone opens on it rather than on a paragraph. */
-  let h='<h2 style="margin:0">The World of Teece</h2>'+
+  let h='<button class="btn topback" type="button" id="loreBack">\u2039 Back</button>'+
+    '<h2 style="margin:0">The World of Teece</h2>'+
     '<div class="lmap"><span class="lworld">'+nm('world')+'</span>'+
     '<div class="lband up" data-reg="above"><span class="lname">'+nm('above')+'</span>'+loreDecks('above').map(sym).join('')+'</div>'+
     '<div class="lmid"><div class="lside">'+world.slice(0,half).map(sym).join('')+'</div>'+
@@ -21998,6 +22009,7 @@ function openLore(){
   ov.scrollTop=0;
   const close=()=>ov.classList.add('hidden');
   document.getElementById('loreClose').addEventListener('click',close);
+  document.getElementById('loreBack').addEventListener('click',close);
   ov.onclick=e=>{
     if(e.target===ov){close();return;}
     /* A symbol opens its deck's page on top; anywhere else on a panel goes
@@ -22012,6 +22024,40 @@ function openLore(){
     }
   };
 }
+/* Back on the setup screens. Whatever is showing on the draft overlay says
+   what its Back does (draftBack), or hides it with null; a handler that
+   returns false keeps the screen up. A picker backed out of rejects with BACK,
+   and setupSteps turns that into the question before it -- or, from the
+   first question, out to the menu. */
+const BACK={back:true};
+let DRAFT_BACK=null;
+function draftBack(fn){
+  DRAFT_BACK=fn||null;
+  const b=document.getElementById('draftBack');
+  if(b)b.classList.toggle('hidden',!fn);
+}
+function draftBackTap(){
+  const f=DRAFT_BACK;
+  if(!f||f()===false)return;
+  if(DRAFT_BACK===f)draftBack(null);
+}
+/* A run of setup questions, each a function of the answers so far. A plain
+   value stands for a question this mode does not ask, and Back steps over it. */
+async function setupSteps(list){
+  const out=[];
+  let i=0;
+  while(i<list.length){
+    const st=list[i];
+    if(typeof st!=='function'){out[i]=st;i++;continue;}
+    try{out[i]=await st(out);i++;}
+    catch(e){
+      if(e!==BACK)throw e;
+      do i--;while(i>=0&&typeof list[i]!=='function');
+      if(i<0)throw BACK;
+    }
+  }
+  return out;
+}
 let DECK_SORT='level';
 const DECK_GROUPS={
   level:[['beginner','Beginner'],['intermediate','Intermediate'],['advanced','Advanced']],
@@ -22019,10 +22065,12 @@ const DECK_GROUPS={
 };
 function pickDeck(who,opts){
   opts=opts||{};
-  return new Promise(res=>{
+  return new Promise((res,rej)=>{
     const overlay=document.getElementById('draftOverlay');
     overlay.classList.remove('hidden');
+    overlay.scrollTop=0;
     hideHcapRow();
+    draftBack(opts.noBack?null:()=>{overlay.classList.add('hidden');rej(BACK);});
     document.getElementById('draftTitle').textContent=opts.title||(who+': choose a deck');
     document.getElementById('draftInfo').textContent=opts.info||'Each deck plays very differently.';
     const box=document.getElementById('draftCards');
@@ -22034,7 +22082,7 @@ function pickDeck(who,opts){
       el.setAttribute('data-card-deck',key);
       el.title=dk.name+' — '+dk.cards.length+' cards\n'+dk.blurb;
       el.innerHTML='<div class="dsymbol">'+(DECK_SYM[key]||'❓')+'</div><div class="dnm">'+dk.name+'</div>';
-      el.addEventListener('click',()=>{overlay.classList.add('hidden');res(key);});
+      el.addEventListener('click',()=>{draftBack(null);overlay.classList.add('hidden');res(key);});
       /* The "i" reads the deck without choosing it, so the tap must stop here
          rather than carrying on into the tile underneath. */
       const info=document.createElement('button');
@@ -22083,10 +22131,12 @@ const HCAPS=[{n:-3,lbl:'Gentle'},{n:-2,lbl:'Easy'},{n:-1,lbl:'Soft'},{n:0,lbl:'E
              {n:1,lbl:'Tough'},{n:2,lbl:'Harsh'},{n:3,lbl:'Brutal'}];
 /* three-player formats. teams[i] is the side seat i fights for. */
 function pickFormat(){
-  return new Promise(res=>{
+  return new Promise((res,rej)=>{
     const overlay=document.getElementById('draftOverlay');
     overlay.classList.remove('hidden');
+    overlay.scrollTop=0;
     hideHcapRow();
+    draftBack(()=>{overlay.classList.add('hidden');rej(BACK);});
     document.getElementById('draftTitle').textContent='Three players: choose the sides';
     document.getElementById('draftInfo').textContent=
       'Four by four board, three seats, and one Teece per turn each \u2014 unless somebody brings a deck that prints its own turn.';
@@ -22105,16 +22155,18 @@ function pickFormat(){
       el.innerHTML='<div class="dnm">'+f.name+'</div><div class="dty">'+
         (f.teams[0]===f.teams[1]?'2 v 1':(f.teams[1]===f.teams[2]?'1 v 2':'every seat alone'))+
         '</div>'+dia+'<div class="dtx">'+f.blurb+'</div>';
-      el.addEventListener('click',()=>{overlay.classList.add('hidden');res(f);});
+      el.addEventListener('click',()=>{draftBack(null);overlay.classList.add('hidden');res(f);});
       box.appendChild(el);
     }
   });
 }
 function hcapLabel(n){return (n>0?'+':'')+n;}
 function pickHandicap(){
-  return new Promise(res=>{
+  return new Promise((res,rej)=>{
     const overlay=document.getElementById('draftOverlay');
     overlay.classList.remove('hidden');
+    overlay.scrollTop=0;
+    draftBack(()=>{hideHcapRow();overlay.classList.add('hidden');rej(BACK);});
     document.getElementById('draftTitle').textContent='Difficulty';
     document.getElementById('draftInfo').textContent=
       'Every Teece the computer fields gets this on all four sides, tokens included. '+
@@ -22128,7 +22180,7 @@ function pickHandicap(){
       const b=document.createElement('button');
       b.className='hcap'+(h.n===0?' even':(h.n<0?' easy':' hard'));
       b.innerHTML='<span class="hn">'+hcapLabel(h.n)+'</span><span class="hl">'+h.lbl+'</span>';
-      b.addEventListener('click',()=>{hideHcapRow();overlay.classList.add('hidden');res(h.n);});
+      b.addEventListener('click',()=>{draftBack(null);hideHcapRow();overlay.classList.add('hidden');res(h.n);});
       row.appendChild(b);
     }
   });
@@ -23541,7 +23593,8 @@ function showGrave(p){
   const box=document.getElementById('infoBox'),ov=document.getElementById('infoOverlay');
   const grave=G.players[p].grave.slice().reverse();
   const who=pname(p)==='You'?'Your':pname(p)+'\u2019s';
-  let h='<h2 style="margin:0">'+escHtml(who)+' graveyard</h2>'+
+  let h='<button class="btn topback" type="button" id="infoBack">\u2039 Back</button>'+
+    '<h2 style="margin:0">'+escHtml(who)+' graveyard</h2>'+
     '<div class="icount">'+grave.length+' card'+(grave.length===1?'':'s')+(grave.length>1?' \u00b7 most recent first':'')+'</div>';
   if(!grave.length)h+='<p>Nothing has gone to this graveyard yet.</p>';
   else{
@@ -23557,8 +23610,10 @@ function showGrave(p){
   h+='<div class="row"><button class="btn primary" id="infoClose">Close</button></div>';
   box.innerHTML=h;
   ov.classList.remove('hidden');
+  ov.scrollTop=0;
   const close=()=>ov.classList.add('hidden');
   document.getElementById('infoClose').addEventListener('click',close);
+  document.getElementById('infoBack').addEventListener('click',close);
   ov.onclick=e=>{if(e.target===ov)close();};
 }
 /* ---- the meter ----
@@ -23849,6 +23904,12 @@ function renderDraft(p,offer,k,res){
   const ready=tapArm(overlay);
   overlay.classList.remove('hidden');
   hideHcapRow();
+  /* Only the first draft of a run is still the menu: Back drops the run and
+     goes there. Later levels are the run itself, with no screen behind them. */
+  draftBack(R&&R.level===1&&!G?()=>{
+    if(k>0&&!confirm('Leave this run?'))return false;
+    restart();
+  }:null);
   const total=(G_DRAFT&&G_DRAFT.total)||20;
   document.getElementById('draftTitle').textContent=((G_DRAFT&&G_DRAFT.title)||'Draft')+' — '+draftName(p)+' (pick '+(k+1)+' of '+total+')';
   document.getElementById('draftInfo').textContent=(G_DRAFT&&G_DRAFT.info)||'Choose one card for your deck.';
@@ -23862,7 +23923,7 @@ function renderDraft(p,offer,k,res){
     dc.className=dcardClass(id);
     dc.setAttribute('data-card-deck',getCardDeck(id));
     dc.innerHTML=dcardInner(id,false);
-    dc.addEventListener('click',()=>{if(!ready())return;res(id);overlay.classList.add('hidden');});
+    dc.addEventListener('click',()=>{if(!ready())return;draftBack(null);res(id);overlay.classList.add('hidden');});
     cards.appendChild(dc);
   }
   const deck=document.getElementById('draftDeck');
@@ -28613,7 +28674,7 @@ function openCampaign(){
   const box=document.getElementById('campBox'),ov=document.getElementById('campOverlay');
   if(!box||!ov)return;
   const chs=campChapters(),won=campWon(),parts=campParts();
-  let h='<h2>Campaign</h2>';
+  let h='<button class="btn topback" type="button" id="campTopBack">\u2039 Back</button><h2>Campaign</h2>';
   if(!chs.length)h+='<p>The campaign has not loaded yet. Try again in a moment.</p>';
   let next=-1;
   chs.forEach((c,i)=>{
@@ -28652,6 +28713,7 @@ function openCampaign(){
   const go=document.getElementById('campGo');
   if(go)go.onclick=()=>campChapter(next<0?0:next);
   document.getElementById('campBack').onclick=campClose;
+  document.getElementById('campTopBack').onclick=campClose;
   const rs=document.getElementById('campReset');
   if(rs)rs.onclick=()=>{if(confirm('Forget every chapter won and start the campaign over?')){campSave([]);openCampaign();}};
   ov.onclick=e=>{
@@ -28898,6 +28960,7 @@ async function start(mode,vsAI,preset){
   G=null;
   try{ await startInner(mode,vsAI,preset); }
   catch(err){
+    if(err===BACK){restart();return;}
     const pb=document.getElementById('promptBar');
     if(pb){pb.classList.add('hot');pb.textContent='Error starting game: '+err.message;}
     throw err;
@@ -28951,17 +29014,22 @@ async function startInner(mode,vsAI,preset){
   }
   if(mode==='three'){
     /* preset: a campaign chapter, which names the sides and all three decks. */
-    const fmt=preset?{key:'camp',name:'Campaign',teams:preset.teams}:vsAI?await pickFormat():{key:'ffa',name:'Free-for-all',teams:[0,1,2]};
-    const keys=preset?preset.decks.slice():[];
-    if(!preset)keys.push(await pickDeck(vsAI?'You':'Player 1',
-      {title:vsAI?'Your deck':'Player 1: choose a deck'}));
-    for(let seat=1;seat<3&&!preset;seat++){
-      const who=vsAI?('Computer '+seat):('Player '+(seat+1));
-      const rel=vsAI?(fmt.teams[seat]===fmt.teams[0]?' (your ally)':' (against you)'):'';
-      keys.push(await pickDeck(who,{title:'Choose '+who+'\u2019s deck'+rel,
-        info:'Any deck, including one already chosen.'}));
+    let fmt,keys,hcap;
+    if(preset){fmt={key:'camp',name:'Campaign',teams:preset.teams};keys=preset.decks.slice();hcap=preset.hcap||0;}
+    else{
+      const seatPick=seat=>a=>{
+        const who=vsAI?('Computer '+seat):('Player '+(seat+1));
+        const rel=vsAI?(a[0].teams[seat]===a[0].teams[0]?' (your ally)':' (against you)'):'';
+        return pickDeck(who,{title:'Choose '+who+'\u2019s deck'+rel,
+          info:'Any deck, including one already chosen.'});
+      };
+      const a=await setupSteps([
+        vsAI?()=>pickFormat():{key:'ffa',name:'Free-for-all',teams:[0,1,2]},
+        ()=>pickDeck(vsAI?'You':'Player 1',{title:vsAI?'Your deck':'Player 1: choose a deck'}),
+        seatPick(1),seatPick(2),
+        vsAI?()=>pickHandicap():0]);
+      fmt=a[0];keys=a.slice(1,4);hcap=a[4];
     }
-    const hcap=preset?(preset.hcap||0):vsAI?await pickHandicap():0;
     G=newState('three',vsAI,keys.map(k=>DECKS[k].cards.slice()),
       {seats:3,width:4,teams:fmt.teams,enemyBonus:hcap,aiSeats:vsAI?[1,2]:[]});
     G.deckNames=keys.map(k=>DECKS[k].name);
@@ -28979,10 +29047,11 @@ async function startInner(mode,vsAI,preset){
      engine sees mode 'deck' -- so nothing downstream needs to know. G.spectate
      shows both hands and turns every click that would play for a seat away. */
   if(mode==='clank'){
-    const a=await pickDeck('Clanker 1',{title:'Choose the first clanker\u2019s deck',
-      info:'The computer plays this deck. You only watch.'});
-    const c=await pickDeck('Clanker 2',{title:'Choose the second clanker\u2019s deck',
-      info:'The computer plays this one too. Choosing the same deck for a mirror match is allowed.'});
+    const [a,c]=await setupSteps([
+      ()=>pickDeck('Clanker 1',{title:'Choose the first clanker\u2019s deck',
+        info:'The computer plays this deck. You only watch.'}),
+      ()=>pickDeck('Clanker 2',{title:'Choose the second clanker\u2019s deck',
+        info:'The computer plays this one too. Choosing the same deck for a mirror match is allowed.'})]);
     const na=DECKS[a].name+(a===c?' (1)':''),nc=DECKS[c].name+(a===c?' (2)':'');
     G=newState('deck',true,[DECKS[a].cards.slice(),DECKS[c].cards.slice()],{aiSeats:[0,1],seatNames:[na,nc]});
     G.spectate=true;
@@ -28998,14 +29067,14 @@ async function startInner(mode,vsAI,preset){
   }
   if(mode==='deck'){
     /* preset skips the three questions: the tutorial's offer of a Basic game. */
-    const mine=preset?preset.mine:await pickDeck(vsAI?'You':'Player 1');
-    let theirs,hcap=0;
-    if(preset){theirs=preset.theirs;hcap=preset.hcap||0;}
-    else if(vsAI){
-      theirs=await pickDeck('Computer',{title:'Choose the computer\u2019s deck',
-        info:'Pick what you want to play against. Choosing your own deck for a mirror match is allowed.'});
-      hcap=await pickHandicap();
-    }else theirs=await pickDeck('Player 2');
+    let mine,theirs,hcap=0;
+    if(preset){mine=preset.mine;theirs=preset.theirs;hcap=preset.hcap||0;}
+    else [mine,theirs,hcap]=await setupSteps([
+      ()=>pickDeck(vsAI?'You':'Player 1'),
+      vsAI?()=>pickDeck('Computer',{title:'Choose the computer\u2019s deck',
+        info:'Pick what you want to play against. Choosing your own deck for a mirror match is allowed.'})
+        :()=>pickDeck('Player 2'),
+      vsAI?()=>pickHandicap():0]);
     G=newState('deck',vsAI,[DECKS[mine].cards.slice(),DECKS[theirs].cards.slice()],{enemyBonus:hcap});
     G.deckNames=[DECKS[mine].name,DECKS[theirs].name];
     applyDeckRules(0,mine);
@@ -29184,7 +29253,7 @@ function netHcapLine(h,a,b){
   return ' '+a+' Teece carry '+v(h[0])+', '+b+' '+v(h[1])+'.';
 }
 function pickNetHandicap(){
-  return new Promise(res=>{
+  return new Promise((res,rej)=>{
     netShow('Difficulty','Every Teece a player fields gets their number on all four sides. Minus weakens, plus strengthens; a side never falls below zero.',null);
     const box=document.getElementById('netHcap');
     box.classList.remove('hidden');
@@ -29204,7 +29273,11 @@ function pickNetHandicap(){
     const go=document.createElement('button');
     go.className='btn primary';go.id='netHcapGo';go.textContent='Make the link';
     go.addEventListener('click',()=>{netArmAlerts();box.classList.add('hidden');box.innerHTML='';res(vals.slice());});
-    const r=document.createElement('div');r.className='row';r.style.marginTop='10px';r.appendChild(go);
+    /* Back to the deck you picked; Cancel below still leaves for the menu. */
+    const bk=document.createElement('button');
+    bk.className='btn';bk.id='netHcapBack';bk.textContent='Back';
+    bk.addEventListener('click',()=>{box.classList.add('hidden');box.innerHTML='';netHide();rej(BACK);});
+    const r=document.createElement('div');r.className='row';r.style.marginTop='10px';r.appendChild(go);r.appendChild(bk);
     box.appendChild(r);
     /* Cancel closes the overlay through restart(); the promise is simply left. */
   });
@@ -29214,9 +29287,13 @@ async function netHost(){
   hideOppHands();
   EPOCH++;G=null;
   document.getElementById('startOverlay').classList.add('hidden');
-  const mine=await pickDeck('You',{title:'Your deck',
-    info:'Pick yours, then send your friend the link. They pick their own deck when they open it.'});
-  const hcap=await pickNetHandicap();
+  let mine,hcap;
+  try{
+    [mine,hcap]=await setupSteps([
+      ()=>pickDeck('You',{title:'Your deck',
+        info:'Pick yours, then send your friend the link. They pick their own deck when they open it.'}),
+      ()=>pickNetHandicap()]);
+  }catch(e){if(e===BACK){restart();return;}throw e;}
   if(!hcap)return;
   const code=Math.random().toString(36).slice(2,8);
   NET={role:'host',seat:0,peerSeat:1,mine,hcap,code,conn:null,peer:null,started:false,queue:Promise.resolve(),qseq:0,last:''};
@@ -29427,8 +29504,11 @@ async function netOnGuest(m){
     if(m.started||me.picked){netShow('Joining','Waiting for the game…',null);return;}
     netHide();
     me.picked=true;
-    const key=await pickDeck('You',{title:'Your deck',info:'Your friend plays '+m.host+'.'+
-      (m.hcap?netHcapLine(m.hcap,'Your friend\u2019s','yours'):'')+' Pick yours and the game starts.'});
+    let key;
+    /* Back from here leaves the game the link opened, for the menu. */
+    try{key=await pickDeck('You',{title:'Your deck',info:'Your friend plays '+m.host+'.'+
+      (m.hcap?netHcapLine(m.hcap,'Your friend\u2019s','yours'):'')+' Pick yours and the game starts.'});}
+    catch(e){if(e===BACK&&NET===me){restart();return;}throw e;}
     if(NET!==me)return;
     netArmAlerts();
     netSend({t:'deck',key});
@@ -29440,7 +29520,7 @@ async function netOnGuest(m){
   if(m.t==='repick'){
     me.rematch={host:null,guest:null};
     document.getElementById('endOverlay').classList.add('hidden');
-    const key=await pickDeck('You',{title:'Rematch: your deck',info:'Your friend is picking a new deck too.'});
+    const key=await pickDeck('You',{title:'Rematch: your deck',info:'Your friend is picking a new deck too.',noBack:true});
     if(NET!==me)return;
     netSend({t:'deck',key});
     netShow('Rematch','Starting the game…',null);
@@ -29532,7 +29612,7 @@ async function netRematchGo(k){
   clearInterval(me.beat);
   document.getElementById('endOverlay').classList.add('hidden');
   netSend({t:'repick'});
-  const mine=await pickDeck('You',{title:'Rematch: your deck',info:'Your friend is picking a new deck too.'});
+  const mine=await pickDeck('You',{title:'Rematch: your deck',info:'Your friend is picking a new deck too.',noBack:true});
   if(NET!==me)return;
   me.mine=mine;
   if(me.theirsNext)await netBegin(me.theirsNext);
@@ -29588,6 +29668,7 @@ function restart(){
   EPOCH++;                      /* orphan any AI turn still in flight */
   document.getElementById('endOverlay').classList.add('hidden');
   document.getElementById('draftOverlay').classList.add('hidden');
+  draftBack(null);
   document.getElementById('startOverlay').classList.remove('hidden');
   G=null;G_DRAFT=null;R=null;
   END_PEEK=false;syncEndPeek();
@@ -29620,6 +29701,7 @@ if(HAS_DOM){
   document.getElementById('dHot').onclick=()=>start('deck',false);
   document.getElementById('dNet').onclick=()=>netHost();
   document.getElementById('netCancel').onclick=()=>{G=null;restart();};
+  document.getElementById('draftBack').onclick=draftBackTap;
   document.getElementById('netCopy').onclick=()=>{
     const inp=document.getElementById('netLink');
     const done=()=>uiToast('Link copied.');
