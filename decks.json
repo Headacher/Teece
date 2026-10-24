@@ -2857,14 +2857,11 @@
               1,
               1
             ],
-            "hcap": 1,
-            "text": "Treasure has been turning up all over Middlemark since the fold, and the Knights rode in to claim it. It is Mimics, all of it, and the Rats have come up the drains to share whatever the Mimics leave. You are on your own against both of them, so you fight as two: two Teece and two cards a turn.",
+            "hcap": 3,
+            "text": "Treasure has been turning up all over Middlemark since the fold, and the Knights rode in to claim it. It is Mimics, all of it, and the Rats have come up the drains to share whatever the Mimics leave. You are on your own against both of them, and nobody expects you to win: hold the streets until round ten is over, and do not let the Rats cover the board.",
             "win": "The Knights ride out with nothing but their horses, which they regard as a victory. A Mimic, broken open, gives a little back: a letter from the Pit, signed by the Archdevil, inviting the Hallowed North to surrender.",
             "env": {
-              "double": {
-                "play": 2,
-                "draw": 2
-              }
+              "survive": 10
             }
           },
           {
